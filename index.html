@@ -649,12 +649,49 @@ body::before {
 <main class="content" id="content">
   <div class="results-info" id="resultsInfo"></div>
   <div id="drugList"></div>
-  <footer style="margin-top:32px; padding:20px 0; border-top:1px solid var(--border); text-align:center;">
-    <div style="font-size:12px; color:var(--text-muted); line-height:1.8;">
-      <div style="font-weight:600; color:var(--text-secondary); margin-bottom:4px;">จัดทำโดย กลุ่มงานเภสัชกรรม</div>
-      <div>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
-      <div style="margin-top:6px; font-size:11px;">ข้อมูลอ้างอิงจาก Lexicomp, Trissel's Handbook on Injectable Drugs, Package Inserts</div>
-      <div style="font-size:11px; margin-top:2px;">เวอร์ชัน 1.0 — มีนาคม 2569 (2026) | ทบทวนครั้งถัดไป: ___________</div>
+  <footer style="margin-top:32px; border-top:1px solid var(--border);">
+    
+    <!-- Disclaimer -->
+    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px 16px; margin:16px 0; text-align:left;">
+      <div style="font-size:12px; font-weight:700; color:#991b1b; margin-bottom:6px; display:flex; align-items:center; gap:5px;">⚠️ ข้อจำกัดความรับผิดชอบ (Disclaimer)</div>
+      <div style="font-size:11px; color:#7f1d1d; line-height:1.6;">
+        ข้อมูลในแอปพลิเคชันนี้จัดทำขึ้นเพื่อเป็น<strong>เครื่องมือสนับสนุนการตัดสินใจทางคลินิก</strong>เท่านั้น ไม่ได้มีวัตถุประสงค์เพื่อทดแทนดุลยพินิจทางวิชาชีพของเภสัชกรหรือบุคลากรทางการแพทย์ ผู้ใช้ควรตรวจสอบข้อมูลกับแหล่งอ้างอิงปฐมภูมิ (เช่น Package Insert, Lexicomp, Trissel's) และพิจารณาข้อมูลเฉพาะของผู้ป่วยแต่ละรายก่อนนำไปใช้ในทางคลินิกเสมอ
+        ผู้จัดทำไม่รับผิดชอบต่อความเสียหายใดๆ ที่อาจเกิดจากการใช้ข้อมูลนี้โดยไม่ได้ตรวจสอบกับแหล่งข้อมูลที่เป็นปัจจุบัน
+      </div>
+    </div>
+
+    <!-- Credit & Attribution -->
+    <div style="padding:16px 0; text-align:center;">
+      <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">💉 IV Drug Quick Reference PWA</div>
+      <div style="font-size:12px; font-weight:600; color:var(--text-secondary);">จัดทำโดย กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา</div>
+      <div style="font-size:11px; color:var(--text-muted);">Neurological Institute of Thailand, Department of Medical Services</div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">
+        แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
+        AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
+      </div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 2.1 — มีนาคม 2569 (2026) | ข้อมูลยา 117 รายการ</div>
+    </div>
+
+    <!-- License -->
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:14px 16px; margin:0 0 16px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; color:#1e40af; margin-bottom:6px;">📜 สัญญาอนุญาต (License)</div>
+      <div style="font-size:11px; color:#1e3a5f; line-height:1.6;">
+        ผลงานนี้เผยแพร่ภายใต้สัญญาอนุญาต <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</strong><br>
+        ✅ ใช้งาน แชร์ ดัดแปลงได้ — ต้องให้เครดิตผู้สร้าง | ❌ ห้ามใช้เชิงพาณิชย์ | 🔄 ถ้าดัดแปลง ต้องแชร์ภายใต้สัญญาเดียวกัน
+      </div>
+      <div style="margin-top:8px;">
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.th" target="_blank" rel="noopener"
+           style="font-size:10px; color:#3b82f6; text-decoration:none; background:#fff; border:1px solid #bfdbfe; padding:4px 12px; border-radius:6px; display:inline-block;">
+          🔗 ดูรายละเอียดสัญญาอนุญาต CC BY-NC-SA 4.0
+        </a>
+      </div>
+    </div>
+
+    <!-- About link -->
+    <div style="text-align:center; padding-bottom:16px;">
+      <button onclick="showAbout()" style="font-family:inherit; font-size:11px; color:var(--text-muted); background:none; border:1px solid var(--border); padding:6px 16px; border-radius:20px; cursor:pointer;">
+        ℹ️ เกี่ยวกับแอปนี้
+      </button>
     </div>
   </footer>
 </main>
@@ -2868,9 +2905,9 @@ function updateOnlineStatus(isOnline) {
 if (!navigator.onLine) updateOnlineStatus(false);
 
 // ============================================================
-// ANALYTICS: Anonymous Usage Tracking
+// ANALYTICS: Anonymous Usage Tracking (with rate limiting)
 // ============================================================
-const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec'; // ← ใส่ Google Apps Script URL ตรงนี้
+const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
 const SESSION_ID = (() => {
   const today = new Date().toISOString().substring(0, 10);
   let id = localStorage.getItem('anonSessionId');
@@ -2889,8 +2926,17 @@ localStorage.setItem('sessionCount', sessionCount);
 let searchStartTime = 0;
 let lastQuery = '';
 
+// Rate limiting: max 60 requests per session, max 5 per minute
+let reqCount = 0;
+let minCount = 0;
+let minTimer = Date.now();
+
 function sendAnalytics(data) {
   if (!ANALYTICS_URL || !analyticsConsent) return;
+  const now = Date.now();
+  if (now - minTimer > 60000) { minCount = 0; minTimer = now; }
+  if (reqCount >= 60 || minCount >= 5) return;
+  reqCount++; minCount++;
   try {
     const payload = JSON.stringify({ ...data, session_id: SESSION_ID });
     if (navigator.sendBeacon) {
@@ -2898,7 +2944,49 @@ function sendAnalytics(data) {
     } else {
       fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
     }
-  } catch (e) { /* silent fail */ }
+  } catch (e) { /* silent */ }
+}
+
+// About modal
+function showAbout() {
+  const o = document.createElement('div');
+  o.id = 'aboutOverlay';
+  o.innerHTML = `
+    <div style="position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.remove()">
+      <div style="background:#fff;border-radius:20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="font-size:18px;font-weight:700;color:#1e293b;">ℹ️ เกี่ยวกับ IV DrugRef</h2>
+          <button onclick="document.getElementById('aboutOverlay').remove()" style="background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;">✕</button>
+        </div>
+        <div style="font-size:13px;line-height:1.8;color:#374151;">
+          <p style="margin-bottom:12px;"><strong>IV Drug Quick Reference PWA</strong> เป็นแอปพลิเคชันสืบค้นข้อมูลการเตรียมและบริหารยาฉีด พัฒนาขึ้นสำหรับบุคลากรทางการแพทย์ ใช้งานได้แม้ไม่มีอินเทอร์เน็ต</p>
+          <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:10px;">
+            <div style="font-size:12px;font-weight:700;color:#0ea5e9;margin-bottom:4px;">📊 ข้อมูลในแอป</div>
+            <div style="font-size:11px;color:#64748b;">• ยาฉีด 117 รายการ<br>• ข้อมูล 22 field ต่อยา: Reconstitution, Dilution, Compatibility, Stability, Monitoring<br>• อ้างอิง: Lexicomp, Trissel's, AHFS, Package Inserts</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:10px;">
+            <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:4px;">👨‍⚕️ ผู้จัดทำ</div>
+            <div style="font-size:11px;color:#64748b;">กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา<br>Neurological Institute of Thailand<br>กรมการแพทย์ กระทรวงสาธารณสุข</div>
+          </div>
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:10px;">
+            <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:4px;">⚠️ Disclaimer</div>
+            <div style="font-size:11px;color:#7f1d1d;">ข้อมูลนี้เป็นเครื่องมือสนับสนุนการตัดสินใจทางคลินิกเท่านั้น ไม่ทดแทนดุลยพินิจทางวิชาชีพ ต้องตรวจสอบกับแหล่งอ้างอิงปฐมภูมิก่อนใช้จริงเสมอ</div>
+          </div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:10px;">
+            <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:4px;">📜 License: CC BY-NC-SA 4.0</div>
+            <div style="font-size:11px;color:#1e3a5f;">✅ ใช้/แชร์/ดัดแปลงได้ (ให้เครดิต) | ❌ ห้ามใช้เชิงพาณิชย์ | 🔄 ดัดแปลงต้องแชร์ภายใต้สัญญาเดียวกัน</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:10px;padding:12px;">
+            <div style="font-size:12px;font-weight:700;color:#d97706;margin-bottom:4px;">📡 การเก็บข้อมูล</div>
+            <div style="font-size:11px;color:#64748b;">เก็บข้อมูลใช้งานแบบ anonymous เพื่อพัฒนาคุณภาพและงานวิจัย ไม่เก็บชื่อ รหัส IP หรือข้อมูลส่วนบุคคลใดๆ</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:16px;">
+          <button onclick="document.getElementById('aboutOverlay').remove()" style="background:#0ea5e9;color:#fff;border:none;padding:10px 32px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">ปิด</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(o);
 }
 
 // Track session on load

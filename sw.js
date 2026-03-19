@@ -1,7 +1,7 @@
 // Service Worker — IV Drug Quick Reference PWA
 // Version: 1.0.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
 
-const CACHE_NAME = 'iv-drugref-v1.1.0';
+const CACHE_NAME = 'iv-drugref-v2.0.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

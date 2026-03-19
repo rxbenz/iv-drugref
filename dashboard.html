@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IV DrugRef — Analytics Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'IBM Plex Sans Thai',sans-serif; background:#f0f4f8; color:#1e293b; min-height:100vh; }
+
+.header { background:#fff; border-bottom:1px solid #e2e8f0; padding:16px 24px; position:sticky; top:0; z-index:10; }
+.header-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.header h1 { font-size:18px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px; }
+.header h1 span { font-size:22px; }
+.header-actions { display:flex; gap:8px; align-items:center; }
+.header-actions button { font-family:inherit; font-size:12px; font-weight:600; padding:6px 14px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#64748b; cursor:pointer; transition:all .2s; }
+.header-actions button:hover { border-color:#0ea5e9; color:#0ea5e9; }
+.header-actions button.primary { background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
+.header-actions button.primary:hover { background:#0284c7; }
+
+.setup-banner { max-width:1200px; margin:16px auto; padding:16px 20px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; display:none; }
+.setup-banner.show { display:block; }
+.setup-banner h3 { font-size:14px; color:#92400e; margin-bottom:8px; }
+.setup-banner input { width:100%; padding:10px 14px; border:1px solid #fde68a; border-radius:8px; font-size:13px; font-family:'JetBrains Mono',monospace; margin-bottom:8px; }
+.setup-banner button { background:#d97706; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+
+.content { max-width:1200px; margin:0 auto; padding:16px 24px 60px; }
+
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
+.stat-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; text-align:center; }
+.stat-value { font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:#1e293b; margin-bottom:4px; }
+.stat-label { font-size:12px; color:#64748b; font-weight:500; }
+.stat-card.blue .stat-value { color:#0ea5e9; }
+.stat-card.green .stat-value { color:#059669; }
+.stat-card.amber .stat-value { color:#d97706; }
+.stat-card.purple .stat-value { color:#7c3aed; }
+
+.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+@media(max-width:800px) { .charts-grid { grid-template-columns:1fr; } }
+.chart-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; }
+.chart-card.full { grid-column:1/-1; }
+.chart-title { font-size:14px; font-weight:600; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.chart-title span { font-size:16px; }
+
+.loading { text-align:center; padding:60px; color:#94a3b8; font-size:14px; }
+.error { text-align:center; padding:40px; color:#dc2626; font-size:14px; }
+
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:#f8fafc; padding:8px 12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+td { padding:8px 12px; border-bottom:1px solid #f1f5f9; }
+tr:hover td { background:#f8fafc; }
+.rank { font-family:'JetBrains Mono',monospace; font-weight:600; color:#94a3b8; width:30px; }
+.drug-name { font-weight:500; }
+.count { font-family:'JetBrains Mono',monospace; font-weight:600; color:#0ea5e9; }
+.bar-cell { width:200px; }
+.mini-bar { height:20px; background:#e0f2fe; border-radius:4px; overflow:hidden; }
+.mini-bar-fill { height:100%; background:linear-gradient(90deg,#0ea5e9,#06b6d4); border-radius:4px; transition:width .6s ease; }
+
+.empty-msg { text-align:center; padding:40px; color:#94a3b8; }
+.empty-msg .icon { font-size:36px; margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1><span>📊</span> IV DrugRef Analytics Dashboard</h1>
+    <div class="header-actions">
+      <button onclick="toggleSetup()">⚙ ตั้งค่า URL</button>
+      <button onclick="exportCSV('Sessions')">📥 Export Sessions</button>
+      <button onclick="exportCSV('Searches')">📥 Export Searches</button>
+      <button onclick="exportCSV('Surveys')">📥 Export Surveys</button>
+      <button class="primary" onclick="loadData()">🔄 Refresh</button>
+    </div>
+  </div>
+</div>
+
+<div class="setup-banner" id="setupBanner">
+  <h3>⚙ ตั้งค่า Google Apps Script URL</h3>
+  <p style="font-size:12px;color:#92400e;margin-bottom:8px;">วาง URL ที่ได้จากการ Deploy Google Apps Script (ดูคู่มือในไฟล์ google-apps-script.js)</p>
+  <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/XXXXXXXXX/exec" />
+  <button onclick="saveUrl()">💾 บันทึก URL</button>
+</div>
+
+<div class="content">
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card blue"><div class="stat-value" id="totalSessions">—</div><div class="stat-label">Total Sessions</div></div>
+    <div class="stat-card green"><div class="stat-value" id="uniqueUsers">—</div><div class="stat-label">Unique Users</div></div>
+    <div class="stat-card"><div class="stat-value" id="totalSearches">—</div><div class="stat-label">Total Searches</div></div>
+    <div class="stat-card amber"><div class="stat-value" id="avgSearchTime">—</div><div class="stat-label">Avg Search Time (sec)</div></div>
+    <div class="stat-card purple"><div class="stat-value" id="avgSat">—</div><div class="stat-label">Satisfaction (1-5)</div></div>
+    <div class="stat-card green"><div class="stat-value" id="avgSUS">—</div><div class="stat-label">SUS Score (0-100)</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card full">
+      <div class="chart-title"><span>📈</span> Daily Active Users (30 วันล่าสุด)</div>
+      <canvas id="dauChart" height="80"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>💊</span> Top 20 ยาที่ค้นหาบ่อย</div>
+      <div class="table-wrap" id="topDrugsTable"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>📱</span> แพลตฟอร์มผู้ใช้</div>
+      <canvas id="platformChart" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>🏷</span> Filter ที่ใช้บ่อย</div>
+      <canvas id="filterChart" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>⏱</span> การกระจายเวลาค้นหา</div>
+      <canvas id="timeChart" height="200"></canvas>
+    </div>
+  </div>
+  
+  <div id="statusMsg" class="loading">กดปุ่ม ⚙ ตั้งค่า URL เพื่อเชื่อมต่อ Google Sheets</div>
+</div>
+
+<script>
+let SCRIPT_URL = localStorage.getItem('analyticsUrl') || '';
+let chartInstances = {};
+
+function toggleSetup() {
+  const banner = document.getElementById('setupBanner');
+  banner.classList.toggle('show');
+  document.getElementById('scriptUrl').value = SCRIPT_URL;
+}
+
+function saveUrl() {
+  SCRIPT_URL = document.getElementById('scriptUrl').value.trim();
+  localStorage.setItem('analyticsUrl', SCRIPT_URL);
+  document.getElementById('setupBanner').classList.remove('show');
+  loadData();
+}
+
+async function loadData() {
+  if (!SCRIPT_URL) {
+    document.getElementById('statusMsg').textContent = 'กดปุ่ม ⚙ ตั้งค่า URL เพื่อเชื่อมต่อ Google Sheets';
+    document.getElementById('statusMsg').style.display = 'block';
+    return;
+  }
+  
+  document.getElementById('statusMsg').textContent = '⏳ กำลังโหลดข้อมูล...';
+  document.getElementById('statusMsg').style.display = 'block';
+  
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=summary');
+    const data = await res.json();
+    
+    if (data.error) throw new Error(data.error);
+    
+    document.getElementById('statusMsg').style.display = 'none';
+    renderDashboard(data);
+  } catch (err) {
+    document.getElementById('statusMsg').innerHTML = `<div class="error">❌ โหลดข้อมูลไม่สำเร็จ: ${err.message}<br><small>ตรวจสอบ URL และการ Deploy ของ Google Apps Script</small></div>`;
+  }
+}
+
+function renderDashboard(data) {
+  // Stats cards
+  document.getElementById('totalSessions').textContent = data.totalSessions.toLocaleString();
+  document.getElementById('uniqueUsers').textContent = data.uniqueUsers.toLocaleString();
+  document.getElementById('totalSearches').textContent = data.totalSearches.toLocaleString();
+  document.getElementById('avgSearchTime').textContent = data.searchTime.avg > 0 ? (data.searchTime.avg / 1000).toFixed(1) : '—';
+  document.getElementById('avgSat').textContent = data.satisfaction.avg > 0 ? data.satisfaction.avg + '/5' : '—';
+  document.getElementById('avgSUS').textContent = data.sus.avg > 0 ? data.sus.avg : '—';
+
+  // DAU Chart
+  if (chartInstances.dau) chartInstances.dau.destroy();
+  const dauCtx = document.getElementById('dauChart').getContext('2d');
+  chartInstances.dau = new Chart(dauCtx, {
+    type: 'line',
+    data: {
+      labels: data.dailyUsers.map(d => d.date.substring(5)),
+      datasets: [{
+        label: 'Daily Active Users',
+        data: data.dailyUsers.map(d => d.users),
+        borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,0.08)',
+        fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#0ea5e9'
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  // Top Drugs Table
+  const topEl = document.getElementById('topDrugsTable');
+  if (data.topDrugs.length === 0) {
+    topEl.innerHTML = '<div class="empty-msg"><div class="icon">💊</div>ยังไม่มีข้อมูลการค้นหา</div>';
+  } else {
+    const maxCount = data.topDrugs[0]?.count || 1;
+    topEl.innerHTML = `<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>
+      ${data.topDrugs.map((d, i) => `<tr>
+        <td class="rank">${i + 1}</td>
+        <td class="drug-name">${d.drug}</td>
+        <td class="count">${d.count}</td>
+        <td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count / maxCount * 100).toFixed(0)}%"></div></div></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  }
+
+  // Platform Chart
+  if (chartInstances.platform) chartInstances.platform.destroy();
+  const platCtx = document.getElementById('platformChart').getContext('2d');
+  const platLabels = Object.keys(data.platforms);
+  const platData = Object.values(data.platforms);
+  chartInstances.platform = new Chart(platCtx, {
+    type: 'doughnut',
+    data: {
+      labels: platLabels.length > 0 ? platLabels : ['No data'],
+      datasets: [{ data: platData.length > 0 ? platData : [1], backgroundColor: ['#0ea5e9', '#059669', '#d97706', '#7c3aed', '#dc2626'] }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  // Filter Chart
+  if (chartInstances.filter) chartInstances.filter.destroy();
+  const filtCtx = document.getElementById('filterChart').getContext('2d');
+  const filtLabels = Object.keys(data.filterUsage);
+  const filtData = Object.values(data.filterUsage);
+  chartInstances.filter = new Chart(filtCtx, {
+    type: 'bar',
+    data: {
+      labels: filtLabels.length > 0 ? filtLabels : ['No data'],
+      datasets: [{ label: 'Uses', data: filtData.length > 0 ? filtData : [0], backgroundColor: '#0ea5e9', borderRadius: 6 }]
+    },
+    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+  });
+
+  // Time distribution (placeholder — needs raw data)
+  if (chartInstances.time) chartInstances.time.destroy();
+  const timeCtx = document.getElementById('timeChart').getContext('2d');
+  chartInstances.time = new Chart(timeCtx, {
+    type: 'bar',
+    data: {
+      labels: ['<5s', '5-10s', '10-20s', '20-30s', '30-60s', '>60s'],
+      datasets: [{ label: 'Searches', data: [0,0,0,0,0,0], backgroundColor: '#06b6d4', borderRadius: 6 }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+
+async function exportCSV(sheet) {
+  if (!SCRIPT_URL) return alert('กรุณาตั้งค่า URL ก่อน');
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=export&sheet=' + sheet);
+    const data = await res.json();
+    if (!data.length) return alert('ไม่มีข้อมูลใน ' + sheet);
+    
+    const headers = Object.keys(data[0]);
+    const csv = [headers.join(','), ...data.map(row => headers.map(h => `"${row[h] || ''}"`).join(','))].join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `IV_DrugRef_${sheet}_${new Date().toISOString().substring(0,10)}.csv`;
+    link.click();
+  } catch (err) {
+    alert('Export failed: ' + err.message);
+  }
+}
+
+// Auto-load if URL exists
+if (SCRIPT_URL) loadData();
+</script>
+</body>
+</html>

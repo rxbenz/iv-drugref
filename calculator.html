@@ -25,6 +25,13 @@ body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; backgro
 }
 .header a { color: var(--accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
 .header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+.header .tdm-link {
+  font-size: 11px; font-weight: 600; color: #38bdf8; background: #1e293b;
+  border: 1.5px solid #38bdf8; padding: 5px 12px; border-radius: 20px;
+  text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+  transition: all .2s;
+}
+.header .tdm-link:hover { background: #334155; box-shadow: 0 0 12px rgba(56,189,248,0.2); }
 
 .container { max-width: 600px; margin: 0 auto; padding: 16px; }
 
@@ -47,7 +54,6 @@ body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; backgro
   display: flex; justify-content: space-between; align-items: center;
 }
 .crcl-value { font-weight: 600; color: var(--text-primary); font-size: 15px; font-family: 'JetBrains Mono',monospace; }
-.crcl-warning { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
 
 .drug-card {
   border: 1px solid var(--border); border-radius: 10px; padding: 14px; cursor: pointer;
@@ -77,9 +83,6 @@ body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; backgro
   font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 }
 
-.calc-output { padding: 16px; display: none; }
-.calc-output.show { display: block; }
-
 .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f4f8; font-size: 13px; }
 .detail-row:last-child { border: none; }
 .detail-label { color: var(--text-secondary); }
@@ -101,6 +104,7 @@ body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; backgro
 <div class="header">
   <a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
   <h1>🧮 Dose Calculator</h1>
+  <a href="tdm.html" class="tdm-link">🎯 TDM Hub</a>
 </div>
 
 <div class="container">
@@ -159,7 +163,7 @@ body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; backgro
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้นเท่านั้น ต้องใช้ clinical judgment ประกอบการตัดสินใจทุกครั้ง<br>ข้อมูลจาก Lexicomp, Trissel's, AHA/ACLS, IDSA, AES Guidelines</div>
 
 <div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted);">
-  IV DrugRef v4.1.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
+  IV DrugRef v4.2.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
 </div>
 
 </div>
@@ -168,7 +172,7 @@ body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; backgro
 // ====== Drug Definitions ======
 const CALC_DRUGS = [
   {
-    id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="vanco-tdm.html" style="color:#38bdf8;">🧬 Bayesian TDM</a>',
+    id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🧬 Bayesian TDM →</a>',
     badges: ['badge-renal'],
     calc: function(pt) {
       const dose_low = Math.round(pt.wt * 15 / 250) * 250;
@@ -213,13 +217,13 @@ const CALC_DRUGS = [
           { l: 'Infusion rate', v: `${rate_mlhr} mL/hr` },
           { l: 'Est. AUC₂₄', v: `~${estAUC} mg·hr/L ${aucNote}` },
         ],
-        info: `<strong>📋 Renal dose adjustment (CrCl ${pt.crcl.toFixed(0)}):</strong>${renalTable}<br><strong>TDM:</strong> AUC/MIC target 400-600 (preferred) | Trough 15-20 mcg/mL (ถ้าไม่มี AUC)<br>เจาะ trough ก่อน dose ที่ 4 (steady state)<br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome → infuse ≥60 min/g<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)<br><strong>HD:</strong> Re-dose 15-25 mg/kg post-HD, เจาะ pre-HD level`,
+        info: `<strong>📋 Renal dose adjustment (CrCl ${pt.crcl.toFixed(0)}):</strong>${renalTable}<br><strong>TDM:</strong> AUC/MIC target 400-600 (preferred) | Trough 15-20 mcg/mL (ถ้าไม่มี AUC)<br>เจาะ trough ก่อน dose ที่ 4 (steady state)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🧬 ใช้ Bayesian TDM Hub สำหรับ AUC-guided dosing →</a><br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome → infuse ≥60 min/g<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)<br><strong>HD:</strong> Re-dose 15-25 mg/kg post-HD, เจาะ pre-HD level`,
         infoType: 'blue'
       };
     }
   },
   {
-    id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL',
+    id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
     badges: ['badge-renal'],
     calc: function(pt) {
       const dose = Math.round(pt.wt * 15);
@@ -238,13 +242,13 @@ const CALC_DRUGS = [
           { l: 'Dilution', v: `ใน NSS/D5W 100-200 mL` },
           { l: 'Infuse over', v: `30-60 min` },
         ],
-        info: `<strong>TDM:</strong> Peak 20-35 mcg/mL (extended) | Trough <5 mcg/mL<br><strong>Monitor:</strong> SCr, audiometry, vestibular fn<br><strong>⚠:</strong> ห้ามผสมกับ Beta-lactams ใน syringe/bag เดียวกัน`,
+        info: `<strong>TDM:</strong> Peak 20-35 mcg/mL (extended) | Trough <5 mcg/mL<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr, audiometry, vestibular fn<br><strong>⚠:</strong> ห้ามผสมกับ Beta-lactams ใน syringe/bag เดียวกัน`,
         infoType: 'blue'
       };
     }
   },
   {
-    id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL',
+    id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
     badges: ['badge-renal'],
     calc: function(pt) {
       const dose_conv = (pt.wt * 1.7).toFixed(0);
@@ -262,7 +266,7 @@ const CALC_DRUGS = [
           { l: 'Dilution', v: `ใน NSS/D5W 50-200 mL` },
           { l: 'Infuse over', v: `30-60 min` },
         ],
-        info: `<strong>TDM:</strong> Hartford nomogram (extended) หรือ Peak 5-10 / Trough <1<br><strong>Monitor:</strong> SCr daily, audiometry<br><strong>Intrathecal:</strong> 4-8 mg/day (ventriculitis)`,
+        info: `<strong>TDM:</strong> Hartford nomogram (extended) หรือ Peak 5-10 / Trough <1<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr daily, audiometry<br><strong>Intrathecal:</strong> 4-8 mg/day (ventriculitis)`,
         infoType: 'blue'
       };
     }
@@ -295,7 +299,7 @@ const CALC_DRUGS = [
     }
   },
   {
-    id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL',
+    id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
     badges: ['badge-loading'],
     calc: function(pt) {
       const dose = Math.round(pt.wt * 20);
@@ -310,13 +314,13 @@ const CALC_DRUGS = [
           { l: 'Concentration', v: `≤6.7 mg/mL (dilute ใน NSS 50-100 mL)` },
           { l: 'Filter', v: `ต้องใช้ 0.22 μm in-line filter` },
         ],
-        info: `<strong>⚠ ใช้ NSS เท่านั้น! ห้าม D5W → ตกตะกอน!</strong><br><strong>Monitor:</strong> ECG continuous, BP q5-15min, IV site (purple glove)<br><strong>Level:</strong> Total 10-20 mcg/mL | Free 1-2 mcg/mL<br><strong>ตรวจ:</strong> Free phenytoin ถ้า albumin <3.5`,
+        info: `<strong>⚠ ใช้ NSS เท่านั้น! ห้าม D5W → ตกตะกอน!</strong><br><strong>Monitor:</strong> ECG continuous, BP q5-15min, IV site (purple glove)<br><strong>Level:</strong> Total 10-20 mcg/mL | Free 1-2 mcg/mL<br><strong>ตรวจ:</strong> Free phenytoin ถ้า albumin <3.5<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Winter-Tozer correction + dose prediction →</a>`,
         infoType: 'red'
       };
     }
   },
   {
-    id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL',
+    id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
     badges: ['badge-loading'],
     calc: function(pt) {
       const dose30 = Math.round(pt.wt * 30);
@@ -330,7 +334,7 @@ const CALC_DRUGS = [
           { l: 'Maintenance', v: `1-2 mg/kg/hr = ${maintRate}–${Math.round(pt.wt*2)} mg/hr CI` },
           { l: 'Alternative', v: `IV→PO: 15-20 mg/kg/day div q8-12h` },
         ],
-        info: `<strong>⚠ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)</strong><br><strong>Level:</strong> 50-100 mcg/mL (SE: 80-120)<br><strong>Monitor:</strong> LFTs, CBC+Plt, ammonia, amylase<br><strong>CI:</strong> Hepatic disease, pregnancy (Cat X)`,
+        info: `<strong>⚠ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)</strong><br><strong>Level:</strong> 50-100 mcg/mL (SE: 80-120)<br><strong>Monitor:</strong> LFTs, CBC+Plt, ammonia, amylase<br><strong>CI:</strong> Hepatic disease, pregnancy (Cat X)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ free level correction + dose adjustment →</a>`,
         infoType: 'red'
       };
     }
@@ -491,7 +495,6 @@ function calculate() {
   sec.style.display = 'block';
   sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   
-  // v4: track calculator usage
   if (typeof trackCalcUsage === 'function') {
     trackCalcUsage(drug.name, pt, result);
   }
@@ -532,7 +535,6 @@ function sendCalcAnalytics(data) {
   } catch(e) {}
 }
 
-// Track page visit on load
 sendCalcAnalytics({
   type: 'calc_visit',
   page: 'calculator',
@@ -540,7 +542,6 @@ sendCalcAnalytics({
   drugs_available: CALC_DRUGS.length
 });
 
-// Track each drug calculation (debounced per drug)
 const calcTracked = {};
 function trackCalcUsage(drugName, pt, result) {
   const key = drugName + '_' + Math.floor(Date.now() / 15000);

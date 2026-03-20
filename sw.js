@@ -1,14 +1,15 @@
 // Service Worker — IV Drug Quick Reference PWA
-// Version: 4.2.0
+// Version: 3.0.0
 // กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
 
-const CACHE_NAME = 'iv-drugref-v4.2.0';
+const CACHE_NAME = 'iv-drugref-v4.3.0';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 วัน
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './calculator.html',
   './vanco-tdm.html',
+  './tdm.html',
   './manifest.json',
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
@@ -60,48 +61,80 @@ self.addEventListener('fetch', event => {
             const clone = networkResponse.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
             // แจ้ง client ว่ามี content ใหม่
-            self.clients.matchAll().then(clients => {
-              clients.forEach(client => {
-                client.postMessage({ type: 'NEW_VERSION' });
+            if (cachedResponse) {
+              self.clients.matchAll().then(clients => {
+                clients.forEach(c => c.postMessage({ type: 'UPDATE_AVAILABLE' }));
               });
-            });
+            }
           }
           return networkResponse;
-        }).catch(() => {
-          return cachedResponse || new Response('Offline', { status: 503 });
-        });
+        }).catch(() => cachedResponse);
+
         return cachedResponse || networkFetch;
       })
     );
     return;
   }
 
-  // Assets → Cache-first with age check
+  // Other assets → Cache-first with expiry check
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        const dateHeader = cachedResponse.headers.get('date');
-        if (dateHeader) {
-          const age = Date.now() - new Date(dateHeader).getTime();
+    caches.match(event.request).then(cached => {
+      if (cached) {
+        // เช็คอายุ cache จาก date header
+        const dateStr = cached.headers.get('date');
+        if (dateStr) {
+          const age = Date.now() - new Date(dateStr).getTime();
           if (age > CACHE_MAX_AGE_MS) {
-            return fetch(event.request).then(networkResponse => {
-              if (networkResponse && networkResponse.status === 200) {
-                const clone = networkResponse.clone();
-                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            // หมดอายุ → ดึงใหม่เบื้องหลัง แต่ส่ง cache ไปก่อน
+            fetch(event.request).then(fresh => {
+              if (fresh && fresh.status === 200) {
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, fresh));
               }
-              return networkResponse;
-            }).catch(() => cachedResponse);
+            }).catch(() => {});
           }
         }
-        return cachedResponse;
+        return cached;
       }
-      return fetch(event.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
-          const clone = networkResponse.clone();
+      // ไม่มี cache → ดึงจาก network
+      return fetch(event.request).then(response => {
+        if (event.request.method === 'GET' && response.status === 200) {
+          const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
-        return networkResponse;
+        return response;
+      }).catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
       });
     })
   );
+});
+
+// รับ message จาก client
+self.addEventListener('message', event => {
+  // บังคับ clear cache แล้วดึงใหม่
+  if (event.data === 'FORCE_UPDATE') {
+    console.log('[SW] Force update requested');
+    caches.delete(CACHE_NAME).then(() => {
+      return caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE));
+    }).then(() => {
+      self.clients.matchAll().then(clients => {
+        clients.forEach(c => c.postMessage({ type: 'UPDATE_COMPLETE' }));
+      });
+    });
+  }
+
+  // เช็ค index.html ใหม่จาก server
+  if (event.data === 'CHECK_UPDATE') {
+    fetch('./index.html', { cache: 'no-store' }).then(response => {
+      if (response && response.status === 200) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(new Request('./index.html'), clone));
+        self.clients.matchAll().then(clients => {
+          clients.forEach(c => c.postMessage({ type: 'UPDATE_AVAILABLE' }));
+        });
+      }
+    }).catch(() => {});
+  }
 });

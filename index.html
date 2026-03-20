@@ -547,6 +547,80 @@ body::before {
   border-top: 1px solid #e2e8f0;
 }
 
+/* Inline dose calculator */
+.calc-section {
+  margin-top: 12px;
+  padding: 14px;
+  background: linear-gradient(135deg, #e6f1fb 0%, #f0f8ff 100%);
+  border-top: 3px solid #0ea5e9;
+  border-radius: 0 0 8px 8px;
+}
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+.calc-field label {
+  font-size: 11px;
+  color: #185FA5;
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.calc-field input, .calc-field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #85B7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  background: #fff;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+.calc-field input:focus, .calc-field select:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+}
+.calc-range {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 3px;
+}
+.calc-result {
+  text-align: center;
+  padding: 10px;
+  background: #dcfce7;
+  border: 2px solid #4ade80;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+.calc-result-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #166534;
+  font-family: 'JetBrains Mono', monospace;
+}
+.calc-note {
+  font-size: 11px;
+  color: #185FA5;
+  background: rgba(255,255,255,0.7);
+  border-radius: 6px;
+  padding: 6px 10px;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+.calc-disclaimer {
+  font-size: 10px;
+  color: #dc2626;
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
 /* Empty state */
 .empty-state {
   text-align: center;
@@ -687,8 +761,11 @@ body::before {
       </div>
     </div>
 
-    <!-- About & Contact links -->
+    <!-- About & Contact & Calculator links -->
     <div style="text-align:center; padding-bottom:16px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <a href="calculator.html" style="font-family:inherit; font-size:11px; color:#fff; background:#0ea5e9; border:none; padding:6px 16px; border-radius:20px; cursor:pointer; text-decoration:none; font-weight:500;">
+        🧮 Dose Calculator
+      </a>
       <button onclick="showAbout()" style="font-family:inherit; font-size:11px; color:var(--text-muted); background:none; border:1px solid var(--border); padding:6px 16px; border-radius:20px; cursor:pointer;">
         ℹ️ เกี่ยวกับแอปนี้
       </button>
@@ -852,6 +929,7 @@ function renderDrugList(drugs) {
       </div>
     </div>`;
   }).join('');
+  initAllCalcs();
 }
 
 function renderCardBody(d) {
@@ -909,8 +987,105 @@ function renderCardBody(d) {
       <div class="monitoring-tags">${d.monitoring.map(m => `<span class="m-tag">${m}</span>`).join('')}</div>
     </div>
     
+    ${renderInlineCalc(d)}
     <div class="ref-line">📚 Ref: ${d.ref}</div>
   `;
+}
+
+const DOSE_CALC = {
+  "Norepinephrine (Levophed)": {
+    unit: "mcg/kg/min", min: 0.01, max: 2, default: 0.1, step: 0.01, wt: true,
+    concs: [{l:"4 mg/250 mL",v:16},{l:"8 mg/250 mL",v:32}],
+    note: "Central line preferred. Extravasation → phentolamine 5-10 mg SC"
+  },
+  "Dobutamine": {
+    unit: "mcg/kg/min", min: 2.5, max: 20, default: 5, step: 0.5, wt: true,
+    concs: [{l:"250 mg/250 mL",v:1000},{l:"500 mg/250 mL",v:2000}],
+    note: "Titrate q10 min. ห้ามผสมกับ NaHCO₃"
+  },
+  "Dopamine": {
+    unit: "mcg/kg/min", min: 1, max: 20, default: 5, step: 0.5, wt: true,
+    concs: [{l:"200 mg/250 mL",v:800},{l:"400 mg/250 mL",v:1600}],
+    note: "Low 1-5: renal | Med 5-10: cardiac | High >10: vasopressor"
+  },
+  "Adrenaline (Epinephrine)": {
+    unit: "mcg/min", min: 1, max: 20, default: 2, step: 0.5, wt: false,
+    concs: [{l:"1 mg/250 mL",v:4},{l:"4 mg/250 mL",v:16}],
+    note: "Infusion 1-10 mcg/min titrate. Cardiac arrest: 1 mg IV push q3-5min"
+  },
+  "Nicardipine": {
+    unit: "mg/hr", min: 1, max: 15, default: 5, step: 0.5, wt: false,
+    concs: [{l:"25 mg/250 mL (0.1 mg/mL)",v:100},{l:"50 mg/250 mL",v:200}],
+    note: "เปลี่ยน IV site q12h (peripheral). Target ถึง → ลด 3 mg/hr"
+  },
+  "Dexmedetomidine": {
+    unit: "mcg/kg/hr", min: 0.2, max: 1.5, default: 0.5, step: 0.1, wt: true,
+    concs: [{l:"200 mcg/50 mL (4 mcg/mL)",v:4}],
+    note: "ห้ามให้ >24 ชม. Loading: 1 mcg/kg/10 min (optional)"
+  }
+};
+
+function renderInlineCalc(d) {
+  const calc = DOSE_CALC[d.generic];
+  if (!calc) return '';
+  const gid = d.generic.replace(/[^a-zA-Z0-9]/g, '_');
+  const concOpts = calc.concs.map((c, i) => `<option value="${c.v}" ${i===0?'selected':''}>${c.l}</option>`).join('');
+  return `
+    <div class="calc-section" onclick="event.stopPropagation()">
+      <div class="section-title" style="color:#185FA5;"><span class="icon">🧮</span> DOSE CALCULATOR</div>
+      <div class="calc-grid">
+        ${calc.wt ? `<div class="calc-field">
+          <label>น้ำหนัก (kg)</label>
+          <input type="number" id="cw_${gid}" value="70" min="20" max="300" step="1" onchange="calcDose_${gid}()" oninput="calcDose_${gid}()">
+        </div>` : ''}
+        <div class="calc-field">
+          <label>Dose (${calc.unit})</label>
+          <input type="number" id="cd_${gid}" value="${calc.default}" min="${calc.min}" max="${calc.max}" step="${calc.step}" onchange="calcDose_${gid}()" oninput="calcDose_${gid}()">
+          <div class="calc-range">${calc.min}–${calc.max} ${calc.unit}</div>
+        </div>
+        <div class="calc-field">
+          <label>Concentration</label>
+          <select id="cc_${gid}" onchange="calcDose_${gid}()">${concOpts}</select>
+        </div>
+      </div>
+      <div class="calc-result" id="cr_${gid}"></div>
+      <div class="calc-note">${calc.note}</div>
+      <div class="calc-disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้น ต้อง clinical judgment ทุกครั้ง</div>
+    </div>
+  `;
+}
+
+function initAllCalcs() {
+  Object.keys(DOSE_CALC).forEach(name => {
+    const gid = name.replace(/[^a-zA-Z0-9]/g, '_');
+    const calc = DOSE_CALC[name];
+    const fn = function() {
+      const dose = parseFloat(document.getElementById('cd_' + gid)?.value);
+      const conc = parseFloat(document.getElementById('cc_' + gid)?.value);
+      const el = document.getElementById('cr_' + gid);
+      if (!el || isNaN(dose) || isNaN(conc)) return;
+      let rateML;
+      if (calc.wt) {
+        const wt = parseFloat(document.getElementById('cw_' + gid)?.value) || 70;
+        if (calc.unit === 'mcg/kg/min') {
+          rateML = (dose * wt * 60) / conc;
+        } else if (calc.unit === 'mcg/kg/hr') {
+          rateML = (dose * wt) / conc;
+        }
+      } else {
+        if (calc.unit === 'mcg/min') {
+          rateML = (dose * 60) / conc;
+        } else if (calc.unit === 'mg/hr') {
+          rateML = (dose * 1000) / conc;
+        }
+      }
+      if (rateML !== undefined) {
+        el.innerHTML = `<span class="calc-result-value">${rateML.toFixed(1)} mL/hr</span>`;
+      }
+    };
+    window['calcDose_' + gid] = fn;
+    setTimeout(fn, 100);
+  });
 }
 
 function toggleCard(id) {

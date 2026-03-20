@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dose Calculator — IV DrugRef | สถาบันประสาทวิทยา</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #f0f4f8; --bg-card: #fff; --border: #e2e8f0;
+  --text-primary: #1e293b; --text-secondary: #64748b; --text-muted: #94a3b8;
+  --accent-blue: #0ea5e9; --accent-green: #059669; --accent-amber: #d97706; --accent-red: #dc2626;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+.header {
+  background: #fff; border-bottom: 1px solid var(--border); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100;
+}
+.header a { color: var(--accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
+.header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+
+.container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+.section { background: #fff; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; }
+.section-header { padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--accent-blue); border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px; }
+
+.field-grid { display: grid; gap: 12px; padding: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+.field label { font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; font-weight: 500; }
+.field input, .field select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: var(--text-primary);
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+
+.crcl-display {
+  background: #f0f4f8; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text-secondary);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.crcl-value { font-weight: 600; color: var(--text-primary); font-size: 15px; font-family: 'JetBrains Mono',monospace; }
+.crcl-warning { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+
+.drug-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 14px; cursor: pointer;
+  transition: border-color .2s, box-shadow .2s; background: #fff;
+}
+.drug-card:hover { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.08); }
+.drug-card.active { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); background: #f0f8ff; }
+.drug-name { font-weight: 600; font-size: 14px; }
+.drug-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.result-box {
+  background: #dcfce7; border: 2px solid #4ade80; border-radius: 12px; padding: 16px; text-align: center;
+}
+.result-title { font-size: 12px; color: #166534; font-weight: 500; margin-bottom: 4px; }
+.result-value { font-size: 28px; font-weight: 700; color: #166534; font-family: 'JetBrains Mono',monospace; }
+.result-detail { font-size: 13px; color: #166534; margin-top: 6px; }
+
+.info-box {
+  border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
+}
+.info-box.blue { background: #e6f1fb; color: #0c447c; }
+.info-box.amber { background: #fef3c7; color: #92400e; }
+.info-box.red { background: #fef2f2; color: #991b1b; }
+
+.disclaimer {
+  text-align: center; font-size: 11px; color: var(--accent-red); padding: 12px 16px;
+  font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
+}
+
+.calc-output { padding: 16px; display: none; }
+.calc-output.show { display: block; }
+
+.detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f4f8; font-size: 13px; }
+.detail-row:last-child { border: none; }
+.detail-label { color: var(--text-secondary); }
+.detail-value { font-weight: 600; font-family: 'JetBrains Mono',monospace; }
+
+.drug-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
+
+.nav-back { display: inline-flex; align-items: center; gap: 4px; }
+.nav-back svg { width: 16px; height: 16px; }
+
+.badge { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 500; display: inline-block; margin-top: 4px; }
+.badge-renal { background: #fef3c7; color: #92400e; }
+.badge-stroke { background: #e6f1fb; color: #0c447c; }
+.badge-loading { background: #f3e8ff; color: #6b21a8; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
+  <h1>🧮 Dose Calculator</h1>
+</div>
+
+<div class="container">
+
+<!-- Patient Info -->
+<div class="section">
+  <div class="section-header">👤 ข้อมูลผู้ป่วย</div>
+  <div class="field-grid">
+    <div class="field-row-3">
+      <div class="field">
+        <label>น้ำหนัก (kg)</label>
+        <input type="number" id="ptWt" value="70" min="20" max="300" step="0.1" oninput="updateCrCl(); calculate();">
+      </div>
+      <div class="field">
+        <label>อายุ (ปี)</label>
+        <input type="number" id="ptAge" value="65" min="1" max="120" oninput="updateCrCl(); calculate();">
+      </div>
+      <div class="field">
+        <label>เพศ</label>
+        <select id="ptSex" onchange="updateCrCl(); calculate();">
+          <option value="M">ชาย</option>
+          <option value="F">หญิง</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>SCr (mg/dL)</label>
+        <input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1" oninput="updateCrCl(); calculate();">
+      </div>
+      <div class="field">
+        <label>ส่วนสูง (cm) — optional</label>
+        <input type="number" id="ptHt" value="" placeholder="สำหรับ IBW/ABW" min="100" max="250" oninput="calculate();">
+      </div>
+    </div>
+    <div class="crcl-display">
+      <span>CrCl (Cockcroft-Gault):</span>
+      <span class="crcl-value" id="crclValue">—</span>
+    </div>
+    <div id="crclWarning" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- Drug Selection -->
+<div class="section">
+  <div class="section-header">💊 เลือกยา</div>
+  <div class="drug-grid" id="drugGrid"></div>
+</div>
+
+<!-- Calculator Output -->
+<div class="section" id="outputSection" style="display:none;">
+  <div class="section-header" id="outputHeader">📊 ผลคำนวณ</div>
+  <div id="outputBody"></div>
+</div>
+
+<div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้นเท่านั้น ต้องใช้ clinical judgment ประกอบการตัดสินใจทุกครั้ง<br>ข้อมูลจาก Lexicomp, Trissel's, AHA/ACLS, IDSA, AES Guidelines</div>
+
+<div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted);">
+  IV DrugRef v4.0.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
+</div>
+
+</div>
+
+<script>
+// ====== Drug Definitions ======
+const CALC_DRUGS = [
+  {
+    id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial',
+    badges: ['badge-renal'],
+    calc: function(pt) {
+      const dose_low = Math.round(pt.wt * 15 / 250) * 250;
+      const dose_high = Math.round(pt.wt * 20 / 250) * 250;
+      const dose = Math.round(pt.wt * 15 / 250) * 250;
+      let freq = 'q12h', freqNote = '';
+      if (pt.crcl > 80) { freq = 'q8-12h'; freqNote = 'CrCl >80 → อาจให้ q8h'; }
+      else if (pt.crcl > 50) { freq = 'q12h'; freqNote = 'CrCl 50-80'; }
+      else if (pt.crcl > 30) { freq = 'q24h'; freqNote = 'CrCl 30-50'; }
+      else if (pt.crcl > 10) { freq = 'q24-48h'; freqNote = 'CrCl 10-30 → extend interval'; }
+      else { freq = 'q48-72h'; freqNote = 'CrCl <10 / HD → re-dose by level'; }
+      const vol = dose <= 1000 ? 200 : 250;
+      const rate_mgmin = 10;
+      const infuse_min = Math.ceil(dose / rate_mgmin);
+      const rate_mlhr = Math.round(vol / (infuse_min / 60));
+      return {
+        title: `Vancomycin ${dose} mg IV ${freq}`,
+        details: [
+          { l: 'Weight-based dose', v: `15-20 mg/kg = ${dose_low}–${dose_high} mg` },
+          { l: 'Recommended dose', v: `${dose} mg` },
+          { l: 'Frequency', v: `${freq}` + (freqNote ? ` (${freqNote})` : '') },
+          { l: 'Dilution', v: `${dose} mg ใน NSS ${vol} mL` },
+          { l: 'Max rate', v: `≤${rate_mgmin} mg/min` },
+          { l: 'Infuse over', v: `≥${infuse_min} min` },
+          { l: 'Infusion rate', v: `${rate_mlhr} mL/hr` },
+        ],
+        info: `<strong>TDM:</strong> AUC/MIC target 400-600 | เจาะ trough ก่อน dose ที่ 4<br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome, phlebitis<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)`,
+        infoType: 'blue'
+      };
+    }
+  },
+  {
+    id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL',
+    badges: ['badge-renal'],
+    calc: function(pt) {
+      const dose = Math.round(pt.wt * 15);
+      const dose_ext = Math.round(pt.wt * 20);
+      let freq = 'q24h', freqNote = '';
+      if (pt.crcl >= 60) { freq = 'q24h'; }
+      else if (pt.crcl >= 40) { freq = 'q36h'; freqNote = 'CrCl 40-60'; }
+      else if (pt.crcl >= 20) { freq = 'q48h'; freqNote = 'CrCl 20-40'; }
+      else { freq = 'by level'; freqNote = 'CrCl <20 → dose by serum level'; }
+      return {
+        title: `Amikacin ${dose} mg IV ${freq}`,
+        details: [
+          { l: 'Conventional dose', v: `15 mg/kg = ${dose} mg q8-12h` },
+          { l: 'Extended-interval', v: `15-20 mg/kg = ${dose}–${dose_ext} mg ${freq}` },
+          { l: 'Frequency adj', v: freq + (freqNote ? ` (${freqNote})` : '') },
+          { l: 'Dilution', v: `ใน NSS/D5W 100-200 mL` },
+          { l: 'Infuse over', v: `30-60 min` },
+        ],
+        info: `<strong>TDM:</strong> Peak 20-35 mcg/mL (extended) | Trough <5 mcg/mL<br><strong>Monitor:</strong> SCr, audiometry, vestibular fn<br><strong>⚠:</strong> ห้ามผสมกับ Beta-lactams ใน syringe/bag เดียวกัน`,
+        infoType: 'blue'
+      };
+    }
+  },
+  {
+    id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL',
+    badges: ['badge-renal'],
+    calc: function(pt) {
+      const dose_conv = (pt.wt * 1.7).toFixed(0);
+      const dose_ext = Math.round(pt.wt * 5);
+      let freq = 'q24h';
+      if (pt.crcl >= 60) freq = 'q24h';
+      else if (pt.crcl >= 40) freq = 'q36h';
+      else if (pt.crcl >= 20) freq = 'q48h';
+      else freq = 'by level';
+      return {
+        title: `Gentamicin ${dose_ext} mg IV ${freq}`,
+        details: [
+          { l: 'Conventional', v: `1-1.7 mg/kg q8h = ${dose_conv} mg q8h` },
+          { l: 'Extended-interval', v: `5-7 mg/kg q24h = ${dose_ext} mg ${freq}` },
+          { l: 'Dilution', v: `ใน NSS/D5W 50-200 mL` },
+          { l: 'Infuse over', v: `30-60 min` },
+        ],
+        info: `<strong>TDM:</strong> Hartford nomogram (extended) หรือ Peak 5-10 / Trough <1<br><strong>Monitor:</strong> SCr daily, audiometry<br><strong>Intrathecal:</strong> 4-8 mg/day (ventriculitis)`,
+        infoType: 'blue'
+      };
+    }
+  },
+  {
+    id: 'colistin', name: 'Colistimethate (CMS)', sub: '150 mg CBA/vial (~2 MIU)',
+    badges: ['badge-renal'],
+    calc: function(pt) {
+      const ibw = pt.sex === 'M' ? 50 + 0.9*(pt.ht-152.4) : 45.5 + 0.9*(pt.ht-152.4);
+      const useWt = pt.ht ? (pt.wt > ibw*1.2 ? (ibw + 0.4*(pt.wt - ibw)).toFixed(0) : pt.wt) : pt.wt;
+      const loading = 300;
+      let maintTotal, maintFreq;
+      if (pt.crcl >= 70) { maintTotal = 300; maintFreq = '150 mg CBA q12h'; }
+      else if (pt.crcl >= 50) { maintTotal = 230; maintFreq = '115 mg CBA q12h'; }
+      else if (pt.crcl >= 30) { maintTotal = 170; maintFreq = '85 mg CBA q12h'; }
+      else { maintTotal = 130; maintFreq = '130 mg CBA q24h (or by level)'; }
+      return {
+        title: `CMS loading ${loading} mg CBA → ${maintFreq}`,
+        details: [
+          { l: 'Loading dose', v: `300 mg CBA (~9 MIU) IV over 30-60 min` },
+          { l: 'Maintenance', v: maintFreq },
+          { l: 'Daily total', v: `${maintTotal} mg CBA/day` },
+          { l: 'Dilution', v: `ใน NSS/D5W 100-250 mL` },
+          { l: 'Infuse over', v: `30-60 min` },
+          { l: 'Unit conversion', v: `1 MIU ≈ 33.3 mg CBA ≈ 80 mg CMS` },
+        ],
+        info: `<strong>⚠ Nephrotoxicity สูง → hydrate well</strong><br><strong>Monitor:</strong> SCr daily, UO, neurotoxicity signs<br><strong>IT/IVT:</strong> 10 mg CBA/day (ventriculitis)<br><strong>Adjust:</strong> ${pt.ht ? `IBW=${ibw.toFixed(0)}kg, adjusted wt=${useWt}kg` : 'ใส่ส่วนสูงเพื่อคำนวณ IBW'}`,
+        infoType: 'amber'
+      };
+    }
+  },
+  {
+    id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL',
+    badges: ['badge-loading'],
+    calc: function(pt) {
+      const dose = Math.round(pt.wt * 20);
+      const maxRate = pt.age >= 65 ? 25 : 50;
+      const infuseMin = Math.ceil(dose / maxRate);
+      return {
+        title: `Phenytoin ${dose} mg IV loading`,
+        details: [
+          { l: 'Loading dose', v: `20 mg/kg = ${dose} mg` },
+          { l: 'Max rate', v: `≤${maxRate} mg/min ${pt.age >= 65 ? '(สูงอายุ)' : ''}` },
+          { l: 'Infuse over', v: `≥${infuseMin} min ใน NSS เท่านั้น!` },
+          { l: 'Concentration', v: `≤6.7 mg/mL (dilute ใน NSS 50-100 mL)` },
+          { l: 'Filter', v: `ต้องใช้ 0.22 μm in-line filter` },
+        ],
+        info: `<strong>⚠ ใช้ NSS เท่านั้น! ห้าม D5W → ตกตะกอน!</strong><br><strong>Monitor:</strong> ECG continuous, BP q5-15min, IV site (purple glove)<br><strong>Level:</strong> Total 10-20 mcg/mL | Free 1-2 mcg/mL<br><strong>ตรวจ:</strong> Free phenytoin ถ้า albumin <3.5`,
+        infoType: 'red'
+      };
+    }
+  },
+  {
+    id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL',
+    badges: ['badge-loading'],
+    calc: function(pt) {
+      const dose30 = Math.round(pt.wt * 30);
+      const dose40 = Math.round(pt.wt * 40);
+      const maintRate = (pt.wt * 1.5).toFixed(0);
+      return {
+        title: `Valproate ${dose30}–${dose40} mg IV loading`,
+        details: [
+          { l: 'Loading dose', v: `30-40 mg/kg = ${dose30}–${dose40} mg` },
+          { l: 'Rate', v: `IV over 15-30 min (max 6 mg/kg/min)` },
+          { l: 'Maintenance', v: `1-2 mg/kg/hr = ${maintRate}–${Math.round(pt.wt*2)} mg/hr CI` },
+          { l: 'Alternative', v: `IV→PO: 15-20 mg/kg/day div q8-12h` },
+        ],
+        info: `<strong>⚠ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)</strong><br><strong>Level:</strong> 50-100 mcg/mL (SE: 80-120)<br><strong>Monitor:</strong> LFTs, CBC+Plt, ammonia, amylase<br><strong>CI:</strong> Hepatic disease, pregnancy (Cat X)`,
+        infoType: 'red'
+      };
+    }
+  },
+  {
+    id: 'levetiracetam', name: 'Levetiracetam loading', sub: '500 mg/5 mL',
+    badges: ['badge-loading'],
+    calc: function(pt) {
+      const dose = Math.round(pt.wt * 60 / 500) * 500;
+      const doseMax = Math.min(dose, 4500);
+      let maint = '1000-1500 mg IV q12h';
+      if (pt.crcl < 30) maint = '250-500 mg IV q12h (CrCl <30)';
+      else if (pt.crcl < 50) maint = '500-750 mg IV q12h (CrCl 30-50)';
+      else if (pt.crcl < 80) maint = '500-1000 mg IV q12h (CrCl 50-80)';
+      return {
+        title: `Levetiracetam ${doseMax} mg IV loading`,
+        details: [
+          { l: 'Loading dose (SE)', v: `60 mg/kg = ${dose} mg (max 4500 mg)` },
+          { l: 'Recommended', v: `${doseMax} mg IV over 10-15 min` },
+          { l: 'Maintenance', v: maint },
+          { l: 'Switch PO', v: `IV ↔ PO 1:1 ratio` },
+        ],
+        info: `<strong>ข้อดี:</strong> No significant drug interactions, safe ใน hepatic impairment<br><strong>SE:</strong> behavioral (irritability, aggression)<br><strong>Monitor:</strong> Seizure freq, SCr, mood/behavior`,
+        infoType: 'blue'
+      };
+    }
+  },
+  {
+    id: 'alteplase', name: 'Alteplase (rt-PA)', sub: 'Actilyse 50 mg/50 mL',
+    badges: ['badge-stroke'],
+    calc: function(pt) {
+      const totalDose = Math.min(pt.wt * 0.9, 90).toFixed(1);
+      const bolus = (totalDose * 0.1).toFixed(1);
+      const infusion = (totalDose * 0.9).toFixed(1);
+      return {
+        title: `Alteplase ${totalDose} mg (stroke protocol)`,
+        details: [
+          { l: 'Total dose', v: `0.9 mg/kg = ${totalDose} mg (max 90 mg)` },
+          { l: '10% bolus', v: `${bolus} mg IV push over 1 min` },
+          { l: '90% infusion', v: `${infusion} mg IV infusion over 60 min` },
+          { l: 'Concentration', v: `1 mg/mL (reconstituted)` },
+        ],
+        info: `<strong>⚠ Door-to-needle <60 min!</strong><br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr หลังให้<br><strong>BP:</strong> q15min x 2hr → q30min x 6hr → q1h x 16hr<br><strong>CT brain:</strong> 24 hr post-dose<br><strong>เตรียม:</strong> Cryoprecipitate, TXA สำหรับ bleeding`,
+        infoType: 'red'
+      };
+    }
+  },
+  {
+    id: 'tenecteplase', name: 'Tenecteplase', sub: 'Metalyse',
+    badges: ['badge-stroke'],
+    calc: function(pt) {
+      let dose_ami;
+      if (pt.wt < 60) dose_ami = 30;
+      else if (pt.wt < 70) dose_ami = 35;
+      else if (pt.wt < 80) dose_ami = 40;
+      else if (pt.wt < 90) dose_ami = 45;
+      else dose_ami = 50;
+      const dose_stroke = Math.min(pt.wt * 0.25, 25).toFixed(1);
+      return {
+        title: `Tenecteplase — single IV bolus`,
+        details: [
+          { l: 'Stroke dose', v: `0.25 mg/kg = ${dose_stroke} mg (max 25 mg)` },
+          { l: 'AMI dose', v: `${dose_ami} mg (weight-tiered)` },
+          { l: 'Route', v: `Single IV bolus over 5-10 sec` },
+          { l: 'Concentration', v: `5 mg/mL (reconstituted)` },
+          { l: 'Volume (stroke)', v: `${(dose_stroke / 5).toFixed(1)} mL` },
+        ],
+        info: `<strong>ข้อดี:</strong> Single bolus → ง่ายกว่า Alteplase<br><strong>Evidence:</strong> TASTE, AcT trials สำหรับ stroke<br><strong>Monitor:</strong> NIHSS, BP q15min, bleeding<br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr`,
+        infoType: 'blue'
+      };
+    }
+  },
+];
+
+// ====== CrCl Calculator ======
+function getCrCl() {
+  const age = parseFloat(document.getElementById('ptAge').value) || 65;
+  const wt = parseFloat(document.getElementById('ptWt').value) || 70;
+  const scr = parseFloat(document.getElementById('ptScr').value) || 1.0;
+  const sex = document.getElementById('ptSex').value;
+  if (scr <= 0) return 0;
+  let crcl = ((140 - age) * wt) / (72 * scr);
+  if (sex === 'F') crcl *= 0.85;
+  return Math.round(crcl * 10) / 10;
+}
+
+function getPatient() {
+  return {
+    wt: parseFloat(document.getElementById('ptWt').value) || 70,
+    age: parseFloat(document.getElementById('ptAge').value) || 65,
+    sex: document.getElementById('ptSex').value,
+    scr: parseFloat(document.getElementById('ptScr').value) || 1.0,
+    ht: parseFloat(document.getElementById('ptHt').value) || 0,
+    crcl: getCrCl()
+  };
+}
+
+function updateCrCl() {
+  const crcl = getCrCl();
+  document.getElementById('crclValue').textContent = crcl.toFixed(1) + ' mL/min';
+  const warn = document.getElementById('crclWarning');
+  if (crcl < 30) {
+    warn.style.display = 'block';
+    warn.innerHTML = '<div class="info-box red"><strong>⚠ CrCl <30 mL/min</strong> — ปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing</div>';
+  } else if (crcl < 50) {
+    warn.style.display = 'block';
+    warn.innerHTML = '<div class="info-box amber"><strong>CrCl 30-50 mL/min</strong> — ยาบางตัวต้องปรับขนาด/interval</div>';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+// ====== Drug Selection ======
+let selectedDrug = null;
+
+function renderDrugGrid() {
+  const grid = document.getElementById('drugGrid');
+  grid.innerHTML = CALC_DRUGS.map(d => `
+    <div class="drug-card ${selectedDrug === d.id ? 'active' : ''}" onclick="selectDrug('${d.id}')">
+      <div class="drug-name">${d.name}</div>
+      <div class="drug-sub">${d.sub}</div>
+      ${d.badges.map(b => `<span class="badge ${b}">${b.replace('badge-','')}</span>`).join(' ')}
+    </div>
+  `).join('');
+}
+
+function selectDrug(id) {
+  selectedDrug = id;
+  renderDrugGrid();
+  calculate();
+}
+
+function calculate() {
+  const sec = document.getElementById('outputSection');
+  const body = document.getElementById('outputBody');
+  const header = document.getElementById('outputHeader');
+  if (!selectedDrug) { sec.style.display = 'none'; return; }
+  
+  const drug = CALC_DRUGS.find(d => d.id === selectedDrug);
+  if (!drug) return;
+  
+  const pt = getPatient();
+  const result = drug.calc(pt);
+  
+  header.innerHTML = `📊 ${drug.name}`;
+  body.innerHTML = `
+    <div style="padding:16px;">
+      <div class="result-box">
+        <div class="result-title">Recommended</div>
+        <div class="result-value" style="font-size:20px;">${result.title}</div>
+      </div>
+      <div style="margin-top:14px;">
+        ${result.details.map(d => `<div class="detail-row"><span class="detail-label">${d.l}</span><span class="detail-value">${d.v}</span></div>`).join('')}
+      </div>
+      <div class="info-box ${result.infoType}" style="margin-top:14px;">${result.info}</div>
+    </div>
+  `;
+  sec.style.display = 'block';
+  sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ====== Init ======
+updateCrCl();
+renderDrugGrid();
+</script>
+</body>
+</html>

@@ -687,10 +687,13 @@ body::before {
       </div>
     </div>
 
-    <!-- About link -->
-    <div style="text-align:center; padding-bottom:16px;">
+    <!-- About & Contact links -->
+    <div style="text-align:center; padding-bottom:16px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
       <button onclick="showAbout()" style="font-family:inherit; font-size:11px; color:var(--text-muted); background:none; border:1px solid var(--border); padding:6px 16px; border-radius:20px; cursor:pointer;">
         ℹ️ เกี่ยวกับแอปนี้
+      </button>
+      <button onclick="showContact()" style="font-family:inherit; font-size:11px; color:#0ea5e9; background:none; border:1px solid #bfdbfe; padding:6px 16px; border-radius:20px; cursor:pointer;">
+        💬 แจ้งปัญหา / ข้อเสนอแนะ
       </button>
     </div>
   </footer>
@@ -2990,9 +2993,68 @@ function showAbout() {
             <div style="font-size:12px;font-weight:700;color:#d97706;margin-bottom:4px;">📡 การเก็บข้อมูล</div>
             <div style="font-size:11px;color:#64748b;">เก็บข้อมูลใช้งานแบบ anonymous เพื่อพัฒนาคุณภาพและงานวิจัย ไม่เก็บชื่อ รหัส IP หรือข้อมูลส่วนบุคคลใดๆ</div>
           </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;">
+            <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:4px;">💬 ติดต่อ / แจ้งปัญหา</div>
+            <div style="font-size:11px;color:#064e3b;">
+              📱 LINE: <strong>rxbenz</strong><br>
+              📧 Email: <strong>thapanat.nk@gmail.com</strong><br>
+              <span style="font-size:10px;color:#6b7280;">พบข้อมูลยาผิดพลาด อยากให้เพิ่มยา หรือมี feedback ใดๆ แจ้งได้เลยครับ</span>
+            </div>
+          </div>
         </div>
         <div style="text-align:center;margin-top:16px;">
           <button onclick="document.getElementById('aboutOverlay').remove()" style="background:#0ea5e9;color:#fff;border:none;padding:10px 32px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">ปิด</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(o);
+}
+
+// Contact modal
+function showContact() {
+  const o = document.createElement('div');
+  o.id = 'contactOverlay';
+  o.innerHTML = `
+    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.remove()">
+      <div style="background:#fff;border-radius:24px;width:100%;max-width:400px;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;overflow:hidden;">
+        
+        <div style="background:linear-gradient(135deg,#059669,#047857);padding:20px 24px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:4px;">💬</div>
+          <div style="font-size:16px;font-weight:700;color:#fff;">ติดต่อผู้พัฒนา</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">แจ้งปัญหา ข้อเสนอแนะ หรือขอเพิ่มยา</div>
+        </div>
+
+        <div style="padding:20px 24px;">
+          <a href="https://line.me/ti/p/~rxbenz" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;margin-bottom:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+            <div style="width:40px;height:40px;background:#06c755;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💚</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1e293b;">LINE: rxbenz</div>
+              <div style="font-size:11px;color:#64748b;">แชทได้เลย ตอบเร็ว</div>
+            </div>
+          </a>
+          
+          <a href="mailto:thapanat.nk@gmail.com?subject=IV%20DrugRef%20Feedback" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;margin-bottom:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+            <div style="width:40px;height:40px;background:#0ea5e9;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📧</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1e293b;">thapanat.nk@gmail.com</div>
+              <div style="font-size:11px;color:#64748b;">ส่ง screenshot / รายละเอียดมาได้</div>
+            </div>
+          </a>
+
+          <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-top:6px;">
+            <div style="font-size:11px;color:#64748b;line-height:1.6;">
+              <strong style="color:#1e293b;">แจ้งได้เลยถ้าเจอ:</strong><br>
+              🔴 ข้อมูลยาผิดพลาด / ไม่ตรงกับ Package Insert<br>
+              💊 อยากให้เพิ่มยาตัวไหน<br>
+              🐛 แอปมีปัญหา / bug<br>
+              💡 ไอเดีย feature ใหม่
+            </div>
+          </div>
+          
+          <div style="text-align:center;margin-top:14px;">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:8px;">ภก. ฐาปนัท นาคครุฑ (Benz) | กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา</div>
+            <button onclick="document.getElementById('contactOverlay').remove()" style="background:none;border:1px solid #e2e8f0;color:#64748b;padding:8px 24px;border-radius:10px;font-size:12px;cursor:pointer;font-family:inherit;">ปิด</button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -3145,7 +3207,7 @@ function openSatSurvey() {
           <div style="margin-bottom:12px;">
             <label style="font-size:11px;font-weight:600;color:#64748b;">หน่วยงาน/แผนก (ไม่บังคับ)</label>
             <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;" id="dept_group">
-              ${['opd_pharmacy|ห้องยา OPD','ipd_pharmacy|ห้องยา IPD','production|ฝ่ายผลิต','clinical|เภสัชคลินิก','dis|DIS','icu|ICU/ER','ward|หอผู้ป่วย','or|ห้องผ่าตัด','other_dept|อื่นๆ'].map(opt => {
+              ${['opd_pharmacy|ห้องยา OPD','ipd_pharmacy|ห้องยา IPD','production|ฝ่ายผลิต','clinical|เภสัชคลินิก','dis|DIS','icu|ICU/ER','ward|หอผู้ป่วย','or|ห้องผ่าตัด','drugstore|ร้านยา','clinic|คลินิก','other_hospital|รพ.อื่น','other_dept|อื่นๆ'].map(opt => {
                 const [val,label] = opt.split('|');
                 return `<button onclick="selectDept('${val}')" data-val="${val}" style="padding:4px 10px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s;">${label}</button>`;
               }).join('')}

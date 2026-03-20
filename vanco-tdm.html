@@ -451,6 +451,16 @@ function runBayesian(){
     updateOptimizer();
     genDoseOpts();
     document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'});
+
+    // v4: track TDM usage
+    if (typeof trackTDMResult === 'function') {
+      trackTDMResult(
+        currentPK.model,
+        aucMAP.toFixed(0),
+        lastD.amount + 'mg ' + lastD.interval + 'h',
+        pt
+      );
+    }
   });
 }
 
@@ -494,6 +504,50 @@ function genDoseOpts(){
       <div class="opt-auc">AUC₂₄ ${o.auc.toFixed(0)} | Pk ${o.pk.toFixed(1)} | Tr ${o.tr.toFixed(1)}</div>
       <span class="opt-badge" style="background:var(--${c}-dim);color:var(--${c})">${o.ok?'In target':o.auc<400?'Below':'Above'}</span></div>`;
   }).join('');
+}
+
+// ============================================================
+// ANALYTICS (shared IDs with index.html via localStorage)
+// ============================================================
+const TDM_ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+const TDM_SID = localStorage.getItem('anonSessionId') || '';
+const TDM_UID = localStorage.getItem('anonUserId') || '';
+let tdmReqCount = 0;
+
+function sendTDMAnalytics(data) {
+  if (!TDM_ANALYTICS_URL || localStorage.getItem('analyticsConsent') !== 'true') return;
+  if (tdmReqCount >= 20) return;
+  tdmReqCount++;
+  try {
+    const payload = JSON.stringify({ ...data, session_id: TDM_SID, user_id: TDM_UID });
+    if (navigator.sendBeacon) navigator.sendBeacon(TDM_ANALYTICS_URL, payload);
+    else fetch(TDM_ANALYTICS_URL, { method:'POST', body:payload, keepalive:true }).catch(()=>{});
+  } catch(e) {}
+}
+
+// Track page visit
+sendTDMAnalytics({
+  type: 'calc_visit',
+  page: 'vanco-tdm',
+  referrer: document.referrer || 'direct',
+  drugs_available: 'Vancomycin'
+});
+
+// Track TDM result (called after MCMC completes)
+let tdmResultTracked = false;
+function trackTDMResult(model, auc, dose, pt) {
+  if (tdmResultTracked) return;
+  tdmResultTracked = true;
+  sendTDMAnalytics({
+    type: 'tdm_usage',
+    drug_name: 'Vancomycin',
+    model: model,
+    auc_result: auc,
+    dose_recommended: dose,
+    weight_kg: pt.wt,
+    scr: pt.scr,
+    age: pt.age
+  });
 }
 
 // Event listeners

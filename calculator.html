@@ -173,7 +173,7 @@ font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 // ====== Drug Definitions ======
 const CALC_DRUGS = [
   {
-    id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial',
+    id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="vanco-tdm.html" style="color:#38bdf8;">🧬 Bayesian TDM</a>',
     badges: ['badge-renal'],
     calc: function(pt) {
       const dose_low = Math.round(pt.wt * 15 / 250) * 250;

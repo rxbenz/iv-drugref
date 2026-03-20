@@ -702,583 +702,7 @@ body::before {
 // ============================================================
 const DRUGS = [
   {
-    id: 1, generic: "Acyclovir", trade: "Acyclovir inj. 250 mg", strength: "250 mg/vial", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "SWFI หรือ NSS", volume: "10 mL", conc: "25 mg/mL" },
-    dilution: { diluent: "NSS, D5W", volume: "≥100 mL", finalConc: "≤7 mg/mL (ไม่เกิน 10 mg/mL)" },
-    admin: { route: "IV infusion เท่านั้น\n(ห้าม IV push, IM, SC)", rate: "ให้นานอย่างน้อย 1 ชม." },
-    stability: { reconst: "12 ชม. ที่ RT", diluted: "24 ชม. ที่ RT", storage: "เก็บ 15-25°C\nห้ามแช่เย็น (ตกผลึก)" },
-    compat: { ysite: "Ceftriaxone, Fluconazole, Meropenem, Ondansetron", incompat: "D10W, D20W, TPN, Blood products\nDobutamine, Dopamine" },
-    precautions: "• ห้าม IV push เพราะเสี่ยง renal tubular damage\n• ต้อง adequate hydration ก่อนให้\n• ระวัง extravasation (pH 11)\n• ปรับขนาดตาม CrCl",
-    monitoring: ["SCr", "BUN", "UO", "CBC", "Neuro status", "Phlebitis signs"],
-    had: false, ref: "Trissel's; Lexicomp"
-  },
-  {
-    id: 2, generic: "Adenosine", trade: "Adenocor Inj. 6 mg/2 mL", strength: "6 mg/2 mL", ed: "E",
-    categories: ["cardiovascular"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "3 mg/mL" },
-    dilution: { diluent: "ไม่ต้องเจือจาง", volume: "-", finalConc: "3 mg/mL (undiluted)" },
-    admin: { route: "Rapid IV push\n1-2 วินาที\nตาม NSS flush 20 mL", rate: "1-2 sec push\nFlush ทันที" },
-    stability: { reconst: "-", diluted: "-", storage: "เก็บ RT ห้ามแช่เย็น" },
-    compat: { ysite: "-", incompat: "-" },
-    precautions: "• ใช้ IV site ใกล้หัวใจที่สุด (antecubital/central)\n• เตรียม crash cart\n• T½ <10 sec → ต้องให้เร็วมาก\n• CI: 2nd/3rd degree AV block, SSS",
-    monitoring: ["Continuous ECG", "HR", "BP", "Dyspnea", "Chest pain"],
-    had: true, ref: "Lexicomp; ACLS guidelines"
-  },
-  {
-    id: 3, generic: "Adrenaline (Epinephrine)", trade: "Adrenaline Inj. 1 mg/mL", strength: "1 mg/1 mL amp", ed: "E",
-    categories: ["icu", "cardiovascular"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "1 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "250-500 mL", finalConc: "4-16 mcg/mL\n(1 mg in 250 mL = 4 mcg/mL)" },
-    admin: { route: "IV push (cardiac arrest)\nIV infusion (shock)\nIM (anaphylaxis)", rate: "Push: ทุก 3-5 min (ACLS)\nInfusion: 1-10 mcg/min titrate\nIM: 0.3-0.5 mg anterolateral thigh" },
-    stability: { reconst: "-", diluted: "24 ชม. ใช้ทันทีถ้าสีเปลี่ยน", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Amiodarone, Calcium chloride, Heparin, Midazolam", incompat: "NaHCO₃, Aminophylline, Thiopental" },
-    precautions: "• Extravasation → tissue necrosis: ให้ phentolamine\n• ห้ามผสมกับ alkaline solutions\n• Cardiac arrest: 1 mg IV push q3-5min\n• ระวัง arrhythmia",
-    monitoring: ["Continuous ECG", "HR", "BP", "UO", "Lactate", "Peripheral perfusion", "Extravasation"],
-    had: true, ref: "Lexicomp; ACLS 2020"
-  },
-  {
-    id: 4, generic: "Amikacin", trade: "Amikacin Inj. 500 mg/2 mL", strength: "500 mg/2 mL", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "250 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "100-200 mL", finalConc: "2.5-5 mg/mL" },
-    admin: { route: "IV infusion (ห้าม IV push)", rate: "30-60 นาที" },
-    stability: { reconst: "-", diluted: "24 ชม. ที่ RT", storage: "เก็บ RT" },
-    compat: { ysite: "Dexamethasone, Furosemide, Midazolam, Ondansetron", incompat: "Amphotericin B, Heparin, Phenytoin, Propofol" },
-    precautions: "• Nephrotoxic & Ototoxic\n• ปรับขนาดตาม renal function\n• Extended-interval dosing preferred\n• ห้ามผสมกับ Penicillins ใน syringe เดียวกัน",
-    monitoring: ["Peak/Trough levels", "SCr", "BUN", "UO", "Audiometry", "Vestibular fn"],
-    had: false, ref: "Lexicomp; AHFS"
-  },
-  {
-    id: 5, generic: "Amiodarone", trade: "Cordarone Inj. 150 mg/3 mL", strength: "150 mg/3 mL amp", ed: "E",
-    categories: ["cardiovascular", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "50 mg/mL" },
-    dilution: { diluent: "D5W เท่านั้น (ห้ามใช้ NSS!)", volume: "Loading: 100 mL\nMaint: 500 mL", finalConc: "Loading: 1.5 mg/mL\nPeripheral max: 2 mg/mL\nCentral: ≤6 mg/mL" },
-    admin: { route: "IV infusion\n(ห้าม IV push ยกเว้น cardiac arrest)", rate: "Loading: 150 mg/10 min\nRapid: 1 mg/min x 6 hr\nSlow: 0.5 mg/min x 18 hr\nCardiac arrest: 300 mg push" },
-    stability: { reconst: "-", diluted: "24 ชม. ที่ RT ใน D5W\n(ใช้ภายใน 2 ชม. ถ้า >2 mg/mL peripheral)", storage: "RT ป้องกันแสง\nใช้ non-PVC container & tubing (ถ้า >2 mg/mL)" },
-    compat: { ysite: "Furosemide (ระวัง), Lidocaine, Midazolam", incompat: "NaHCO₃, Heparin, Ceftazidime\nAmpicillin/sulbactam, Pip/Tazo" },
-    precautions: "• ต้องใช้ D5W เท่านั้น! (NSS incompatible)\n• ใช้ non-PVC tubing (ถ้า conc >2 mg/mL)\n• ระวัง hypotension จากการให้เร็ว\n• Phlebitis สูง → prefer central line\n• QT prolongation risk\n• CYP inhibitor → drug interactions มาก",
-    monitoring: ["Continuous ECG", "BP", "HR", "QTc", "TFTs q3-6 mo", "LFTs", "PFTs", "Phlebitis"],
-    had: true, ref: "Lexicomp; Trissel's; AHA/ACLS"
-  },
-  {
-    id: 6, generic: "Amphotericin B (conventional)", trade: "Amphotericin B Inj. 50 mg", strength: "50 mg/vial", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "SWFI 10 mL\n(ห้าม NSS/electrolyte solutions)", volume: "10 mL", conc: "5 mg/mL" },
-    dilution: { diluent: "D5W เท่านั้น (ห้าม NSS!)", volume: "500 mL D5W", finalConc: "0.1 mg/mL (max 0.25 mg/mL peripheral)" },
-    admin: { route: "IV infusion\nผ่าน 0.22 μm in-line filter", rate: "2-6 ชม.\nTest dose: 1 mg/20 mL D5W over 20-30 min ก่อน" },
-    stability: { reconst: "24 ชม. ที่ 2-8°C", diluted: "24 ชม. RT ป้องกันแสง (เริ่มภายใน 8 ชม.)", storage: "2-8°C ป้องกันแสง" },
-    compat: { ysite: "Heparin (≤1 unit/mL เท่านั้น)", incompat: "NSS, Electrolyte solutions ทุกชนิด\nMost drugs (give alone)" },
-    precautions: "• ห้ามใช้ NSS ทุกขั้นตอน!\n• Test dose ก่อนเสมอ\n• Premedication: Paracetamol + Diphenhydramine ± Hydrocortisone\n• ให้ K⁺/Mg²⁺ supplement\n• Nephrotoxicity สูงมาก",
-    monitoring: ["SCr", "BUN", "K⁺", "Mg²⁺ (ทุกวัน)", "CBC (weekly)", "LFTs", "Infusion reactions", "UO"],
-    had: true, ref: "Lexicomp; Trissel's"
-  },
-  {
-    id: 7, generic: "Calcium gluconate", trade: "Calcium gluconate 10%", strength: "10% (100 mg/mL) 10 mL", ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL (Ca 9.3 mg/mL)" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "≤50 mg/mL (5%)" },
-    admin: { route: "IV infusion (preferred)\nSlow IV push (emergency)", rate: "IV infusion: ≥30 min\nIV push: ≤1.5-2 mL/min" },
-    stability: { reconst: "-", diluted: "24 ชม. ที่ RT", storage: "เก็บ RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Ceftriaxone (ห้ามเด็ดขาด!)\nNaHCO₃, Phosphate solutions, Amphotericin B" },
-    precautions: "• ห้ามผสมกับ Ceftriaxone เด็ดขาด! (ตกตะกอน → fatal)\n• ระวัง extravasation → tissue necrosis/calcification\n• ให้ช้าๆ ป้องกัน cardiac arrest\n• ระวังในผู้ป่วยที่ได้ Digoxin",
-    monitoring: ["iCa²⁺", "Total Ca", "ECG (QT)", "HR", "BP", "Extravasation", "Renal fn"],
-    had: true, ref: "Lexicomp; Trissel's"
-  },
-  {
-    id: 8, generic: "Ceftriaxone", trade: "Ceftriaxone Inj. 1 g / 2 g", strength: "1 g, 2 g/vial", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "IV: SWFI | IM: Lidocaine 1%", volume: "IV: 10 mL (1g), 20 mL (2g)\nIM: 3.5 mL (1g)", conc: "100 mg/mL (IV)\n250 mg/mL (IM)" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "10-40 mg/mL" },
-    admin: { route: "IV infusion | IV push (≥2 min) | IM", rate: "IV infusion: 30 min\nIV push: ≥2-4 min\nNeonates: 60 min" },
-    stability: { reconst: "3 วัน RT | 10 วัน 2-8°C", diluted: "24 ชม. RT ใน NSS/D5W", storage: "RT" },
-    compat: { ysite: "Acyclovir, Metronidazole, Morphine", incompat: "Calcium solutions (ห้ามเด็ดขาด ในทารก!)\nAminoglycosides, Vancomycin" },
-    precautions: "• ห้ามผสมกับ Calcium solutions เด็ดขาด (neonates)\n• ไม่ผสม Aminoglycosides ใน bag เดียวกัน\n• Biliary sludge ได้\n• ไม่ต้องปรับขนาดใน renal impairment",
-    monitoring: ["CBC", "SCr", "LFTs", "Allergy signs", "Biliary sx (prolonged)"],
-    had: false, ref: "Lexicomp; Trissel's"
-  },
-  {
-    id: 9, generic: "Dexamethasone", trade: "Dexamethasone Inj. 4-5 mg/mL", strength: "4 mg/mL, 5 mg/mL", ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "4-5 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "0.04-0.4 mg/mL" },
-    admin: { route: "IV push | IV infusion | IM", rate: "IV push: 1-4 min\nIV infusion: 15-30 min" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Midazolam (some), Vancomycin (some)" },
-    precautions: "• Perineal burning ถ้า IV push เร็ว\n• ระวัง hyperglycemia\n• Adrenal suppression (prolonged)\n• GI bleeding risk",
-    monitoring: ["BG", "Electrolytes", "BP", "Infection signs", "Adrenal fn"],
-    had: false, ref: "Lexicomp"
-  },
-  {
-    id: 10, generic: "Dexmedetomidine", trade: "Dexmedetomidine Inj.", strength: "200 mcg/2 mL", ed: "E",
-    categories: ["icu", "analgesic"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mcg/mL" },
-    dilution: { diluent: "NSS เท่านั้น", volume: "48 mL NSS (200 mcg + 48 mL = 4 mcg/mL)", finalConc: "4 mcg/mL" },
-    admin: { route: "IV infusion เท่านั้น (ห้าม bolus)", rate: "Loading: 1 mcg/kg over 10 min (optional)\nMaint: 0.2-0.7 mcg/kg/hr\nMax: 1.5 mcg/kg/hr" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิดใน NSS", incompat: "Amphotericin B, Diazepam, Phenytoin, Blood products" },
-    precautions: "• ห้ามให้ >24 ชม. (withdrawal risk)\n• Loading → bradycardia/HTN ได้\n• ระวัง co-sedation\n• ไม่ต้องปรับใน renal impairment",
-    monitoring: ["HR", "BP", "SpO₂", "RR", "RASS score", "Pain assessment"],
-    had: true, ref: "Lexicomp; ICU sedation guidelines"
-  },
-  {
-    id: 11, generic: "Diazepam", trade: "Diazepam Inj. 10 mg/2 mL", strength: "10 mg/2 mL", ed: "E",
-    categories: ["antiepileptic", "analgesic"],
-    reconst: { solvent: "ห้ามเจือจาง! (ตกตะกอน)", volume: "-", conc: "5 mg/mL" },
-    dilution: { diluent: "ห้ามเจือจาง (incompatible กับ NSS/D5W)", volume: "-", finalConc: "5 mg/mL (undiluted)" },
-    admin: { route: "Slow IV push | IM (ดูดซึมไม่ดี) | Rectal", rate: "≤5 mg/min (ผู้ใหญ่)\n≤1-2 mg/min (เด็ก/สูงอายุ)\nSE: 5 mg/min" },
-    stability: { reconst: "-", diluted: "-", storage: "RT ป้องกันแสง\nAdsorbs to PVC" },
-    compat: { ysite: "-", incompat: "IV fluids ทุกชนิด (ห้ามเจือจาง)\nAdsorbs to PVC → ใช้ glass/polyolefin" },
-    precautions: "• ห้ามเจือจาง/ผสมกับยาอื่น!\n• Adsorbs to PVC tubing\n• Respiratory depression → เตรียม Flumazenil\n• Propylene glycol toxicity (high dose)\n• IM ดูดซึมไม่ดี\n• ห้าม intra-arterial",
-    monitoring: ["RR", "SpO₂", "BP", "HR", "Sedation level", "Seizure activity", "Extravasation"],
-    had: true, ref: "Lexicomp; SE guidelines"
-  },
-  {
-    id: 12, generic: "Enoxaparin", trade: "Clexane Inj. 40/60/80 mg", strength: "Prefilled syringe", ed: "E",
-    categories: ["cardiovascular"],
-    reconst: { solvent: "Ready to use (prefilled)", volume: "-", conc: "100 mg/mL" },
-    dilution: { diluent: "ไม่ต้องเจือจาง", volume: "-", finalConc: "100 mg/mL" },
-    admin: { route: "SC เท่านั้น (ปกติ) | IV bolus (ACS)", rate: "SC: anterolateral abdominal\nIV (ACS): 30 mg bolus\nห้ามไล่ bubble ออก" },
-    stability: { reconst: "-", diluted: "-", storage: "RT ห้ามแช่เย็น" },
-    compat: { ysite: "-", incompat: "-" },
-    precautions: "• SC เท่านั้น (ห้าม IM)\n• ห้ามไล่ air bubble (air lock design)\n• สลับซ้าย-ขวาทุกครั้ง\n• ห้ามถูบริเวณฉีด\n• ระวัง HIT\n• ปรับขนาด CrCl <30",
-    monitoring: ["CBC + Plt q2-3d", "Anti-Xa (renal/obesity)", "SCr", "Bleeding signs", "Stool OB"],
-    had: true, ref: "Lexicomp"
-  },
-  {
-    id: 13, generic: "Fentanyl", trade: "Fentanyl Inj. 0.1 mg/2 mL", strength: "50 mcg/mL, 2 mL", ed: "E",
-    categories: ["analgesic", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "50 mcg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "Dilute to 10-50 mcg/mL", finalConc: "10-50 mcg/mL" },
-    admin: { route: "IV push (slow) | IV infusion | IM, Epidural, IT", rate: "IV push: 1-2 min\nInfusion: 25-100 mcg/hr" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Phenytoin, Thiopental" },
-    precautions: "• Respiratory depression → เตรียม Naloxone\n• Chest wall rigidity (ให้เร็ว/dose สูง)\n• Serotonin syndrome (+ SSRI/SNRI)\n• ระวัง dose ในสูงอายุ, hepatic impairment",
-    monitoring: ["RR", "SpO₂", "BP", "HR", "Pain score", "Sedation", "Bowel fn"],
-    had: true, ref: "Lexicomp"
-  },
-  {
-    id: 14, generic: "Furosemide", trade: "Lasix Inj. 20 mg/2 mL", strength: "20 mg/2 mL", ed: "E",
-    categories: ["cardiovascular", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
-    dilution: { diluent: "NSS (preferred) | D5W", volume: "50-100 mL", finalConc: "1-2 mg/mL" },
-    admin: { route: "IV push (slow) | IV infusion | IM", rate: "IV push: ≤4 mg/min\nInfusion: 0.1-0.4 mg/kg/hr\nHigh dose >80 mg: infusion preferred" },
-    stability: { reconst: "-", diluted: "24 ชม. RT ใน NSS", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Midazolam, Morphine, KCl", incompat: "Dobutamine, Dopamine, Milrinone\nVancomycin, Ondansetron (mixed)" },
-    precautions: "• ให้เร็วเกิน → ototoxicity (dose สูง)\n• ระวัง hypoK, hypoNa, hypoMg\n• ตกตะกอนที่ pH <7\n• Photosensitive",
-    monitoring: ["K⁺", "Na⁺", "Mg²⁺", "Ca²⁺", "BP", "UO", "Weight", "SCr", "Hearing (high dose)"],
-    had: false, ref: "Lexicomp; Trissel's"
-  },
-  {
-    id: 15, generic: "Heparin", trade: "Heparin Inj. 5000/25000 units", strength: "1000-5000 units/mL", ed: "E",
-    categories: ["cardiovascular", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "1000 or 5000 units/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "250-500 mL", finalConc: "25000 u/250 mL = 100 u/mL" },
-    admin: { route: "IV infusion (continuous) | SC | IV flush", rate: "Loading: 60-80 u/kg bolus\nMaint: 12-18 u/kg/hr\nAdjust per aPTT nomogram" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Alteplase, Amiodarone, Diazepam, Gentamicin" },
-    precautions: "• หลาย concentration → ตรวจ dose ซ้ำเสมอ!\n• HIT: หยุดทันทีถ้า plt drop >50%\n• Antidote: Protamine\n• ห้ามฉีด IM\n• ใช้ infusion pump เสมอ",
-    monitoring: ["aPTT q6h → stable → q12-24h", "Anti-Xa", "CBC + Plt q2-3d", "Hgb/Hct", "Bleeding signs"],
-    had: true, ref: "Lexicomp; CHEST guidelines"
-  },
-  {
-    id: 16, generic: "Labetalol", trade: "Labetalol Inj. 100 mg/20 mL", strength: "5 mg/mL", ed: "E",
-    categories: ["stroke", "cardiovascular", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "5 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "200 mL", finalConc: "1-2 mg/mL" },
-    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: 10-20 mg/2 min q10min (max 300 mg)\nInfusion: 0.5-2 mg/min" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Fentanyl, Midazolam, Morphine", incompat: "NaHCO₃, Furosemide (variable)" },
-    precautions: "• First-line HT emergency ใน stroke\n• CI: Severe bradycardia, AV block ≥2nd, Asthma\n• ไม่ลด CBF → safe for neuro\n• Supine position during IV push",
-    monitoring: ["BP q5-15 min", "HR", "ECG", "Neuro status", "UO"],
-    had: true, ref: "Lexicomp; AHA stroke guidelines"
-  },
-  {
-    id: 17, generic: "Lacosamide", trade: "Lacosamide Inj. 200 mg/20 mL", strength: "10 mg/mL", ed: "E",
-    categories: ["antiepileptic"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
-    dilution: { diluent: "NSS, D5W หรือ LR\nให้ undiluted ได้", volume: "ไม่ต้อง หรือ 50-100 mL", finalConc: "10 mg/mL (undiluted) หรือ dilute" },
-    admin: { route: "IV infusion (PO ↔ IV 1:1)", rate: "15-60 min\nSE: ≥15 min" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Limited data" },
-    precautions: "• Switch PO ↔ IV 1:1\n• ระวัง PR prolongation\n• CI: 2nd/3rd degree AV block\n• ปรับขนาดใน severe hepatic/renal\n• Suicidal ideation monitoring",
-    monitoring: ["ECG (PR interval)", "Seizure freq", "LFTs", "SCr", "Mood/behavior"],
-    had: false, ref: "Lexicomp"
-  },
-  {
-    id: 18, generic: "Levetiracetam", trade: "Levetiracetam Inj. 500 mg/5 mL", strength: "100 mg/mL", ed: "E",
-    categories: ["antiepileptic"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL" },
-    dilution: { diluent: "NSS, D5W หรือ LR", volume: "100 mL", finalConc: "5-15 mg/mL" },
-    admin: { route: "IV infusion (PO ↔ IV 1:1)", rate: "15 min\nSE: 5-15 min\nLoading 60 mg/kg: 10-15 min" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Lorazepam, Diazepam, Valproate", incompat: "Limited data" },
-    precautions: "• Switch PO ↔ IV 1:1\n• Behavioral side effects (irritability, aggression)\n• ปรับขนาดตาม CrCl\n• ไม่มี significant drug interactions\n• Safe in hepatic impairment\n• First-line adjunctive focal seizures",
-    monitoring: ["Seizure freq", "SCr", "Behavior/mood", "CBC (rare leukopenia)"],
-    had: false, ref: "Lexicomp; Epilepsy guidelines"
-  },
-  {
-    id: 19, generic: "Magnesium sulfate", trade: "MgSO₄ Inj. 50%", strength: "50% (500 mg/mL) 10 mL = 5 g", ed: "E",
-    categories: ["icu", "antiepileptic"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "500 mg/mL (50%)" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL", finalConc: "≤200 mg/mL (20%)\nPrefer: 10-20 mg/mL" },
-    admin: { route: "IV infusion | Slow IV push | IM (deep)", rate: "Eclampsia: 4-6 g/15-20 min → 1-2 g/hr\nArrhythmia: 1-2 g/15 min\nHypoMg: 1-2 g/1 hr" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Amphotericin B, Calcium (same line), NaHCO₃" },
-    precautions: "• ติดตาม DTR (knee jerk) → absent = toxicity!\n• Antidote: Calcium gluconate 1 g IV\n• ลด dose ใน renal impairment\n• ระวัง respiratory depression\n• CI: myasthenia gravis, heart block",
-    monitoring: ["Mg²⁺ q6-8h", "DTR (patellar)", "RR (>12/min)", "UO (>25 mL/hr)", "BP", "HR", "SpO₂"],
-    had: true, ref: "Lexicomp; Eclampsia guidelines"
-  },
-  {
-    id: 20, generic: "Meropenem", trade: "Meropenem Inj. 1 g", strength: "1 g/vial", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "SWFI หรือ NSS", volume: "20 mL", conc: "50 mg/mL" },
-    dilution: { diluent: "NSS (preferred) | D5W (stability สั้นกว่า)", volume: "50-250 mL", finalConc: "1-20 mg/mL" },
-    admin: { route: "IV infusion | IV push (3-5 min)", rate: "Standard: 15-30 min\nExtended: 3-4 ชม.\nIV push: 3-5 min" },
-    stability: { reconst: "2 ชม. RT (SWFI) | 12 ชม. 2-8°C", diluted: "4 ชม. RT (NSS) | 1 ชม. RT (D5W)", storage: "RT (powder)" },
-    compat: { ysite: "Dexamethasone, Heparin, Metronidazole, Morphine", incompat: "Acyclovir, Amphotericin B, Diazepam, Ondansetron (variable)" },
-    precautions: "• Extended infusion: stability check (NSS only, <4 hr RT)\n• ลด seizure threshold → ระวังใน CNS pathology\n• ปรับขนาดตาม CrCl\n• ⚠️ ลด Valproic acid level อย่างมาก! ห้ามให้ร่วม!",
-    monitoring: ["SCr", "CrCl", "CBC", "LFTs", "Seizure activity", "C&S", "VPA level (ห้ามใช้ร่วม!)"],
-    had: false, ref: "Lexicomp; Trissel's"
-  },
-  {
-    id: 21, generic: "Methylprednisolone", trade: "Solu-Medrol Inj. 500 mg / 1 g", strength: "500 mg, 1 g/vial", ed: "E",
-    categories: ["immunotherapy", "icu"],
-    reconst: { solvent: "SWFI / supplied diluent", volume: "8 mL (500 mg) | 16 mL (1 g)", conc: "62.5 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL (pulse: 250 mL)", finalConc: "≤5 mg/mL" },
-    admin: { route: "IV push (slow, small dose) | IV infusion (pulse)", rate: "IV push: ≤30 mg/≥1 min\nPulse (500mg-1g): 30-60 min\n(ให้เร็ว → arrhythmia/cardiac arrest!)" },
-    stability: { reconst: "48 ชม. RT", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Heparin, Metoclopramide, Ondansetron", incompat: "Calcium gluconate, Ciprofloxacin IV" },
-    precautions: "• Pulse therapy ต้องให้ช้า ≥30 min (cardiac risk!)\n• Monitor ECG during pulse\n• ใช้มากใน: MS relapse, NMOSD, autoimmune encephalitis\n• ระวัง hyperglycemia, insomnia\n• GI prophylaxis",
-    monitoring: ["BP", "HR", "ECG (pulse)", "BG q6h (pulse)", "K⁺", "Na⁺", "Infection", "Mood"],
-    had: true, ref: "Lexicomp; MS/NMOSD guidelines"
-  },
-  {
-    id: 22, generic: "Midazolam", trade: "Midazolam Inj. 5-15 mg", strength: "1 mg/mL (5 mL) | 5 mg/mL (3 mL)", ed: "E",
-    categories: ["antiepileptic", "analgesic", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "1 or 5 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL หรือ undiluted via syringe pump", finalConc: "0.5-5 mg/mL" },
-    admin: { route: "IV push (slow) | IV infusion | IM, IN, Buccal", rate: "IV push: ≥2 min\nSedation: 0.02-0.1 mg/kg/hr\nSE: 0.2 mg/kg IM/buccal" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Fentanyl, Morphine, Atropine, Ketamine", incompat: "Amphotericin B, NaHCO₃, Thiopental, Albumin" },
-    precautions: "• Respiratory depression → เตรียม Flumazenil\n• Synergy with opioids → ลด dose ทั้งคู่\n• ลด dose 30-50% ในสูงอายุ\n• Active metabolite สะสมใน renal failure\n• Paradoxical reactions ในเด็ก",
-    monitoring: ["RR", "SpO₂", "BP", "HR", "RASS score", "Seizure activity"],
-    had: true, ref: "Lexicomp; SE guidelines"
-  },
-  {
-    id: 23, generic: "Morphine", trade: "Morphine Inj. 10 mg/mL", strength: "10 mg/1 mL", ed: "E",
-    categories: ["analgesic"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL | PCA: undiluted/1 mg/mL", finalConc: "0.1-1 mg/mL" },
-    admin: { route: "IV push (slow) | IV infusion/PCA | SC, IM, Epidural, IT", rate: "IV push: 1-2 mg/4-5 min\nInfusion: 0.8-10 mg/hr\nPCA: 1-2 mg q6-10min" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Midazolam, Metoclopramide, Ondansetron, KCl", incompat: "Amphotericin B, Phenytoin, Thiopental" },
-    precautions: "• Respiratory depression → Naloxone (0.4-2 mg IV)\n• Histamine release → hypotension, flushing\n• M6G สะสมใน renal failure\n• Constipation ทุกราย → bowel regimen\n• CI: severe resp depression, paralytic ileus",
-    monitoring: ["RR", "SpO₂", "BP", "HR", "Pain score", "Sedation (Pasero)", "Bowel fn", "Urine retention"],
-    had: true, ref: "Lexicomp"
-  },
-  {
-    id: 24, generic: "Nicardipine", trade: "Nicardipine Inj. 10 mg/10 mL", strength: "1 mg/mL", ed: "E",
-    categories: ["stroke", "cardiovascular", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "1 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "240 mL (25 mg/250 mL) | 250 mL (central)", finalConc: "Peripheral: 0.1 mg/mL\nCentral: 0.2 mg/mL" },
-    admin: { route: "IV infusion เท่านั้น (ห้าม IV push)", rate: "Start: 5 mg/hr\nTitrate: ↑2.5 mg/hr q5-15min\nMax: 15 mg/hr\nTarget ถึง: ลด 3 mg/hr" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Midazolam, Morphine, Fentanyl, Heparin", incompat: "NaHCO₃, Furosemide, Amp/Sulb, Thiopental" },
-    precautions: "• Peripheral: max 0.1 mg/mL (phlebitis)\n• เปลี่ยน IV site q12h (peripheral)\n• Prefer central line\n• ดีกว่า Labetalol ใน titratability\n• ใช้บ่อยใน ICH, SAH, periop HTN",
-    monitoring: ["BP q5-15 min (titrating)", "HR", "Neuro status", "IV site (phlebitis)", "UO"],
-    had: true, ref: "Lexicomp; AHA stroke guidelines"
-  },
-  {
-    id: 25, generic: "Nimodipine", trade: "Nimodipine Inj./PO", strength: "0.2 mg/mL (50 mL) | Cap 30 mg", ed: "E",
-    categories: ["stroke"],
-    reconst: { solvent: "Ready to use solution", volume: "-", conc: "0.2 mg/mL" },
-    dilution: { diluent: "Co-infuse กับ carrier fluid\nห้าม PVC bag!", volume: "Via dedicated line", finalConc: "0.2 mg/mL (undiluted)" },
-    admin: { route: "IV: central line เท่านั้น\nPO/NG (preferred)", rate: "IV: Start 0.5 → 1-2 mg/hr\nPO: 60 mg q4h x 21 days" },
-    stability: { reconst: "-", diluted: "ใช้ทันทีหลังเปิด ป้องกันแสง", storage: "RT ป้องกันแสง\nใช้ PE tubing เท่านั้น" },
-    compat: { ysite: "-", incompat: "PVC (adsorbs!)\nMost IV drugs (dedicated line)" },
-    precautions: "• SAH vasospasm prophylaxis → เริ่มภายใน 96 hr\n• ห้ามใช้ PVC! (adsorbs → ลด bioavailability)\n• ใช้ PE/polyethylene tubing & syringe เท่านั้น\n• PO preferred เมื่อเป็นไปได้\n• ห้าม IV push!\n• Hold ถ้า SBP <90",
-    monitoring: ["BP q1-2h", "HR", "Neuro (GCS, NIHSS)", "CBF/TCD", "Vasospasm signs"],
-    had: true, ref: "Lexicomp; AHA SAH guidelines 2023"
-  },
-  {
-    id: 26, generic: "Norepinephrine (Levophed)", trade: "Norepinephrine Inj. 4 mg/4 mL", strength: "1 mg/mL base", ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "1 mg/mL" },
-    dilution: { diluent: "D5W (preferred) | D5NS | NSS ได้", volume: "250 mL", finalConc: "4 mg/250 mL = 16 mcg/mL\n8 mg/250 mL = 32 mcg/mL" },
-    admin: { route: "IV infusion เท่านั้น\nCentral line preferred!", rate: "Start: 0.1-0.5 mcg/kg/min\nTitrate q5-15 min\nUsual: 0.1-0.3 mcg/kg/min" },
-    stability: { reconst: "-", diluted: "24 ชม. RT (ทิ้งถ้าสีเปลี่ยน)", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Amiodarone, Calcium, Heparin, Midazolam, Fentanyl", incompat: "NaHCO₃, Insulin, Amphotericin B, Thiopental" },
-    precautions: "• Central line เท่านั้น! (peripheral → necrosis)\n• ถ้า peripheral จำเป็น: ≤4 mcg/mL\n• Extravasation → phentolamine 5-10 mg SC\n• ห้ามหยุดกะทันหัน (taper)\n• First-line vasopressor septic shock",
-    monitoring: ["BP (arterial line preferred)", "HR", "ECG", "MAP target", "UO", "Lactate", "Perfusion", "Extravasation"],
-    had: true, ref: "Lexicomp; SSC 2021"
-  },
-  {
-    id: 27, generic: "Phenytoin", trade: "Dilantin Inj. 250 mg/5 mL", strength: "50 mg/mL", ed: "E",
-    categories: ["antiepileptic"],
-    reconst: { solvent: "Aqueous solution (pH 12)", volume: "-", conc: "50 mg/mL" },
-    dilution: { diluent: "NSS เท่านั้น!\n(ห้าม D5W → ตกตะกอน!)", volume: "50-100 mL NSS", finalConc: "≤6.7 mg/mL" },
-    admin: { route: "IV infusion (0.22 μm filter)\nSlow IV push (undiluted)", rate: "ผู้ใหญ่: ≤50 mg/min\nสูงอายุ: ≤25 mg/min\nเด็ก: 1-3 mg/kg/min\nSE loading: 20 mg/kg" },
-    stability: { reconst: "-", diluted: "ใช้ทันที (ภายใน 1 ชม.)\nFilter จำเป็น!", storage: "RT ห้ามแช่เย็น (ตกตะกอน)\nต้องใส" },
-    compat: { ysite: "-", incompat: "D5W (ตกตะกอน!)\nMost drugs (แยก line)\nLipid, TPN" },
-    precautions: "• ใช้ NSS เท่านั้น! D5W ตกตะกอน!\n• ต้องใช้ 0.22 μm in-line filter\n• ตกตะกอนง่ายมาก → สังเกตตลอด\n• Purple glove syndrome (extravasation)\n• Cardiac toxicity ถ้าให้เร็ว\n• Concentration-dependent PK\n• Strong enzyme inducer",
-    monitoring: ["ECG (continuous during loading)", "BP q5-15min", "HR", "Phenytoin level (free+total)", "Albumin", "IV site (purple glove)", "Seizure activity", "LFTs", "CBC"],
-    had: true, ref: "Lexicomp; AES SE guidelines"
-  },
-  {
-    id: 28, generic: "Propofol", trade: "Propofol Inj. 200 mg/20 mL", strength: "1% (10 mg/mL)", ed: "E",
-    categories: ["icu", "analgesic"],
-    reconst: { solvent: "Lipid emulsion - Ready to use", volume: "-", conc: "10 mg/mL" },
-    dilution: { diluent: "D5W (ถ้าต้อง dilute)\nPrefer undiluted", volume: "ไม่แนะนำ dilute", finalConc: "10 mg/mL (undiluted)\nMin 2 mg/mL" },
-    admin: { route: "IV infusion | IV push (induction)\nห้าม IM/SC", rate: "Induction: 40 mg q10sec\nSedation: 5-50 mcg/kg/min\nSE: 1-5 mg/kg → 2-10 mg/kg/hr" },
-    stability: { reconst: "ใช้ทันที (no preservative)\nMax 12 ชม. หลังเปิด", diluted: "ใช้ภายใน 6 ชม.", storage: "RT ห้ามแช่เย็น Shake before use" },
-    compat: { ysite: "Fentanyl, Midazolam, Ketamine, Lidocaine", incompat: "Blood products, Most antibiotics (Y-site)" },
-    precautions: "• Lipid emulsion → infection risk → strict aseptic\n• เปลี่ยน tubing ทุก 12 ชม.\n• PRIS: >4 mg/kg/hr >48hr → FATAL\n• คิด calorie จาก lipid (1.1 kcal/mL)\n• Injection pain → Lidocaine 20 mg",
-    monitoring: ["RR", "SpO₂", "BP (continuous)", "RASS score", "Triglycerides q24-48h", "CK/Lactate (PRIS)", "Calorie from lipid"],
-    had: true, ref: "Lexicomp; ICU sedation guidelines"
-  },
-  {
-    id: 29, generic: "Alteplase (rt-PA)", trade: "Actilyse 50 mg", strength: "50 mg/50 mL", ed: "E",
-    categories: ["stroke"],
-    reconst: { solvent: "SWFI (supplied diluent)", volume: "50 mL → 1 mg/mL", conc: "1 mg/mL" },
-    dilution: { diluent: "ไม่ต้องเจือจางเพิ่ม", volume: "-", finalConc: "1 mg/mL" },
-    admin: { route: "IV infusion (dedicated line)", rate: "Stroke (0.9 mg/kg, max 90 mg):\n10% bolus IV 1 min\n90% infusion 60 min" },
-    stability: { reconst: "8 ชม. 2-8°C", diluted: "ใช้ทันที", storage: "2-8°C (powder)" },
-    compat: { ysite: "Dedicated line เท่านั้น\nFlush NSS ก่อน-หลัง", incompat: "Heparin (แยก line)\nMost drugs (dedicated line)" },
-    precautions: "• Door-to-needle <60 min!\n• ห้าม Heparin/Antiplatelet 24 hr (stroke)\n• BP ทุก 15 min x 2hr → q30min x 6hr\n• เตรียม cryoprecipitate, TXA\n• Screen all CI ก่อนให้\n• Angioedema risk (+ ACEi)",
-    monitoring: ["NIHSS q15min x 2hr", "BP q15min → q30min → q1h", "Bleeding (all sites)", "CT brain 24hr", "Fibrinogen, PT/aPTT, CBC", "Angioedema"],
-    had: true, ref: "Lexicomp; AHA/ASA 2019"
-  },
-  {
-    id: 30, generic: "Sodium Valproate", trade: "Depakine Inj. 400 mg/4 mL", strength: "100 mg/mL", ed: "E",
-    categories: ["antiepileptic"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "≤2 mg/mL preferred" },
-    admin: { route: "IV infusion | IV push (slow, diluted)", rate: "Standard: 15-60 min\nLoading: 20-40 mg/kg/15-30 min\nMaint: 1-2 mg/kg/hr\nMax: 6 mg/kg/min" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Most common ICU drugs", incompat: "⚠️ Meropenem/Carbapenem ทุกตัว!\nPhenobarbital, Phenytoin (interaction)" },
-    precautions: "• ⚠️ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)\n• Hepatotoxicity (especially <2 yr)\n• Pancreatitis risk\n• Teratogenic (Cat X)\n• Thrombocytopenia (dose-dependent)\n• PO ↔ IV 1:1",
-    monitoring: ["VPA level (50-100 mcg/mL)", "Free VPA (hypoalbumin)", "LFTs", "CBC + Plt", "Amylase/Lipase", "Ammonia", "Seizure freq"],
-    had: true, ref: "Lexicomp; AES guidelines"
-  },
-  {
-    id: 31, generic: "Tenecteplase", trade: "Metalyse Inj.", strength: "30-50 mg/vial", ed: "E",
-    categories: ["stroke"],
-    reconst: { solvent: "SWFI (supplied)", volume: "Supplied diluent", conc: "5 mg/mL" },
-    dilution: { diluent: "ไม่ต้อง (IV push only)", volume: "-", finalConc: "5 mg/mL" },
-    admin: { route: "IV push (single bolus) 5-10 sec", rate: "<60 kg: 30 mg | 60-70: 35 mg | 70-80: 40 mg\n80-90: 45 mg | >90: 50 mg\nStroke: 0.25 mg/kg (max 25 mg)" },
-    stability: { reconst: "8 ชม. 2-8°C", diluted: "-", storage: "2-8°C" },
-    compat: { ysite: "Flush NSS ก่อน-หลัง", incompat: "D5W, Most drugs (dedicated line)" },
-    precautions: "• Single bolus → ใช้ง่ายกว่า Alteplase\n• หลักฐานเพิ่มขึ้นสำหรับ stroke (TASTE, AcT)\n• ห้าม Heparin/Antiplatelet 24 hr\n• CI เหมือน Alteplase\n• Dedicated IV line",
-    monitoring: ["NIHSS", "BP q15min", "Bleeding signs", "CT brain", "Fibrinogen, CBC, PT/aPTT"],
-    had: true, ref: "Lexicomp; AHA/ASA; TASTE trial"
-  },
-  {
-    id: 32, generic: "Vancomycin", trade: "Vancomycin Inj. 500 mg / 1 g", strength: "500 mg, 1 g/vial", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "SWFI หรือ D5W", volume: "10 mL (500 mg) | 20 mL (1 g)", conc: "50 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL (≤5 mg/mL)", finalConc: "≤5 mg/mL" },
-    admin: { route: "IV infusion เท่านั้น (ห้าม IV push, IM)", rate: "≤10 mg/min หรือ 1g/hr\n500 mg: ≥60 min\n1 g: ≥60-90 min\n1.5-2 g: ≥90-120 min" },
-    stability: { reconst: "14 วัน 2-8°C", diluted: "24 ชม. RT | 14 วัน 2-8°C", storage: "RT (powder)" },
-    compat: { ysite: "Amikacin (dilute separately), Ondansetron, Midazolam", incompat: "Ceftazidime, Ceftriaxone (variable)\nHeparin, Pip/Tazo (nephrotoxic!)" },
-    precautions: "• Red Man Syndrome: ให้ช้า ≥60 min/g\n• Premedicate antihistamine ถ้า RMS hx\n• Nephrotoxicity (+ Pip/Tazo)\n• AUC-guided dosing (AUC/MIC 400-600)\n• ระวัง thrombophlebitis",
-    monitoring: ["Vanc trough/AUC (400-600)", "SCr daily", "CBC", "UO", "RMS/phlebitis", "Hearing"],
-    had: false, ref: "Lexicomp; ASHP/IDSA 2020"
-  },
-  {
-    id: 33, generic: "Tocilizumab", trade: "Actemra Inj.", strength: "20 mg/mL vials", ed: "N",
-    categories: ["immunotherapy"],
-    reconst: { solvent: "Ready to use concentrate", volume: "-", conc: "20 mg/mL" },
-    dilution: { diluent: "NSS 0.9% เท่านั้น", volume: "100 mL (withdraw equal NSS → add drug)", finalConc: "0.8-4 mg/mL" },
-    admin: { route: "IV infusion เท่านั้น", rate: "60 min\nไม่ต้อง premedication ปกติ" },
-    stability: { reconst: "-", diluted: "24 ชม. 2-8°C | 8 ชม. RT", storage: "2-8°C ป้องกันแสง" },
-    compat: { ysite: "-", incompat: "ห้ามผสมกับยาอื่น" },
-    precautions: "• ใช้ใน autoimmune encephalitis, NMOSD\n• Immunosuppression → serious infections\n• Screen TB/HBV ก่อนเริ่ม\n• ระวัง GI perforation\n• Mask infection signs (suppress CRP/fever)",
-    monitoring: ["CBC + Diff", "LFTs q4-8 wk", "Lipid panel", "CRP", "Infection signs", "GI perforation"],
-    had: false, ref: "Lexicomp; NMOSD guidelines"
-  },
-  {
-    id: 34, generic: "Rituximab", trade: "MabThera/Rituximab Inj.", strength: "10 mg/mL", ed: "N",
-    categories: ["immunotherapy"],
-    reconst: { solvent: "Ready to use concentrate", volume: "-", conc: "10 mg/mL" },
-    dilution: { diluent: "NSS (preferred) | D5W", volume: "Dilute to 1-4 mg/mL", finalConc: "1-4 mg/mL" },
-    admin: { route: "IV infusion เท่านั้น (ห้ามbolus)", rate: "1st: 50 mg/hr → ↑50/hr q30min → max 400\nSubseq: 100 → ↑100/hr → max 400" },
-    stability: { reconst: "-", diluted: "24 ชม. 2-8°C | 12 ชม. RT", storage: "2-8°C ป้องกันแสง" },
-    compat: { ysite: "Limited data", incompat: "ห้ามผสมกับยาอื่น" },
-    precautions: "• Premed: Paracetamol + Diphenhydramine + MethylPred 100 mg IV 30 min ก่อน\n• Infusion reaction สูง (1st dose)\n• PML risk\n• HBV reactivation → screen ก่อน\n• ใช้ใน: MS, NMOSD, autoimmune encephalitis, MG\n• Check IgG before each cycle",
-    monitoring: ["VS q15min x 1hr → q30min", "Infusion reactions", "CBC + Diff", "IgG levels", "HBV markers", "PML signs", "CD19/CD20"],
-    had: true, ref: "Lexicomp; MS/NMOSD guidelines"
-  },
-  {
-    id: 35, generic: "IVIG (Immunoglobulin)", trade: "IVIG Inj.", strength: "5% or 10% solutions", ed: "E",
-    categories: ["immunotherapy"],
-    reconst: { solvent: "Liquid: Ready to use\nPowder: ตาม insert", volume: "-", conc: "5% (50 mg/mL) | 10% (100 mg/mL)" },
-    dilution: { diluent: "ไม่ต้อง (preferred)\nD5W ถ้าจำเป็น", volume: "-", finalConc: "5-10% undiluted" },
-    admin: { route: "IV infusion (dedicated line)", rate: "Start: 0.5-1 mL/kg/hr (30 min)\nIncrease q15-30min\n5%: max 4 mL/kg/hr\n10%: max 8 mL/kg/hr" },
-    stability: { reconst: "ตาม manufacturer", diluted: "ใช้ทันทีหลังเปิด", storage: "2-8°C ห้ามเขย่า/แช่แข็ง" },
-    compat: { ysite: "ห้ามผสมกับยาอื่น", incompat: "ห้ามผสมกับยาอื่นทุกชนิด" },
-    precautions: "• Premed: Paracetamol + Antihistamine\n• ให้ช้าๆ → infusion reactions\n• Renal failure risk (sucrose products)\n• Thromboembolism (elderly, immobilized)\n• ⚠️ Aseptic meningitis (สำคัญใน neuro!)\n• Hemolytic anemia (non-O blood)\n• ใช้ใน: GBS, CIDP, MG crisis, autoimmune encephalitis",
-    monitoring: ["VS q15min → q30min", "SCr (baseline + post)", "CBC", "IgA (baseline)", "LDH/Haptoglobin", "Neuro (aseptic meningitis)", "Fluid balance"],
-    had: true, ref: "Lexicomp; EFNS/AAN guidelines"
-  },
-  {
-    id: 36, generic: "Tranexamic acid", trade: "Transamin Inj.", strength: "50-100 mg/mL", ed: "E",
-    categories: ["stroke", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "50-100 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "≤25 mg/mL" },
-    admin: { route: "Slow IV push | IV infusion", rate: "IV push: ≤100 mg/min\nTrauma: 1 g/10 min → 1 g/8 hr" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Blood products (theoretical)" },
-    precautions: "• ห้ามให้เร็ว → seizures!\n• Seizure risk ที่ dose สูง\n• CI: Active thromboembolic disease\n• ใช้ใน: ICH, trauma (CRASH-2)\n• ห้ามใน DIC (consumption phase)",
-    monitoring: ["Bleeding/thrombosis", "SCr", "Seizure activity", "Coagulation studies"],
-    had: false, ref: "Lexicomp; CRASH-2"
-  },
-  {
-    id: 37, generic: "Phenobarbital", trade: "Phenobarbital Inj. 200 mg/mL", strength: "200 mg/mL", ed: "E",
-    categories: ["antiepileptic"],
-    reconst: { solvent: "Aqueous solution", volume: "-", conc: "200 mg/mL" },
-    dilution: { diluent: "NSS หรือ SWFI (dilute ก่อนให้ IV)", volume: "≥10-fold dilution", finalConc: "≤30 mg/mL" },
-    admin: { route: "Slow IV push (diluted) | IV infusion | IM (deep)", rate: "≤60 mg/min (ผู้ใหญ่)\n≤30 mg/min (เด็ก)\nSE loading: 20 mg/kg/20-30 min" },
-    stability: { reconst: "Indefinite (undiluted RT)", diluted: "ใช้ภายใน 30 นาที", storage: "RT ป้องกันแสง ห้ามแช่เย็น" },
-    compat: { ysite: "Limited data", incompat: "Most drugs ห้ามผสม\nAcidic solutions" },
-    precautions: "• Respiratory depression → เตรียม ventilator\n• ให้ช้าๆ (arrhythmia, hypotension)\n• Extravasation tissue damage (pH 9-10)\n• Long T½ → accumulation\n• Strong enzyme inducer",
-    monitoring: ["RR", "SpO₂", "BP", "HR", "Sedation", "Phenobarbital level (15-40)", "LFTs", "Seizure activity"],
-    had: true, ref: "Lexicomp; AES SE guidelines"
-  },
-  {
-    id: 38, generic: "Piperacillin/Tazobactam", trade: "Tazocin Inj. 4.5 g", strength: "4 g/0.5 g per vial", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "SWFI หรือ NSS 20 mL", volume: "20 mL", conc: "200 mg/mL (pip)" },
-    dilution: { diluent: "NSS (preferred) | D5W", volume: "50-150 mL", finalConc: "20-40 mg/mL" },
-    admin: { route: "IV infusion (ห้าม IM)", rate: "Standard: 30 min\nExtended: 3-4 ชม.\nCI: ตาม protocol" },
-    stability: { reconst: "24 ชม. RT (SWFI)", diluted: "24 ชม. RT (NSS) | 48 ชม. 2-8°C", storage: "RT (powder)" },
-    compat: { ysite: "Dexamethasone, Metronidazole, Morphine, Furosemide", incompat: "Vancomycin! (physical)\nAmikacin, Gentamicin (same line)\nAcyclovir" },
-    precautions: "• ห้ามให้ line เดียวกับ Vancomycin!\n• ห้ามผสม Aminoglycosides ใน bag\n• ↑ nephrotoxicity กับ Vancomycin\n• ปรับขนาดตาม CrCl\n• Extended infusion preferred\n• ระวัง hypokalemia",
-    monitoring: ["SCr", "CrCl", "CBC", "LFTs", "K⁺", "C&S", "Superinfection"],
-    had: false, ref: "Lexicomp; Trissel's"
-  },
-  {
-    id: 39, generic: "Colistimethate sodium (CMS)", trade: "Colistin Inj. 150 mg CBA", strength: "150 mg CBA/vial (~2 MIU)", ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: "SWFI หรือ NSS 2 mL", volume: "2 mL", conc: "75 mg CBA/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL", finalConc: "ตาม volume" },
-    admin: { route: "IV infusion | Intrathecal/IVT", rate: "IV: 30-60 min\nLoading: 300 mg CBA (9 MIU)\nMaint: 150-225 mg CBA q12h" },
-    stability: { reconst: "24 ชม. RT", diluted: "24 ชม. RT", storage: "2-8°C (powder)" },
-    compat: { ysite: "Limited data", incompat: "แยก line เมื่อเป็นไปได้" },
-    precautions: "• Nephrotoxicity สูง → hydrate well\n• Neurotoxicity (paresthesia, weakness)\n• Unit conversion: 1 MIU = ~33.3 mg CBA = ~80 mg CMS\n• Loading dose สำคัญ\n• Last-resort MDR Gram-neg\n• IT/IVT: 10 mg CBA/day",
-    monitoring: ["SCr daily", "UO", "Neuro symptoms", "CMS level", "C&S"],
-    had: true, ref: "Lexicomp; CMS consensus guidelines"
-  },
-  {
-    id: 40, generic: "Ketamine", trade: "Ketamine Inj. 500 mg/10 mL", strength: "50 mg/mL", ed: "E",
-    categories: ["icu", "analgesic", "antiepileptic"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "50 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-500 mL", finalConc: "0.1-2 mg/mL (analgesic)" },
-    admin: { route: "IV push (slow) | IV infusion | IM", rate: "Induction: 1-4.5 mg/kg/60 sec\nAnalgesic: 0.1-0.5 mg/kg/hr\nRefractory SE: 1-5 mg/kg → 1-10 mg/kg/hr" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Propofol, Midazolam, Fentanyl, Morphine", incompat: "Barbiturates, Diazepam, NaHCO₃" },
-    precautions: "• Emergence reactions → ให้ Midazolam ร่วม\n• ICP concern (controversial) → ระวัง TBI\n• ไม่กด respiratory drive (ข้อดี)\n• Dissociative anesthesia\n• ยาเสพติด\n• ใช้ใน refractory SE",
-    monitoring: ["BP", "HR", "RR", "SpO₂", "Sedation", "Emergence reactions", "ICP", "Seizure activity"],
-    had: true, ref: "Lexicomp; AES refractory SE"
-  },
-  {
-    id: 41, generic: "Ondansetron", trade: "Ondansetron Inj. 4/8 mg", strength: "2 mg/mL", ed: "E",
-    categories: [],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "2 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50 mL", finalConc: "0.16-0.64 mg/mL" },
-    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: ≥2-5 min\nInfusion: 15-30 min\nMax single dose IV: 16 mg" },
-    stability: { reconst: "-", diluted: "48 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Morphine, Fentanyl, Dexamethasone, KCl", incompat: "Acyclovir (variable), Amphotericin B" },
-    precautions: "• Max single dose IV 16 mg (QT prolongation)\n• CI: congenital long QT syndrome\n• Serotonin syndrome (rare, with 5-HT drugs)",
-    monitoring: ["ECG/QTc (high dose)", "Bowel function", "N/V assessment"],
-    had: false, ref: "Lexicomp; ASCO"
-  },
-  {
-    id: 42, generic: "Pantoprazole", trade: "Pantoprazole Inj. 40 mg", strength: "40 mg/vial", ed: "E",
-    categories: [],
-    reconst: { solvent: "NSS 10 mL", volume: "10 mL", conc: "4 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "100 mL", finalConc: "0.4-0.8 mg/mL" },
-    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: ≥2 min\nInfusion: 15 min\nCI (GI bleed): 8 mg/hr x 72 hr" },
-    stability: { reconst: "6 ชม. RT (NSS)", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Limited data", incompat: "Midazolam (variable), Zinc solutions" },
-    precautions: "• ใช้แทน Omeprazole IV ได้\n• เปลี่ยน PO ASAP\n• ระวัง hypoMg (prolonged)",
-    monitoring: ["GI bleeding signs", "Mg²⁺ (prolonged)", "CBC"],
-    had: false, ref: "Lexicomp"
-  },
-  {
-    id: 43, generic: "Rocuronium", trade: "Esmeron Inj. 50 mg/5 mL", strength: "10 mg/mL", ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
-    dilution: { diluent: "NSS, D5W หรือ LR", volume: "100 mL หรือ undiluted", finalConc: "0.5-5 mg/mL" },
-    admin: { route: "IV push | IV infusion", rate: "Intubation: 0.6-1.2 mg/kg\nMaint: 0.6 mg/kg/hr (adjust TOF)\nRSI: 1.2 mg/kg" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "2-8°C (RT 60d ถ้าไม่เปิด)" },
-    compat: { ysite: "Midazolam, Fentanyl, Propofol", incompat: "Amphotericin B, Diazepam, Thiopental" },
-    precautions: "• Reversal: Sugammadex (specific)\n• หรือ Neostigmine + Atropine\n• TOF monitoring จำเป็น\n• ระวังใน MG (ลด dose)\n• Onset: 60-90 sec",
-    monitoring: ["TOF monitoring", "RR", "SpO₂", "Tidal volume", "Sedation adequacy", "NM recovery"],
-    had: true, ref: "Lexicomp"
-  },
-  {
-    id: 44, generic: "Sugammadex", trade: "Bridion Inj. 200 mg/2 mL", strength: "100 mg/mL", ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL" },
-    dilution: { diluent: "ไม่ต้อง (undiluted IV push)", volume: "-", finalConc: "100 mg/mL" },
-    admin: { route: "IV push (10 sec)", rate: "Routine: 2 mg/kg\nDeep block: 4 mg/kg\nImmediate (RSI): 16 mg/kg" },
-    stability: { reconst: "-", diluted: "-", storage: "2-8°C (เปิดแล้ว 24 hr RT)" },
-    compat: { ysite: "-", incompat: "-" },
-    precautions: "• Selective: Rocuronium/Vecuronium เท่านั้น\n• ไม่ reverse Succinylcholine/Cisatracurium\n• ลด OC efficacy 7 วัน\n• Bradycardia (rare)\n• ปรับ dose ใน severe renal",
-    monitoring: ["TOF recovery", "RR", "SpO₂", "Re-curarization signs", "BP", "HR"],
-    had: false, ref: "Lexicomp"
-  },
-  {
-    id: 45, generic: "Hydrocortisone", trade: "Solu-Cortef Inj. 100 mg", strength: "100 mg/vial", ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: "SWFI หรือ NSS 2 mL", volume: "2 mL", conc: "50 mg/mL" },
-    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "1-2 mg/mL" },
-    admin: { route: "IV push | IV infusion | IM", rate: "IV push: 3-5 min\nInfusion: 20-30 min\nSeptic shock CI: 10 mg/hr" },
-    stability: { reconst: "3 วัน RT", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Midazolam, Phenytoin (mixed), Ciprofloxacin" },
-    precautions: "• Adrenal crisis ถ้าหยุดกะทันหัน (taper)\n• ระวัง hyperglycemia\n• Immunosuppression\n• GI bleeding (+ NSAIDs)\n• Stress dose ใน septic shock",
-    monitoring: ["BG", "Electrolytes", "BP", "Infection signs", "HPA axis"],
-    had: false, ref: "Lexicomp"
-  },
-  {
-    id: 46, generic: "Omeprazole", trade: "Omeprazole Inj. 40 mg", strength: "40 mg/vial", ed: "E",
-    categories: [],
-    reconst: { solvent: "SWFI/D5W 10 mL", volume: "10 mL", conc: "4 mg/mL" },
-    dilution: { diluent: "NSS/D5W (ห้าม LR)", volume: "100 mL", finalConc: "0.4 mg/mL" },
-    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: ≥5 min\nInfusion: 20-30 min\nCI (GI bleed): 80 mg bolus → 8 mg/hr x 72 hr" },
-    stability: { reconst: "4 ชม. RT", diluted: "12 ชม. RT", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "Limited data", incompat: "Midazolam (variable)" },
-    precautions: "• ห้ามผสมกับยาอื่น (ตกตะกอนง่าย)\n• Alkaline pH → incompatible กับ acidic drugs\n• CI infusion: dedicated line\n• Switch PO ASAP",
-    monitoring: ["GI bleeding signs", "Mg²⁺ (prolonged)", "CBC", "Stool color"],
-    had: false, ref: "Lexicomp"
-  },
-  {
-    id: 47, generic: "Digoxin", trade: "Digoxin Inj. 0.5 mg/2 mL", strength: "0.25 mg/mL", ed: "E",
-    categories: ["cardiovascular"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "0.25 mg/mL" },
-    dilution: { diluent: "NSS, D5W หรือ SWFI", volume: "≥4-fold dilution", finalConc: "≥0.05 mg/mL" },
-    admin: { route: "Slow IV push (diluted) | IV infusion\nห้าม IM", rate: "IV push: ≥5 min\nInfusion: 15-30 min" },
-    stability: { reconst: "-", diluted: "ใช้ภายใน 4 ชม.", storage: "RT ป้องกันแสง" },
-    compat: { ysite: "-", incompat: "Dobutamine, Fluconazole, Insulin, Amiodarone" },
-    precautions: "• Dilute ≥4x ก่อนให้ IV\n• ห้าม IM\n• ระวัง hypoK → ↑toxicity\n• Drug interactions มาก\n• Narrow therapeutic index\n• ระวังสูงอายุ, renal impairment",
-    monitoring: ["Digoxin level (0.5-2 ng/mL)", "K⁺", "Mg²⁺", "Ca²⁺", "SCr", "ECG", "HR", "Toxicity signs"],
-    had: true, ref: "Lexicomp; Trissel's"
-  },
-  {
-    id: 48, generic: "Lidocaine", trade: "Lidocaine Inj. 2%", strength: "20 mg/mL", ed: "E",
-    categories: ["cardiovascular", "icu"],
-    reconst: { solvent: "Ready to use", volume: "-", conc: "20 mg/mL (2%)" },
-    dilution: { diluent: "D5W (preferred) | NSS", volume: "250-500 mL", finalConc: "1-4 mg/mL" },
-    admin: { route: "IV push (bolus) | IV infusion | Local", rate: "Bolus: 1-1.5 mg/kg/2-3 min\nInfusion: 1-4 mg/min\n(reduce ใน HF, liver, elderly)" },
-    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
-    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Amphotericin B, Phenytoin" },
-    precautions: "• CNS toxicity: tinnitus → seizures → coma\n• ลด dose ใน HF, hepatic, elderly\n• Therapeutic: 1.5-5 mcg/mL\n• ระวัง methemoglobinemia (rare)",
-    monitoring: ["ECG (continuous)", "HR", "BP", "Lidocaine level (>24h)", "CNS toxicity", "Seizure activity"],
-    had: true, ref: "Lexicomp; ACLS"
-  },
-  {
-    id: 49, generic: `Abciximab`, trade: `Abciximab Inj. 10 mg/5 mL`, strength: `2 mg/mL`, ed: "N",
+    id: 1, generic: `Abciximab`, trade: `Abciximab Inj. 10 mg/5 mL`, strength: `2 mg/mL`, ed: "N",
     categories: ["cardiovascular"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `2 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `250 mL`, finalConc: `Bolus: undiluted
@@ -1297,7 +721,79 @@ Infusion: 10 mcg/min x 12 hr (max)` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 50, generic: `Amoxicillin/Clavulanic acid`, trade: `Augmentin Inj. 1.2 g`, strength: `1 g/0.2 g per vial`, ed: "E",
+    id: 2, generic: "Acyclovir", trade: "Acyclovir inj. 250 mg", strength: "250 mg/vial", ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: "SWFI หรือ NSS", volume: "10 mL", conc: "25 mg/mL" },
+    dilution: { diluent: "NSS, D5W", volume: "≥100 mL", finalConc: "≤7 mg/mL (ไม่เกิน 10 mg/mL)" },
+    admin: { route: "IV infusion เท่านั้น\n(ห้าม IV push, IM, SC)", rate: "ให้นานอย่างน้อย 1 ชม." },
+    stability: { reconst: "12 ชม. ที่ RT", diluted: "24 ชม. ที่ RT", storage: "เก็บ 15-25°C\nห้ามแช่เย็น (ตกผลึก)" },
+    compat: { ysite: "Ceftriaxone, Fluconazole, Meropenem, Ondansetron", incompat: "D10W, D20W, TPN, Blood products\nDobutamine, Dopamine" },
+    precautions: "• ห้าม IV push เพราะเสี่ยง renal tubular damage\n• ต้อง adequate hydration ก่อนให้\n• ระวัง extravasation (pH 11)\n• ปรับขนาดตาม CrCl",
+    monitoring: ["SCr", "BUN", "UO", "CBC", "Neuro status", "Phlebitis signs"],
+    had: false, ref: "Trissel's; Lexicomp"
+  },
+  {
+    id: 3, generic: "Adenosine", trade: "Adenocor Inj. 6 mg/2 mL", strength: "6 mg/2 mL", ed: "E",
+    categories: ["cardiovascular"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "3 mg/mL" },
+    dilution: { diluent: "ไม่ต้องเจือจาง", volume: "-", finalConc: "3 mg/mL (undiluted)" },
+    admin: { route: "Rapid IV push\n1-2 วินาที\nตาม NSS flush 20 mL", rate: "1-2 sec push\nFlush ทันที" },
+    stability: { reconst: "-", diluted: "-", storage: "เก็บ RT ห้ามแช่เย็น" },
+    compat: { ysite: "-", incompat: "-" },
+    precautions: "• ใช้ IV site ใกล้หัวใจที่สุด (antecubital/central)\n• เตรียม crash cart\n• T½ <10 sec → ต้องให้เร็วมาก\n• CI: 2nd/3rd degree AV block, SSS",
+    monitoring: ["Continuous ECG", "HR", "BP", "Dyspnea", "Chest pain"],
+    had: true, ref: "Lexicomp; ACLS guidelines"
+  },
+  {
+    id: 4, generic: "Adrenaline (Epinephrine)", trade: "Adrenaline Inj. 1 mg/mL", strength: "1 mg/1 mL amp", ed: "E",
+    categories: ["icu", "cardiovascular"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "1 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "250-500 mL", finalConc: "4-16 mcg/mL\n(1 mg in 250 mL = 4 mcg/mL)" },
+    admin: { route: "IV push (cardiac arrest)\nIV infusion (shock)\nIM (anaphylaxis)", rate: "Push: ทุก 3-5 min (ACLS)\nInfusion: 1-10 mcg/min titrate\nIM: 0.3-0.5 mg anterolateral thigh" },
+    stability: { reconst: "-", diluted: "24 ชม. ใช้ทันทีถ้าสีเปลี่ยน", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Amiodarone, Calcium chloride, Heparin, Midazolam", incompat: "NaHCO₃, Aminophylline, Thiopental" },
+    precautions: "• Extravasation → tissue necrosis: ให้ phentolamine\n• ห้ามผสมกับ alkaline solutions\n• Cardiac arrest: 1 mg IV push q3-5min\n• ระวัง arrhythmia",
+    monitoring: ["Continuous ECG", "HR", "BP", "UO", "Lactate", "Peripheral perfusion", "Extravasation"],
+    had: true, ref: "Lexicomp; ACLS 2020"
+  },
+  {
+    id: 5, generic: "Alteplase (rt-PA)", trade: "Actilyse 50 mg", strength: "50 mg/50 mL", ed: "E",
+    categories: ["stroke"],
+    reconst: { solvent: "SWFI (supplied diluent)", volume: "50 mL → 1 mg/mL", conc: "1 mg/mL" },
+    dilution: { diluent: "ไม่ต้องเจือจางเพิ่ม", volume: "-", finalConc: "1 mg/mL" },
+    admin: { route: "IV infusion (dedicated line)", rate: "Stroke (0.9 mg/kg, max 90 mg):\n10% bolus IV 1 min\n90% infusion 60 min" },
+    stability: { reconst: "8 ชม. 2-8°C", diluted: "ใช้ทันที", storage: "2-8°C (powder)" },
+    compat: { ysite: "Dedicated line เท่านั้น\nFlush NSS ก่อน-หลัง", incompat: "Heparin (แยก line)\nMost drugs (dedicated line)" },
+    precautions: "• Door-to-needle <60 min!\n• ห้าม Heparin/Antiplatelet 24 hr (stroke)\n• BP ทุก 15 min x 2hr → q30min x 6hr\n• เตรียม cryoprecipitate, TXA\n• Screen all CI ก่อนให้\n• Angioedema risk (+ ACEi)",
+    monitoring: ["NIHSS q15min x 2hr", "BP q15min → q30min → q1h", "Bleeding (all sites)", "CT brain 24hr", "Fibrinogen, PT/aPTT, CBC", "Angioedema"],
+    had: true, ref: "Lexicomp; AHA/ASA 2019"
+  },
+  {
+    id: 6, generic: "Amikacin", trade: "Amikacin Inj. 500 mg/2 mL", strength: "500 mg/2 mL", ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "250 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "100-200 mL", finalConc: "2.5-5 mg/mL" },
+    admin: { route: "IV infusion (ห้าม IV push)", rate: "30-60 นาที" },
+    stability: { reconst: "-", diluted: "24 ชม. ที่ RT", storage: "เก็บ RT" },
+    compat: { ysite: "Dexamethasone, Furosemide, Midazolam, Ondansetron", incompat: "Amphotericin B, Heparin, Phenytoin, Propofol" },
+    precautions: "• Nephrotoxic & Ototoxic\n• ปรับขนาดตาม renal function\n• Extended-interval dosing preferred\n• ห้ามผสมกับ Penicillins ใน syringe เดียวกัน",
+    monitoring: ["Peak/Trough levels", "SCr", "BUN", "UO", "Audiometry", "Vestibular fn"],
+    had: false, ref: "Lexicomp; AHFS"
+  },
+  {
+    id: 7, generic: "Amiodarone", trade: "Cordarone Inj. 150 mg/3 mL", strength: "150 mg/3 mL amp", ed: "E",
+    categories: ["cardiovascular", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "50 mg/mL" },
+    dilution: { diluent: "D5W เท่านั้น (ห้ามใช้ NSS!)", volume: "Loading: 100 mL\nMaint: 500 mL", finalConc: "Loading: 1.5 mg/mL\nPeripheral max: 2 mg/mL\nCentral: ≤6 mg/mL" },
+    admin: { route: "IV infusion\n(ห้าม IV push ยกเว้น cardiac arrest)", rate: "Loading: 150 mg/10 min\nRapid: 1 mg/min x 6 hr\nSlow: 0.5 mg/min x 18 hr\nCardiac arrest: 300 mg push" },
+    stability: { reconst: "-", diluted: "24 ชม. ที่ RT ใน D5W\n(ใช้ภายใน 2 ชม. ถ้า >2 mg/mL peripheral)", storage: "RT ป้องกันแสง\nใช้ non-PVC container & tubing (ถ้า >2 mg/mL)" },
+    compat: { ysite: "Furosemide (ระวัง), Lidocaine, Midazolam", incompat: "NaHCO₃, Heparin, Ceftazidime\nAmpicillin/sulbactam, Pip/Tazo" },
+    precautions: "• ต้องใช้ D5W เท่านั้น! (NSS incompatible)\n• ใช้ non-PVC tubing (ถ้า conc >2 mg/mL)\n• ระวัง hypotension จากการให้เร็ว\n• Phlebitis สูง → prefer central line\n• QT prolongation risk\n• CYP inhibitor → drug interactions มาก",
+    monitoring: ["Continuous ECG", "BP", "HR", "QTc", "TFTs q3-6 mo", "LFTs", "PFTs", "Phlebitis"],
+    had: true, ref: "Lexicomp; Trissel's; AHA/ACLS"
+  },
+  {
+    id: 8, generic: `Amoxicillin/Clavulanic acid`, trade: `Augmentin Inj. 1.2 g`, strength: `1 g/0.2 g per vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI`, volume: `20 mL`, conc: `60 mg/mL (as amoxicillin)` },
     dilution: { diluent: `NSS (preferred)
@@ -1319,7 +815,19 @@ Sodium bicarbonate, Blood products` },
     had: false, ref: `Lexicomp; Trissel's`
   },
   {
-    id: 51, generic: `Ampicillin`, trade: `Ampicillin Inj. 1 g`, strength: `1 g/vial`, ed: "E",
+    id: 9, generic: "Amphotericin B (conventional)", trade: "Amphotericin B Inj. 50 mg", strength: "50 mg/vial", ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: "SWFI 10 mL\n(ห้าม NSS/electrolyte solutions)", volume: "10 mL", conc: "5 mg/mL" },
+    dilution: { diluent: "D5W เท่านั้น (ห้าม NSS!)", volume: "500 mL D5W", finalConc: "0.1 mg/mL (max 0.25 mg/mL peripheral)" },
+    admin: { route: "IV infusion\nผ่าน 0.22 μm in-line filter", rate: "2-6 ชม.\nTest dose: 1 mg/20 mL D5W over 20-30 min ก่อน" },
+    stability: { reconst: "24 ชม. ที่ 2-8°C", diluted: "24 ชม. RT ป้องกันแสง (เริ่มภายใน 8 ชม.)", storage: "2-8°C ป้องกันแสง" },
+    compat: { ysite: "Heparin (≤1 unit/mL เท่านั้น)", incompat: "NSS, Electrolyte solutions ทุกชนิด\nMost drugs (give alone)" },
+    precautions: "• ห้ามใช้ NSS ทุกขั้นตอน!\n• Test dose ก่อนเสมอ\n• Premedication: Paracetamol + Diphenhydramine ± Hydrocortisone\n• ให้ K⁺/Mg²⁺ supplement\n• Nephrotoxicity สูงมาก",
+    monitoring: ["SCr", "BUN", "K⁺", "Mg²⁺ (ทุกวัน)", "CBC (weekly)", "LFTs", "Infusion reactions", "UO"],
+    had: true, ref: "Lexicomp; Trissel's"
+  },
+  {
+    id: 10, generic: `Ampicillin`, trade: `Ampicillin Inj. 1 g`, strength: `1 g/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI`, volume: `10 mL`, conc: `100 mg/mL` },
     dilution: { diluent: `NSS (preferred)
@@ -1338,7 +846,7 @@ Sodium bicarbonate` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 52, generic: `Ampicillin/Sulbactam`, trade: `Unasyn Inj. 1.5 g / 3 g`, strength: `1.5 g, 3 g/vial`, ed: "E",
+    id: 11, generic: `Ampicillin/Sulbactam`, trade: `Unasyn Inj. 1.5 g / 3 g`, strength: `1.5 g, 3 g/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI หรือ NSS`, volume: `3.2 mL (1.5g)
 6.4 mL (3g)`, conc: `375 mg/mL` },
@@ -1356,7 +864,7 @@ Sodium bicarbonate` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 53, generic: `Atracurium`, trade: `Atracurium Inj. 25/50 mg`, strength: `10 mg/mL`, ed: "E",
+    id: 12, generic: `Atracurium`, trade: `Atracurium Inj. 25/50 mg`, strength: `10 mg/mL`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `10 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `Dilute to 0.2-0.5 mg/mL`, finalConc: `0.2-0.5 mg/mL` },
@@ -1375,7 +883,7 @@ Thiopental, Propofol (same syringe)` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 54, generic: `Atropine`, trade: `Atropine Inj. 0.6 mg/mL`, strength: `0.6 mg/mL amp`, ed: "E",
+    id: 13, generic: `Atropine`, trade: `Atropine Inj. 0.6 mg/mL`, strength: `0.6 mg/mL amp`, ed: "E",
     categories: ["cardiovascular", "icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `0.6 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง
@@ -1396,7 +904,75 @@ Max total: 3 mg` },
     had: false, ref: `Lexicomp; ACLS 2020`
   },
   {
-    id: 55, generic: `Cefazolin`, trade: `CeFAZolin Inj. 1 g`, strength: `1 g/vial`, ed: "E",
+    id: 14, generic: `Benzathine Penicillin G`, trade: `Benzathine Penicillin G Inj. 1.2 MU`, strength: `1.2 MU/vial`, ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: `SWFI (supplied diluent)`, volume: `ตาม package insert`, conc: `Suspension for IM` },
+    dilution: { diluent: `ห้ามเจือจาง!`, volume: `-`, finalConc: `Suspension (IM only)` },
+    admin: { route: `IM เท่านั้น!
+⚠️ ห้าม IV เด็ดขาด! (fatal emboli!)`, rate: `Deep IM injection (gluteal)
+Syphilis: 2.4 MU IM single dose
+Rheumatic fever prophylaxis: 1.2 MU IM q3-4wk` },
+    stability: { reconst: `ใช้ทันทีหลังผสม`, diluted: `-`, storage: `2-8°C` },
+    compat: { ysite: `N/A (IM only)`, incompat: `N/A (IM only)` },
+    precautions: `• ⚠️⚠️ ห้าม IV เด็ดขาด! → fatal cardiopulmonary emboli!
+• IM only — deep gluteal injection
+• Aspirate before injecting (avoid IV)
+• Hoigné syndrome (non-allergic embolic reaction)
+• Penicillin allergy screening
+• ใช้ใน: Syphilis, Rheumatic fever prophylaxis`,
+    monitoring: ["Observation 30 min post-injection", "Signs of embolic reaction", "Allergy signs", "RPR/VDRL (syphilis)"],
+    had: true, ref: `Lexicomp; CDC STI guidelines`
+  },
+  {
+    id: 15, generic: `Benztropine mesylate`, trade: `Benztropine Inj. 1 mg/mL`, strength: `1 mg/mL, 2 mL amp`, ed: "E",
+    categories: ["antiepileptic"],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `1 mg/mL` },
+    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `1 mg/mL` },
+    admin: { route: `IV push | IM`, rate: `IV push: 1-2 mg over 1-2 min\nAcute dystonia: 1-2 mg IV/IM\nMay repeat in 15-30 min` },
+    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง` },
+    compat: { ysite: `Limited data`, incompat: `Limited data` },
+    precautions: `• First-line สำหรับ acute dystonia (drug-induced EPS)!\n• Anticholinergic → dry mouth, urinary retention, confusion\n• ระวังในผู้สูงอายุ (delirium risk)\n• ระวังใน glaucoma, BPH\n• ใช้ใน: Drug-induced dystonia, EPS, Parkinsonism\n• ไม่ effective สำหรับ tardive dyskinesia`,
+    monitoring: ["EPS/dystonia resolution", "Mental status", "HR", "UO", "Anticholinergic effects"],
+    had: false, ref: `Lexicomp`
+  },
+  {
+    id: 16, generic: `Botulinum toxin type A`, trade: `Botox / Dysport Inj.`, strength: `100 U (Botox)\n500 U (Dysport)`, ed: "E",
+    categories: [],
+    reconst: { solvent: `NSS (preservative-free)\nห้ามเขย่า!`, volume: `Botox 100U: 1-4 mL\nDysport 500U: 2.5 mL`, conc: `Botox: 25-100 U/mL\nDysport: 200 U/mL\n(units ไม่ interchangeable ระหว่าง brands!)` },
+    dilution: { diluent: `ไม่ต้องเจือจางเพิ่ม`, volume: `-`, finalConc: `ตาม reconstitution` },
+    admin: { route: `IM injection (targeted muscles)\nIntradermal (hyperhidrosis)`, rate: `IM injection เข้ากล้ามเนื้อเป้าหมาย\nใช้ EMG/ultrasound guidance (ถ้าจำเป็น)` },
+    stability: { reconst: `24 ชม. 2-8°C (reconstituted)\nBest: ใช้ภายใน 4 ชม.`, diluted: `-`, storage: `2-8°C (ห้ามแช่แข็ง)` },
+    compat: { ysite: `N/A (IM injection)`, incompat: `N/A` },
+    precautions: `• ⚠️ Units ไม่ interchangeable ระหว่าง Botox/Dysport/Xeomin!\n• Spread → distant effects (dysphagia, resp weakness)\n• Black Box: distant spread of toxin effect\n• ใช้ใน (Neuro): Spasticity, Dystonia, Chronic migraine, Hemifacial spasm, Blepharospasm\n• Onset: 2-14 วัน | Duration: 3-6 เดือน\n• Antibody formation → resistance (high dose, frequent injection)`,
+    monitoring: ["Muscle weakness assessment", "Dysphagia screening", "Respiratory function (cervical dystonia)", "Treatment response (spasticity scales)", "Injection site reactions"],
+    had: true, ref: `Lexicomp; AAN guidelines`
+  },
+  {
+    id: 17, generic: `Bupivacaine`, trade: `Marcain Inj. 0.5%`, strength: `0.5% (5 mg/mL) 20 mL`, ed: "E",
+    categories: ["analgesic"],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `5 mg/mL (0.5%)\n2.5 mg/mL (0.25%)` },
+    dilution: { diluent: `NSS (สำหรับ epidural dilution)`, volume: `ตาม protocol`, finalConc: `0.0625-0.5% ตามใช้งาน` },
+    admin: { route: `Epidural | Spinal (hyperbaric)\nPeripheral nerve block\nLocal infiltration\n⚠️ ห้าม IV!`, rate: `Epidural: 0.0625-0.125% + Fentanyl\nSpinal: 0.5% hyperbaric 7.5-15 mg\nMax dose: 2 mg/kg (without epi)\n3 mg/kg (with epinephrine)` },
+    stability: { reconst: `-`, diluted: `24 ชม. RT (epidural admixture)`, storage: `RT` },
+    compat: { ysite: `Fentanyl (epidural)\nMorphine (epidural)`, incompat: `Alkaline solutions` },
+    precautions: `• ⚠️ ห้าม IV! → cardiac arrest (prolonged, refractory)!\n• Cardiotoxic มากกว่า Lidocaine\n• Intralipid 20% = antidote (lipid rescue)\n• LAST (Local Anesthetic Systemic Toxicity): tinnitus → seizure → cardiac arrest\n• Aspirate ก่อนฉีดเสมอ\n• ระวังใน hepatic impairment`,
+    monitoring: ["BP", "HR", "ECG (ถ้า large dose)", "Sensory/motor block level", "Signs of LAST", "Respiratory function (epidural)"],
+    had: true, ref: `Lexicomp; ASRA LAST guidelines`
+  },
+  {
+    id: 18, generic: "Calcium gluconate", trade: "Calcium gluconate 10%", strength: "10% (100 mg/mL) 10 mL", ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL (Ca 9.3 mg/mL)" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "≤50 mg/mL (5%)" },
+    admin: { route: "IV infusion (preferred)\nSlow IV push (emergency)", rate: "IV infusion: ≥30 min\nIV push: ≤1.5-2 mL/min" },
+    stability: { reconst: "-", diluted: "24 ชม. ที่ RT", storage: "เก็บ RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Ceftriaxone (ห้ามเด็ดขาด!)\nNaHCO₃, Phosphate solutions, Amphotericin B" },
+    precautions: "• ห้ามผสมกับ Ceftriaxone เด็ดขาด! (ตกตะกอน → fatal)\n• ระวัง extravasation → tissue necrosis/calcification\n• ให้ช้าๆ ป้องกัน cardiac arrest\n• ระวังในผู้ป่วยที่ได้ Digoxin",
+    monitoring: ["iCa²⁺", "Total Ca", "ECG (QT)", "HR", "BP", "Extravasation", "Renal fn"],
+    had: true, ref: "Lexicomp; Trissel's"
+  },
+  {
+    id: 19, generic: `Cefazolin`, trade: `CeFAZolin Inj. 1 g`, strength: `1 g/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI หรือ NSS`, volume: `10 mL`, conc: `100 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `10-20 mg/mL` },
@@ -1413,7 +989,25 @@ Surgical prophylaxis: ให้ภายใน 60 min ก่อน incision` },
     had: false, ref: `Lexicomp; ASHP surgical prophylaxis guidelines`
   },
   {
-    id: 56, generic: `Ceftazidime`, trade: `CefTAZidime Inj. 1 g`, strength: `1 g/vial`, ed: "E",
+    id: 20, generic: `Cefoperazone/Sulbactam`, trade: `Sulperazon Inj. 1.5 g`, strength: `1 g/0.5 g per vial`, ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: `SWFI`, volume: `5 mL`, conc: `200 mg/mL (cefoperazone)` },
+    dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `10-40 mg/mL` },
+    admin: { route: `IV infusion | IV push (slow)`, rate: `IV infusion: 15-30 min
+IV push: 3-5 min (≤2 g)` },
+    stability: { reconst: `24 ชม. RT | 5 วัน 2-8°C`, diluted: `24 ชม. RT`, storage: `RT (powder)` },
+    compat: { ysite: `Heparin`, incompat: `Aminoglycosides
+Calcium (แยก line)` },
+    precautions: `• Disulfiram-like reaction กับ alcohol! (MTT side chain)
+• Vitamin K deficiency → coagulopathy (prolonged use)
+• ปรับขนาดใน hepatic impairment
+• Biliary excretion สูง → ไม่ต้องปรับมากใน renal impairment
+• ระวัง hypoprothrombinemia`,
+    monitoring: ["PT/INR (coagulopathy)", "LFTs", "CBC", "C&S", "Bleeding signs"],
+    had: false, ref: `Lexicomp`
+  },
+  {
+    id: 21, generic: `Ceftazidime`, trade: `CefTAZidime Inj. 1 g`, strength: `1 g/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI`, volume: `10 mL`, conc: `100 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `10-40 mg/mL` },
@@ -1432,7 +1026,7 @@ Vancomycin, Amiodarone` },
     had: false, ref: `Lexicomp; Trissel's`
   },
   {
-    id: 57, generic: `Ceftazidime/Avibactam`, trade: `Zavicefta Inj. 2/0.5 g`, strength: `2 g/0.5 g per vial`, ed: "E",
+    id: 22, generic: `Ceftazidime/Avibactam`, trade: `Zavicefta Inj. 2/0.5 g`, strength: `2 g/0.5 g per vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI`, volume: `10 mL`, conc: `167.3 mg/mL (ceftazidime)` },
     dilution: { diluent: `NSS, D5W หรือ LR`, volume: `50-250 mL`, finalConc: `8-40 mg/mL (ceftazidime component)` },
@@ -1452,25 +1046,19 @@ CrCl ≤15: 0.94g q24h
     had: false, ref: `Lexicomp; IDSA MDR guidelines`
   },
   {
-    id: 58, generic: `Cefoperazone/Sulbactam`, trade: `Sulperazon Inj. 1.5 g`, strength: `1 g/0.5 g per vial`, ed: "E",
+    id: 23, generic: "Ceftriaxone", trade: "Ceftriaxone Inj. 1 g / 2 g", strength: "1 g, 2 g/vial", ed: "E",
     categories: ["antimicrobial"],
-    reconst: { solvent: `SWFI`, volume: `5 mL`, conc: `200 mg/mL (cefoperazone)` },
-    dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `10-40 mg/mL` },
-    admin: { route: `IV infusion | IV push (slow)`, rate: `IV infusion: 15-30 min
-IV push: 3-5 min (≤2 g)` },
-    stability: { reconst: `24 ชม. RT | 5 วัน 2-8°C`, diluted: `24 ชม. RT`, storage: `RT (powder)` },
-    compat: { ysite: `Heparin`, incompat: `Aminoglycosides
-Calcium (แยก line)` },
-    precautions: `• Disulfiram-like reaction กับ alcohol! (MTT side chain)
-• Vitamin K deficiency → coagulopathy (prolonged use)
-• ปรับขนาดใน hepatic impairment
-• Biliary excretion สูง → ไม่ต้องปรับมากใน renal impairment
-• ระวัง hypoprothrombinemia`,
-    monitoring: ["PT/INR (coagulopathy)", "LFTs", "CBC", "C&S", "Bleeding signs"],
-    had: false, ref: `Lexicomp`
+    reconst: { solvent: "IV: SWFI | IM: Lidocaine 1%", volume: "IV: 10 mL (1g), 20 mL (2g)\nIM: 3.5 mL (1g)", conc: "100 mg/mL (IV)\n250 mg/mL (IM)" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "10-40 mg/mL" },
+    admin: { route: "IV infusion | IV push (≥2 min) | IM", rate: "IV infusion: 30 min\nIV push: ≥2-4 min\nNeonates: 60 min" },
+    stability: { reconst: "3 วัน RT | 10 วัน 2-8°C", diluted: "24 ชม. RT ใน NSS/D5W", storage: "RT" },
+    compat: { ysite: "Acyclovir, Metronidazole, Morphine", incompat: "Calcium solutions (ห้ามเด็ดขาด ในทารก!)\nAminoglycosides, Vancomycin" },
+    precautions: "• ห้ามผสมกับ Calcium solutions เด็ดขาด (neonates)\n• ไม่ผสม Aminoglycosides ใน bag เดียวกัน\n• Biliary sludge ได้\n• ไม่ต้องปรับขนาดใน renal impairment",
+    monitoring: ["CBC", "SCr", "LFTs", "Allergy signs", "Biliary sx (prolonged)"],
+    had: false, ref: "Lexicomp; Trissel's"
   },
   {
-    id: 59, generic: `Chlorpheniramine`, trade: `Chlorpheniramine Inj. 10 mg/mL`, strength: `10 mg/mL amp`, ed: "E",
+    id: 24, generic: `Chlorpheniramine`, trade: `Chlorpheniramine Inj. 10 mg/mL`, strength: `10 mg/mL amp`, ed: "E",
     categories: [],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `10 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง หรือ dilute ใน NSS`, volume: `-`, finalConc: `10 mg/mL (undiluted)` },
@@ -1486,7 +1074,19 @@ Single dose: 10 mg` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 60, generic: `Cisatracurium`, trade: `Nimbex Inj. 2 mg/mL`, strength: `2 mg/mL, 5 mL & 10 mL`, ed: "E",
+    id: 25, generic: `Ciprofloxacin`, trade: `Ciprofloxacin Inj. 200 mg/100 mL`, strength: `2 mg/mL premixed`, ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: `Ready to use (premixed bag)`, volume: `-`, conc: `2 mg/mL` },
+    dilution: { diluent: `ไม่ต้องเจือจาง (premixed)`, volume: `-`, finalConc: `2 mg/mL` },
+    admin: { route: `IV infusion เท่านั้น`, rate: `200 mg: ≥30 min\n400 mg: ≥60 min\n(ห้ามให้เร็ว → crystalluria, seizure risk)` },
+    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง` },
+    compat: { ysite: `Midazolam, Potassium chloride`, incompat: `Heparin, NaHCO₃, Aminophylline\nClindamycin, Dexamethasone (variable)\nPhenytoin, Furosemide` },
+    precautions: `• QT prolongation risk\n• Tendon rupture (elderly, steroids, renal)\n• CNS: seizure, confusion (โดยเฉพาะ + NSAIDs)\n• ⚠️ Myasthenia gravis exacerbation!\n• C. difficile risk\n• Crystalluria → adequate hydration\n• Peripheral neuropathy risk\n• Chelation: ห้ามกับ Mg²⁺/Ca²⁺/Al³⁺/Fe²⁺ (PO)`,
+    monitoring: ["QTc", "SCr", "Tendon symptoms", "CNS effects", "MG symptoms", "C&S", "UO"],
+    had: false, ref: `Lexicomp`
+  },
+  {
+    id: 26, generic: `Cisatracurium`, trade: `Nimbex Inj. 2 mg/mL`, strength: `2 mg/mL, 5 mL & 10 mL`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `2 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `Dilute to 0.1-0.4 mg/mL`, finalConc: `0.1-0.4 mg/mL` },
@@ -1506,7 +1106,7 @@ Ketorolac` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 61, generic: `Clindamycin`, trade: `Clindamycin Inj. 600 mg`, strength: `150 mg/mL, 4 mL`, ed: "E",
+    id: 27, generic: `Clindamycin`, trade: `Clindamycin Inj. 600 mg`, strength: `150 mg/mL, 4 mL`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `150 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL
@@ -1529,7 +1129,19 @@ Phenytoin, Ciprofloxacin` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 62, generic: `Cotrimoxazole (TMP/SMX)`, trade: `Cotrimoxazole Inj. 480 mg/5 mL`, strength: `80 mg TMP + 400 mg SMX per 5 mL`, ed: "E",
+    id: 28, generic: "Colistimethate sodium (CMS)", trade: "Colistin Inj. 150 mg CBA", strength: "150 mg CBA/vial (~2 MIU)", ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: "SWFI หรือ NSS 2 mL", volume: "2 mL", conc: "75 mg CBA/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL", finalConc: "ตาม volume" },
+    admin: { route: "IV infusion | Intrathecal/IVT", rate: "IV: 30-60 min\nLoading: 300 mg CBA (9 MIU)\nMaint: 150-225 mg CBA q12h" },
+    stability: { reconst: "24 ชม. RT", diluted: "24 ชม. RT", storage: "2-8°C (powder)" },
+    compat: { ysite: "Limited data", incompat: "แยก line เมื่อเป็นไปได้" },
+    precautions: "• Nephrotoxicity สูง → hydrate well\n• Neurotoxicity (paresthesia, weakness)\n• Unit conversion: 1 MIU = ~33.3 mg CBA = ~80 mg CMS\n• Loading dose สำคัญ\n• Last-resort MDR Gram-neg\n• IT/IVT: 10 mg CBA/day",
+    monitoring: ["SCr daily", "UO", "Neuro symptoms", "CMS level", "C&S"],
+    had: true, ref: "Lexicomp; CMS consensus guidelines"
+  },
+  {
+    id: 29, generic: `Cotrimoxazole (TMP/SMX)`, trade: `Cotrimoxazole Inj. 480 mg/5 mL`, strength: `80 mg TMP + 400 mg SMX per 5 mL`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `Ready to use (concentrate)`, volume: `-`, conc: `16 mg/mL TMP + 80 mg/mL SMX` },
     dilution: { diluent: `D5W (preferred)
@@ -1555,7 +1167,7 @@ NSS (stability จำกัด)` },
     had: false, ref: `Lexicomp; Trissel's`
   },
   {
-    id: 63, generic: `Cyclophosphamide`, trade: `Endoxan Inj. 500 mg / 1 g`, strength: `500 mg, 1 g/vial`, ed: "E",
+    id: 30, generic: `Cyclophosphamide`, trade: `Endoxan Inj. 500 mg / 1 g`, strength: `500 mg, 1 g/vial`, ed: "E",
     categories: ["immunotherapy"],
     reconst: { solvent: `SWFI หรือ NSS`, volume: `25 mL (500 mg)
 50 mL (1 g)`, conc: `20 mg/mL` },
@@ -1575,7 +1187,7 @@ Lupus nephritis: 500 mg/m² monthly` },
     had: true, ref: `Lexicomp; ACR lupus guidelines`
   },
   {
-    id: 64, generic: `Desmopressin (DDAVP)`, trade: `Minirin Inj. 4 mcg/mL`, strength: `4 mcg/mL, 1 mL amp`, ed: "E",
+    id: 31, generic: `Desmopressin (DDAVP)`, trade: `Minirin Inj. 4 mcg/mL`, strength: `4 mcg/mL, 1 mL amp`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `4 mcg/mL` },
     dilution: { diluent: `NSS 50 mL (สำหรับ infusion)`, volume: `50 mL`, finalConc: `0.08 mcg/mL` },
@@ -1594,7 +1206,43 @@ vWD/Hemophilia A: 0.3 mcg/kg over 15-30 min` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 65, generic: `Diclofenac`, trade: `Voltaren Inj. 75 mg/3 mL`, strength: `25 mg/mL, 3 mL amp`, ed: "E",
+    id: 32, generic: "Dexamethasone", trade: "Dexamethasone Inj. 4-5 mg/mL", strength: "4 mg/mL, 5 mg/mL", ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "4-5 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "0.04-0.4 mg/mL" },
+    admin: { route: "IV push | IV infusion | IM", rate: "IV push: 1-4 min\nIV infusion: 15-30 min" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Midazolam (some), Vancomycin (some)" },
+    precautions: "• Perineal burning ถ้า IV push เร็ว\n• ระวัง hyperglycemia\n• Adrenal suppression (prolonged)\n• GI bleeding risk",
+    monitoring: ["BG", "Electrolytes", "BP", "Infection signs", "Adrenal fn"],
+    had: false, ref: "Lexicomp"
+  },
+  {
+    id: 33, generic: "Dexmedetomidine", trade: "Dexmedetomidine Inj.", strength: "200 mcg/2 mL", ed: "E",
+    categories: ["icu", "analgesic"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mcg/mL" },
+    dilution: { diluent: "NSS เท่านั้น", volume: "48 mL NSS (200 mcg + 48 mL = 4 mcg/mL)", finalConc: "4 mcg/mL" },
+    admin: { route: "IV infusion เท่านั้น (ห้าม bolus)", rate: "Loading: 1 mcg/kg over 10 min (optional)\nMaint: 0.2-0.7 mcg/kg/hr\nMax: 1.5 mcg/kg/hr" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิดใน NSS", incompat: "Amphotericin B, Diazepam, Phenytoin, Blood products" },
+    precautions: "• ห้ามให้ >24 ชม. (withdrawal risk)\n• Loading → bradycardia/HTN ได้\n• ระวัง co-sedation\n• ไม่ต้องปรับใน renal impairment",
+    monitoring: ["HR", "BP", "SpO₂", "RR", "RASS score", "Pain assessment"],
+    had: true, ref: "Lexicomp; ICU sedation guidelines"
+  },
+  {
+    id: 34, generic: "Diazepam", trade: "Diazepam Inj. 10 mg/2 mL", strength: "10 mg/2 mL", ed: "E",
+    categories: ["antiepileptic", "analgesic"],
+    reconst: { solvent: "ห้ามเจือจาง! (ตกตะกอน)", volume: "-", conc: "5 mg/mL" },
+    dilution: { diluent: "ห้ามเจือจาง (incompatible กับ NSS/D5W)", volume: "-", finalConc: "5 mg/mL (undiluted)" },
+    admin: { route: "Slow IV push | IM (ดูดซึมไม่ดี) | Rectal", rate: "≤5 mg/min (ผู้ใหญ่)\n≤1-2 mg/min (เด็ก/สูงอายุ)\nSE: 5 mg/min" },
+    stability: { reconst: "-", diluted: "-", storage: "RT ป้องกันแสง\nAdsorbs to PVC" },
+    compat: { ysite: "-", incompat: "IV fluids ทุกชนิด (ห้ามเจือจาง)\nAdsorbs to PVC → ใช้ glass/polyolefin" },
+    precautions: "• ห้ามเจือจาง/ผสมกับยาอื่น!\n• Adsorbs to PVC tubing\n• Respiratory depression → เตรียม Flumazenil\n• Propylene glycol toxicity (high dose)\n• IM ดูดซึมไม่ดี\n• ห้าม intra-arterial",
+    monitoring: ["RR", "SpO₂", "BP", "HR", "Sedation level", "Seizure activity", "Extravasation"],
+    had: true, ref: "Lexicomp; SE guidelines"
+  },
+  {
+    id: 35, generic: `Diclofenac`, trade: `Voltaren Inj. 75 mg/3 mL`, strength: `25 mg/mL, 3 mL amp`, ed: "E",
     categories: ["analgesic"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `25 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W
@@ -1615,7 +1263,55 @@ Acidic solutions` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 66, generic: `Doripenem`, trade: `Doribax Inj. 500 mg`, strength: `500 mg/vial`, ed: "N",
+    id: 36, generic: "Digoxin", trade: "Digoxin Inj. 0.5 mg/2 mL", strength: "0.25 mg/mL", ed: "E",
+    categories: ["cardiovascular"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "0.25 mg/mL" },
+    dilution: { diluent: "NSS, D5W หรือ SWFI", volume: "≥4-fold dilution", finalConc: "≥0.05 mg/mL" },
+    admin: { route: "Slow IV push (diluted) | IV infusion\nห้าม IM", rate: "IV push: ≥5 min\nInfusion: 15-30 min" },
+    stability: { reconst: "-", diluted: "ใช้ภายใน 4 ชม.", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "-", incompat: "Dobutamine, Fluconazole, Insulin, Amiodarone" },
+    precautions: "• Dilute ≥4x ก่อนให้ IV\n• ห้าม IM\n• ระวัง hypoK → ↑toxicity\n• Drug interactions มาก\n• Narrow therapeutic index\n• ระวังสูงอายุ, renal impairment",
+    monitoring: ["Digoxin level (0.5-2 ng/mL)", "K⁺", "Mg²⁺", "Ca²⁺", "SCr", "ECG", "HR", "Toxicity signs"],
+    had: true, ref: "Lexicomp; Trissel's"
+  },
+  {
+    id: 37, generic: `Dimenhydrinate`, trade: `Dimenhydrinate Inj. 50 mg/mL`, strength: `50 mg/mL amp`, ed: "E",
+    categories: [],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `50 mg/mL` },
+    dilution: { diluent: `NSS 10 mL (dilute ก่อน IV)`, volume: `10 mL`, finalConc: `5 mg/mL` },
+    admin: { route: `IV push (slow, diluted) | IM`, rate: `IV push: 50 mg diluted over ≥2 min\nIM: 50 mg deep gluteal\nMax: 300 mg/day` },
+    stability: { reconst: `-`, diluted: `ใช้ทันที`, storage: `RT ป้องกันแสง` },
+    compat: { ysite: `Limited data`, incompat: `Aminophylline, Heparin\nPhenobarbital, Thiopental` },
+    precautions: `• Sedation → ระวังใน neuro patients ที่ต้อง monitor consciousness\n• Anticholinergic effects\n• ระวังในผู้สูงอายุ (confusion, falls)\n• Vertigo, motion sickness, N/V\n• ห้ามให้ intra-arterial`,
+    monitoring: ["Sedation level", "N/V assessment", "BP"],
+    had: false, ref: `Lexicomp`
+  },
+  {
+    id: 38, generic: `Dobutamine`, trade: `DOBUTamine Inj. 250 mg/20 mL`, strength: `12.5 mg/mL`, ed: "E",
+    categories: ["icu", "cardiovascular"],
+    reconst: { solvent: `Ready to use (concentrate)`, volume: `-`, conc: `12.5 mg/mL` },
+    dilution: { diluent: `NSS หรือ D5W`, volume: `250 mL`, finalConc: `250 mg/250 mL = 1000 mcg/mL\n500 mg/250 mL = 2000 mcg/mL` },
+    admin: { route: `IV infusion เท่านั้น (ห้าม IV push!)`, rate: `2.5-20 mcg/kg/min\nTitrate q10 min\nMax: 40 mcg/kg/min (rarely)` },
+    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT (สีชมพูเล็กน้อยปกติ)\nห้ามใช้ถ้าสีเข้ม` },
+    compat: { ysite: `Amiodarone, Calcium, Heparin, Lidocaine, Midazolam, Morphine`, incompat: `NaHCO₃, Furosemide, Diazepam\nAcyclovir, Aminophylline, Phenytoin` },
+    precautions: `• ห้ามผสมกับ NaHCO₃! (inactivation)\n• ⚠️ Tachyarrhythmia risk\n• Hypokalemia risk\n• ระวัง hypertension/hypotension\n• ใช้ infusion pump เสมอ\n• สี solution อาจเปลี่ยนเล็กน้อย (ใช้ได้)\n• ไม่เพิ่ม MAP เท่า Norepinephrine`,
+    monitoring: ["HR (continuous)", "BP (continuous/arterial line)", "ECG", "UO", "CI/CO (if Swan-Ganz)", "K⁺"],
+    had: true, ref: `Lexicomp; SSC guidelines`
+  },
+  {
+    id: 39, generic: `Dopamine`, trade: `Dopamine Inj. 250 mg/10 mL`, strength: `25 mg/mL (concentrate)`, ed: "E",
+    categories: ["icu", "cardiovascular"],
+    reconst: { solvent: `Ready to use (concentrate)`, volume: `-`, conc: `25 mg/mL` },
+    dilution: { diluent: `NSS หรือ D5W`, volume: `250-500 mL`, finalConc: `400-3200 mcg/mL\n(200 mg/250 mL = 800 mcg/mL typical)` },
+    admin: { route: `IV infusion เท่านั้น (ห้าม IV push!)\nCentral line preferred`, rate: `Low: 1-5 mcg/kg/min (renal)\nMod: 5-10 mcg/kg/min (cardiac)\nHigh: 10-20 mcg/kg/min (vasopressor)\nMax: 50 mcg/kg/min` },
+    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT ป้องกันแสง\nห้ามใช้ถ้าสีเข้มกว่าเหลืองอ่อน` },
+    compat: { ysite: `Amiodarone, Calcium, Heparin, Fentanyl, KCl`, incompat: `NaHCO₃, Furosemide\nAmphotericin B, Insulin (variable)\nAlteplase, Thiopental` },
+    precautions: `• Extravasation → tissue necrosis! Phentolamine antidote\n• Central line preferred (peripheral → necrosis risk)\n• ⚠️ Tachyarrhythmia common\n• "Renal dose" dopamine (1-3 mcg/kg/min) ไม่แนะนำแล้ว\n• Norepinephrine preferred ใน septic shock (SSC)\n• ใช้ infusion pump เสมอ`,
+    monitoring: ["HR (continuous)", "BP (continuous/arterial line)", "ECG", "UO", "Peripheral perfusion", "Extravasation signs"],
+    had: true, ref: `Lexicomp; SSC 2021`
+  },
+  {
+    id: 40, generic: `Doripenem`, trade: `Doribax Inj. 500 mg`, strength: `500 mg/vial`, ed: "N",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI หรือ NSS 10 mL`, volume: `10 mL`, conc: `50 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `100-250 mL`, finalConc: `2-4.5 mg/mL` },
@@ -1631,7 +1327,19 @@ Extended: 4 ชม. (เพิ่ม T>MIC)` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 67, generic: `Ephedrine`, trade: `Ephedrine Inj. 30 mg/mL`, strength: `30 mg/mL amp`, ed: "E",
+    id: 41, generic: "Enoxaparin", trade: "Clexane Inj. 40/60/80 mg", strength: "Prefilled syringe", ed: "E",
+    categories: ["cardiovascular"],
+    reconst: { solvent: "Ready to use (prefilled)", volume: "-", conc: "100 mg/mL" },
+    dilution: { diluent: "ไม่ต้องเจือจาง", volume: "-", finalConc: "100 mg/mL" },
+    admin: { route: "SC เท่านั้น (ปกติ) | IV bolus (ACS)", rate: "SC: anterolateral abdominal\nIV (ACS): 30 mg bolus\nห้ามไล่ bubble ออก" },
+    stability: { reconst: "-", diluted: "-", storage: "RT ห้ามแช่เย็น" },
+    compat: { ysite: "-", incompat: "-" },
+    precautions: "• SC เท่านั้น (ห้าม IM)\n• ห้ามไล่ air bubble (air lock design)\n• สลับซ้าย-ขวาทุกครั้ง\n• ห้ามถูบริเวณฉีด\n• ระวัง HIT\n• ปรับขนาด CrCl <30",
+    monitoring: ["CBC + Plt q2-3d", "Anti-Xa (renal/obesity)", "SCr", "Bleeding signs", "Stool OB"],
+    had: true, ref: "Lexicomp"
+  },
+  {
+    id: 42, generic: `Ephedrine`, trade: `Ephedrine Inj. 30 mg/mL`, strength: `30 mg/mL amp`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `30 mg/mL` },
     dilution: { diluent: `NSS (dilute ก่อนให้ IV)`, volume: `Dilute to 5-10 mg/mL`, finalConc: `5-10 mg/mL` },
@@ -1649,7 +1357,38 @@ Thiopental, Phenobarbital` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 68, generic: `Esmolol`, trade: `Esbloc Inj. 100 mg/10 mL`, strength: `10 mg/mL`, ed: "E",
+    id: 43, generic: `Eptifibatide`, trade: `Integrilin Inj. 20 mg/10 mL`, strength: `2 mg/mL`, ed: "E",
+    categories: ["cardiovascular"],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `2 mg/mL` },
+    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `2 mg/mL (0.75 mg/mL for 100 mL vial)` },
+    admin: { route: `IV push (bolus) + IV infusion`, rate: `ACS: 180 mcg/kg bolus → 2 mcg/kg/min infusion (max 72 hr)
+PCI: 180 mcg/kg bolus → 2 mcg/kg/min → 2nd bolus 180 mcg/kg at 10 min` },
+    stability: { reconst: `-`, diluted: `-`, storage: `2-8°C (ใช้ได้ที่ RT ภายใน 2 เดือน)` },
+    compat: { ysite: `Heparin, Atropine`, incompat: `Furosemide` },
+    precautions: `• Bleeding risk → platelet function inhibition
+• ปรับขนาดตาม CrCl (CrCl <50: 1 mcg/kg/min)
+• ห้ามใน dialysis
+• Thrombocytopenia → check plt 6h post
+• ใช้ใน: ACS, PCI`,
+    monitoring: ["Platelet (baseline, 6h, daily)", "aPTT", "ACT (PCI)", "Hgb/Hct", "Bleeding signs", "SCr"],
+    had: true, ref: `Lexicomp; AHA/ACC guidelines`
+  },
+  {
+    id: 44, generic: `Ertapenem`, trade: `Invanz Inj. 1 g`, strength: `1 g/vial`, ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: `SWFI หรือ Lidocaine 1% (IM)
+ห้ามใช้ diluent ที่มี dextrose!`, volume: `10 mL (IV)
+3.2 mL Lidocaine 1% (IM)`, conc: `100 mg/mL (IV)` },
+    dilution: { diluent: `NSS เท่านั้น!\n(ห้ามใช้ D5W หรือ LR!)`, volume: `50 mL NSS`, finalConc: `20 mg/mL` },
+    admin: { route: `IV infusion เท่านั้น (ห้าม IV push!)\nIM (ผสม Lidocaine)`, rate: `IV infusion: 30 นาที\n(ห้ามให้เร็วกว่านี้)\nIM: deep gluteal` },
+    stability: { reconst: `6 ชม. RT | 24 ชม. 2-8°C`, diluted: `6 ชม. RT | 24 ชม. 2-8°C (NSS)`, storage: `RT (powder)\nReconstituted: ดูด้านบน` },
+    compat: { ysite: `Heparin, Metronidazole, Tigecycline`, incompat: `D5W, LR, Dextrose-containing solutions ทุกชนิด!\nห้ามผสมกับยาอื่นใน bag เดียวกัน` },
+    precautions: `• ⚠️ ใช้ NSS เท่านั้น! ห้าม D5W/LR/Dextrose!\n• ห้าม IV push!\n• ให้วันละครั้ง (q24h) — ข้อดีด้าน compliance\n• ไม่ cover Pseudomonas, Acinetobacter!\n• Seizure risk (โดยเฉพาะ renal impairment, CNS pathology)\n• ปรับขนาด: CrCl ≤30 หรือ HD → 500 mg q24h\n• ⚠️ ลด Valproic acid level (carbapenem class!)\n• IM: ผสมกับ Lidocaine 1% เท่านั้น`,
+    monitoring: ["SCr", "CrCl", "CBC", "LFTs", "Seizure activity", "C&S", "VPA level (ห้ามใช้ร่วม!)"],
+    had: false, ref: `Lexicomp; IDSA guidelines`
+  },
+  {
+    id: 45, generic: `Esmolol`, trade: `Esbloc Inj. 100 mg/10 mL`, strength: `10 mg/mL`, ed: "E",
     categories: ["cardiovascular", "icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `10 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `250 mL (2.5 g/250 mL = 10 mg/mL premix available)`, finalConc: `10 mg/mL (undiluted)
@@ -1670,7 +1409,7 @@ Furosemide, Diazepam` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 69, generic: `Etomidate`, trade: `Etomidate Inj. 20 mg/10 mL`, strength: `2 mg/mL`, ed: "E",
+    id: 46, generic: `Etomidate`, trade: `Etomidate Inj. 20 mg/10 mL`, strength: `2 mg/mL`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `2 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `2 mg/mL` },
@@ -1689,7 +1428,19 @@ Duration: 3-5 min` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 70, generic: `Fluconazole`, trade: `Fluconazole Inj. 200 mg/100 mL`, strength: `2 mg/mL premixed`, ed: "E",
+    id: 47, generic: "Fentanyl", trade: "Fentanyl Inj. 0.1 mg/2 mL", strength: "50 mcg/mL, 2 mL", ed: "E",
+    categories: ["analgesic", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "50 mcg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "Dilute to 10-50 mcg/mL", finalConc: "10-50 mcg/mL" },
+    admin: { route: "IV push (slow) | IV infusion | IM, Epidural, IT", rate: "IV push: 1-2 min\nInfusion: 25-100 mcg/hr" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Phenytoin, Thiopental" },
+    precautions: "• Respiratory depression → เตรียม Naloxone\n• Chest wall rigidity (ให้เร็ว/dose สูง)\n• Serotonin syndrome (+ SSRI/SNRI)\n• ระวัง dose ในสูงอายุ, hepatic impairment",
+    monitoring: ["RR", "SpO₂", "BP", "HR", "Pain score", "Sedation", "Bowel fn"],
+    had: true, ref: "Lexicomp"
+  },
+  {
+    id: 48, generic: `Fluconazole`, trade: `Fluconazole Inj. 200 mg/100 mL`, strength: `2 mg/mL premixed`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `Ready to use (premixed bag)`, volume: `-`, conc: `2 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง (premixed)`, volume: `-`, finalConc: `2 mg/mL` },
@@ -1709,7 +1460,7 @@ Ceftazidime (variable), Furosemide` },
     had: false, ref: `Lexicomp; IDSA candidiasis guidelines`
   },
   {
-    id: 71, generic: `Fosfomycin`, trade: `Fosfomycin Inj. 2 g`, strength: `2 g/vial`, ed: "E",
+    id: 49, generic: `Fosfomycin`, trade: `Fosfomycin Inj. 2 g`, strength: `2 g/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI`, volume: `20 mL`, conc: `100 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `100-500 mL`, finalConc: `4-40 mg/mL` },
@@ -1727,7 +1478,19 @@ Max: 8 g q8h` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 72, generic: `Ganciclovir`, trade: `Cymevene Inj. 500 mg`, strength: `500 mg/vial`, ed: "E",
+    id: 50, generic: "Furosemide", trade: "Lasix Inj. 20 mg/2 mL", strength: "20 mg/2 mL", ed: "E",
+    categories: ["cardiovascular", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
+    dilution: { diluent: "NSS (preferred) | D5W", volume: "50-100 mL", finalConc: "1-2 mg/mL" },
+    admin: { route: "IV push (slow) | IV infusion | IM", rate: "IV push: ≤4 mg/min\nInfusion: 0.1-0.4 mg/kg/hr\nHigh dose >80 mg: infusion preferred" },
+    stability: { reconst: "-", diluted: "24 ชม. RT ใน NSS", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Midazolam, Morphine, KCl", incompat: "Dobutamine, Dopamine, Milrinone\nVancomycin, Ondansetron (mixed)" },
+    precautions: "• ให้เร็วเกิน → ototoxicity (dose สูง)\n• ระวัง hypoK, hypoNa, hypoMg\n• ตกตะกอนที่ pH <7\n• Photosensitive",
+    monitoring: ["K⁺", "Na⁺", "Mg²⁺", "Ca²⁺", "BP", "UO", "Weight", "SCr", "Hearing (high dose)"],
+    had: false, ref: "Lexicomp; Trissel's"
+  },
+  {
+    id: 51, generic: `Ganciclovir`, trade: `Cymevene Inj. 500 mg`, strength: `500 mg/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI`, volume: `10 mL`, conc: `50 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `100 mL`, finalConc: `≤10 mg/mL` },
@@ -1748,7 +1511,7 @@ Max: 8 g q8h` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 73, generic: `Gentamicin`, trade: `Gentamicin Inj. 80 mg/2 mL`, strength: `40 mg/mL`, ed: "E",
+    id: 52, generic: `Gentamicin`, trade: `Gentamicin Inj. 80 mg/2 mL`, strength: `40 mg/mL`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `40 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50-200 mL`, finalConc: `1-2 mg/mL` },
@@ -1767,7 +1530,19 @@ Heparin, Furosemide (variable)` },
     had: false, ref: `Lexicomp; IDSA`
   },
   {
-    id: 74, generic: `Glyceryl trinitrate (NTG)`, trade: `NTG Inj. 50 mg/10 mL`, strength: `5 mg/mL`, ed: "E",
+    id: 53, generic: `Glucose 50% (Dextrose 50%)`, trade: `Glucose Inj. 50% 50 mL`, strength: `50% (500 mg/mL)`, ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `500 mg/mL (50%)` },
+    dilution: { diluent: `ไม่ต้องเจือจาง (emergency)\nDilute ใน NSS/D5W (non-emergency)`, volume: `Emergency: undiluted\nNon-emergency: dilute to D10-D20W`, finalConc: `50% (push) หรือ 10-20% (infusion)` },
+    admin: { route: `IV push (slow, diluted) — central preferred\nIV infusion`, rate: `Hypoglycemia emergency:\n25-50 mL of D50W (= 12.5-25 g) IV push over 3-5 min\nInfusion: D10W 100-200 mL/hr` },
+    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT` },
+    compat: { ysite: `Compatible กับยาหลายชนิด`, incompat: `Ampicillin (ลด stability)\nPhenytoin (ตกตะกอน!)\nSodium bicarbonate (some)` },
+    precautions: `• Hypertonic! → prefer central line (50%)\n• Extravasation → tissue necrosis (50%)!\n• ตาม Thiamine (B1) 100 mg IV ก่อนให้ glucose ในผู้ป่วยเสี่ยง Wernicke!\n• Rebound hypoglycemia → monitor BG q15-30 min\n• Hyperglycemia ถ้าให้เร็ว/มาก`,
+    monitoring: ["BG q15-30 min (post-dose)", "IV site (extravasation)", "Mental status", "Electrolytes (prolonged infusion)"],
+    had: true, ref: `Lexicomp; ADA hypoglycemia guidelines`
+  },
+  {
+    id: 54, generic: `Glyceryl trinitrate (NTG)`, trade: `NTG Inj. 50 mg/10 mL`, strength: `5 mg/mL`, ed: "E",
     categories: ["cardiovascular", "icu"],
     reconst: { solvent: `Ready to use (concentrate)`, volume: `-`, conc: `5 mg/mL` },
     dilution: { diluent: `D5W (preferred) หรือ NSS`, volume: `250-500 mL`, finalConc: `50-400 mcg/mL
@@ -1789,7 +1564,19 @@ Adsorbs to PVC! → ใช้ non-PVC tubing` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 75, generic: `Haloperidol`, trade: `Haldol Inj. / Haldol Decanoate`, strength: `5 mg/mL (Haldol)
+    id: 55, generic: `Glycopyrrolate`, trade: `Glycopyrrolate Inj. 0.2 mg/mL`, strength: `0.2 mg/mL amp`, ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `0.2 mg/mL` },
+    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `0.2 mg/mL` },
+    admin: { route: `IV push | IM`, rate: `IV push: 0.1-0.2 mg over 1-2 min\nNMB reversal: 0.2 mg per Neostigmine 1 mg` },
+    stability: { reconst: `-`, diluted: `-`, storage: `RT` },
+    compat: { ysite: `Neostigmine (ผสม syringe เดียวกันได้)`, incompat: `Limited data` },
+    precautions: `• ใช้แทน Atropine ใน NMB reversal (less tachycardia)\n• ไม่ cross BBB (vs Atropine) → ข้อดีใน neuro patients\n• Antisialagogue (ลด secretions)\n• ระวัง urinary retention (BPH)\n• CI: glaucoma (relative)`,
+    monitoring: ["HR", "BP", "Secretions", "UO"],
+    had: false, ref: `Lexicomp`
+  },
+  {
+    id: 56, generic: `Haloperidol`, trade: `Haldol Inj. / Haldol Decanoate`, strength: `5 mg/mL (Haldol)
 50 mg/mL (Decanoate)`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `5 mg/mL (acute)
@@ -1813,7 +1600,19 @@ Fluconazole (some)` },
     had: true, ref: `Lexicomp; PADIS guidelines 2018`
   },
   {
-    id: 76, generic: `Human Insulin (Regular)`, trade: `Actrapid HM 100 IU/mL`, strength: `100 IU/mL, 10 mL vial`, ed: "E",
+    id: 57, generic: "Heparin", trade: "Heparin Inj. 5000/25000 units", strength: "1000-5000 units/mL", ed: "E",
+    categories: ["cardiovascular", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "1000 or 5000 units/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "250-500 mL", finalConc: "25000 u/250 mL = 100 u/mL" },
+    admin: { route: "IV infusion (continuous) | SC | IV flush", rate: "Loading: 60-80 u/kg bolus\nMaint: 12-18 u/kg/hr\nAdjust per aPTT nomogram" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Alteplase, Amiodarone, Diazepam, Gentamicin" },
+    precautions: "• หลาย concentration → ตรวจ dose ซ้ำเสมอ!\n• HIT: หยุดทันทีถ้า plt drop >50%\n• Antidote: Protamine\n• ห้ามฉีด IM\n• ใช้ infusion pump เสมอ",
+    monitoring: ["aPTT q6h → stable → q12-24h", "Anti-Xa", "CBC + Plt q2-3d", "Hgb/Hct", "Bleeding signs"],
+    had: true, ref: "Lexicomp; CHEST guidelines"
+  },
+  {
+    id: 58, generic: `Human Insulin (Regular)`, trade: `Actrapid HM 100 IU/mL`, strength: `100 IU/mL, 10 mL vial`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `100 IU/mL` },
     dilution: { diluent: `NSS (preferred)
@@ -1835,7 +1634,31 @@ Dobutamine, Dopamine (variable)` },
     had: true, ref: `Lexicomp; ADA DKA guidelines`
   },
   {
-    id: 77, generic: `Infliximab`, trade: `Remicade/Infliximab Inj. 100 mg`, strength: `100 mg/vial`, ed: "N",
+    id: 59, generic: "Hydrocortisone", trade: "Solu-Cortef Inj. 100 mg", strength: "100 mg/vial", ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: "SWFI หรือ NSS 2 mL", volume: "2 mL", conc: "50 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "1-2 mg/mL" },
+    admin: { route: "IV push | IV infusion | IM", rate: "IV push: 3-5 min\nInfusion: 20-30 min\nSeptic shock CI: 10 mg/hr" },
+    stability: { reconst: "3 วัน RT", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Midazolam, Phenytoin (mixed), Ciprofloxacin" },
+    precautions: "• Adrenal crisis ถ้าหยุดกะทันหัน (taper)\n• ระวัง hyperglycemia\n• Immunosuppression\n• GI bleeding (+ NSAIDs)\n• Stress dose ใน septic shock",
+    monitoring: ["BG", "Electrolytes", "BP", "Infection signs", "HPA axis"],
+    had: false, ref: "Lexicomp"
+  },
+  {
+    id: 60, generic: `Hyoscine N-butylbromide`, trade: `Buscopan Inj. 20 mg/mL`, strength: `20 mg/mL amp`, ed: "E",
+    categories: [],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `20 mg/mL` },
+    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `20 mg/mL` },
+    admin: { route: `IV push (slow) | IM`, rate: `IV push: 20 mg over 1-2 min\nMax: 100 mg/day\nMay repeat q30 min` },
+    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง` },
+    compat: { ysite: `Limited data`, incompat: `Limited data` },
+    precautions: `• Anticholinergic (quaternary ammonium → ไม่ cross BBB)\n• Tachycardia, dry mouth\n• CI: glaucoma, myasthenia gravis, tachyarrhythmia\n• ⚠️ ระวัง anaphylaxis (rare but reported)\n• ใช้ใน: Abdominal/renal colic, GI spasm\n• ไม่ข้าม BBB → safe ใน neuro patients (ไม่ confuse)`,
+    monitoring: ["HR", "BP", "Abdominal symptoms", "UO"],
+    had: false, ref: `Lexicomp`
+  },
+  {
+    id: 61, generic: `Infliximab`, trade: `Remicade/Infliximab Inj. 100 mg`, strength: `100 mg/vial`, ed: "N",
     categories: ["immunotherapy"],
     reconst: { solvent: `SWFI 10 mL
 (ชี้เข็มไปที่ผนัง vial หมุนเบาๆ ห้ามเขย่า)`, volume: `10 mL`, conc: `10 mg/mL` },
@@ -1859,7 +1682,67 @@ PVC bag/tubing ใช้ได้` },
     had: true, ref: `Lexicomp; ACR guidelines`
   },
   {
-    id: 78, generic: `Levofloxacin`, trade: `Cravit Inj. 750 mg`, strength: `5 mg/mL premixed`, ed: "E",
+    id: 62, generic: "IVIG (Immunoglobulin)", trade: "IVIG Inj.", strength: "5% or 10% solutions", ed: "E",
+    categories: ["immunotherapy"],
+    reconst: { solvent: "Liquid: Ready to use\nPowder: ตาม insert", volume: "-", conc: "5% (50 mg/mL) | 10% (100 mg/mL)" },
+    dilution: { diluent: "ไม่ต้อง (preferred)\nD5W ถ้าจำเป็น", volume: "-", finalConc: "5-10% undiluted" },
+    admin: { route: "IV infusion (dedicated line)", rate: "Start: 0.5-1 mL/kg/hr (30 min)\nIncrease q15-30min\n5%: max 4 mL/kg/hr\n10%: max 8 mL/kg/hr" },
+    stability: { reconst: "ตาม manufacturer", diluted: "ใช้ทันทีหลังเปิด", storage: "2-8°C ห้ามเขย่า/แช่แข็ง" },
+    compat: { ysite: "ห้ามผสมกับยาอื่น", incompat: "ห้ามผสมกับยาอื่นทุกชนิด" },
+    precautions: "• Premed: Paracetamol + Antihistamine\n• ให้ช้าๆ → infusion reactions\n• Renal failure risk (sucrose products)\n• Thromboembolism (elderly, immobilized)\n• ⚠️ Aseptic meningitis (สำคัญใน neuro!)\n• Hemolytic anemia (non-O blood)\n• ใช้ใน: GBS, CIDP, MG crisis, autoimmune encephalitis",
+    monitoring: ["VS q15min → q30min", "SCr (baseline + post)", "CBC", "IgA (baseline)", "LDH/Haptoglobin", "Neuro (aseptic meningitis)", "Fluid balance"],
+    had: true, ref: "Lexicomp; EFNS/AAN guidelines"
+  },
+  {
+    id: 63, generic: "Ketamine", trade: "Ketamine Inj. 500 mg/10 mL", strength: "50 mg/mL", ed: "E",
+    categories: ["icu", "analgesic", "antiepileptic"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "50 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-500 mL", finalConc: "0.1-2 mg/mL (analgesic)" },
+    admin: { route: "IV push (slow) | IV infusion | IM", rate: "Induction: 1-4.5 mg/kg/60 sec\nAnalgesic: 0.1-0.5 mg/kg/hr\nRefractory SE: 1-5 mg/kg → 1-10 mg/kg/hr" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Propofol, Midazolam, Fentanyl, Morphine", incompat: "Barbiturates, Diazepam, NaHCO₃" },
+    precautions: "• Emergence reactions → ให้ Midazolam ร่วม\n• ICP concern (controversial) → ระวัง TBI\n• ไม่กด respiratory drive (ข้อดี)\n• Dissociative anesthesia\n• ยาเสพติด\n• ใช้ใน refractory SE",
+    monitoring: ["BP", "HR", "RR", "SpO₂", "Sedation", "Emergence reactions", "ICP", "Seizure activity"],
+    had: true, ref: "Lexicomp; AES refractory SE"
+  },
+  {
+    id: 64, generic: "Labetalol", trade: "Labetalol Inj. 100 mg/20 mL", strength: "5 mg/mL", ed: "E",
+    categories: ["stroke", "cardiovascular", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "5 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "200 mL", finalConc: "1-2 mg/mL" },
+    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: 10-20 mg/2 min q10min (max 300 mg)\nInfusion: 0.5-2 mg/min" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Fentanyl, Midazolam, Morphine", incompat: "NaHCO₃, Furosemide (variable)" },
+    precautions: "• First-line HT emergency ใน stroke\n• CI: Severe bradycardia, AV block ≥2nd, Asthma\n• ไม่ลด CBF → safe for neuro\n• Supine position during IV push",
+    monitoring: ["BP q5-15 min", "HR", "ECG", "Neuro status", "UO"],
+    had: true, ref: "Lexicomp; AHA stroke guidelines"
+  },
+  {
+    id: 65, generic: "Lacosamide", trade: "Lacosamide Inj. 200 mg/20 mL", strength: "10 mg/mL", ed: "E",
+    categories: ["antiepileptic"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
+    dilution: { diluent: "NSS, D5W หรือ LR\nให้ undiluted ได้", volume: "ไม่ต้อง หรือ 50-100 mL", finalConc: "10 mg/mL (undiluted) หรือ dilute" },
+    admin: { route: "IV infusion (PO ↔ IV 1:1)", rate: "15-60 min\nSE: ≥15 min" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Limited data" },
+    precautions: "• Switch PO ↔ IV 1:1\n• ระวัง PR prolongation\n• CI: 2nd/3rd degree AV block\n• ปรับขนาดใน severe hepatic/renal\n• Suicidal ideation monitoring",
+    monitoring: ["ECG (PR interval)", "Seizure freq", "LFTs", "SCr", "Mood/behavior"],
+    had: false, ref: "Lexicomp"
+  },
+  {
+    id: 66, generic: "Levetiracetam", trade: "Levetiracetam Inj. 500 mg/5 mL", strength: "100 mg/mL", ed: "E",
+    categories: ["antiepileptic"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL" },
+    dilution: { diluent: "NSS, D5W หรือ LR", volume: "100 mL", finalConc: "5-15 mg/mL" },
+    admin: { route: "IV infusion (PO ↔ IV 1:1)", rate: "15 min\nSE: 5-15 min\nLoading 60 mg/kg: 10-15 min" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Lorazepam, Diazepam, Valproate", incompat: "Limited data" },
+    precautions: "• Switch PO ↔ IV 1:1\n• Behavioral side effects (irritability, aggression)\n• ปรับขนาดตาม CrCl\n• ไม่มี significant drug interactions\n• Safe in hepatic impairment\n• First-line adjunctive focal seizures",
+    monitoring: ["Seizure freq", "SCr", "Behavior/mood", "CBC (rare leukopenia)"],
+    had: false, ref: "Lexicomp; Epilepsy guidelines"
+  },
+  {
+    id: 67, generic: `Levofloxacin`, trade: `Cravit Inj. 750 mg`, strength: `5 mg/mL premixed`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `Ready to use (premixed bag)`, volume: `-`, conc: `5 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง (premixed)`, volume: `-`, finalConc: `5 mg/mL` },
@@ -1878,7 +1761,79 @@ PVC bag/tubing ใช้ได้` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 79, generic: `Metoclopramide`, trade: `Metoclopramide Inj. 10 mg/2 mL`, strength: `5 mg/mL`, ed: "E",
+    id: 68, generic: "Lidocaine", trade: "Lidocaine Inj. 2%", strength: "20 mg/mL", ed: "E",
+    categories: ["cardiovascular", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "20 mg/mL (2%)" },
+    dilution: { diluent: "D5W (preferred) | NSS", volume: "250-500 mL", finalConc: "1-4 mg/mL" },
+    admin: { route: "IV push (bolus) | IV infusion | Local", rate: "Bolus: 1-1.5 mg/kg/2-3 min\nInfusion: 1-4 mg/min\n(reduce ใน HF, liver, elderly)" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Amphotericin B, Phenytoin" },
+    precautions: "• CNS toxicity: tinnitus → seizures → coma\n• ลด dose ใน HF, hepatic, elderly\n• Therapeutic: 1.5-5 mcg/mL\n• ระวัง methemoglobinemia (rare)",
+    monitoring: ["ECG (continuous)", "HR", "BP", "Lidocaine level (>24h)", "CNS toxicity", "Seizure activity"],
+    had: true, ref: "Lexicomp; ACLS"
+  },
+  {
+    id: 69, generic: `Linezolid`, trade: `Zyvox Inj. 600 mg/300 mL`, strength: `2 mg/mL premixed`, ed: "N",
+    categories: ["antimicrobial"],
+    reconst: { solvent: `Ready to use (premixed bag)`, volume: `-`, conc: `2 mg/mL` },
+    dilution: { diluent: `ไม่ต้องเจือจาง (premixed)`, volume: `-`, finalConc: `2 mg/mL` },
+    admin: { route: `IV infusion เท่านั้น`, rate: `30-120 min\n(usual 600 mg q12h over 30-120 min)` },
+    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง\nห้ามแช่เย็น (ตกผลึก)` },
+    compat: { ysite: `Limited data → dedicated line preferred`, incompat: `Amphotericin B, Chlorpromazine\nDiazepam, Phenytoin, Thiopental\nCeftriaxone (variable)` },
+    precautions: `• MAO inhibitor → serotonin syndrome risk กับ SSRI/SNRI/tramadol!\n• Myelosuppression (thrombocytopenia) หลัง 14 วัน\n• Max 28 วัน (bone marrow toxicity)\n• Lactic acidosis (prolonged use)\n• Peripheral/optic neuropathy (prolonged)\n• 100% PO bioavailability → switch PO ASAP\n• Cover: MRSA, VRE\n• Good CNS penetration (brain abscess, meningitis)`,
+    monitoring: ["CBC weekly (thrombocytopenia!)", "Visual symptoms (optic neuropathy)", "Lactate (prolonged use)", "Serotonin syndrome signs", "Peripheral neuropathy", "C&S"],
+    had: false, ref: `Lexicomp; IDSA MRSA guidelines`
+  },
+  {
+    id: 70, generic: "Magnesium sulfate", trade: "MgSO₄ Inj. 50%", strength: "50% (500 mg/mL) 10 mL = 5 g", ed: "E",
+    categories: ["icu", "antiepileptic"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "500 mg/mL (50%)" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL", finalConc: "≤200 mg/mL (20%)\nPrefer: 10-20 mg/mL" },
+    admin: { route: "IV infusion | Slow IV push | IM (deep)", rate: "Eclampsia: 4-6 g/15-20 min → 1-2 g/hr\nArrhythmia: 1-2 g/15 min\nHypoMg: 1-2 g/1 hr" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Amphotericin B, Calcium (same line), NaHCO₃" },
+    precautions: "• ติดตาม DTR (knee jerk) → absent = toxicity!\n• Antidote: Calcium gluconate 1 g IV\n• ลด dose ใน renal impairment\n• ระวัง respiratory depression\n• CI: myasthenia gravis, heart block",
+    monitoring: ["Mg²⁺ q6-8h", "DTR (patellar)", "RR (>12/min)", "UO (>25 mL/hr)", "BP", "HR", "SpO₂"],
+    had: true, ref: "Lexicomp; Eclampsia guidelines"
+  },
+  {
+    id: 71, generic: "Meropenem", trade: "Meropenem Inj. 1 g", strength: "1 g/vial", ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: "SWFI หรือ NSS", volume: "20 mL", conc: "50 mg/mL" },
+    dilution: { diluent: "NSS (preferred) | D5W (stability สั้นกว่า)", volume: "50-250 mL", finalConc: "1-20 mg/mL" },
+    admin: { route: "IV infusion | IV push (3-5 min)", rate: "Standard: 15-30 min\nExtended: 3-4 ชม.\nIV push: 3-5 min" },
+    stability: { reconst: "2 ชม. RT (SWFI) | 12 ชม. 2-8°C", diluted: "4 ชม. RT (NSS) | 1 ชม. RT (D5W)", storage: "RT (powder)" },
+    compat: { ysite: "Dexamethasone, Heparin, Metronidazole, Morphine", incompat: "Acyclovir, Amphotericin B, Diazepam, Ondansetron (variable)" },
+    precautions: "• Extended infusion: stability check (NSS only, <4 hr RT)\n• ลด seizure threshold → ระวังใน CNS pathology\n• ปรับขนาดตาม CrCl\n• ⚠️ ลด Valproic acid level อย่างมาก! ห้ามให้ร่วม!",
+    monitoring: ["SCr", "CrCl", "CBC", "LFTs", "Seizure activity", "C&S", "VPA level (ห้ามใช้ร่วม!)"],
+    had: false, ref: "Lexicomp; Trissel's"
+  },
+  {
+    id: 72, generic: `Mesna`, trade: `Mesna Inj. 400 mg`, strength: `100 mg/mL, 4 mL amp`, ed: "E",
+    categories: ["immunotherapy"],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `100 mg/mL` },
+    dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `1-20 mg/mL` },
+    admin: { route: `IV push (slow) | IV infusion`, rate: `IV push: over 1-2 min\nInfusion: 15-30 min\nGive at 0, 4, 8 hr after cyclophosphamide/ifosfamide` },
+    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT\nเปิดแล้ว: 48 hr RT` },
+    compat: { ysite: `Cyclophosphamide (ผสมใน bag เดียวกันได้)\nIfosfamide`, incompat: `Cisplatin\nCarboplatin` },
+    precautions: `• ต้องให้ร่วมกับ Cyclophosphamide/Ifosfamide เสมอ!\n• ป้องกัน hemorrhagic cystitis\n• Dose = 60% ของ oxazaphosphorine dose (แบ่ง 3 ครั้ง)\n• หรือ 100% as CI\n• N/V common\n• กลิ่นเหม็น (thiol compound)`,
+    monitoring: ["UA (hematuria)", "Fluid I/O", "N/V"],
+    had: false, ref: `Lexicomp`
+  },
+  {
+    id: 73, generic: "Methylprednisolone", trade: "Solu-Medrol Inj. 500 mg / 1 g", strength: "500 mg, 1 g/vial", ed: "E",
+    categories: ["immunotherapy", "icu"],
+    reconst: { solvent: "SWFI / supplied diluent", volume: "8 mL (500 mg) | 16 mL (1 g)", conc: "62.5 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL (pulse: 250 mL)", finalConc: "≤5 mg/mL" },
+    admin: { route: "IV push (slow, small dose) | IV infusion (pulse)", rate: "IV push: ≤30 mg/≥1 min\nPulse (500mg-1g): 30-60 min\n(ให้เร็ว → arrhythmia/cardiac arrest!)" },
+    stability: { reconst: "48 ชม. RT", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Heparin, Metoclopramide, Ondansetron", incompat: "Calcium gluconate, Ciprofloxacin IV" },
+    precautions: "• Pulse therapy ต้องให้ช้า ≥30 min (cardiac risk!)\n• Monitor ECG during pulse\n• ใช้มากใน: MS relapse, NMOSD, autoimmune encephalitis\n• ระวัง hyperglycemia, insomnia\n• GI prophylaxis",
+    monitoring: ["BP", "HR", "ECG (pulse)", "BG q6h (pulse)", "K⁺", "Na⁺", "Infection", "Mood"],
+    had: true, ref: "Lexicomp; MS/NMOSD guidelines"
+  },
+  {
+    id: 74, generic: `Metoclopramide`, trade: `Metoclopramide Inj. 10 mg/2 mL`, strength: `5 mg/mL`, ed: "E",
     categories: [],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `5 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50 mL (infusion)`, finalConc: `0.2 mg/mL` },
@@ -1897,7 +1852,7 @@ IV infusion: 15-30 min
     had: false, ref: `Lexicomp`
   },
   {
-    id: 80, generic: `Metronidazole`, trade: `Metronidazole Inj. 500 mg/100 mL`, strength: `5 mg/mL premixed`, ed: "E",
+    id: 75, generic: `Metronidazole`, trade: `Metronidazole Inj. 500 mg/100 mL`, strength: `5 mg/mL premixed`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `Ready to use (premixed bag)`, volume: `-`, conc: `5 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง (premixed)`, volume: `-`, finalConc: `5 mg/mL` },
@@ -1917,7 +1872,7 @@ IV infusion: 15-30 min
     had: false, ref: `Lexicomp`
   },
   {
-    id: 81, generic: `Micafungin`, trade: `Micafungin Inj. 50 mg`, strength: `50 mg/vial`, ed: "E",
+    id: 76, generic: `Micafungin`, trade: `Micafungin Inj. 50 mg`, strength: `50 mg/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `NSS หรือ D5W 5 mL`, volume: `5 mL`, conc: `10 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `100 mL`, finalConc: `0.5-1.5 mg/mL` },
@@ -1934,7 +1889,31 @@ IV infusion: 15-30 min
     had: false, ref: `Lexicomp; IDSA candidiasis guidelines`
   },
   {
-    id: 82, generic: `Naloxone`, trade: `Naloxone Inj. 0.4 mg/mL`, strength: `0.4 mg/mL amp`, ed: "E",
+    id: 77, generic: "Midazolam", trade: "Midazolam Inj. 5-15 mg", strength: "1 mg/mL (5 mL) | 5 mg/mL (3 mL)", ed: "E",
+    categories: ["antiepileptic", "analgesic", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "1 or 5 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL หรือ undiluted via syringe pump", finalConc: "0.5-5 mg/mL" },
+    admin: { route: "IV push (slow) | IV infusion | IM, IN, Buccal", rate: "IV push: ≥2 min\nSedation: 0.02-0.1 mg/kg/hr\nSE: 0.2 mg/kg IM/buccal" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Fentanyl, Morphine, Atropine, Ketamine", incompat: "Amphotericin B, NaHCO₃, Thiopental, Albumin" },
+    precautions: "• Respiratory depression → เตรียม Flumazenil\n• Synergy with opioids → ลด dose ทั้งคู่\n• ลด dose 30-50% ในสูงอายุ\n• Active metabolite สะสมใน renal failure\n• Paradoxical reactions ในเด็ก",
+    monitoring: ["RR", "SpO₂", "BP", "HR", "RASS score", "Seizure activity"],
+    had: true, ref: "Lexicomp; SE guidelines"
+  },
+  {
+    id: 78, generic: "Morphine", trade: "Morphine Inj. 10 mg/mL", strength: "10 mg/1 mL", ed: "E",
+    categories: ["analgesic"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL | PCA: undiluted/1 mg/mL", finalConc: "0.1-1 mg/mL" },
+    admin: { route: "IV push (slow) | IV infusion/PCA | SC, IM, Epidural, IT", rate: "IV push: 1-2 mg/4-5 min\nInfusion: 0.8-10 mg/hr\nPCA: 1-2 mg q6-10min" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Midazolam, Metoclopramide, Ondansetron, KCl", incompat: "Amphotericin B, Phenytoin, Thiopental" },
+    precautions: "• Respiratory depression → Naloxone (0.4-2 mg IV)\n• Histamine release → hypotension, flushing\n• M6G สะสมใน renal failure\n• Constipation ทุกราย → bowel regimen\n• CI: severe resp depression, paralytic ileus",
+    monitoring: ["RR", "SpO₂", "BP", "HR", "Pain score", "Sedation (Pasero)", "Bowel fn", "Urine retention"],
+    had: true, ref: "Lexicomp"
+  },
+  {
+    id: 79, generic: `Naloxone`, trade: `Naloxone Inj. 0.4 mg/mL`, strength: `0.4 mg/mL amp`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `0.4 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `Infusion: dilute 2 mg in 500 mL (4 mcg/mL)`, finalConc: `4 mcg/mL (infusion)
@@ -1954,7 +1933,7 @@ Amphotericin B` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 83, generic: `Neostigmine`, trade: `Neostigmine Inj. 2.5 mg/mL`, strength: `2.5 mg/mL, 1 mL amp`, ed: "E",
+    id: 80, generic: `Neostigmine`, trade: `Neostigmine Inj. 2.5 mg/mL`, strength: `2.5 mg/mL, 1 mL amp`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `2.5 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `2.5 mg/mL` },
@@ -1972,7 +1951,79 @@ Give over 1-2 min` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 84, generic: `Paracetamol (Acetaminophen) IV`, trade: `Paracetamol Inj. 10 mg/mL`, strength: `10 mg/mL, 100 mL vial (1 g)`, ed: "N",
+    id: 81, generic: "Nicardipine", trade: "Nicardipine Inj. 10 mg/10 mL", strength: "1 mg/mL", ed: "E",
+    categories: ["stroke", "cardiovascular", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "1 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "240 mL (25 mg/250 mL) | 250 mL (central)", finalConc: "Peripheral: 0.1 mg/mL\nCentral: 0.2 mg/mL" },
+    admin: { route: "IV infusion เท่านั้น (ห้าม IV push)", rate: "Start: 5 mg/hr\nTitrate: ↑2.5 mg/hr q5-15min\nMax: 15 mg/hr\nTarget ถึง: ลด 3 mg/hr" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Midazolam, Morphine, Fentanyl, Heparin", incompat: "NaHCO₃, Furosemide, Amp/Sulb, Thiopental" },
+    precautions: "• Peripheral: max 0.1 mg/mL (phlebitis)\n• เปลี่ยน IV site q12h (peripheral)\n• Prefer central line\n• ดีกว่า Labetalol ใน titratability\n• ใช้บ่อยใน ICH, SAH, periop HTN",
+    monitoring: ["BP q5-15 min (titrating)", "HR", "Neuro status", "IV site (phlebitis)", "UO"],
+    had: true, ref: "Lexicomp; AHA stroke guidelines"
+  },
+  {
+    id: 82, generic: "Nimodipine", trade: "Nimodipine Inj./PO", strength: "0.2 mg/mL (50 mL) | Cap 30 mg", ed: "E",
+    categories: ["stroke"],
+    reconst: { solvent: "Ready to use solution", volume: "-", conc: "0.2 mg/mL" },
+    dilution: { diluent: "Co-infuse กับ carrier fluid\nห้าม PVC bag!", volume: "Via dedicated line", finalConc: "0.2 mg/mL (undiluted)" },
+    admin: { route: "IV: central line เท่านั้น\nPO/NG (preferred)", rate: "IV: Start 0.5 → 1-2 mg/hr\nPO: 60 mg q4h x 21 days" },
+    stability: { reconst: "-", diluted: "ใช้ทันทีหลังเปิด ป้องกันแสง", storage: "RT ป้องกันแสง\nใช้ PE tubing เท่านั้น" },
+    compat: { ysite: "-", incompat: "PVC (adsorbs!)\nMost IV drugs (dedicated line)" },
+    precautions: "• SAH vasospasm prophylaxis → เริ่มภายใน 96 hr\n• ห้ามใช้ PVC! (adsorbs → ลด bioavailability)\n• ใช้ PE/polyethylene tubing & syringe เท่านั้น\n• PO preferred เมื่อเป็นไปได้\n• ห้าม IV push!\n• Hold ถ้า SBP <90",
+    monitoring: ["BP q1-2h", "HR", "Neuro (GCS, NIHSS)", "CBF/TCD", "Vasospasm signs"],
+    had: true, ref: "Lexicomp; AHA SAH guidelines 2023"
+  },
+  {
+    id: 83, generic: "Norepinephrine (Levophed)", trade: "Norepinephrine Inj. 4 mg/4 mL", strength: "1 mg/mL base", ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "1 mg/mL" },
+    dilution: { diluent: "D5W (preferred) | D5NS | NSS ได้", volume: "250 mL", finalConc: "4 mg/250 mL = 16 mcg/mL\n8 mg/250 mL = 32 mcg/mL" },
+    admin: { route: "IV infusion เท่านั้น\nCentral line preferred!", rate: "Start: 0.1-0.5 mcg/kg/min\nTitrate q5-15 min\nUsual: 0.1-0.3 mcg/kg/min" },
+    stability: { reconst: "-", diluted: "24 ชม. RT (ทิ้งถ้าสีเปลี่ยน)", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Amiodarone, Calcium, Heparin, Midazolam, Fentanyl", incompat: "NaHCO₃, Insulin, Amphotericin B, Thiopental" },
+    precautions: "• Central line เท่านั้น! (peripheral → necrosis)\n• ถ้า peripheral จำเป็น: ≤4 mcg/mL\n• Extravasation → phentolamine 5-10 mg SC\n• ห้ามหยุดกะทันหัน (taper)\n• First-line vasopressor septic shock",
+    monitoring: ["BP (arterial line preferred)", "HR", "ECG", "MAP target", "UO", "Lactate", "Perfusion", "Extravasation"],
+    had: true, ref: "Lexicomp; SSC 2021"
+  },
+  {
+    id: 84, generic: "Omeprazole", trade: "Omeprazole Inj. 40 mg", strength: "40 mg/vial", ed: "E",
+    categories: [],
+    reconst: { solvent: "SWFI/D5W 10 mL", volume: "10 mL", conc: "4 mg/mL" },
+    dilution: { diluent: "NSS/D5W (ห้าม LR)", volume: "100 mL", finalConc: "0.4 mg/mL" },
+    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: ≥5 min\nInfusion: 20-30 min\nCI (GI bleed): 80 mg bolus → 8 mg/hr x 72 hr" },
+    stability: { reconst: "4 ชม. RT", diluted: "12 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Limited data", incompat: "Midazolam (variable)" },
+    precautions: "• ห้ามผสมกับยาอื่น (ตกตะกอนง่าย)\n• Alkaline pH → incompatible กับ acidic drugs\n• CI infusion: dedicated line\n• Switch PO ASAP",
+    monitoring: ["GI bleeding signs", "Mg²⁺ (prolonged)", "CBC", "Stool color"],
+    had: false, ref: "Lexicomp"
+  },
+  {
+    id: 85, generic: "Ondansetron", trade: "Ondansetron Inj. 4/8 mg", strength: "2 mg/mL", ed: "E",
+    categories: [],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "2 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50 mL", finalConc: "0.16-0.64 mg/mL" },
+    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: ≥2-5 min\nInfusion: 15-30 min\nMax single dose IV: 16 mg" },
+    stability: { reconst: "-", diluted: "48 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Morphine, Fentanyl, Dexamethasone, KCl", incompat: "Acyclovir (variable), Amphotericin B" },
+    precautions: "• Max single dose IV 16 mg (QT prolongation)\n• CI: congenital long QT syndrome\n• Serotonin syndrome (rare, with 5-HT drugs)",
+    monitoring: ["ECG/QTc (high dose)", "Bowel function", "N/V assessment"],
+    had: false, ref: "Lexicomp; ASCO"
+  },
+  {
+    id: 86, generic: "Pantoprazole", trade: "Pantoprazole Inj. 40 mg", strength: "40 mg/vial", ed: "E",
+    categories: [],
+    reconst: { solvent: "NSS 10 mL", volume: "10 mL", conc: "4 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "100 mL", finalConc: "0.4-0.8 mg/mL" },
+    admin: { route: "IV push (slow) | IV infusion", rate: "IV push: ≥2 min\nInfusion: 15 min\nCI (GI bleed): 8 mg/hr x 72 hr" },
+    stability: { reconst: "6 ชม. RT (NSS)", diluted: "24 ชม. RT", storage: "RT ป้องกันแสง" },
+    compat: { ysite: "Limited data", incompat: "Midazolam (variable), Zinc solutions" },
+    precautions: "• ใช้แทน Omeprazole IV ได้\n• เปลี่ยน PO ASAP\n• ระวัง hypoMg (prolonged)",
+    monitoring: ["GI bleeding signs", "Mg²⁺ (prolonged)", "CBC"],
+    had: false, ref: "Lexicomp"
+  },
+  {
+    id: 87, generic: `Paracetamol (Acetaminophen) IV`, trade: `Paracetamol Inj. 10 mg/mL`, strength: `10 mg/mL, 100 mL vial (1 g)`, ed: "N",
     categories: ["analgesic"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `10 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `10 mg/mL` },
@@ -1992,7 +2043,7 @@ Give over 1-2 min` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 85, generic: `Parecoxib`, trade: `Dynastat Inj. 40 mg`, strength: `40 mg/vial`, ed: "N",
+    id: 88, generic: `Parecoxib`, trade: `Dynastat Inj. 40 mg`, strength: `40 mg/vial`, ed: "N",
     categories: ["analgesic"],
     reconst: { solvent: `NSS หรือ D5W`, volume: `2 mL`, conc: `20 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `20 mg/mL` },
@@ -2010,7 +2061,7 @@ Switch PO ASAP` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 86, generic: `Penicillin G (Benzylpenicillin)`, trade: `Penicillin G Inj. 5 MU`, strength: `5 MU/vial`, ed: "E",
+    id: 89, generic: `Penicillin G (Benzylpenicillin)`, trade: `Penicillin G Inj. 5 MU`, strength: `5 MU/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI หรือ NSS`, volume: `10 mL (5 MU)`, conc: `500,000 U/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `50,000-100,000 U/mL` },
@@ -2030,7 +2081,7 @@ Amphotericin B` },
     had: false, ref: `Lexicomp; CDC STI guidelines`
   },
   {
-    id: 87, generic: `Pethidine (Meperidine)`, trade: `Pethidine Inj. 50 mg/mL`, strength: `50 mg/mL amp`, ed: "E",
+    id: 90, generic: `Pethidine (Meperidine)`, trade: `Pethidine Inj. 50 mg/mL`, strength: `50 mg/mL amp`, ed: "E",
     categories: ["analgesic"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `50 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W (ถ้า infusion)`, volume: `-`, finalConc: `1-10 mg/mL` },
@@ -2049,7 +2100,19 @@ Max: 600 mg/24h` },
     had: true, ref: `Lexicomp; ISMP`
   },
   {
-    id: 88, generic: `Phenylephrine`, trade: `Phenylephrine Inj. 500 mcg/10 mL`, strength: `50 mcg/mL (diluted) or 10 mg/mL (concentrate)`, ed: "E",
+    id: 91, generic: "Phenobarbital", trade: "Phenobarbital Inj. 200 mg/mL", strength: "200 mg/mL", ed: "E",
+    categories: ["antiepileptic"],
+    reconst: { solvent: "Aqueous solution", volume: "-", conc: "200 mg/mL" },
+    dilution: { diluent: "NSS หรือ SWFI (dilute ก่อนให้ IV)", volume: "≥10-fold dilution", finalConc: "≤30 mg/mL" },
+    admin: { route: "Slow IV push (diluted) | IV infusion | IM (deep)", rate: "≤60 mg/min (ผู้ใหญ่)\n≤30 mg/min (เด็ก)\nSE loading: 20 mg/kg/20-30 min" },
+    stability: { reconst: "Indefinite (undiluted RT)", diluted: "ใช้ภายใน 30 นาที", storage: "RT ป้องกันแสง ห้ามแช่เย็น" },
+    compat: { ysite: "Limited data", incompat: "Most drugs ห้ามผสม\nAcidic solutions" },
+    precautions: "• Respiratory depression → เตรียม ventilator\n• ให้ช้าๆ (arrhythmia, hypotension)\n• Extravasation tissue damage (pH 9-10)\n• Long T½ → accumulation\n• Strong enzyme inducer",
+    monitoring: ["RR", "SpO₂", "BP", "HR", "Sedation", "Phenobarbital level (15-40)", "LFTs", "Seizure activity"],
+    had: true, ref: "Lexicomp; AES SE guidelines"
+  },
+  {
+    id: 92, generic: `Phenylephrine`, trade: `Phenylephrine Inj. 500 mcg/10 mL`, strength: `50 mcg/mL (diluted) or 10 mg/mL (concentrate)`, ed: "E",
     categories: ["cardiovascular", "icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `50 mcg/mL (premix) or 10 mg/mL (concentrate)` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `250-500 mL`, finalConc: `Bolus: 100-200 mcg/mL
@@ -2067,7 +2130,19 @@ Infusion: 10-200 mcg/min (0.1-0.5 mcg/kg/min)` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 89, generic: `Phytomenadione (Vitamin K1)`, trade: `Vitamin K1 Inj. 10 mg/mL`, strength: `10 mg/mL amp`, ed: "E",
+    id: 93, generic: "Phenytoin", trade: "Dilantin Inj. 250 mg/5 mL", strength: "50 mg/mL", ed: "E",
+    categories: ["antiepileptic"],
+    reconst: { solvent: "Aqueous solution (pH 12)", volume: "-", conc: "50 mg/mL" },
+    dilution: { diluent: "NSS เท่านั้น!\n(ห้าม D5W → ตกตะกอน!)", volume: "50-100 mL NSS", finalConc: "≤6.7 mg/mL" },
+    admin: { route: "IV infusion (0.22 μm filter)\nSlow IV push (undiluted)", rate: "ผู้ใหญ่: ≤50 mg/min\nสูงอายุ: ≤25 mg/min\nเด็ก: 1-3 mg/kg/min\nSE loading: 20 mg/kg" },
+    stability: { reconst: "-", diluted: "ใช้ทันที (ภายใน 1 ชม.)\nFilter จำเป็น!", storage: "RT ห้ามแช่เย็น (ตกตะกอน)\nต้องใส" },
+    compat: { ysite: "-", incompat: "D5W (ตกตะกอน!)\nMost drugs (แยก line)\nLipid, TPN" },
+    precautions: "• ใช้ NSS เท่านั้น! D5W ตกตะกอน!\n• ต้องใช้ 0.22 μm in-line filter\n• ตกตะกอนง่ายมาก → สังเกตตลอด\n• Purple glove syndrome (extravasation)\n• Cardiac toxicity ถ้าให้เร็ว\n• Concentration-dependent PK\n• Strong enzyme inducer",
+    monitoring: ["ECG (continuous during loading)", "BP q5-15min", "HR", "Phenytoin level (free+total)", "Albumin", "IV site (purple glove)", "Seizure activity", "LFTs", "CBC"],
+    had: true, ref: "Lexicomp; AES SE guidelines"
+  },
+  {
+    id: 94, generic: `Phytomenadione (Vitamin K1)`, trade: `Vitamin K1 Inj. 10 mg/mL`, strength: `10 mg/mL amp`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `10 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50 mL (minimum)`, finalConc: `≤0.2 mg/mL
@@ -2087,7 +2162,43 @@ Anaphylaxis risk → ให้ช้าที่สุด` },
     had: true, ref: `Lexicomp; AHA warfarin reversal guidelines`
   },
   {
-    id: 90, generic: `Protamine sulfate`, trade: `Protamine sulfate Inj. 50 mg/5 mL`, strength: `10 mg/mL`, ed: "E",
+    id: 95, generic: "Piperacillin/Tazobactam", trade: "Tazocin Inj. 4.5 g", strength: "4 g/0.5 g per vial", ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: "SWFI หรือ NSS 20 mL", volume: "20 mL", conc: "200 mg/mL (pip)" },
+    dilution: { diluent: "NSS (preferred) | D5W", volume: "50-150 mL", finalConc: "20-40 mg/mL" },
+    admin: { route: "IV infusion (ห้าม IM)", rate: "Standard: 30 min\nExtended: 3-4 ชม.\nCI: ตาม protocol" },
+    stability: { reconst: "24 ชม. RT (SWFI)", diluted: "24 ชม. RT (NSS) | 48 ชม. 2-8°C", storage: "RT (powder)" },
+    compat: { ysite: "Dexamethasone, Metronidazole, Morphine, Furosemide", incompat: "Vancomycin! (physical)\nAmikacin, Gentamicin (same line)\nAcyclovir" },
+    precautions: "• ห้ามให้ line เดียวกับ Vancomycin!\n• ห้ามผสม Aminoglycosides ใน bag\n• ↑ nephrotoxicity กับ Vancomycin\n• ปรับขนาดตาม CrCl\n• Extended infusion preferred\n• ระวัง hypokalemia",
+    monitoring: ["SCr", "CrCl", "CBC", "LFTs", "K⁺", "C&S", "Superinfection"],
+    had: false, ref: "Lexicomp; Trissel's"
+  },
+  {
+    id: 96, generic: `Potassium chloride (KCl)`, trade: `KCl Inj. 1.5 g/10 mL (20 mEq/10 mL)`, strength: `20 mEq/10 mL (concentrate)`, ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: `⚠️ CONCENTRATE! ห้ามให้ undiluted!`, volume: `-`, conc: `2 mEq/mL (LETHAL ถ้าไม่ dilute!)` },
+    dilution: { diluent: `NSS (preferred) หรือ D5W`, volume: `100-1000 mL`, finalConc: `Peripheral: ≤40 mEq/L\nCentral: ≤80 mEq/L (max 120 mEq/L ถ้า monitor)` },
+    admin: { route: `IV infusion เท่านั้น!\n⚠️ ห้าม IV push เด็ดขาด! (cardiac arrest!)`, rate: `Peripheral: ≤10 mEq/hr\nCentral: ≤20 mEq/hr (max 40 mEq/hr กับ ECG monitor)\nMild hypoK: 10-20 mEq/hr\nSevere/symptomatic: 20-40 mEq/hr (central + ECG)` },
+    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT\n⚠️ เก็บแยกจากยาอื่น (ISMP high alert)` },
+    compat: { ysite: `Compatible กับยาหลายชนิด:\nHeparin, Insulin, Midazolam, Morphine, Fentanyl`, incompat: `Amphotericin B, Diazepam\nPhenytoin, Methylprednisolone (concentrated)` },
+    precautions: `• ⚠️⚠️ HIGH ALERT DRUG อันดับ 1! Fatal ถ้าให้ IV push!\n• ต้อง dilute เสมอ! ห้ามเก็บ concentrate บนหอผู้ป่วย!\n• ตรวจสอบ concentration ซ้ำก่อนให้\n• ใช้ infusion pump เสมอ\n• Burning/pain ที่ IV site (peripheral >40 mEq/L)\n• Check K⁺ ก่อนให้ dose ถัดไป\n• Tissue necrosis ถ้า extravasation (concentrated)\n• ระวังใน renal impairment, ACEi/ARB, K⁺-sparing diuretics`,
+    monitoring: ["K⁺ q1-4h (during replacement)", "ECG (continuous ถ้า rate >10 mEq/hr)", "Mg²⁺ (correct ก่อน ถ้าต่ำ)", "SCr", "IV site (pain, extravasation)", "UO"],
+    had: true, ref: `Lexicomp; ISMP High Alert List`
+  },
+  {
+    id: 97, generic: "Propofol", trade: "Propofol Inj. 200 mg/20 mL", strength: "1% (10 mg/mL)", ed: "E",
+    categories: ["icu", "analgesic"],
+    reconst: { solvent: "Lipid emulsion - Ready to use", volume: "-", conc: "10 mg/mL" },
+    dilution: { diluent: "D5W (ถ้าต้อง dilute)\nPrefer undiluted", volume: "ไม่แนะนำ dilute", finalConc: "10 mg/mL (undiluted)\nMin 2 mg/mL" },
+    admin: { route: "IV infusion | IV push (induction)\nห้าม IM/SC", rate: "Induction: 40 mg q10sec\nSedation: 5-50 mcg/kg/min\nSE: 1-5 mg/kg → 2-10 mg/kg/hr" },
+    stability: { reconst: "ใช้ทันที (no preservative)\nMax 12 ชม. หลังเปิด", diluted: "ใช้ภายใน 6 ชม.", storage: "RT ห้ามแช่เย็น Shake before use" },
+    compat: { ysite: "Fentanyl, Midazolam, Ketamine, Lidocaine", incompat: "Blood products, Most antibiotics (Y-site)" },
+    precautions: "• Lipid emulsion → infection risk → strict aseptic\n• เปลี่ยน tubing ทุก 12 ชม.\n• PRIS: >4 mg/kg/hr >48hr → FATAL\n• คิด calorie จาก lipid (1.1 kcal/mL)\n• Injection pain → Lidocaine 20 mg",
+    monitoring: ["RR", "SpO₂", "BP (continuous)", "RASS score", "Triglycerides q24-48h", "CK/Lactate (PRIS)", "Calorie from lipid"],
+    had: true, ref: "Lexicomp; ICU sedation guidelines"
+  },
+  {
+    id: 98, generic: `Protamine sulfate`, trade: `Protamine sulfate Inj. 50 mg/5 mL`, strength: `10 mg/mL`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `10 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W (ถ้าต้อง dilute)`, volume: `Dilute to 1-5 mg/mL`, finalConc: `1-5 mg/mL` },
@@ -2106,7 +2217,7 @@ Max: 50 mg over 10 min
     had: true, ref: `Lexicomp; STS guidelines`
   },
   {
-    id: 91, generic: `Remdesivir`, trade: `Remdesivir Inj. 100 mg`, strength: `100 mg/vial`, ed: "E",
+    id: 99, generic: `Remdesivir`, trade: `Remdesivir Inj. 100 mg`, strength: `100 mg/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI 19 mL`, volume: `19 mL (→ 20 mL total, 5 mg/mL)`, conc: `5 mg/mL` },
     dilution: { diluent: `NSS 0.9% (preferred)
@@ -2126,7 +2237,43 @@ Day 2+: 100 mg over 30-120 min
     had: false, ref: `Lexicomp; NIH COVID guidelines`
   },
   {
-    id: 92, generic: `Sodium bicarbonate`, trade: `NaHCO₃ Inj. 7.5% 50 mL`, strength: `7.5% (0.893 mEq/mL)`, ed: "E",
+    id: 100, generic: `Remifentanil`, trade: `Remifentanil Inj. 2 mg`, strength: `2 mg/vial`, ed: "N",
+    categories: ["icu", "analgesic"],
+    reconst: { solvent: `SWFI, NSS หรือ D5W`, volume: `1 mL per mg\n(2 mL for 2 mg vial → 1 mg/mL)`, conc: `1 mg/mL` },
+    dilution: { diluent: `NSS หรือ D5W`, volume: `Dilute to 20-250 mcg/mL`, finalConc: `20-50 mcg/mL (usual)` },
+    admin: { route: `IV infusion เท่านั้น\n(ห้าม bolus ยกเว้น anesthesia induction)`, rate: `Analgesia: 0.025-0.2 mcg/kg/min\nSedation (ICU): 0.5-15 mcg/kg/hr\nAnesthesia: 0.1-2 mcg/kg/min` },
+    stability: { reconst: `24 ชม. RT`, diluted: `4 ชม. RT`, storage: `RT (powder)` },
+    compat: { ysite: `Midazolam, Propofol`, incompat: `Blood products\nAlkaline solutions` },
+    precautions: `• Ultra-short acting (T½ 3-10 min!) → หยุด = หมดฤทธิ์ทันที\n• ข้อดี: no accumulation ใน renal/hepatic failure\n• Ester hydrolysis (organ-independent)\n• ⚠️ ต้องเริ่มยาแก้ปวดอื่นก่อนหยุด! (rebound pain/hyperalgesia)\n• Chest wall rigidity (bolus/high dose)\n• Respiratory depression\n• ห้ามใช้ epidural/intrathecal (glycine in formulation)`,
+    monitoring: ["RR", "SpO₂", "BP", "HR", "Pain score", "Sedation (RASS)", "Muscle rigidity"],
+    had: true, ref: `Lexicomp`
+  },
+  {
+    id: 101, generic: "Rituximab", trade: "MabThera/Rituximab Inj.", strength: "10 mg/mL", ed: "N",
+    categories: ["immunotherapy"],
+    reconst: { solvent: "Ready to use concentrate", volume: "-", conc: "10 mg/mL" },
+    dilution: { diluent: "NSS (preferred) | D5W", volume: "Dilute to 1-4 mg/mL", finalConc: "1-4 mg/mL" },
+    admin: { route: "IV infusion เท่านั้น (ห้ามbolus)", rate: "1st: 50 mg/hr → ↑50/hr q30min → max 400\nSubseq: 100 → ↑100/hr → max 400" },
+    stability: { reconst: "-", diluted: "24 ชม. 2-8°C | 12 ชม. RT", storage: "2-8°C ป้องกันแสง" },
+    compat: { ysite: "Limited data", incompat: "ห้ามผสมกับยาอื่น" },
+    precautions: "• Premed: Paracetamol + Diphenhydramine + MethylPred 100 mg IV 30 min ก่อน\n• Infusion reaction สูง (1st dose)\n• PML risk\n• HBV reactivation → screen ก่อน\n• ใช้ใน: MS, NMOSD, autoimmune encephalitis, MG\n• Check IgG before each cycle",
+    monitoring: ["VS q15min x 1hr → q30min", "Infusion reactions", "CBC + Diff", "IgG levels", "HBV markers", "PML signs", "CD19/CD20"],
+    had: true, ref: "Lexicomp; MS/NMOSD guidelines"
+  },
+  {
+    id: 102, generic: "Rocuronium", trade: "Esmeron Inj. 50 mg/5 mL", strength: "10 mg/mL", ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "10 mg/mL" },
+    dilution: { diluent: "NSS, D5W หรือ LR", volume: "100 mL หรือ undiluted", finalConc: "0.5-5 mg/mL" },
+    admin: { route: "IV push | IV infusion", rate: "Intubation: 0.6-1.2 mg/kg\nMaint: 0.6 mg/kg/hr (adjust TOF)\nRSI: 1.2 mg/kg" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "2-8°C (RT 60d ถ้าไม่เปิด)" },
+    compat: { ysite: "Midazolam, Fentanyl, Propofol", incompat: "Amphotericin B, Diazepam, Thiopental" },
+    precautions: "• Reversal: Sugammadex (specific)\n• หรือ Neostigmine + Atropine\n• TOF monitoring จำเป็น\n• ระวังใน MG (ลด dose)\n• Onset: 60-90 sec",
+    monitoring: ["TOF monitoring", "RR", "SpO₂", "Tidal volume", "Sedation adequacy", "NM recovery"],
+    had: true, ref: "Lexicomp"
+  },
+  {
+    id: 103, generic: `Sodium bicarbonate`, trade: `NaHCO₃ Inj. 7.5% 50 mL`, strength: `7.5% (0.893 mEq/mL)`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `7.5% = 0.893 mEq/mL
 (50 mL = 44.6 mEq)` },
@@ -2150,7 +2297,19 @@ Most drugs → แยก line!` },
     had: false, ref: `Lexicomp; ACLS`
   },
   {
-    id: 93, generic: `Streptomycin`, trade: `Streptomycin Inj. 1 g`, strength: `1 g/vial`, ed: "E",
+    id: 104, generic: "Sodium Valproate", trade: "Depakine Inj. 400 mg/4 mL", strength: "100 mg/mL", ed: "E",
+    categories: ["antiepileptic"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "≤2 mg/mL preferred" },
+    admin: { route: "IV infusion | IV push (slow, diluted)", rate: "Standard: 15-60 min\nLoading: 20-40 mg/kg/15-30 min\nMaint: 1-2 mg/kg/hr\nMax: 6 mg/kg/min" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Most common ICU drugs", incompat: "⚠️ Meropenem/Carbapenem ทุกตัว!\nPhenobarbital, Phenytoin (interaction)" },
+    precautions: "• ⚠️ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)\n• Hepatotoxicity (especially <2 yr)\n• Pancreatitis risk\n• Teratogenic (Cat X)\n• Thrombocytopenia (dose-dependent)\n• PO ↔ IV 1:1",
+    monitoring: ["VPA level (50-100 mcg/mL)", "Free VPA (hypoalbumin)", "LFTs", "CBC + Plt", "Amylase/Lipase", "Ammonia", "Seizure freq"],
+    had: true, ref: "Lexicomp; AES guidelines"
+  },
+  {
+    id: 105, generic: `Streptomycin`, trade: `Streptomycin Inj. 1 g`, strength: `1 g/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI`, volume: `4-5 mL`, conc: `200-250 mg/mL` },
     dilution: { diluent: `NSS 100 mL (ถ้า IV)`, volume: `100 mL`, finalConc: `10 mg/mL` },
@@ -2167,7 +2326,7 @@ IV: 30-60 min (ถ้าใช้)` },
     had: false, ref: `Lexicomp; WHO TB guidelines`
   },
   {
-    id: 94, generic: `Succinylcholine`, trade: `Suxamethonium Inj. 500 mg`, strength: `50 mg/mL (reconstituted)`, ed: "E",
+    id: 106, generic: `Succinylcholine`, trade: `Suxamethonium Inj. 500 mg`, strength: `50 mg/mL (reconstituted)`, ed: "E",
     categories: ["icu"],
     reconst: { solvent: `NSS หรือ SWFI (ถ้า powder)`, volume: `10 mL (powder form)`, conc: `50 mg/mL` },
     dilution: { diluent: `ไม่ต้องเจือจาง (bolus)
@@ -2190,7 +2349,60 @@ Thiopental (same syringe)` },
     had: true, ref: `Lexicomp`
   },
   {
-    id: 95, generic: `Thiopental`, trade: `Thiopental Inj. 500 mg / 1 g`, strength: `500 mg, 1 g/vial`, ed: "E",
+    id: 107, generic: "Sugammadex", trade: "Bridion Inj. 200 mg/2 mL", strength: "100 mg/mL", ed: "E",
+    categories: ["icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "100 mg/mL" },
+    dilution: { diluent: "ไม่ต้อง (undiluted IV push)", volume: "-", finalConc: "100 mg/mL" },
+    admin: { route: "IV push (10 sec)", rate: "Routine: 2 mg/kg\nDeep block: 4 mg/kg\nImmediate (RSI): 16 mg/kg" },
+    stability: { reconst: "-", diluted: "-", storage: "2-8°C (เปิดแล้ว 24 hr RT)" },
+    compat: { ysite: "-", incompat: "-" },
+    precautions: "• Selective: Rocuronium/Vecuronium เท่านั้น\n• ไม่ reverse Succinylcholine/Cisatracurium\n• ลด OC efficacy 7 วัน\n• Bradycardia (rare)\n• ปรับ dose ใน severe renal",
+    monitoring: ["TOF recovery", "RR", "SpO₂", "Re-curarization signs", "BP", "HR"],
+    had: false, ref: "Lexicomp"
+  },
+  {
+    id: 108, generic: `Sulbactam (standalone)`, trade: `Sulbactam Inj. 2 g`, strength: `2 g/vial`, ed: "N",
+    categories: ["antimicrobial"],
+    reconst: { solvent: `SWFI หรือ NSS`, volume: `8 mL`, conc: `250 mg/mL` },
+    dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `20-40 mg/mL` },
+    admin: { route: `IV infusion`, rate: `15-30 min
+Extended infusion: 4 ชม. (กับ Acinetobacter protocol)` },
+    stability: { reconst: `8 ชม. RT`, diluted: `24 ชม. RT`, storage: `RT (powder)` },
+    compat: { ysite: `Limited data`, incompat: `Aminoglycosides` },
+    precautions: `• ใช้ standalone สำหรับ MDR Acinetobacter (high dose 8-12 g/day)
+• มักใช้ร่วมกับ Meropenem หรือ Colistin
+• ปรับขนาดตาม CrCl
+• High dose: seizure risk
+• Diarrhea, rash common`,
+    monitoring: ["SCr", "CBC", "C&S", "Seizure activity (high dose)", "LFTs"],
+    had: false, ref: `Lexicomp; IDSA MDR guidelines`
+  },
+  {
+    id: 109, generic: "Tenecteplase", trade: "Metalyse Inj.", strength: "30-50 mg/vial", ed: "E",
+    categories: ["stroke"],
+    reconst: { solvent: "SWFI (supplied)", volume: "Supplied diluent", conc: "5 mg/mL" },
+    dilution: { diluent: "ไม่ต้อง (IV push only)", volume: "-", finalConc: "5 mg/mL" },
+    admin: { route: "IV push (single bolus) 5-10 sec", rate: "<60 kg: 30 mg | 60-70: 35 mg | 70-80: 40 mg\n80-90: 45 mg | >90: 50 mg\nStroke: 0.25 mg/kg (max 25 mg)" },
+    stability: { reconst: "8 ชม. 2-8°C", diluted: "-", storage: "2-8°C" },
+    compat: { ysite: "Flush NSS ก่อน-หลัง", incompat: "D5W, Most drugs (dedicated line)" },
+    precautions: "• Single bolus → ใช้ง่ายกว่า Alteplase\n• หลักฐานเพิ่มขึ้นสำหรับ stroke (TASTE, AcT)\n• ห้าม Heparin/Antiplatelet 24 hr\n• CI เหมือน Alteplase\n• Dedicated IV line",
+    monitoring: ["NIHSS", "BP q15min", "Bleeding signs", "CT brain", "Fibrinogen, CBC, PT/aPTT"],
+    had: true, ref: "Lexicomp; AHA/ASA; TASTE trial"
+  },
+  {
+    id: 110, generic: `Tetracosactide (ACTH)`, trade: `Synacthen Inj. 0.25 mg`, strength: `0.25 mg/mL amp`, ed: "E",
+    categories: ["antiepileptic"],
+    reconst: { solvent: `Ready to use`, volume: `-`, conc: `0.25 mg/mL` },
+    dilution: { diluent: `NSS (diagnostic test)\nIM for therapeutic`, volume: `500 mL NSS (6-hr infusion test)`, finalConc: `0.25 mg/mL (undiluted IM)` },
+    admin: { route: `IM (therapeutic — West syndrome)\nIV push (diagnostic — cosyntropin test)\nIV infusion (6-hr test)`, rate: `Diagnostic: 0.25 mg IV push\nWest syndrome: 0.25-0.5 mg IM daily-alternate days\nUsual course: 2-6 weeks then taper` },
+    stability: { reconst: `-`, diluted: `ใช้ทันที`, storage: `2-8°C` },
+    compat: { ysite: `Limited data`, incompat: `Limited data` },
+    precautions: `• ⚠️ First-line สำหรับ Infantile spasms (West syndrome)!\n• ACTH analog → adrenal stimulation\n• Hypertension, hyperglycemia, immunosuppression\n• Cushing-like effects (prolonged use)\n• Hypokalemia\n• Must taper (adrenal suppression)\n• Monitor BP, growth, glucose in infants`,
+    monitoring: ["BP (ทุกวัน)", "BG", "K⁺", "Growth (infants)", "Seizure/spasm frequency", "EEG (hypsarrhythmia resolution)", "Signs of infection"],
+    had: true, ref: `Lexicomp; ILAE West syndrome guidelines`
+  },
+  {
+    id: 111, generic: `Thiopental`, trade: `Thiopental Inj. 500 mg / 1 g`, strength: `500 mg, 1 g/vial`, ed: "E",
     categories: ["icu", "antiepileptic"],
     reconst: { solvent: `SWFI หรือ NSS`, volume: `20 mL (500 mg) → 25 mg/mL
 40 mL (1 g) → 25 mg/mL`, conc: `25 mg/mL (2.5%)` },
@@ -2213,7 +2425,7 @@ Succinylcholine, Atracurium, Vecuronium (same syringe)` },
     had: true, ref: `Lexicomp; AES refractory SE guidelines`
   },
   {
-    id: 96, generic: `Tigecycline`, trade: `Tygacil Inj. 50 mg`, strength: `50 mg/vial`, ed: "N",
+    id: 112, generic: `Tigecycline`, trade: `Tygacil Inj. 50 mg`, strength: `50 mg/vial`, ed: "N",
     categories: ["antimicrobial"],
     reconst: { solvent: `NSS หรือ D5W 5.3 mL`, volume: `5.3 mL`, conc: `10 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `100 mL`, finalConc: `0.5-1 mg/mL` },
@@ -2231,7 +2443,19 @@ Loading: 100 mg → Maint: 50 mg q12h` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 97, generic: `Tramadol`, trade: `Tramadol Inj. 50 mg/mL`, strength: `50 mg/mL, 1 mL amp`, ed: "E",
+    id: 113, generic: "Tocilizumab", trade: "Actemra Inj.", strength: "20 mg/mL vials", ed: "N",
+    categories: ["immunotherapy"],
+    reconst: { solvent: "Ready to use concentrate", volume: "-", conc: "20 mg/mL" },
+    dilution: { diluent: "NSS 0.9% เท่านั้น", volume: "100 mL (withdraw equal NSS → add drug)", finalConc: "0.8-4 mg/mL" },
+    admin: { route: "IV infusion เท่านั้น", rate: "60 min\nไม่ต้อง premedication ปกติ" },
+    stability: { reconst: "-", diluted: "24 ชม. 2-8°C | 8 ชม. RT", storage: "2-8°C ป้องกันแสง" },
+    compat: { ysite: "-", incompat: "ห้ามผสมกับยาอื่น" },
+    precautions: "• ใช้ใน autoimmune encephalitis, NMOSD\n• Immunosuppression → serious infections\n• Screen TB/HBV ก่อนเริ่ม\n• ระวัง GI perforation\n• Mask infection signs (suppress CRP/fever)",
+    monitoring: ["CBC + Diff", "LFTs q4-8 wk", "Lipid panel", "CRP", "Infection signs", "GI perforation"],
+    had: false, ref: "Lexicomp; NMOSD guidelines"
+  },
+  {
+    id: 114, generic: `Tramadol`, trade: `Tramadol Inj. 50 mg/mL`, strength: `50 mg/mL, 1 mL amp`, ed: "E",
     categories: ["analgesic"],
     reconst: { solvent: `Ready to use`, volume: `-`, conc: `50 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL (infusion)`, finalConc: `0.5-5 mg/mL` },
@@ -2249,7 +2473,31 @@ Max: 400 mg/day` },
     had: false, ref: `Lexicomp`
   },
   {
-    id: 98, generic: `Voriconazole`, trade: `Voriconazole Inj. 200 mg`, strength: `200 mg/vial`, ed: "E",
+    id: 115, generic: "Tranexamic acid", trade: "Transamin Inj.", strength: "50-100 mg/mL", ed: "E",
+    categories: ["stroke", "icu"],
+    reconst: { solvent: "Ready to use", volume: "-", conc: "50-100 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "50-100 mL", finalConc: "≤25 mg/mL" },
+    admin: { route: "Slow IV push | IV infusion", rate: "IV push: ≤100 mg/min\nTrauma: 1 g/10 min → 1 g/8 hr" },
+    stability: { reconst: "-", diluted: "24 ชม. RT", storage: "RT" },
+    compat: { ysite: "Compatible กับยาหลายชนิด", incompat: "Blood products (theoretical)" },
+    precautions: "• ห้ามให้เร็ว → seizures!\n• Seizure risk ที่ dose สูง\n• CI: Active thromboembolic disease\n• ใช้ใน: ICH, trauma (CRASH-2)\n• ห้ามใน DIC (consumption phase)",
+    monitoring: ["Bleeding/thrombosis", "SCr", "Seizure activity", "Coagulation studies"],
+    had: false, ref: "Lexicomp; CRASH-2"
+  },
+  {
+    id: 116, generic: "Vancomycin", trade: "Vancomycin Inj. 500 mg / 1 g", strength: "500 mg, 1 g/vial", ed: "E",
+    categories: ["antimicrobial"],
+    reconst: { solvent: "SWFI หรือ D5W", volume: "10 mL (500 mg) | 20 mL (1 g)", conc: "50 mg/mL" },
+    dilution: { diluent: "NSS หรือ D5W", volume: "100-250 mL (≤5 mg/mL)", finalConc: "≤5 mg/mL" },
+    admin: { route: "IV infusion เท่านั้น (ห้าม IV push, IM)", rate: "≤10 mg/min หรือ 1g/hr\n500 mg: ≥60 min\n1 g: ≥60-90 min\n1.5-2 g: ≥90-120 min" },
+    stability: { reconst: "14 วัน 2-8°C", diluted: "24 ชม. RT | 14 วัน 2-8°C", storage: "RT (powder)" },
+    compat: { ysite: "Amikacin (dilute separately), Ondansetron, Midazolam", incompat: "Ceftazidime, Ceftriaxone (variable)\nHeparin, Pip/Tazo (nephrotoxic!)" },
+    precautions: "• Red Man Syndrome: ให้ช้า ≥60 min/g\n• Premedicate antihistamine ถ้า RMS hx\n• Nephrotoxicity (+ Pip/Tazo)\n• AUC-guided dosing (AUC/MIC 400-600)\n• ระวัง thrombophlebitis",
+    monitoring: ["Vanc trough/AUC (400-600)", "SCr daily", "CBC", "UO", "RMS/phlebitis", "Hearing"],
+    had: false, ref: "Lexicomp; ASHP/IDSA 2020"
+  },
+  {
+    id: 117, generic: `Voriconazole`, trade: `Voriconazole Inj. 200 mg`, strength: `200 mg/vial`, ed: "E",
     categories: ["antimicrobial"],
     reconst: { solvent: `SWFI 19 mL`, volume: `19 mL (→ 20 mL total, 10 mg/mL)`, conc: `10 mg/mL` },
     dilution: { diluent: `NSS หรือ D5W`, volume: `ให้ final conc ≤5 mg/mL`, finalConc: `0.5-5 mg/mL` },
@@ -2270,254 +2518,6 @@ Maint: 4 mg/kg q12h` },
 • TDM recommended (trough 1-5.5 mg/L)`,
     monitoring: ["LFTs (weekly)", "Visual symptoms", "Voriconazole trough (1-5.5 mg/L)", "QTc", "SCr", "Electrolytes", "Drug interactions"],
     had: false, ref: `Lexicomp; IDSA aspergillosis guidelines`
-  },
-  {
-    id: 99, generic: `Eptifibatide`, trade: `Integrilin Inj. 20 mg/10 mL`, strength: `2 mg/mL`, ed: "E",
-    categories: ["cardiovascular"],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `2 mg/mL` },
-    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `2 mg/mL (0.75 mg/mL for 100 mL vial)` },
-    admin: { route: `IV push (bolus) + IV infusion`, rate: `ACS: 180 mcg/kg bolus → 2 mcg/kg/min infusion (max 72 hr)
-PCI: 180 mcg/kg bolus → 2 mcg/kg/min → 2nd bolus 180 mcg/kg at 10 min` },
-    stability: { reconst: `-`, diluted: `-`, storage: `2-8°C (ใช้ได้ที่ RT ภายใน 2 เดือน)` },
-    compat: { ysite: `Heparin, Atropine`, incompat: `Furosemide` },
-    precautions: `• Bleeding risk → platelet function inhibition
-• ปรับขนาดตาม CrCl (CrCl <50: 1 mcg/kg/min)
-• ห้ามใน dialysis
-• Thrombocytopenia → check plt 6h post
-• ใช้ใน: ACS, PCI`,
-    monitoring: ["Platelet (baseline, 6h, daily)", "aPTT", "ACT (PCI)", "Hgb/Hct", "Bleeding signs", "SCr"],
-    had: true, ref: `Lexicomp; AHA/ACC guidelines`
-  },
-  {
-    id: 100, generic: `Benzathine Penicillin G`, trade: `Benzathine Penicillin G Inj. 1.2 MU`, strength: `1.2 MU/vial`, ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: `SWFI (supplied diluent)`, volume: `ตาม package insert`, conc: `Suspension for IM` },
-    dilution: { diluent: `ห้ามเจือจาง!`, volume: `-`, finalConc: `Suspension (IM only)` },
-    admin: { route: `IM เท่านั้น!
-⚠️ ห้าม IV เด็ดขาด! (fatal emboli!)`, rate: `Deep IM injection (gluteal)
-Syphilis: 2.4 MU IM single dose
-Rheumatic fever prophylaxis: 1.2 MU IM q3-4wk` },
-    stability: { reconst: `ใช้ทันทีหลังผสม`, diluted: `-`, storage: `2-8°C` },
-    compat: { ysite: `N/A (IM only)`, incompat: `N/A (IM only)` },
-    precautions: `• ⚠️⚠️ ห้าม IV เด็ดขาด! → fatal cardiopulmonary emboli!
-• IM only — deep gluteal injection
-• Aspirate before injecting (avoid IV)
-• Hoigné syndrome (non-allergic embolic reaction)
-• Penicillin allergy screening
-• ใช้ใน: Syphilis, Rheumatic fever prophylaxis`,
-    monitoring: ["Observation 30 min post-injection", "Signs of embolic reaction", "Allergy signs", "RPR/VDRL (syphilis)"],
-    had: true, ref: `Lexicomp; CDC STI guidelines`
-  },
-  {
-    id: 101, generic: `Sulbactam (standalone)`, trade: `Sulbactam Inj. 2 g`, strength: `2 g/vial`, ed: "N",
-    categories: ["antimicrobial"],
-    reconst: { solvent: `SWFI หรือ NSS`, volume: `8 mL`, conc: `250 mg/mL` },
-    dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `20-40 mg/mL` },
-    admin: { route: `IV infusion`, rate: `15-30 min
-Extended infusion: 4 ชม. (กับ Acinetobacter protocol)` },
-    stability: { reconst: `8 ชม. RT`, diluted: `24 ชม. RT`, storage: `RT (powder)` },
-    compat: { ysite: `Limited data`, incompat: `Aminoglycosides` },
-    precautions: `• ใช้ standalone สำหรับ MDR Acinetobacter (high dose 8-12 g/day)
-• มักใช้ร่วมกับ Meropenem หรือ Colistin
-• ปรับขนาดตาม CrCl
-• High dose: seizure risk
-• Diarrhea, rash common`,
-    monitoring: ["SCr", "CBC", "C&S", "Seizure activity (high dose)", "LFTs"],
-    had: false, ref: `Lexicomp; IDSA MDR guidelines`
-  },
-  {
-    id: 102, generic: `Ertapenem`, trade: `Invanz Inj. 1 g`, strength: `1 g/vial`, ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: `SWFI หรือ Lidocaine 1% (IM)
-ห้ามใช้ diluent ที่มี dextrose!`, volume: `10 mL (IV)
-3.2 mL Lidocaine 1% (IM)`, conc: `100 mg/mL (IV)` },
-    dilution: { diluent: `NSS เท่านั้น!\n(ห้ามใช้ D5W หรือ LR!)`, volume: `50 mL NSS`, finalConc: `20 mg/mL` },
-    admin: { route: `IV infusion เท่านั้น (ห้าม IV push!)\nIM (ผสม Lidocaine)`, rate: `IV infusion: 30 นาที\n(ห้ามให้เร็วกว่านี้)\nIM: deep gluteal` },
-    stability: { reconst: `6 ชม. RT | 24 ชม. 2-8°C`, diluted: `6 ชม. RT | 24 ชม. 2-8°C (NSS)`, storage: `RT (powder)\nReconstituted: ดูด้านบน` },
-    compat: { ysite: `Heparin, Metronidazole, Tigecycline`, incompat: `D5W, LR, Dextrose-containing solutions ทุกชนิด!\nห้ามผสมกับยาอื่นใน bag เดียวกัน` },
-    precautions: `• ⚠️ ใช้ NSS เท่านั้น! ห้าม D5W/LR/Dextrose!\n• ห้าม IV push!\n• ให้วันละครั้ง (q24h) — ข้อดีด้าน compliance\n• ไม่ cover Pseudomonas, Acinetobacter!\n• Seizure risk (โดยเฉพาะ renal impairment, CNS pathology)\n• ปรับขนาด: CrCl ≤30 หรือ HD → 500 mg q24h\n• ⚠️ ลด Valproic acid level (carbapenem class!)\n• IM: ผสมกับ Lidocaine 1% เท่านั้น`,
-    monitoring: ["SCr", "CrCl", "CBC", "LFTs", "Seizure activity", "C&S", "VPA level (ห้ามใช้ร่วม!)"],
-    had: false, ref: `Lexicomp; IDSA guidelines`
-  },
-  {
-    id: 103, generic: `Dobutamine`, trade: `DOBUTamine Inj. 250 mg/20 mL`, strength: `12.5 mg/mL`, ed: "E",
-    categories: ["icu", "cardiovascular"],
-    reconst: { solvent: `Ready to use (concentrate)`, volume: `-`, conc: `12.5 mg/mL` },
-    dilution: { diluent: `NSS หรือ D5W`, volume: `250 mL`, finalConc: `250 mg/250 mL = 1000 mcg/mL\n500 mg/250 mL = 2000 mcg/mL` },
-    admin: { route: `IV infusion เท่านั้น (ห้าม IV push!)`, rate: `2.5-20 mcg/kg/min\nTitrate q10 min\nMax: 40 mcg/kg/min (rarely)` },
-    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT (สีชมพูเล็กน้อยปกติ)\nห้ามใช้ถ้าสีเข้ม` },
-    compat: { ysite: `Amiodarone, Calcium, Heparin, Lidocaine, Midazolam, Morphine`, incompat: `NaHCO₃, Furosemide, Diazepam\nAcyclovir, Aminophylline, Phenytoin` },
-    precautions: `• ห้ามผสมกับ NaHCO₃! (inactivation)\n• ⚠️ Tachyarrhythmia risk\n• Hypokalemia risk\n• ระวัง hypertension/hypotension\n• ใช้ infusion pump เสมอ\n• สี solution อาจเปลี่ยนเล็กน้อย (ใช้ได้)\n• ไม่เพิ่ม MAP เท่า Norepinephrine`,
-    monitoring: ["HR (continuous)", "BP (continuous/arterial line)", "ECG", "UO", "CI/CO (if Swan-Ganz)", "K⁺"],
-    had: true, ref: `Lexicomp; SSC guidelines`
-  },
-  {
-    id: 104, generic: `Dopamine`, trade: `Dopamine Inj. 250 mg/10 mL`, strength: `25 mg/mL (concentrate)`, ed: "E",
-    categories: ["icu", "cardiovascular"],
-    reconst: { solvent: `Ready to use (concentrate)`, volume: `-`, conc: `25 mg/mL` },
-    dilution: { diluent: `NSS หรือ D5W`, volume: `250-500 mL`, finalConc: `400-3200 mcg/mL\n(200 mg/250 mL = 800 mcg/mL typical)` },
-    admin: { route: `IV infusion เท่านั้น (ห้าม IV push!)\nCentral line preferred`, rate: `Low: 1-5 mcg/kg/min (renal)\nMod: 5-10 mcg/kg/min (cardiac)\nHigh: 10-20 mcg/kg/min (vasopressor)\nMax: 50 mcg/kg/min` },
-    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT ป้องกันแสง\nห้ามใช้ถ้าสีเข้มกว่าเหลืองอ่อน` },
-    compat: { ysite: `Amiodarone, Calcium, Heparin, Fentanyl, KCl`, incompat: `NaHCO₃, Furosemide\nAmphotericin B, Insulin (variable)\nAlteplase, Thiopental` },
-    precautions: `• Extravasation → tissue necrosis! Phentolamine antidote\n• Central line preferred (peripheral → necrosis risk)\n• ⚠️ Tachyarrhythmia common\n• "Renal dose" dopamine (1-3 mcg/kg/min) ไม่แนะนำแล้ว\n• Norepinephrine preferred ใน septic shock (SSC)\n• ใช้ infusion pump เสมอ`,
-    monitoring: ["HR (continuous)", "BP (continuous/arterial line)", "ECG", "UO", "Peripheral perfusion", "Extravasation signs"],
-    had: true, ref: `Lexicomp; SSC 2021`
-  },
-  {
-    id: 105, generic: `Ciprofloxacin`, trade: `Ciprofloxacin Inj. 200 mg/100 mL`, strength: `2 mg/mL premixed`, ed: "E",
-    categories: ["antimicrobial"],
-    reconst: { solvent: `Ready to use (premixed bag)`, volume: `-`, conc: `2 mg/mL` },
-    dilution: { diluent: `ไม่ต้องเจือจาง (premixed)`, volume: `-`, finalConc: `2 mg/mL` },
-    admin: { route: `IV infusion เท่านั้น`, rate: `200 mg: ≥30 min\n400 mg: ≥60 min\n(ห้ามให้เร็ว → crystalluria, seizure risk)` },
-    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง` },
-    compat: { ysite: `Midazolam, Potassium chloride`, incompat: `Heparin, NaHCO₃, Aminophylline\nClindamycin, Dexamethasone (variable)\nPhenytoin, Furosemide` },
-    precautions: `• QT prolongation risk\n• Tendon rupture (elderly, steroids, renal)\n• CNS: seizure, confusion (โดยเฉพาะ + NSAIDs)\n• ⚠️ Myasthenia gravis exacerbation!\n• C. difficile risk\n• Crystalluria → adequate hydration\n• Peripheral neuropathy risk\n• Chelation: ห้ามกับ Mg²⁺/Ca²⁺/Al³⁺/Fe²⁺ (PO)`,
-    monitoring: ["QTc", "SCr", "Tendon symptoms", "CNS effects", "MG symptoms", "C&S", "UO"],
-    had: false, ref: `Lexicomp`
-  },
-  {
-    id: 106, generic: `Linezolid`, trade: `Zyvox Inj. 600 mg/300 mL`, strength: `2 mg/mL premixed`, ed: "N",
-    categories: ["antimicrobial"],
-    reconst: { solvent: `Ready to use (premixed bag)`, volume: `-`, conc: `2 mg/mL` },
-    dilution: { diluent: `ไม่ต้องเจือจาง (premixed)`, volume: `-`, finalConc: `2 mg/mL` },
-    admin: { route: `IV infusion เท่านั้น`, rate: `30-120 min\n(usual 600 mg q12h over 30-120 min)` },
-    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง\nห้ามแช่เย็น (ตกผลึก)` },
-    compat: { ysite: `Limited data → dedicated line preferred`, incompat: `Amphotericin B, Chlorpromazine\nDiazepam, Phenytoin, Thiopental\nCeftriaxone (variable)` },
-    precautions: `• MAO inhibitor → serotonin syndrome risk กับ SSRI/SNRI/tramadol!\n• Myelosuppression (thrombocytopenia) หลัง 14 วัน\n• Max 28 วัน (bone marrow toxicity)\n• Lactic acidosis (prolonged use)\n• Peripheral/optic neuropathy (prolonged)\n• 100% PO bioavailability → switch PO ASAP\n• Cover: MRSA, VRE\n• Good CNS penetration (brain abscess, meningitis)`,
-    monitoring: ["CBC weekly (thrombocytopenia!)", "Visual symptoms (optic neuropathy)", "Lactate (prolonged use)", "Serotonin syndrome signs", "Peripheral neuropathy", "C&S"],
-    had: false, ref: `Lexicomp; IDSA MRSA guidelines`
-  },
-  {
-    id: 107, generic: `Potassium chloride (KCl)`, trade: `KCl Inj. 1.5 g/10 mL (20 mEq/10 mL)`, strength: `20 mEq/10 mL (concentrate)`, ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: `⚠️ CONCENTRATE! ห้ามให้ undiluted!`, volume: `-`, conc: `2 mEq/mL (LETHAL ถ้าไม่ dilute!)` },
-    dilution: { diluent: `NSS (preferred) หรือ D5W`, volume: `100-1000 mL`, finalConc: `Peripheral: ≤40 mEq/L\nCentral: ≤80 mEq/L (max 120 mEq/L ถ้า monitor)` },
-    admin: { route: `IV infusion เท่านั้น!\n⚠️ ห้าม IV push เด็ดขาด! (cardiac arrest!)`, rate: `Peripheral: ≤10 mEq/hr\nCentral: ≤20 mEq/hr (max 40 mEq/hr กับ ECG monitor)\nMild hypoK: 10-20 mEq/hr\nSevere/symptomatic: 20-40 mEq/hr (central + ECG)` },
-    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT\n⚠️ เก็บแยกจากยาอื่น (ISMP high alert)` },
-    compat: { ysite: `Compatible กับยาหลายชนิด:\nHeparin, Insulin, Midazolam, Morphine, Fentanyl`, incompat: `Amphotericin B, Diazepam\nPhenytoin, Methylprednisolone (concentrated)` },
-    precautions: `• ⚠️⚠️ HIGH ALERT DRUG อันดับ 1! Fatal ถ้าให้ IV push!\n• ต้อง dilute เสมอ! ห้ามเก็บ concentrate บนหอผู้ป่วย!\n• ตรวจสอบ concentration ซ้ำก่อนให้\n• ใช้ infusion pump เสมอ\n• Burning/pain ที่ IV site (peripheral >40 mEq/L)\n• Check K⁺ ก่อนให้ dose ถัดไป\n• Tissue necrosis ถ้า extravasation (concentrated)\n• ระวังใน renal impairment, ACEi/ARB, K⁺-sparing diuretics`,
-    monitoring: ["K⁺ q1-4h (during replacement)", "ECG (continuous ถ้า rate >10 mEq/hr)", "Mg²⁺ (correct ก่อน ถ้าต่ำ)", "SCr", "IV site (pain, extravasation)", "UO"],
-    had: true, ref: `Lexicomp; ISMP High Alert List`
-  },
-  {
-    id: 108, generic: `Glucose 50% (Dextrose 50%)`, trade: `Glucose Inj. 50% 50 mL`, strength: `50% (500 mg/mL)`, ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `500 mg/mL (50%)` },
-    dilution: { diluent: `ไม่ต้องเจือจาง (emergency)\nDilute ใน NSS/D5W (non-emergency)`, volume: `Emergency: undiluted\nNon-emergency: dilute to D10-D20W`, finalConc: `50% (push) หรือ 10-20% (infusion)` },
-    admin: { route: `IV push (slow, diluted) — central preferred\nIV infusion`, rate: `Hypoglycemia emergency:\n25-50 mL of D50W (= 12.5-25 g) IV push over 3-5 min\nInfusion: D10W 100-200 mL/hr` },
-    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT` },
-    compat: { ysite: `Compatible กับยาหลายชนิด`, incompat: `Ampicillin (ลด stability)\nPhenytoin (ตกตะกอน!)\nSodium bicarbonate (some)` },
-    precautions: `• Hypertonic! → prefer central line (50%)\n• Extravasation → tissue necrosis (50%)!\n• ตาม Thiamine (B1) 100 mg IV ก่อนให้ glucose ในผู้ป่วยเสี่ยง Wernicke!\n• Rebound hypoglycemia → monitor BG q15-30 min\n• Hyperglycemia ถ้าให้เร็ว/มาก`,
-    monitoring: ["BG q15-30 min (post-dose)", "IV site (extravasation)", "Mental status", "Electrolytes (prolonged infusion)"],
-    had: true, ref: `Lexicomp; ADA hypoglycemia guidelines`
-  },
-  {
-    id: 109, generic: `Glycopyrrolate`, trade: `Glycopyrrolate Inj. 0.2 mg/mL`, strength: `0.2 mg/mL amp`, ed: "E",
-    categories: ["icu"],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `0.2 mg/mL` },
-    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `0.2 mg/mL` },
-    admin: { route: `IV push | IM`, rate: `IV push: 0.1-0.2 mg over 1-2 min\nNMB reversal: 0.2 mg per Neostigmine 1 mg` },
-    stability: { reconst: `-`, diluted: `-`, storage: `RT` },
-    compat: { ysite: `Neostigmine (ผสม syringe เดียวกันได้)`, incompat: `Limited data` },
-    precautions: `• ใช้แทน Atropine ใน NMB reversal (less tachycardia)\n• ไม่ cross BBB (vs Atropine) → ข้อดีใน neuro patients\n• Antisialagogue (ลด secretions)\n• ระวัง urinary retention (BPH)\n• CI: glaucoma (relative)`,
-    monitoring: ["HR", "BP", "Secretions", "UO"],
-    had: false, ref: `Lexicomp`
-  },
-  {
-    id: 110, generic: `Bupivacaine`, trade: `Marcain Inj. 0.5%`, strength: `0.5% (5 mg/mL) 20 mL`, ed: "E",
-    categories: ["analgesic"],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `5 mg/mL (0.5%)\n2.5 mg/mL (0.25%)` },
-    dilution: { diluent: `NSS (สำหรับ epidural dilution)`, volume: `ตาม protocol`, finalConc: `0.0625-0.5% ตามใช้งาน` },
-    admin: { route: `Epidural | Spinal (hyperbaric)\nPeripheral nerve block\nLocal infiltration\n⚠️ ห้าม IV!`, rate: `Epidural: 0.0625-0.125% + Fentanyl\nSpinal: 0.5% hyperbaric 7.5-15 mg\nMax dose: 2 mg/kg (without epi)\n3 mg/kg (with epinephrine)` },
-    stability: { reconst: `-`, diluted: `24 ชม. RT (epidural admixture)`, storage: `RT` },
-    compat: { ysite: `Fentanyl (epidural)\nMorphine (epidural)`, incompat: `Alkaline solutions` },
-    precautions: `• ⚠️ ห้าม IV! → cardiac arrest (prolonged, refractory)!\n• Cardiotoxic มากกว่า Lidocaine\n• Intralipid 20% = antidote (lipid rescue)\n• LAST (Local Anesthetic Systemic Toxicity): tinnitus → seizure → cardiac arrest\n• Aspirate ก่อนฉีดเสมอ\n• ระวังใน hepatic impairment`,
-    monitoring: ["BP", "HR", "ECG (ถ้า large dose)", "Sensory/motor block level", "Signs of LAST", "Respiratory function (epidural)"],
-    had: true, ref: `Lexicomp; ASRA LAST guidelines`
-  },
-  {
-    id: 111, generic: `Remifentanil`, trade: `Remifentanil Inj. 2 mg`, strength: `2 mg/vial`, ed: "N",
-    categories: ["icu", "analgesic"],
-    reconst: { solvent: `SWFI, NSS หรือ D5W`, volume: `1 mL per mg\n(2 mL for 2 mg vial → 1 mg/mL)`, conc: `1 mg/mL` },
-    dilution: { diluent: `NSS หรือ D5W`, volume: `Dilute to 20-250 mcg/mL`, finalConc: `20-50 mcg/mL (usual)` },
-    admin: { route: `IV infusion เท่านั้น\n(ห้าม bolus ยกเว้น anesthesia induction)`, rate: `Analgesia: 0.025-0.2 mcg/kg/min\nSedation (ICU): 0.5-15 mcg/kg/hr\nAnesthesia: 0.1-2 mcg/kg/min` },
-    stability: { reconst: `24 ชม. RT`, diluted: `4 ชม. RT`, storage: `RT (powder)` },
-    compat: { ysite: `Midazolam, Propofol`, incompat: `Blood products\nAlkaline solutions` },
-    precautions: `• Ultra-short acting (T½ 3-10 min!) → หยุด = หมดฤทธิ์ทันที\n• ข้อดี: no accumulation ใน renal/hepatic failure\n• Ester hydrolysis (organ-independent)\n• ⚠️ ต้องเริ่มยาแก้ปวดอื่นก่อนหยุด! (rebound pain/hyperalgesia)\n• Chest wall rigidity (bolus/high dose)\n• Respiratory depression\n• ห้ามใช้ epidural/intrathecal (glycine in formulation)`,
-    monitoring: ["RR", "SpO₂", "BP", "HR", "Pain score", "Sedation (RASS)", "Muscle rigidity"],
-    had: true, ref: `Lexicomp`
-  },
-  {
-    id: 112, generic: `Benztropine mesylate`, trade: `Benztropine Inj. 1 mg/mL`, strength: `1 mg/mL, 2 mL amp`, ed: "E",
-    categories: ["antiepileptic"],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `1 mg/mL` },
-    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `1 mg/mL` },
-    admin: { route: `IV push | IM`, rate: `IV push: 1-2 mg over 1-2 min\nAcute dystonia: 1-2 mg IV/IM\nMay repeat in 15-30 min` },
-    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง` },
-    compat: { ysite: `Limited data`, incompat: `Limited data` },
-    precautions: `• First-line สำหรับ acute dystonia (drug-induced EPS)!\n• Anticholinergic → dry mouth, urinary retention, confusion\n• ระวังในผู้สูงอายุ (delirium risk)\n• ระวังใน glaucoma, BPH\n• ใช้ใน: Drug-induced dystonia, EPS, Parkinsonism\n• ไม่ effective สำหรับ tardive dyskinesia`,
-    monitoring: ["EPS/dystonia resolution", "Mental status", "HR", "UO", "Anticholinergic effects"],
-    had: false, ref: `Lexicomp`
-  },
-  {
-    id: 113, generic: `Tetracosactide (ACTH)`, trade: `Synacthen Inj. 0.25 mg`, strength: `0.25 mg/mL amp`, ed: "E",
-    categories: ["antiepileptic"],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `0.25 mg/mL` },
-    dilution: { diluent: `NSS (diagnostic test)\nIM for therapeutic`, volume: `500 mL NSS (6-hr infusion test)`, finalConc: `0.25 mg/mL (undiluted IM)` },
-    admin: { route: `IM (therapeutic — West syndrome)\nIV push (diagnostic — cosyntropin test)\nIV infusion (6-hr test)`, rate: `Diagnostic: 0.25 mg IV push\nWest syndrome: 0.25-0.5 mg IM daily-alternate days\nUsual course: 2-6 weeks then taper` },
-    stability: { reconst: `-`, diluted: `ใช้ทันที`, storage: `2-8°C` },
-    compat: { ysite: `Limited data`, incompat: `Limited data` },
-    precautions: `• ⚠️ First-line สำหรับ Infantile spasms (West syndrome)!\n• ACTH analog → adrenal stimulation\n• Hypertension, hyperglycemia, immunosuppression\n• Cushing-like effects (prolonged use)\n• Hypokalemia\n• Must taper (adrenal suppression)\n• Monitor BP, growth, glucose in infants`,
-    monitoring: ["BP (ทุกวัน)", "BG", "K⁺", "Growth (infants)", "Seizure/spasm frequency", "EEG (hypsarrhythmia resolution)", "Signs of infection"],
-    had: true, ref: `Lexicomp; ILAE West syndrome guidelines`
-  },
-  {
-    id: 114, generic: `Mesna`, trade: `Mesna Inj. 400 mg`, strength: `100 mg/mL, 4 mL amp`, ed: "E",
-    categories: ["immunotherapy"],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `100 mg/mL` },
-    dilution: { diluent: `NSS หรือ D5W`, volume: `50-100 mL`, finalConc: `1-20 mg/mL` },
-    admin: { route: `IV push (slow) | IV infusion`, rate: `IV push: over 1-2 min\nInfusion: 15-30 min\nGive at 0, 4, 8 hr after cyclophosphamide/ifosfamide` },
-    stability: { reconst: `-`, diluted: `24 ชม. RT`, storage: `RT\nเปิดแล้ว: 48 hr RT` },
-    compat: { ysite: `Cyclophosphamide (ผสมใน bag เดียวกันได้)\nIfosfamide`, incompat: `Cisplatin\nCarboplatin` },
-    precautions: `• ต้องให้ร่วมกับ Cyclophosphamide/Ifosfamide เสมอ!\n• ป้องกัน hemorrhagic cystitis\n• Dose = 60% ของ oxazaphosphorine dose (แบ่ง 3 ครั้ง)\n• หรือ 100% as CI\n• N/V common\n• กลิ่นเหม็น (thiol compound)`,
-    monitoring: ["UA (hematuria)", "Fluid I/O", "N/V"],
-    had: false, ref: `Lexicomp`
-  },
-  {
-    id: 115, generic: `Botulinum toxin type A`, trade: `Botox / Dysport Inj.`, strength: `100 U (Botox)\n500 U (Dysport)`, ed: "E",
-    categories: [],
-    reconst: { solvent: `NSS (preservative-free)\nห้ามเขย่า!`, volume: `Botox 100U: 1-4 mL\nDysport 500U: 2.5 mL`, conc: `Botox: 25-100 U/mL\nDysport: 200 U/mL\n(units ไม่ interchangeable ระหว่าง brands!)` },
-    dilution: { diluent: `ไม่ต้องเจือจางเพิ่ม`, volume: `-`, finalConc: `ตาม reconstitution` },
-    admin: { route: `IM injection (targeted muscles)\nIntradermal (hyperhidrosis)`, rate: `IM injection เข้ากล้ามเนื้อเป้าหมาย\nใช้ EMG/ultrasound guidance (ถ้าจำเป็น)` },
-    stability: { reconst: `24 ชม. 2-8°C (reconstituted)\nBest: ใช้ภายใน 4 ชม.`, diluted: `-`, storage: `2-8°C (ห้ามแช่แข็ง)` },
-    compat: { ysite: `N/A (IM injection)`, incompat: `N/A` },
-    precautions: `• ⚠️ Units ไม่ interchangeable ระหว่าง Botox/Dysport/Xeomin!\n• Spread → distant effects (dysphagia, resp weakness)\n• Black Box: distant spread of toxin effect\n• ใช้ใน (Neuro): Spasticity, Dystonia, Chronic migraine, Hemifacial spasm, Blepharospasm\n• Onset: 2-14 วัน | Duration: 3-6 เดือน\n• Antibody formation → resistance (high dose, frequent injection)`,
-    monitoring: ["Muscle weakness assessment", "Dysphagia screening", "Respiratory function (cervical dystonia)", "Treatment response (spasticity scales)", "Injection site reactions"],
-    had: true, ref: `Lexicomp; AAN guidelines`
-  },
-  {
-    id: 116, generic: `Dimenhydrinate`, trade: `Dimenhydrinate Inj. 50 mg/mL`, strength: `50 mg/mL amp`, ed: "E",
-    categories: [],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `50 mg/mL` },
-    dilution: { diluent: `NSS 10 mL (dilute ก่อน IV)`, volume: `10 mL`, finalConc: `5 mg/mL` },
-    admin: { route: `IV push (slow, diluted) | IM`, rate: `IV push: 50 mg diluted over ≥2 min\nIM: 50 mg deep gluteal\nMax: 300 mg/day` },
-    stability: { reconst: `-`, diluted: `ใช้ทันที`, storage: `RT ป้องกันแสง` },
-    compat: { ysite: `Limited data`, incompat: `Aminophylline, Heparin\nPhenobarbital, Thiopental` },
-    precautions: `• Sedation → ระวังใน neuro patients ที่ต้อง monitor consciousness\n• Anticholinergic effects\n• ระวังในผู้สูงอายุ (confusion, falls)\n• Vertigo, motion sickness, N/V\n• ห้ามให้ intra-arterial`,
-    monitoring: ["Sedation level", "N/V assessment", "BP"],
-    had: false, ref: `Lexicomp`
-  },
-  {
-    id: 117, generic: `Hyoscine N-butylbromide`, trade: `Buscopan Inj. 20 mg/mL`, strength: `20 mg/mL amp`, ed: "E",
-    categories: [],
-    reconst: { solvent: `Ready to use`, volume: `-`, conc: `20 mg/mL` },
-    dilution: { diluent: `ไม่ต้องเจือจาง`, volume: `-`, finalConc: `20 mg/mL` },
-    admin: { route: `IV push (slow) | IM`, rate: `IV push: 20 mg over 1-2 min\nMax: 100 mg/day\nMay repeat q30 min` },
-    stability: { reconst: `-`, diluted: `-`, storage: `RT ป้องกันแสง` },
-    compat: { ysite: `Limited data`, incompat: `Limited data` },
-    precautions: `• Anticholinergic (quaternary ammonium → ไม่ cross BBB)\n• Tachycardia, dry mouth\n• CI: glaucoma, myasthenia gravis, tachyarrhythmia\n• ⚠️ ระวัง anaphylaxis (rare but reported)\n• ใช้ใน: Abdominal/renal colic, GI spasm\n• ไม่ข้าม BBB → safe ใน neuro patients (ไม่ confuse)`,
-    monitoring: ["HR", "BP", "Abdominal symptoms", "UO"],
-    had: false, ref: `Lexicomp`
   }
 ];
 

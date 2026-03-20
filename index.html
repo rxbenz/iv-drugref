@@ -3076,121 +3076,213 @@ function declineConsent() {
 // ============================================================
 function showSurveyPrompt() {
   if (!analyticsConsent) return;
-  if (localStorage.getItem('surveyCompleted')) return;
-  if (sessionCount < 5) return;
-  // Show after 60 seconds of use
-  setTimeout(() => {
-    if (localStorage.getItem('surveyCompleted') || localStorage.getItem('surveyDismissed')) return;
-    const prompt = document.createElement('div');
-    prompt.id = 'surveyPrompt';
-    prompt.innerHTML = `
-      <div style="position:fixed;bottom:80px;right:16px;z-index:9999;
-                  background:#fff;border:1px solid #e2e8f0;border-radius:16px;
-                  padding:16px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.12);
-                  animation:slideUp .4s ease;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <span style="font-size:20px;">📋</span>
-          <span style="font-size:14px;font-weight:600;color:#1e293b;">แบบประเมินความพึงพอใจ</span>
-        </div>
-        <p style="font-size:12px;color:#64748b;margin-bottom:12px;line-height:1.4;">ช่วยตอบแบบสอบถามสั้นๆ (2-3 นาที) เพื่อพัฒนาแอปให้ดียิ่งขึ้น</p>
-        <div style="display:flex;gap:8px;">
-          <button onclick="dismissSurvey()" style="flex:1;background:none;border:1px solid #e2e8f0;color:#64748b;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">ไว้ก่อน</button>
-          <button onclick="openSurvey()" style="flex:1;background:#0ea5e9;color:#fff;border:none;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">ทำแบบสอบถาม</button>
-        </div>
-      </div>`;
-    document.body.appendChild(prompt);
-  }, 60000);
+  const satDone = localStorage.getItem('satCompleted');
+  const susDone = localStorage.getItem('susCompleted');
+  
+  // Phase 1: Satisfaction (5 ข้อ) — เปิดครั้งที่ 2+, รอ 15 วินาที
+  if (!satDone && sessionCount >= 2) {
+    // ถ้าเคยกด "ไว้ก่อน" → ถามใหม่ทุก 2 sessions
+    const dismissedAt = parseInt(localStorage.getItem('satDismissedSession') || '0');
+    if (dismissedAt > 0 && sessionCount < dismissedAt + 2) return;
+    setTimeout(() => {
+      if (localStorage.getItem('satCompleted') || document.getElementById('surveyOverlay')) return;
+      openSatSurvey();
+    }, 15000);
+  }
+  // Phase 2: SUS (10 ข้อ) — หลังทำ Phase 1 แล้ว + เปิดอีก 3 ครั้ง
+  else if (satDone && !susDone) {
+    const satSession = parseInt(localStorage.getItem('satCompletedSession') || '0');
+    const susDismissedAt = parseInt(localStorage.getItem('susDismissedSession') || '0');
+    if (susDismissedAt > 0 && sessionCount < susDismissedAt + 2) return;
+    if (sessionCount >= satSession + 3) {
+      setTimeout(() => {
+        if (localStorage.getItem('susCompleted') || document.getElementById('surveyOverlay')) return;
+        openSusSurvey();
+      }, 15000);
+    }
+  }
 }
 
-function dismissSurvey() {
-  localStorage.setItem('surveyDismissed', Date.now());
-  document.getElementById('surveyPrompt')?.remove();
-}
-
-function openSurvey() {
-  document.getElementById('surveyPrompt')?.remove();
-  const overlay = document.createElement('div');
-  overlay.id = 'surveyOverlay';
-  overlay.innerHTML = `
-    <div style="position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:20px;">
-      <div style="background:#fff;border-radius:20px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;padding:24px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h2 style="font-size:18px;font-weight:700;color:#1e293b;">📋 แบบประเมิน IV DrugRef</h2>
-          <button onclick="closeSurvey()" style="background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;">✕</button>
+// ============================================================
+// Phase 1: Satisfaction Survey (5 ข้อ — ทำเร็ว 30 วินาที)
+// ============================================================
+function openSatSurvey() {
+  const o = document.createElement('div');
+  o.id = 'surveyOverlay';
+  o.innerHTML = `
+    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;">
+      <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;">
+        
+        <div style="background:linear-gradient(135deg,#0ea5e9,#0284c7);padding:20px 24px;text-align:center;">
+          <div style="font-size:32px;margin-bottom:6px;">⭐</div>
+          <div style="font-size:16px;font-weight:700;color:#fff;">ช่วยให้คะแนนแอปหน่อยครับ</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">แค่ 5 ข้อ ใช้เวลาไม่ถึง 30 วินาที</div>
         </div>
         
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:600;color:#64748b;">ตำแหน่ง (ไม่บังคับ)</label>
-          <select id="sv_role" style="width:100%;padding:8px;border:1px solid #e2e8f0;border-radius:8px;margin-top:4px;font-family:inherit;font-size:13px;">
-            <option value="">— ไม่ระบุ —</option>
-            <option value="pharmacist">เภสัชกร</option>
-            <option value="nurse">พยาบาล</option>
-            <option value="physician">แพทย์</option>
-            <option value="other">อื่นๆ</option>
-          </select>
-        </div>
-        
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:600;color:#64748b;">หน่วยงาน (ไม่บังคับ)</label>
-          <select id="sv_dept" style="width:100%;padding:8px;border:1px solid #e2e8f0;border-radius:8px;margin-top:4px;font-family:inherit;font-size:13px;">
-            <option value="">— ไม่ระบุ —</option>
-            <option value="pharmacy">เภสัชกรรม</option>
-            <option value="icu">ICU</option>
-            <option value="ward">หอผู้ป่วย</option>
-            <option value="er">ER</option>
-            <option value="or">ห้องผ่าตัด</option>
-            <option value="opd">OPD</option>
-            <option value="other">อื่นๆ</option>
-          </select>
-        </div>
-
-        <h3 style="font-size:14px;font-weight:600;color:#0ea5e9;margin:16px 0 8px;padding-top:12px;border-top:1px solid #e2e8f0;">ส่วนที่ 1: ความพึงพอใจ (1=น้อยที่สุด, 5=มากที่สุด)</h3>
-        ${[
-          ['sat_1', 'ค้นหาข้อมูลยาได้ง่ายและรวดเร็ว'],
-          ['sat_2', 'ข้อมูลถูกต้อง ครบถ้วน เชื่อถือได้'],
-          ['sat_3', 'เร็วกว่าวิธีเดิมที่เคยใช้ (หนังสือ/PDF/Google)'],
-          ['sat_4', 'จะแนะนำให้เพื่อนร่วมงานใช้'],
-          ['sat_5', 'ความพึงพอใจโดยรวม'],
-        ].map(([id, label]) => `
-          <div style="margin-bottom:10px;">
-            <div style="font-size:12px;color:#374151;margin-bottom:4px;">${label}</div>
-            <div style="display:flex;gap:4px;" id="${id}_group">
-              ${[1,2,3,4,5].map(v => `<button onclick="setRating('${id}',${v})" data-val="${v}" style="flex:1;padding:8px 0;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:14px;cursor:pointer;transition:all .15s;font-family:inherit;">${v}</button>`).join('')}
+        <div style="padding:20px 24px;">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:600;color:#64748b;">ตำแหน่ง (ไม่บังคับ)</label>
+            <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;" id="role_group">
+              ${['pharmacist|เภสัชกร','nurse|พยาบาล','physician|แพทย์','other|อื่นๆ'].map(opt => {
+                const [val,label] = opt.split('|');
+                return `<button onclick="selectRole('${val}')" data-val="${val}" style="padding:6px 14px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;">${label}</button>`;
+              }).join('')}
             </div>
           </div>
-        `).join('')}
 
-        <h3 style="font-size:14px;font-weight:600;color:#7c3aed;margin:16px 0 8px;padding-top:12px;border-top:1px solid #e2e8f0;">ส่วนที่ 2: System Usability Scale (SUS)</h3>
-        <p style="font-size:11px;color:#94a3b8;margin-bottom:8px;">1=ไม่เห็นด้วยอย่างยิ่ง, 5=เห็นด้วยอย่างยิ่ง</p>
-        ${[
-          'ฉันคิดว่าจะใช้แอปนี้บ่อยๆ',
-          'ฉันพบว่าแอปนี้ซับซ้อนเกินไป',
-          'ฉันคิดว่าแอปนี้ใช้งานง่าย',
-          'ฉันคิดว่าต้องมีคนช่วยสอนจึงจะใช้ได้',
-          'ฉันพบว่าฟังก์ชันต่างๆ ถูกรวมไว้อย่างดี',
-          'ฉันคิดว่าแอปนี้มีความไม่สอดคล้องกันมาก',
-          'ฉันคิดว่าคนส่วนใหญ่จะเรียนรู้การใช้ได้เร็ว',
-          'ฉันพบว่าแอปนี้ใช้งานยุ่งยาก',
-          'ฉันรู้สึกมั่นใจในการใช้แอปนี้',
-          'ฉันต้องเรียนรู้หลายอย่างก่อนจะเริ่มใช้ได้',
-        ].map((q, i) => `
-          <div style="margin-bottom:10px;">
-            <div style="font-size:12px;color:#374151;margin-bottom:4px;">${i+1}. ${q}</div>
-            <div style="display:flex;gap:4px;" id="sus_${i}_group">
-              ${[1,2,3,4,5].map(v => `<button onclick="setRating('sus_${i}',${v})" data-val="${v}" style="flex:1;padding:8px 0;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:14px;cursor:pointer;transition:all .15s;font-family:inherit;">${v}</button>`).join('')}
+          <div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:10px;">1 = น้อยที่สุด → 5 = มากที่สุด</div>
+          
+          ${[
+            ['sat_1', '🔍 ค้นหาข้อมูลยาได้ง่ายและรวดเร็ว'],
+            ['sat_2', '✅ ข้อมูลถูกต้อง ครบถ้วน เชื่อถือได้'],
+            ['sat_3', '⚡ เร็วกว่าวิธีเดิมที่เคยใช้'],
+            ['sat_4', '👥 จะแนะนำให้เพื่อนร่วมงานใช้'],
+            ['sat_5', '⭐ ความพึงพอใจโดยรวม'],
+          ].map(([id, label]) => `
+            <div style="margin-bottom:10px;">
+              <div style="font-size:13px;color:#1e293b;margin-bottom:6px;font-weight:500;">${label}</div>
+              <div style="display:flex;gap:6px;" id="${id}_group">
+                ${[1,2,3,4,5].map(v => `<button onclick="setRating('${id}',${v})" data-val="${v}" style="flex:1;padding:10px 0;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;color:#94a3b8;">${v}</button>`).join('')}
+              </div>
             </div>
+          `).join('')}
+
+          <div style="margin-top:6px;">
+            <textarea id="sv_comments" rows="2" style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:12px;resize:none;color:#374151;" placeholder="💬 ข้อเสนอแนะ / อยากให้เพิ่มยาตัวไหน (ไม่บังคับ)"></textarea>
           </div>
-        `).join('')}
 
-        <div style="margin:16px 0 8px;padding-top:12px;border-top:1px solid #e2e8f0;">
-          <label style="font-size:12px;font-weight:600;color:#64748b;">ข้อเสนอแนะเพิ่มเติม (ไม่บังคับ)</label>
-          <textarea id="sv_comments" rows="3" style="width:100%;padding:8px;border:1px solid #e2e8f0;border-radius:8px;margin-top:4px;font-family:inherit;font-size:13px;resize:vertical;" placeholder="เช่น อยากให้เพิ่มยาตัวไหน, feature ที่อยากได้..."></textarea>
+          <button onclick="submitSatSurvey()" id="satSubmitBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;box-shadow:0 4px 12px rgba(14,165,233,0.3);transition:all .2s;">ส่งคะแนน ⭐</button>
+          
+          <button onclick="dismissSatSurvey()" style="width:100%;padding:10px;background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px;">ไว้ครั้งหน้า</button>
         </div>
-
-        <button onclick="submitSurvey()" style="width:100%;padding:12px;background:#0ea5e9;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;">ส่งแบบประเมิน</button>
       </div>
     </div>`;
-  document.body.appendChild(overlay);
+  document.body.appendChild(o);
+}
+
+let selectedRole = '';
+function selectRole(val) {
+  selectedRole = val;
+  document.getElementById('role_group')?.querySelectorAll('button').forEach(btn => {
+    if (btn.dataset.val === val) {
+      btn.style.background = '#0ea5e9'; btn.style.color = '#fff'; btn.style.borderColor = '#0ea5e9';
+    } else {
+      btn.style.background = '#fff'; btn.style.color = '#374151'; btn.style.borderColor = '#e2e8f0';
+    }
+  });
+}
+
+function submitSatSurvey() {
+  for (let i = 1; i <= 5; i++) {
+    if (!surveyData['sat_' + i]) {
+      const el = document.getElementById('sat_' + i + '_group');
+      if (el) el.style.animation = 'shake .3s ease';
+      setTimeout(() => { if (el) el.style.animation = ''; }, 300);
+      return;
+    }
+  }
+  sendAnalytics({
+    type: 'survey',
+    role: selectedRole,
+    department: '',
+    sat_1: surveyData.sat_1, sat_2: surveyData.sat_2, sat_3: surveyData.sat_3,
+    sat_4: surveyData.sat_4, sat_5: surveyData.sat_5,
+    sus: [],
+    comments: document.getElementById('sv_comments')?.value || ''
+  });
+  localStorage.setItem('satCompleted', Date.now());
+  localStorage.setItem('satCompletedSession', sessionCount);
+  document.getElementById('surveyOverlay')?.remove();
+  showThankYou('ขอบคุณสำหรับคะแนน! ⭐');
+}
+
+function dismissSatSurvey() {
+  localStorage.setItem('satDismissedSession', sessionCount);
+  document.getElementById('surveyOverlay')?.remove();
+}
+
+// ============================================================
+// Phase 2: SUS Survey (10 ข้อ — ทำหลัง Satisfaction แล้ว)
+// ============================================================
+function openSusSurvey() {
+  const o = document.createElement('div');
+  o.id = 'surveyOverlay';
+  o.innerHTML = `
+    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;">
+      <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;">
+        
+        <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:20px 24px;text-align:center;position:sticky;top:0;z-index:1;">
+          <div style="font-size:32px;margin-bottom:6px;">📋</div>
+          <div style="font-size:16px;font-weight:700;color:#fff;">แบบประเมิน Usability (SUS)</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">10 ข้อสุดท้าย ใช้เวลา 1-2 นาที เป็นมาตรฐานสากล</div>
+        </div>
+        
+        <div style="padding:20px 24px;">
+          <div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:12px;">1 = ไม่เห็นด้วยอย่างยิ่ง → 5 = เห็นด้วยอย่างยิ่ง</div>
+          
+          ${[
+            'ฉันคิดว่าจะใช้แอปนี้บ่อยๆ',
+            'ฉันพบว่าแอปนี้ซับซ้อนเกินไป',
+            'ฉันคิดว่าแอปนี้ใช้งานง่าย',
+            'ฉันคิดว่าต้องมีคนช่วยสอนจึงจะใช้ได้',
+            'ฉันพบว่าฟังก์ชันต่างๆ ถูกรวมไว้อย่างดี',
+            'ฉันคิดว่าแอปนี้มีความไม่สอดคล้องกันมาก',
+            'ฉันคิดว่าคนส่วนใหญ่จะเรียนรู้การใช้ได้เร็ว',
+            'ฉันพบว่าแอปนี้ใช้งานยุ่งยาก',
+            'ฉันรู้สึกมั่นใจในการใช้แอปนี้',
+            'ฉันต้องเรียนรู้หลายอย่างก่อนจะเริ่มใช้ได้',
+          ].map((q, i) => `
+            <div style="margin-bottom:10px;">
+              <div style="font-size:13px;color:#1e293b;margin-bottom:6px;font-weight:500;"><span style="color:#7c3aed;font-weight:700;">${i+1}.</span> ${q}</div>
+              <div style="display:flex;gap:6px;" id="sus_${i}_group">
+                ${[1,2,3,4,5].map(v => `<button onclick="setRating('sus_${i}',${v})" data-val="${v}" style="flex:1;padding:10px 0;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;color:#94a3b8;">${v}</button>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+
+          <button onclick="submitSusSurvey()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;box-shadow:0 4px 12px rgba(124,58,237,0.3);">ส่งแบบประเมิน 📋</button>
+          
+          <button onclick="localStorage.setItem('susDismissedSession',sessionCount);document.getElementById('surveyOverlay')?.remove()" style="width:100%;padding:10px;background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px;">ไว้ครั้งหน้า</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(o);
+}
+
+function submitSusSurvey() {
+  const sus = [];
+  for (let i = 0; i < 10; i++) {
+    if (!surveyData['sus_' + i]) {
+      const el = document.getElementById('sus_' + i + '_group');
+      if (el) { el.style.animation = 'shake .3s ease'; el.scrollIntoView({behavior:'smooth',block:'center'}); }
+      setTimeout(() => { if (el) el.style.animation = ''; }, 300);
+      return;
+    }
+    sus.push(surveyData['sus_' + i]);
+  }
+  sendAnalytics({
+    type: 'survey',
+    role: '', department: '',
+    sat_1: '', sat_2: '', sat_3: '', sat_4: '', sat_5: '',
+    sus: sus,
+    comments: ''
+  });
+  localStorage.setItem('susCompleted', Date.now());
+  document.getElementById('surveyOverlay')?.remove();
+  showThankYou('ขอบคุณมากครับ! แบบประเมินครบแล้ว 🎉');
+}
+
+function showThankYou(msg) {
+  const ty = document.createElement('div');
+  ty.innerHTML = `
+    <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10002;
+                background:linear-gradient(135deg,#059669,#047857);color:#fff;padding:14px 28px;border-radius:14px;
+                font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(5,150,105,0.3);
+                animation:slideUp .3s ease;text-align:center;">
+      ${msg}
+    </div>`;
+  document.body.appendChild(ty);
+  setTimeout(() => ty.remove(), 3000);
 }
 
 const surveyData = {};
@@ -3200,75 +3292,24 @@ function setRating(id, val) {
   if (group) {
     group.querySelectorAll('button').forEach(btn => {
       const v = parseInt(btn.dataset.val);
+      const color = id.startsWith('sus') ? '#7c3aed' : '#0ea5e9';
       if (v <= val) {
-        btn.style.background = id.startsWith('sus') ? '#7c3aed' : '#0ea5e9';
-        btn.style.color = '#fff';
-        btn.style.borderColor = id.startsWith('sus') ? '#7c3aed' : '#0ea5e9';
+        btn.style.background = color; btn.style.color = '#fff'; btn.style.borderColor = color;
       } else {
-        btn.style.background = '#fff';
-        btn.style.color = '#374151';
-        btn.style.borderColor = '#e2e8f0';
+        btn.style.background = '#fff'; btn.style.color = '#94a3b8'; btn.style.borderColor = '#e2e8f0';
       }
     });
   }
 }
 
-function submitSurvey() {
-  // Validate satisfaction (required)
-  for (let i = 1; i <= 5; i++) {
-    if (!surveyData['sat_' + i]) {
-      alert('กรุณาตอบคำถามความพึงพอใจให้ครบ 5 ข้อ');
-      return;
-    }
-  }
-
-  // Collect SUS (optional but encouraged)
-  const sus = [];
-  let susComplete = true;
-  for (let i = 0; i < 10; i++) {
-    if (surveyData['sus_' + i]) {
-      sus.push(surveyData['sus_' + i]);
-    } else {
-      susComplete = false;
-    }
-  }
-
-  if (!susComplete && sus.length > 0) {
-    if (!confirm('คำถาม SUS ยังตอบไม่ครบ 10 ข้อ ต้องการส่งแบบนี้หรือไม่?')) return;
-  }
-
-  sendAnalytics({
-    type: 'survey',
-    role: document.getElementById('sv_role').value,
-    department: document.getElementById('sv_dept').value,
-    sat_1: surveyData.sat_1,
-    sat_2: surveyData.sat_2,
-    sat_3: surveyData.sat_3,
-    sat_4: surveyData.sat_4,
-    sat_5: surveyData.sat_5,
-    sus: susComplete ? sus : [],
-    comments: document.getElementById('sv_comments').value
-  });
-
-  localStorage.setItem('surveyCompleted', Date.now());
-  closeSurvey();
-
-  // Thank you message
-  const ty = document.createElement('div');
-  ty.innerHTML = `
-    <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10002;
-                background:#059669;color:#fff;padding:12px 24px;border-radius:12px;
-                font-size:14px;font-weight:500;box-shadow:0 4px 16px rgba(5,150,105,0.3);
-                animation:slideUp .3s ease;">
-      ✅ ขอบคุณสำหรับความคิดเห็น!
-    </div>`;
-  document.body.appendChild(ty);
-  setTimeout(() => ty.remove(), 3000);
-}
-
 function closeSurvey() {
   document.getElementById('surveyOverlay')?.remove();
 }
+
+// Legacy support
+function openSurvey() { openSatSurvey(); }
+function submitSurvey() { submitSatSurvey(); }
+function dismissSurvey() { dismissSatSurvey(); }
 
 // Initialize analytics
 if (!analyticsConsent && !localStorage.getItem('analyticsDeclined')) {
@@ -3299,6 +3340,11 @@ if (isStandalone) {
 @keyframes slideDown {
   from { transform: translateY(-100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
 }
 /* Safe area for iOS standalone */
 @supports (padding: env(safe-area-inset-bottom)) {

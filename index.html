@@ -994,6 +994,9 @@ function renderInlineCalc(d) {
 }
 
 function initAllCalcs() {
+  // v4: debounce tracker — only send analytics once per drug per session
+  const doseCalcTracked = {};
+  
   Object.keys(DOSE_CALC).forEach(name => {
     const gid = name.replace(/[^a-zA-Z0-9]/g, '_');
     const calc = DOSE_CALC[name];
@@ -1003,8 +1006,9 @@ function initAllCalcs() {
       const el = document.getElementById('cr_' + gid);
       if (!el || isNaN(dose) || isNaN(conc)) return;
       let rateML;
+      let wt = 0;
       if (calc.wt) {
-        const wt = parseFloat(document.getElementById('cw_' + gid)?.value) || 70;
+        wt = parseFloat(document.getElementById('cw_' + gid)?.value) || 70;
         if (calc.unit === 'mcg/kg/min') {
           rateML = (dose * wt * 60) / conc;
         } else if (calc.unit === 'mcg/kg/hr') {
@@ -1019,6 +1023,20 @@ function initAllCalcs() {
       }
       if (rateML !== undefined) {
         el.innerHTML = `<span class="calc-result-value">${rateML.toFixed(1)} mL/hr</span>`;
+        // v4: track dose_calc usage (debounced — 1 per drug per 30 seconds)
+        const trackKey = name + '_' + Math.floor(Date.now() / 30000);
+        if (!doseCalcTracked[trackKey] && typeof sendAnalytics === 'function') {
+          doseCalcTracked[trackKey] = true;
+          sendAnalytics({
+            type: 'dose_calc',
+            drug_name: name,
+            weight_kg: wt || '',
+            dose_value: dose,
+            dose_unit: calc.unit,
+            concentration: conc,
+            result_ml_hr: rateML.toFixed(1)
+          });
+        }
       }
     };
     window['calcDose_' + gid] = fn;
@@ -1602,8 +1620,45 @@ toggleCard = function(id) {
     const drug = DRUGS.find(d => d.id === id);
     if (drug) {
       trackSearch(lastQuery || '(browse)', drug.generic, getFilteredDrugs().length);
+      // v4: track drug_expand separately
+      const source = lastQuery && lastQuery.length > 0 ? 'search' : (currentFilter !== 'all' ? 'filter' : 'browse');
+      const hasDoseCalc = typeof findDoseCalc !== 'undefined' && findDoseCalc(drug.generic) !== null;
+      sendAnalytics({
+        type: 'drug_expand',
+        drug_id: drug.id,
+        drug_name: drug.generic,
+        source: source,
+        filter_used: currentFilter,
+        has_dose_calc: hasDoseCalc
+      });
     }
   }
+};
+
+// v4: Track calculator page link clicks
+document.querySelectorAll('a[href="calculator.html"]').forEach(link => {
+  link.addEventListener('click', function() {
+    sendAnalytics({
+      type: 'calc_visit',
+      page: 'calculator',
+      referrer: 'index',
+      drugs_available: Object.keys(DOSE_CALC).length
+    });
+  });
+});
+
+// v4: Global function for TDM tracking (called from calculator.html)
+window.trackTDMUsage = function(data) {
+  sendAnalytics({
+    type: 'tdm_usage',
+    drug_name: data.drug_name || 'Vancomycin',
+    model: data.model || '',
+    auc_result: data.auc_result || '',
+    dose_recommended: data.dose_recommended || '',
+    weight_kg: data.weight_kg || '',
+    scr: data.scr || '',
+    age: data.age || ''
+  });
 };
 
 // Consent banner

@@ -3,245 +3,468 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IV DrugRef — Analytics Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>IV DrugRef — Analytics Dashboard v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #111827;
+  --bg-card-hover: #1a2234;
+  --border: #1e293b;
+  --border-glow: rgba(56,189,248,0.15);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #38bdf8;
+  --accent-cyan: #22d3ee;
+  --accent-green: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-purple: #a78bfa;
+  --accent-red: #f87171;
+  --accent-pink: #f472b6;
+  --font-sans: 'Noto Sans Thai', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'IBM Plex Sans Thai',sans-serif; background:#f0f4f8; color:#1e293b; min-height:100vh; }
+body { font-family:var(--font-sans); background:var(--bg); color:var(--text-primary); min-height:100vh; }
 
-.header { background:#fff; border-bottom:1px solid #e2e8f0; padding:16px 24px; position:sticky; top:0; z-index:10; }
-.header-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-.header h1 { font-size:18px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px; }
-.header h1 span { font-size:22px; }
-.header-actions { display:flex; gap:8px; align-items:center; }
-.header-actions button { font-family:inherit; font-size:12px; font-weight:600; padding:6px 14px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#64748b; cursor:pointer; transition:all .2s; }
-.header-actions button:hover { border-color:#0ea5e9; color:#0ea5e9; }
-.header-actions button.primary { background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
-.header-actions button.primary:hover { background:#0284c7; }
+/* Header */
+.header {
+  background: linear-gradient(180deg, rgba(17,24,39,0.98) 0%, rgba(10,14,26,0.95) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  position: sticky; top: 0; z-index: 50;
+}
+.header-inner { max-width:1400px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.header h1 { font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px; letter-spacing:-0.02em; }
+.header h1 .logo { font-size:20px; }
+.header h1 .ver { font-size:10px; font-weight:600; color:var(--accent-cyan); background:rgba(34,211,238,0.12); padding:2px 8px; border-radius:20px; margin-left:4px; }
+.header-actions { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.btn { font-family:var(--font-sans); font-size:11px; font-weight:600; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-secondary); cursor:pointer; transition:all .2s; white-space:nowrap; }
+.btn:hover { border-color:var(--accent-blue); color:var(--accent-blue); }
+.btn.primary { background:linear-gradient(135deg,#0ea5e9,#06b6d4); color:#fff; border-color:transparent; }
+.btn.primary:hover { filter:brightness(1.15); }
 
-.setup-banner { max-width:1200px; margin:16px auto; padding:16px 20px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; display:none; }
+/* Setup */
+.setup-banner { max-width:1400px; margin:12px auto; padding:14px 18px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2); border-radius:var(--radius-sm); display:none; }
 .setup-banner.show { display:block; }
-.setup-banner h3 { font-size:14px; color:#92400e; margin-bottom:8px; }
-.setup-banner input { width:100%; padding:10px 14px; border:1px solid #fde68a; border-radius:8px; font-size:13px; font-family:'JetBrains Mono',monospace; margin-bottom:8px; }
-.setup-banner button { background:#d97706; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+.setup-banner h3 { font-size:13px; color:var(--accent-amber); margin-bottom:6px; }
+.setup-banner input { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:var(--font-mono); margin-bottom:6px; background:var(--bg); color:var(--text-primary); }
+.setup-banner button { background:var(--accent-amber); color:#000; border:none; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font-sans); }
 
-.content { max-width:1200px; margin:0 auto; padding:16px 24px 60px; }
+/* Tabs */
+.tabs { max-width:1400px; margin:0 auto; padding:12px 24px 0; display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.tab { font-family:var(--font-sans); font-size:12px; font-weight:500; padding:8px 16px; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none; background:transparent; color:var(--text-muted); cursor:pointer; white-space:nowrap; transition:all .2s; }
+.tab:hover { color:var(--text-secondary); background:rgba(255,255,255,0.03); }
+.tab.active { background:var(--bg-card); color:var(--accent-cyan); border-color:var(--border); font-weight:600; }
 
-.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
-.stat-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; text-align:center; }
-.stat-value { font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:#1e293b; margin-bottom:4px; }
-.stat-label { font-size:12px; color:#64748b; font-weight:500; }
-.stat-card.blue .stat-value { color:#0ea5e9; }
-.stat-card.green .stat-value { color:#059669; }
-.stat-card.amber .stat-value { color:#d97706; }
-.stat-card.purple .stat-value { color:#7c3aed; }
+/* Content */
+.content { max-width:1400px; margin:0 auto; padding:0 24px 60px; }
+.tab-panel { display:none; padding-top:16px; }
+.tab-panel.active { display:block; }
 
-.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
-@media(max-width:800px) { .charts-grid { grid-template-columns:1fr; } }
-.chart-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; }
-.chart-card.full { grid-column:1/-1; }
-.chart-title { font-size:14px; font-weight:600; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
-.chart-title span { font-size:16px; }
+/* Stats Grid (Bento) */
+.bento { display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:10px; margin-bottom:16px; }
+.stat { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; position:relative; overflow:hidden; transition:border-color .3s; }
+.stat:hover { border-color:var(--border-glow); }
+.stat::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; border-radius:2px 2px 0 0; }
+.stat.blue::before { background:var(--accent-blue); }
+.stat.green::before { background:var(--accent-green); }
+.stat.amber::before { background:var(--accent-amber); }
+.stat.purple::before { background:var(--accent-purple); }
+.stat.red::before { background:var(--accent-red); }
+.stat.cyan::before { background:var(--accent-cyan); }
+.stat.pink::before { background:var(--accent-pink); }
+.stat-icon { font-size:16px; margin-bottom:8px; }
+.stat-value { font-family:var(--font-mono); font-size:26px; font-weight:700; line-height:1; margin-bottom:4px; }
+.stat.blue .stat-value { color:var(--accent-blue); }
+.stat.green .stat-value { color:var(--accent-green); }
+.stat.amber .stat-value { color:var(--accent-amber); }
+.stat.purple .stat-value { color:var(--accent-purple); }
+.stat.red .stat-value { color:var(--accent-red); }
+.stat.cyan .stat-value { color:var(--accent-cyan); }
+.stat.pink .stat-value { color:var(--accent-pink); }
+.stat-label { font-size:11px; color:var(--text-muted); font-weight:500; }
 
-.loading { text-align:center; padding:60px; color:#94a3b8; font-size:14px; }
-.error { text-align:center; padding:40px; color:#dc2626; font-size:14px; }
+/* Cards & Charts */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
+@media(max-width:900px) { .grid-2, .grid-3 { grid-template-columns:1fr; } }
+.card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
+.card.full { grid-column:1/-1; }
+.card-title { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+.card-title .emoji { font-size:15px; }
 
-.table-wrap { overflow-x:auto; }
-table { width:100%; border-collapse:collapse; font-size:13px; }
-th { background:#f8fafc; padding:8px 12px; text-align:left; font-weight:600; color:#64748b; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
-td { padding:8px 12px; border-bottom:1px solid #f1f5f9; }
-tr:hover td { background:#f8fafc; }
-.rank { font-family:'JetBrains Mono',monospace; font-weight:600; color:#94a3b8; width:30px; }
-.drug-name { font-weight:500; }
-.count { font-family:'JetBrains Mono',monospace; font-weight:600; color:#0ea5e9; }
-.bar-cell { width:200px; }
-.mini-bar { height:20px; background:#e0f2fe; border-radius:4px; overflow:hidden; }
-.mini-bar-fill { height:100%; background:linear-gradient(90deg,#0ea5e9,#06b6d4); border-radius:4px; transition:width .6s ease; }
+/* Table */
+.table-wrap { overflow-x:auto; max-height:400px; overflow-y:auto; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { padding:8px 10px; text-align:left; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg-card); font-size:11px; text-transform:uppercase; letter-spacing:0.04em; }
+td { padding:7px 10px; border-bottom:1px solid rgba(30,41,59,0.5); }
+tr:hover td { background:rgba(255,255,255,0.02); }
+.rank { font-family:var(--font-mono); font-weight:700; color:var(--text-muted); width:28px; font-size:11px; }
+.drug-name { font-weight:500; color:var(--text-primary); }
+.count { font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan); }
+.bar-cell { width:150px; }
+.mini-bar { height:16px; background:rgba(56,189,248,0.1); border-radius:3px; overflow:hidden; }
+.mini-bar-fill { height:100%; border-radius:3px; transition:width .6s ease; }
 
-.empty-msg { text-align:center; padding:40px; color:#94a3b8; }
-.empty-msg .icon { font-size:36px; margin-bottom:8px; }
+/* Status */
+.loading { text-align:center; padding:60px; color:var(--text-muted); font-size:13px; }
+.error { text-align:center; padding:40px; color:var(--accent-red); font-size:13px; }
+.empty-msg { text-align:center; padding:30px; color:var(--text-muted); font-size:12px; }
+.empty-msg .icon { font-size:28px; margin-bottom:6px; }
+
+/* Last updated */
+.footer-info { text-align:center; padding:20px; font-size:11px; color:var(--text-muted); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-inner">
-    <h1><span>📊</span> IV DrugRef Analytics Dashboard</h1>
+    <h1><span class="logo">📊</span> IV DrugRef Analytics <span class="ver">v4</span></h1>
     <div class="header-actions">
-      <button onclick="toggleSetup()">⚙ ตั้งค่า URL</button>
-      <button onclick="exportCSV('Sessions')">📥 Export Sessions</button>
-      <button onclick="exportCSV('Searches')">📥 Export Searches</button>
-      <button onclick="exportCSV('Surveys')">📥 Export Surveys</button>
-      <button class="primary" onclick="loadData()">🔄 Refresh</button>
+      <button class="btn" onclick="toggleSetup()">⚙ URL</button>
+      <button class="btn" onclick="exportCSV('Sessions')">📥 Sessions</button>
+      <button class="btn" onclick="exportCSV('Searches')">📥 Searches</button>
+      <button class="btn" onclick="exportCSV('Surveys')">📥 Surveys</button>
+      <button class="btn" onclick="exportCSV('DoseCalcs')">📥 DoseCalcs</button>
+      <button class="btn" onclick="exportCSV('DrugExpands')">📥 Expands</button>
+      <button class="btn" onclick="exportCSV('TDMUsage')">📥 TDM</button>
+      <button class="btn primary" onclick="loadData()">🔄 Refresh</button>
     </div>
   </div>
 </div>
 
 <div class="setup-banner" id="setupBanner">
   <h3>⚙ ตั้งค่า Google Apps Script URL</h3>
-  <p style="font-size:12px;color:#92400e;margin-bottom:8px;">วาง URL ที่ได้จากการ Deploy Google Apps Script (ดูคู่มือในไฟล์ google-apps-script.js)</p>
-  <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/XXXXXXXXX/exec" />
-  <button onclick="saveUrl()">💾 บันทึก URL</button>
+  <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+  <button onclick="saveUrl()">💾 บันทึก</button>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-tab="overview">📈 Overview</button>
+  <button class="tab" data-tab="drugs">💊 Drug Usage</button>
+  <button class="tab" data-tab="calculator">🧮 Dose Calc & TDM</button>
+  <button class="tab" data-tab="survey">📋 Survey & SUS</button>
+  <button class="tab" data-tab="retention">👥 Retention</button>
 </div>
 
 <div class="content">
-  <div class="stats-grid" id="statsGrid">
-    <div class="stat-card blue"><div class="stat-value" id="totalSessions">—</div><div class="stat-label">Total Sessions</div></div>
-    <div class="stat-card green"><div class="stat-value" id="uniqueUsers">—</div><div class="stat-label">Unique Users</div></div>
-    <div class="stat-card"><div class="stat-value" id="totalSearches">—</div><div class="stat-label">Total Searches</div></div>
-    <div class="stat-card amber"><div class="stat-value" id="avgSearchTime">—</div><div class="stat-label">Avg Search Time (sec)</div></div>
-    <div class="stat-card purple"><div class="stat-value" id="avgSat">—</div><div class="stat-label">Satisfaction (1-5)</div></div>
-    <div class="stat-card green"><div class="stat-value" id="avgSUS">—</div><div class="stat-label">SUS Score (0-100)</div></div>
+  <!-- TAB: Overview -->
+  <div class="tab-panel active" id="panel-overview">
+    <div class="bento" id="statsGrid">
+      <div class="stat blue"><div class="stat-icon">👤</div><div class="stat-value" id="totalSessions">—</div><div class="stat-label">Sessions</div></div>
+      <div class="stat green"><div class="stat-icon">🧑‍⚕️</div><div class="stat-value" id="uniqueUsers">—</div><div class="stat-label">Unique Users</div></div>
+      <div class="stat cyan"><div class="stat-icon">🔍</div><div class="stat-value" id="totalSearches">—</div><div class="stat-label">Searches</div></div>
+      <div class="stat amber"><div class="stat-icon">⏱</div><div class="stat-value" id="avgSearchTime">—</div><div class="stat-label">Avg Search (sec)</div></div>
+      <div class="stat purple"><div class="stat-icon">⭐</div><div class="stat-value" id="avgSat">—</div><div class="stat-label">Satisfaction</div></div>
+      <div class="stat green"><div class="stat-icon">📊</div><div class="stat-value" id="avgSUS">—</div><div class="stat-label">SUS Score</div></div>
+      <div class="stat pink"><div class="stat-icon">🧮</div><div class="stat-value" id="totalDoseCalcs">—</div><div class="stat-label">Dose Calcs</div></div>
+      <div class="stat red"><div class="stat-icon">🧬</div><div class="stat-value" id="totalTDM">—</div><div class="stat-label">TDM Uses</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card full">
+        <div class="card-title"><span class="emoji">📈</span> Daily Active Users (30 วัน)</div>
+        <canvas id="dauChart" height="70"></canvas>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="emoji">📱</span> Platform</div>
+        <canvas id="platformChart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="emoji">⏱</span> Search Time Distribution</div>
+        <canvas id="timeChart" height="200"></canvas>
+      </div>
+    </div>
   </div>
 
-  <div class="charts-grid">
-    <div class="chart-card full">
-      <div class="chart-title"><span>📈</span> Daily Active Users (30 วันล่าสุด)</div>
-      <canvas id="dauChart" height="80"></canvas>
+  <!-- TAB: Drug Usage -->
+  <div class="tab-panel" id="panel-drugs">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="emoji">🔍</span> Top 20 ยาที่ค้นหาบ่อย (Searches)</div>
+        <div class="table-wrap" id="topDrugsTable"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="emoji">👁</span> Top 20 ยาที่ดูบ่อย (Expands)</div>
+        <div class="table-wrap" id="topExpandsTable"></div>
+      </div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title"><span>💊</span> Top 20 ยาที่ค้นหาบ่อย</div>
-      <div class="table-wrap" id="topDrugsTable"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title"><span>📱</span> แพลตฟอร์มผู้ใช้</div>
-      <canvas id="platformChart" height="200"></canvas>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title"><span>🏷</span> Filter ที่ใช้บ่อย</div>
-      <canvas id="filterChart" height="200"></canvas>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title"><span>⏱</span> การกระจายเวลาค้นหา</div>
-      <canvas id="timeChart" height="200"></canvas>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="emoji">🏷</span> Filter ที่ใช้บ่อย</div>
+        <canvas id="filterChart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="emoji">📂</span> Expand Source (search / browse / filter)</div>
+        <canvas id="expandSourceChart" height="200"></canvas>
+      </div>
     </div>
   </div>
-  
-  <div id="statusMsg" class="loading">กดปุ่ม ⚙ ตั้งค่า URL เพื่อเชื่อมต่อ Google Sheets</div>
+
+  <!-- TAB: Dose Calc & TDM -->
+  <div class="tab-panel" id="panel-calculator">
+    <div class="bento">
+      <div class="stat purple"><div class="stat-icon">🧮</div><div class="stat-value" id="dcTotal">—</div><div class="stat-label">Dose Calc Total</div></div>
+      <div class="stat cyan"><div class="stat-icon">👤</div><div class="stat-value" id="dcUsers">—</div><div class="stat-label">Unique Users (Calc)</div></div>
+      <div class="stat red"><div class="stat-icon">🧬</div><div class="stat-value" id="tdmTotal">—</div><div class="stat-label">TDM Total</div></div>
+      <div class="stat amber"><div class="stat-icon">📈</div><div class="stat-value" id="tdmAvgAUC">—</div><div class="stat-label">Avg AUC</div></div>
+      <div class="stat green"><div class="stat-icon">🔗</div><div class="stat-value" id="calcVisitsTotal">—</div><div class="stat-label">Calculator Page Visits</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="emoji">🧮</span> Inline Dose Calc — ยาที่คำนวณบ่อย</div>
+        <div class="table-wrap" id="doseCalcDrugsTable"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="emoji">🧬</span> Vanco TDM — Model Usage</div>
+        <canvas id="tdmModelChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Survey & SUS -->
+  <div class="tab-panel" id="panel-survey">
+    <div class="bento">
+      <div class="stat purple"><div class="stat-icon">📋</div><div class="stat-value" id="surveyTotal">—</div><div class="stat-label">Total Surveys</div></div>
+      <div class="stat blue"><div class="stat-icon">✅</div><div class="stat-value" id="satCount">—</div><div class="stat-label">Satisfaction Done</div></div>
+      <div class="stat green"><div class="stat-icon">📊</div><div class="stat-value" id="susCount">—</div><div class="stat-label">SUS Done</div></div>
+      <div class="stat amber"><div class="stat-icon">🔁</div><div class="stat-value" id="bothCount">—</div><div class="stat-label">Both Phases</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="emoji">⭐</span> Satisfaction Breakdown (avg per question)</div>
+        <canvas id="satBreakdownChart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="emoji">👥</span> Demographics — Role</div>
+        <canvas id="roleChart" height="200"></canvas>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="emoji">🏥</span> Demographics — Department</div>
+        <canvas id="deptChart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="emoji">📊</span> SUS Score Distribution</div>
+        <div class="empty-msg" id="susDistMsg"><div class="icon">📊</div>ต้องการข้อมูล SUS ≥5 responses</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Retention -->
+  <div class="tab-panel" id="panel-retention">
+    <div class="bento">
+      <div class="stat blue"><div class="stat-icon">👤</div><div class="stat-value" id="retTotalUsers">—</div><div class="stat-label">Total Users</div></div>
+      <div class="stat green"><div class="stat-icon">🔁</div><div class="stat-value" id="retReturning">—</div><div class="stat-label">Returning Users</div></div>
+      <div class="stat amber"><div class="stat-icon">📊</div><div class="stat-value" id="retRate">—</div><div class="stat-label">Retention Rate</div></div>
+    </div>
+    <div class="card full" style="margin-top:12px;">
+      <div class="card-title"><span class="emoji">📈</span> Calculator Page Visits by Day</div>
+      <canvas id="calcVisitsDayChart" height="120"></canvas>
+    </div>
+  </div>
+
+  <div id="statusMsg" class="loading">กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ Google Sheets</div>
+  <div class="footer-info" id="footerInfo"></div>
 </div>
 
 <script>
 let SCRIPT_URL = localStorage.getItem('analyticsUrl') || 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
-let chartInstances = {};
+let charts = {};
+const COLORS = { blue:'#38bdf8', cyan:'#22d3ee', green:'#34d399', amber:'#fbbf24', purple:'#a78bfa', red:'#f87171', pink:'#f472b6', slate:'#64748b' };
+const CHART_DEFAULTS = { responsive:true, plugins:{ legend:{ labels:{ color:'#94a3b8', font:{ family:'Noto Sans Thai', size:11 } } } }, scales:{ x:{ ticks:{color:'#64748b',font:{size:10}}, grid:{color:'rgba(30,41,59,0.5)'} }, y:{ ticks:{color:'#64748b',font:{size:10}}, grid:{color:'rgba(30,41,59,0.5)'}, beginAtZero:true } } };
 
-function toggleSetup() {
-  const banner = document.getElementById('setupBanner');
-  banner.classList.toggle('show');
-  document.getElementById('scriptUrl').value = SCRIPT_URL;
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+function toggleSetup() { const b = document.getElementById('setupBanner'); b.classList.toggle('show'); document.getElementById('scriptUrl').value = SCRIPT_URL; }
+function saveUrl() { SCRIPT_URL = document.getElementById('scriptUrl').value.trim(); localStorage.setItem('analyticsUrl', SCRIPT_URL); document.getElementById('setupBanner').classList.remove('show'); loadData(); }
+
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+
+function makeChart(id, config) {
+  const key = id;
+  destroyChart(key);
+  const ctx = document.getElementById(id)?.getContext('2d');
+  if (!ctx) return;
+  charts[key] = new Chart(ctx, config);
 }
 
-function saveUrl() {
-  SCRIPT_URL = document.getElementById('scriptUrl').value.trim();
-  localStorage.setItem('analyticsUrl', SCRIPT_URL);
-  document.getElementById('setupBanner').classList.remove('show');
-  loadData();
+function buildTable(containerId, rows, barColor) {
+  const el = document.getElementById(containerId);
+  if (!rows || rows.length === 0) {
+    el.innerHTML = '<div class="empty-msg"><div class="icon">📭</div>ยังไม่มีข้อมูล</div>';
+    return;
+  }
+  const maxC = rows[0]?.count || 1;
+  el.innerHTML = `<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>
+    ${rows.map((d, i) => `<tr>
+      <td class="rank">${i + 1}</td>
+      <td class="drug-name">${d.drug}</td>
+      <td class="count">${d.count}</td>
+      <td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count/maxC*100).toFixed(0)}%;background:${barColor || COLORS.cyan}"></div></div></td>
+    </tr>`).join('')}
+  </tbody></table>`;
 }
 
 async function loadData() {
-  if (!SCRIPT_URL) {
-    document.getElementById('statusMsg').textContent = 'กดปุ่ม ⚙ ตั้งค่า URL เพื่อเชื่อมต่อ Google Sheets';
-    document.getElementById('statusMsg').style.display = 'block';
-    return;
-  }
-  
+  if (!SCRIPT_URL) { document.getElementById('statusMsg').textContent = 'กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ'; document.getElementById('statusMsg').style.display = 'block'; return; }
   document.getElementById('statusMsg').textContent = '⏳ กำลังโหลดข้อมูล...';
   document.getElementById('statusMsg').style.display = 'block';
-  
   try {
     const res = await fetch(SCRIPT_URL + '?action=summary');
-    const data = await res.json();
-    
-    if (data.error) throw new Error(data.error);
-    
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
     document.getElementById('statusMsg').style.display = 'none';
-    renderDashboard(data);
+    render(d);
   } catch (err) {
-    document.getElementById('statusMsg').innerHTML = `<div class="error">❌ โหลดข้อมูลไม่สำเร็จ: ${err.message}<br><small>ตรวจสอบ URL และการ Deploy ของ Google Apps Script</small></div>`;
+    document.getElementById('statusMsg').innerHTML = `<div class="error">❌ โหลดไม่สำเร็จ: ${err.message}</div>`;
   }
 }
 
-function renderDashboard(data) {
-  // Stats cards
-  document.getElementById('totalSessions').textContent = data.totalSessions.toLocaleString();
-  document.getElementById('uniqueUsers').textContent = data.uniqueUsers.toLocaleString();
-  document.getElementById('totalSearches').textContent = data.totalSearches.toLocaleString();
-  document.getElementById('avgSearchTime').textContent = data.searchTime.avg > 0 ? (data.searchTime.avg / 1000).toFixed(1) : '—';
-  document.getElementById('avgSat').textContent = data.satisfaction.avg > 0 ? data.satisfaction.avg + '/5' : '—';
-  document.getElementById('avgSUS').textContent = data.sus.avg > 0 ? data.sus.avg : '—';
+function render(d) {
+  // Overview stats
+  document.getElementById('totalSessions').textContent = (d.totalSessions||0).toLocaleString();
+  document.getElementById('uniqueUsers').textContent = (d.uniqueUsers||0).toLocaleString();
+  document.getElementById('totalSearches').textContent = (d.totalSearches||0).toLocaleString();
+  document.getElementById('avgSearchTime').textContent = d.searchTime?.avg > 0 ? (d.searchTime.avg / 1000).toFixed(1) : '—';
+  document.getElementById('avgSat').textContent = d.satisfaction?.avg > 0 ? d.satisfaction.avg + '/5' : '—';
+  document.getElementById('avgSUS').textContent = d.sus?.avg > 0 ? d.sus.avg : '—';
+  document.getElementById('totalDoseCalcs').textContent = (d.doseCalcStats?.total || 0).toLocaleString();
+  document.getElementById('totalTDM').textContent = (d.tdmStats?.total || 0).toLocaleString();
 
   // DAU Chart
-  if (chartInstances.dau) chartInstances.dau.destroy();
-  const dauCtx = document.getElementById('dauChart').getContext('2d');
-  chartInstances.dau = new Chart(dauCtx, {
-    type: 'line',
-    data: {
-      labels: data.dailyUsers.map(d => d.date.substring(5)),
-      datasets: [{
-        label: 'Daily Active Users',
-        data: data.dailyUsers.map(d => d.users),
-        borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,0.08)',
-        fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#0ea5e9'
-      }]
-    },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  const dauLabels = (d.dailyUsers||[]).map(x => x.date.substring(5));
+  const dauData = (d.dailyUsers||[]).map(x => x.users);
+  makeChart('dauChart', {
+    type:'line',
+    data:{ labels:dauLabels, datasets:[{ label:'DAU', data:dauData, borderColor:COLORS.cyan, backgroundColor:'rgba(34,211,238,0.08)', fill:true, tension:0.35, pointRadius:2, pointBackgroundColor:COLORS.cyan, borderWidth:2 }] },
+    options:{ ...CHART_DEFAULTS, plugins:{ legend:{display:false} } }
   });
 
-  // Top Drugs Table
-  const topEl = document.getElementById('topDrugsTable');
-  if (data.topDrugs.length === 0) {
-    topEl.innerHTML = '<div class="empty-msg"><div class="icon">💊</div>ยังไม่มีข้อมูลการค้นหา</div>';
-  } else {
-    const maxCount = data.topDrugs[0]?.count || 1;
-    topEl.innerHTML = `<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>
-      ${data.topDrugs.map((d, i) => `<tr>
-        <td class="rank">${i + 1}</td>
-        <td class="drug-name">${d.drug}</td>
-        <td class="count">${d.count}</td>
-        <td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count / maxCount * 100).toFixed(0)}%"></div></div></td>
-      </tr>`).join('')}
-    </tbody></table>`;
-  }
-
-  // Platform Chart
-  if (chartInstances.platform) chartInstances.platform.destroy();
-  const platCtx = document.getElementById('platformChart').getContext('2d');
-  const platLabels = Object.keys(data.platforms);
-  const platData = Object.values(data.platforms);
-  chartInstances.platform = new Chart(platCtx, {
-    type: 'doughnut',
-    data: {
-      labels: platLabels.length > 0 ? platLabels : ['No data'],
-      datasets: [{ data: platData.length > 0 ? platData : [1], backgroundColor: ['#0ea5e9', '#059669', '#d97706', '#7c3aed', '#dc2626'] }]
-    },
-    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  // Platform
+  const platL = Object.keys(d.platforms||{}); const platD = Object.values(d.platforms||{});
+  makeChart('platformChart', {
+    type:'doughnut',
+    data:{ labels:platL.length?platL:['—'], datasets:[{ data:platD.length?platD:[1], backgroundColor:[COLORS.blue,COLORS.green,COLORS.amber,COLORS.purple,COLORS.red] }] },
+    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',font:{size:11}} } } }
   });
 
-  // Filter Chart
-  if (chartInstances.filter) chartInstances.filter.destroy();
-  const filtCtx = document.getElementById('filterChart').getContext('2d');
-  const filtLabels = Object.keys(data.filterUsage);
-  const filtData = Object.values(data.filterUsage);
-  chartInstances.filter = new Chart(filtCtx, {
-    type: 'bar',
-    data: {
-      labels: filtLabels.length > 0 ? filtLabels : ['No data'],
-      datasets: [{ label: 'Uses', data: filtData.length > 0 ? filtData : [0], backgroundColor: '#0ea5e9', borderRadius: 6 }]
-    },
-    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+  // Time distribution
+  const buckets = d.searchTime?.buckets || [0,0,0,0,0,0];
+  makeChart('timeChart', {
+    type:'bar',
+    data:{ labels:['<5s','5-10s','10-20s','20-30s','30-60s','>60s'], datasets:[{ label:'Searches', data:buckets, backgroundColor:COLORS.cyan, borderRadius:4 }] },
+    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}} }
   });
 
-  // Time distribution (placeholder — needs raw data)
-  if (chartInstances.time) chartInstances.time.destroy();
-  const timeCtx = document.getElementById('timeChart').getContext('2d');
-  chartInstances.time = new Chart(timeCtx, {
-    type: 'bar',
-    data: {
-      labels: ['<5s', '5-10s', '10-20s', '20-30s', '30-60s', '>60s'],
-      datasets: [{ label: 'Searches', data: [0,0,0,0,0,0], backgroundColor: '#06b6d4', borderRadius: 6 }]
-    },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  // Drug Usage Tab
+  buildTable('topDrugsTable', d.topDrugs, COLORS.cyan);
+  buildTable('topExpandsTable', d.drugExpandStats?.topDrugs || [], COLORS.purple);
+
+  // Filter chart
+  const filtL = Object.keys(d.filterUsage||{}); const filtD = Object.values(d.filterUsage||{});
+  makeChart('filterChart', {
+    type:'bar',
+    data:{ labels:filtL.length?filtL:['—'], datasets:[{ label:'Uses', data:filtD.length?filtD:[0], backgroundColor:COLORS.blue, borderRadius:4 }] },
+    options:{ ...CHART_DEFAULTS, indexAxis:'y', plugins:{legend:{display:false}} }
   });
+
+  // Expand source
+  const srcL = Object.keys(d.drugExpandStats?.bySources||{}); const srcD = Object.values(d.drugExpandStats?.bySources||{});
+  makeChart('expandSourceChart', {
+    type:'doughnut',
+    data:{ labels:srcL.length?srcL:['—'], datasets:[{ data:srcD.length?srcD:[1], backgroundColor:[COLORS.blue,COLORS.green,COLORS.amber] }] },
+    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',font:{size:11}} } } }
+  });
+
+  // Calculator & TDM Tab
+  document.getElementById('dcTotal').textContent = (d.doseCalcStats?.total||0).toLocaleString();
+  document.getElementById('dcUsers').textContent = (d.doseCalcStats?.uniqueUsers||0).toLocaleString();
+  document.getElementById('tdmTotal').textContent = (d.tdmStats?.total||0).toLocaleString();
+  document.getElementById('tdmAvgAUC').textContent = d.tdmStats?.avgAUC > 0 ? d.tdmStats.avgAUC : '—';
+  document.getElementById('calcVisitsTotal').textContent = (d.calcVisitStats?.total||0).toLocaleString();
+
+  buildTable('doseCalcDrugsTable', d.doseCalcStats?.byDrug || [], COLORS.purple);
+
+  // TDM Model chart
+  const mdlL = Object.keys(d.tdmStats?.byModel||{}); const mdlD = Object.values(d.tdmStats?.byModel||{});
+  makeChart('tdmModelChart', {
+    type:'bar',
+    data:{ labels:mdlL.length?mdlL:['—'], datasets:[{ label:'Uses', data:mdlD.length?mdlD:[0], backgroundColor:COLORS.red, borderRadius:4 }] },
+    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}} }
+  });
+
+  // Survey Tab
+  document.getElementById('surveyTotal').textContent = (d.totalSurveys||0).toLocaleString();
+  document.getElementById('satCount').textContent = (d.surveyCompletion?.satOnly||0).toLocaleString();
+  document.getElementById('susCount').textContent = (d.surveyCompletion?.susOnly||0).toLocaleString();
+  document.getElementById('bothCount').textContent = (d.surveyCompletion?.bothPhases||0).toLocaleString();
+
+  // Sat breakdown
+  const satBD = d.satisfaction?.breakdown || {};
+  const satLabels = ['ค้นหาง่าย','ถูกต้อง','เร็วขึ้น','แนะนำคนอื่น','โดยรวม'];
+  const satKeys = ['sat_1_easy_to_find','sat_2_accurate','sat_3_faster','sat_4_recommend','sat_5_overall'];
+  makeChart('satBreakdownChart', {
+    type:'bar',
+    data:{ labels:satLabels, datasets:[{ label:'Average (1-5)', data:satKeys.map(k => parseFloat(satBD[k])||0), backgroundColor:COLORS.amber, borderRadius:4 }] },
+    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}}, scales:{...CHART_DEFAULTS.scales, y:{...CHART_DEFAULTS.scales.y, max:5}} }
+  });
+
+  // Role chart
+  const roleL = Object.keys(d.demographics?.roles||{}); const roleD = Object.values(d.demographics?.roles||{});
+  makeChart('roleChart', {
+    type:'doughnut',
+    data:{ labels:roleL.length?roleL:['—'], datasets:[{ data:roleD.length?roleD:[1], backgroundColor:[COLORS.blue,COLORS.green,COLORS.amber,COLORS.purple,COLORS.red,COLORS.pink] }] },
+    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',font:{size:11}} } } }
+  });
+
+  // Dept chart
+  const deptL = Object.keys(d.demographics?.departments||{}); const deptD = Object.values(d.demographics?.departments||{});
+  makeChart('deptChart', {
+    type:'bar',
+    data:{ labels:deptL.length?deptL:['—'], datasets:[{ label:'Count', data:deptD.length?deptD:[0], backgroundColor:COLORS.green, borderRadius:4 }] },
+    options:{ ...CHART_DEFAULTS, indexAxis:'y', plugins:{legend:{display:false}} }
+  });
+
+  // Retention Tab
+  document.getElementById('retTotalUsers').textContent = (d.retention?.totalUsers||0).toLocaleString();
+  document.getElementById('retReturning').textContent = (d.retention?.returningUsers||0).toLocaleString();
+  document.getElementById('retRate').textContent = d.retention?.retentionRate > 0 ? d.retention.retentionRate + '%' : '—';
+
+  // Calc visits by day
+  const cvDay = d.calcVisitStats?.byDay || {};
+  const cvDayL = Object.keys(cvDay).sort(); const cvDayD = cvDayL.map(k => cvDay[k]);
+  makeChart('calcVisitsDayChart', {
+    type:'bar',
+    data:{ labels:cvDayL.map(x=>x.substring(5)), datasets:[{ label:'Visits', data:cvDayD, backgroundColor:COLORS.amber, borderRadius:4 }] },
+    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}} }
+  });
+
+  // Footer
+  document.getElementById('footerInfo').textContent = `Last updated: ${d.lastUpdated || '—'} | Version: ${d.version || 'v3'}`;
 }
 
 async function exportCSV(sheet) {
@@ -249,10 +472,10 @@ async function exportCSV(sheet) {
   try {
     const res = await fetch(SCRIPT_URL + '?action=export&sheet=' + sheet);
     const data = await res.json();
+    if (data.error) return alert('Error: ' + data.error);
     if (!data.length) return alert('ไม่มีข้อมูลใน ' + sheet);
-    
     const headers = Object.keys(data[0]);
-    const csv = [headers.join(','), ...data.map(row => headers.map(h => `"${row[h] || ''}"`).join(','))].join('\n');
+    const csv = [headers.join(','), ...data.map(row => headers.map(h => `"${String(row[h]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -263,7 +486,6 @@ async function exportCSV(sheet) {
   }
 }
 
-// Auto-load if URL exists
 if (SCRIPT_URL) loadData();
 </script>
 </body>

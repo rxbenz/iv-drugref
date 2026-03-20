@@ -490,6 +490,71 @@ function calculate() {
   `;
   sec.style.display = 'block';
   sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  
+  // v4: track calculator usage
+  if (typeof trackCalcUsage === 'function') {
+    trackCalcUsage(drug.name, pt, result);
+  }
+}
+
+// ====== Analytics (shared with index.html) ======
+const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+
+const CALC_SESSION_ID = (() => {
+  const today = new Date().toISOString().substring(0, 10);
+  let id = localStorage.getItem('anonSessionId');
+  let idDate = localStorage.getItem('anonSessionDate');
+  if (!id || idDate !== today) {
+    id = 'u' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    localStorage.setItem('anonSessionId', id);
+    localStorage.setItem('anonSessionDate', today);
+  }
+  return id;
+})();
+const CALC_USER_ID = (() => {
+  let uid = localStorage.getItem('anonUserId');
+  if (!uid) {
+    uid = 'p' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+    localStorage.setItem('anonUserId', uid);
+  }
+  return uid;
+})();
+
+let calcReqCount = 0;
+function sendCalcAnalytics(data) {
+  if (!ANALYTICS_URL || localStorage.getItem('analyticsConsent') !== 'true') return;
+  if (calcReqCount >= 30) return;
+  calcReqCount++;
+  try {
+    const payload = JSON.stringify({ ...data, session_id: CALC_SESSION_ID, user_id: CALC_USER_ID });
+    if (navigator.sendBeacon) navigator.sendBeacon(ANALYTICS_URL, payload);
+    else fetch(ANALYTICS_URL, { method:'POST', body:payload, keepalive:true }).catch(()=>{});
+  } catch(e) {}
+}
+
+// Track page visit on load
+sendCalcAnalytics({
+  type: 'calc_visit',
+  page: 'calculator',
+  referrer: document.referrer || 'direct',
+  drugs_available: CALC_DRUGS.length
+});
+
+// Track each drug calculation (debounced per drug)
+const calcTracked = {};
+function trackCalcUsage(drugName, pt, result) {
+  const key = drugName + '_' + Math.floor(Date.now() / 15000);
+  if (calcTracked[key]) return;
+  calcTracked[key] = true;
+  sendCalcAnalytics({
+    type: 'dose_calc',
+    drug_name: drugName,
+    weight_kg: pt.wt,
+    dose_value: result.title,
+    dose_unit: 'calculated',
+    concentration: '',
+    result_ml_hr: ''
+  });
 }
 
 // ====== Init ======

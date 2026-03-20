@@ -3110,27 +3110,29 @@ function openSatSurvey() {
   const o = document.createElement('div');
   o.id = 'surveyOverlay';
   o.innerHTML = `
-    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;">
-      <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;">
+    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:flex;align-items:flex-start;justify-content:center;">
+      <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;margin:auto;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;position:relative;">
         
-        <div style="background:linear-gradient(135deg,#0ea5e9,#0284c7);padding:20px 24px;text-align:center;">
-          <div style="font-size:32px;margin-bottom:6px;">⭐</div>
-          <div style="font-size:16px;font-weight:700;color:#fff;">ช่วยให้คะแนนแอปหน่อยครับ</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">แค่ 5 ข้อ ใช้เวลาไม่ถึง 30 วินาที</div>
+        <button onclick="dismissSatSurvey()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.3);border:none;font-size:20px;color:#fff;cursor:pointer;z-index:2;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;">✕</button>
+
+        <div style="background:linear-gradient(135deg,#0ea5e9,#0284c7);padding:18px 24px;text-align:center;border-radius:24px 24px 0 0;">
+          <div style="font-size:28px;margin-bottom:4px;">⭐</div>
+          <div style="font-size:15px;font-weight:700;color:#fff;">ช่วยให้คะแนนแอปหน่อยครับ</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">แค่ 5 ข้อ ใช้เวลาไม่ถึง 30 วินาที</div>
         </div>
         
-        <div style="padding:20px 24px;">
-          <div style="margin-bottom:14px;">
-            <label style="font-size:12px;font-weight:600;color:#64748b;">ตำแหน่ง (ไม่บังคับ)</label>
-            <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;" id="role_group">
+        <div style="padding:16px 20px;">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:#64748b;">ตำแหน่ง (ไม่บังคับ)</label>
+            <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;" id="role_group">
               ${['pharmacist|เภสัชกร','nurse|พยาบาล','physician|แพทย์','other|อื่นๆ'].map(opt => {
                 const [val,label] = opt.split('|');
-                return `<button onclick="selectRole('${val}')" data-val="${val}" style="padding:6px 14px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;">${label}</button>`;
+                return `<button onclick="selectRole('${val}')" data-val="${val}" style="padding:5px 12px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;">${label}</button>`;
               }).join('')}
             </div>
           </div>
 
-          <div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:10px;">1 = น้อยที่สุด → 5 = มากที่สุด</div>
+          <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:8px;">1 = น้อยที่สุด → 5 = มากที่สุด</div>
           
           ${[
             ['sat_1', '🔍 ค้นหาข้อมูลยาได้ง่ายและรวดเร็ว'],
@@ -3139,21 +3141,18 @@ function openSatSurvey() {
             ['sat_4', '👥 จะแนะนำให้เพื่อนร่วมงานใช้'],
             ['sat_5', '⭐ ความพึงพอใจโดยรวม'],
           ].map(([id, label]) => `
-            <div style="margin-bottom:10px;">
-              <div style="font-size:13px;color:#1e293b;margin-bottom:6px;font-weight:500;">${label}</div>
-              <div style="display:flex;gap:6px;" id="${id}_group">
-                ${[1,2,3,4,5].map(v => `<button onclick="setRating('${id}',${v})" data-val="${v}" style="flex:1;padding:10px 0;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;color:#94a3b8;">${v}</button>`).join('')}
+            <div style="margin-bottom:8px;">
+              <div style="font-size:12px;color:#1e293b;margin-bottom:4px;font-weight:500;">${label}</div>
+              <div style="display:flex;gap:5px;" id="${id}_group">
+                ${[1,2,3,4,5].map(v => `<button onclick="setRating('${id}',${v})" data-val="${v}" style="flex:1;padding:8px 0;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;color:#94a3b8;">${v}</button>`).join('')}
               </div>
             </div>
           `).join('')}
 
-          <div style="margin-top:6px;">
-            <textarea id="sv_comments" rows="2" style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:12px;resize:none;color:#374151;" placeholder="💬 ข้อเสนอแนะ / อยากให้เพิ่มยาตัวไหน (ไม่บังคับ)"></textarea>
-          </div>
+          <textarea id="sv_comments" rows="2" style="width:100%;padding:8px;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:11px;resize:none;color:#374151;margin-top:4px;" placeholder="💬 ข้อเสนอแนะ / อยากให้เพิ่มยาตัวไหน (ไม่บังคับ)"></textarea>
 
-          <button onclick="submitSatSurvey()" id="satSubmitBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;box-shadow:0 4px 12px rgba(14,165,233,0.3);transition:all .2s;">ส่งคะแนน ⭐</button>
-          
-          <button onclick="dismissSatSurvey()" style="width:100%;padding:10px;background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px;">ไว้ครั้งหน้า</button>
+          <button onclick="submitSatSurvey()" style="width:100%;padding:12px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 4px 12px rgba(14,165,233,0.3);">ส่งคะแนน ⭐</button>
+          <button onclick="dismissSatSurvey()" style="width:100%;padding:8px;background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;margin-top:2px;">ไว้ครั้งหน้า</button>
         </div>
       </div>
     </div>`;
@@ -3208,13 +3207,15 @@ function openSusSurvey() {
   const o = document.createElement('div');
   o.id = 'surveyOverlay';
   o.innerHTML = `
-    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;">
-      <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;">
+    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:flex;align-items:flex-start;justify-content:center;">
+      <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;margin:auto;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;position:relative;">
         
-        <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:20px 24px;text-align:center;position:sticky;top:0;z-index:1;">
-          <div style="font-size:32px;margin-bottom:6px;">📋</div>
-          <div style="font-size:16px;font-weight:700;color:#fff;">แบบประเมิน Usability (SUS)</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">10 ข้อสุดท้าย ใช้เวลา 1-2 นาที เป็นมาตรฐานสากล</div>
+        <button onclick="document.getElementById('surveyOverlay')?.remove()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.3);border:none;font-size:20px;color:#fff;cursor:pointer;z-index:2;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;">✕</button>
+
+        <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 24px;text-align:center;border-radius:24px 24px 0 0;">
+          <div style="font-size:28px;margin-bottom:4px;">📋</div>
+          <div style="font-size:15px;font-weight:700;color:#fff;">แบบประเมิน Usability (SUS)</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">10 ข้อสุดท้าย ใช้เวลา 1-2 นาที</div>
         </div>
         
         <div style="padding:20px 24px;">

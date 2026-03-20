@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +6,6 @@
 <title>IV Drug Quick Reference — สถาบันประสาทวิทยา | Neurological Institute of Thailand</title>
 
 <!-- PWA Meta Tags -->
-
 <meta name="description" content="คู่มือผสมยาฉีดฉบับพกพา สำหรับกลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา">
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,18 +16,15 @@
 <meta name="msapplication-TileImage" content="icons/icon-144x144.png">
 
 <!-- PWA Manifest -->
-
 <link rel="manifest" href="manifest.json">
 
 <!-- Icons for various platforms -->
-
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
 
 <!-- Fonts - with system fallbacks for offline -->
-
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -66,605 +61,605 @@
   --shadow-glow: 0 0 0 3px rgba(14,165,233,0.08);
 }
 
-- { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
 
 body {
-font-family: ‘IBM Plex Sans Thai’, ‘Plus Jakarta Sans’, sans-serif;
-background: var(–bg-primary);
-color: var(–text-primary);
-min-height: 100vh;
--webkit-font-smoothing: antialiased;
+  font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Subtle dot pattern */
 body::before {
-content: ‘’;
-position: fixed;
-inset: 0;
-background-image: radial-gradient(circle, #cbd5e1 0.5px, transparent 0.5px);
-background-size: 24px 24px;
-opacity: 0.3;
-pointer-events: none;
-z-index: 0;
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, #cbd5e1 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Header */
 .header {
-position: sticky;
-top: 0;
-z-index: 100;
-background: rgba(255,255,255,0.8);
-backdrop-filter: blur(20px) saturate(180%);
--webkit-backdrop-filter: blur(20px) saturate(180%);
-border-bottom: 1px solid var(–border);
-padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
 }
 
 .header-inner {
-max-width: 900px;
-margin: 0 auto;
-padding: 14px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 14px 20px;
 }
 
 .header-top {
-display: flex;
-align-items: center;
-justify-content: space-between;
-margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .logo-area {
-display: flex;
-align-items: center;
-gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .logo-icon {
-width: 34px; height: 34px;
-background: linear-gradient(135deg, var(–accent-blue), var(–accent-cyan));
-border-radius: var(–radius-sm);
-display: flex; align-items: center; justify-content: center;
-font-size: 16px;
-box-shadow: 0 2px 12px rgba(59,130,246,0.25);
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 12px rgba(59,130,246,0.25);
 }
 
 .logo-text {
-font-family: ‘Plus Jakarta Sans’, sans-serif;
-font-weight: 700;
-font-size: 15px;
-letter-spacing: -0.3px;
-background: linear-gradient(135deg, #0f172a, #334155);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #0f172a, #334155);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .logo-sub {
-font-size: 10px;
-color: var(–text-muted);
-font-weight: 400;
-letter-spacing: 0.5px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0.5px;
 }
 
 .drug-count {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-color: var(–accent-cyan);
-background: rgba(6,182,212,0.08);
-border: 1px solid rgba(6,182,212,0.15);
-padding: 4px 10px;
-border-radius: 20px;
-font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-cyan);
+  background: rgba(6,182,212,0.08);
+  border: 1px solid rgba(6,182,212,0.15);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
 /* Search */
 .search-wrap {
-position: relative;
+  position: relative;
 }
 
 .search-icon {
-position: absolute;
-left: 14px;
-top: 50%;
-transform: translateY(-50%);
-color: var(–text-muted);
-font-size: 16px;
-pointer-events: none;
-transition: color 0.2s;
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 16px;
+  pointer-events: none;
+  transition: color 0.2s;
 }
 
 .search-input {
-width: 100%;
-padding: 12px 44px 12px 42px;
-background: var(–bg-input);
-border: 1.5px solid var(–border);
-border-radius: var(–radius-md);
-color: var(–text-primary);
-font-family: ‘IBM Plex Sans Thai’, sans-serif;
-font-size: 15px;
-outline: none;
-transition: all 0.25s;
+  width: 100%;
+  padding: 12px 44px 12px 42px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.25s;
 }
 
 .search-input::placeholder {
-color: var(–text-muted);
-font-size: 14px;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 .search-input:focus {
-border-color: var(–accent-blue);
-box-shadow: 0 0 0 3px rgba(59,130,246,0.12), 0 2px 8px rgba(59,130,246,0.08);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12), 0 2px 8px rgba(59,130,246,0.08);
 }
 
 .search-input:focus + .search-icon,
 .search-input:focus ~ .search-icon {
-color: var(–accent-blue);
+  color: var(--accent-blue);
 }
 
 .search-clear {
-position: absolute;
-right: 12px;
-top: 50%;
-transform: translateY(-50%);
-background: var(–bg-card);
-border: 1px solid var(–border);
-color: var(–text-secondary);
-width: 26px; height: 26px;
-border-radius: 50%;
-display: none;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-font-size: 13px;
-transition: all 0.2s;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
 }
 
 .search-clear:hover {
-background: var(–accent-red);
-border-color: var(–accent-red);
-color: white;
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  color: white;
 }
 
 .search-clear.show { display: flex; }
 
 /* Filters */
 .filters {
-max-width: 900px;
-margin: 0 auto;
-padding: 10px 20px;
-display: flex;
-gap: 6px;
-flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .filter-btn {
-font-family: ‘IBM Plex Sans Thai’, sans-serif;
-font-size: 12px;
-font-weight: 500;
-padding: 5px 12px;
-border-radius: 20px;
-border: 1px solid var(–border);
-background: transparent;
-color: var(–text-secondary);
-cursor: pointer;
-transition: all 0.2s;
-white-space: nowrap;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .filter-btn:hover {
-border-color: var(–accent-blue);
-color: var(–accent-blue);
-background: rgba(59,130,246,0.05);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: rgba(59,130,246,0.05);
 }
 
 .filter-btn.active {
-background: var(–accent-blue);
-border-color: var(–accent-blue);
-color: white;
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
 }
 
 /* Content */
 .content {
-max-width: 900px;
-margin: 0 auto;
-padding: 12px 20px 80px;
-position: relative;
-z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 12px 20px 80px;
+  position: relative;
+  z-index: 1;
 }
 
 .results-info {
-font-size: 12px;
-color: var(–text-muted);
-padding: 6px 0 10px;
-font-weight: 500;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 6px 0 10px;
+  font-weight: 500;
 }
 
 /* Drug Card */
 .drug-card {
-background: var(–bg-card);
-border: 1px solid var(–border);
-border-radius: var(–radius-lg);
-margin-bottom: 10px;
-overflow: hidden;
-transition: all 0.25s;
-cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all 0.25s;
+  cursor: pointer;
 }
 
 .drug-card:hover {
-border-color: rgba(59,130,246,0.3);
-box-shadow: var(–shadow-glow);
+  border-color: rgba(59,130,246,0.3);
+  box-shadow: var(--shadow-glow);
 }
 
 .drug-card.had {
-border-color: var(–had-border);
+  border-color: var(--had-border);
 }
 
 .drug-card.had:hover {
-border-color: rgba(239,68,68,0.4);
-box-shadow: 0 0 30px var(–had-glow);
+  border-color: rgba(239,68,68,0.4);
+  box-shadow: 0 0 30px var(--had-glow);
 }
 
 .drug-card.expanded {
-border-color: var(–accent-blue);
-box-shadow: var(–shadow-md), var(–shadow-glow);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 
 .drug-card.had.expanded {
-border-color: var(–accent-red);
-box-shadow: var(–shadow-md), 0 0 40px var(–had-glow);
+  border-color: var(--accent-red);
+  box-shadow: var(--shadow-md), 0 0 40px var(--had-glow);
 }
 
 .card-header {
-padding: 14px 16px;
-display: flex;
-align-items: center;
-gap: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .card-number {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-font-weight: 600;
-color: var(–text-muted);
-min-width: 28px;
-height: 28px;
-display: flex;
-align-items: center;
-justify-content: center;
-background: rgba(14,165,233,0.08);
-border-radius: var(–radius-sm);
-flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14,165,233,0.08);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 .card-title-area {
-flex: 1;
-min-width: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .card-generic {
-font-weight: 600;
-font-size: 15px;
-color: var(–text-primary);
-line-height: 1.3;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.3;
 }
 
 .card-trade {
-font-size: 12px;
-color: var(–text-secondary);
-margin-top: 2px;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card-badges {
-display: flex;
-gap: 5px;
-align-items: center;
-flex-shrink: 0;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .badge {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-font-weight: 600;
-padding: 3px 8px;
-border-radius: 4px;
-letter-spacing: 0.3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
 }
 
 .badge-had {
-background: rgba(220,38,38,0.08);
-color: #dc2626;
-border: 1px solid rgba(220,38,38,0.2);
-animation: pulse-had 3s infinite;
+  background: rgba(220,38,38,0.08);
+  color: #dc2626;
+  border: 1px solid rgba(220,38,38,0.2);
+  animation: pulse-had 3s infinite;
 }
 
 @keyframes pulse-had {
-0%, 100% { opacity: 1; }
-50% { opacity: 0.7; }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .badge-ed {
-background: rgba(5,150,105,0.08);
-color: #059669;
-border: 1px solid rgba(5,150,105,0.2);
+  background: rgba(5,150,105,0.08);
+  color: #059669;
+  border: 1px solid rgba(5,150,105,0.2);
 }
 
 .badge-ned {
-background: rgba(217,119,6,0.08);
-color: #d97706;
-border: 1px solid rgba(217,119,6,0.2);
+  background: rgba(217,119,6,0.08);
+  color: #d97706;
+  border: 1px solid rgba(217,119,6,0.2);
 }
 
 .card-chevron {
-color: var(–text-muted);
-transition: transform 0.3s;
-font-size: 16px;
-flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.3s;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .drug-card.expanded .card-chevron {
-transform: rotate(180deg);
-color: var(–accent-blue);
+  transform: rotate(180deg);
+  color: var(--accent-blue);
 }
 
 /* Expanded content */
 .card-body {
-display: none;
-padding: 0 16px 16px;
+  display: none;
+  padding: 0 16px 16px;
 }
 
 .drug-card.expanded .card-body {
-display: block;
-animation: slideDown 0.3s ease;
+  display: block;
+  animation: slideDown 0.3s ease;
 }
 
 @keyframes slideDown {
-from { opacity: 0; transform: translateY(-8px); }
-to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .info-section {
-margin-bottom: 14px;
+  margin-bottom: 14px;
 }
 
 .section-title {
-font-size: 11px;
-font-weight: 600;
-text-transform: uppercase;
-letter-spacing: 1px;
-color: var(–text-muted);
-margin-bottom: 8px;
-display: flex;
-align-items: center;
-gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .section-title .icon {
-font-size: 13px;
+  font-size: 13px;
 }
 
 .info-grid {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 @media (max-width: 600px) {
-.info-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
 }
 
 .info-item {
-background: #f8fafc;
-border: 1px solid #e2e8f0;
-border-radius: var(–radius-sm);
-padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
 }
 
 .info-item.full-width {
-grid-column: 1 / -1;
+  grid-column: 1 / -1;
 }
 
 .info-label {
-font-size: 10px;
-font-weight: 600;
-text-transform: uppercase;
-letter-spacing: 0.8px;
-color: var(–accent-cyan);
-margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent-cyan);
+  margin-bottom: 4px;
 }
 
 .info-value {
-font-size: 13px;
-line-height: 1.55;
-color: var(–text-primary);
-white-space: pre-line;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  white-space: pre-line;
 }
 
 .info-value.mono {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
 }
 
 /* Warning box */
 .warning-box {
-background: #fef2f2;
-border: 1px solid #fecaca;
-border-radius: var(–radius-md);
-padding: 12px 14px;
-margin-top: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-top: 8px;
 }
 
 .warning-box .info-label {
-color: #dc2626;
+  color: #dc2626;
 }
 
 .warning-box .info-value {
-color: #7f1d1d;
-font-size: 12.5px;
+  color: #7f1d1d;
+  font-size: 12.5px;
 }
 
 /* Compat boxes */
 .compat-ok {
-background: #f0fdf4;
-border: 1px solid #bbf7d0;
-border-radius: var(–radius-sm);
-padding: 10px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
 }
 
 .compat-ok .info-label { color: #059669; }
 
 .compat-bad {
-background: #fef2f2;
-border: 1px solid #fecaca;
-border-radius: var(–radius-sm);
-padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
 }
 
 .compat-bad .info-label { color: #dc2626; }
 
 /* Monitoring tag cloud */
 .monitoring-tags {
-display: flex;
-flex-wrap: wrap;
-gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .m-tag {
-font-size: 11px;
-padding: 3px 9px;
-background: #eff6ff;
-border: 1px solid #bfdbfe;
-border-radius: 4px;
-color: #1d4ed8;
-font-weight: 500;
+  font-size: 11px;
+  padding: 3px 9px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  color: #1d4ed8;
+  font-weight: 500;
 }
 
 /* Ref line */
 .ref-line {
-font-size: 11px;
-color: var(–text-muted);
-font-style: italic;
-margin-top: 8px;
-padding-top: 8px;
-border-top: 1px solid #e2e8f0;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* Inline dose calculator */
 .calc-section {
-margin-top: 12px;
-padding: 14px;
-background: linear-gradient(135deg, #e6f1fb 0%, #f0f8ff 100%);
-border-top: 3px solid #0ea5e9;
-border-radius: 0 0 8px 8px;
+  margin-top: 12px;
+  padding: 14px;
+  background: linear-gradient(135deg, #e6f1fb 0%, #f0f8ff 100%);
+  border-top: 3px solid #0ea5e9;
+  border-radius: 0 0 8px 8px;
 }
 .calc-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-gap: 10px;
-margin: 10px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
 }
 .calc-field label {
-font-size: 11px;
-color: #185FA5;
-display: block;
-margin-bottom: 4px;
-font-weight: 500;
+  font-size: 11px;
+  color: #185FA5;
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
 }
 .calc-field input, .calc-field select {
-width: 100%;
-padding: 8px 10px;
-border: 1px solid #85B7EB;
-border-radius: 8px;
-font-size: 14px;
-font-weight: 500;
-font-family: inherit;
-background: #fff;
-color: var(–text-primary);
-box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #85B7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  background: #fff;
+  color: var(--text-primary);
+  box-sizing: border-box;
 }
 .calc-field input:focus, .calc-field select:focus {
-outline: none;
-border-color: #0ea5e9;
-box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
 }
 .calc-range {
-font-size: 10px;
-color: #64748b;
-margin-top: 3px;
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 3px;
 }
 .calc-result {
-text-align: center;
-padding: 10px;
-background: #dcfce7;
-border: 2px solid #4ade80;
-border-radius: 10px;
-margin: 10px 0;
+  text-align: center;
+  padding: 10px;
+  background: #dcfce7;
+  border: 2px solid #4ade80;
+  border-radius: 10px;
+  margin: 10px 0;
 }
 .calc-result-value {
-font-size: 24px;
-font-weight: 700;
-color: #166534;
-font-family: ‘JetBrains Mono’, monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: #166534;
+  font-family: 'JetBrains Mono', monospace;
 }
 .calc-note {
-font-size: 11px;
-color: #185FA5;
-background: rgba(255,255,255,0.7);
-border-radius: 6px;
-padding: 6px 10px;
-line-height: 1.5;
-margin-bottom: 6px;
+  font-size: 11px;
+  color: #185FA5;
+  background: rgba(255,255,255,0.7);
+  border-radius: 6px;
+  padding: 6px 10px;
+  line-height: 1.5;
+  margin-bottom: 6px;
 }
 .calc-disclaimer {
-font-size: 10px;
-color: #dc2626;
-text-align: center;
-font-weight: 500;
-opacity: 0.8;
+  font-size: 10px;
+  color: #dc2626;
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 /* Empty state */
 .empty-state {
-text-align: center;
-padding: 60px 20px;
-color: var(–text-muted);
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
 }
 
 .empty-icon {
-font-size: 48px;
-margin-bottom: 12px;
-opacity: 0.4;
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
 }
 
 .empty-text {
-font-size: 15px;
-font-weight: 500;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .empty-hint {
-font-size: 12px;
-margin-top: 6px;
-color: var(–text-muted);
-opacity: 0.7;
+  font-size: 12px;
+  margin-top: 6px;
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 /* Keyboard shortcut hint */
 .kbd-hint {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-padding: 2px 6px;
-border-radius: 3px;
-background: rgba(255,255,255,0.06);
-border: 1px solid rgba(255,255,255,0.1);
-color: var(–text-muted);
-position: absolute;
-right: 46px;
-top: 50%;
-transform: translateY(-50%);
-pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-muted);
+  position: absolute;
+  right: 46px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 /* Scrollbar */
@@ -675,20 +670,19 @@ pointer-events: none;
 
 /* Quick category jump */
 .category-bar {
-display: none; /* hidden by default, shown when useful */
+  display: none; /* hidden by default, shown when useful */
 }
 
 @media (max-width: 480px) {
-.header-inner { padding: 10px 14px; }
-.content { padding: 10px 14px 80px; }
-.filters { padding: 8px 14px; }
-.card-header { padding: 12px 14px; }
-.card-body { padding: 0 14px 14px; }
-.card-generic { font-size: 14px; }
-.logo-text { font-size: 13px; }
+  .header-inner { padding: 10px 14px; }
+  .content { padding: 10px 14px 80px; }
+  .filters { padding: 8px 14px; }
+  .card-header { padding: 12px 14px; }
+  .card-body { padding: 0 14px 14px; }
+  .card-generic { font-size: 14px; }
+  .logo-text { font-size: 13px; }
 }
 </style>
-
 </head>
 <body>
 
@@ -731,58 +725,55 @@ display: none; /* hidden by default, shown when useful */
   <div class="results-info" id="resultsInfo"></div>
   <div id="drugList"></div>
   <footer style="margin-top:32px; border-top:1px solid var(--border);">
+    
+    <!-- Disclaimer -->
+    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px 16px; margin:16px 0; text-align:left;">
+      <div style="font-size:12px; font-weight:700; color:#991b1b; margin-bottom:6px; display:flex; align-items:center; gap:5px;">⚠️ ข้อจำกัดความรับผิดชอบ (Disclaimer)</div>
+      <div style="font-size:11px; color:#7f1d1d; line-height:1.6;">
+        ข้อมูลในแอปพลิเคชันนี้จัดทำขึ้นเพื่อเป็น<strong>เครื่องมือสนับสนุนการตัดสินใจทางคลินิก</strong>เท่านั้น ไม่ได้มีวัตถุประสงค์เพื่อทดแทนดุลยพินิจทางวิชาชีพของเภสัชกรหรือบุคลากรทางการแพทย์ ผู้ใช้ควรตรวจสอบข้อมูลกับแหล่งอ้างอิงปฐมภูมิ (เช่น Package Insert, Lexicomp, Trissel's) และพิจารณาข้อมูลเฉพาะของผู้ป่วยแต่ละรายก่อนนำไปใช้ในทางคลินิกเสมอ
+        ผู้จัดทำไม่รับผิดชอบต่อความเสียหายใดๆ ที่อาจเกิดจากการใช้ข้อมูลนี้โดยไม่ได้ตรวจสอบกับแหล่งข้อมูลที่เป็นปัจจุบัน
+      </div>
+    </div>
 
-```
-<!-- Disclaimer -->
-<div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px 16px; margin:16px 0; text-align:left;">
-  <div style="font-size:12px; font-weight:700; color:#991b1b; margin-bottom:6px; display:flex; align-items:center; gap:5px;">⚠️ ข้อจำกัดความรับผิดชอบ (Disclaimer)</div>
-  <div style="font-size:11px; color:#7f1d1d; line-height:1.6;">
-    ข้อมูลในแอปพลิเคชันนี้จัดทำขึ้นเพื่อเป็น<strong>เครื่องมือสนับสนุนการตัดสินใจทางคลินิก</strong>เท่านั้น ไม่ได้มีวัตถุประสงค์เพื่อทดแทนดุลยพินิจทางวิชาชีพของเภสัชกรหรือบุคลากรทางการแพทย์ ผู้ใช้ควรตรวจสอบข้อมูลกับแหล่งอ้างอิงปฐมภูมิ (เช่น Package Insert, Lexicomp, Trissel's) และพิจารณาข้อมูลเฉพาะของผู้ป่วยแต่ละรายก่อนนำไปใช้ในทางคลินิกเสมอ
-    ผู้จัดทำไม่รับผิดชอบต่อความเสียหายใดๆ ที่อาจเกิดจากการใช้ข้อมูลนี้โดยไม่ได้ตรวจสอบกับแหล่งข้อมูลที่เป็นปัจจุบัน
-  </div>
-</div>
+    <!-- Credit & Attribution -->
+    <div style="padding:16px 0; text-align:center;">
+      <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">💉 IV Drug Quick Reference PWA</div>
+      <div style="font-size:12px; font-weight:600; color:var(--text-secondary);">จัดทำโดย ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม</div>
+      <div style="font-size:11px; color:var(--text-muted);">สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">
+        แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
+        AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
+      </div>
+      <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.1.2 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
+    </div>
 
-<!-- Credit & Attribution -->
-<div style="padding:16px 0; text-align:center;">
-  <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">💉 IV Drug Quick Reference PWA</div>
-  <div style="font-size:12px; font-weight:600; color:var(--text-secondary);">จัดทำโดย ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม</div>
-  <div style="font-size:11px; color:var(--text-muted);">สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
-  <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">
-    แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
-    AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
-  </div>
-  <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.1.2 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
-</div>
+    <!-- License -->
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:14px 16px; margin:0 0 16px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; color:#1e40af; margin-bottom:6px;">📜 สัญญาอนุญาต (License)</div>
+      <div style="font-size:11px; color:#1e3a5f; line-height:1.6;">
+        ผลงานนี้เผยแพร่ภายใต้สัญญาอนุญาต <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</strong><br>
+        ✅ ใช้งาน แชร์ ดัดแปลงได้ — ต้องให้เครดิตผู้สร้าง | ❌ ห้ามใช้เชิงพาณิชย์ | 🔄 ถ้าดัดแปลง ต้องแชร์ภายใต้สัญญาเดียวกัน
+      </div>
+      <div style="margin-top:8px;">
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.th" target="_blank" rel="noopener"
+           style="font-size:10px; color:#3b82f6; text-decoration:none; background:#fff; border:1px solid #bfdbfe; padding:4px 12px; border-radius:6px; display:inline-block;">
+          🔗 ดูรายละเอียดสัญญาอนุญาต CC BY-NC-SA 4.0
+        </a>
+      </div>
+    </div>
 
-<!-- License -->
-<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:14px 16px; margin:0 0 16px; text-align:center;">
-  <div style="font-size:11px; font-weight:700; color:#1e40af; margin-bottom:6px;">📜 สัญญาอนุญาต (License)</div>
-  <div style="font-size:11px; color:#1e3a5f; line-height:1.6;">
-    ผลงานนี้เผยแพร่ภายใต้สัญญาอนุญาต <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</strong><br>
-    ✅ ใช้งาน แชร์ ดัดแปลงได้ — ต้องให้เครดิตผู้สร้าง | ❌ ห้ามใช้เชิงพาณิชย์ | 🔄 ถ้าดัดแปลง ต้องแชร์ภายใต้สัญญาเดียวกัน
-  </div>
-  <div style="margin-top:8px;">
-    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.th" target="_blank" rel="noopener"
-       style="font-size:10px; color:#3b82f6; text-decoration:none; background:#fff; border:1px solid #bfdbfe; padding:4px 12px; border-radius:6px; display:inline-block;">
-      🔗 ดูรายละเอียดสัญญาอนุญาต CC BY-NC-SA 4.0
-    </a>
-  </div>
-</div>
-
-<!-- About & Contact & Calculator links -->
-<div style="text-align:center; padding-bottom:16px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
-  <a href="calculator.html" style="font-family:inherit; font-size:11px; color:#fff; background:#0ea5e9; border:none; padding:6px 16px; border-radius:20px; cursor:pointer; text-decoration:none; font-weight:500;">
-    🧮 Dose Calculator
-  </a>
-  <button onclick="showAbout()" style="font-family:inherit; font-size:11px; color:var(--text-muted); background:none; border:1px solid var(--border); padding:6px 16px; border-radius:20px; cursor:pointer;">
-    ℹ️ เกี่ยวกับแอปนี้
-  </button>
-  <button onclick="showContact()" style="font-family:inherit; font-size:11px; color:#0ea5e9; background:none; border:1px solid #bfdbfe; padding:6px 16px; border-radius:20px; cursor:pointer;">
-    💬 แจ้งปัญหา / ข้อเสนอแนะ
-  </button>
-</div>
-```
-
+    <!-- About & Contact & Calculator links -->
+    <div style="text-align:center; padding-bottom:16px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <a href="calculator.html" style="font-family:inherit; font-size:11px; color:#fff; background:#0ea5e9; border:none; padding:6px 16px; border-radius:20px; cursor:pointer; text-decoration:none; font-weight:500;">
+        🧮 Dose Calculator
+      </a>
+      <button onclick="showAbout()" style="font-family:inherit; font-size:11px; color:var(--text-muted); background:none; border:1px solid var(--border); padding:6px 16px; border-radius:20px; cursor:pointer;">
+        ℹ️ เกี่ยวกับแอปนี้
+      </button>
+      <button onclick="showContact()" style="font-family:inherit; font-size:11px; color:#0ea5e9; background:none; border:1px solid #bfdbfe; padding:6px 16px; border-radius:20px; cursor:pointer;">
+        💬 แจ้งปัญหา / ข้อเสนอแนะ
+      </button>
+    </div>
   </footer>
 </main>
 
@@ -1724,172 +1715,172 @@ function openSatSurvey() {
 
           <textarea id="sv_comments" rows="2" style="width:100%;padding:8px;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:11px;resize:none;color:#374151;margin-top:4px;" placeholder="💬 ข้อเสนอแนะ / อยากให้เพิ่มยาตัวไหน (ไม่บังคับ)"></textarea>
 
-```
-      <button onclick="submitSatSurvey()" style="width:100%;padding:12px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 4px 12px rgba(14,165,233,0.3);">ส่งคะแนน ⭐</button>
-      <button onclick="dismissSatSurvey()" style="width:100%;padding:8px;background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;margin-top:2px;">ไว้ครั้งหน้า</button>
-    </div>
-  </div>
-</div>`;
-```
-
-document.body.appendChild(o);
+          <button onclick="submitSatSurvey()" style="width:100%;padding:12px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 4px 12px rgba(14,165,233,0.3);">ส่งคะแนน ⭐</button>
+          <button onclick="dismissSatSurvey()" style="width:100%;padding:8px;background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;margin-top:2px;">ไว้ครั้งหน้า</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(o);
 }
 
-let selectedRole = ‘’;
+let selectedRole = '';
 function selectRole(val) {
-selectedRole = val;
-document.getElementById(‘role_group’)?.querySelectorAll(‘button’).forEach(btn => {
-if (btn.dataset.val === val) {
-btn.style.background = ‘#0ea5e9’; btn.style.color = ‘#fff’; btn.style.borderColor = ‘#0ea5e9’;
-} else {
-btn.style.background = ‘#fff’; btn.style.color = ‘#374151’; btn.style.borderColor = ‘#e2e8f0’;
-}
-});
+  selectedRole = val;
+  document.getElementById('role_group')?.querySelectorAll('button').forEach(btn => {
+    if (btn.dataset.val === val) {
+      btn.style.background = '#0ea5e9'; btn.style.color = '#fff'; btn.style.borderColor = '#0ea5e9';
+    } else {
+      btn.style.background = '#fff'; btn.style.color = '#374151'; btn.style.borderColor = '#e2e8f0';
+    }
+  });
 }
 
-let selectedDept = ‘’;
+let selectedDept = '';
 function selectDept(val) {
-selectedDept = val;
-document.getElementById(‘dept_group’)?.querySelectorAll(‘button’).forEach(btn => {
-if (btn.dataset.val === val) {
-btn.style.background = ‘#0ea5e9’; btn.style.color = ‘#fff’; btn.style.borderColor = ‘#0ea5e9’;
-} else {
-btn.style.background = ‘#fff’; btn.style.color = ‘#374151’; btn.style.borderColor = ‘#e2e8f0’;
-}
-});
+  selectedDept = val;
+  document.getElementById('dept_group')?.querySelectorAll('button').forEach(btn => {
+    if (btn.dataset.val === val) {
+      btn.style.background = '#0ea5e9'; btn.style.color = '#fff'; btn.style.borderColor = '#0ea5e9';
+    } else {
+      btn.style.background = '#fff'; btn.style.color = '#374151'; btn.style.borderColor = '#e2e8f0';
+    }
+  });
 }
 
 function submitSatSurvey() {
-for (let i = 1; i <= 5; i++) {
-if (!surveyData[‘sat_’ + i]) {
-const el = document.getElementById(‘sat_’ + i + ‘_group’);
-if (el) el.style.animation = ‘shake .3s ease’;
-setTimeout(() => { if (el) el.style.animation = ‘’; }, 300);
-return;
-}
-}
-sendAnalytics({
-type: ‘survey’,
-role: selectedRole,
-department: selectedDept,
-sat_1: surveyData.sat_1, sat_2: surveyData.sat_2, sat_3: surveyData.sat_3,
-sat_4: surveyData.sat_4, sat_5: surveyData.sat_5,
-sus: [],
-comments: document.getElementById(‘sv_comments’)?.value || ‘’
-});
-localStorage.setItem(‘satCompleted’, Date.now());
-localStorage.setItem(‘satCompletedSession’, sessionCount);
-document.getElementById(‘surveyOverlay’)?.remove();
-showThankYou(‘ขอบคุณสำหรับคะแนน! ⭐’);
+  for (let i = 1; i <= 5; i++) {
+    if (!surveyData['sat_' + i]) {
+      const el = document.getElementById('sat_' + i + '_group');
+      if (el) el.style.animation = 'shake .3s ease';
+      setTimeout(() => { if (el) el.style.animation = ''; }, 300);
+      return;
+    }
+  }
+  sendAnalytics({
+    type: 'survey',
+    role: selectedRole,
+    department: selectedDept,
+    sat_1: surveyData.sat_1, sat_2: surveyData.sat_2, sat_3: surveyData.sat_3,
+    sat_4: surveyData.sat_4, sat_5: surveyData.sat_5,
+    sus: [],
+    comments: document.getElementById('sv_comments')?.value || ''
+  });
+  localStorage.setItem('satCompleted', Date.now());
+  localStorage.setItem('satCompletedSession', sessionCount);
+  document.getElementById('surveyOverlay')?.remove();
+  showThankYou('ขอบคุณสำหรับคะแนน! ⭐');
 }
 
 function dismissSatSurvey() {
-localStorage.setItem(‘satDismissedSession’, sessionCount);
-document.getElementById(‘surveyOverlay’)?.remove();
+  localStorage.setItem('satDismissedSession', sessionCount);
+  document.getElementById('surveyOverlay')?.remove();
 }
 
 // ============================================================
 // Phase 2: SUS Survey (10 ข้อ — ทำหลัง Satisfaction แล้ว)
 // ============================================================
 function openSusSurvey() {
-const o = document.createElement(‘div’);
-o.id = ‘surveyOverlay’;
-o.innerHTML = `
-<div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:flex;align-items:flex-start;justify-content:center;">
-<div style="background:#fff;border-radius:24px;width:100%;max-width:440px;margin:auto;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;position:relative;">
+  const o = document.createElement('div');
+  o.id = 'surveyOverlay';
+  o.innerHTML = `
+    <div style="position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:flex;align-items:flex-start;justify-content:center;">
+      <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;margin:auto;box-shadow:0 24px 48px rgba(0,0,0,0.15);animation:slideUp .4s ease;position:relative;">
+        
+        <button onclick="document.getElementById('surveyOverlay')?.remove()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.3);border:none;font-size:20px;color:#fff;cursor:pointer;z-index:2;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;">✕</button>
 
-```
-    <button onclick="document.getElementById('surveyOverlay')?.remove()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.3);border:none;font-size:20px;color:#fff;cursor:pointer;z-index:2;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;">✕</button>
-
-    <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 24px;text-align:center;border-radius:24px 24px 0 0;">
-      <div style="font-size:28px;margin-bottom:4px;">📋</div>
-      <div style="font-size:15px;font-weight:700;color:#fff;">แบบประเมิน Usability (SUS)</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">10 ข้อสุดท้าย ใช้เวลา 1-2 นาที</div>
-    </div>
-    
-    <div style="padding:20px 24px;">
-      <div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:12px;">1 = ไม่เห็นด้วยอย่างยิ่ง → 5 = เห็นด้วยอย่างยิ่ง</div>
-      
-      ${[
-        'ฉันคิดว่าจะใช้แอปนี้บ่อยๆ',
-        'ฉันพบว่าแอปนี้ซับซ้อนเกินไป',
-        'ฉันคิดว่าแอปนี้ใช้งานง่าย',
-        'ฉันคิดว่าต้องมีคนช่วยสอนจึงจะใช้ได้',
-        'ฉันพบว่าฟังก์ชันต่างๆ ถูกรวมไว้อย่างดี',
-        'ฉันคิดว่าแอปนี้มีความไม่สอดคล้องกันมาก',
-        'ฉันคิดว่าคนส่วนใหญ่จะเรียนรู้การใช้ได้เร็ว',
-        'ฉันพบว่าแอปนี้ใช้งานยุ่งยาก',
-        'ฉันรู้สึกมั่นใจในการใช้แอปนี้',
-        'ฉันต้องเรียนรู้หลายอย่างก่อนจะเริ่มใช้ได้',
-      ].map((q, i) => `
-        <div style="margin-bottom:10px;">
-          <div style="font-size:13px;color:#1e293b;margin-bottom:6px;font-weight:500;"><span style="color:#7c3aed;font-weight:700;">${i+1}.</span> ${q}</div>
-          <div style="display:flex;gap:6px;" id="sus_${i}_group">
-            ${[1,2,3,4,5].map(v => `<button onclick="setRating('sus_${i}',${v})" data-val="${v}" style="flex:1;padding:10px 0;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;color:#94a3b8;">${v}</button>`).join('')}
-          </div>
+        <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 24px;text-align:center;border-radius:24px 24px 0 0;">
+          <div style="font-size:28px;margin-bottom:4px;">📋</div>
+          <div style="font-size:15px;font-weight:700;color:#fff;">แบบประเมิน Usability (SUS)</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">10 ข้อสุดท้าย ใช้เวลา 1-2 นาที</div>
         </div>
-      `).join('')}
+        
+        <div style="padding:20px 24px;">
+          <div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:12px;">1 = ไม่เห็นด้วยอย่างยิ่ง → 5 = เห็นด้วยอย่างยิ่ง</div>
+          
+          ${[
+            'ฉันคิดว่าจะใช้แอปนี้บ่อยๆ',
+            'ฉันพบว่าแอปนี้ซับซ้อนเกินไป',
+            'ฉันคิดว่าแอปนี้ใช้งานง่าย',
+            'ฉันคิดว่าต้องมีคนช่วยสอนจึงจะใช้ได้',
+            'ฉันพบว่าฟังก์ชันต่างๆ ถูกรวมไว้อย่างดี',
+            'ฉันคิดว่าแอปนี้มีความไม่สอดคล้องกันมาก',
+            'ฉันคิดว่าคนส่วนใหญ่จะเรียนรู้การใช้ได้เร็ว',
+            'ฉันพบว่าแอปนี้ใช้งานยุ่งยาก',
+            'ฉันรู้สึกมั่นใจในการใช้แอปนี้',
+            'ฉันต้องเรียนรู้หลายอย่างก่อนจะเริ่มใช้ได้',
+          ].map((q, i) => `
+            <div style="margin-bottom:10px;">
+              <div style="font-size:13px;color:#1e293b;margin-bottom:6px;font-weight:500;"><span style="color:#7c3aed;font-weight:700;">${i+1}.</span> ${q}</div>
+              <div style="display:flex;gap:6px;" id="sus_${i}_group">
+                ${[1,2,3,4,5].map(v => `<button onclick="setRating('sus_${i}',${v})" data-val="${v}" style="flex:1;padding:10px 0;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;color:#94a3b8;">${v}</button>`).join('')}
+              </div>
+            </div>
+          `).join('')}
 
-      <button onclick="submitSusSurvey()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;box-shadow:0 4px 12px rgba(124,58,237,0.3);">ส่งแบบประเมิน 📋</button>
-      
-      <button onclick="localStorage.setItem('susDismissedSession',sessionCount);document.getElementById('surveyOverlay')?.remove()" style="width:100%;padding:10px;background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px;">ไว้ครั้งหน้า</button>
-    </div>
-  </div>
-</div>`;
-```
-
-document.body.appendChild(o);
+          <button onclick="submitSusSurvey()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;box-shadow:0 4px 12px rgba(124,58,237,0.3);">ส่งแบบประเมิน 📋</button>
+          
+          <button onclick="localStorage.setItem('susDismissedSession',sessionCount);document.getElementById('surveyOverlay')?.remove()" style="width:100%;padding:10px;background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px;">ไว้ครั้งหน้า</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(o);
 }
 
 function submitSusSurvey() {
-const sus = [];
-for (let i = 0; i < 10; i++) {
-if (!surveyData[‘sus_’ + i]) {
-const el = document.getElementById(‘sus_’ + i + ‘*group’);
-if (el) { el.style.animation = ‘shake .3s ease’; el.scrollIntoView({behavior:‘smooth’,block:‘center’}); }
-setTimeout(() => { if (el) el.style.animation = ‘’; }, 300);
-return;
-}
-sus.push(surveyData[’sus*’ + i]);
-}
-sendAnalytics({
-type: ‘survey’,
-role: ‘’, department: ‘’,
-sat_1: ‘’, sat_2: ‘’, sat_3: ‘’, sat_4: ‘’, sat_5: ‘’,
-sus: sus,
-comments: ‘’
-});
-localStorage.setItem(‘susCompleted’, Date.now());
-document.getElementById(‘surveyOverlay’)?.remove();
-showThankYou(‘ขอบคุณมากครับ! แบบประเมินครบแล้ว 🎉’);
+  const sus = [];
+  for (let i = 0; i < 10; i++) {
+    if (!surveyData['sus_' + i]) {
+      const el = document.getElementById('sus_' + i + '_group');
+      if (el) { el.style.animation = 'shake .3s ease'; el.scrollIntoView({behavior:'smooth',block:'center'}); }
+      setTimeout(() => { if (el) el.style.animation = ''; }, 300);
+      return;
+    }
+    sus.push(surveyData['sus_' + i]);
+  }
+  sendAnalytics({
+    type: 'survey',
+    role: '', department: '',
+    sat_1: '', sat_2: '', sat_3: '', sat_4: '', sat_5: '',
+    sus: sus,
+    comments: ''
+  });
+  localStorage.setItem('susCompleted', Date.now());
+  document.getElementById('surveyOverlay')?.remove();
+  showThankYou('ขอบคุณมากครับ! แบบประเมินครบแล้ว 🎉');
 }
 
 function showThankYou(msg) {
-const ty = document.createElement(‘div’);
-ty.innerHTML = ` <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10002; background:linear-gradient(135deg,#059669,#047857);color:#fff;padding:14px 28px;border-radius:14px; font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(5,150,105,0.3); animation:slideUp .3s ease;text-align:center;"> ${msg} </div>`;
-document.body.appendChild(ty);
-setTimeout(() => ty.remove(), 3000);
+  const ty = document.createElement('div');
+  ty.innerHTML = `
+    <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10002;
+                background:linear-gradient(135deg,#059669,#047857);color:#fff;padding:14px 28px;border-radius:14px;
+                font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(5,150,105,0.3);
+                animation:slideUp .3s ease;text-align:center;">
+      ${msg}
+    </div>`;
+  document.body.appendChild(ty);
+  setTimeout(() => ty.remove(), 3000);
 }
 
 const surveyData = {};
 function setRating(id, val) {
-surveyData[id] = val;
-const group = document.getElementById(id + ‘_group’);
-if (group) {
-group.querySelectorAll(‘button’).forEach(btn => {
-const v = parseInt(btn.dataset.val);
-const color = id.startsWith(‘sus’) ? ‘#7c3aed’ : ‘#0ea5e9’;
-if (v <= val) {
-btn.style.background = color; btn.style.color = ‘#fff’; btn.style.borderColor = color;
-} else {
-btn.style.background = ‘#fff’; btn.style.color = ‘#94a3b8’; btn.style.borderColor = ‘#e2e8f0’;
-}
-});
-}
+  surveyData[id] = val;
+  const group = document.getElementById(id + '_group');
+  if (group) {
+    group.querySelectorAll('button').forEach(btn => {
+      const v = parseInt(btn.dataset.val);
+      const color = id.startsWith('sus') ? '#7c3aed' : '#0ea5e9';
+      if (v <= val) {
+        btn.style.background = color; btn.style.color = '#fff'; btn.style.borderColor = color;
+      } else {
+        btn.style.background = '#fff'; btn.style.color = '#94a3b8'; btn.style.borderColor = '#e2e8f0';
+      }
+    });
+  }
 }
 
 function closeSurvey() {
-document.getElementById(‘surveyOverlay’)?.remove();
+  document.getElementById('surveyOverlay')?.remove();
 }
 
 // Legacy support
@@ -1898,23 +1889,23 @@ function submitSurvey() { submitSatSurvey(); }
 function dismissSurvey() { dismissSatSurvey(); }
 
 // Initialize analytics
-if (!analyticsConsent && !localStorage.getItem(‘analyticsDeclined’)) {
-setTimeout(showConsentBanner, 2000);
+if (!analyticsConsent && !localStorage.getItem('analyticsDeclined')) {
+  setTimeout(showConsentBanner, 2000);
 } else if (analyticsConsent) {
-trackSession();
-showSurveyPrompt();
+  trackSession();
+  showSurveyPrompt();
 }
 
 // ============================================================
 // STANDALONE MODE
 // ============================================================
 if (isStandalone) {
-// Add safe-area padding for iOS notch
-document.documentElement.style.setProperty(’–sat’, ‘env(safe-area-inset-top)’);
-document.documentElement.style.setProperty(’–sab’, ‘env(safe-area-inset-bottom)’);
-const header = document.querySelector(’.header’);
-if (header) header.style.paddingTop = ‘max(0px, env(safe-area-inset-top))’;
-console.log(’[PWA] Running in standalone mode’);
+  // Add safe-area padding for iOS notch
+  document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top)');
+  document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom)');
+  const header = document.querySelector('.header');
+  if (header) header.style.paddingTop = 'max(0px, env(safe-area-inset-top))';
+  console.log('[PWA] Running in standalone mode');
 }
 </script>
 
@@ -1938,6 +1929,5 @@ console.log(’[PWA] Running in standalone mode’);
   .content { padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
 }
 </style>
-
 </body>
 </html>

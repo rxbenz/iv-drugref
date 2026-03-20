@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -21,61 +20,61 @@
 body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
 .header {
-background: #fff; border-bottom: 1px solid var(–border); padding: 12px 16px;
-display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100;
+  background: #fff; border-bottom: 1px solid var(--border); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100;
 }
-.header a { color: var(–accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
+.header a { color: var(--accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
 .header h1 { font-size: 16px; font-weight: 600; flex: 1; }
 
 .container { max-width: 600px; margin: 0 auto; padding: 16px; }
 
-.section { background: #fff; border-radius: 12px; border: 1px solid var(–border); margin-bottom: 16px; overflow: hidden; }
-.section-header { padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(–accent-blue); border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px; }
+.section { background: #fff; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; }
+.section-header { padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--accent-blue); border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px; }
 
 .field-grid { display: grid; gap: 12px; padding: 16px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
-.field label { font-size: 11px; color: var(–text-secondary); display: block; margin-bottom: 4px; font-weight: 500; }
+.field label { font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; font-weight: 500; }
 .field input, .field select {
-width: 100%; padding: 10px 12px; border: 1px solid var(–border); border-radius: 8px;
-font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: var(–text-primary);
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: var(--text-primary);
 }
-.field input:focus, .field select:focus { outline: none; border-color: var(–accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
 
 .crcl-display {
-background: #f0f4f8; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(–text-secondary);
-display: flex; justify-content: space-between; align-items: center;
+  background: #f0f4f8; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text-secondary);
+  display: flex; justify-content: space-between; align-items: center;
 }
-.crcl-value { font-weight: 600; color: var(–text-primary); font-size: 15px; font-family: ‘JetBrains Mono’,monospace; }
+.crcl-value { font-weight: 600; color: var(--text-primary); font-size: 15px; font-family: 'JetBrains Mono',monospace; }
 .crcl-warning { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
 
 .drug-card {
-border: 1px solid var(–border); border-radius: 10px; padding: 14px; cursor: pointer;
-transition: border-color .2s, box-shadow .2s; background: #fff;
+  border: 1px solid var(--border); border-radius: 10px; padding: 14px; cursor: pointer;
+  transition: border-color .2s, box-shadow .2s; background: #fff;
 }
-.drug-card:hover { border-color: var(–accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.08); }
-.drug-card.active { border-color: var(–accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); background: #f0f8ff; }
+.drug-card:hover { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.08); }
+.drug-card.active { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); background: #f0f8ff; }
 .drug-name { font-weight: 600; font-size: 14px; }
-.drug-sub { font-size: 12px; color: var(–text-secondary); margin-top: 2px; }
+.drug-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
 .result-box {
-background: #dcfce7; border: 2px solid #4ade80; border-radius: 12px; padding: 16px; text-align: center;
+  background: #dcfce7; border: 2px solid #4ade80; border-radius: 12px; padding: 16px; text-align: center;
 }
 .result-title { font-size: 12px; color: #166534; font-weight: 500; margin-bottom: 4px; }
-.result-value { font-size: 28px; font-weight: 700; color: #166534; font-family: ‘JetBrains Mono’,monospace; }
+.result-value { font-size: 28px; font-weight: 700; color: #166534; font-family: 'JetBrains Mono',monospace; }
 .result-detail { font-size: 13px; color: #166534; margin-top: 6px; }
 
 .info-box {
-border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
+  border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
 }
 .info-box.blue { background: #e6f1fb; color: #0c447c; }
 .info-box.amber { background: #fef3c7; color: #92400e; }
 .info-box.red { background: #fef2f2; color: #991b1b; }
 
 .disclaimer {
-text-align: center; font-size: 11px; color: var(–accent-red); padding: 12px 16px;
-font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
+  text-align: center; font-size: 11px; color: var(--accent-red); padding: 12px 16px;
+  font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 }
 
 .calc-output { padding: 16px; display: none; }
@@ -83,8 +82,8 @@ font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 
 .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f4f8; font-size: 13px; }
 .detail-row:last-child { border: none; }
-.detail-label { color: var(–text-secondary); }
-.detail-value { font-weight: 600; font-family: ‘JetBrains Mono’,monospace; }
+.detail-label { color: var(--text-secondary); }
+.detail-value { font-weight: 600; font-family: 'JetBrains Mono',monospace; }
 
 .drug-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
 
@@ -96,7 +95,6 @@ font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 .badge-stroke { background: #e6f1fb; color: #0c447c; }
 .badge-loading { background: #f3e8ff; color: #6b21a8; }
 </style>
-
 </head>
 <body>
 
@@ -108,7 +106,6 @@ font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 <div class="container">
 
 <!-- Patient Info -->
-
 <div class="section">
   <div class="section-header">👤 ข้อมูลผู้ป่วย</div>
   <div class="field-grid">
@@ -148,14 +145,12 @@ font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 </div>
 
 <!-- Drug Selection -->
-
 <div class="section">
   <div class="section-header">💊 เลือกยา</div>
   <div class="drug-grid" id="drugGrid"></div>
 </div>
 
 <!-- Calculator Output -->
-
 <div class="section" id="outputSection" style="display:none;">
   <div class="section-header" id="outputHeader">📊 ผลคำนวณ</div>
   <div id="outputBody"></div>
@@ -501,6 +496,5 @@ function calculate() {
 updateCrCl();
 renderDrugGrid();
 </script>
-
 </body>
 </html>

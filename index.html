@@ -669,7 +669,7 @@ body::before {
         แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
         AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
       </div>
-      <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 3.0.0 — มีนาคม 2569 (2026) | ข้อมูลยา 117 รายการ</div>
+      <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.0.0 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
     </div>
 
     <!-- License -->
@@ -951,6 +951,8 @@ function getFilteredDrugs() {
 function updateList() {
   renderDrugList(getFilteredDrugs());
   document.getElementById('drugCount').textContent = `${getFilteredDrugs().length} / ${DRUGS.length} drugs`;
+  const fc = document.getElementById('footerDrugCount');
+  if (fc) fc.textContent = DRUGS.length;
 }
 
 function clearSearch() {

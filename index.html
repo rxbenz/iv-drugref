@@ -3122,12 +3122,22 @@ function openSatSurvey() {
         </div>
         
         <div style="padding:16px 20px;">
-          <div style="margin-bottom:12px;">
+          <div style="margin-bottom:10px;">
             <label style="font-size:11px;font-weight:600;color:#64748b;">ตำแหน่ง (ไม่บังคับ)</label>
             <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;" id="role_group">
-              ${['pharmacist|เภสัชกร','nurse|พยาบาล','physician|แพทย์','other|อื่นๆ'].map(opt => {
+              ${['pharmacist|เภสัชกร','nurse|พยาบาล','physician|แพทย์','student|นศ.เภสัชฯ','other|อื่นๆ'].map(opt => {
                 const [val,label] = opt.split('|');
-                return `<button onclick="selectRole('${val}')" data-val="${val}" style="padding:5px 12px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;">${label}</button>`;
+                return `<button onclick="selectRole('${val}')" data-val="${val}" style="padding:5px 12px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s;">${label}</button>`;
+              }).join('')}
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:#64748b;">หน่วยงาน/แผนก (ไม่บังคับ)</label>
+            <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;" id="dept_group">
+              ${['opd_pharmacy|ห้องยา OPD','ipd_pharmacy|ห้องยา IPD','production|ฝ่ายผลิต','clinical|เภสัชคลินิก','dis|DIS','icu|ICU/ER','ward|หอผู้ป่วย','or|ห้องผ่าตัด','other_dept|อื่นๆ'].map(opt => {
+                const [val,label] = opt.split('|');
+                return `<button onclick="selectDept('${val}')" data-val="${val}" style="padding:4px 10px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s;">${label}</button>`;
               }).join('')}
             </div>
           </div>
@@ -3171,6 +3181,18 @@ function selectRole(val) {
   });
 }
 
+let selectedDept = '';
+function selectDept(val) {
+  selectedDept = val;
+  document.getElementById('dept_group')?.querySelectorAll('button').forEach(btn => {
+    if (btn.dataset.val === val) {
+      btn.style.background = '#0ea5e9'; btn.style.color = '#fff'; btn.style.borderColor = '#0ea5e9';
+    } else {
+      btn.style.background = '#fff'; btn.style.color = '#374151'; btn.style.borderColor = '#e2e8f0';
+    }
+  });
+}
+
 function submitSatSurvey() {
   for (let i = 1; i <= 5; i++) {
     if (!surveyData['sat_' + i]) {
@@ -3183,7 +3205,7 @@ function submitSatSurvey() {
   sendAnalytics({
     type: 'survey',
     role: selectedRole,
-    department: '',
+    department: selectedDept,
     sat_1: surveyData.sat_1, sat_2: surveyData.sat_2, sat_3: surveyData.sat_3,
     sat_4: surveyData.sat_4, sat_5: surveyData.sat_5,
     sus: [],

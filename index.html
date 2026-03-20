@@ -708,6 +708,7 @@ body::before {
     </div>
   </div>
   <div class="filters" id="filters">
+    <a href="calculator.html" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:#0ea5e9;color:#fff;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;font-family:inherit;border:none;white-space:nowrap;">🧮 Dose Calculator</a>
     <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
     <button class="filter-btn" data-filter="had">⚠ High Alert</button>
     <button class="filter-btn" data-filter="antiepileptic">Antiepileptic</button>
@@ -743,7 +744,7 @@ body::before {
         แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
         AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
       </div>
-      <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.0.0 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
+      <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.1.0 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
     </div>
 
     <!-- License -->
@@ -921,6 +922,7 @@ function renderDrugList(drugs) {
         <div class="card-badges">
           ${drug.had ? '<span class="badge badge-had">⚠ HAD</span>' : ''}
           <span class="badge ${drug.ed === 'E' ? 'badge-ed' : 'badge-ned'}">${drug.ed === 'E' ? 'ED' : 'NED'}</span>
+          ${DOSE_CALC[drug.generic] ? '<span class="badge" style="background:#e6f1fb;color:#0c447c;font-size:9px;">🧮</span>' : ''}
         </div>
         <div class="card-chevron">▼</div>
       </div>

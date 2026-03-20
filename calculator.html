@@ -159,7 +159,7 @@ body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; backgro
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้นเท่านั้น ต้องใช้ clinical judgment ประกอบการตัดสินใจทุกครั้ง<br>ข้อมูลจาก Lexicomp, Trissel's, AHA/ACLS, IDSA, AES Guidelines</div>
 
 <div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted);">
-  IV DrugRef v4.0.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
+  IV DrugRef v4.1.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
 </div>
 
 </div>
@@ -174,28 +174,46 @@ const CALC_DRUGS = [
       const dose_low = Math.round(pt.wt * 15 / 250) * 250;
       const dose_high = Math.round(pt.wt * 20 / 250) * 250;
       const dose = Math.round(pt.wt * 15 / 250) * 250;
-      let freq = 'q12h', freqNote = '';
-      if (pt.crcl > 80) { freq = 'q8-12h'; freqNote = 'CrCl >80 → อาจให้ q8h'; }
-      else if (pt.crcl > 50) { freq = 'q12h'; freqNote = 'CrCl 50-80'; }
-      else if (pt.crcl > 30) { freq = 'q24h'; freqNote = 'CrCl 30-50'; }
-      else if (pt.crcl > 10) { freq = 'q24-48h'; freqNote = 'CrCl 10-30 → extend interval'; }
-      else { freq = 'q48-72h'; freqNote = 'CrCl <10 / HD → re-dose by level'; }
+      let freq = 'q12h', freqNote = '', dailyDose = 0;
+      if (pt.crcl > 80) { freq = 'q8-12h'; freqNote = 'CrCl >80'; dailyDose = dose * 3; }
+      else if (pt.crcl > 50) { freq = 'q12h'; freqNote = 'CrCl 50-80'; dailyDose = dose * 2; }
+      else if (pt.crcl > 30) { freq = 'q24h'; freqNote = 'CrCl 30-50'; dailyDose = dose; }
+      else if (pt.crcl > 10) { freq = 'q24-48h'; freqNote = 'CrCl 10-30'; dailyDose = dose; }
+      else { freq = 'q48-72h'; freqNote = 'CrCl <10 / HD'; dailyDose = dose * 0.5; }
       const vol = dose <= 1000 ? 200 : 250;
       const rate_mgmin = 10;
       const infuse_min = Math.ceil(dose / rate_mgmin);
       const rate_mlhr = Math.round(vol / (infuse_min / 60));
+      const ke = 0.00083 * pt.crcl + 0.0044;
+      const vd = 0.7 * pt.wt;
+      const estAUC = dailyDose > 0 ? Math.round(dailyDose / (ke * vd)) : 0;
+      let aucNote = '';
+      if (estAUC > 0) {
+        if (estAUC >= 400 && estAUC <= 600) aucNote = '✅ อยู่ใน target (400-600)';
+        else if (estAUC < 400) aucNote = '⚠ ต่ำกว่า target → พิจารณาเพิ่ม dose/frequency';
+        else aucNote = '⚠ สูงกว่า target → เสี่ยง nephrotoxicity';
+      }
+      const renalTable = '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;">'
+        + '<tr style="background:#e6f1fb;"><th style="padding:4px 6px;text-align:left;border:1px solid #85B7EB;">CrCl (mL/min)</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Interval</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Daily dose</th></tr>'
+        + `<tr${pt.crcl>80?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">>80</td><td style="padding:4px 6px;border:1px solid #ddd;">q8-12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 2-3/day</td></tr>`
+        + `<tr${pt.crcl>50&&pt.crcl<=80?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">50-80</td><td style="padding:4px 6px;border:1px solid #ddd;">q12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 2/day</td></tr>`
+        + `<tr${pt.crcl>30&&pt.crcl<=50?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">30-50</td><td style="padding:4px 6px;border:1px solid #ddd;">q24h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 1/day</td></tr>`
+        + `<tr${pt.crcl>10&&pt.crcl<=30?' style="background:#fef3c7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">10-30</td><td style="padding:4px 6px;border:1px solid #ddd;">q24-48h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose by level</td></tr>`
+        + `<tr${pt.crcl<=10?' style="background:#fef2f2;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;"><10 / HD</td><td style="padding:4px 6px;border:1px solid #ddd;">q48-72h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose when trough <15-20</td></tr>`
+        + '</table>';
       return {
         title: `Vancomycin ${dose} mg IV ${freq}`,
         details: [
           { l: 'Weight-based dose', v: `15-20 mg/kg = ${dose_low}–${dose_high} mg` },
           { l: 'Recommended dose', v: `${dose} mg` },
-          { l: 'Frequency', v: `${freq}` + (freqNote ? ` (${freqNote})` : '') },
+          { l: 'Frequency', v: `${freq} (${freqNote}, CrCl ${pt.crcl.toFixed(0)} mL/min)` },
+          { l: 'Daily total', v: `~${dailyDose} mg/day` },
           { l: 'Dilution', v: `${dose} mg ใน NSS ${vol} mL` },
-          { l: 'Max rate', v: `≤${rate_mgmin} mg/min` },
-          { l: 'Infuse over', v: `≥${infuse_min} min` },
+          { l: 'Max rate', v: `≤${rate_mgmin} mg/min → infuse ≥${infuse_min} min` },
           { l: 'Infusion rate', v: `${rate_mlhr} mL/hr` },
+          { l: 'Est. AUC₂₄', v: `~${estAUC} mg·hr/L ${aucNote}` },
         ],
-        info: `<strong>TDM:</strong> AUC/MIC target 400-600 | เจาะ trough ก่อน dose ที่ 4<br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome, phlebitis<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)`,
+        info: `<strong>📋 Renal dose adjustment (CrCl ${pt.crcl.toFixed(0)}):</strong>${renalTable}<br><strong>TDM:</strong> AUC/MIC target 400-600 (preferred) | Trough 15-20 mcg/mL (ถ้าไม่มี AUC)<br>เจาะ trough ก่อน dose ที่ 4 (steady state)<br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome → infuse ≥60 min/g<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)<br><strong>HD:</strong> Re-dose 15-25 mg/kg post-HD, เจาะ pre-HD level`,
         infoType: 'blue'
       };
     }

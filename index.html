@@ -751,7 +751,7 @@ display: none; /* hidden by default, shown when useful */
     แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
     AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
   </div>
-  <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.1.0 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
+  <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.1.2 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
 </div>
 
 <!-- License -->
@@ -870,36 +870,18 @@ function showSyncStatus(msg, type) {
 }
 
 async function initDrugs() {
-  // Step 1: Instant load from cache or static fallback
-  const cached = loadDrugsFromCache();
-  DRUGS = cached || STATIC_DRUGS;
+  // v4.1.2 HOTFIX: Force use STATIC_DRUGS always
+  // Clear any bad cache from previous versions
+  try {
+    localStorage.removeItem(DRUG_CACHE_KEY);
+    localStorage.removeItem(DRUG_CACHE_TS_KEY);
+  } catch(e) {}
+  
+  DRUGS = STATIC_DRUGS;
   updateList();
-
-  // Step 2: Background sync from Google Sheets
-  const lastSync = parseInt(localStorage.getItem(DRUG_CACHE_TS_KEY) || "0");
-  const needsSync = (Date.now() - lastSync) > DRUG_SYNC_INTERVAL;
-
-  if (navigator.onLine && needsSync) {
-    showSyncStatus("🔄 กำลัง sync ข้อมูลยา...", "syncing");
-    const serverDrugs = await fetchDrugsFromServer();
-    if (serverDrugs && serverDrugs.length >= STATIC_DRUGS.length) {
-      const oldCount = DRUGS.length;
-      DRUGS = serverDrugs;
-      saveDrugsToCache(serverDrugs);
-      updateList();
-      const diff = serverDrugs.length - oldCount;
-      const diffText = diff > 0 ? ` (+${diff} ใหม่)` : "";
-      showSyncStatus(`✅ อัปเดตแล้ว ${serverDrugs.length} รายการ${diffText}`, "success");
-    } else if (serverDrugs && serverDrugs.length < STATIC_DRUGS.length) {
-      // Server has fewer drugs than static — likely incomplete import, ignore
-      console.warn('[DrugSync] Server has ' + serverDrugs.length + ' drugs, static has ' + STATIC_DRUGS.length + '. Using static.');
-      DRUGS = STATIC_DRUGS;
-      updateList();
-      showSyncStatus("📦 ใช้ข้อมูล built-in (" + STATIC_DRUGS.length + " รายการ)", "offline");
-    } else if (cached) {
-      showSyncStatus("📦 ใช้ข้อมูลจาก cache", "offline");
-    }
-  }
+  
+  // Google Sheets sync temporarily disabled (re-enable after testing)
+  // TODO: Re-enable sync after verifying API data format
 }
 
 // Manual sync (callable from UI)

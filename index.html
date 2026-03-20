@@ -744,7 +744,7 @@ body::before {
         แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
         AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
       </div>
-      <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.1.2 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
+      <div id="versionInfo" style="font-size:11px; color:var(--text-muted); margin-top:2px;">เวอร์ชัน 4.2.0 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">117</span> รายการ</div>
     </div>
 
     <!-- License -->
@@ -861,18 +861,37 @@ function showSyncStatus(msg, type) {
 }
 
 async function initDrugs() {
-  // v4.1.2 HOTFIX: Force use STATIC_DRUGS always
-  // Clear any bad cache from previous versions
+  // Step 1: Clear legacy bad cache (one-time migration from v4.1.2)
   try {
-    localStorage.removeItem(DRUG_CACHE_KEY);
-    localStorage.removeItem(DRUG_CACHE_TS_KEY);
+    const cacheVer = localStorage.getItem('drugCacheVer');
+    if (cacheVer !== 'v5') {
+      localStorage.removeItem(DRUG_CACHE_KEY);
+      localStorage.removeItem(DRUG_CACHE_TS_KEY);
+      localStorage.setItem('drugCacheVer', 'v5');
+    }
   } catch(e) {}
-  
-  DRUGS = STATIC_DRUGS;
+
+  // Step 2: Load from cache or static fallback (instant)
+  const cached = loadDrugsFromCache();
+  DRUGS = cached || STATIC_DRUGS;
   updateList();
-  
-  // Google Sheets sync temporarily disabled (re-enable after testing)
-  // TODO: Re-enable sync after verifying API data format
+
+  // Step 3: Background sync from Google Sheets
+  const lastSync = parseInt(localStorage.getItem(DRUG_CACHE_TS_KEY) || "0");
+  const needsSync = (Date.now() - lastSync) > DRUG_SYNC_INTERVAL;
+
+  if (navigator.onLine && needsSync) {
+    showSyncStatus("🔄 กำลัง sync ข้อมูลยา...", "syncing");
+    const serverDrugs = await fetchDrugsFromServer();
+    if (serverDrugs) {
+      DRUGS = serverDrugs;
+      saveDrugsToCache(serverDrugs);
+      updateList();
+      showSyncStatus("✅ อัปเดตแล้ว " + serverDrugs.length + " รายการ", "success");
+    } else {
+      showSyncStatus(cached ? "📦 ใช้ข้อมูลจาก cache" : "📦 ใช้ข้อมูล built-in", "offline");
+    }
+  }
 }
 
 // Manual sync (callable from UI)

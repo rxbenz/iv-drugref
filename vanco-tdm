@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vancomycin Bayesian TDM — IV DrugRef</title>
+<meta name="theme-color" content="#1e293b">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f172a; --bg2: #1e293b; --bg3: #334155;
+  --card: #1e293b; --card-border: #334155;
+  --text: #f1f5f9; --text2: #94a3b8; --text3: #64748b;
+  --blue: #38bdf8; --blue2: #0ea5e9; --blue-dim: rgba(56,189,248,0.12);
+  --green: #4ade80; --green-dim: rgba(74,222,128,0.12);
+  --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.12);
+  --red: #f87171; --red-dim: rgba(248,113,113,0.12);
+  --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.12);
+  --target-low: 400; --target-high: 600;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+
+.header { background:var(–bg2); border-bottom:1px solid var(–card-border); padding:12px 16px; display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:100; }
+.header a { color:var(–blue); text-decoration:none; font-size:14px; font-weight:500; display:flex; align-items:center; gap:4px; }
+.header h1 { font-size:15px; font-weight:600; flex:1; }
+.header .ver { font-size:11px; color:var(–text3); }
+
+.container { max-width:700px; margin:0 auto; padding:16px; }
+
+.card { background:var(–card); border:1px solid var(–card-border); border-radius:12px; margin-bottom:16px; overflow:hidden; }
+.card-head { padding:12px 16px; font-size:12px; font-weight:600; color:var(–blue); letter-spacing:0.05em; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; gap:8px; }
+.card-body { padding:16px; }
+
+.row { display:grid; gap:10px; }
+.row-2 { grid-template-columns:1fr 1fr; }
+.row-3 { grid-template-columns:1fr 1fr 1fr; }
+.row-4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+
+.field label { font-size:11px; color:var(–text2); display:block; margin-bottom:4px; font-weight:500; }
+.field input, .field select {
+width:100%; padding:9px 11px; border:1px solid var(–card-border); border-radius:8px;
+font-size:14px; font-weight:500; font-family:var(–mono); background:var(–bg); color:var(–text);
+}
+.field input:focus, .field select:focus { outline:none; border-color:var(–blue); box-shadow:0 0 0 3px var(–blue-dim); }
+.field .unit { font-size:10px; color:var(–text3); margin-top:2px; }
+
+.dose-entry { background:var(–bg); border:1px solid var(–card-border); border-radius:10px; padding:12px; margin-bottom:10px; }
+.dose-entry-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.dose-entry-head span { font-size:12px; font-weight:600; color:var(–purple); }
+.dose-entry-head button { background:none; border:none; color:var(–red); font-size:18px; cursor:pointer; padding:0 4px; }
+
+.level-entry { background:var(–bg); border:1px solid var(–card-border); border-radius:10px; padding:12px; margin-bottom:10px; }
+
+.btn { padding:10px 20px; border-radius:8px; font-family:var(–sans); font-size:13px; font-weight:600; cursor:pointer; border:none; transition:all .15s; }
+.btn-primary { background:var(–blue); color:#0f172a; }
+.btn-primary:hover { background:#7dd3fc; }
+.btn-primary:active { transform:scale(0.98); }
+.btn-secondary { background:var(–bg3); color:var(–text); }
+.btn-sm { padding:6px 12px; font-size:11px; }
+.btn-add { background:var(–purple-dim); color:var(–purple); border:1px dashed rgba(167,139,250,0.3); width:100%; padding:8px; border-radius:8px; font-family:var(–sans); font-size:12px; cursor:pointer; }
+
+.result-box { border-radius:10px; padding:14px; margin:12px 0; text-align:center; }
+.result-box.green { background:var(–green-dim); border:1.5px solid rgba(74,222,128,0.3); }
+.result-box.amber { background:var(–amber-dim); border:1.5px solid rgba(251,191,36,0.3); }
+.result-box.red { background:var(–red-dim); border:1.5px solid rgba(248,113,113,0.3); }
+.result-title { font-size:11px; color:var(–text2); font-weight:500; margin-bottom:4px; letter-spacing:0.03em; }
+.result-value { font-size:28px; font-weight:700; font-family:var(–mono); }
+.result-sub { font-size:12px; margin-top:4px; }
+
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0; }
+.stat { background:var(–bg); border-radius:8px; padding:10px; text-align:center; }
+.stat-label { font-size:10px; color:var(–text3); margin-bottom:2px; }
+.stat-val { font-size:16px; font-weight:600; font-family:var(–mono); }
+
+.graph-container { position:relative; background:var(–bg); border:1px solid var(–card-border); border-radius:10px; overflow:hidden; margin:12px 0; }
+canvas { display:block; width:100%; }
+
+.slider-row { display:flex; align-items:center; gap:10px; margin:8px 0; }
+.slider-row label { font-size:11px; color:var(–text2); min-width:80px; }
+.slider-row input[type=range] { flex:1; accent-color:var(–blue); height:6px; }
+.slider-row .slider-val { font-size:13px; font-weight:600; font-family:var(–mono); color:var(–blue); min-width:70px; text-align:right; }
+
+.info-box { border-radius:8px; padding:10px 12px; font-size:12px; line-height:1.6; margin:10px 0; }
+.info-box.blue { background:var(–blue-dim); color:var(–blue); }
+.info-box.amber { background:var(–amber-dim); color:var(–amber); }
+.info-box.red { background:var(–red-dim); color:var(–red); }
+
+.pk-table { width:100%; border-collapse:collapse; font-size:12px; }
+.pk-table td { padding:6px 8px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.pk-table td:first-child { color:var(–text2); }
+.pk-table td:last-child { font-family:var(–mono); font-weight:500; text-align:right; }
+
+.disclaimer { text-align:center; font-size:10px; color:var(–red); padding:16px; font-weight:500; background:var(–red-dim); border-radius:8px; margin-top:16px; line-height:1.5; }
+
+.tabs { display:flex; gap:4px; margin-bottom:12px; }
+.tab { padding:6px 14px; border-radius:6px; font-size:12px; font-weight:500; cursor:pointer; border:none; font-family:var(–sans); background:var(–bg); color:var(–text3); transition:all .15s; }
+.tab.active { background:var(–blue-dim); color:var(–blue); }
+
+.dose-compare { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0; }
+.dose-option { background:var(–bg); border:1px solid var(–card-border); border-radius:10px; padding:12px; cursor:pointer; transition:all .15s; }
+.dose-option:hover { border-color:var(–blue); }
+.dose-option.selected { border-color:var(–green); background:var(–green-dim); }
+.dose-option .opt-dose { font-size:15px; font-weight:600; font-family:var(–mono); }
+.dose-option .opt-auc { font-size:12px; color:var(–text2); margin-top:4px; }
+.dose-option .opt-badge { display:inline-block; font-size:10px; padding:2px 6px; border-radius:4px; margin-top:4px; font-weight:500; }
+
+@media (max-width:500px) {
+.row-3 { grid-template-columns:1fr 1fr; }
+.row-4 { grid-template-columns:1fr 1fr; }
+.stat-grid { grid-template-columns:1fr 1fr; }
+.dose-compare { grid-template-columns:1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <a href="calculator.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>กลับ</a>
+  <h1>Vancomycin Bayesian TDM</h1>
+  <span class="ver">v1.0</span>
+</div>
+
+<div class="container">
+
+<!-- Patient Info -->
+
+<div class="card">
+  <div class="card-head">👤 PATIENT INFORMATION</div>
+  <div class="card-body">
+    <div class="row row-4" style="margin-bottom:10px;">
+      <div class="field"><label>Weight (kg)</label><input type="number" id="ptWt" value="70" min="20" max="300" step="0.1"></div>
+      <div class="field"><label>Age (yr)</label><input type="number" id="ptAge" value="55" min="18" max="120"></div>
+      <div class="field"><label>Sex</label><select id="ptSex"><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="field"><label>SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div>
+    </div>
+    <div class="row row-2">
+      <div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div>
+      <div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly style="color:var(--blue);background:var(--bg3);border:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Dose History -->
+
+<div class="card">
+  <div class="card-head">💊 DOSE HISTORY</div>
+  <div class="card-body">
+    <div id="doseList"></div>
+    <button class="btn-add" onclick="addDose()">+ เพิ่ม dose</button>
+  </div>
+</div>
+
+<!-- Measured Levels -->
+
+<div class="card">
+  <div class="card-head">🩸 MEASURED LEVELS</div>
+  <div class="card-body">
+    <div id="levelList"></div>
+    <button class="btn-add" onclick="addLevel()">+ เพิ่ม level</button>
+  </div>
+</div>
+
+<!-- Calculate -->
+
+<div style="text-align:center;margin:16px 0;">
+  <button class="btn btn-primary" onclick="runBayesian()" style="width:100%;padding:14px;font-size:15px;">
+    🧬 Run Bayesian Estimation
+  </button>
+</div>
+
+<!-- Results -->
+
+<div id="resultsSection" style="display:none;">
+
+<div class="card">
+  <div class="card-head">📊 BAYESIAN ESTIMATION RESULTS</div>
+  <div class="card-body">
+    <div id="aucResult"></div>
+    <div class="stat-grid" id="pkStats"></div>
+    <table class="pk-table" id="pkTable"></table>
+  </div>
+</div>
+
+<!-- Interactive Graph -->
+
+<div class="card">
+  <div class="card-head">📈 CONCENTRATION-TIME CURVE</div>
+  <div class="card-body">
+    <div class="graph-container">
+      <canvas id="pkGraph" height="300"></canvas>
+    </div>
+    <div class="info-box blue" style="font-size:11px;">
+      🟦 สีฟ้า = predicted concentration &nbsp; 🟡 จุดเหลือง = measured levels &nbsp; 
+      <span style="color:var(--green);">█</span> เขียว = AUC target zone (400-600)
+    </div>
+  </div>
+</div>
+
+<!-- Dose Optimization -->
+
+<div class="card">
+  <div class="card-head">🎯 DOSE OPTIMIZATION</div>
+  <div class="card-body">
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">ปรับ dose/interval แล้วดูกราฟเปลี่ยน real-time:</p>
+    <div class="slider-row">
+      <label>Dose (mg)</label>
+      <input type="range" id="optDose" min="250" max="3000" step="250" value="1000">
+      <span class="slider-val" id="optDoseVal">1000 mg</span>
+    </div>
+    <div class="slider-row">
+      <label>Interval (hr)</label>
+      <input type="range" id="optInterval" min="6" max="48" step="2" value="12">
+      <span class="slider-val" id="optIntervalVal">q12h</span>
+    </div>
+    <div class="slider-row">
+      <label>Infusion (hr)</label>
+      <input type="range" id="optInfusion" min="0.5" max="4" step="0.5" value="1">
+      <span class="slider-val" id="optInfusionVal">1 hr</span>
+    </div>
+    <div id="optResult"></div>
+    <div class="dose-compare" id="doseCompare"></div>
+  </div>
+</div>
+
+</div><!-- resultsSection -->
+
+<div class="disclaimer">
+  ⚠ DISCLAIMER: เครื่องมือนี้เป็นเพียงตัวช่วยในการคำนวณเบื้องต้น ไม่สามารถทดแทน clinical judgment ได้<br>
+  ผลคำนวณจาก Bayesian MAP estimation ใช้ population PK model (Buelga 2005) เป็น prior<br>
+  ต้องใช้ประกอบกับการประเมินทางคลินิกทุกครั้ง | สำหรับบุคลากรทางการแพทย์เท่านั้น<br>
+  Ref: Buelga DS et al. Antimicrob Agents Chemother 2005; ASHP/IDSA Vancomycin Guidelines 2020
+</div>
+
+<div style="text-align:center;padding:16px;font-size:11px;color:var(--text3);">
+  IV DrugRef v4.1.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
+</div>
+
+</div>
+
+<script>
+// ============================================================
+// VANCOMYCIN BAYESIAN TDM CALCULATOR
+// Population PK Model: Buelga 2005 (1-compartment)
+// Method: Maximum A Posteriori (MAP) Bayesian Estimation
+// ============================================================
+
+// --- Population PK Parameters (Buelga 2005) ---
+const POP_PK = {
+  name: 'Buelga 2005',
+  // CL (L/hr) = theta1 * CrCl + theta2
+  theta_cl: [0.0048, 0.0], // CL = 0.0048 * CrCl (L/hr)
+  omega_cl: 0.25, // IIV on CL (CV ~50%)
+  // Vd (L) = theta_vd * TBW
+  theta_vd: 0.65, // L/kg
+  omega_vd: 0.15, // IIV on Vd (CV ~39%)
+  sigma: 0.10, // Residual error proportional (10%)
+};
+
+// --- Helpers ---
+function cockcroft(age, wt, scr, sex) {
+  let crcl = ((140 - age) * wt) / (72 * scr);
+  if (sex === 'F') crcl *= 0.85;
+  return Math.max(crcl, 5);
+}
+
+function getPatient() {
+  return {
+    wt: parseFloat(document.getElementById('ptWt').value) || 70,
+    age: parseFloat(document.getElementById('ptAge').value) || 55,
+    sex: document.getElementById('ptSex').value,
+    scr: parseFloat(document.getElementById('ptScr').value) || 1.0,
+    ht: parseFloat(document.getElementById('ptHt').value) || 170,
+  };
+}
+
+function updateCrCl() {
+  const pt = getPatient();
+  const crcl = cockcroft(pt.age, pt.wt, pt.scr, pt.sex);
+  document.getElementById('ptCrCl').value = crcl.toFixed(1) + ' mL/min';
+  return crcl;
+}
+
+// --- Dose & Level Management ---
+let doses = [{ amount: 1000, interval: 12, infusion: 1, startTime: 0, nDoses: 3 }];
+let levels = [{ value: 15, time: 35.5 }];
+
+function renderDoses() {
+  const el = document.getElementById('doseList');
+  el.innerHTML = doses.map((d, i) => `
+    <div class="dose-entry">
+      <div class="dose-entry-head"><span>Dose #${i+1}</span>${doses.length>1?`<button onclick="doses.splice(${i},1);renderDoses();">×</button>`:''}</div>
+      <div class="row row-3" style="gap:8px;">
+        <div class="field"><label>Amount (mg)</label><input type="number" value="${d.amount}" min="100" max="4000" step="250" onchange="doses[${i}].amount=+this.value"></div>
+        <div class="field"><label>Interval (hr)</label><input type="number" value="${d.interval}" min="4" max="72" step="1" onchange="doses[${i}].interval=+this.value"></div>
+        <div class="field"><label>Infusion (hr)</label><input type="number" value="${d.infusion}" min="0.5" max="4" step="0.5" onchange="doses[${i}].infusion=+this.value"></div>
+      </div>
+      <div class="row row-2" style="gap:8px;margin-top:8px;">
+        <div class="field"><label>Start time (hr from first dose=0)</label><input type="number" value="${d.startTime}" min="0" step="0.5" onchange="doses[${i}].startTime=+this.value"></div>
+        <div class="field"><label># doses given</label><input type="number" value="${d.nDoses}" min="1" max="50" onchange="doses[${i}].nDoses=+this.value"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addDose() {
+  const last = doses[doses.length-1];
+  doses.push({ amount:last.amount, interval:last.interval, infusion:last.infusion, startTime:last.startTime+last.interval*last.nDoses, nDoses:1 });
+  renderDoses();
+}
+
+function renderLevels() {
+  const el = document.getElementById('levelList');
+  el.innerHTML = levels.map((l, i) => `
+    <div class="level-entry">
+      <div class="row row-2" style="gap:8px;align-items:end;">
+        <div class="field"><label>Level #${i+1} (mcg/mL)</label><input type="number" value="${l.value}" min="0.1" max="100" step="0.1" onchange="levels[${i}].value=+this.value"></div>
+        <div class="field"><label>Time drawn (hr from first dose=0)</label><input type="number" value="${l.time}" min="0" max="500" step="0.5" onchange="levels[${i}].time=+this.value">
+        ${levels.length>1?`<button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);margin-top:4px;" onclick="levels.splice(${i},1);renderLevels();">ลบ</button>`:''}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addLevel() {
+  levels.push({ value: 10, time: levels[levels.length-1].time + 12 });
+  renderLevels();
+}
+
+// ============================================================
+// PHARMACOKINETIC ENGINE (1-compartment, intermittent infusion)
+// ============================================================
+
+// Predict concentration at time t given PK params and dose history
+function predictConc(t, cl, vd, doseHistory) {
+  const ke = cl / vd;
+  let conc = 0;
+  for (const dh of doseHistory) {
+    for (let n = 0; n < dh.nDoses; n++) {
+      const tStart = dh.startTime + n * dh.interval;
+      const tEnd = tStart + dh.infusion;
+      const k0 = dh.amount / dh.infusion; // mg/hr infusion rate
+      
+      if (t <= tStart) continue;
+      
+      if (t <= tEnd) {
+        // During infusion
+        const dt = t - tStart;
+        conc += (k0 / (ke * vd)) * (1 - Math.exp(-ke * dt));
+      } else {
+        // Post infusion
+        const cEnd = (k0 / (ke * vd)) * (1 - Math.exp(-ke * dh.infusion));
+        conc += cEnd * Math.exp(-ke * (t - tEnd));
+      }
+    }
+  }
+  return conc;
+}
+
+// Calculate AUC over one dosing interval at steady state
+function calcAUC(cl, vd, dose, interval, infusion, nPoints) {
+  nPoints = nPoints || 200;
+  const ke = cl / vd;
+  const k0 = dose / infusion;
+  
+  // Steady-state: accumulation factor
+  const accum = 1 / (1 - Math.exp(-ke * interval));
+  
+  let auc = 0;
+  const dt = interval / nPoints;
+  for (let i = 0; i < nPoints; i++) {
+    const t = i * dt;
+    let c;
+    if (t <= infusion) {
+      const cInf = (k0 / (ke * vd)) * (1 - Math.exp(-ke * t));
+      // Add accumulation from previous doses
+      const cPrev = (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion)) * Math.exp(-ke * (interval - infusion + t)) * (accum - 1);
+      c = cInf + cPrev;
+    } else {
+      const cEnd = (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion));
+      const cPost = cEnd * Math.exp(-ke * (t - infusion));
+      const cPrev = cEnd * Math.exp(-ke * (t - infusion)) * (accum - 1) * Math.exp(-ke * (interval - infusion));
+      c = cPost + cPrev;
+    }
+    auc += Math.max(c, 0) * dt;
+  }
+  return auc;
+}
+
+// ============================================================
+// BAYESIAN MAP ESTIMATION
+// Uses grid search + Nelder-Mead simplex for MAP
+// ============================================================
+
+function bayesianMAP(pt, doseHist, measuredLevels) {
+  const crcl = cockcroft(pt.age, pt.wt, pt.scr, pt.sex);
+  
+  // Population predictions (priors)
+  const popCL = POP_PK.theta_cl[0] * crcl + POP_PK.theta_cl[1];
+  const popVd = POP_PK.theta_vd * pt.wt;
+  
+  // Objective function: -2 * log(posterior)
+  // = sum of weighted residuals (measured vs predicted)
+  // + sum of weighted deviations from population (prior)
+  function objective(cl, vd) {
+    if (cl <= 0 || vd <= 0) return 1e10;
+    
+    // Prior: log-normal distribution on CL and Vd
+    const etaCL = Math.log(cl / popCL);
+    const etaVd = Math.log(vd / popVd);
+    let obj = (etaCL * etaCL) / POP_PK.omega_cl + (etaVd * etaVd) / POP_PK.omega_vd;
+    
+    // Likelihood: measured levels
+    for (const lv of measuredLevels) {
+      const pred = predictConc(lv.time, cl, vd, doseHist);
+      if (pred <= 0) return 1e10;
+      const residual = Math.log(lv.value) - Math.log(pred);
+      obj += (residual * residual) / POP_PK.sigma;
+    }
+    
+    return obj;
+  }
+  
+  // Grid search for initial estimates
+  let bestCL = popCL, bestVd = popVd, bestObj = objective(popCL, popVd);
+  
+  for (let ci = 0.3; ci <= 3.0; ci += 0.1) {
+    for (let vi = 0.5; vi <= 2.0; vi += 0.1) {
+      const cl = popCL * ci;
+      const vd = popVd * vi;
+      const obj = objective(cl, vd);
+      if (obj < bestObj) { bestObj = obj; bestCL = cl; bestVd = vd; }
+    }
+  }
+  
+  // Nelder-Mead simplex refinement
+  let simplex = [
+    { cl: bestCL, vd: bestVd },
+    { cl: bestCL * 1.05, vd: bestVd },
+    { cl: bestCL, vd: bestVd * 1.05 },
+  ];
+  
+  const objFn = (p) => objective(p.cl, p.vd);
+  
+  for (let iter = 0; iter < 200; iter++) {
+    simplex.sort((a, b) => objFn(a) - objFn(b));
+    
+    // Centroid (excluding worst)
+    const cx = (simplex[0].cl + simplex[1].cl) / 2;
+    const cy = (simplex[0].vd + simplex[1].vd) / 2;
+    
+    // Reflection
+    const rx = 2 * cx - simplex[2].cl;
+    const ry = 2 * cy - simplex[2].vd;
+    const fr = objFn({ cl: rx, vd: ry });
+    
+    if (fr < objFn(simplex[0])) {
+      // Expansion
+      const ex = 3 * cx - 2 * simplex[2].cl;
+      const ey = 3 * cy - 2 * simplex[2].vd;
+      const fe = objFn({ cl: ex, vd: ey });
+      if (fe < fr) { simplex[2] = { cl: ex, vd: ey }; }
+      else { simplex[2] = { cl: rx, vd: ry }; }
+    } else if (fr < objFn(simplex[1])) {
+      simplex[2] = { cl: rx, vd: ry };
+    } else {
+      // Contraction
+      const ccx = (cx + simplex[2].cl) / 2;
+      const ccy = (cy + simplex[2].vd) / 2;
+      const fc = objFn({ cl: ccx, vd: ccy });
+      if (fc < objFn(simplex[2])) {
+        simplex[2] = { cl: ccx, vd: ccy };
+      } else {
+        // Shrink
+        simplex[1] = { cl: (simplex[0].cl + simplex[1].cl) / 2, vd: (simplex[0].vd + simplex[1].vd) / 2 };
+        simplex[2] = { cl: (simplex[0].cl + simplex[2].cl) / 2, vd: (simplex[0].vd + simplex[2].vd) / 2 };
+      }
+    }
+    
+    // Convergence check
+    const spread = Math.abs(objFn(simplex[0]) - objFn(simplex[2]));
+    if (spread < 1e-8) break;
+  }
+  
+  simplex.sort((a, b) => objFn(a) - objFn(b));
+  
+  return {
+    cl: simplex[0].cl,
+    vd: simplex[0].vd,
+    ke: simplex[0].cl / simplex[0].vd,
+    halflife: Math.LN2 / (simplex[0].cl / simplex[0].vd),
+    popCL: popCL,
+    popVd: popVd,
+    crcl: crcl,
+    method: measuredLevels.length > 0 ? 'Bayesian MAP' : 'Population PK',
+    model: POP_PK.name,
+  };
+}
+
+// ============================================================
+// GRAPH RENDERING (Canvas)
+// ============================================================
+
+let currentPK = null;
+
+function drawGraph(pk, doseHist, measuredLvls, optDose, optInterval, optInfusion) {
+  const canvas = document.getElementById('pkGraph');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 300 * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = 300;
+  
+  // Time range: 0 to last dose + 2 intervals
+  let maxTime = 0;
+  for (const d of doseHist) { maxTime = Math.max(maxTime, d.startTime + d.interval * d.nDoses + d.interval); }
+  maxTime = Math.max(maxTime, 48);
+  
+  // Also show optimized regimen for 2 more intervals after measured
+  const optMaxTime = maxTime + optInterval * 3;
+  const totalTime = optMaxTime;
+  
+  // Concentration range
+  let maxConc = 50;
+  
+  const pad = { left: 50, right: 20, top: 20, bottom: 40 };
+  const gW = W - pad.left - pad.right;
+  const gH = H - pad.top - pad.bottom;
+  
+  const tToX = (t) => pad.left + (t / totalTime) * gW;
+  const cToY = (c) => pad.top + gH - (Math.min(c, maxConc) / maxConc) * gH;
+  
+  // Clear
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 0.5;
+  for (let t = 0; t <= totalTime; t += 12) {
+    const x = tToX(t);
+    ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, H - pad.bottom); ctx.stroke();
+  }
+  for (let c = 0; c <= maxConc; c += 10) {
+    const y = cToY(c);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  
+  // AUC target band (shaded) - using peak/trough visual hint
+  // Show therapeutic trough range (10-20 mcg/mL)
+  ctx.fillStyle = 'rgba(74,222,128,0.08)';
+  ctx.fillRect(pad.left, cToY(20), gW, cToY(10) - cToY(20));
+  ctx.strokeStyle = 'rgba(74,222,128,0.2)';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(pad.left, cToY(20)); ctx.lineTo(W - pad.right, cToY(20)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.left, cToY(10)); ctx.lineTo(W - pad.right, cToY(10)); ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Axes labels
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px "DM Sans"';
+  ctx.textAlign = 'center';
+  for (let t = 0; t <= totalTime; t += 12) {
+    ctx.fillText(t + 'h', tToX(t), H - pad.bottom + 16);
+  }
+  ctx.textAlign = 'right';
+  for (let c = 0; c <= maxConc; c += 10) {
+    ctx.fillText(c, pad.left - 6, cToY(c) + 3);
+  }
+  
+  // Y-axis label
+  ctx.save();
+  ctx.translate(12, H / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px "DM Sans"';
+  ctx.fillText('Conc (mcg/mL)', 0, 0);
+  ctx.restore();
+  
+  // Therapeutic range labels
+  ctx.fillStyle = 'rgba(74,222,128,0.5)';
+  ctx.font = '9px "DM Sans"';
+  ctx.textAlign = 'left';
+  ctx.fillText('Trough 10-20', pad.left + 4, cToY(20) - 3);
+  
+  // Current regimen curve (blue)
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const step = 0.2;
+  let first = true;
+  for (let t = 0; t <= maxTime; t += step) {
+    const c = predictConc(t, pk.cl, pk.vd, doseHist);
+    const x = tToX(t), y = cToY(c);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  
+  // Optimized regimen curve (green dashed) starting after last measured
+  const optStart = maxTime;
+  const optDoseHist = [{ amount: optDose, interval: optInterval, infusion: optInfusion, startTime: optStart, nDoses: 3 }];
+  
+  // Get last concentration from current regimen
+  const lastConc = predictConc(maxTime, pk.cl, pk.vd, doseHist);
+  
+  ctx.strokeStyle = '#4ade80';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 3]);
+  ctx.beginPath();
+  first = true;
+  for (let t = optStart; t <= optMaxTime; t += step) {
+    // Carry over residual from current regimen
+    const cCarry = lastConc * Math.exp(-pk.ke * (t - optStart));
+    const cNew = predictConc(t, pk.cl, pk.vd, optDoseHist);
+    const c = cCarry + cNew;
+    const x = tToX(t), y = cToY(c);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Transition line
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 2]);
+  ctx.beginPath(); ctx.moveTo(tToX(maxTime), pad.top); ctx.lineTo(tToX(maxTime), H - pad.bottom); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#64748b';
+  ctx.font = '9px "DM Sans"';
+  ctx.textAlign = 'center';
+  ctx.fillText('→ proposed', tToX(maxTime) + 30, pad.top + 12);
+  
+  // Measured levels (yellow dots)
+  for (const lv of measuredLvls) {
+    const x = tToX(lv.time), y = cToY(lv.value);
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.stroke();
+    // Label
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = '10px "JetBrains Mono"';
+    ctx.textAlign = 'center';
+    ctx.fillText(lv.value.toFixed(1), x, y - 10);
+  }
+  
+  // Legend
+  ctx.font = '10px "DM Sans"';
+  const legendX = W - pad.right - 140;
+  const legendY = pad.top + 10;
+  
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(legendX, legendY); ctx.lineTo(legendX + 20, legendY); ctx.stroke();
+  ctx.fillStyle = '#94a3b8'; ctx.textAlign = 'left';
+  ctx.fillText('Current', legendX + 25, legendY + 3);
+  
+  ctx.strokeStyle = '#4ade80'; ctx.setLineDash([4, 2]);
+  ctx.beginPath(); ctx.moveTo(legendX, legendY + 16); ctx.lineTo(legendX + 20, legendY + 16); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillText('Proposed', legendX + 25, legendY + 19);
+}
+
+// ============================================================
+// MAIN CALCULATION
+// ============================================================
+
+function runBayesian() {
+  const pt = getPatient();
+  const pk = bayesianMAP(pt, doses, levels);
+  currentPK = pk;
+  
+  // Calculate AUC for current regimen
+  const lastDose = doses[doses.length - 1];
+  const auc24 = calcAUC(pk.cl, pk.vd, lastDose.amount, lastDose.interval, lastDose.infusion) * (24 / lastDose.interval);
+  
+  // Steady-state peak and trough
+  const ke = pk.ke;
+  const k0 = lastDose.amount / lastDose.infusion;
+  const accum = 1 / (1 - Math.exp(-ke * lastDose.interval));
+  const ssPeak = (k0 / (ke * pk.vd)) * (1 - Math.exp(-ke * lastDose.infusion)) * accum;
+  const ssTrough = ssPeak * Math.exp(-ke * (lastDose.interval - lastDose.infusion));
+  
+  // AUC result
+  let aucClass = 'green', aucMsg = '✅ AUC₂₄ อยู่ใน target range';
+  if (auc24 < 400) { aucClass = 'amber'; aucMsg = '⚠ AUC₂₄ ต่ำกว่า target → พิจารณาเพิ่ม dose/ลด interval'; }
+  else if (auc24 > 600) { aucClass = 'red'; aucMsg = '⚠ AUC₂₄ สูงกว่า target → เสี่ยง nephrotoxicity'; }
+  
+  document.getElementById('aucResult').innerHTML = `
+    <div class="result-box ${aucClass}">
+      <div class="result-title">ESTIMATED AUC₂₄/MIC (assumed MIC = 1)</div>
+      <div class="result-value" style="color:var(--${aucClass});">${auc24.toFixed(0)}</div>
+      <div class="result-sub" style="color:var(--${aucClass});">${aucMsg}<br>Target: 400-600 mg·hr/L</div>
+    </div>
+  `;
+  
+  // PK Stats
+  document.getElementById('pkStats').innerHTML = `
+    <div class="stat"><div class="stat-label">SS Peak</div><div class="stat-val" style="color:var(--blue);">${ssPeak.toFixed(1)}</div></div>
+    <div class="stat"><div class="stat-label">SS Trough</div><div class="stat-val" style="color:var(--purple);">${ssTrough.toFixed(1)}</div></div>
+    <div class="stat"><div class="stat-label">Half-life</div><div class="stat-val">${pk.halflife.toFixed(1)}h</div></div>
+    <div class="stat"><div class="stat-label">AUC₂₄</div><div class="stat-val" style="color:var(--${aucClass});">${auc24.toFixed(0)}</div></div>
+  `;
+  
+  // PK Table
+  document.getElementById('pkTable').innerHTML = `
+    <tr><td>Method</td><td style="color:var(--blue);">${pk.method}</td></tr>
+    <tr><td>PK Model</td><td>${pk.model}</td></tr>
+    <tr><td>CrCl (CG)</td><td>${pk.crcl.toFixed(1)} mL/min</td></tr>
+    <tr><td>Clearance (CL)</td><td>${pk.cl.toFixed(3)} L/hr</td></tr>
+    <tr><td>Volume (Vd)</td><td>${pk.vd.toFixed(1)} L</td></tr>
+    <tr><td>Elimination (Ke)</td><td>${pk.ke.toFixed(4)} hr⁻¹</td></tr>
+    <tr><td>Half-life</td><td>${pk.halflife.toFixed(1)} hr</td></tr>
+    <tr><td>Pop CL (prior)</td><td>${pk.popCL.toFixed(3)} L/hr</td></tr>
+    <tr><td>Pop Vd (prior)</td><td>${pk.popVd.toFixed(1)} L</td></tr>
+  `;
+  
+  // Set optimizer defaults based on current
+  document.getElementById('optDose').value = lastDose.amount;
+  document.getElementById('optInterval').value = lastDose.interval;
+  document.getElementById('optInfusion').value = lastDose.infusion;
+  
+  // Show results
+  document.getElementById('resultsSection').style.display = 'block';
+  
+  // Draw graph & optimize
+  updateOptimizer();
+  generateDoseOptions();
+  
+  // Scroll to results
+  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateOptimizer() {
+  if (!currentPK) return;
+  const optDose = +document.getElementById('optDose').value;
+  const optInterval = +document.getElementById('optInterval').value;
+  const optInfusion = +document.getElementById('optInfusion').value;
+  
+  document.getElementById('optDoseVal').textContent = optDose + ' mg';
+  document.getElementById('optIntervalVal').textContent = 'q' + optInterval + 'h';
+  document.getElementById('optInfusionVal').textContent = optInfusion + ' hr';
+  
+  const auc24 = calcAUC(currentPK.cl, currentPK.vd, optDose, optInterval, optInfusion) * (24 / optInterval);
+  
+  const ke = currentPK.ke;
+  const k0 = optDose / optInfusion;
+  const accum = 1 / (1 - Math.exp(-ke * optInterval));
+  const ssPeak = (k0 / (ke * currentPK.vd)) * (1 - Math.exp(-ke * optInfusion)) * accum;
+  const ssTrough = ssPeak * Math.exp(-ke * (optInterval - optInfusion));
+  
+  let cls = 'green', msg = '✅ In target';
+  if (auc24 < 400) { cls = 'amber'; msg = '⚠ Below target'; }
+  else if (auc24 > 600) { cls = 'red'; msg = '⚠ Above target'; }
+  
+  const vol = optDose <= 1000 ? 200 : 250;
+  const rateMin = Math.ceil(optDose / 10);
+  const rateMlhr = Math.round(vol / (optInfusion));
+  
+  document.getElementById('optResult').innerHTML = `
+    <div class="result-box ${cls}" style="padding:10px;">
+      <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--${cls});">
+        AUC₂₄ = ${auc24.toFixed(0)} mg·hr/L ${msg}
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-top:6px;">
+        SS Peak: ${ssPeak.toFixed(1)} | SS Trough: ${ssTrough.toFixed(1)} | 
+        Dilute ${optDose}mg ใน NSS ${vol}mL → ${rateMlhr} mL/hr
+      </div>
+    </div>
+  `;
+  
+  drawGraph(currentPK, doses, levels, optDose, optInterval, optInfusion);
+}
+
+function generateDoseOptions() {
+  if (!currentPK) return;
+  const intervals = [8, 12, 24, 36, 48];
+  const doseOptions = [500, 750, 1000, 1250, 1500, 1750, 2000];
+  const infTime = 1;
+  
+  let options = [];
+  for (const q of intervals) {
+    for (const d of doseOptions) {
+      const auc = calcAUC(currentPK.cl, currentPK.vd, d, q, infTime) * (24 / q);
+      if (auc >= 350 && auc <= 700) {
+        const ke = currentPK.ke;
+        const k0 = d / infTime;
+        const accum = 1 / (1 - Math.exp(-ke * q));
+        const ssTrough = (k0 / (ke * currentPK.vd)) * (1 - Math.exp(-ke * infTime)) * accum * Math.exp(-ke * (q - infTime));
+        options.push({ dose: d, interval: q, auc: auc, trough: ssTrough, inTarget: auc >= 400 && auc <= 600 });
+      }
+    }
+  }
+  
+  // Sort by closest to AUC 500
+  options.sort((a, b) => Math.abs(a.auc - 500) - Math.abs(b.auc - 500));
+  options = options.slice(0, 6);
+  
+  const el = document.getElementById('doseCompare');
+  el.innerHTML = options.map(o => {
+    const cls = o.inTarget ? 'green' : (o.auc < 400 ? 'amber' : 'red');
+    return `
+      <div class="dose-option" onclick="document.getElementById('optDose').value=${o.dose};document.getElementById('optInterval').value=${o.interval};updateOptimizer();">
+        <div class="opt-dose">${o.dose} mg q${o.interval}h</div>
+        <div class="opt-auc">AUC₂₄: ${o.auc.toFixed(0)} | Trough: ${o.trough.toFixed(1)}</div>
+        <span class="opt-badge" style="background:var(--${cls}-dim);color:var(--${cls});">${o.inTarget ? 'In target' : (o.auc < 400 ? 'Below' : 'Above')}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- Event Listeners ---
+['ptWt','ptAge','ptSex','ptScr','ptHt'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateCrCl);
+});
+
+['optDose','optInterval','optInfusion'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    updateOptimizer();
+    generateDoseOptions();
+  });
+});
+
+window.addEventListener('resize', () => { if (currentPK) updateOptimizer(); });
+
+// --- Init ---
+updateCrCl();
+renderDoses();
+renderLevels();
+</script>
+
+</body>
+</html>

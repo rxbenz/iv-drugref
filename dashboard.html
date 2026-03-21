@@ -3,147 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IV DrugRef — Analytics Dashboard v4</title>
+<title>IV DrugRef — Analytics Dashboard v5</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg: #0a0e1a;
-  --bg-card: #111827;
-  --bg-card-hover: #1a2234;
-  --border: #1e293b;
-  --border-glow: rgba(56,189,248,0.15);
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent-blue: #38bdf8;
-  --accent-cyan: #22d3ee;
-  --accent-green: #34d399;
-  --accent-amber: #fbbf24;
-  --accent-purple: #a78bfa;
-  --accent-red: #f87171;
-  --accent-pink: #f472b6;
-  --font-sans: 'Noto Sans Thai', system-ui, sans-serif;
-  --font-mono: 'Space Mono', monospace;
-  --radius: 16px;
-  --radius-sm: 10px;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:var(--font-sans); background:var(--bg); color:var(--text-primary); min-height:100vh; }
-
-/* Header */
-.header {
-  background: linear-gradient(180deg, rgba(17,24,39,0.98) 0%, rgba(10,14,26,0.95) 100%);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 24px;
-  position: sticky; top: 0; z-index: 50;
-}
-.header-inner { max-width:1400px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
-.header h1 { font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px; letter-spacing:-0.02em; }
-.header h1 .logo { font-size:20px; }
-.header h1 .ver { font-size:10px; font-weight:600; color:var(--accent-cyan); background:rgba(34,211,238,0.12); padding:2px 8px; border-radius:20px; margin-left:4px; }
-.header-actions { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.btn { font-family:var(--font-sans); font-size:11px; font-weight:600; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-secondary); cursor:pointer; transition:all .2s; white-space:nowrap; }
-.btn:hover { border-color:var(--accent-blue); color:var(--accent-blue); }
-.btn.primary { background:linear-gradient(135deg,#0ea5e9,#06b6d4); color:#fff; border-color:transparent; }
-.btn.primary:hover { filter:brightness(1.15); }
-
-/* Setup */
-.setup-banner { max-width:1400px; margin:12px auto; padding:14px 18px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2); border-radius:var(--radius-sm); display:none; }
-.setup-banner.show { display:block; }
-.setup-banner h3 { font-size:13px; color:var(--accent-amber); margin-bottom:6px; }
-.setup-banner input { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:var(--font-mono); margin-bottom:6px; background:var(--bg); color:var(--text-primary); }
-.setup-banner button { background:var(--accent-amber); color:#000; border:none; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font-sans); }
-
-/* Tabs */
-.tabs { max-width:1400px; margin:0 auto; padding:12px 24px 0; display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-.tab { font-family:var(--font-sans); font-size:12px; font-weight:500; padding:8px 16px; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none; background:transparent; color:var(--text-muted); cursor:pointer; white-space:nowrap; transition:all .2s; }
-.tab:hover { color:var(--text-secondary); background:rgba(255,255,255,0.03); }
-.tab.active { background:var(--bg-card); color:var(--accent-cyan); border-color:var(--border); font-weight:600; }
-
-/* Content */
-.content { max-width:1400px; margin:0 auto; padding:0 24px 60px; }
-.tab-panel { display:none; padding-top:16px; }
-.tab-panel.active { display:block; }
-
-/* Stats Grid (Bento) */
-.bento { display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:10px; margin-bottom:16px; }
-.stat { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; position:relative; overflow:hidden; transition:border-color .3s; }
-.stat:hover { border-color:var(--border-glow); }
-.stat::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; border-radius:2px 2px 0 0; }
-.stat.blue::before { background:var(--accent-blue); }
-.stat.green::before { background:var(--accent-green); }
-.stat.amber::before { background:var(--accent-amber); }
-.stat.purple::before { background:var(--accent-purple); }
-.stat.red::before { background:var(--accent-red); }
-.stat.cyan::before { background:var(--accent-cyan); }
-.stat.pink::before { background:var(--accent-pink); }
-.stat-icon { font-size:16px; margin-bottom:8px; }
-.stat-value { font-family:var(--font-mono); font-size:26px; font-weight:700; line-height:1; margin-bottom:4px; }
-.stat.blue .stat-value { color:var(--accent-blue); }
-.stat.green .stat-value { color:var(--accent-green); }
-.stat.amber .stat-value { color:var(--accent-amber); }
-.stat.purple .stat-value { color:var(--accent-purple); }
-.stat.red .stat-value { color:var(--accent-red); }
-.stat.cyan .stat-value { color:var(--accent-cyan); }
-.stat.pink .stat-value { color:var(--accent-pink); }
-.stat-label { font-size:11px; color:var(--text-muted); font-weight:500; }
-
-/* Cards & Charts */
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
-.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
-@media(max-width:900px) { .grid-2, .grid-3 { grid-template-columns:1fr; } }
-.card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
-.card.full { grid-column:1/-1; }
-.card-title { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:14px; display:flex; align-items:center; gap:6px; }
-.card-title .emoji { font-size:15px; }
-
-/* Table */
-.table-wrap { overflow-x:auto; max-height:400px; overflow-y:auto; }
-table { width:100%; border-collapse:collapse; font-size:12px; }
-th { padding:8px 10px; text-align:left; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg-card); font-size:11px; text-transform:uppercase; letter-spacing:0.04em; }
-td { padding:7px 10px; border-bottom:1px solid rgba(30,41,59,0.5); }
-tr:hover td { background:rgba(255,255,255,0.02); }
-.rank { font-family:var(--font-mono); font-weight:700; color:var(--text-muted); width:28px; font-size:11px; }
-.drug-name { font-weight:500; color:var(--text-primary); }
-.count { font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan); }
-.bar-cell { width:150px; }
-.mini-bar { height:16px; background:rgba(56,189,248,0.1); border-radius:3px; overflow:hidden; }
-.mini-bar-fill { height:100%; border-radius:3px; transition:width .6s ease; }
-
-/* Status */
-.loading { text-align:center; padding:60px; color:var(--text-muted); font-size:13px; }
-.error { text-align:center; padding:40px; color:var(--accent-red); font-size:13px; }
-.empty-msg { text-align:center; padding:30px; color:var(--text-muted); font-size:12px; }
-.empty-msg .icon { font-size:28px; margin-bottom:6px; }
-
-/* Last updated */
-.footer-info { text-align:center; padding:20px; font-size:11px; color:var(--text-muted); }
-
-/* Scrollbar */
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+:root{--bg:#0a0e1a;--bg-card:#111827;--bg-card-hover:#1a2234;--border:#1e293b;--border-glow:rgba(56,189,248,0.15);--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--accent-blue:#38bdf8;--accent-cyan:#22d3ee;--accent-green:#34d399;--accent-amber:#fbbf24;--accent-purple:#a78bfa;--accent-red:#f87171;--accent-pink:#f472b6;--font-sans:'Noto Sans Thai',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--radius:16px;--radius-sm:10px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-sans);background:var(--bg);color:var(--text-primary);min-height:100vh}
+.header{background:linear-gradient(180deg,rgba(17,24,39,0.98) 0%,rgba(10,14,26,0.95) 100%);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 24px;position:sticky;top:0;z-index:50}
+.header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header h1{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;letter-spacing:-0.02em}.header h1 .logo{font-size:20px}.header h1 .ver{font-size:10px;font-weight:600;color:var(--accent-cyan);background:rgba(34,211,238,0.12);padding:2px 8px;border-radius:20px;margin-left:4px}
+.header-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn{font-family:var(--font-sans);font-size:11px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;transition:all .2s;white-space:nowrap}.btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}.btn.primary{background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;border-color:transparent}.btn.primary:hover{filter:brightness(1.15)}
+.setup-banner{max-width:1400px;margin:12px auto;padding:14px 18px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:var(--radius-sm);display:none}.setup-banner.show{display:block}.setup-banner h3{font-size:13px;color:var(--accent-amber);margin-bottom:6px}.setup-banner input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--font-mono);margin-bottom:6px;background:var(--bg);color:var(--text-primary)}.setup-banner button{background:var(--accent-amber);color:#000;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-sans)}
+.tabs{max-width:1400px;margin:0 auto;padding:12px 24px 0;display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch}.tab{font-family:var(--font-sans);font-size:12px;font-weight:500;padding:8px 16px;border-radius:10px 10px 0 0;border:1px solid transparent;border-bottom:none;background:transparent;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all .2s}.tab:hover{color:var(--text-secondary);background:rgba(255,255,255,0.03)}.tab.active{background:var(--bg-card);color:var(--accent-cyan);border-color:var(--border);font-weight:600}
+.content{max-width:1400px;margin:0 auto;padding:0 24px 60px}.tab-panel{display:none;padding-top:16px}.tab-panel.active{display:block}
+.bento{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;position:relative;overflow:hidden;transition:border-color .3s}.stat:hover{border-color:var(--border-glow)}.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.stat.blue::before{background:var(--accent-blue)}.stat.green::before{background:var(--accent-green)}.stat.amber::before{background:var(--accent-amber)}.stat.purple::before{background:var(--accent-purple)}.stat.red::before{background:var(--accent-red)}.stat.cyan::before{background:var(--accent-cyan)}.stat.pink::before{background:var(--accent-pink)}
+.stat-icon{font-size:16px;margin-bottom:8px}.stat-value{font-family:var(--font-mono);font-size:26px;font-weight:700;line-height:1;margin-bottom:4px}
+.stat.blue .stat-value{color:var(--accent-blue)}.stat.green .stat-value{color:var(--accent-green)}.stat.amber .stat-value{color:var(--accent-amber)}.stat.purple .stat-value{color:var(--accent-purple)}.stat.red .stat-value{color:var(--accent-red)}.stat.cyan .stat-value{color:var(--accent-cyan)}.stat.pink .stat-value{color:var(--accent-pink)}
+.stat-label{font-size:11px;color:var(--text-muted);font-weight:500}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}.card.full{grid-column:1/-1}
+.card-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:14px;display:flex;align-items:center;gap:6px}.card-title .emoji{font-size:15px}
+.table-wrap{overflow-x:auto;max-height:400px;overflow-y:auto}table{width:100%;border-collapse:collapse;font-size:12px}th{padding:8px 10px;text-align:left;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-card);font-size:11px;text-transform:uppercase;letter-spacing:0.04em}td{padding:7px 10px;border-bottom:1px solid rgba(30,41,59,0.5)}tr:hover td{background:rgba(255,255,255,0.02)}
+.rank{font-family:var(--font-mono);font-weight:700;color:var(--text-muted);width:28px;font-size:11px}.drug-name{font-weight:500;color:var(--text-primary)}.count{font-family:var(--font-mono);font-weight:700;color:var(--accent-cyan)}.bar-cell{width:150px}.mini-bar{height:16px;background:rgba(56,189,248,0.1);border-radius:3px;overflow:hidden}.mini-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.loading{text-align:center;padding:60px;color:var(--text-muted);font-size:13px}.error{text-align:center;padding:40px;color:var(--accent-red);font-size:13px}.empty-msg{text-align:center;padding:30px;color:var(--text-muted);font-size:12px}.empty-msg .icon{font-size:28px;margin-bottom:6px}
+.footer-info{text-align:center;padding:20px;font-size:11px;color:var(--text-muted)}
+.journey-search{display:flex;gap:8px;margin-bottom:16px}.journey-search input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-primary);font-family:var(--font-mono);font-size:13px}.journey-search input::placeholder{color:var(--text-muted)}.journey-search input:focus{outline:none;border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(34,211,238,0.12)}.journey-search button{padding:10px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-blue));color:#fff;font-weight:600;cursor:pointer;font-family:var(--font-sans);font-size:13px}
+.timeline{position:relative;padding-left:24px}.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}.tl-item{position:relative;margin-bottom:12px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px}.tl-item::before{content:'';position:absolute;left:-20px;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid var(--border);background:var(--bg)}.tl-item.page_view::before{background:var(--accent-blue);border-color:var(--accent-blue)}.tl-item.search::before{background:var(--accent-cyan);border-color:var(--accent-cyan)}.tl-item.dose_calc::before{background:var(--accent-purple);border-color:var(--accent-purple)}.tl-item.tdm_calc::before{background:var(--accent-red);border-color:var(--accent-red)}
+.tl-time{font-size:10px;color:var(--text-muted);font-family:var(--font-mono)}.tl-type{font-size:11px;font-weight:600;margin:2px 0}.tl-detail{font-size:12px;color:var(--text-secondary)}
+.user-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}.user-pill{padding:4px 10px;border-radius:6px;font-size:11px;font-family:var(--font-mono);background:var(--bg-card);border:1px solid var(--border);cursor:pointer;color:var(--text-secondary);transition:all .15s}.user-pill:hover{border-color:var(--accent-cyan);color:var(--accent-cyan)}.user-pill.active{background:rgba(34,211,238,0.12);border-color:var(--accent-cyan);color:var(--accent-cyan)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-inner">
-    <h1><span class="logo">📊</span> IV DrugRef Analytics <span class="ver">v4</span></h1>
-    <div class="header-actions">
-      <button class="btn" onclick="toggleSetup()">⚙ URL</button>
-      <button class="btn" onclick="exportCSV('Sessions')">📥 Sessions</button>
-      <button class="btn" onclick="exportCSV('Searches')">📥 Searches</button>
-      <button class="btn" onclick="exportCSV('Surveys')">📥 Surveys</button>
-      <button class="btn" onclick="exportCSV('DoseCalcs')">📥 DoseCalcs</button>
-      <button class="btn" onclick="exportCSV('DrugExpands')">📥 Expands</button>
-      <button class="btn" onclick="exportCSV('TDMUsage')">📥 TDM</button>
-      <button class="btn primary" onclick="loadData()">🔄 Refresh</button>
-    </div>
+<div class="header"><div class="header-inner">
+  <h1><span class="logo">📊</span> IV DrugRef Analytics <span class="ver">v5</span></h1>
+  <div class="header-actions">
+    <button class="btn" onclick="toggleSetup()">⚙ URL</button>
+    <button class="btn" onclick="exportCSV('Sessions')">📥 Sessions</button>
+    <button class="btn" onclick="exportCSV('Searches')">📥 Searches</button>
+    <button class="btn" onclick="exportCSV('Surveys')">📥 Surveys</button>
+    <button class="btn" onclick="exportCSV('TDMUsage')">📥 TDM</button>
+    <button class="btn primary" onclick="loadData()">🔄 Refresh</button>
   </div>
-</div>
+</div></div>
 
 <div class="setup-banner" id="setupBanner">
   <h3>⚙ ตั้งค่า Google Apps Script URL</h3>
@@ -154,142 +61,156 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 <div class="tabs" id="tabs">
   <button class="tab active" data-tab="overview">📈 Overview</button>
   <button class="tab" data-tab="drugs">💊 Drug Usage</button>
-  <button class="tab" data-tab="calculator">🧮 Dose Calc & TDM</button>
-  <button class="tab" data-tab="survey">📋 Survey & SUS</button>
+  <button class="tab" data-tab="tdm">🎯 TDM Hub</button>
+  <button class="tab" data-tab="calculator">🧮 Dose Calc</button>
+  <button class="tab" data-tab="survey">📋 Survey</button>
   <button class="tab" data-tab="retention">👥 Retention</button>
+  <button class="tab" data-tab="journey">🗺 User Journey</button>
 </div>
 
 <div class="content">
-  <!-- TAB: Overview -->
-  <div class="tab-panel active" id="panel-overview">
-    <div class="bento" id="statsGrid">
-      <div class="stat blue"><div class="stat-icon">👤</div><div class="stat-value" id="totalSessions">—</div><div class="stat-label">Sessions</div></div>
-      <div class="stat green"><div class="stat-icon">🧑‍⚕️</div><div class="stat-value" id="uniqueUsers">—</div><div class="stat-label">Unique Users</div></div>
-      <div class="stat cyan"><div class="stat-icon">🔍</div><div class="stat-value" id="totalSearches">—</div><div class="stat-label">Searches</div></div>
-      <div class="stat amber"><div class="stat-icon">⏱</div><div class="stat-value" id="avgSearchTime">—</div><div class="stat-label">Avg Search (sec)</div></div>
-      <div class="stat purple"><div class="stat-icon">⭐</div><div class="stat-value" id="avgSat">—</div><div class="stat-label">Satisfaction</div></div>
-      <div class="stat green"><div class="stat-icon">📊</div><div class="stat-value" id="avgSUS">—</div><div class="stat-label">SUS Score</div></div>
-      <div class="stat pink"><div class="stat-icon">🧮</div><div class="stat-value" id="totalDoseCalcs">—</div><div class="stat-label">Dose Calcs</div></div>
-      <div class="stat red"><div class="stat-icon">🧬</div><div class="stat-value" id="totalTDM">—</div><div class="stat-label">TDM Uses</div></div>
-    </div>
 
-    <div class="grid-2">
-      <div class="card full">
-        <div class="card-title"><span class="emoji">📈</span> Daily Active Users (30 วัน)</div>
-        <canvas id="dauChart" height="70"></canvas>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="emoji">📱</span> Platform</div>
-        <canvas id="platformChart" height="200"></canvas>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="emoji">⏱</span> Search Time Distribution</div>
-        <canvas id="timeChart" height="200"></canvas>
-      </div>
-    </div>
+<!-- TAB: Overview -->
+<div class="tab-panel active" id="panel-overview">
+  <div class="bento">
+    <div class="stat blue"><div class="stat-icon">👤</div><div class="stat-value" id="totalSessions">—</div><div class="stat-label">Sessions</div></div>
+    <div class="stat green"><div class="stat-icon">🧑‍⚕️</div><div class="stat-value" id="uniqueUsers">—</div><div class="stat-label">Unique Users</div></div>
+    <div class="stat cyan"><div class="stat-icon">🔍</div><div class="stat-value" id="totalSearches">—</div><div class="stat-label">Searches</div></div>
+    <div class="stat amber"><div class="stat-icon">⏱</div><div class="stat-value" id="avgSearchTime">—</div><div class="stat-label">Avg Search (sec)</div></div>
+    <div class="stat purple"><div class="stat-icon">⭐</div><div class="stat-value" id="avgSat">—</div><div class="stat-label">Satisfaction</div></div>
+    <div class="stat green"><div class="stat-icon">📊</div><div class="stat-value" id="avgSUS">—</div><div class="stat-label">SUS Score</div></div>
+    <div class="stat pink"><div class="stat-icon">🧮</div><div class="stat-value" id="totalDoseCalcs">—</div><div class="stat-label">Dose Calcs</div></div>
+    <div class="stat red"><div class="stat-icon">🎯</div><div class="stat-value" id="totalTDM">—</div><div class="stat-label">TDM Calculations</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card full"><div class="card-title"><span class="emoji">📈</span> Daily Active Users (30 วัน)</div><canvas id="dauChart" height="70"></canvas></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">📱</span> Platform</div><canvas id="platformChart" height="200"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">⏱</span> Search Time Distribution</div><canvas id="timeChart" height="200"></canvas></div>
+  </div>
+</div>
+
+<!-- TAB: Drug Usage -->
+<div class="tab-panel" id="panel-drugs">
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">🔍</span> Top 20 ยาค้นหาบ่อย</div><div class="table-wrap" id="topDrugsTable"></div></div>
+    <div class="card"><div class="card-title"><span class="emoji">👁</span> Top 20 ยาดูบ่อย (Expands)</div><div class="table-wrap" id="topExpandsTable"></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">🏷</span> Filter ที่ใช้บ่อย</div><canvas id="filterChart" height="200"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">📂</span> Expand Source</div><canvas id="expandSourceChart" height="200"></canvas></div>
+  </div>
+</div>
+
+<!-- TAB: TDM Hub (v5 NEW) -->
+<div class="tab-panel" id="panel-tdm">
+  <div class="bento">
+    <div class="stat red"><div class="stat-icon">🎯</div><div class="stat-value" id="tdmTotal">—</div><div class="stat-label">TDM Calculations</div></div>
+    <div class="stat cyan"><div class="stat-icon">👤</div><div class="stat-value" id="tdmUsers">—</div><div class="stat-label">TDM Users</div></div>
+    <div class="stat blue"><div class="stat-icon">🧬</div><div class="stat-value" id="tdmVancoTotal">—</div><div class="stat-label">Vancomycin</div></div>
+    <div class="stat purple"><div class="stat-icon">⚡</div><div class="stat-value" id="tdmPhenyTotal">—</div><div class="stat-label">Phenytoin</div></div>
+    <div class="stat green"><div class="stat-icon">💉</div><div class="stat-value" id="tdmAGTotal">—</div><div class="stat-label">Aminoglycosides</div></div>
+    <div class="stat amber"><div class="stat-icon">🧠</div><div class="stat-value" id="tdmVPATotal">—</div><div class="stat-label">Valproate</div></div>
   </div>
 
-  <!-- TAB: Drug Usage -->
-  <div class="tab-panel" id="panel-drugs">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="emoji">🔍</span> Top 20 ยาที่ค้นหาบ่อย (Searches)</div>
-        <div class="table-wrap" id="topDrugsTable"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="emoji">👁</span> Top 20 ยาที่ดูบ่อย (Expands)</div>
-        <div class="table-wrap" id="topExpandsTable"></div>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="emoji">🏷</span> Filter ที่ใช้บ่อย</div>
-        <canvas id="filterChart" height="200"></canvas>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="emoji">📂</span> Expand Source (search / browse / filter)</div>
-        <canvas id="expandSourceChart" height="200"></canvas>
-      </div>
-    </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">📊</span> TDM Usage by Drug</div><canvas id="tdmByDrugChart" height="200"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">🎯</span> Clinical Interpretation (All Drugs)</div><canvas id="tdmInterpChart" height="200"></canvas></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">📈</span> TDM Usage by Day</div><canvas id="tdmByDayChart" height="180"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">🔀</span> Tab Switch Frequency</div><canvas id="tdmTabSwitchChart" height="180"></canvas></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">🧬</span> Vancomycin — Model Usage</div><canvas id="vancoModelChart" height="200"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">🧬</span> Vancomycin — AUC₂₄ in Target?</div><canvas id="vancoAUCTargetChart" height="200"></canvas></div>
+  </div>
+  <div class="grid-3">
+    <div class="card"><div class="card-title"><span class="emoji">💉</span> AG — Dosing Strategy</div><canvas id="agStrategyChart" height="180"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">💉</span> AG — Hartford Nomogram</div><canvas id="agNomogramChart" height="180"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">🧠</span> VPA — Indication</div><canvas id="vpaIndicationChart" height="180"></canvas></div>
+  </div>
+</div>
+
+<!-- TAB: Dose Calc -->
+<div class="tab-panel" id="panel-calculator">
+  <div class="bento">
+    <div class="stat purple"><div class="stat-icon">🧮</div><div class="stat-value" id="dcTotal">—</div><div class="stat-label">Dose Calc Total</div></div>
+    <div class="stat cyan"><div class="stat-icon">👤</div><div class="stat-value" id="dcUsers">—</div><div class="stat-label">Unique Users</div></div>
+    <div class="stat green"><div class="stat-icon">🔗</div><div class="stat-value" id="calcVisitsTotal">—</div><div class="stat-label">Calculator Visits</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">🧮</span> Inline Dose Calc — ยาที่คำนวณบ่อย</div><div class="table-wrap" id="doseCalcDrugsTable"></div></div>
+    <div class="card"><div class="card-title"><span class="emoji">📈</span> Calculator Visits by Day</div><canvas id="calcVisitsDayChart" height="200"></canvas></div>
+  </div>
+</div>
+
+<!-- TAB: Survey -->
+<div class="tab-panel" id="panel-survey">
+  <div class="bento">
+    <div class="stat purple"><div class="stat-icon">📋</div><div class="stat-value" id="surveyTotal">—</div><div class="stat-label">Total Surveys</div></div>
+    <div class="stat blue"><div class="stat-icon">✅</div><div class="stat-value" id="satCount">—</div><div class="stat-label">Satisfaction</div></div>
+    <div class="stat green"><div class="stat-icon">📊</div><div class="stat-value" id="susCount">—</div><div class="stat-label">SUS Done</div></div>
+    <div class="stat amber"><div class="stat-icon">🔁</div><div class="stat-value" id="bothCount">—</div><div class="stat-label">Both Phases</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">⭐</span> Satisfaction Breakdown</div><canvas id="satBreakdownChart" height="200"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">👥</span> Role</div><canvas id="roleChart" height="200"></canvas></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">🏥</span> Department</div><canvas id="deptChart" height="200"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">📊</span> SUS Score</div><div class="empty-msg" id="susDistMsg"><div class="icon">📊</div>ต้องการข้อมูล SUS ≥5 responses</div></div>
+  </div>
+</div>
+
+<!-- TAB: Retention -->
+<div class="tab-panel" id="panel-retention">
+  <div class="bento">
+    <div class="stat blue"><div class="stat-icon">👤</div><div class="stat-value" id="retTotalUsers">—</div><div class="stat-label">Total Users</div></div>
+    <div class="stat green"><div class="stat-icon">🔁</div><div class="stat-value" id="retReturning">—</div><div class="stat-label">Returning</div></div>
+    <div class="stat amber"><div class="stat-icon">📊</div><div class="stat-value" id="retRate">—</div><div class="stat-label">Retention Rate</div></div>
+  </div>
+</div>
+
+<!-- TAB: User Journey (v5 NEW) -->
+<div class="tab-panel" id="panel-journey">
+  <div class="bento">
+    <div class="stat cyan"><div class="stat-icon">📄</div><div class="stat-value" id="pvTotal">—</div><div class="stat-label">Page Views</div></div>
+    <div class="stat blue"><div class="stat-icon">🔀</div><div class="stat-value" id="pvMultiPage">—</div><div class="stat-label">Multi-page Sessions</div></div>
+    <div class="stat green"><div class="stat-icon">⏱</div><div class="stat-value" id="pvAvgDurTDM">—</div><div class="stat-label">Avg Time TDM (sec)</div></div>
+    <div class="stat purple"><div class="stat-icon">⏱</div><div class="stat-value" id="pvAvgDurCalc">—</div><div class="stat-label">Avg Time Calc (sec)</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="emoji">📄</span> Page Visit Count</div><canvas id="pvPageChart" height="200"></canvas></div>
+    <div class="card"><div class="card-title"><span class="emoji">⏱</span> Avg Time on Page (sec)</div><canvas id="pvDurationChart" height="200"></canvas></div>
+  </div>
+  <div class="grid-2">
+    <div class="card full"><div class="card-title"><span class="emoji">🔀</span> Navigation Flow (from → to)</div><canvas id="pvFlowChart" height="200"></canvas></div>
   </div>
 
-  <!-- TAB: Dose Calc & TDM -->
-  <div class="tab-panel" id="panel-calculator">
-    <div class="bento">
-      <div class="stat purple"><div class="stat-icon">🧮</div><div class="stat-value" id="dcTotal">—</div><div class="stat-label">Dose Calc Total</div></div>
-      <div class="stat cyan"><div class="stat-icon">👤</div><div class="stat-value" id="dcUsers">—</div><div class="stat-label">Unique Users (Calc)</div></div>
-      <div class="stat red"><div class="stat-icon">🧬</div><div class="stat-value" id="tdmTotal">—</div><div class="stat-label">TDM Total</div></div>
-      <div class="stat amber"><div class="stat-icon">📈</div><div class="stat-value" id="tdmAvgAUC">—</div><div class="stat-label">Avg AUC</div></div>
-      <div class="stat green"><div class="stat-icon">🔗</div><div class="stat-value" id="calcVisitsTotal">—</div><div class="stat-label">Calculator Page Visits</div></div>
+  <!-- User Timeline Lookup -->
+  <div class="card full" style="margin-top:12px">
+    <div class="card-title"><span class="emoji">🗺</span> User Timeline — เลือก user เพื่อดู journey</div>
+    <div class="user-list" id="userList"></div>
+    <div class="journey-search">
+      <input type="text" id="journeyUserInput" placeholder="พิมพ์ user_id หรือเลือกจากด้านบน...">
+      <button onclick="showUserTimeline()">🔍 ค้นหา</button>
     </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="emoji">🧮</span> Inline Dose Calc — ยาที่คำนวณบ่อย</div>
-        <div class="table-wrap" id="doseCalcDrugsTable"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="emoji">🧬</span> Vanco TDM — Model Usage</div>
-        <canvas id="tdmModelChart" height="200"></canvas>
-      </div>
-    </div>
+    <div id="userTimeline"></div>
   </div>
+</div>
 
-  <!-- TAB: Survey & SUS -->
-  <div class="tab-panel" id="panel-survey">
-    <div class="bento">
-      <div class="stat purple"><div class="stat-icon">📋</div><div class="stat-value" id="surveyTotal">—</div><div class="stat-label">Total Surveys</div></div>
-      <div class="stat blue"><div class="stat-icon">✅</div><div class="stat-value" id="satCount">—</div><div class="stat-label">Satisfaction Done</div></div>
-      <div class="stat green"><div class="stat-icon">📊</div><div class="stat-value" id="susCount">—</div><div class="stat-label">SUS Done</div></div>
-      <div class="stat amber"><div class="stat-icon">🔁</div><div class="stat-value" id="bothCount">—</div><div class="stat-label">Both Phases</div></div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="emoji">⭐</span> Satisfaction Breakdown (avg per question)</div>
-        <canvas id="satBreakdownChart" height="200"></canvas>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="emoji">👥</span> Demographics — Role</div>
-        <canvas id="roleChart" height="200"></canvas>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><span class="emoji">🏥</span> Demographics — Department</div>
-        <canvas id="deptChart" height="200"></canvas>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="emoji">📊</span> SUS Score Distribution</div>
-        <div class="empty-msg" id="susDistMsg"><div class="icon">📊</div>ต้องการข้อมูล SUS ≥5 responses</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: Retention -->
-  <div class="tab-panel" id="panel-retention">
-    <div class="bento">
-      <div class="stat blue"><div class="stat-icon">👤</div><div class="stat-value" id="retTotalUsers">—</div><div class="stat-label">Total Users</div></div>
-      <div class="stat green"><div class="stat-icon">🔁</div><div class="stat-value" id="retReturning">—</div><div class="stat-label">Returning Users</div></div>
-      <div class="stat amber"><div class="stat-icon">📊</div><div class="stat-value" id="retRate">—</div><div class="stat-label">Retention Rate</div></div>
-    </div>
-    <div class="card full" style="margin-top:12px;">
-      <div class="card-title"><span class="emoji">📈</span> Calculator Page Visits by Day</div>
-      <canvas id="calcVisitsDayChart" height="120"></canvas>
-    </div>
-  </div>
-
-  <div id="statusMsg" class="loading">กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ Google Sheets</div>
-  <div class="footer-info" id="footerInfo"></div>
+<div id="statusMsg" class="loading">กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ Google Sheets</div>
+<div class="footer-info" id="footerInfo"></div>
 </div>
 
 <script>
 let SCRIPT_URL = localStorage.getItem('analyticsUrl') || 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
 let charts = {};
-const COLORS = { blue:'#38bdf8', cyan:'#22d3ee', green:'#34d399', amber:'#fbbf24', purple:'#a78bfa', red:'#f87171', pink:'#f472b6', slate:'#64748b' };
-const CHART_DEFAULTS = { responsive:true, plugins:{ legend:{ labels:{ color:'#94a3b8', font:{ family:'Noto Sans Thai', size:11 } } } }, scales:{ x:{ ticks:{color:'#64748b',font:{size:10}}, grid:{color:'rgba(30,41,59,0.5)'} }, y:{ ticks:{color:'#64748b',font:{size:10}}, grid:{color:'rgba(30,41,59,0.5)'}, beginAtZero:true } } };
+const C = {blue:'#38bdf8',cyan:'#22d3ee',green:'#34d399',amber:'#fbbf24',purple:'#a78bfa',red:'#f87171',pink:'#f472b6',slate:'#64748b',teal:'#2dd4bf'};
+const CHART_DEF = {responsive:true,plugins:{legend:{labels:{color:'#94a3b8',font:{family:'Noto Sans Thai',size:11}}}},scales:{x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,41,59,0.5)'}},y:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(30,41,59,0.5)'},beginAtZero:true}}};
 
-// Tabs
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -299,194 +220,204 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-function toggleSetup() { const b = document.getElementById('setupBanner'); b.classList.toggle('show'); document.getElementById('scriptUrl').value = SCRIPT_URL; }
-function saveUrl() { SCRIPT_URL = document.getElementById('scriptUrl').value.trim(); localStorage.setItem('analyticsUrl', SCRIPT_URL); document.getElementById('setupBanner').classList.remove('show'); loadData(); }
+function toggleSetup(){const b=document.getElementById('setupBanner');b.classList.toggle('show');document.getElementById('scriptUrl').value=SCRIPT_URL;}
+function saveUrl(){SCRIPT_URL=document.getElementById('scriptUrl').value.trim();localStorage.setItem('analyticsUrl',SCRIPT_URL);document.getElementById('setupBanner').classList.remove('show');loadData();}
+function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
+function makeChart(id,config){destroyChart(id);const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;charts[id]=new Chart(ctx,config);}
 
-function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
-
-function makeChart(id, config) {
-  const key = id;
-  destroyChart(key);
-  const ctx = document.getElementById(id)?.getContext('2d');
-  if (!ctx) return;
-  charts[key] = new Chart(ctx, config);
+function buildTable(cid,rows,barColor){
+  const el=document.getElementById(cid);if(!rows||!rows.length){el.innerHTML='<div class="empty-msg"><div class="icon">📭</div>ยังไม่มีข้อมูล</div>';return;}
+  const mx=rows[0]?.count||1;
+  el.innerHTML=`<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>${rows.map((d,i)=>`<tr><td class="rank">${i+1}</td><td class="drug-name">${d.drug}</td><td class="count">${d.count}</td><td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count/mx*100).toFixed(0)}%;background:${barColor||C.cyan}"></div></div></td></tr>`).join('')}</tbody></table>`;
 }
 
-function buildTable(containerId, rows, barColor) {
-  const el = document.getElementById(containerId);
-  if (!rows || rows.length === 0) {
-    el.innerHTML = '<div class="empty-msg"><div class="icon">📭</div>ยังไม่มีข้อมูล</div>';
-    return;
-  }
-  const maxC = rows[0]?.count || 1;
-  el.innerHTML = `<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>
-    ${rows.map((d, i) => `<tr>
-      <td class="rank">${i + 1}</td>
-      <td class="drug-name">${d.drug}</td>
-      <td class="count">${d.count}</td>
-      <td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count/maxC*100).toFixed(0)}%;background:${barColor || COLORS.cyan}"></div></div></td>
-    </tr>`).join('')}
-  </tbody></table>`;
+async function loadData(){
+  if(!SCRIPT_URL){document.getElementById('statusMsg').textContent='กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ';document.getElementById('statusMsg').style.display='block';return;}
+  document.getElementById('statusMsg').textContent='⏳ กำลังโหลดข้อมูล...';document.getElementById('statusMsg').style.display='block';
+  try{const res=await fetch(SCRIPT_URL+'?action=summary');const d=await res.json();if(d.error)throw new Error(d.error);document.getElementById('statusMsg').style.display='none';render(d);}
+  catch(err){document.getElementById('statusMsg').innerHTML=`<div class="error">❌ ${err.message}</div>`;}
 }
 
-async function loadData() {
-  if (!SCRIPT_URL) { document.getElementById('statusMsg').textContent = 'กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ'; document.getElementById('statusMsg').style.display = 'block'; return; }
-  document.getElementById('statusMsg').textContent = '⏳ กำลังโหลดข้อมูล...';
-  document.getElementById('statusMsg').style.display = 'block';
-  try {
-    const res = await fetch(SCRIPT_URL + '?action=summary');
-    const d = await res.json();
-    if (d.error) throw new Error(d.error);
-    document.getElementById('statusMsg').style.display = 'none';
-    render(d);
-  } catch (err) {
-    document.getElementById('statusMsg').innerHTML = `<div class="error">❌ โหลดไม่สำเร็จ: ${err.message}</div>`;
-  }
-}
+function render(d){
+  // Overview
+  document.getElementById('totalSessions').textContent=(d.totalSessions||0).toLocaleString();
+  document.getElementById('uniqueUsers').textContent=(d.uniqueUsers||0).toLocaleString();
+  document.getElementById('totalSearches').textContent=(d.totalSearches||0).toLocaleString();
+  document.getElementById('avgSearchTime').textContent=d.searchTime?.avg>0?(d.searchTime.avg/1000).toFixed(1):'—';
+  document.getElementById('avgSat').textContent=d.satisfaction?.avg>0?d.satisfaction.avg+'/5':'—';
+  document.getElementById('avgSUS').textContent=d.sus?.avg>0?d.sus.avg:'—';
+  document.getElementById('totalDoseCalcs').textContent=(d.doseCalcStats?.total||0).toLocaleString();
+  document.getElementById('totalTDM').textContent=(d.tdmStats?.total||0).toLocaleString();
 
-function render(d) {
-  // Overview stats
-  document.getElementById('totalSessions').textContent = (d.totalSessions||0).toLocaleString();
-  document.getElementById('uniqueUsers').textContent = (d.uniqueUsers||0).toLocaleString();
-  document.getElementById('totalSearches').textContent = (d.totalSearches||0).toLocaleString();
-  document.getElementById('avgSearchTime').textContent = d.searchTime?.avg > 0 ? (d.searchTime.avg / 1000).toFixed(1) : '—';
-  document.getElementById('avgSat').textContent = d.satisfaction?.avg > 0 ? d.satisfaction.avg + '/5' : '—';
-  document.getElementById('avgSUS').textContent = d.sus?.avg > 0 ? d.sus.avg : '—';
-  document.getElementById('totalDoseCalcs').textContent = (d.doseCalcStats?.total || 0).toLocaleString();
-  document.getElementById('totalTDM').textContent = (d.tdmStats?.total || 0).toLocaleString();
-
-  // DAU Chart
-  const dauLabels = (d.dailyUsers||[]).map(x => x.date.substring(5));
-  const dauData = (d.dailyUsers||[]).map(x => x.users);
-  makeChart('dauChart', {
-    type:'line',
-    data:{ labels:dauLabels, datasets:[{ label:'DAU', data:dauData, borderColor:COLORS.cyan, backgroundColor:'rgba(34,211,238,0.08)', fill:true, tension:0.35, pointRadius:2, pointBackgroundColor:COLORS.cyan, borderWidth:2 }] },
-    options:{ ...CHART_DEFAULTS, plugins:{ legend:{display:false} } }
-  });
+  // DAU
+  makeChart('dauChart',{type:'line',data:{labels:(d.dailyUsers||[]).map(x=>x.date.substring(5)),datasets:[{label:'DAU',data:(d.dailyUsers||[]).map(x=>x.users),borderColor:C.cyan,backgroundColor:'rgba(34,211,238,0.08)',fill:true,tension:0.35,pointRadius:2,borderWidth:2}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
   // Platform
-  const platL = Object.keys(d.platforms||{}); const platD = Object.values(d.platforms||{});
-  makeChart('platformChart', {
-    type:'doughnut',
-    data:{ labels:platL.length?platL:['—'], datasets:[{ data:platD.length?platD:[1], backgroundColor:[COLORS.blue,COLORS.green,COLORS.amber,COLORS.purple,COLORS.red] }] },
-    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',font:{size:11}} } } }
-  });
+  const pl=Object.keys(d.platforms||{}),pd=Object.values(d.platforms||{});
+  makeChart('platformChart',{type:'doughnut',data:{labels:pl.length?pl:['—'],datasets:[{data:pd.length?pd:[1],backgroundColor:[C.blue,C.green,C.amber,C.purple]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}});
 
-  // Time distribution
-  const buckets = d.searchTime?.buckets || [0,0,0,0,0,0];
-  makeChart('timeChart', {
-    type:'bar',
-    data:{ labels:['<5s','5-10s','10-20s','20-30s','30-60s','>60s'], datasets:[{ label:'Searches', data:buckets, backgroundColor:COLORS.cyan, borderRadius:4 }] },
-    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}} }
-  });
+  // Time dist
+  makeChart('timeChart',{type:'bar',data:{labels:['<5s','5-10s','10-20s','20-30s','30-60s','>60s'],datasets:[{data:d.searchTime?.buckets||[0,0,0,0,0,0],backgroundColor:C.cyan,borderRadius:4}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
-  // Drug Usage Tab
-  buildTable('topDrugsTable', d.topDrugs, COLORS.cyan);
-  buildTable('topExpandsTable', d.drugExpandStats?.topDrugs || [], COLORS.purple);
+  // Drug Usage
+  buildTable('topDrugsTable',d.topDrugs,C.cyan);
+  buildTable('topExpandsTable',d.drugExpandStats?.topDrugs||[],C.purple);
+  const fl=Object.keys(d.filterUsage||{}),fd=Object.values(d.filterUsage||{});
+  makeChart('filterChart',{type:'bar',data:{labels:fl.length?fl:['—'],datasets:[{data:fd.length?fd:[0],backgroundColor:C.blue,borderRadius:4}]},options:{...CHART_DEF,indexAxis:'y',plugins:{legend:{display:false}}}});
+  const sl=Object.keys(d.drugExpandStats?.bySources||{}),sd=Object.values(d.drugExpandStats?.bySources||{});
+  makeChart('expandSourceChart',{type:'doughnut',data:{labels:sl.length?sl:['—'],datasets:[{data:sd.length?sd:[1],backgroundColor:[C.blue,C.green,C.amber]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}});
 
-  // Filter chart
-  const filtL = Object.keys(d.filterUsage||{}); const filtD = Object.values(d.filterUsage||{});
-  makeChart('filterChart', {
-    type:'bar',
-    data:{ labels:filtL.length?filtL:['—'], datasets:[{ label:'Uses', data:filtD.length?filtD:[0], backgroundColor:COLORS.blue, borderRadius:4 }] },
-    options:{ ...CHART_DEFAULTS, indexAxis:'y', plugins:{legend:{display:false}} }
-  });
+  // =========================================
+  // TDM HUB TAB (v5)
+  // =========================================
+  const tdm = d.tdmStats || {};
+  document.getElementById('tdmTotal').textContent = (tdm.total||0).toLocaleString();
+  document.getElementById('tdmUsers').textContent = (tdm.uniqueUsers||0).toLocaleString();
+  document.getElementById('tdmVancoTotal').textContent = (tdm.vancomycin?.total||0).toLocaleString();
+  document.getElementById('tdmPhenyTotal').textContent = (tdm.phenytoin?.total||0).toLocaleString();
+  document.getElementById('tdmAGTotal').textContent = (tdm.aminoglycosides?.total||0).toLocaleString();
+  document.getElementById('tdmVPATotal').textContent = (tdm.valproate?.total||0).toLocaleString();
 
-  // Expand source
-  const srcL = Object.keys(d.drugExpandStats?.bySources||{}); const srcD = Object.values(d.drugExpandStats?.bySources||{});
-  makeChart('expandSourceChart', {
-    type:'doughnut',
-    data:{ labels:srcL.length?srcL:['—'], datasets:[{ data:srcD.length?srcD:[1], backgroundColor:[COLORS.blue,COLORS.green,COLORS.amber] }] },
-    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',font:{size:11}} } } }
-  });
+  // TDM by drug
+  const drugNames = ['Vancomycin','Phenytoin','Amikacin','Gentamicin','Valproate'];
+  const drugCounts = drugNames.map(n => tdm.byDrug?.[n]?.total || 0);
+  makeChart('tdmByDrugChart',{type:'bar',data:{labels:drugNames,datasets:[{data:drugCounts,backgroundColor:[C.blue,C.purple,C.green,C.teal,C.amber],borderRadius:6}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
-  // Calculator & TDM Tab
-  document.getElementById('dcTotal').textContent = (d.doseCalcStats?.total||0).toLocaleString();
-  document.getElementById('dcUsers').textContent = (d.doseCalcStats?.uniqueUsers||0).toLocaleString();
-  document.getElementById('tdmTotal').textContent = (d.tdmStats?.total||0).toLocaleString();
-  document.getElementById('tdmAvgAUC').textContent = d.tdmStats?.avgAUC > 0 ? d.tdmStats.avgAUC : '—';
-  document.getElementById('calcVisitsTotal').textContent = (d.calcVisitStats?.total||0).toLocaleString();
+  // Interpretation distribution
+  const interpL=Object.keys(tdm.allInterpretations||{}), interpD=Object.values(tdm.allInterpretations||{});
+  const interpColors={'therapeutic':C.green,'subtherapeutic':C.amber,'supratherapeutic':C.red,'toxic':C.pink,'borderline_toxic':'#fb923c','elevated_trough':C.red};
+  makeChart('tdmInterpChart',{type:'doughnut',data:{labels:interpL.length?interpL:['—'],datasets:[{data:interpD.length?interpD:[1],backgroundColor:interpL.map(l=>interpColors[l]||C.slate)}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}});
 
-  buildTable('doseCalcDrugsTable', d.doseCalcStats?.byDrug || [], COLORS.purple);
+  // TDM by day
+  const tdmDayL=Object.keys(tdm.byDay||{}).sort(), tdmDayD=tdmDayL.map(k=>(tdm.byDay||{})[k]);
+  makeChart('tdmByDayChart',{type:'bar',data:{labels:tdmDayL.map(x=>x.substring(5)),datasets:[{data:tdmDayD,backgroundColor:C.red,borderRadius:4}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
-  // TDM Model chart
-  const mdlL = Object.keys(d.tdmStats?.byModel||{}); const mdlD = Object.values(d.tdmStats?.byModel||{});
-  makeChart('tdmModelChart', {
-    type:'bar',
-    data:{ labels:mdlL.length?mdlL:['—'], datasets:[{ label:'Uses', data:mdlD.length?mdlD:[0], backgroundColor:COLORS.red, borderRadius:4 }] },
-    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}} }
-  });
+  // Tab switches
+  const tsL=Object.keys(tdm.tabSwitches||{}), tsD=Object.values(tdm.tabSwitches||{});
+  makeChart('tdmTabSwitchChart',{type:'bar',data:{labels:tsL.length?tsL:['—'],datasets:[{data:tsD.length?tsD:[0],backgroundColor:C.cyan,borderRadius:4}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
-  // Survey Tab
-  document.getElementById('surveyTotal').textContent = (d.totalSurveys||0).toLocaleString();
-  document.getElementById('satCount').textContent = (d.surveyCompletion?.satOnly||0).toLocaleString();
-  document.getElementById('susCount').textContent = (d.surveyCompletion?.susOnly||0).toLocaleString();
-  document.getElementById('bothCount').textContent = (d.surveyCompletion?.bothPhases||0).toLocaleString();
+  // Vancomycin model usage
+  const vmL=Object.keys(tdm.vancomycin?.byModel||{}), vmD=Object.values(tdm.vancomycin?.byModel||{});
+  makeChart('vancoModelChart',{type:'bar',data:{labels:vmL.length?vmL:['—'],datasets:[{data:vmD.length?vmD:[0],backgroundColor:C.blue,borderRadius:4}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
-  // Sat breakdown
-  const satBD = d.satisfaction?.breakdown || {};
-  const satLabels = ['ค้นหาง่าย','ถูกต้อง','เร็วขึ้น','แนะนำคนอื่น','โดยรวม'];
-  const satKeys = ['sat_1_easy_to_find','sat_2_accurate','sat_3_faster','sat_4_recommend','sat_5_overall'];
-  makeChart('satBreakdownChart', {
-    type:'bar',
-    data:{ labels:satLabels, datasets:[{ label:'Average (1-5)', data:satKeys.map(k => parseFloat(satBD[k])||0), backgroundColor:COLORS.amber, borderRadius:4 }] },
-    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}}, scales:{...CHART_DEFAULTS.scales, y:{...CHART_DEFAULTS.scales.y, max:5}} }
-  });
+  // Vancomycin AUC in target
+  const vancoInTarget = tdm.vancomycin?.aucInTarget || 0;
+  const vancoOutTarget = (tdm.vancomycin?.total || 0) - vancoInTarget;
+  makeChart('vancoAUCTargetChart',{type:'doughnut',data:{labels:['In target (400-600)','Out of target'],datasets:[{data:[vancoInTarget,vancoOutTarget],backgroundColor:[C.green,C.red]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}});
 
-  // Role chart
-  const roleL = Object.keys(d.demographics?.roles||{}); const roleD = Object.values(d.demographics?.roles||{});
-  makeChart('roleChart', {
-    type:'doughnut',
-    data:{ labels:roleL.length?roleL:['—'], datasets:[{ data:roleD.length?roleD:[1], backgroundColor:[COLORS.blue,COLORS.green,COLORS.amber,COLORS.purple,COLORS.red,COLORS.pink] }] },
-    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{color:'#94a3b8',font:{size:11}} } } }
-  });
+  // AG strategy
+  const asL=Object.keys(tdm.aminoglycosides?.byStrategy||{}), asD=Object.values(tdm.aminoglycosides?.byStrategy||{});
+  makeChart('agStrategyChart',{type:'doughnut',data:{labels:asL.length?asL:['—'],datasets:[{data:asD.length?asD:[1],backgroundColor:[C.blue,C.amber]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}});
 
-  // Dept chart
-  const deptL = Object.keys(d.demographics?.departments||{}); const deptD = Object.values(d.demographics?.departments||{});
-  makeChart('deptChart', {
-    type:'bar',
-    data:{ labels:deptL.length?deptL:['—'], datasets:[{ label:'Count', data:deptD.length?deptD:[0], backgroundColor:COLORS.green, borderRadius:4 }] },
-    options:{ ...CHART_DEFAULTS, indexAxis:'y', plugins:{legend:{display:false}} }
-  });
+  // AG nomogram
+  const anL=Object.keys(tdm.aminoglycosides?.byNomogram||{}), anD=Object.values(tdm.aminoglycosides?.byNomogram||{});
+  makeChart('agNomogramChart',{type:'bar',data:{labels:anL.length?anL:['—'],datasets:[{data:anD.length?anD:[0],backgroundColor:C.green,borderRadius:4}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
-  // Retention Tab
-  document.getElementById('retTotalUsers').textContent = (d.retention?.totalUsers||0).toLocaleString();
-  document.getElementById('retReturning').textContent = (d.retention?.returningUsers||0).toLocaleString();
-  document.getElementById('retRate').textContent = d.retention?.retentionRate > 0 ? d.retention.retentionRate + '%' : '—';
+  // VPA indication
+  const viL=Object.keys(tdm.valproate?.byIndication||{}), viD=Object.values(tdm.valproate?.byIndication||{});
+  makeChart('vpaIndicationChart',{type:'doughnut',data:{labels:viL.length?viL:['—'],datasets:[{data:viD.length?viD:[1],backgroundColor:[C.amber,C.red,C.purple,C.cyan]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}});
 
-  // Calc visits by day
-  const cvDay = d.calcVisitStats?.byDay || {};
-  const cvDayL = Object.keys(cvDay).sort(); const cvDayD = cvDayL.map(k => cvDay[k]);
-  makeChart('calcVisitsDayChart', {
-    type:'bar',
-    data:{ labels:cvDayL.map(x=>x.substring(5)), datasets:[{ label:'Visits', data:cvDayD, backgroundColor:COLORS.amber, borderRadius:4 }] },
-    options:{ ...CHART_DEFAULTS, plugins:{legend:{display:false}} }
-  });
+  // Dose Calc tab
+  document.getElementById('dcTotal').textContent=(d.doseCalcStats?.total||0).toLocaleString();
+  document.getElementById('dcUsers').textContent=(d.doseCalcStats?.uniqueUsers||0).toLocaleString();
+  document.getElementById('calcVisitsTotal').textContent=(d.calcVisitStats?.total||0).toLocaleString();
+  buildTable('doseCalcDrugsTable',d.doseCalcStats?.byDrug||[],C.purple);
+  const cvDay=d.calcVisitStats?.byDay||{},cvDayL=Object.keys(cvDay).sort(),cvDayD=cvDayL.map(k=>cvDay[k]);
+  makeChart('calcVisitsDayChart',{type:'bar',data:{labels:cvDayL.map(x=>x.substring(5)),datasets:[{data:cvDayD,backgroundColor:C.amber,borderRadius:4}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
 
-  // Footer
-  document.getElementById('footerInfo').textContent = `Last updated: ${d.lastUpdated || '—'} | Version: ${d.version || 'v3'}`;
+  // Survey tab
+  document.getElementById('surveyTotal').textContent=(d.totalSurveys||0).toLocaleString();
+  document.getElementById('satCount').textContent=(d.surveyCompletion?.satOnly||0).toLocaleString();
+  document.getElementById('susCount').textContent=(d.surveyCompletion?.susOnly||0).toLocaleString();
+  document.getElementById('bothCount').textContent=(d.surveyCompletion?.bothPhases||0).toLocaleString();
+  const satBD=d.satisfaction?.breakdown||{};
+  makeChart('satBreakdownChart',{type:'bar',data:{labels:['ค้นหาง่าย','ถูกต้อง','เร็วขึ้น','แนะนำ','โดยรวม'],datasets:[{data:['sat_1_easy_to_find','sat_2_accurate','sat_3_faster','sat_4_recommend','sat_5_overall'].map(k=>parseFloat(satBD[k])||0),backgroundColor:C.amber,borderRadius:4}]},options:{...CHART_DEF,plugins:{legend:{display:false}},scales:{...CHART_DEF.scales,y:{...CHART_DEF.scales.y,max:5}}}});
+  const rl=Object.keys(d.demographics?.roles||{}),rd=Object.values(d.demographics?.roles||{});
+  makeChart('roleChart',{type:'doughnut',data:{labels:rl.length?rl:['—'],datasets:[{data:rd.length?rd:[1],backgroundColor:[C.blue,C.green,C.amber,C.purple,C.red]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}});
+  const dl=Object.keys(d.demographics?.departments||{}),dd=Object.values(d.demographics?.departments||{});
+  makeChart('deptChart',{type:'bar',data:{labels:dl.length?dl:['—'],datasets:[{data:dd.length?dd:[0],backgroundColor:C.green,borderRadius:4}]},options:{...CHART_DEF,indexAxis:'y',plugins:{legend:{display:false}}}});
+
+  // Retention
+  document.getElementById('retTotalUsers').textContent=(d.retention?.totalUsers||0).toLocaleString();
+  document.getElementById('retReturning').textContent=(d.retention?.returningUsers||0).toLocaleString();
+  document.getElementById('retRate').textContent=d.retention?.retentionRate>0?d.retention.retentionRate+'%':'—';
+
+  // =========================================
+  // User Journey tab (v5)
+  // =========================================
+  const pv = d.pageViewStats || {};
+  document.getElementById('pvTotal').textContent = (pv.total||0).toLocaleString();
+  document.getElementById('pvMultiPage').textContent = (pv.multiPageSessions||0).toLocaleString();
+  document.getElementById('pvAvgDurTDM').textContent = pv.avgDurations?.tdm || '—';
+  document.getElementById('pvAvgDurCalc').textContent = pv.avgDurations?.calculator || '—';
+
+  // Page visits bar
+  const pvL=Object.keys(pv.pageVisits||{}), pvD=Object.values(pv.pageVisits||{});
+  makeChart('pvPageChart',{type:'bar',data:{labels:pvL.length?pvL:['—'],datasets:[{data:pvD.length?pvD:[0],backgroundColor:C.cyan,borderRadius:6}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
+
+  // Avg duration bar
+  const durL=Object.keys(pv.avgDurations||{}), durD=Object.values(pv.avgDurations||{});
+  makeChart('pvDurationChart',{type:'bar',data:{labels:durL.length?durL:['—'],datasets:[{label:'sec',data:durD.length?durD:[0],backgroundColor:C.amber,borderRadius:6}]},options:{...CHART_DEF,plugins:{legend:{display:false}}}});
+
+  // Navigation flow
+  const flL=Object.keys(pv.flows||{}).sort((a,b)=>(pv.flows[b]||0)-(pv.flows[a]||0)).slice(0,15);
+  const flD=flL.map(k=>pv.flows[k]);
+  makeChart('pvFlowChart',{type:'bar',data:{labels:flL.length?flL:['—'],datasets:[{data:flD.length?flD:[0],backgroundColor:C.blue,borderRadius:4}]},options:{...CHART_DEF,indexAxis:'y',plugins:{legend:{display:false}}}});
+
+  // Recent users list
+  window._recentUsers = d.recentUsers || {};
+  const userIds = Object.keys(window._recentUsers);
+  document.getElementById('userList').innerHTML = userIds.length
+    ? userIds.map(uid => `<span class="user-pill" onclick="document.getElementById('journeyUserInput').value='${uid}';showUserTimeline()">${uid.substring(0,12)}…</span>`).join('')
+    : '<div class="empty-msg">ยังไม่มีข้อมูล page_view</div>';
+
+  document.getElementById('footerInfo').textContent=`Last updated: ${d.lastUpdated||'—'} | Version: ${d.version||'v5'}`;
 }
 
-async function exportCSV(sheet) {
-  if (!SCRIPT_URL) return alert('กรุณาตั้งค่า URL ก่อน');
-  try {
-    const res = await fetch(SCRIPT_URL + '?action=export&sheet=' + sheet);
-    const data = await res.json();
-    if (data.error) return alert('Error: ' + data.error);
-    if (!data.length) return alert('ไม่มีข้อมูลใน ' + sheet);
-    const headers = Object.keys(data[0]);
-    const csv = [headers.join(','), ...data.map(row => headers.map(h => `"${String(row[h]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `IV_DrugRef_${sheet}_${new Date().toISOString().substring(0,10)}.csv`;
-    link.click();
-  } catch (err) {
-    alert('Export failed: ' + err.message);
+function showUserTimeline(){
+  const uid = document.getElementById('journeyUserInput').value.trim();
+  const el = document.getElementById('userTimeline');
+  if(!uid){el.innerHTML='<div class="empty-msg">กรุณาเลือกหรือพิมพ์ user_id</div>';return;}
+  const events = window._recentUsers?.[uid];
+  if(!events||!events.length){
+    // Try partial match
+    const match = Object.keys(window._recentUsers||{}).find(k=>k.includes(uid));
+    if(match){
+      document.getElementById('journeyUserInput').value=match;
+      return showUserTimeline();
+    }
+    el.innerHTML=`<div class="empty-msg"><div class="icon">🔍</div>ไม่พบข้อมูลสำหรับ ${uid}<br><span style="font-size:10px;color:#64748b">ลอง user_id อื่น หรือรอให้มี page_view data</span></div>`;
+    return;
   }
+  // Highlight active pill
+  document.querySelectorAll('.user-pill').forEach(p=>{p.classList.toggle('active',p.textContent.startsWith(uid.substring(0,12)));});
+
+  const typeLabels={page_view:'📄 Page View',search:'🔍 Search',dose_calc:'🧮 Dose Calc',tdm_calc:'🎯 TDM Calc'};
+  const typeColors={page_view:'var(--accent-blue)',search:'var(--accent-cyan)',dose_calc:'var(--accent-purple)',tdm_calc:'var(--accent-red)'};
+
+  el.innerHTML=`
+    <div style="font-size:12px;color:var(--accent-cyan);font-weight:600;margin-bottom:10px;">
+      🗺 Timeline: ${uid} (${events.length} events)
+    </div>
+    <div class="timeline">
+      ${events.map(ev=>`
+        <div class="tl-item ${ev.type}">
+          <div class="tl-time">${ev.time?ev.time.substring(0,19).replace('T',' '):''}</div>
+          <div class="tl-type" style="color:${typeColors[ev.type]||'var(--text-primary)'}">${typeLabels[ev.type]||ev.type}</div>
+          <div class="tl-detail">${ev.detail||'—'}</div>
+        </div>`).join('')}
+    </div>`;
 }
 
-if (SCRIPT_URL) loadData();
+async function exportCSV(sheet){
+  if(!SCRIPT_URL)return alert('กรุณาตั้งค่า URL ก่อน');
+  try{const res=await fetch(SCRIPT_URL+'?action=export&sheet='+sheet);const data=await res.json();if(data.error)return alert('Error: '+data.error);if(!data.length)return alert('ไม่มีข้อมูลใน '+sheet);
+  const headers=Object.keys(data[0]);const csv=[headers.join(','),...data.map(row=>headers.map(h=>`"${String(row[h]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`IV_DrugRef_${sheet}_${new Date().toISOString().substring(0,10)}.csv`;link.click();
+  }catch(err){alert('Export failed: '+err.message);}
+}
+
+if(SCRIPT_URL)loadData();
 </script>
 </body>
 </html>

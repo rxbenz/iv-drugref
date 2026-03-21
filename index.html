@@ -2968,6 +2968,25 @@ function sendAnalytics(data) {
   } catch (e) { /* silent */ }
 }
 
+// --- Unified page_view tracking (v5) ---
+const PAGE_ENTER_TIME = Date.now();
+const FROM_PAGE = (() => {
+  const ref = document.referrer || '';
+  if (ref.includes('calculator.html')) return 'calculator';
+  if (ref.includes('tdm.html')) return 'tdm';
+  if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+  return ref ? 'external' : 'direct';
+})();
+sendAnalytics({type:'page_view',page:'drugref',action:'enter',from_page:FROM_PAGE,referrer:document.referrer||'direct'});
+let pageViewSent = false;
+function sendPageLeave(){
+  if(pageViewSent) return; pageViewSent = true;
+  const dur = Math.round((Date.now() - PAGE_ENTER_TIME) / 1000);
+  sendAnalytics({type:'page_view',page:'drugref',action:'leave',duration_sec:dur,from_page:FROM_PAGE});
+}
+window.addEventListener('beforeunload', sendPageLeave);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') sendPageLeave(); });
+
 // About modal
 function showAbout() {
   const o = document.createElement('div');

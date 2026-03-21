@@ -839,9 +839,7 @@ function switchDrug(drug){
   const idx=['vancomycin','phenytoin','aminoglycoside','valproate'].indexOf(drug);
   if(idx>=0) tabs[idx].classList.add('active');
   document.getElementById('sec_'+drug).classList.add('active');
-
-  // Track
-  sendAnalytics({type:'tdm_usage',drug_name:drug,action:'tab_switch'});
+  // Note: tab switching is NOT tracked — only actual calculations are tracked
 }
 
 // ============================================================
@@ -853,14 +851,36 @@ const UID=localStorage.getItem('anonUserId')||'';
 let reqCount=0;
 function sendAnalytics(data){
   if(!ANALYTICS_URL||localStorage.getItem('analyticsConsent')!=='true')return;
-  if(reqCount>=30)return; reqCount++;
+  if(reqCount>=40)return; reqCount++;
   try{
     const payload=JSON.stringify({...data,session_id:SID,user_id:UID});
     if(navigator.sendBeacon) navigator.sendBeacon(ANALYTICS_URL,payload);
     else fetch(ANALYTICS_URL,{method:'POST',body:payload,keepalive:true}).catch(()=>{});
   }catch(e){}
 }
-sendAnalytics({type:'calc_visit',page:'tdm',referrer:document.referrer||'direct',drugs_available:'Vancomycin,Phenytoin,Aminoglycosides,Valproate'});
+
+// --- Unified page_view tracking ---
+const PAGE_ENTER_TIME=Date.now();
+const FROM_PAGE=(()=>{
+  const ref=document.referrer||'';
+  if(ref.includes('calculator.html'))return'calculator';
+  if(ref.includes('index.html')||ref.endsWith('iv-drugref/'))return'drugref';
+  if(ref.includes('vanco-tdm.html'))return'vanco-tdm';
+  if(ref.includes('tdm.html'))return'tdm';
+  return ref?'external':'direct';
+})();
+// Send page_view on load
+sendAnalytics({type:'page_view',page:'tdm',action:'enter',from_page:FROM_PAGE,referrer:document.referrer||'direct'});
+// Send duration on leave
+let pageViewSent=false;
+function sendPageLeave(){
+  if(pageViewSent)return; pageViewSent=true;
+  const dur=Math.round((Date.now()-PAGE_ENTER_TIME)/1000);
+  sendAnalytics({type:'page_view',page:'tdm',action:'leave',duration_sec:dur,from_page:FROM_PAGE,
+    active_drug:activeDrug});
+}
+window.addEventListener('beforeunload',sendPageLeave);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')sendPageLeave();});
 
 
 // ============================================================
@@ -1201,7 +1221,19 @@ const VancoTDM = (function(){
         updateOptimizer(); genDoseOpts();
         document.getElementById('vancoResults').scrollIntoView({behavior:'smooth'});
 
-        sendAnalytics({type:'tdm_usage',drug_name:'Vancomycin',model:currentPK.model,auc_result:aucMAP.toFixed(0),dose:lastD.amount+'mg q'+lastD.interval+'h'});
+        sendAnalytics({type:'tdm_usage',drug_name:'Vancomycin',action:'calculation',
+          model:currentPK.model,auc_result:aucMAP.toFixed(0),
+          auc_ci_lo:aucLo.toFixed(0),auc_ci_hi:aucHi.toFixed(0),
+          interpretation:aucMAP>=400&&aucMAP<=600?'therapeutic':(aucMAP<400?'subtherapeutic':'supratherapeutic'),
+          ss_peak:currentPK.ssPeak.toFixed(1),ss_trough:currentPK.ssTrough.toFixed(1),
+          cl_map:currentPK.cl.toFixed(3),vd_map:currentPK.vd.toFixed(1),halflife:currentPK.halflife.toFixed(1),
+          dose:lastD.amount+'mg q'+lastD.interval+'h',mcmc_accept:(acceptRate*100).toFixed(0),
+          weight_kg:pt.wt,height_cm:pt.ht,age:pt.age,sex:pt.sex,
+          scr:pt.scr,crcl:currentPK.crcl.toFixed(0),albumin:pt.alb,dialysis:pt.dialysis,
+          measured_levels:JSON.stringify(levels.map(l=>({value:l.value,time:l.time}))),
+          num_levels:levels.length,
+          dose_history:JSON.stringify(doses.map(d=>({amount:d.amount,interval:d.interval,infusion:d.infusion,start:d.startTime,n:d.nDoses}))),
+          num_dose_entries:doses.length});
       });
     }
   };
@@ -1439,7 +1471,14 @@ const PhenytoinTDM = (function(){
       updateDosePredict();
       document.getElementById('phenyResults').scrollIntoView({behavior:'smooth'});
 
-      sendAnalytics({type:'tdm_usage',drug_name:'Phenytoin',level:totalLevel,corrected:wt.corrected.toFixed(1),dose:currentDose});
+      sendAnalytics({type:'tdm_usage',drug_name:'Phenytoin',action:'calculation',
+        level:totalLevel,corrected_level:wt.corrected.toFixed(1),
+        free_level:freeLevel>0?freeLevel:estFree.toFixed(1),free_level_source:freeLevel>0?'measured':'estimated',
+        free_fraction:(freeFrac*100).toFixed(0),correction_applied:pt.alb<3.5||pt.crcl<15||pt.dialysis!=='none'?'yes':'none',
+        interpretation:useCss>=10&&useCss<=20?'therapeutic':(useCss<10?'subtherapeutic':(useCss<=25?'borderline_toxic':'toxic')),
+        dose:currentDose,vmax_est:mm.method1.Vmax.toFixed(0),km:mm.method1.Km.toFixed(1),
+        weight_kg:pt.wt,height_cm:pt.ht,age:pt.age,sex:pt.sex,
+        scr:pt.scr,crcl:pt.crcl.toFixed(0),albumin:pt.alb,dialysis:pt.dialysis});
     }
   };
 })();
@@ -1705,7 +1744,20 @@ const AminoglyTDM = (function(){
       document.getElementById('agResults').style.display='block';
       document.getElementById('agResults').scrollIntoView({behavior:'smooth'});
 
-      sendAnalytics({type:'tdm_usage',drug_name:p.name,strategy,dose:dose+'mg q'+interval+'h'});
+      sendAnalytics({type:'tdm_usage',drug_name:p.name,action:'calculation',
+        strategy,dose:dose+'mg q'+interval+'h',interval:interval,
+        nomogram_result:nomoResult?nomoResult.zone:'N/A',
+        est_peak:ssPeak.toFixed(1),est_trough:ssTrough.toFixed(1),
+        interpretation:ssTrough<(drug==='amikacin'?5:2)?'therapeutic':'elevated_trough',
+        ke:ke.toFixed(4),vd:vd.toFixed(1),halflife:hl.toFixed(1),pk_source:pkSource,
+        dosing_weight:dw.toFixed(1),ibw:ibw.toFixed(1),
+        // Measured levels user entered
+        measured_peak:peak||'',measured_trough:trough||'',
+        measured_random:randomLvl||'',random_time:randomTime||'',
+        infusion_duration:infDuration,
+        // Full patient info
+        weight_kg:pt.wt,height_cm:pt.ht,age:pt.age,sex:pt.sex,
+        scr:pt.scr,crcl:pt.crcl.toFixed(0),albumin:pt.alb,dialysis:pt.dialysis});
     }
   };
 })();
@@ -1853,7 +1905,17 @@ const ValproateTDM = (function(){
       updateDoseRec();
       document.getElementById('vpaResults').scrollIntoView({behavior:'smooth'});
 
-      sendAnalytics({type:'tdm_usage',drug_name:'Valproate',level:totalVPA,dose:currentDose+'mg/d',indication});
+      sendAnalytics({type:'tdm_usage',drug_name:'Valproate',action:'calculation',
+        level:totalVPA,free_level:freeVPA>0?freeVPA:estFree.toFixed(1),
+        free_fraction:(freeVPA>0?(freeVPA/totalVPA*100):(ff*100)).toFixed(0),
+        corrected_total:pt.alb<3.5?corrTotal.toFixed(0):totalVPA,
+        interpretation:totalVPA<target.total.low?'subtherapeutic':(totalVPA<=target.total.high?'therapeutic':(totalVPA<=150?'supratherapeutic':'toxic')),
+        dose:currentDose+'mg/d',indication,formulation:form,
+        hypoalbumin:pt.alb<3.5?'yes':'no',
+        free_level_source:freeVPA>0?'measured':'estimated',
+        // Full patient info
+        weight_kg:pt.wt,height_cm:pt.ht,age:pt.age,sex:pt.sex,
+        scr:pt.scr,crcl:pt.crcl.toFixed(0),albumin:pt.alb,dialysis:pt.dialysis});
     }
   };
 })();

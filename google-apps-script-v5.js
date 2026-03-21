@@ -59,7 +59,11 @@ function setupV5() {
     'dose_history',                  // Vancomycin: JSON [{amount,interval,infusion,start,n},...]
     'num_dose_entries',              // Vancomycin: count of dose entries
     'measured_peak', 'measured_trough', 'measured_random', 'random_time', // AG: raw level inputs
-    'infusion_duration'              // AG: infusion time user entered
+    'infusion_duration',              // AG: infusion time user entered
+    // v5.1: Special population & sampling adequacy
+    'bmi', 'obesity_flag', 'elderly_flag',    // obesity: obese|normal; elderly: elderly_80+|elderly_65+|adult
+    'at_steady_state', 'sampling_warnings',   // yes|no; pre-steady-state,not-true-trough
+    'total_doses_given'                       // count of doses given before TDM
   ];
   
   // Check if headers need updating
@@ -116,6 +120,10 @@ function setupV4() {
     'PageViews': {
       headers: ['timestamp', 'session_id', 'user_id', 'page', 'action', 'duration_sec', 'from_page', 'referrer', 'active_drug', 'last_drug_selected'],
       color: '#0EA5E9'
+    },
+    'RenalDosing': {
+      headers: ['timestamp', 'session_id', 'user_id', 'drug_name', 'drug_class', 'formula_used', 'gfr_value', 'crcl_cg', 'egfr_ckd', 'ckd_stage', 'recommended_dose', 'weight_kg', 'height_cm', 'age', 'sex', 'scr'],
+      color: '#0D9488'
     }
   };
   
@@ -255,6 +263,27 @@ function doPost(e) {
       ]);
     }
     
+    // v5.1: Renal Dosing usage tracking
+    else if (data.type === 'renal_dosing') {
+      const sheet = ss.getSheetByName('RenalDosing');
+      if (sheet) sheet.appendRow([
+        now, sid, uid,
+        data.drug_name || '',
+        data.drug_class || '',
+        data.formula_used || '',
+        data.gfr_value || '',
+        data.crcl_cg || '',
+        data.egfr_ckd || '',
+        data.ckd_stage || '',
+        data.recommended_dose || '',
+        data.weight_kg || '',
+        data.height_cm || '',
+        data.age || '',
+        data.sex || '',
+        data.scr || ''
+      ]);
+    }
+    
     // v5: Enriched TDM usage (all 4 drugs — only actual calculations, not browsing)
     else if (data.type === 'tdm_usage') {
       const sheet = ss.getSheetByName('TDMUsage');
@@ -310,7 +339,14 @@ function doPost(e) {
           data.measured_trough || '',
           data.measured_random || '',
           data.random_time || '',
-          data.infusion_duration || ''
+          data.infusion_duration || '',
+          // v5.1: Special population & sampling adequacy
+          data.bmi || '',
+          data.obesity_flag || '',
+          data.elderly_flag || '',
+          data.at_steady_state || '',
+          data.sampling_warnings || '',
+          data.total_doses_given || ''
         ]);
       }
     }
@@ -340,6 +376,7 @@ function doGet(e) {
       const calcVisits = getSheetData('CalcVisits');
       const tdmUsage = getSheetData('TDMUsage');
       const pageViews = getSheetData('PageViews');
+      const renalDosing = getSheetData('RenalDosing');
       
       // =========================================
       // v3 existing aggregations (unchanged)
@@ -449,9 +486,19 @@ function doGet(e) {
       const vancoCalcs = tdmCalcs.filter(r => String(r.drug_name || '') === 'Vancomycin');
       const vancoModelCount = {};
       const vancoAUCs = [];
+      const vancoObesityCount = {};
+      const vancoElderlyCount = {};
+      const vancoSSCount = { yes: 0, no: 0 };
+      const vancoSamplingWarnings = {};
       vancoCalcs.forEach(r => {
         const model = String(r.model || '').trim(); if (model) vancoModelCount[model] = (vancoModelCount[model] || 0) + 1;
         const auc = parseFloat(r.auc_result); if (!isNaN(auc) && auc > 0) vancoAUCs.push(auc);
+        // v5.1 aggregation
+        const ob = String(r.obesity_flag || '').trim(); if (ob) vancoObesityCount[ob] = (vancoObesityCount[ob] || 0) + 1;
+        const el = String(r.elderly_flag || '').trim(); if (el) vancoElderlyCount[el] = (vancoElderlyCount[el] || 0) + 1;
+        const ss = String(r.at_steady_state || '').trim(); if (ss === 'yes') vancoSSCount.yes++; else if (ss === 'no') vancoSSCount.no++;
+        const sw = String(r.sampling_warnings || '').trim();
+        if (sw && sw !== 'none') sw.split(',').forEach(w => { vancoSamplingWarnings[w] = (vancoSamplingWarnings[w] || 0) + 1; });
       });
       const vancoAvgAUC = vancoAUCs.length > 0 ? (vancoAUCs.reduce((a, b) => a + b, 0) / vancoAUCs.length).toFixed(0) : 0;
       
@@ -509,6 +556,28 @@ function doGet(e) {
       let returningUsers = 0;
       Object.keys(userFirstSeen).forEach(uid => { if (userFirstSeen[uid] !== userLastSeen[uid]) returningUsers++; });
       
+      // =========================================
+      // v5.1: Renal Dosing aggregation
+      // =========================================
+      const renalDrugCount = {};
+      const renalClassCount = {};
+      const renalFormulaCount = {};
+      const renalStageCount = {};
+      const renalByDay = {};
+      renalDosing.forEach(r => {
+        const drug = String(r.drug_name || '').trim();
+        if (drug) renalDrugCount[drug] = (renalDrugCount[drug] || 0) + 1;
+        const cls = String(r.drug_class || '').trim();
+        if (cls) renalClassCount[cls] = (renalClassCount[cls] || 0) + 1;
+        const formula = String(r.formula_used || '').trim();
+        if (formula) renalFormulaCount[formula] = (renalFormulaCount[formula] || 0) + 1;
+        const stage = String(r.ckd_stage || '').trim();
+        if (stage) renalStageCount[stage] = (renalStageCount[stage] || 0) + 1;
+        const day = String(r.timestamp || '').substring(0, 10);
+        if (day && day !== 'undefined') renalByDay[day] = (renalByDay[day] || 0) + 1;
+      });
+      const topRenalDrugs = Object.entries(renalDrugCount).sort((a, b) => b[1] - a[1]).map(([drug, count]) => ({ drug, count }));
+      
       const result = {
         // v3
         totalSessions: sessions.length,
@@ -547,7 +616,12 @@ function doGet(e) {
             total: vancoCalcs.length,
             byModel: vancoModelCount,
             avgAUC: vancoAvgAUC,
-            aucInTarget: vancoCalcs.filter(r => { const a = parseFloat(r.auc_result); return a >= 400 && a <= 600; }).length
+            aucInTarget: vancoCalcs.filter(r => { const a = parseFloat(r.auc_result); return a >= 400 && a <= 600; }).length,
+            // v5.1: Special population analytics
+            obesityDistribution: vancoObesityCount,
+            elderlyDistribution: vancoElderlyCount,
+            steadyStateCompliance: vancoSSCount,
+            samplingWarnings: vancoSamplingWarnings
           },
           phenytoin: {
             total: phenyCalcs.length,
@@ -630,6 +704,7 @@ function doGet(e) {
           addEvents(searches, 'search');
           addEvents(doseCalcs, 'dose_calc');
           addEvents(tdmCalcs, 'tdm_calc');
+          addEvents(renalDosing, 'renal_dosing');
           // Get last 50 users sorted by most recent activity
           const userLastTime = {};
           for (const [uid, events] of Object.entries(userMap)) {
@@ -648,7 +723,18 @@ function doGet(e) {
         })(),
         
         lastUpdated: bangkokNow(),
-        version: 'v5'
+        version: 'v5.1',
+        
+        // v5.1: Renal Dosing stats
+        renalDosingStats: {
+          total: renalDosing.length,
+          uniqueUsers: new Set(renalDosing.map(r => String(r.user_id || r.session_id || '').trim()).filter(Boolean)).size,
+          topDrugs: topRenalDrugs,
+          byClass: renalClassCount,
+          byFormula: renalFormulaCount,
+          byCKDStage: renalStageCount,
+          byDay: renalByDay
+        }
       };
       
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
@@ -656,7 +742,7 @@ function doGet(e) {
     
     if (action === 'export') {
       const sheet = (e && e.parameter && e.parameter.sheet) ? e.parameter.sheet : 'Sessions';
-      const validSheets = ['Sessions', 'Searches', 'Surveys', 'DoseCalcs', 'DrugExpands', 'CalcVisits', 'TDMUsage', 'PageViews'];
+      const validSheets = ['Sessions', 'Searches', 'Surveys', 'DoseCalcs', 'DrugExpands', 'CalcVisits', 'TDMUsage', 'PageViews', 'RenalDosing'];
       if (!validSheets.includes(sheet)) {
         return ContentService.createTextOutput(JSON.stringify({ error: 'Invalid sheet', validSheets })).setMimeType(ContentService.MimeType.JSON);
       }

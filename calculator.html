@@ -10,584 +10,70 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg-primary: #f0f4f8; --bg-card: #fff; --border: #e2e8f0;
-  --text-primary: #1e293b; --text-secondary: #64748b; --text-muted: #94a3b8;
-  --accent-blue: #0ea5e9; --accent-green: #059669; --accent-amber: #d97706; --accent-red: #dc2626;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-
-.header {
-  background: #fff; border-bottom: 1px solid var(--border); padding: 12px 16px;
-  display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100;
-}
-.header a { color: var(--accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
-.header h1 { font-size: 16px; font-weight: 600; flex: 1; }
-.header .tdm-link {
-  font-size: 11px; font-weight: 600; color: #38bdf8; background: #1e293b;
-  border: 1.5px solid #38bdf8; padding: 5px 12px; border-radius: 20px;
-  text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
-  transition: all .2s;
-}
-.header .tdm-link:hover { background: #334155; box-shadow: 0 0 12px rgba(56,189,248,0.2); }
-
-.container { max-width: 600px; margin: 0 auto; padding: 16px; }
-
-.section { background: #fff; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; }
-.section-header { padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--accent-blue); border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px; }
-
-.field-grid { display: grid; gap: 12px; padding: 16px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-
-.field label { font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; font-weight: 500; }
-.field input, .field select {
-  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-  font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: var(--text-primary);
-}
-.field input:focus, .field select:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
-
-.crcl-display {
-  background: #f0f4f8; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text-secondary);
-  display: flex; justify-content: space-between; align-items: center;
-}
-.crcl-value { font-weight: 600; color: var(--text-primary); font-size: 15px; font-family: 'JetBrains Mono',monospace; }
-
-.drug-card {
-  border: 1px solid var(--border); border-radius: 10px; padding: 14px; cursor: pointer;
-  transition: border-color .2s, box-shadow .2s; background: #fff;
-}
-.drug-card:hover { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.08); }
-.drug-card.active { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); background: #f0f8ff; }
-.drug-name { font-weight: 600; font-size: 14px; }
-.drug-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-
-.result-box {
-  background: #dcfce7; border: 2px solid #4ade80; border-radius: 12px; padding: 16px; text-align: center;
-}
-.result-title { font-size: 12px; color: #166534; font-weight: 500; margin-bottom: 4px; }
-.result-value { font-size: 28px; font-weight: 700; color: #166534; font-family: 'JetBrains Mono',monospace; }
-.result-detail { font-size: 13px; color: #166534; margin-top: 6px; }
-
-.info-box {
-  border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
-}
-.info-box.blue { background: #e6f1fb; color: #0c447c; }
-.info-box.amber { background: #fef3c7; color: #92400e; }
-.info-box.red { background: #fef2f2; color: #991b1b; }
-
-.disclaimer {
-  text-align: center; font-size: 11px; color: var(--accent-red); padding: 12px 16px;
-  font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
-}
-
-.detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f4f8; font-size: 13px; }
-.detail-row:last-child { border: none; }
-.detail-label { color: var(--text-secondary); }
-.detail-value { font-weight: 600; font-family: 'JetBrains Mono',monospace; }
-
-.drug-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
-
-.nav-back { display: inline-flex; align-items: center; gap: 4px; }
-.nav-back svg { width: 16px; height: 16px; }
-
-.badge { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 500; display: inline-block; margin-top: 4px; }
-.badge-renal { background: #fef3c7; color: #92400e; }
-.badge-stroke { background: #e6f1fb; color: #0c447c; }
-.badge-loading { background: #f3e8ff; color: #6b21a8; }
-</style>
+<style>:root{--bg-primary:#f0f4f8;--bg-card:#fff;--border:#e2e8f0;--text-primary:#1e293b;--text-secondary:#64748b;--text-muted:#94a3b8;--accent-blue:#0ea5e9;--accent-green:#059669;--accent-amber:#d97706;--accent-red:#dc2626}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;-webkit-font-smoothing:antialiased}.header{background:#fff;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}.header a{color:var(--accent-blue);text-decoration:none;font-size:14px;font-weight:500}.header h1{font-size:16px;font-weight:600;flex:1}.header .tdm-link{font-size:11px;font-weight:600;color:#38bdf8;background:#1e293b;border:1.5px solid #38bdf8;padding:5px 12px;border-radius:20px;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:all .2s}.header .tdm-link:hover{background:#334155;box-shadow:0 0 12px rgba(56,189,248,0.2)}.container{max-width:600px;margin:0 auto;padding:16px}.section{background:#fff;border-radius:12px;border:1px solid var(--border);margin-bottom:16px;overflow:hidden}.section-header{padding:12px 16px;font-size:13px;font-weight:600;color:var(--accent-blue);border-bottom:1px solid #f0f4f8;display:flex;align-items:center;gap:8px}.field-grid{display:grid;gap:12px;padding:16px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.field label{font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px;font-weight:500}.field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-weight:500;font-family:inherit;background:#fff;color:var(--text-primary)}.field input:focus,.field select:focus{outline:none;border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(14,165,233,0.12)}.crcl-display{background:#f0f4f8;border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center}.crcl-value{font-weight:600;color:var(--text-primary);font-size:15px;font-family:'JetBrains Mono',monospace}.drug-card{border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .2s,box-shadow .2s;background:#fff}.drug-card:hover{border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(14,165,233,0.08)}.drug-card.active{border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(14,165,233,0.12);background:#f0f8ff}.drug-name{font-weight:600;font-size:14px}.drug-sub{font-size:12px;color:var(--text-secondary);margin-top:2px}.result-box{background:#dcfce7;border:2px solid #4ade80;border-radius:12px;padding:16px;text-align:center}.result-title{font-size:12px;color:#166534;font-weight:500;margin-bottom:4px}.result-value{font-size:28px;font-weight:700;color:#166534;font-family:'JetBrains Mono',monospace}.result-detail{font-size:13px;color:#166534;margin-top:6px}.info-box{border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;margin-top:12px}.info-box.blue{background:#e6f1fb;color:#0c447c}.info-box.amber{background:#fef3c7;color:#92400e}.info-box.red{background:#fef2f2;color:#991b1b}.disclaimer{text-align:center;font-size:11px;color:var(--accent-red);padding:12px 16px;font-weight:500;background:#fef2f2;border-radius:8px;margin-top:16px}.detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f4f8;font-size:13px}.detail-row:last-child{border:none}.detail-label{color:var(--text-secondary)}.detail-value{font-weight:600;font-family:'JetBrains Mono',monospace}.drug-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px}.nav-back{display:inline-flex;align-items:center;gap:4px}.nav-back svg{width:16px;height:16px}.badge{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:500;display:inline-block;margin-top:4px}.badge-renal{background:#fef3c7;color:#92400e}.badge-stroke{background:#e6f1fb;color:#0c447c}.badge-loading{background:#f3e8ff;color:#6b21a8}</style>
 </head>
 <body>
-
 <div class="header">
-  <a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
-  <h1>🧮 Dose Calculator</h1>
-  <a href="tdm.html" class="tdm-link">🎯 TDM Hub</a>
+<a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
+<h1>🧮 Dose Calculator</h1>
+<a href="tdm.html" class="tdm-link">🎯 TDM Hub</a>
 </div>
-
 <div class="container">
-
 <!-- Patient Info -->
 <div class="section">
-  <div class="section-header">👤 ข้อมูลผู้ป่วย</div>
-  <div class="field-grid">
-    <div class="field-row-3">
-      <div class="field">
-        <label>น้ำหนัก (kg)</label>
-        <input type="number" id="ptWt" value="70" min="20" max="300" step="0.1" oninput="updateCrCl(); calculate();">
-      </div>
-      <div class="field">
-        <label>อายุ (ปี)</label>
-        <input type="number" id="ptAge" value="65" min="1" max="120" oninput="updateCrCl(); calculate();">
-      </div>
-      <div class="field">
-        <label>เพศ</label>
-        <select id="ptSex" onchange="updateCrCl(); calculate();">
-          <option value="M">ชาย</option>
-          <option value="F">หญิง</option>
-        </select>
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>SCr (mg/dL)</label>
-        <input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1" oninput="updateCrCl(); calculate();">
-      </div>
-      <div class="field">
-        <label>ส่วนสูง (cm) — optional</label>
-        <input type="number" id="ptHt" value="" placeholder="สำหรับ IBW/ABW" min="100" max="250" oninput="calculate();">
-      </div>
-    </div>
-    <div class="crcl-display">
-      <span>CrCl (Cockcroft-Gault):</span>
-      <span class="crcl-value" id="crclValue">—</span>
-    </div>
-    <div id="crclWarning" style="display:none;"></div>
-  </div>
+<div class="section-header">👤 ข้อมูลผู้ป่วย</div>
+<div class="field-grid">
+<div class="field-row-3">
+<div class="field">
+<label>น้ำหนัก (kg)</label>
+<input type="number" id="ptWt" value="70" min="20" max="300" step="0.1" oninput="updateCrCl(); calculate();">
 </div>
-
+<div class="field">
+<label>อายุ (ปี)</label>
+<input type="number" id="ptAge" value="65" min="1" max="120" oninput="updateCrCl(); calculate();">
+</div>
+<div class="field">
+<label>เพศ</label>
+<select id="ptSex" onchange="updateCrCl(); calculate();">
+<option value="M">ชาย</option>
+<option value="F">หญิง</option>
+</select>
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label>SCr (mg/dL)</label>
+<input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1" oninput="updateCrCl(); calculate();">
+</div>
+<div class="field">
+<label>ส่วนสูง (cm) — optional</label>
+<input type="number" id="ptHt" value="" placeholder="สำหรับ IBW/ABW" min="100" max="250" oninput="calculate();">
+</div>
+</div>
+<div class="crcl-display">
+<span>CrCl (Cockcroft-Gault):</span>
+<span class="crcl-value" id="crclValue">—</span>
+</div>
+<div id="crclWarning" style="display:none;"></div>
+</div>
+</div>
 <!-- Drug Selection -->
 <div class="section">
-  <div class="section-header">💊 เลือกยา</div>
-  <div class="drug-grid" id="drugGrid"></div>
+<div class="section-header">💊 เลือกยา</div>
+<div class="drug-grid" id="drugGrid"></div>
 </div>
-
 <!-- Calculator Output -->
 <div class="section" id="outputSection" style="display:none;">
-  <div class="section-header" id="outputHeader">📊 ผลคำนวณ</div>
-  <div id="outputBody"></div>
+<div class="section-header" id="outputHeader">📊 ผลคำนวณ</div>
+<div id="outputBody"></div>
 </div>
-
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้นเท่านั้น ต้องใช้ clinical judgment ประกอบการตัดสินใจทุกครั้ง<br>ข้อมูลจาก Lexicomp, Trissel's, AHA/ACLS, IDSA, AES Guidelines</div>
-
 <div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted);">
-  IV DrugRef v4.2.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
+IV DrugRef v4.2.0 — กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา
 </div>
-
 </div>
-
 <script>
-// ====== Drug Definitions ======
-const CALC_DRUGS = [
-  {
-    id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🧬 Bayesian TDM →</a>',
-    badges: ['badge-renal'],
-    calc: function(pt) {
-      const dose_low = Math.round(pt.wt * 15 / 250) * 250;
-      const dose_high = Math.round(pt.wt * 20 / 250) * 250;
-      const dose = Math.round(pt.wt * 15 / 250) * 250;
-      let freq = 'q12h', freqNote = '', dailyDose = 0;
-      if (pt.crcl > 80) { freq = 'q8-12h'; freqNote = 'CrCl >80'; dailyDose = dose * 3; }
-      else if (pt.crcl > 50) { freq = 'q12h'; freqNote = 'CrCl 50-80'; dailyDose = dose * 2; }
-      else if (pt.crcl > 30) { freq = 'q24h'; freqNote = 'CrCl 30-50'; dailyDose = dose; }
-      else if (pt.crcl > 10) { freq = 'q24-48h'; freqNote = 'CrCl 10-30'; dailyDose = dose; }
-      else { freq = 'q48-72h'; freqNote = 'CrCl <10 / HD'; dailyDose = dose * 0.5; }
-      const vol = dose <= 1000 ? 200 : 250;
-      const rate_mgmin = 10;
-      const infuse_min = Math.ceil(dose / rate_mgmin);
-      const rate_mlhr = Math.round(vol / (infuse_min / 60));
-      const ke = 0.00083 * pt.crcl + 0.0044;
-      const vd = 0.7 * pt.wt;
-      const estAUC = dailyDose > 0 ? Math.round(dailyDose / (ke * vd)) : 0;
-      let aucNote = '';
-      if (estAUC > 0) {
-        if (estAUC >= 400 && estAUC <= 600) aucNote = '✅ อยู่ใน target (400-600)';
-        else if (estAUC < 400) aucNote = '⚠ ต่ำกว่า target → พิจารณาเพิ่ม dose/frequency';
-        else aucNote = '⚠ สูงกว่า target → เสี่ยง nephrotoxicity';
-      }
-      const renalTable = '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;">'
-        + '<tr style="background:#e6f1fb;"><th style="padding:4px 6px;text-align:left;border:1px solid #85B7EB;">CrCl (mL/min)</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Interval</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Daily dose</th></tr>'
-        + `<tr${pt.crcl>80?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">>80</td><td style="padding:4px 6px;border:1px solid #ddd;">q8-12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 2-3/day</td></tr>`
-        + `<tr${pt.crcl>50&&pt.crcl<=80?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">50-80</td><td style="padding:4px 6px;border:1px solid #ddd;">q12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 2/day</td></tr>`
-        + `<tr${pt.crcl>30&&pt.crcl<=50?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">30-50</td><td style="padding:4px 6px;border:1px solid #ddd;">q24h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 1/day</td></tr>`
-        + `<tr${pt.crcl>10&&pt.crcl<=30?' style="background:#fef3c7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">10-30</td><td style="padding:4px 6px;border:1px solid #ddd;">q24-48h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose by level</td></tr>`
-        + `<tr${pt.crcl<=10?' style="background:#fef2f2;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;"><10 / HD</td><td style="padding:4px 6px;border:1px solid #ddd;">q48-72h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose when trough <15-20</td></tr>`
-        + '</table>';
-      return {
-        title: `Vancomycin ${dose} mg IV ${freq}`,
-        details: [
-          { l: 'Weight-based dose', v: `15-20 mg/kg = ${dose_low}–${dose_high} mg` },
-          { l: 'Recommended dose', v: `${dose} mg` },
-          { l: 'Frequency', v: `${freq} (${freqNote}, CrCl ${pt.crcl.toFixed(0)} mL/min)` },
-          { l: 'Daily total', v: `~${dailyDose} mg/day` },
-          { l: 'Dilution', v: `${dose} mg ใน NSS ${vol} mL` },
-          { l: 'Max rate', v: `≤${rate_mgmin} mg/min → infuse ≥${infuse_min} min` },
-          { l: 'Infusion rate', v: `${rate_mlhr} mL/hr` },
-          { l: 'Est. AUC₂₄', v: `~${estAUC} mg·hr/L ${aucNote}` },
-        ],
-        info: `<strong>📋 Renal dose adjustment (CrCl ${pt.crcl.toFixed(0)}):</strong>${renalTable}<br><strong>TDM:</strong> AUC/MIC target 400-600 (preferred) | Trough 15-20 mcg/mL (ถ้าไม่มี AUC)<br>เจาะ trough ก่อน dose ที่ 4 (steady state)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🧬 ใช้ Bayesian TDM Hub สำหรับ AUC-guided dosing →</a><br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome → infuse ≥60 min/g<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)<br><strong>HD:</strong> Re-dose 15-25 mg/kg post-HD, เจาะ pre-HD level`,
-        infoType: 'blue'
-      };
-    }
-  },
-  {
-    id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
-    badges: ['badge-renal'],
-    calc: function(pt) {
-      const dose = Math.round(pt.wt * 15);
-      const dose_ext = Math.round(pt.wt * 20);
-      let freq = 'q24h', freqNote = '';
-      if (pt.crcl >= 60) { freq = 'q24h'; }
-      else if (pt.crcl >= 40) { freq = 'q36h'; freqNote = 'CrCl 40-60'; }
-      else if (pt.crcl >= 20) { freq = 'q48h'; freqNote = 'CrCl 20-40'; }
-      else { freq = 'by level'; freqNote = 'CrCl <20 → dose by serum level'; }
-      return {
-        title: `Amikacin ${dose} mg IV ${freq}`,
-        details: [
-          { l: 'Conventional dose', v: `15 mg/kg = ${dose} mg q8-12h` },
-          { l: 'Extended-interval', v: `15-20 mg/kg = ${dose}–${dose_ext} mg ${freq}` },
-          { l: 'Frequency adj', v: freq + (freqNote ? ` (${freqNote})` : '') },
-          { l: 'Dilution', v: `ใน NSS/D5W 100-200 mL` },
-          { l: 'Infuse over', v: `30-60 min` },
-        ],
-        info: `<strong>TDM:</strong> Peak 20-35 mcg/mL (extended) | Trough <5 mcg/mL<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr, audiometry, vestibular fn<br><strong>⚠:</strong> ห้ามผสมกับ Beta-lactams ใน syringe/bag เดียวกัน`,
-        infoType: 'blue'
-      };
-    }
-  },
-  {
-    id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
-    badges: ['badge-renal'],
-    calc: function(pt) {
-      const dose_conv = (pt.wt * 1.7).toFixed(0);
-      const dose_ext = Math.round(pt.wt * 5);
-      let freq = 'q24h';
-      if (pt.crcl >= 60) freq = 'q24h';
-      else if (pt.crcl >= 40) freq = 'q36h';
-      else if (pt.crcl >= 20) freq = 'q48h';
-      else freq = 'by level';
-      return {
-        title: `Gentamicin ${dose_ext} mg IV ${freq}`,
-        details: [
-          { l: 'Conventional', v: `1-1.7 mg/kg q8h = ${dose_conv} mg q8h` },
-          { l: 'Extended-interval', v: `5-7 mg/kg q24h = ${dose_ext} mg ${freq}` },
-          { l: 'Dilution', v: `ใน NSS/D5W 50-200 mL` },
-          { l: 'Infuse over', v: `30-60 min` },
-        ],
-        info: `<strong>TDM:</strong> Hartford nomogram (extended) หรือ Peak 5-10 / Trough <1<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr daily, audiometry<br><strong>Intrathecal:</strong> 4-8 mg/day (ventriculitis)`,
-        infoType: 'blue'
-      };
-    }
-  },
-  {
-    id: 'colistin', name: 'Colistimethate (CMS)', sub: '150 mg CBA/vial (~2 MIU)',
-    badges: ['badge-renal'],
-    calc: function(pt) {
-      const ibw = pt.sex === 'M' ? 50 + 0.9*(pt.ht-152.4) : 45.5 + 0.9*(pt.ht-152.4);
-      const useWt = pt.ht ? (pt.wt > ibw*1.2 ? (ibw + 0.4*(pt.wt - ibw)).toFixed(0) : pt.wt) : pt.wt;
-      const loading = 300;
-      let maintTotal, maintFreq;
-      if (pt.crcl >= 70) { maintTotal = 300; maintFreq = '150 mg CBA q12h'; }
-      else if (pt.crcl >= 50) { maintTotal = 230; maintFreq = '115 mg CBA q12h'; }
-      else if (pt.crcl >= 30) { maintTotal = 170; maintFreq = '85 mg CBA q12h'; }
-      else { maintTotal = 130; maintFreq = '130 mg CBA q24h (or by level)'; }
-      return {
-        title: `CMS loading ${loading} mg CBA → ${maintFreq}`,
-        details: [
-          { l: 'Loading dose', v: `300 mg CBA (~9 MIU) IV over 30-60 min` },
-          { l: 'Maintenance', v: maintFreq },
-          { l: 'Daily total', v: `${maintTotal} mg CBA/day` },
-          { l: 'Dilution', v: `ใน NSS/D5W 100-250 mL` },
-          { l: 'Infuse over', v: `30-60 min` },
-          { l: 'Unit conversion', v: `1 MIU ≈ 33.3 mg CBA ≈ 80 mg CMS` },
-        ],
-        info: `<strong>⚠ Nephrotoxicity สูง → hydrate well</strong><br><strong>Monitor:</strong> SCr daily, UO, neurotoxicity signs<br><strong>IT/IVT:</strong> 10 mg CBA/day (ventriculitis)<br><strong>Adjust:</strong> ${pt.ht ? `IBW=${ibw.toFixed(0)}kg, adjusted wt=${useWt}kg` : 'ใส่ส่วนสูงเพื่อคำนวณ IBW'}`,
-        infoType: 'amber'
-      };
-    }
-  },
-  {
-    id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
-    badges: ['badge-loading'],
-    calc: function(pt) {
-      const dose = Math.round(pt.wt * 20);
-      const maxRate = pt.age >= 65 ? 25 : 50;
-      const infuseMin = Math.ceil(dose / maxRate);
-      return {
-        title: `Phenytoin ${dose} mg IV loading`,
-        details: [
-          { l: 'Loading dose', v: `20 mg/kg = ${dose} mg` },
-          { l: 'Max rate', v: `≤${maxRate} mg/min ${pt.age >= 65 ? '(สูงอายุ)' : ''}` },
-          { l: 'Infuse over', v: `≥${infuseMin} min ใน NSS เท่านั้น!` },
-          { l: 'Concentration', v: `≤6.7 mg/mL (dilute ใน NSS 50-100 mL)` },
-          { l: 'Filter', v: `ต้องใช้ 0.22 μm in-line filter` },
-        ],
-        info: `<strong>⚠ ใช้ NSS เท่านั้น! ห้าม D5W → ตกตะกอน!</strong><br><strong>Monitor:</strong> ECG continuous, BP q5-15min, IV site (purple glove)<br><strong>Level:</strong> Total 10-20 mcg/mL | Free 1-2 mcg/mL<br><strong>ตรวจ:</strong> Free phenytoin ถ้า albumin <3.5<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Winter-Tozer correction + dose prediction →</a>`,
-        infoType: 'red'
-      };
-    }
-  },
-  {
-    id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
-    badges: ['badge-loading'],
-    calc: function(pt) {
-      const dose30 = Math.round(pt.wt * 30);
-      const dose40 = Math.round(pt.wt * 40);
-      const maintRate = (pt.wt * 1.5).toFixed(0);
-      return {
-        title: `Valproate ${dose30}–${dose40} mg IV loading`,
-        details: [
-          { l: 'Loading dose', v: `30-40 mg/kg = ${dose30}–${dose40} mg` },
-          { l: 'Rate', v: `IV over 15-30 min (max 6 mg/kg/min)` },
-          { l: 'Maintenance', v: `1-2 mg/kg/hr = ${maintRate}–${Math.round(pt.wt*2)} mg/hr CI` },
-          { l: 'Alternative', v: `IV→PO: 15-20 mg/kg/day div q8-12h` },
-        ],
-        info: `<strong>⚠ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)</strong><br><strong>Level:</strong> 50-100 mcg/mL (SE: 80-120)<br><strong>Monitor:</strong> LFTs, CBC+Plt, ammonia, amylase<br><strong>CI:</strong> Hepatic disease, pregnancy (Cat X)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ free level correction + dose adjustment →</a>`,
-        infoType: 'red'
-      };
-    }
-  },
-  {
-    id: 'levetiracetam', name: 'Levetiracetam loading', sub: '500 mg/5 mL',
-    badges: ['badge-loading'],
-    calc: function(pt) {
-      const dose = Math.round(pt.wt * 60 / 500) * 500;
-      const doseMax = Math.min(dose, 4500);
-      let maint = '1000-1500 mg IV q12h';
-      if (pt.crcl < 30) maint = '250-500 mg IV q12h (CrCl <30)';
-      else if (pt.crcl < 50) maint = '500-750 mg IV q12h (CrCl 30-50)';
-      else if (pt.crcl < 80) maint = '500-1000 mg IV q12h (CrCl 50-80)';
-      return {
-        title: `Levetiracetam ${doseMax} mg IV loading`,
-        details: [
-          { l: 'Loading dose (SE)', v: `60 mg/kg = ${dose} mg (max 4500 mg)` },
-          { l: 'Recommended', v: `${doseMax} mg IV over 10-15 min` },
-          { l: 'Maintenance', v: maint },
-          { l: 'Switch PO', v: `IV ↔ PO 1:1 ratio` },
-        ],
-        info: `<strong>ข้อดี:</strong> No significant drug interactions, safe ใน hepatic impairment<br><strong>SE:</strong> behavioral (irritability, aggression)<br><strong>Monitor:</strong> Seizure freq, SCr, mood/behavior`,
-        infoType: 'blue'
-      };
-    }
-  },
-  {
-    id: 'alteplase', name: 'Alteplase (rt-PA)', sub: 'Actilyse 50 mg/50 mL',
-    badges: ['badge-stroke'],
-    calc: function(pt) {
-      const totalDose = Math.min(pt.wt * 0.9, 90).toFixed(1);
-      const bolus = (totalDose * 0.1).toFixed(1);
-      const infusion = (totalDose * 0.9).toFixed(1);
-      return {
-        title: `Alteplase ${totalDose} mg (stroke protocol)`,
-        details: [
-          { l: 'Total dose', v: `0.9 mg/kg = ${totalDose} mg (max 90 mg)` },
-          { l: '10% bolus', v: `${bolus} mg IV push over 1 min` },
-          { l: '90% infusion', v: `${infusion} mg IV infusion over 60 min` },
-          { l: 'Concentration', v: `1 mg/mL (reconstituted)` },
-        ],
-        info: `<strong>⚠ Door-to-needle <60 min!</strong><br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr หลังให้<br><strong>BP:</strong> q15min x 2hr → q30min x 6hr → q1h x 16hr<br><strong>CT brain:</strong> 24 hr post-dose<br><strong>เตรียม:</strong> Cryoprecipitate, TXA สำหรับ bleeding`,
-        infoType: 'red'
-      };
-    }
-  },
-  {
-    id: 'tenecteplase', name: 'Tenecteplase', sub: 'Metalyse',
-    badges: ['badge-stroke'],
-    calc: function(pt) {
-      let dose_ami;
-      if (pt.wt < 60) dose_ami = 30;
-      else if (pt.wt < 70) dose_ami = 35;
-      else if (pt.wt < 80) dose_ami = 40;
-      else if (pt.wt < 90) dose_ami = 45;
-      else dose_ami = 50;
-      const dose_stroke = Math.min(pt.wt * 0.25, 25).toFixed(1);
-      return {
-        title: `Tenecteplase — single IV bolus`,
-        details: [
-          { l: 'Stroke dose', v: `0.25 mg/kg = ${dose_stroke} mg (max 25 mg)` },
-          { l: 'AMI dose', v: `${dose_ami} mg (weight-tiered)` },
-          { l: 'Route', v: `Single IV bolus over 5-10 sec` },
-          { l: 'Concentration', v: `5 mg/mL (reconstituted)` },
-          { l: 'Volume (stroke)', v: `${(dose_stroke / 5).toFixed(1)} mL` },
-        ],
-        info: `<strong>ข้อดี:</strong> Single bolus → ง่ายกว่า Alteplase<br><strong>Evidence:</strong> TASTE, AcT trials สำหรับ stroke<br><strong>Monitor:</strong> NIHSS, BP q15min, bleeding<br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr`,
-        infoType: 'blue'
-      };
-    }
-  },
-];
-
-// ====== CrCl Calculator ======
-function getCrCl() {
-  const age = parseFloat(document.getElementById('ptAge').value) || 65;
-  const wt = parseFloat(document.getElementById('ptWt').value) || 70;
-  const scr = parseFloat(document.getElementById('ptScr').value) || 1.0;
-  const sex = document.getElementById('ptSex').value;
-  if (scr <= 0) return 0;
-  let crcl = ((140 - age) * wt) / (72 * scr);
-  if (sex === 'F') crcl *= 0.85;
-  return Math.round(crcl * 10) / 10;
-}
-
-function getPatient() {
-  return {
-    wt: parseFloat(document.getElementById('ptWt').value) || 70,
-    age: parseFloat(document.getElementById('ptAge').value) || 65,
-    sex: document.getElementById('ptSex').value,
-    scr: parseFloat(document.getElementById('ptScr').value) || 1.0,
-    ht: parseFloat(document.getElementById('ptHt').value) || 0,
-    crcl: getCrCl()
-  };
-}
-
-function updateCrCl() {
-  const crcl = getCrCl();
-  document.getElementById('crclValue').textContent = crcl.toFixed(1) + ' mL/min';
-  const warn = document.getElementById('crclWarning');
-  if (crcl < 30) {
-    warn.style.display = 'block';
-    warn.innerHTML = '<div class="info-box red"><strong>⚠ CrCl <30 mL/min</strong> — ปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing</div>';
-  } else if (crcl < 50) {
-    warn.style.display = 'block';
-    warn.innerHTML = '<div class="info-box amber"><strong>CrCl 30-50 mL/min</strong> — ยาบางตัวต้องปรับขนาด/interval</div>';
-  } else {
-    warn.style.display = 'none';
-  }
-}
-
-// ====== Drug Selection ======
-let selectedDrug = null;
-
-function renderDrugGrid() {
-  const grid = document.getElementById('drugGrid');
-  grid.innerHTML = CALC_DRUGS.map(d => `
-    <div class="drug-card ${selectedDrug === d.id ? 'active' : ''}" onclick="selectDrug('${d.id}')">
-      <div class="drug-name">${d.name}</div>
-      <div class="drug-sub">${d.sub}</div>
-      ${d.badges.map(b => `<span class="badge ${b}">${b.replace('badge-','')}</span>`).join(' ')}
-    </div>
-  `).join('');
-}
-
-function selectDrug(id) {
-  selectedDrug = id;
-  lastSelectedDrugForTracking = CALC_DRUGS.find(d => d.id === id)?.name || null; // Flag: this is explicit user click
-  renderDrugGrid();
-  calculate();
-}
-
-function calculate() {
-  const sec = document.getElementById('outputSection');
-  const body = document.getElementById('outputBody');
-  const header = document.getElementById('outputHeader');
-  if (!selectedDrug) { sec.style.display = 'none'; return; }
-  
-  const drug = CALC_DRUGS.find(d => d.id === selectedDrug);
-  if (!drug) return;
-  
-  const pt = getPatient();
-  const result = drug.calc(pt);
-  
-  header.innerHTML = `📊 ${drug.name}`;
-  body.innerHTML = `
-    <div style="padding:16px;">
-      <div class="result-box">
-        <div class="result-title">Recommended</div>
-        <div class="result-value" style="font-size:20px;">${result.title}</div>
-      </div>
-      <div style="margin-top:14px;">
-        ${result.details.map(d => `<div class="detail-row"><span class="detail-label">${d.l}</span><span class="detail-value">${d.v}</span></div>`).join('')}
-      </div>
-      <div class="info-box ${result.infoType}" style="margin-top:14px;">${result.info}</div>
-    </div>
-  `;
-  sec.style.display = 'block';
-  sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  
-  if (typeof trackCalcUsage === 'function') {
-    trackCalcUsage(drug.name, pt, result);
-  }
-}
-
-// ====== Analytics (shared with index.html) ======
-const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
-
-const CALC_SESSION_ID = (() => {
-  const today = new Date().toISOString().substring(0, 10);
-  let id = localStorage.getItem('anonSessionId');
-  let idDate = localStorage.getItem('anonSessionDate');
-  if (!id || idDate !== today) {
-    id = 'u' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-    localStorage.setItem('anonSessionId', id);
-    localStorage.setItem('anonSessionDate', today);
-  }
-  return id;
-})();
-const CALC_USER_ID = (() => {
-  let uid = localStorage.getItem('anonUserId');
-  if (!uid) {
-    uid = 'p' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-    localStorage.setItem('anonUserId', uid);
-  }
-  return uid;
-})();
-
-let calcReqCount = 0;
-function sendCalcAnalytics(data) {
-  if (!ANALYTICS_URL || localStorage.getItem('analyticsConsent') !== 'true') return;
-  if (calcReqCount >= 40) return;
-  calcReqCount++;
-  try {
-    const payload = JSON.stringify({ ...data, session_id: CALC_SESSION_ID, user_id: CALC_USER_ID });
-    if (navigator.sendBeacon) navigator.sendBeacon(ANALYTICS_URL, payload);
-    else fetch(ANALYTICS_URL, { method:'POST', body:payload, keepalive:true }).catch(()=>{});
-  } catch(e) {}
-}
-
-// --- Unified page_view tracking ---
-const PAGE_ENTER_TIME = Date.now();
-const FROM_PAGE = (() => {
-  const ref = document.referrer || '';
-  if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
-  if (ref.includes('tdm.html')) return 'tdm';
-  if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
-  return ref ? 'external' : 'direct';
-})();
-sendCalcAnalytics({type:'page_view',page:'calculator',action:'enter',from_page:FROM_PAGE,referrer:document.referrer||'direct'});
-let calcPageViewSent = false;
-function sendCalcPageLeave(){
-  if(calcPageViewSent)return; calcPageViewSent=true;
-  const dur=Math.round((Date.now()-PAGE_ENTER_TIME)/1000);
-  sendCalcAnalytics({type:'page_view',page:'calculator',action:'leave',duration_sec:dur,from_page:FROM_PAGE,
-    last_drug_selected:selectedDrug||'none'});
-}
-window.addEventListener('beforeunload',sendCalcPageLeave);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')sendCalcPageLeave();});
-
-// Track only when user EXPLICITLY clicks a drug card (not auto-recalc from field changes)
-let lastSelectedDrugForTracking = null;
-
-const calcTracked = {};
-function trackCalcUsage(drugName, pt, result) {
-  // Only track if this is a NEW drug selection (user clicked a card)
-  // Not when auto-recalculating from patient field changes
-  if (drugName !== lastSelectedDrugForTracking) return;
-  lastSelectedDrugForTracking = null; // Reset so subsequent auto-recalcs don't track
-  
-  const key = drugName + '_' + Math.floor(Date.now() / 30000); // 30s debounce
-  if (calcTracked[key]) return;
-  calcTracked[key] = true;
-  sendCalcAnalytics({
-    type: 'dose_calc',
-    drug_name: drugName,
-    // Full patient parameters
-    weight_kg: pt.wt,
-    height_cm: pt.ht || '',
-    age: pt.age,
-    sex: pt.sex,
-    scr: pt.scr,
-    crcl: pt.crcl.toFixed(1),
-    // Calculation result
-    dose_recommended: result.title,
-    details: JSON.stringify(result.details.map(d => d.l + ': ' + d.v))
-  });
-}
-
-// ====== Init ======
-updateCrCl();
-renderDrugGrid();
+const a0_0x112d56=a0_0x2663;(function(_0x486254,_0x19d74e){const _0x14cce7=a0_0x2663,_0x4da6df=_0x486254();while(!![]){try{const _0x366825=-parseInt(_0x14cce7(0xff))/(-0x20f9+0x1e05+-0x1*-0x2f5)*(-parseInt(_0x14cce7(0x17a))/(-0x1b*0x141+0x541+0x1c9c))+parseInt(_0x14cce7(0x19c))/(-0x1*-0x1203+0x245d+-0x365d)*(parseInt(_0x14cce7(0x189))/(0xc5f*-0x2+-0xdbd+0x267f))+parseInt(_0x14cce7(0x177))/(0x2*0x5bf+0x2559+0x30d2*-0x1)+-parseInt(_0x14cce7(0x1ef))/(0x1109+0x18a2+0x7*-0x5f3)+parseInt(_0x14cce7(0xf5))/(-0x2ed*-0x5+0x1533+-0x729*0x5)+-parseInt(_0x14cce7(0x18d))/(0xb02*0x3+-0x177c+-0x982)+-parseInt(_0x14cce7(0x1c9))/(-0x25cf*0x1+0x2194+0x1c*0x27);if(_0x366825===_0x19d74e)break;else _0x4da6df['push'](_0x4da6df['shift']());}catch(_0x8affcd){_0x4da6df['push'](_0x4da6df['shift']());}}}(a0_0x1f92,0x5*0xae87+0x1dd*-0x3a+-0x1dd*0x3b));const CALC_DRUGS=[{'id':'vancomycin','name':a0_0x112d56(0x11b),'sub':a0_0x112d56(0x153),'badges':[a0_0x112d56(0x1cd)],'calc':function(_0x467139){const _0x476038=a0_0x112d56,_0x358b70={'WRikL':function(_0x3bd40b,_0x29c624){return _0x3bd40b*_0x29c624;},'rpqpm':_0x476038(0x1b9),'ZmqSj':function(_0x36d555,_0x3486f9){return _0x36d555>_0x3486f9;},'JsFMI':_0x476038(0x124),'pgriw':'q24h','nYlFm':'CrCl\x2030-50','pQKnl':function(_0x1cdd68,_0x5a9e7f){return _0x1cdd68>_0x5a9e7f;},'bJDDp':_0x476038(0x1e0),'Thoko':_0x476038(0x17c),'vHJwU':_0x476038(0xfe),'umcMY':function(_0x3d7a1f,_0x33125c){return _0x3d7a1f<=_0x33125c;},'uVpcq':function(_0x4f9cde,_0x528ca5){return _0x4f9cde/_0x528ca5;},'FHiIs':function(_0x2dcbe8,_0x503b68){return _0x2dcbe8/_0x503b68;},'nbKeT':function(_0x418132,_0x1d94af){return _0x418132>_0x1d94af;},'fjUeR':function(_0x13ece2,_0x565a67){return _0x13ece2/_0x565a67;},'joMBa':function(_0x453a8b,_0x389265){return _0x453a8b>=_0x389265;},'pZrKk':function(_0x3157e1,_0x2eca1b){return _0x3157e1<=_0x2eca1b;},'DvCwe':_0x476038(0x185),'qBFlH':'\x20style=\x22background:#dcfce7;font-weight:600;\x22','RvJnw':function(_0x17e1b6,_0x2d673f){return _0x17e1b6<=_0x2d673f;},'cFnYq':_0x476038(0x12f),'ytoLT':'Frequency','YRCyn':'Infusion\x20rate','mTqKd':'blue'},_0x5d47bf=(-0x2*0xbb9+0x1aa3+-0x237)*Math['round'](_0x358b70['WRikL'](-0xb0d+-0x1142+0x2*0xe2f,_0x467139['wt'])/(-0x1*-0x7ad+0x377+0x1*-0xa2a)),_0x4e4a26=(0xd1+0xb68+-0xb3f*0x1)*Math['round']((0xc00+0x16ce*-0x1+-0xc7*-0xe)*_0x467139['wt']/(-0x7c7+0x190+0x731)),_0x4e39a5=_0x358b70[_0x476038(0x1e7)](-0x8*-0x177+0x18e9+-0x23a7*0x1,Math[_0x476038(0xfb)]((0x335*0x4+-0x2196+0x49*0x49)*_0x467139['wt']/(-0x6fc+-0x626*-0x1+0x1d0)));let _0x26f4f0=_0x358b70[_0x476038(0x13f)],_0x116352='',_0x420a10=0x14b2+-0x1*-0x250e+-0x39c0;_0x358b70[_0x476038(0x1c0)](_0x467139['crcl'],0xd52+0x11*0x96+-0x16f8)?(_0x26f4f0='q8-12h',_0x116352=_0x358b70[_0x476038(0x133)],_0x420a10=_0x358b70['WRikL'](0x4*-0x61a+0xb*-0x76+0x1d7d,_0x4e39a5)):_0x467139['crcl']>-0x7de*-0x3+0x4ab+-0x1c13*0x1?(_0x26f4f0=_0x358b70[_0x476038(0x13f)],_0x116352=_0x476038(0x1c6),_0x420a10=(-0x241c+-0x3bf*0x1+0x27dd)*_0x4e39a5):_0x467139['crcl']>-0x4*0x817+0xa2a*0x3+-0x7f*-0x4?(_0x26f4f0=_0x358b70[_0x476038(0x120)],_0x116352=_0x358b70[_0x476038(0x14d)],_0x420a10=_0x4e39a5):_0x358b70['pQKnl'](_0x467139[_0x476038(0x1a0)],-0x1*-0x286+0x1b80+-0x1dfc)?(_0x26f4f0=_0x358b70[_0x476038(0x1cf)],_0x116352=_0x358b70[_0x476038(0x18f)],_0x420a10=_0x4e39a5):(_0x26f4f0=_0x476038(0x160),_0x116352=_0x358b70[_0x476038(0x1b8)],_0x420a10=_0x358b70[_0x476038(0x1e7)](0x23bb*-0x1+0x1ce9+-0x1*-0x6d2+0.5,_0x4e39a5));const _0x17b29f=_0x358b70[_0x476038(0x130)](_0x4e39a5,0x2*-0x727+0x2d9+0xcf*0x13)?-0x1*-0x509+0x17e6+-0x1c27*0x1:0x2*-0x72f+-0x316+0x937*0x2,_0x10bb63=Math['ceil'](_0x358b70['uVpcq'](_0x4e39a5,0x3*-0x7fc+-0xf1+0x18ef)),_0x295cbe=Math[_0x476038(0xfb)](_0x17b29f/_0x358b70['FHiIs'](_0x10bb63,-0xa0f+0x5*0x55b+0xa*-0x1a6)),_0x48f872=_0x358b70['WRikL'](-0xba*-0x9+-0x1728+-0x1*-0x109e+0.00083,_0x467139[_0x476038(0x1a0)])+(0x1f4c+-0xa8c+-0x14c0+0.0044),_0x54ca8c=(0xb*-0x30d+-0x21a2+0x4331+0.7)*_0x467139['wt'],_0x50f3e1=_0x358b70['nbKeT'](_0x420a10,0x13b7+0xf47*0x1+-0x22fe)?Math[_0x476038(0xfb)](_0x358b70[_0x476038(0x12a)](_0x420a10,_0x358b70[_0x476038(0x1e7)](_0x48f872,_0x54ca8c))):-0x1*0x106+-0x82+0x188;let _0x4842f1='';_0x358b70['ZmqSj'](_0x50f3e1,0x92f+-0x270c+0x1ddd)&&(_0x4842f1=_0x358b70['joMBa'](_0x50f3e1,-0x3cf+0x1*-0xf31+0x1490)&&_0x358b70['pZrKk'](_0x50f3e1,0xe1*0x17+-0xab2+-0x72d)?_0x476038(0x196):_0x50f3e1<-0xb80+0x10*0x61+0x80*0xe?'⚠\x20ต่ำกว่า\x20target\x20→\x20พิจารณาเพิ่ม\x20dose/frequency':_0x358b70[_0x476038(0x1c5)]);const _0x53cd78='<table\x20style=\x22width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;\x22><tr\x20style=\x22background:#e6f1fb;\x22><th\x20style=\x22padding:4px\x206px;text-align:left;border:1px\x20solid\x20#85B7EB;\x22>CrCl\x20(mL/min)</th><th\x20style=\x22padding:4px\x206px;border:1px\x20solid\x20#85B7EB;\x22>Interval</th><th\x20style=\x22padding:4px\x206px;border:1px\x20solid\x20#85B7EB;\x22>Daily\x20dose</th></tr><tr'+(_0x467139['crcl']>-0x936+-0x773+0x10f9?_0x358b70[_0x476038(0x17e)]:'')+_0x476038(0x169)+_0x4e39a5+_0x476038(0x109)+(_0x467139['crcl']>-0x1*0xfd7+0x14b*-0x15+-0x4*-0xacc&&_0x467139[_0x476038(0x1a0)]<=0x2367+0xa6*0x5+0x1*-0x2655?_0x476038(0x14b):'')+_0x476038(0x1de)+_0x4e39a5+'mg\x20x\x202/day</td></tr><tr'+(_0x467139[_0x476038(0x1a0)]>-0x33e*-0x3+-0x8c5*0x3+0x10b3&&_0x358b70['RvJnw'](_0x467139[_0x476038(0x1a0)],0x1*0xfb8+-0xe59+-0x12d)?_0x358b70[_0x476038(0x17e)]:'')+_0x476038(0x17f)+_0x4e39a5+_0x476038(0x176)+(_0x467139['crcl']>-0x13ef+-0xe9*0xc+-0x1*-0x1ee5&&_0x467139[_0x476038(0x1a0)]<=0x19b4+-0x1963+-0x33?'\x20style=\x22background:#fef3c7;font-weight:600;\x22':'')+_0x476038(0x1a1)+(_0x358b70['pZrKk'](_0x467139[_0x476038(0x1a0)],0x1039+-0x3ce*0x3+0x25*-0x21)?_0x476038(0x188):'')+_0x476038(0x15d);return{'title':'Vancomycin\x20'+_0x4e39a5+_0x476038(0x175)+_0x26f4f0,'details':[{'l':'Weight-based\x20dose','v':'15-20\x20mg/kg\x20=\x20'+_0x5d47bf+'–'+_0x4e4a26+'\x20mg'},{'l':_0x358b70[_0x476038(0x136)],'v':_0x4e39a5+_0x476038(0x161)},{'l':_0x358b70[_0x476038(0x1ce)],'v':_0x26f4f0+'\x20('+_0x116352+_0x476038(0x1bd)+_0x467139[_0x476038(0x1a0)][_0x476038(0x1b7)](-0x1f*0x5+-0x18e6*-0x1+0x9*-0x2b3)+'\x20mL/min)'},{'l':_0x476038(0x128),'v':'~'+_0x420a10+_0x476038(0x1e9)},{'l':_0x476038(0x139),'v':_0x4e39a5+'\x20mg\x20ใน\x20NSS\x20'+_0x17b29f+_0x476038(0x1f2)},{'l':_0x476038(0x1db),'v':'≤10\x20mg/min\x20→\x20infuse\x20≥'+_0x10bb63+'\x20min'},{'l':_0x358b70[_0x476038(0x100)],'v':_0x295cbe+'\x20mL/hr'},{'l':'Est.\x20AUC₂₄','v':'~'+_0x50f3e1+'\x20mg·hr/L\x20'+_0x4842f1}],'info':_0x476038(0x1f8)+_0x467139[_0x476038(0x1a0)][_0x476038(0x1b7)](0x1f55*-0x1+0x1*0x10dd+0x1*0xe78)+_0x476038(0x119)+_0x53cd78+_0x476038(0x137),'infoType':_0x358b70['mTqKd']};}},{'id':'amikacin','name':a0_0x112d56(0x1d0),'sub':a0_0x112d56(0x155),'badges':[a0_0x112d56(0x1cd)],'calc':function(_0x1d91b4){const _0x1e3d6d=a0_0x112d56,_0x5f551e={'ghZmX':function(_0x163972,_0x254d0e){return _0x163972*_0x254d0e;},'djGIZ':'q24h','UGDoa':function(_0x1a15cb,_0x4b3f2a){return _0x1a15cb>=_0x4b3f2a;},'TYzaP':'q36h','xpHZm':'CrCl\x2040-60','Zskdo':_0x1e3d6d(0x18c),'VqHfx':_0x1e3d6d(0x1ea),'uWjlo':_0x1e3d6d(0x163),'vacAo':_0x1e3d6d(0x101),'eANST':_0x1e3d6d(0x146),'aaBBs':'ใน\x20NSS/D5W\x20100-200\x20mL','zFWfK':_0x1e3d6d(0x127)},_0x1a8b08=Math['round'](_0x5f551e[_0x1e3d6d(0x13d)](-0x4*-0x7f4+-0x202*-0x4+-0x5af*0x7,_0x1d91b4['wt'])),_0x559d62=Math[_0x1e3d6d(0xfb)]((-0x19d8+0x320+0x1*0x16cc)*_0x1d91b4['wt']);let _0x5bbeec=_0x5f551e['djGIZ'],_0x242e39='';return _0x5f551e[_0x1e3d6d(0x111)](_0x1d91b4[_0x1e3d6d(0x1a0)],0x1ff4+-0x5*-0x20b+-0x29ef*0x1)?_0x5bbeec=_0x1e3d6d(0x11c):_0x5f551e[_0x1e3d6d(0x111)](_0x1d91b4[_0x1e3d6d(0x1a0)],0x232f+-0x7a+-0x228d)?(_0x5bbeec=_0x5f551e[_0x1e3d6d(0x11d)],_0x242e39=_0x5f551e['xpHZm']):_0x5f551e[_0x1e3d6d(0x111)](_0x1d91b4[_0x1e3d6d(0x1a0)],-0x1*0x1bf5+0xb2*-0x1+-0x1*-0x1cbb)?(_0x5bbeec=_0x5f551e['Zskdo'],_0x242e39=_0x5f551e[_0x1e3d6d(0x1e6)]):(_0x5bbeec=_0x5f551e[_0x1e3d6d(0x141)],_0x242e39=_0x5f551e[_0x1e3d6d(0x12b)]),{'title':'Amikacin\x20'+_0x1a8b08+'\x20mg\x20IV\x20'+_0x5bbeec,'details':[{'l':_0x5f551e['eANST'],'v':_0x1e3d6d(0x16b)+_0x1a8b08+_0x1e3d6d(0x113)},{'l':_0x1e3d6d(0x149),'v':'15-20\x20mg/kg\x20=\x20'+_0x1a8b08+'–'+_0x559d62+_0x1e3d6d(0x1eb)+_0x5bbeec},{'l':'Frequency\x20adj','v':_0x5bbeec+(_0x242e39?'\x20('+_0x242e39+')':'')},{'l':_0x1e3d6d(0x139),'v':_0x5f551e['aaBBs']},{'l':'Infuse\x20over','v':'30-60\x20min'}],'info':_0x1e3d6d(0x10c),'infoType':_0x5f551e[_0x1e3d6d(0x15b)]};}},{'id':a0_0x112d56(0x156),'name':a0_0x112d56(0x138),'sub':a0_0x112d56(0x122),'badges':[a0_0x112d56(0x1cd)],'calc':function(_0x1e9d7a){const _0x56439b=a0_0x112d56,_0x31f224={'EcJvw':function(_0x53b8cc,_0x3cfcc5){return _0x53b8cc*_0x3cfcc5;},'AfBdA':'q24h','TaAXB':_0x56439b(0x18c),'jmojW':_0x56439b(0x149),'KHKpK':'30-60\x20min','IzmkI':'<strong>TDM:</strong>\x20Hartford\x20nomogram\x20(extended)\x20หรือ\x20Peak\x205-10\x20/\x20Trough\x20<1<br><a\x20href=\x22tdm.html\x22\x20style=\x22color:#38bdf8;font-weight:700;\x22>🎯\x20ใช้\x20TDM\x20Hub\x20สำหรับ\x20Hartford\x20nomogram\x20+\x20PK\x20→</a><br><strong>Monitor:</strong>\x20SCr\x20daily,\x20audiometry<br><strong>Intrathecal:</strong>\x204-8\x20mg/day\x20(ventriculitis)'},_0x46e55c=((-0xe6d+-0x1*0x734+-0x8e*-0x27+0.7)*_0x1e9d7a['wt'])[_0x56439b(0x1b7)](0x9*-0x17f+0x6f0+0x687),_0x11fb08=Math[_0x56439b(0xfb)](_0x31f224[_0x56439b(0x1a7)](-0x6d+0x5ae*-0x5+0x1cd8,_0x1e9d7a['wt']));let _0x4717c0='q24h';return _0x4717c0=_0x1e9d7a['crcl']>=-0x205f*-0x1+0x2*0x11b3+-0x4389?_0x31f224['AfBdA']:_0x1e9d7a['crcl']>=-0x2*-0xa31+0x1*-0x248d+-0x7*-0x255?_0x56439b(0x183):_0x1e9d7a[_0x56439b(0x1a0)]>=0x2d5+-0x7f6+-0x1f*-0x2b?_0x31f224[_0x56439b(0x134)]:'by\x20level',{'title':_0x56439b(0x1a3)+_0x11fb08+'\x20mg\x20IV\x20'+_0x4717c0,'details':[{'l':'Conventional','v':'1-1.7\x20mg/kg\x20q8h\x20=\x20'+_0x46e55c+'\x20mg\x20q8h'},{'l':_0x31f224['jmojW'],'v':_0x56439b(0x1d2)+_0x11fb08+'\x20mg\x20'+_0x4717c0},{'l':_0x56439b(0x139),'v':_0x56439b(0x102)},{'l':_0x56439b(0x164),'v':_0x31f224['KHKpK']}],'info':_0x31f224['IzmkI'],'infoType':_0x56439b(0x127)};}},{'id':a0_0x112d56(0x1d7),'name':a0_0x112d56(0xf6),'sub':a0_0x112d56(0x143),'badges':['badge-renal'],'calc':function(_0xe7eca9){const _0x269a33=a0_0x112d56,_0x2c2c0b={'wqWvf':function(_0x5ece47,_0x311f1a){return _0x5ece47*_0x311f1a;},'CMMgP':function(_0x2cf37b,_0x1343cc){return _0x2cf37b-_0x1343cc;},'BaLRs':function(_0x3ce950,_0x4dde13){return _0x3ce950>=_0x4dde13;},'dPzMW':_0x269a33(0x16a),'MqNXk':'Loading\x20dose','iFzDb':_0x269a33(0x128),'yIEQY':'30-60\x20min','abMay':_0x269a33(0x157),'FeOcz':_0x269a33(0x1d9)},_0x110eb7='M'===_0xe7eca9[_0x269a33(0x1ab)]?-0x13e8+0x23ff+-0xfe5*0x1+_0x2c2c0b['wqWvf'](0x1*0x4b1+0x786+0x35*-0x3b+0.9,_0x2c2c0b[_0x269a33(0x14a)](_0xe7eca9['ht'],-0x1c27*0x1+0x4f*-0x61+0x3aae+0.4000000000000057)):-0x1e0*0xe+0x1e07+-0x39a+0.5+(-0x1149+0x175e+0x1*-0x615+0.9)*_0x2c2c0b[_0x269a33(0x14a)](_0xe7eca9['ht'],0x10f1*-0x1+-0x2a*-0x7d+-0x2f9+0.4000000000000057),_0x21aabf=_0xe7eca9['ht']&&_0xe7eca9['wt']>(-0x760+-0xab4+0x3*0x607+0.19999999999999996)*_0x110eb7?(_0x110eb7+_0x2c2c0b['wqWvf'](0x246d+-0x6a*0x59+0x6d*0x1+0.4,_0xe7eca9['wt']-_0x110eb7))[_0x269a33(0x1b7)](0x2*-0x8b3+0x13*-0x202+0xb4*0x4f):_0xe7eca9['wt'];let _0x8466e0,_0xcd3489;return _0x2c2c0b[_0x269a33(0x1c4)](_0xe7eca9[_0x269a33(0x1a0)],0x38*-0x2e+-0xb6+-0x65*-0x1c)?(_0x8466e0=0x25*-0x4a+-0x1cb1+0x1*0x288f,_0xcd3489='150\x20mg\x20CBA\x20q12h'):_0xe7eca9[_0x269a33(0x1a0)]>=0x16c8+-0x6d3+-0xfc3?(_0x8466e0=0xdb7+-0x2*-0x668+0x3*-0x88b,_0xcd3489=_0x269a33(0x1be)):_0x2c2c0b['BaLRs'](_0xe7eca9[_0x269a33(0x1a0)],0x14b0+-0xbbe+0x235*-0x4)?(_0x8466e0=0x76d*-0x3+-0x13d*-0x17+-0x58a,_0xcd3489=_0x269a33(0x13c)):(_0x8466e0=0xa61*0x3+-0x1fee+0x25*0x9,_0xcd3489=_0x2c2c0b['dPzMW']),{'title':'CMS\x20loading\x20300\x20mg\x20CBA\x20→\x20'+_0xcd3489,'details':[{'l':_0x2c2c0b[_0x269a33(0x14c)],'v':'300\x20mg\x20CBA\x20(~9\x20MIU)\x20IV\x20over\x2030-60\x20min'},{'l':'Maintenance','v':_0xcd3489},{'l':_0x2c2c0b[_0x269a33(0xf9)],'v':_0x8466e0+'\x20mg\x20CBA/day'},{'l':_0x269a33(0x139),'v':_0x269a33(0x135)},{'l':'Infuse\x20over','v':_0x2c2c0b[_0x269a33(0x13e)]},{'l':_0x269a33(0x1dd),'v':_0x2c2c0b['abMay']}],'info':'<strong>⚠\x20Nephrotoxicity\x20สูง\x20→\x20hydrate\x20well</strong><br><strong>Monitor:</strong>\x20SCr\x20daily,\x20UO,\x20neurotoxicity\x20signs<br><strong>IT/IVT:</strong>\x2010\x20mg\x20CBA/day\x20(ventriculitis)<br><strong>Adjust:</strong>\x20'+(_0xe7eca9['ht']?_0x269a33(0x13b)+_0x110eb7[_0x269a33(0x1b7)](-0xa*0x2df+0x1*-0xd42+0x29f8)+_0x269a33(0x1e8)+_0x21aabf+'kg':_0x269a33(0x1d6)),'infoType':_0x2c2c0b[_0x269a33(0x1b0)]};}},{'id':a0_0x112d56(0x1b3),'name':a0_0x112d56(0x13a),'sub':a0_0x112d56(0x1b6),'badges':[a0_0x112d56(0x11a)],'calc':function(_0x208477){const _0x10e55c=a0_0x112d56,_0x4bc60c={'HJyAO':'Loading\x20dose','IAIVq':_0x10e55c(0x19e),'IJaGo':_0x10e55c(0x162)},_0x1c3a35=Math[_0x10e55c(0xfb)]((-0x1b5+0x1a08+-0x183f)*_0x208477['wt']),_0xe5eb8d=_0x208477[_0x10e55c(0x117)]>=0x19d7+0x7e0+-0x2176?-0x1d5c+0x20bb+-0x346:0x92*0x6+0x461+-0x79b,_0xd08f80=Math[_0x10e55c(0x1f7)](_0x1c3a35/_0xe5eb8d);return{'title':'Phenytoin\x20'+_0x1c3a35+_0x10e55c(0x144),'details':[{'l':_0x4bc60c[_0x10e55c(0x12c)],'v':_0x10e55c(0x14e)+_0x1c3a35+_0x10e55c(0x161)},{'l':_0x10e55c(0x1db),'v':'≤'+_0xe5eb8d+_0x10e55c(0x1ed)+(_0x208477['age']>=0x1*-0x16f+-0x4cb*0x1+0x67b?_0x10e55c(0x16d):'')},{'l':_0x10e55c(0x164),'v':'≥'+_0xd08f80+'\x20min\x20ใน\x20NSS\x20เท่านั้น!'},{'l':_0x10e55c(0x142),'v':_0x4bc60c['IAIVq']},{'l':'Filter','v':_0x4bc60c[_0x10e55c(0x123)]}],'info':_0x10e55c(0x199),'infoType':_0x10e55c(0x1ee)};}},{'id':a0_0x112d56(0x14f),'name':a0_0x112d56(0x1c7),'sub':a0_0x112d56(0x1d4),'badges':['badge-loading'],'calc':function(_0x1e4a95){const _0x320868=a0_0x112d56,_0x54402b={'gcmUV':_0x320868(0x121),'Ivkuq':_0x320868(0x18a),'kivMv':'IV\x20over\x2015-30\x20min\x20(max\x206\x20mg/kg/min)','zNvJe':function(_0x179f64,_0x10055f){return _0x179f64*_0x10055f;},'mvZQE':_0x320868(0x12e),'IPous':'IV→PO:\x2015-20\x20mg/kg/day\x20div\x20q8-12h','XoPEl':'<strong>⚠\x20ห้ามใช้ร่วม\x20Meropenem/Carbapenem\x20เด็ดขาด!\x20(ลด\x20VPA\x2060-100%)</strong><br><strong>Level:</strong>\x2050-100\x20mcg/mL\x20(SE:\x2080-120)<br><strong>Monitor:</strong>\x20LFTs,\x20CBC+Plt,\x20ammonia,\x20amylase<br><strong>CI:</strong>\x20Hepatic\x20disease,\x20pregnancy\x20(Cat\x20X)<br><a\x20href=\x22tdm.html\x22\x20style=\x22color:#38bdf8;font-weight:700;\x22>🎯\x20ใช้\x20TDM\x20Hub\x20สำหรับ\x20free\x20level\x20correction\x20+\x20dose\x20adjustment\x20→</a>','FDJkL':'red'},_0x59cb89=Math[_0x320868(0xfb)]((-0x196c+-0x1bc2+0x2*0x1aa6)*_0x1e4a95['wt']),_0x4b9029=Math['round']((-0x631+0x9ff+-0x3a6)*_0x1e4a95['wt']);return{'title':_0x320868(0x1af)+_0x59cb89+'–'+_0x4b9029+_0x320868(0x144),'details':[{'l':_0x54402b['gcmUV'],'v':_0x320868(0x193)+_0x59cb89+'–'+_0x4b9029+_0x320868(0x161)},{'l':_0x54402b[_0x320868(0x1f1)],'v':_0x54402b[_0x320868(0x171)]},{'l':_0x320868(0x16e),'v':_0x320868(0x172)+((-0x1*0x2665+0x3d*-0x3a+0x3438+0.5)*_0x1e4a95['wt'])[_0x320868(0x1b7)](-0xf1c+-0x184c+0x68*0x61)+'–'+Math['round'](_0x54402b[_0x320868(0x15a)](-0x1*-0x85f+0xcfe+-0x155b,_0x1e4a95['wt']))+'\x20mg/hr\x20CI'},{'l':_0x54402b[_0x320868(0x15e)],'v':_0x54402b[_0x320868(0x1b1)]}],'info':_0x54402b['XoPEl'],'infoType':_0x54402b['FDJkL']};}},{'id':'levetiracetam','name':'Levetiracetam\x20loading','sub':a0_0x112d56(0x178),'badges':['badge-loading'],'calc':function(_0x4ce443){const _0x637e35=a0_0x112d56,_0x2aac6c={'lzdoj':function(_0x323f50,_0xd5ae66){return _0x323f50*_0xd5ae66;},'HBrEX':'1000-1500\x20mg\x20IV\x20q12h','klauY':function(_0x2c07c9,_0x3a1f2c){return _0x2c07c9<_0x3a1f2c;},'ONaZi':'Loading\x20dose\x20(SE)','FKxnE':'Recommended','JkvJy':'Maintenance','HYfUe':'Switch\x20PO','QRHrx':_0x637e35(0x1c1)},_0x5242bf=(0x22d0+-0x2b1+-0x1*0x1e2b)*Math['round'](_0x2aac6c['lzdoj'](-0x4bb+-0x1*0x2597+0x2a8e,_0x4ce443['wt'])/(-0x14f1+0x1*-0x21c7+0x38ac)),_0x300657=Math[_0x637e35(0x129)](_0x5242bf,-0x2*-0x9d6+0xd*-0x21d+0x1961*0x1);let _0x5e2652=_0x2aac6c[_0x637e35(0x15f)];return _0x4ce443['crcl']<0xc97+0x3d*0x7f+-0x223*0x14?_0x5e2652='250-500\x20mg\x20IV\x20q12h\x20(CrCl\x20<30)':_0x2aac6c[_0x637e35(0x1f6)](_0x4ce443[_0x637e35(0x1a0)],-0x1de*-0x4+-0xe53*-0x1+-0x1599)?_0x5e2652='500-750\x20mg\x20IV\x20q12h\x20(CrCl\x2030-50)':_0x4ce443['crcl']<0x6*0x1e5+0x2*0x65+-0xbd8&&(_0x5e2652=_0x637e35(0x167)),{'title':_0x637e35(0x1ca)+_0x300657+'\x20mg\x20IV\x20loading','details':[{'l':_0x2aac6c[_0x637e35(0x107)],'v':'60\x20mg/kg\x20=\x20'+_0x5242bf+'\x20mg\x20(max\x204500\x20mg)'},{'l':_0x2aac6c['FKxnE'],'v':_0x300657+'\x20mg\x20IV\x20over\x2010-15\x20min'},{'l':_0x2aac6c['JkvJy'],'v':_0x5e2652},{'l':_0x2aac6c[_0x637e35(0xf7)],'v':_0x2aac6c[_0x637e35(0x147)]}],'info':_0x637e35(0x1a8),'infoType':_0x637e35(0x127)};}},{'id':a0_0x112d56(0x195),'name':'Alteplase\x20(rt-PA)','sub':a0_0x112d56(0x148),'badges':[a0_0x112d56(0x19a)],'calc':function(_0xf71c3b){const _0x4c3805=a0_0x112d56,_0x4e517b={'WjUjn':_0x4c3805(0x114),'GJxvE':'10%\x20bolus','iTVQi':_0x4c3805(0x142),'krinS':_0x4c3805(0x1dc)},_0x3759fa=Math[_0x4c3805(0x129)]((0x2b*-0x7+0x9da+-0x1*0x8ad+0.9)*_0xf71c3b['wt'],0xb57*0x2+0x1957+-0x1*0x2fab)[_0x4c3805(0x1b7)](0xc4c+-0x3d7*-0x7+-0x4*0x9cb);return{'title':'Alteplase\x20'+_0x3759fa+'\x20mg\x20(stroke\x20protocol)','details':[{'l':_0x4e517b['WjUjn'],'v':_0x4c3805(0x1cc)+_0x3759fa+_0x4c3805(0x125)},{'l':_0x4e517b[_0x4c3805(0x1aa)],'v':((0x852+-0x12+-0x1*0x840+0.1)*_0x3759fa)[_0x4c3805(0x1b7)](-0x7dc*-0x3+0x26e5+-0x2*0x1f3c)+_0x4c3805(0x12d)},{'l':'90%\x20infusion','v':((0x4*0x56+0x1*-0x183b+0x16e3+0.9)*_0x3759fa)[_0x4c3805(0x1b7)](0x5*0x159+0x27a+-0x936)+_0x4c3805(0x1a5)},{'l':_0x4e517b['iTVQi'],'v':'1\x20mg/mL\x20(reconstituted)'}],'info':_0x4e517b['krinS'],'infoType':_0x4c3805(0x1ee)};}},{'id':a0_0x112d56(0xfd),'name':'Tenecteplase','sub':'Metalyse','badges':[a0_0x112d56(0x19a)],'calc':function(_0x3c6a0f){const _0xa629fd=a0_0x112d56,_0x32ef4b={'JlpcA':function(_0x1fdd06,_0x5b63e4){return _0x1fdd06*_0x5b63e4;},'dWOBA':_0xa629fd(0xfc),'aasqJ':_0xa629fd(0x181),'FfnvR':'Route','oiiyI':function(_0x258789,_0x1f1fa0){return _0x258789/_0x1f1fa0;}};let _0xabc9b1;_0xabc9b1=_0x3c6a0f['wt']<-0x1*0x1051+0xaae+-0x1*-0x5df?0x988*0x3+-0x2f9*-0x4+0x285e*-0x1:_0x3c6a0f['wt']<0x1434+0x17a5*0x1+-0x2b93?0x2039+-0x1e7f+0x197*-0x1:_0x3c6a0f['wt']<-0x204e+-0x10*0x127+0x330e?0x1*0x6d4+0x1*-0x43c+-0x8*0x4e:_0x3c6a0f['wt']<-0x142f+-0x47*0x53+0x2b8e?0xa49*-0x2+0x8be*0x1+0xc01:-0x26bc+-0x1605+0x3cf3;const _0x26674d=Math['min'](_0x32ef4b['JlpcA'](0x1*-0xa7f+-0xefa+-0x1979*-0x1+0.25,_0x3c6a0f['wt']),0x1*-0x2305+0x209*-0x7+-0x315d*-0x1)['toFixed'](0x1*0x1a03+0x26d2+-0x40d4);return{'title':_0x32ef4b['dWOBA'],'details':[{'l':_0xa629fd(0x10a),'v':_0xa629fd(0x112)+_0x26674d+'\x20mg\x20(max\x2025\x20mg)'},{'l':_0x32ef4b[_0xa629fd(0x131)],'v':_0xabc9b1+_0xa629fd(0x1ad)},{'l':_0x32ef4b['FfnvR'],'v':'Single\x20IV\x20bolus\x20over\x205-10\x20sec'},{'l':_0xa629fd(0x142),'v':_0xa629fd(0x197)},{'l':_0xa629fd(0x1b2),'v':_0x32ef4b['oiiyI'](_0x26674d,0x482+0x344*-0x1+-0x139)[_0xa629fd(0x1b7)](-0x3*0x955+0x58e+-0x1a*-0xdd)+_0xa629fd(0x1f2)}],'info':_0xa629fd(0x1cb),'infoType':'blue'};}}];function getCrCl(){const _0x3e4a65=a0_0x112d56,_0xf7bc8b={'Bywev':function(_0x26e1b8,_0x4be27a){return _0x26e1b8(_0x4be27a);},'YITUv':function(_0x405797,_0xf71ca5){return _0x405797(_0xf71ca5);},'XkEqM':_0x3e4a65(0x10d),'NzTuJ':function(_0x4e570d,_0x2f7a9e){return _0x4e570d*_0x2f7a9e;},'RvPEW':function(_0x129c26,_0x5d912a){return _0x129c26/_0x5d912a;}},_0x3b0c66=_0xf7bc8b[_0x3e4a65(0x17b)](parseFloat,document[_0x3e4a65(0x158)](_0x3e4a65(0x179))['value'])||0x551*-0x1+0x1c35*-0x1+0x21c7,_0x1d16a9=_0xf7bc8b['Bywev'](parseFloat,document[_0x3e4a65(0x158)](_0x3e4a65(0x118))[_0x3e4a65(0x132)])||-0x5*0x371+-0x153d+0x674*0x6,_0x49d27a=_0xf7bc8b['YITUv'](parseFloat,document[_0x3e4a65(0x158)](_0xf7bc8b[_0x3e4a65(0x1ba)])['value'])||-0x1681+0xc12+0xa70,_0x1901b5=document[_0x3e4a65(0x158)](_0x3e4a65(0x194))[_0x3e4a65(0x132)];if(_0x49d27a<=-0x1dbf+-0x1a71+-0x3e*-0xe8)return-0xee6*0x1+0x1a46+-0xb60;let _0x4764aa=_0xf7bc8b['NzTuJ'](0xa*-0x23b+0xfd9+0xb*0xa3-_0x3b0c66,_0x1d16a9)/((0x1525+0x2*-0x804+-0x1*0x4d5)*_0x49d27a);return'F'===_0x1901b5&&(_0x4764aa*=-0x5*0x420+-0xd17+0x21b7+0.85),_0xf7bc8b[_0x3e4a65(0x1c3)](Math['round'](_0xf7bc8b[_0x3e4a65(0x1f5)](0x5*-0x139+-0x2*-0x64c+0x11*-0x61,_0x4764aa)),-0x1b*-0x89+-0x16*-0x1b4+0x2bb*-0x13);}function getPatient(){const _0x1d45ca=a0_0x112d56,_0xafa1a3={'fwzQL':'ptWt','SERHW':'ptAge','jTZGP':_0x1d45ca(0x194),'aRqOr':function(_0x33e76e,_0x59a41b){return _0x33e76e(_0x59a41b);},'teTby':function(_0x4c5052,_0x1600e0){return _0x4c5052(_0x1600e0);}};return{'wt':parseFloat(document[_0x1d45ca(0x158)](_0xafa1a3[_0x1d45ca(0x17d)])[_0x1d45ca(0x132)])||-0x1649+-0x1a*0x172+0x3c23,'age':parseFloat(document[_0x1d45ca(0x158)](_0xafa1a3['SERHW'])[_0x1d45ca(0x132)])||-0x1*-0xb0d+-0x1c72+0x11a6,'sex':document['getElementById'](_0xafa1a3[_0x1d45ca(0x140)])[_0x1d45ca(0x132)],'scr':_0xafa1a3[_0x1d45ca(0x1ae)](parseFloat,document[_0x1d45ca(0x158)]('ptScr')[_0x1d45ca(0x132)])||0x12f4+-0xc8*-0x19+0x1*-0x267b,'ht':_0xafa1a3[_0x1d45ca(0x187)](parseFloat,document[_0x1d45ca(0x158)](_0x1d45ca(0x1e3))[_0x1d45ca(0x132)])||0x853*-0x1+0x10e9+0xe*-0x9d,'crcl':getCrCl()};}function updateCrCl(){const _0x534497=a0_0x112d56,_0x4b1290={'KVCUY':'\x20mL/min','jWQlG':_0x534497(0x19d),'HVyLm':function(_0xb56b98,_0x430bfb){return _0xb56b98<_0x430bfb;},'RaZmn':_0x534497(0x1d5)},_0x20488e=getCrCl();document['getElementById'](_0x534497(0x145))[_0x534497(0xfa)]=_0x20488e['toFixed'](-0x1*0x2598+-0xa*-0x3cf+-0x7d*0x1)+_0x4b1290['KVCUY'];const _0x3fd0ec=document['getElementById']('crclWarning');_0x20488e<-0xa*-0x97+-0x2305+0x1d3d?(_0x3fd0ec['style'][_0x534497(0x115)]=_0x4b1290['jWQlG'],_0x3fd0ec[_0x534497(0x1b4)]=_0x534497(0x1a9)):_0x4b1290['HVyLm'](_0x20488e,-0xd83+0x95*-0x35+0x2c8e)?(_0x3fd0ec[_0x534497(0x1a4)]['display']=_0x4b1290[_0x534497(0xf8)],_0x3fd0ec['innerHTML']=_0x534497(0x1ec)):_0x3fd0ec[_0x534497(0x1a4)][_0x534497(0x115)]=_0x4b1290['RaZmn'];}let selectedDrug=null;function renderDrugGrid(){const _0x525e38=a0_0x112d56;document['getElementById'](_0x525e38(0x154))['innerHTML']=CALC_DRUGS['map'](_0x182098=>'\x0a\x20\x20\x20\x20<div\x20class=\x22drug-card\x20'+(selectedDrug===_0x182098['id']?'active':'')+_0x525e38(0x1bf)+_0x182098['id']+'\x27)\x22>\x0a\x20\x20\x20\x20\x20\x20<div\x20class=\x22drug-name\x22>'+_0x182098['name']+_0x525e38(0x103)+_0x182098['sub']+'</div>\x0a\x20\x20\x20\x20\x20\x20'+_0x182098[_0x525e38(0x106)][_0x525e38(0x198)](_0x1c3729=>_0x525e38(0x1d1)+_0x1c3729+'\x22>'+_0x1c3729['replace']('badge-','')+_0x525e38(0x10f))[_0x525e38(0x11e)]('\x20')+_0x525e38(0x184))[_0x525e38(0x11e)]('');}function selectDrug(_0x2e785c){const _0x2a0251=a0_0x112d56;selectedDrug=_0x2e785c,lastSelectedDrugForTracking=CALC_DRUGS['find'](_0x273edb=>_0x273edb['id']===_0x2e785c)?.[_0x2a0251(0x10e)]||null,renderDrugGrid(),calculate();}function calculate(){const _0x4a98cb=a0_0x112d56,_0x4feaa1={'DNjey':'outputSection','MZezn':_0x4a98cb(0x173),'ysXdr':_0x4a98cb(0x1d5),'DFYGE':'function'},_0x4a299e=document[_0x4a98cb(0x158)](_0x4feaa1['DNjey']),_0x52e839=document['getElementById'](_0x4feaa1[_0x4a98cb(0x1e4)]),_0x99529a=document['getElementById'](_0x4a98cb(0x105));if(!selectedDrug)return void(_0x4a299e['style']['display']=_0x4feaa1['ysXdr']);const _0x27812f=CALC_DRUGS['find'](_0x447a20=>_0x447a20['id']===selectedDrug);if(!_0x27812f)return;const _0x1977cf=getPatient(),_0xd23c52=_0x27812f['calc'](_0x1977cf);_0x99529a['innerHTML']=_0x4a98cb(0x1d3)+_0x27812f[_0x4a98cb(0x10e)],_0x52e839[_0x4a98cb(0x1b4)]='\x0a\x20\x20\x20\x20<div\x20style=\x22padding:16px;\x22>\x0a\x20\x20\x20\x20\x20\x20<div\x20class=\x22result-box\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22result-title\x22>Recommended</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22result-value\x22\x20style=\x22font-size:20px;\x22>'+_0xd23c52['title']+_0x4a98cb(0x1e5)+_0xd23c52[_0x4a98cb(0x1e1)][_0x4a98cb(0x198)](_0x50c061=>_0x4a98cb(0x11f)+_0x50c061['l']+_0x4a98cb(0x168)+_0x50c061['v']+'</span></div>')['join']('')+'\x0a\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20<div\x20class=\x22info-box\x20'+_0xd23c52[_0x4a98cb(0x1a2)]+'\x22\x20style=\x22margin-top:14px;\x22>'+_0xd23c52['info']+_0x4a98cb(0x1c2),_0x4a299e[_0x4a98cb(0x1a4)][_0x4a98cb(0x115)]='block',_0x4a299e['scrollIntoView']({'behavior':'smooth','block':'nearest'}),_0x4feaa1['DFYGE']==typeof trackCalcUsage&&trackCalcUsage(_0x27812f['name'],_0x1977cf,_0xd23c52);}const ANALYTICS_URL=a0_0x112d56(0x165),CALC_SESSION_ID=((()=>{const _0x1aa863=a0_0x112d56,_0x43e102={'VDvSV':function(_0x58a383,_0x1a96b8){return _0x58a383+_0x1a96b8;},'axIRH':_0x1aa863(0x104)},_0x4fe181=new Date()[_0x1aa863(0x151)]()['substring'](0x1337+0x1c6f+-0x2fa6,0x1e5a+-0x6c*0x50+0xb*0x50);let _0x36c56d=localStorage[_0x1aa863(0x170)]('anonSessionId'),_0x1fbf38=localStorage[_0x1aa863(0x170)](_0x1aa863(0x104));return _0x36c56d&&_0x1fbf38===_0x4fe181||(_0x36c56d=_0x43e102['VDvSV']('u',Math['random']()[_0x1aa863(0x192)](0x83*-0x8+0x116f+0xd33*-0x1)[_0x1aa863(0x126)](0x2556+-0x3a*0x19+0x1*-0x1faa,0xa2e+0x1a9*0xf+-0x230b*0x1))+Date[_0x1aa863(0x18e)]()['toString'](0x12d0+-0x1*0x10e3+-0x1c9),localStorage['setItem']('anonSessionId',_0x36c56d),localStorage[_0x1aa863(0x10b)](_0x43e102['axIRH'],_0x4fe181)),_0x36c56d;})()),CALC_USER_ID=((()=>{const _0x225c0c=a0_0x112d56,_0x566c6f={'vPqto':_0x225c0c(0x1f3)};let _0x5df870=localStorage['getItem'](_0x566c6f[_0x225c0c(0x18b)]);return _0x5df870||(_0x5df870='p'+Math[_0x225c0c(0x166)]()[_0x225c0c(0x192)](-0x677+0x14*0x2+0x673)['substring'](0x21cb+-0x832+-0x1997,-0x1750+0xb*-0x183+-0x27fd*-0x1)+Date['now']()[_0x225c0c(0x192)](-0x17d6*-0x1+-0x22*-0x3a+-0x1*0x1f66),localStorage[_0x225c0c(0x10b)](_0x566c6f[_0x225c0c(0x18b)],_0x5df870)),_0x5df870;})());let calcReqCount=-0x2100+-0x2625+0x3*0x17b7;function sendCalcAnalytics(_0x16502f){const _0x434f42=a0_0x112d56,_0x3485c2={'PFMhp':function(_0x33fc7e,_0x334a45){return _0x33fc7e===_0x334a45;},'GRNwr':function(_0x42171f,_0x2ae63b,_0x626800){return _0x42171f(_0x2ae63b,_0x626800);}};if(_0x3485c2[_0x434f42(0x116)](_0x434f42(0x174),localStorage['getItem'](_0x434f42(0x108)))&&!(calcReqCount>=0x19e9+-0xf74+-0xa4d)){calcReqCount++;try{const _0x252de1=JSON['stringify']({..._0x16502f,'session_id':CALC_SESSION_ID,'user_id':CALC_USER_ID});navigator['sendBeacon']?navigator[_0x434f42(0x110)](ANALYTICS_URL,_0x252de1):_0x3485c2['GRNwr'](fetch,ANALYTICS_URL,{'method':'POST','body':_0x252de1,'keepalive':!(0x2*0x11d6+0x1c1b+-0x3fc7)})[_0x434f42(0x182)](()=>{});}catch(_0x33218d){}}}const PAGE_ENTER_TIME=Date[a0_0x112d56(0x18e)](),FROM_PAGE=((()=>{const _0x193e16=a0_0x112d56,_0x1a5d5e={'ylPNJ':_0x193e16(0x1f4),'Soqwk':_0x193e16(0x1bc),'XlczB':_0x193e16(0x1b5)},_0x4bd060=document[_0x193e16(0x191)]||'';return _0x4bd060[_0x193e16(0x1a6)](_0x1a5d5e[_0x193e16(0x150)])||_0x4bd060[_0x193e16(0x190)](_0x193e16(0x1bb))?'drugref':_0x4bd060['includes']('tdm.html')?_0x1a5d5e['Soqwk']:_0x4bd060['includes'](_0x1a5d5e[_0x193e16(0x1df)])?'vanco-tdm':_0x4bd060?'external':_0x193e16(0x1d8);})());sendCalcAnalytics({'type':a0_0x112d56(0x152),'page':'calculator','action':a0_0x112d56(0x180),'from_page':FROM_PAGE,'referrer':document[a0_0x112d56(0x191)]||a0_0x112d56(0x1d8)});function a0_0x2663(_0x29be53,_0x1425be){_0x29be53=_0x29be53-(0x23d3+0x2e3+-0x25c1*0x1);const _0x2c9907=a0_0x1f92();let _0x18346c=_0x2c9907[_0x29be53];if(a0_0x2663['rQcNHg']===undefined){var _0x5d3dd9=function(_0x22013f){const _0x49c4fc='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x1d4d4f='',_0x4e38bf='';for(let _0x430aa2=-0x10d5+0xc07+0x4ce,_0x18f3b1,_0x143504,_0x399777=-0x2*0x613+0x3*-0xc53+-0x1*-0x311f;_0x143504=_0x22013f['charAt'](_0x399777++);~_0x143504&&(_0x18f3b1=_0x430aa2%(-0x12a3+0x2645+0xba*-0x1b)?_0x18f3b1*(0x4e*-0x56+0x1*-0x16b3+-0x3127*-0x1)+_0x143504:_0x143504,_0x430aa2++%(0x1035+-0x6ee*-0x3+-0x24fb))?_0x1d4d4f+=String['fromCharCode'](0x1d34+-0x1*-0x7e1+-0x1*0x2416&_0x18f3b1>>(-(-0x1ec0+0x231+0x1c91)*_0x430aa2&0x1*-0x1021+-0x148e+0x24b5)):0x26d6+-0x6a3*0x3+0x143*-0xf){_0x143504=_0x49c4fc['indexOf'](_0x143504);}for(let _0x19e046=-0x4*0x43c+0x4e*-0x62+-0x2ecc*-0x1,_0x4db872=_0x1d4d4f['length'];_0x19e046<_0x4db872;_0x19e046++){_0x4e38bf+='%'+('00'+_0x1d4d4f['charCodeAt'](_0x19e046)['toString'](0x1c*-0x73+-0x3*0x52+0xd9a))['slice'](-(-0x23b*-0xb+-0x3*-0x3e1+-0x242a));}return decodeURIComponent(_0x4e38bf);};a0_0x2663['yUjhuD']=_0x5d3dd9,a0_0x2663['mQhSkI']={},a0_0x2663['rQcNHg']=!![];}const _0x15ff6b=_0x2c9907[0x54c+-0x1051+0xb05],_0x392a46=_0x29be53+_0x15ff6b,_0x16052e=a0_0x2663['mQhSkI'][_0x392a46];return!_0x16052e?(_0x18346c=a0_0x2663['yUjhuD'](_0x18346c),a0_0x2663['mQhSkI'][_0x392a46]=_0x18346c):_0x18346c=_0x16052e,_0x18346c;}let calcPageViewSent=!(0x81*0x36+-0x25cc+0x1*0xa97);function sendCalcPageLeave(){const _0x77183b=a0_0x112d56,_0x4e91c2={'dHeud':_0x77183b(0x152),'NKIRp':_0x77183b(0x15c),'wSsPF':function(_0x3d15fe,_0x13cb11){return _0x3d15fe-_0x13cb11;},'Utigy':'none'};calcPageViewSent||(calcPageViewSent=!(0x17f6+0x7db+-0x1fd1),sendCalcAnalytics({'type':_0x4e91c2[_0x77183b(0x1ac)],'page':_0x77183b(0x1da),'action':_0x4e91c2[_0x77183b(0x16f)],'duration_sec':Math[_0x77183b(0xfb)](_0x4e91c2['wSsPF'](Date[_0x77183b(0x18e)](),PAGE_ENTER_TIME)/(0x4d*-0x67+-0x3e5*-0x1+0x2*0xf7f)),'from_page':FROM_PAGE,'last_drug_selected':selectedDrug||_0x4e91c2[_0x77183b(0x1e2)]}));}function a0_0x1f92(){const _0x3d409c=['zg9Zzv9JywXJ','koc4QUc4UEc4H+c4REc4SUc4OUc4UcK','twfPBNrLBMfUy2u','tKTjuNa','z2v0sxrLBq','A2L2txy','ms0Yig1Nl2TNl2HYid0G','B3v0Chv0qM9KEq','Dhj1zq','ig1NieLwia','BwCGEcaXl2rHEtWVDgq+pc90CJ48Dhi','otu5nJu1rK9pzuvr','ntaWig1NlZuGBuW','Chrbz2u','mJC4mti2zxv6zeHi','qNL3zxy','q3jdBcaXmc0Zma','zND6uuW','CujgBeG','pJX0zcbZDhLSzt0ICgfKzgLUzZO0ChGGnNb4o2jVCMrLCJOXChGGC29SAwqGi2rKzdSIpJmWltuWpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ5XmJrOpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ4','zw50zxi','qu1jigrVC2u','y2f0y2G','Ctm2Aa','cIaGica8l2rPDJ4kica','4PQGioc4QUc4UEc4H+c4GEc4P+c5Ioc4SIb0yxjNzxqG4OAsioc5Goc4QUc4TEc5Ioc4OUc4HYbUzxbOCM90B3HPy2L0Eq','DMLZAwjPBgL0EwnOyw5Nzq','DgvuyNK','ihn0EwXLpsjIywnRz3jVDw5KoInMzwyYzJi7zM9UDc13zwLNAhq6nJaWoYi','mJm2rKT4sgHi','uMf0zq','DLbXDg8','Ctq4Aa','mtq1ntaWohHrr3jvtW','BM93','vgHVA28','zw5KC1DPDgG','CMvMzxjYzxi','Dg9tDhjPBMC','mZaTndaGBwCVA2CGpsa','ChrtzxG','ywX0zxbSyxnL','4PYfioc4REc4OUc4UEc5Ioc5G+c4Msb0yxjNzxqGkdqWmc02mdaP','nsbTzY9TtcaOCMvJB25ZDgL0DxrLzcK','BwfW','phn0CM9UzZ7IMQaG4lMd4lIk4lMjie5tuYdGUydGUjFGUyJGUllGUjNGUlhGUyNGUjKHioc4Q+c5IEc4SUc4OsbenvCG4OAsioc4LEc4GEc4LEc4Soc4GEc4REc4Mse8l3n0CM9UzZ48yNi+phn0CM9UzZ5nB25PDg9YoJWVC3rYB25NpIbfq0CGy29UDgLUDw91CYWGqLaGCtuTmtvTAw4SieLwihnPDguGkhb1CNbSzsbNBg92zsK8yNi+phn0CM9UzZ5mzxzLBdO8l3n0CM9UzZ4Gvg90ywWGmtaTmJaGBwnNl21mihWGrNjLzsaXltiGBwnNl21mpgjYpJXZDhjVBMC+4lIv4lIJ4lIN4lIioJWVC3rYB25NpIbgCMvLihbOzw55Dg9PBIdGUjBGUyNGUliGywXIDw1PBIa8mY41pgjYpJXHigHYzwy9iNrKBs5ODg1SiIbZDhLSzt0Iy29SB3i6iZm4yMrModTMB250lxDLAwDODdO3mda7iJ7WN46Vioc5G+c4IUc5Isbure0GshvIioc4QUc4S+c4Q+c4O+c4SEc4MIbxAw50zxiTvg96zxiGy29YCMvJDgLVBIaRigrVC2uGChjLzgLJDgLVBIdIHPi8l2e+','yMfKz2uTC3rYB2TL','DMLZAwjPBgL0Evn0yxrL','mtG2m2PnsuzfuG','yMXVy2S','4OMKnI43ig1Nl21micHKAwX1DguG4lMd4lIzie5tuYa1mc0XmdaGBuWP','AunqrgW','y3jJBa','pJX0zcbZDhLSzt0ICgfKzgLUzZO0ChGGnNb4o2jVCMrLCJOXChGGC29SAwqGi2rKzdSIpJeWltmWpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ5XmJqTndHOpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ5szs1KB3nLigj5igXLDMvSpc90zd48l3rYpJX0CG','Aw5MB1r5Cgu','r2vUDgfTAwnPBIa','C3r5Bgu','ig1NieLwigLUzNvZAw9Uig92zxiGnJaGBwLU','Aw5JBhvKzxm','rwnkDNC','phn0CM9UzZ7GUilGUyNGUk3GUjtGUlu6pc9ZDhjVBMC+ie5VihnPz25PzMLJyw50igrYDwCGAw50zxjHy3rPB25ZlcbZywzLioc5G+c4MsbOzxbHDgLJigLTCgfPCM1LBNq8yNi+phn0CM9UzZ5trtO8l3n0CM9UzZ4GyMvOyxzPB3jHBcaOAxjYAxrHyMLSAxr5lcbHz2DYzxnZAw9UktXICJ48C3rYB25NpK1VBML0B3i6pc9ZDhjVBMC+ifnLAxP1CMuGzNjLCsWGu0nYlcbTB29Kl2jLAgf2Aw9Y','pgrPDIbJBgfZCZ0IAw5MBY1IB3GGCMvKiJ48C3rYB25NpUkAOcbdCKnSidWZmcbTtc9TAw48l3n0CM9UzZ4G4Ocuioc4M+c4O+c4SEc4MUc4GUc4MEc4SUc4Loc4OUc4SUc4QUc5Ioc4P+c4MEc5G+c4Q+c4JEc5IcdGUjxGUkpGUkFGUiJGUkRGUk3GUjOGCMvUywWGzg9ZAw5Npc9KAxy+','r0P4DKu','C2v4','zeHLDwq','ig1NicH3zwLNAhqTDgLLCMvKkq','yvjXt3i','vMfSChjVyxrLia','rMvpy3O','svbVDxm','vM9SDw1LicHZDhjVA2uP','CgHLBNL0B2LU','Aw5Uzxjive1m','DMfUy28TDgrTlMH0BwW','mJuWig1NlZuGBuWG4OcuidXHigHYzwy9iNrKBs5ODg1SiIbZDhLSzt0Iy29SB3i6iZm4yMrModTMB250lxDLAwDODdO2mda7iIbVBMnSAwnRpsjLDMvUDc5ZDg9WuhjVCgfNyxrPB24Oksi+8j+oRYbure0G4OAspc9HpG','Dg9gAxHLza','DKHkD1u','CteYAa','wgTfCu0','AxyTzhj1z3jLzI8','DgrT','lcbdCKnSia','mte1ig1NiencqsbXmtjO','iIbVBMnSAwnRpsjZzwXLy3reCNvNkcC','wM1Xu2O','svyG4OAuifbpide6msbYyxrPBW','pc9KAxy+cIaGica8l2rPDJ4kica','uNzqrvC','qMfmuNm','rhzdD2u','q3jdBca1mc04ma','u29KAxvTifzHBhbYB2f0zsbSB2fKAw5N','EuHvuMW','mtmYody1mNn1uNbevq','tgv2zxrPCMfJzxrHBsa','phn0CM9UzZ7GUilGUyNGUk3GUjtGUlu6pc9ZDhjVBMC+ifnPBMDSzsbIB2X1CYdIHPiG4lIh4lMi4lIY4lII4lIb4lIN4lMi4lIYiefSDgvWBgfZztXICJ48C3rYB25NpKv2AwrLBMnLoJWVC3rYB25NpIbuqvnursWGqwnuihrYAwfSCYdGUkRGUlpGUkVGUkpGUlhGUjOGC3rYB2TLpgjYpJXZDhjVBMC+tw9UAxrVCJO8l3n0CM9UzZ4GtKLiu1mSiejqiheXnw1PBIWGyMXLzwrPBMC8yNi+phn0CM9UzZ7GUkVGUyNGUllGUke6pc9ZDhjVBMC+ieHLCgfYAw4Vqw50AxbSyxrLBgv0idi0igHY','mc45ig1Nl2TNid0G','yMfKz2uTCMvUywW','ExrVtfq','yKPerha','qw1PA2fJAw4','phnWyw4Gy2XHC3m9iMjHzgDLia','ns03ig1Nl2TNiheYngGGpsa','8j+tIIa','ndaWig1NlZqGBuWG4OcuidXHigHYzwy9iNrKBs5ODg1SiIbZDhLSzt0Iy29SB3i6iZm4yMrModTMB250lxDLAwDODdO2mda7iIbVBMnSAwnRpsjLDMvUDc5ZDg9WuhjVCgfNyxrPB24Oksi+8j+oRYbure0G4OAspc9HpG','BM9Uzq','4lMd4lIQ4lMi4lIQ4lMi4lIN4lIz4lIQ4lI54lIh4lMa4lIE4lI34lMi4lIT4lIe4lIZ4lIz4lIN4lItieLcvW','y29SAxn0Aw4','zgLYzwn0','yw1Izxi','y2fSy3vSyxrVCG','twf4ihjHDgu','phn0CM9UzZ7IMQaGrg9VCI10BY1UzwvKBguGpdyWig1PBIe8l3n0CM9UzZ48yNi+phn0CM9UzZ7GUkVGUyNGUllGUke6pc9ZDhjVBMC+ieHLCgfYAw4Vqw50AxbSyxrLBgv0idi0igHYioc4Q+c4PEc4SEc4H+c5G+c4Q+c5ItXICJ48C3rYB25NpKjqoJWVC3rYB25NpIbXmtvTAw4GEcaYAhiG4OAsiheZmg1PBIb4idzOCIdIHPiGCtfOihGGmtzOCJXICJ48C3rYB25NpKnuigjYywLUoJWVC3rYB25NpIaYncbOCIbWB3n0lwrVC2u8yNi+phn0CM9UzZ7GUydGUjxGUkpGUlxGUklGUke6pc9ZDhjVBMC+ienYEw9WCMvJAxbPDgf0zsWGvfHbioc4QUc4S+c4Q+c4O+c4SEc4MIbIBgvLzgLUzW','vw5PDcbJB252zxjZAw9U','pJX0zcbZDhLSzt0ICgfKzgLUzZO0ChGGnNb4o2jVCMrLCJOXChGGC29SAwqGi2rKzdSIpJuWltGWpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ5XmtjOpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ4','wgXJEKi','Cti0ltq4Aa','zgv0ywLSCW','vxrPz3K','ChriDa','tvPLEM4','pc9KAxy+cIaGicaGidWVzgL2pGOGicaGica8zgL2ihn0EwXLpsjTyxjNAw4TDg9WoJe0ChG7iJ4kicaGicaGica','vNfizNG','v1jPA0W','A2CSigfKANvZDgvKihD0pq','ig1Nl2rHEq','q3jdBcaYmc00ma','ig1Nia','pgrPDIbJBgfZCZ0IAw5MBY1IB3GGyw1IzxiIpJXZDhjVBMC+q3jdBcaZmc01mcbTtc9TAw48l3n0CM9UzZ4G4Ocuioc4OUc4SUc4MUc4SUc4H+c4LEc4SEc4P+c4LEc5IEc4REc4H+c4M+c4O+c4SEc4MUc4GUc4MEc4SUc4Lc9PBNrLCNzHBdWVzgL2pG','ig1Nl21PBIa','CMvK','mtu3mdK1nKvIsMrUBa','AgLKzgvU','sxzRDxe','ig1m','yw5VBLvZzxjjza','Aw5KzxGUAhrTBa','tNPuDuO','A2XHDvK','y2vPBa','phn0CM9UzZ7WN5olifjLBMfSigrVC2uGywrQDxn0BwvUDcaOq3jdBca','mtC2ntu0mffcvMDdwq','q29SAxn0Aw1LDgHHDguGkennuYK','sfLMvwu','ALDrBeC','Auz6rgi','Dgv4DenVBNrLBNq','CM91BMq','vgvUzwn0zxbSyxnLiokaLcbZAw5NBguGsvyGyM9SDxm','DgvUzwn0zxbSyxnL','q3jdBca8mtaGlYbira','mLvZwM1yBq','wvjdEw4','q3jdBca8mJaG4OAsigrVC2uGyNKGC2vYDw0GBgv2zwW','4lMd4lIzie5tuY9envCGntaTmJaWig1m','pc9KAxy+cIaGicaGidXKAxyGy2XHC3m9iMrYDwCTC3vIiJ4','yw5VBLnLC3nPB25eyxrL','B3v0Chv0sgvHzgvY','yMfKz2vZ','t05HwMK','yw5HBhL0AwnZq29UC2vUDa','BwCGEcaYltmVzgf5pc90zd48l3rYpJX0CG','u3rYB2TLigrVC2u','C2v0sxrLBq','phn0CM9UzZ5ure06pc9ZDhjVBMC+ifbLywSGmJaTmZuGBwnNl21micHLEhrLBMrLzcKGFcbuCM91z2GGpduGBwnNl21mpgjYpJXHigHYzwy9iNrKBs5ODg1SiIbZDhLSzt0Iy29SB3i6iZm4yMrModTMB250lxDLAwDODdO3mda7iJ7WN46Vioc5G+c4IUc5Isbure0GshvIioc4QUc4S+c4Q+c4O+c4SEc4MIbiyxj0zM9YzcbUB21Vz3jHBsaRifbliokgKJWVyt48yNi+phn0CM9UzZ5nB25PDg9YoJWVC3rYB25NpIbtq3iSigf1zgLVBwv0CNKSihzLC3rPyNvSyxiGzM48yNi+phn0CM9UzZ7IMQa6pc9ZDhjVBMC+ioc4Q+c5IEc4SUc4OEc4Noc4QUc4OEc4GEc4SEc4MIbczxrHlwXHy3rHBxmG4lMd4lIzihn5CMLUz2uVyMfNioc5Goc4Loc4TEc4OUc4P+c4GEc4SEc4Mq','Chrty3i','BMfTzq','pc9ZCgfUpG','C2vUzejLywnVBG','vuDeB2e','mc4YnsbTzY9RzYa9ia','ig1Nihe4lteYAa','vg90ywWGzg9Zzq','zgLZCgXHEq','ueznAha','ywDL','ChrxDa','ktO8l3n0CM9UzZ4','yMfKz2uTBg9HzgLUzW','vMfUy29TEwnPBG','Cti0Aa','vfL6yva','AM9PBG','pgrPDIbJBgfZCZ0Izgv0ywLSlxjVDYi+phnWyw4Gy2XHC3m9iMrLDgfPBc1SywjLBci+','CgDYAxC','tg9HzgLUzYbKB3nL','odaGBwCVmIbTtcdIGjqGpgeGAhjLzJ0IDgrTlMH0BwWIihn0EwXLpsjJB2XVCJOJmZHIzgy4o2zVBNqTD2vPz2H0oJyWmdSIig9Uy2XPy2S9iMv2zw50lNn0B3bqCM9WywDHDgLVBIGPiJ7WN46VifretsdIHPi8l2e+','suPHr28','q3jdBca+oda','ig1NicHTyxGGotaGBwCP','C3vIC3rYAw5N','yMX1zq','rgfPBhKGDg90ywW','BwLU','zMPvzvi','DMfJqw8','seP5qu8','ig1NieLwihb1C2GGB3zLCIaXig1PBG','qwX0zxjUyxrPDMu','uMvJB21Tzw5KzwqGzg9Zzq','Dw1JtvK','ywfZCuO','DMfSDwu','sNngtuK','vgfbwei','4lMd4lIzie5tuY9envCGmtaWlti1mcbTta','y0zUwxe','pgjYpJXZDhjVBMC+vernoJWVC3rYB25NpIbbvumVtuLdihrHCMDLDca0mdaTnJaWicHWCMvMzxjYzwqPihWGvhjVDwDOide1ltiWig1JzY9TtcaO4lIw4lMj4lIY4lMe4lIH4lMi4lIH4lI1iefvqYK8yNi+4lMa4lIi4lIY4lIWihrYB3vNAcdGUihGUyJGUk3GUjKGzg9ZzsdGUjFGUlxGUyGGncaOC3rLywr5ihn0yxrLktXICJ48ysbOCMvMpsj0zg0UAhrTBciGC3r5Bgu9iMnVBg9YoImZogjKzJG7zM9UDc13zwLNAhq6nZaWoYi+8j+NRcdGUypGUiRGUyKGqMf5zxnPyw4GvernieH1yIdGUkRGUlpGUkVGUkpGUlhGUjOGqvvdlwD1AwrLzcbKB3nPBMCG4OAspc9HpJXICJ48C3rYB25NpK1VBML0B3i6pc9ZDhjVBMC+ifndCIbKywLSEsWGq0jdlcbszwqGtwfUifn5BMrYB21LiokgKIbPBMz1C2uG4OMLnJaGBwLUl2C8yNi+phn0CM9UzZ7IMQa6pc9ZDhjVBMC+ioc4Q+c5IEc4SUc4OEc5G+c4Q+c5IsbSAw5Lioc5Goc4Loc4TEc4OUc4P+c4GEc4SEc4MIbqAxaVvgf6BYaO4OArBMvWAhjVDg94AwnPDhKPpgjYpJXZDhjVBMC+seq6pc9ZDhjVBMC+ifjLlwrVC2uGmtuTmJuGBwCVA2CGCg9ZDc1ircWG4lMa4lIi4lIY4lIWihbYzs1ircbSzxzLBa','r2vUDgfTAwnPBG','rgLSDxrPB24','ugHLBNL0B2LUigXVywrPBMC','sujxpq','oduGBwCGq0jbiheXmMG','z2HABvG','EuLfuvK','CNbXCg0','ALrAr1a','DvDQBg8','q29Uy2vUDhjHDgLVBG','mtuWig1Niencqs92AwfSicH+mIbnsvuP','ig1NieLwigXVywrPBMC','y3jJBfzHBhvL','q29UDMvUDgLVBMfSigrVC2u','uvjiCNG','qwn0AwX5C2uGntaGBwCVntaGBuW','rxH0zw5KzwqTAw50zxj2ywW','q01nz1a','ihn0EwXLpsjIywnRz3jVDw5KoInKy2zJztC7zM9UDc13zwLNAhq6nJaWoYi','txfowgS','BLLSrM0','mJaGBwCVA2CGpsa','DMfSChjVyxrL','EwXqtKO','Dg9ju09tDhjPBMC','CgfNzv92Awv3','ntaWig1NlcaXigCVDMLHBcdIGjqGpgeGAhjLzJ0IDgrTlMH0BwWIihn0EwXLpsjJB2XVCJOJmZHIzgy4o2zVBNqTD2vPz2H0oJyWmdSIig9Uy2XPy2S9iMv2zw50lNn0B3bqCM9WywDHDgLVBIGPiJ7WN6ESiejHEwvZAwfUifretsdIHPi8l2e+','zhj1z0DYAwq','ntaWig1NlZiGBuWG4OcuidXHigHYzwy9iNrKBs5ODg1SiIbZDhLSzt0Iy29SB3i6iZm4yMrModTMB250lxDLAwDODdO2mda7iIbVBMnSAwnRpsjLDMvUDc5ZDg9WuhjVCgfNyxrPB24Oksi+8j+oRYbure0G4OAspc9HpG','z2vUDgfTAwnPBG','msbnsvuG4OMiidmZlJmGBwCGq0jbiokjIca4mcbTzYbdtvm','z2v0rwXLBwvUDej5swq','C2nY','EK52sMu','EKzxzKS','BgvHDMu','pJX0zcbZDhLSzt0ICgfKzgLUzZO0ChGGnNb4o2jVCMrLCJOXChGGC29SAwqGi2rKzdSIpJWXmcaVieHepc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ5XndGTnZjOpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ5szs1KB3nLihDOzw4GDhjVDwDOidWXns0YmdWVDgq+pc90CJ48l3rHyMXLpG','BxzAuuu','sejYrvG','Ctq4ltCYAa','ig1N','4lIv4lMj4lIT4lIh4lMd4lIk4lMjidaUmJiGZRXTigLUlwXPBMuGzMLSDgvY','yNKGBgv2zwW','sw5MDxnLig92zxi','Ahr0Chm6lY9Zy3jPChqUz29Vz2XLlMnVBs9TywnYB3mVCY9bs2z5y2j4C05grZrbExe5t09zztuZCevOzdG4x3nbmNnHshDtAKnWAdzfBg9futjlx2yZneruzuWXq21eCNmWutjyx2nZs1aVzxHLyW','CMfUzg9T','ntaWlteWmdaGBwCGsvyGCteYAcaOq3jdBca1mc04mcK','pc9ZCgfUpJXZCgfUignSyxnZpsjKzxrHAwWTDMfSDwuIpG','pJX0zcbZDhLSzt0ICgfKzgLUzZO0ChGGnNb4o2jVCMrLCJOXChGGC29SAwqGi2rKzdSIpJ44mdWVDgq+phrKihn0EwXLpsjWywrKAw5NoJrWEca2ChG7yM9YzgvYoJfWEcbZB2XPzcaJzgrKoYi+CtGTmtjOpc90zd48DgqGC3r5Bgu9iNbHzgrPBMC6nhb4idzWEdTIB3jKzxi6mxb4ihnVBgLKicnKzgq7iJ4','mtmWig1NiencqsbXmJrOicHVCIbIEsbSzxzLBcK','mtuGBwCVA2CGpsa'];a0_0x1f92=function(){return _0x3d409c;};return a0_0x1f92();}window['addEventListener']('beforeunload',sendCalcPageLeave),document['addEventListener'](a0_0x112d56(0x186),()=>{const _0x4882a1=a0_0x112d56,_0x1c143c={'yHURl':function(_0x3ede26,_0x2c4d3e){return _0x3ede26===_0x2c4d3e;},'TOTjd':function(_0x44fd2b){return _0x44fd2b();}};_0x1c143c[_0x4882a1(0x1c8)](_0x4882a1(0x1f0),document[_0x4882a1(0x19b)])&&_0x1c143c['TOTjd'](sendCalcPageLeave);});let lastSelectedDrugForTracking=null;const calcTracked={};function trackCalcUsage(_0x4698f3,_0x36a5cb,_0x40c6d0){const _0x5e481a=a0_0x112d56,_0x1123dd={'iCPDl':function(_0x2bc00e,_0x4bd8c7){return _0x2bc00e!==_0x4bd8c7;}};if(_0x1123dd[_0x5e481a(0x19f)](_0x4698f3,lastSelectedDrugForTracking))return;lastSelectedDrugForTracking=null;const _0x2d5f95=_0x4698f3+'_'+Math['floor'](Date['now']()/(-0xa0bf+-0x5cb*0x1b+0x1b258));calcTracked[_0x2d5f95]||(calcTracked[_0x2d5f95]=!(0x2dd+0x109d*-0x1+-0xa0*-0x16),sendCalcAnalytics({'type':_0x5e481a(0x16c),'drug_name':_0x4698f3,'weight_kg':_0x36a5cb['wt'],'height_cm':_0x36a5cb['ht']||'','age':_0x36a5cb['age'],'sex':_0x36a5cb[_0x5e481a(0x1ab)],'scr':_0x36a5cb[_0x5e481a(0x159)],'crcl':_0x36a5cb['crcl'][_0x5e481a(0x1b7)](0xa8*-0x1+0x1bee+0xd*-0x219),'dose_recommended':_0x40c6d0['title'],'details':JSON['stringify'](_0x40c6d0[_0x5e481a(0x1e1)][_0x5e481a(0x198)](_0xd76955=>_0xd76955['l']+':\x20'+_0xd76955['v']))}));}updateCrCl(),renderDrugGrid();
 </script>
 </body>
 </html>

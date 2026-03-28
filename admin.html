@@ -1707,7 +1707,8 @@ function saveConfig(cfg) {
 function initGoogleAuth() {
   const cfg = getConfig();
   if (!cfg.clientId) {
-    // First-time setup: show app directly with settings
+    // First-time setup: grant admin role so settings tab is accessible
+    state.myRole = 'admin';
     showApp({ name: 'Admin (Setup)', email: 'setup@local', picture: '' });
     switchTab('settings');
     toast('กรุณาตั้งค่า Google Client ID และ Script URL ก่อน', 'info');
@@ -1766,9 +1767,13 @@ function showApp(user) {
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-user-name').textContent = user.name;
   document.getElementById('topbar-user-avatar').src = user.picture || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>';
-  loadDrugs();
-  loadAuditLog();
   loadSettingsUI();
+  // Only load data if Script URL is configured
+  const cfg = getConfig();
+  if (cfg.scriptUrl) {
+    loadDrugs();
+    loadAuditLog();
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -2922,6 +2927,7 @@ document.addEventListener('DOMContentLoaded', () => {
       clearInterval(check);
       const cfg = getConfig();
       if (!cfg.clientId) {
+        state.myRole = 'admin';
         showApp({ name: 'Admin (Setup)', email: 'setup@local', picture: '' });
         switchTab('settings');
       }

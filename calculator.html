@@ -111,7 +111,1379 @@
 </nav>
 
 <script>
-!function(){"use strict";const e="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",t="iv_drugref_error_log",n="iv_drugref_error_queue",o="low",r="medium",i="high",a="critical";let l=[],s=0,d=null,c=null;function g(){return(window.location.pathname.split("/").pop()||"index.html").replace(".html","")}function m(){try{return JSON.parse(localStorage.getItem(n)||"[]")}catch(e){return[]}}function u(){const t=m();0!==t.length&&navigator.onLine&&(function(t){if(!navigator.onLine||0===t.length)return;if(s>=10)return;s+=t.length;const n=JSON.stringify({type:"error_report",errors:t,batch_size:t.length,reported_at:(new Date).toISOString()});try{navigator.sendBeacon?navigator.sendBeacon(e,n):fetch(e,{method:"POST",body:n,mode:"no-cors",keepalive:!0}).catch(()=>{})}catch(e){}}(t),function(){try{localStorage.removeItem(n)}catch(e){}}())}function p(e){const s=`${e.message}|${e.source}|${e.line}`;if(function(e){const t=Date.now();return l=l.filter(e=>t-e.time<6e4),!!l.some(t=>t.fp===e)||(l.push({fp:e,time:t}),!1)}(s))return;const d=function(e){const t=(e.message||"").toLowerCase();return t.includes("drugs")&&t.includes("undefined")||t.includes("json")&&t.includes("parse")?a:t.includes("security")||t.includes("cors")||t.includes("calculation")||t.includes("dose")?i:t.includes("fetch")||t.includes("network")||t.includes("typeerror")||t.includes("referenceerror")?r:o}(e),m={page:g(),url:window.location.href,userAgent:navigator.userAgent,online:navigator.onLine,timestamp:(new Date).toISOString(),sessionId:sessionStorage.getItem("sessionId")||"unknown",screenSize:`${screen.width}x${screen.height}`,viewportSize:`${window.innerWidth}x${window.innerHeight}`,language:navigator.language,standalone:window.matchMedia("(display-mode: standalone)").matches,memoryUsage:navigator.deviceMemory?`${navigator.deviceMemory}GB`:"N/A",appVersion:"5.0.0"},p={...e,severity:d,context:m,fingerprint:s,id:`err_${Date.now()}_${Math.random().toString(36).substr(2,6)}`};console.error(`[ErrorTracker] ${d.toUpperCase()}:`,e.message,p),function(e){try{let n=JSON.parse(localStorage.getItem(t)||"[]");n.unshift(e),n.length>50&&(n=n.slice(0,50)),localStorage.setItem(t,JSON.stringify(n))}catch(e){}}(p),d!==o&&function(e,t){if(!document.body)return;const n=c||(c=document.createElement("div"),c.id="iv-error-toast-container",c.style.cssText="\n      position: fixed;\n      bottom: 80px;\n      left: 50%;\n      transform: translateX(-50%);\n      z-index: 99999;\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      align-items: center;\n      pointer-events: none;\n      max-width: 90vw;\n    ",document.body.appendChild(c),c),o=document.createElement("div"),r={low:{bg:"#f0f4f8",border:"#94a3b8",text:"#475569",icon:"ℹ️"},medium:{bg:"#fef9c3",border:"#f59e0b",text:"#92400e",icon:"⚠️"},high:{bg:"#fee2e2",border:"#ef4444",text:"#991b1b",icon:"🔴"},critical:{bg:"#fecaca",border:"#dc2626",text:"#7f1d1d",icon:"🚨"}},i=r[t]||r.medium;o.style.cssText=`\n      background: ${i.bg};\n      border: 1px solid ${i.border};\n      border-radius: 12px;\n      padding: 10px 16px;\n      font-family: 'IBM Plex Sans Thai', sans-serif;\n      font-size: 13px;\n      color: ${i.text};\n      box-shadow: 0 4px 16px rgba(0,0,0,0.12);\n      pointer-events: auto;\n      opacity: 0;\n      transform: translateY(10px);\n      transition: all 0.3s ease;\n      max-width: 100%;\n      text-align: center;\n      line-height: 1.4;\n    `;const a="critical"===t||"high"===t?`${i.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`:`${i.icon} เกิดข้อผิดพลาดเล็กน้อย`;o.textContent=a,n.appendChild(o),requestAnimationFrame(()=>{o.style.opacity="1",o.style.transform="translateY(0)"}),setTimeout(()=>{o.style.opacity="0",o.style.transform="translateY(10px)",setTimeout(()=>o.remove(),300)},5e3),o.addEventListener("click",()=>{o.style.opacity="0",setTimeout(()=>o.remove(),300)})}(e.message,d),function(e){try{let t=JSON.parse(localStorage.getItem(n)||"[]");t.push(e),t.length>20&&(t=t.slice(-20)),localStorage.setItem(n,JSON.stringify(t))}catch(e){}}(p),d!==a&&d!==i||u()}window.onerror=function(e,t,n,o,r){return p({type:"runtime_error",message:String(e),source:t||"unknown",line:n||0,col:o||0,stack:r?r.stack:"N/A"}),!1},window.addEventListener("unhandledrejection",function(e){const t=e.reason;p({type:"unhandled_rejection",message:t?t.message||String(t):"Unknown rejection",source:"Promise",line:0,col:0,stack:t&&t.stack?t.stack:"N/A"})}),window.addEventListener("error",function(e){if(e.target&&e.target!==window){const t=e.target.tagName||"unknown",n=e.target.src||e.target.href||"unknown";p({type:"resource_error",message:`Failed to load ${t}: ${n}`,source:n,line:0,col:0,stack:"N/A"})}},!0),"serviceWorker"in navigator&&navigator.serviceWorker.addEventListener("message",function(e){e.data&&"SW_ERROR"===e.data.type&&p({type:"service_worker_error",message:e.data.error.message,source:e.data.error.filename||"sw.js",line:e.data.error.lineno||0,col:0,stack:"Service Worker context"})}),window.addEventListener("online",function(){setTimeout(u,2e3)}),d=setInterval(u,3e4),setInterval(function(){s=0},6e4),window.IVErrorTracker={report:function(e,t,n){p({type:"manual_report",message:String(e),source:g(),line:0,col:0,stack:(new Error).stack||"N/A",extra:n||{}})},getLog:function(){try{return JSON.parse(localStorage.getItem(t)||"[]")}catch(e){return[]}},clearLog:function(){localStorage.removeItem(t),localStorage.removeItem(n),console.log("[ErrorTracker] Log cleared")},flush:u,queueSize:function(){return m().length}},window.addEventListener("load",function(){setTimeout(u,3e3)}),console.log("[ErrorTracker] Initialized — v1.0 | Page:",g())}();var IVDrugRef=function(){function e(e,t){if(!e||e<=0)return 0;const n=e/2.54;return"M"===t?50+2.3*(n-60):45.5+2.3*(n-60)}function t(e,t){return t+.4*(e-t)}function n(e,t){return!t||t<=0?0:e/(t/100)**2}function o(e,t){return!e||!t||e<=0||t<=0?0:Math.sqrt(e*t/3600)}function r(n,o,r,i,a){if(r<=0)return 0;let l=o;if(a&&a>0){const n=e(a,i);o>1.3*n&&(l=t(o,n))}let s=(140-n)*l/(72*r);return"F"===i&&(s*=.85),Math.max(Math.round(10*s)/10,5)}function i(e,t){return t<=0||!e||e<=0?0:Math.round(.413*e/t*10)/10}function a(e,t,n){let o;if("F"===n){const n=.7,r=t<=n?-.241:-1.2;o=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)*1.012}else{const n=.9,r=t<=n?-.302:-1.2;o=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)}return Math.round(10*o)/10}const l="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec";let s=0;function d(){return localStorage.getItem("anonSessionId")||""}function c(){return localStorage.getItem("anonUserId")||""}function g(){return"true"===localStorage.getItem("analyticsConsent")}function m(e){if(g()&&!(s>=40)){s++;try{const t=JSON.stringify({...e,session_id:d(),user_id:c()});navigator.sendBeacon?navigator.sendBeacon(l,t):fetch(l,{method:"POST",body:t,keepalive:!0}).catch(()=>{})}catch(e){}}}return{VERSION:"5.0.0",APP_NAME:"IV DrugRef",calcIBW:e,calcABW:t,calcBMI:n,calcBSA:o,calcCockcroftGault:r,calcCG_raw:function(e,t,n,o){if(n<=0)return 0;let r=(140-e)*t/(72*n);return"F"===o&&(r*=.85),Math.round(10*r)/10},calcSchwartz:i,calcCKDEPI2021:a,calcCKDEPI2021_nonindexed:function(e,t,n,o){const r=a(e,t,n);return Math.round(r*o/1.73*10)/10},getCKDStage:function(e){return e>=90?{stage:"G1",label:"ปกติ/สูง",cls:"stage-1"}:e>=60?{stage:"G2",label:"ลดลงเล็กน้อย",cls:"stage-2"}:e>=45?{stage:"G3a",label:"ลดลงเล็กน้อย-ปานกลาง",cls:"stage-3a"}:e>=30?{stage:"G3b",label:"ลดลงปานกลาง-มาก",cls:"stage-3b"}:e>=15?{stage:"G4",label:"ลดลงมาก",cls:"stage-4"}:{stage:"G5",label:"ไตวาย",cls:"stage-5"}},getPatientFromForm:function(a){const l=Object.assign({age:"ptAge",wt:"ptWt",ht:"ptHt",sex:"ptSex",scr:"ptScr",alb:"ptAlb",dialysis:"ptDialysis"},a||{}),s=(e,t)=>{const n=document.getElementById(e);return n&&parseFloat(n.value)||t},d=(e,t)=>{const n=document.getElementById(e);return n?n.value:t},c=s(l.age,55),g=s(l.wt,70),m=s(l.ht,170),u=d(l.sex,"M"),p=s(l.scr,1),f=s(l.alb,4),h=d(l.dialysis,"none"),v=Math.round(10*e(m,u))/10,b=Math.round(10*t(g,v))/10,y=Math.round(10*n(g,m))/10,x=Math.round(100*o(m,g))/100,w=g>1.3*v,S=g<v,I=c<18;let C;return C=I&&m>0?i(m,p):r(c,g,p,u,m),{age:c,wt:g,ht:m,sex:u,scr:p,alb:f,dialysis:h,ibw:v,abw:b,bmi:y,bsa:x,isObese:w,isUnderweight:S,isPediatric:I,crcl:C}},sendAnalytics:m,trackPageView:function(e){const t=Date.now(),n=function(){const e=document.referrer||"";return e.includes("index.html")||e.endsWith("iv-drugref/")?"drugref":e.includes("calculator.html")?"calculator":e.includes("tdm.html")?"tdm":e.includes("vanco-tdm.html")?"vanco-tdm":e.includes("renal-dosing.html")?"renal-dosing":e.includes("compatibility.html")?"compatibility":e.includes("dashboard.html")?"dashboard":e?"external":"direct"}();m({type:"page_view",page:e,action:"enter",from_page:n,referrer:document.referrer||"direct"});let o=!1;function r(r){o||(o=!0,m({type:"page_view",page:e,action:"leave",duration_sec:Math.round((Date.now()-t)/1e3),from_page:n,...r||{}}))}return window.addEventListener("beforeunload",()=>r()),document.addEventListener("visibilitychange",()=>{"hidden"===document.visibilityState&&r()}),{sendExit:r,fromPage:n,enterTime:t}},getSessionId:d,getUserId:c,hasAnalyticsConsent:g,registerSW:function(){"serviceWorker"in navigator&&navigator.serviceWorker.register("sw.js").then(e=>console.log("[SW] Registered:",e.scope)).catch(e=>console.warn("[SW] Registration failed:",e))},generateId:function(e){e=e||16;const t=new Uint8Array(e/2);return crypto.getRandomValues(t),Array.from(t,e=>e.toString(16).padStart(2,"0")).join("")},debounce:function(e,t){let n;return function(...o){clearTimeout(n),n=setTimeout(()=>e.apply(this,o),t)}},fmt:function(e,t){return t=void 0!==t?t:1,(Math.round(e*Math.pow(10,t))/Math.pow(10,t)).toFixed(t)}}}();document.addEventListener("DOMContentLoaded",()=>{IVDrugRef.registerSW()}),function(){"use strict";const e=[{id:"vancomycin",name:"Vancomycin",sub:'500 mg, 1 g/vial — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🧬 Bayesian TDM →</a>',badges:["badge-renal"],calc:function(e){const t=250*Math.round(15*e.wt/250),n=250*Math.round(20*e.wt/250),o=250*Math.round(15*e.wt/250);let r="q12h",i="",a=0;e.crcl>80?(r="q8-12h",i="CrCl >80",a=3*o):e.crcl>50?(r="q12h",i="CrCl 50-80",a=2*o):e.crcl>30?(r="q24h",i="CrCl 30-50",a=o):e.crcl>10?(r="q24-48h",i="CrCl 10-30",a=o):(r="q48-72h",i="CrCl <10 / HD",a=.5*o);const l=o<=1e3?200:250,s=Math.ceil(o/10),d=Math.round(l/(s/60)),c=83e-5*e.crcl+.0044,g=.7*e.wt,m=a>0?Math.round(a/(c*g)):0;let u="";m>0&&(u=m>=400&&m<=600?"✅ อยู่ใน target (400-600)":m<400?"⚠ ต่ำกว่า target → พิจารณาเพิ่ม dose/frequency":"⚠ สูงกว่า target → เสี่ยง nephrotoxicity");const p=`<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;"><tr style="background:#e6f1fb;"><th style="padding:4px 6px;text-align:left;border:1px solid #85B7EB;">CrCl (mL/min)</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Interval</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Daily dose</th></tr><tr${e.crcl>80?' style="background:#dcfce7;font-weight:600;"':""}><td style="padding:4px 6px;border:1px solid #ddd;">>80</td><td style="padding:4px 6px;border:1px solid #ddd;">q8-12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${o}mg x 2-3/day</td></tr><tr${e.crcl>50&&e.crcl<=80?' style="background:#dcfce7;font-weight:600;"':""}><td style="padding:4px 6px;border:1px solid #ddd;">50-80</td><td style="padding:4px 6px;border:1px solid #ddd;">q12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${o}mg x 2/day</td></tr><tr${e.crcl>30&&e.crcl<=50?' style="background:#dcfce7;font-weight:600;"':""}><td style="padding:4px 6px;border:1px solid #ddd;">30-50</td><td style="padding:4px 6px;border:1px solid #ddd;">q24h</td><td style="padding:4px 6px;border:1px solid #ddd;">${o}mg x 1/day</td></tr><tr${e.crcl>10&&e.crcl<=30?' style="background:#fef3c7;font-weight:600;"':""}><td style="padding:4px 6px;border:1px solid #ddd;">10-30</td><td style="padding:4px 6px;border:1px solid #ddd;">q24-48h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose by level</td></tr><tr${e.crcl<=10?' style="background:#fef2f2;font-weight:600;"':""}><td style="padding:4px 6px;border:1px solid #ddd;"><10 / HD</td><td style="padding:4px 6px;border:1px solid #ddd;">q48-72h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose when trough <15-20</td></tr></table>`;return{title:`Vancomycin ${o} mg IV ${r}`,details:[{l:"Weight-based dose",v:`15-20 mg/kg = ${t}–${n} mg`},{l:"Recommended dose",v:`${o} mg`},{l:"Frequency",v:`${r} (${i}, CrCl ${e.crcl.toFixed(0)} mL/min)`},{l:"Daily total",v:`~${a} mg/day`},{l:"Dilution",v:`${o} mg ใน NSS ${l} mL`},{l:"Max rate",v:`≤10 mg/min → infuse ≥${s} min`},{l:"Infusion rate",v:`${d} mL/hr`},{l:"Est. AUC₂₄",v:`~${m} mg·hr/L ${u}`}],info:`<strong>📋 Renal dose adjustment (CrCl ${e.crcl.toFixed(0)}):</strong>${p}<br><strong>TDM:</strong> AUC/MIC target 400-600 (preferred) | Trough 15-20 mcg/mL (ถ้าไม่มี AUC)<br>เจาะ trough ก่อน dose ที่ 4 (steady state)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🧬 ใช้ Bayesian TDM Hub สำหรับ AUC-guided dosing →</a><br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome → infuse ≥60 min/g<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)<br><strong>HD:</strong> Re-dose 15-25 mg/kg post-HD, เจาะ pre-HD level`,infoType:"blue"}}},{id:"amikacin",name:"Amikacin",sub:'500 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',badges:["badge-renal"],calc:function(e){const t=Math.round(15*e.wt),n=Math.round(20*e.wt);let o="q24h",r="";return e.crcl>=60?o="q24h":e.crcl>=40?(o="q36h",r="CrCl 40-60"):e.crcl>=20?(o="q48h",r="CrCl 20-40"):(o="by level",r="CrCl <20 → dose by serum level"),{title:`Amikacin ${t} mg IV ${o}`,details:[{l:"Conventional dose",v:`15 mg/kg = ${t} mg q8-12h`},{l:"Extended-interval",v:`15-20 mg/kg = ${t}–${n} mg ${o}`},{l:"Frequency adj",v:o+(r?` (${r})`:"")},{l:"Dilution",v:"ใน NSS/D5W 100-200 mL"},{l:"Infuse over",v:"30-60 min"}],info:'<strong>TDM:</strong> Peak 20-35 mcg/mL (extended) | Trough <5 mcg/mL<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr, audiometry, vestibular fn<br><strong>⚠:</strong> ห้ามผสมกับ Beta-lactams ใน syringe/bag เดียวกัน',infoType:"blue"}}},{id:"gentamicin",name:"Gentamicin",sub:'80 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',badges:["badge-renal"],calc:function(e){const t=(1.7*e.wt).toFixed(0),n=Math.round(5*e.wt);let o="q24h";return o=e.crcl>=60?"q24h":e.crcl>=40?"q36h":e.crcl>=20?"q48h":"by level",{title:`Gentamicin ${n} mg IV ${o}`,details:[{l:"Conventional",v:`1-1.7 mg/kg q8h = ${t} mg q8h`},{l:"Extended-interval",v:`5-7 mg/kg q24h = ${n} mg ${o}`},{l:"Dilution",v:"ใน NSS/D5W 50-200 mL"},{l:"Infuse over",v:"30-60 min"}],info:'<strong>TDM:</strong> Hartford nomogram (extended) หรือ Peak 5-10 / Trough <1<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr daily, audiometry<br><strong>Intrathecal:</strong> 4-8 mg/day (ventriculitis)',infoType:"blue"}}},{id:"colistin",name:"Colistimethate (CMS)",sub:"150 mg CBA/vial (~2 MIU)",badges:["badge-renal"],calc:function(e){const t="M"===e.sex?50+.9*(e.ht-152.4):45.5+.9*(e.ht-152.4),n=e.ht&&e.wt>1.2*t?(t+.4*(e.wt-t)).toFixed(0):e.wt;let o,r;return e.crcl>=70?(o=300,r="150 mg CBA q12h"):e.crcl>=50?(o=230,r="115 mg CBA q12h"):e.crcl>=30?(o=170,r="85 mg CBA q12h"):(o=130,r="130 mg CBA q24h (or by level)"),{title:`CMS loading 300 mg CBA → ${r}`,details:[{l:"Loading dose",v:"300 mg CBA (~9 MIU) IV over 30-60 min"},{l:"Maintenance",v:r},{l:"Daily total",v:`${o} mg CBA/day`},{l:"Dilution",v:"ใน NSS/D5W 100-250 mL"},{l:"Infuse over",v:"30-60 min"},{l:"Unit conversion",v:"1 MIU ≈ 33.3 mg CBA ≈ 80 mg CMS"}],info:"<strong>⚠ Nephrotoxicity สูง → hydrate well</strong><br><strong>Monitor:</strong> SCr daily, UO, neurotoxicity signs<br><strong>IT/IVT:</strong> 10 mg CBA/day (ventriculitis)<br><strong>Adjust:</strong> "+(e.ht?`IBW=${t.toFixed(0)}kg, adjusted wt=${n}kg`:"ใส่ส่วนสูงเพื่อคำนวณ IBW"),infoType:"amber"}}},{id:"phenytoin",name:"Phenytoin loading",sub:'250 mg/5 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',badges:["badge-loading"],calc:function(e){const t=Math.round(20*e.wt),n=e.age>=65?25:50,o=Math.ceil(t/n);return{title:`Phenytoin ${t} mg IV loading`,details:[{l:"Loading dose",v:`20 mg/kg = ${t} mg`},{l:"Max rate",v:`≤${n} mg/min ${e.age>=65?"(สูงอายุ)":""}`},{l:"Infuse over",v:`≥${o} min ใน NSS เท่านั้น!`},{l:"Concentration",v:"≤6.7 mg/mL (dilute ใน NSS 50-100 mL)"},{l:"Filter",v:"ต้องใช้ 0.22 μm in-line filter"}],info:'<strong>⚠ ใช้ NSS เท่านั้น! ห้าม D5W → ตกตะกอน!</strong><br><strong>Monitor:</strong> ECG continuous, BP q5-15min, IV site (purple glove)<br><strong>Level:</strong> Total 10-20 mcg/mL | Free 1-2 mcg/mL<br><strong>ตรวจ:</strong> Free phenytoin ถ้า albumin <3.5<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Winter-Tozer correction + dose prediction →</a>',infoType:"red"}}},{id:"valproate",name:"Sodium Valproate loading",sub:'400 mg/4 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',badges:["badge-loading"],calc:function(e){const t=Math.round(30*e.wt),n=Math.round(40*e.wt);return{title:`Valproate ${t}–${n} mg IV loading`,details:[{l:"Loading dose",v:`30-40 mg/kg = ${t}–${n} mg`},{l:"Rate",v:"IV over 15-30 min (max 6 mg/kg/min)"},{l:"Maintenance",v:`1-2 mg/kg/hr = ${(1.5*e.wt).toFixed(0)}–${Math.round(2*e.wt)} mg/hr CI`},{l:"Alternative",v:"IV→PO: 15-20 mg/kg/day div q8-12h"}],info:'<strong>⚠ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)</strong><br><strong>Level:</strong> 50-100 mcg/mL (SE: 80-120)<br><strong>Monitor:</strong> LFTs, CBC+Plt, ammonia, amylase<br><strong>CI:</strong> Hepatic disease, pregnancy (Cat X)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ free level correction + dose adjustment →</a>',infoType:"red"}}},{id:"levetiracetam",name:"Levetiracetam loading",sub:"500 mg/5 mL",badges:["badge-loading"],calc:function(e){const t=500*Math.round(60*e.wt/500),n=Math.min(t,4500);let o="1000-1500 mg IV q12h";return e.crcl<30?o="250-500 mg IV q12h (CrCl <30)":e.crcl<50?o="500-750 mg IV q12h (CrCl 30-50)":e.crcl<80&&(o="500-1000 mg IV q12h (CrCl 50-80)"),{title:`Levetiracetam ${n} mg IV loading`,details:[{l:"Loading dose (SE)",v:`60 mg/kg = ${t} mg (max 4500 mg)`},{l:"Recommended",v:`${n} mg IV over 10-15 min`},{l:"Maintenance",v:o},{l:"Switch PO",v:"IV ↔ PO 1:1 ratio"}],info:"<strong>ข้อดี:</strong> No significant drug interactions, safe ใน hepatic impairment<br><strong>SE:</strong> behavioral (irritability, aggression)<br><strong>Monitor:</strong> Seizure freq, SCr, mood/behavior",infoType:"blue"}}},{id:"alteplase",name:"Alteplase (rt-PA)",sub:"Actilyse 50 mg/50 mL",badges:["badge-stroke"],calc:function(e){const t=Math.min(.9*e.wt,90).toFixed(1);return{title:`Alteplase ${t} mg (stroke protocol)`,details:[{l:"Total dose",v:`0.9 mg/kg = ${t} mg (max 90 mg)`},{l:"10% bolus",v:`${(.1*t).toFixed(1)} mg IV push over 1 min`},{l:"90% infusion",v:`${(.9*t).toFixed(1)} mg IV infusion over 60 min`},{l:"Concentration",v:"1 mg/mL (reconstituted)"}],info:"<strong>⚠ Door-to-needle <60 min!</strong><br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr หลังให้<br><strong>BP:</strong> q15min x 2hr → q30min x 6hr → q1h x 16hr<br><strong>CT brain:</strong> 24 hr post-dose<br><strong>เตรียม:</strong> Cryoprecipitate, TXA สำหรับ bleeding",infoType:"red"}}},{id:"tenecteplase",name:"Tenecteplase",sub:"Metalyse",badges:["badge-stroke"],calc:function(e){let t;t=e.wt<60?30:e.wt<70?35:e.wt<80?40:e.wt<90?45:50;const n=Math.min(.25*e.wt,25).toFixed(1);return{title:"Tenecteplase — single IV bolus",details:[{l:"Stroke dose",v:`0.25 mg/kg = ${n} mg (max 25 mg)`},{l:"AMI dose",v:`${t} mg (weight-tiered)`},{l:"Route",v:"Single IV bolus over 5-10 sec"},{l:"Concentration",v:"5 mg/mL (reconstituted)"},{l:"Volume (stroke)",v:`${(n/5).toFixed(1)} mL`}],info:"<strong>ข้อดี:</strong> Single bolus → ง่ายกว่า Alteplase<br><strong>Evidence:</strong> TASTE, AcT trials สำหรับ stroke<br><strong>Monitor:</strong> NIHSS, BP q15min, bleeding<br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr",infoType:"blue"}}}];function t(e,t){const n=e/2.54;return"M"===t?50+2.3*(n-60):45.5+2.3*(n-60)}function n(){const e=parseFloat(document.getElementById("ptAge").value)||65,n=parseFloat(document.getElementById("ptWt").value)||70,o=parseFloat(document.getElementById("ptScr").value)||1,r=document.getElementById("ptSex").value,i=parseFloat(document.getElementById("ptHt").value)||0;if(o<=0)return 0;if(e<18&&i>0)return IVDrugRef.calcSchwartz(i,o);let a=n;if(i>0){const e=t(i,r);n>1.3*e?a=e+.4*(n-e):n<e&&(a=n)}return IVDrugRef.calcCockcroftGault(e,a,o,r)}function o(){const e=parseFloat(document.getElementById("ptAge").value)||65,o=parseFloat(document.getElementById("ptWt").value)||70,r=parseFloat(document.getElementById("ptHt").value)||0,i=document.getElementById("ptSex").value,a=parseFloat(document.getElementById("ptScr").value)||1,l=n(),s=e<18,d=document.getElementById("bodyCompInfo"),c=document.getElementById("crclWarning"),g=document.getElementById("crclLabel");if(s&&r>0?(g.textContent="eGFR (Bedside Schwartz):",document.getElementById("crclValue").textContent=l.toFixed(1)+" mL/min/1.73m²"):(g.textContent="CrCl (Cockcroft-Gault):",document.getElementById("crclValue").textContent=l.toFixed(1)+" mL/min"),!s&&r>0){const n=t(r,i),s=o/(r/100)**2,c=n+.4*(o-n),g=o>1.3*n,m=e>=65&&a<.7,u=(140-e)*o/(72*a)*("F"===i?.85:1);if(g||m){d.style.display="block";let e='<div class="info-box blue" style="font-size:11px;line-height:1.6;">';e+=`<strong>📐 Body Comp:</strong> BMI ${s.toFixed(1)} | IBW ${n.toFixed(1)} kg | ABW ${c.toFixed(1)} kg<br>`,g&&(e+=`<strong>⚠ Obesity (TBW>${Math.round(1.3*n)}kg):</strong> CG ปรับใช้ ABW ${c.toFixed(1)} kg (TBW ${o} → CrCl overestimate ~${Math.round(u-l)} mL/min)`),m&&(e+=`${g?"<br>":""}<strong>👴 Elderly + SCr ${a}:</strong> Low SCr อาจ overestimate CrCl จาก low muscle mass — พิจารณาใช้ clinical judgment`),e+="</div>",d.innerHTML=e}else d.style.display="none"}else s?(d.style.display="block",d.innerHTML=r>0?'<div class="info-box blue" style="font-size:11px;"><strong>👶 Pediatric:</strong> ใช้ Bedside Schwartz (0.413 × Ht / SCr) — CG ไม่เหมาะสำหรับเด็ก<br>⚠ Dosing guidelines ด้านล่างเป็นของผู้ใหญ่ — กรุณาตรวจสอบ pediatric dosing แยก</div>':'<div class="info-box amber" style="font-size:11px;"><strong>👶 Pediatric:</strong> กรุณาใส่ส่วนสูงเพื่อคำนวณ eGFR (Schwartz) — CG ไม่เหมาะสำหรับเด็ก</div>'):d.style.display="none";l<30?(c.style.display="block",c.innerHTML='<div class="info-box red"><strong>⚠ CrCl <30 mL/min</strong> — ปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing</div>'):l<50?(c.style.display="block",c.innerHTML='<div class="info-box amber"><strong>CrCl 30-50 mL/min</strong> — ยาบางตัวต้องปรับขนาด/interval</div>'):c.style.display="none"}let r=null;function i(){document.getElementById("drugGrid").innerHTML=e.map(e=>`\n      <div class="drug-card ${r===e.id?"active":""}" onclick="selectDrug('${e.id}')">\n        <div class="drug-name">${e.name}</div>\n        <div class="drug-sub">${e.sub}</div>\n        ${e.badges.map(e=>`<span class="badge ${e}">${e.replace("badge-","")}</span>`).join(" ")}\n      </div>\n    `).join("")}function a(){const t=document.getElementById("outputSection"),o=document.getElementById("outputBody"),i=document.getElementById("outputHeader");if(!r)return void(t.style.display="none");const a=e.find(e=>e.id===r);if(!a)return;const l=function(){const e=parseFloat(document.getElementById("ptAge").value)||65,t=parseFloat(document.getElementById("ptWt").value)||70,o=parseFloat(document.getElementById("ptHt").value)||0;return{wt:t,age:e,sex:document.getElementById("ptSex").value,scr:parseFloat(document.getElementById("ptScr").value)||1,ht:o,crcl:n()}}(),s=a.calc(l);i.innerHTML=`📊 ${a.name}`,o.innerHTML=`\n      <div style="padding:16px;">\n        <div class="result-box">\n          <div class="result-title">Recommended</div>\n          <div class="result-value" style="font-size:20px;">${s.title}</div>\n        </div>\n        <div style="margin-top:14px;">\n          ${s.details.map(e=>`<div class="detail-row"><span class="detail-label">${e.l}</span><span class="detail-value">${e.v}</span></div>`).join("")}\n        </div>\n        <div class="info-box ${s.infoType}" style="margin-top:14px;">${s.info}</div>\n      </div>\n    `,t.style.display="block",t.scrollIntoView({behavior:"smooth",block:"nearest"}),function(e,t,n){if(e!==g)return;g=null;const o=e+"_"+Math.floor(Date.now()/3e4);m[o]||(m[o]=!0,IVDrugRef.sendAnalytics({type:"dose_calc",drug_name:e,weight_kg:t.wt,height_cm:t.ht||"",age:t.age,sex:t.sex,scr:t.scr,crcl:t.crcl.toFixed(1),dose_recommended:n.title,details:JSON.stringify(n.details.map(e=>e.l+": "+e.v))}))}(a.name,l,s)}(()=>{const e=(new Date).toISOString().substring(0,10);let t=localStorage.getItem("anonSessionId"),n=localStorage.getItem("anonSessionDate");t&&n===e||(t="u"+Math.random().toString(36).substring(2,10)+Date.now().toString(36),localStorage.setItem("anonSessionId",t),localStorage.setItem("anonSessionDate",e))})(),(()=>{let e=localStorage.getItem("anonUserId");e||(e="p"+Math.random().toString(36).substring(2,12)+Date.now().toString(36),localStorage.setItem("anonUserId",e))})();const l=Date.now(),s=(()=>{const e=document.referrer||"";return e.includes("index.html")||e.endsWith("iv-drugref/")?"drugref":e.includes("tdm.html")?"tdm":e.includes("vanco-tdm.html")?"vanco-tdm":e?"external":"direct"})();let d=!1;function c(){if(d)return;d=!0;const e=Math.round((Date.now()-l)/1e3);IVDrugRef.sendAnalytics({type:"page_view",page:"calculator",action:"leave",duration_sec:e,from_page:s,last_drug_selected:r||"none"})}let g=null;const m={};window.selectDrug=function(t){r=t,g=e.find(e=>e.id===t)?.name||null,i(),a()},window.calculate=a,window.renderDrugGrid=i,window.updateCrCl=o,document.addEventListener("DOMContentLoaded",function(){IVDrugRef.trackPageView("calculator"),o(),i()}),window.addEventListener("beforeunload",c),document.addEventListener("visibilitychange",()=>{"hidden"===document.visibilityState&&c()})}();
+// ============================================================================
+// IV DrugRef PWA — Error Tracker v1.0
+// Hybrid error tracking: client-side capture + GAS remote reporting
+// ============================================================================
+// Features:
+// - Global error capture (window.onerror, unhandledrejection)
+// - Non-intrusive toast notification for users
+// - In-memory error log with localStorage persistence for debugging
+// - Offline queue → auto-flush to GAS when back online
+// - Deduplication (same error within 60s = skip)
+// - Rate limiting (max 10 reports per minute to GAS)
+// - Email alert for critical errors via GAS
+// ============================================================================
+
+(function () {
+  'use strict';
+
+  // ─── Configuration ───
+  const CONFIG = {
+    // GAS endpoint (same as analytics)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
+
+    // LocalStorage keys
+    LS_ERROR_LOG: 'iv_drugref_error_log',
+    LS_ERROR_QUEUE: 'iv_drugref_error_queue',
+
+    // Limits
+    MAX_LOG_ENTRIES: 50,        // Keep last 50 errors in localStorage
+    MAX_QUEUE_SIZE: 20,         // Max queued errors before flush
+    DEDUP_WINDOW_MS: 60000,     // 60s dedup window
+    RATE_LIMIT_PER_MIN: 10,     // Max 10 reports/minute to GAS
+    TOAST_DURATION_MS: 5000,    // Toast visible for 5s
+    FLUSH_INTERVAL_MS: 30000,   // Auto-flush queue every 30s
+
+    // Severity levels
+    SEVERITY: {
+      LOW: 'low',           // Minor UI glitch
+      MEDIUM: 'medium',     // Feature broken but app usable
+      HIGH: 'high',         // Core feature broken
+      CRITICAL: 'critical'  // App crash / data corruption
+    },
+
+    // App metadata
+    APP_VERSION: '5.0.0',
+    APP_NAME: 'IV DrugRef PWA'
+  };
+
+  // ─── State ───
+  let recentErrors = [];        // For dedup tracking
+  let rateLimitCount = 0;       // Reports sent this minute
+  let flushTimer = null;
+  let toastContainer = null;
+
+  // ─── Utility: Get current page name ───
+  function getPageName() {
+    const path = window.location.pathname;
+    const file = path.split('/').pop() || 'index.html';
+    return file.replace('.html', '');
+  }
+
+  // ─── Utility: Generate error fingerprint for dedup ───
+  function errorFingerprint(message, source, line) {
+    return `${message}|${source}|${line}`;
+  }
+
+  // ─── Utility: Check dedup ───
+  function isDuplicate(fingerprint) {
+    const now = Date.now();
+    // Clean old entries
+    recentErrors = recentErrors.filter(e => now - e.time < CONFIG.DEDUP_WINDOW_MS);
+    // Check if exists
+    if (recentErrors.some(e => e.fp === fingerprint)) return true;
+    recentErrors.push({ fp: fingerprint, time: now });
+    return false;
+  }
+
+  // ─── Utility: Classify severity ───
+  function classifySeverity(error) {
+    const msg = (error.message || '').toLowerCase();
+
+    // Critical: data corruption, security, crashes
+    if (msg.includes('drugs') && msg.includes('undefined')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('json') && msg.includes('parse')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
+
+    // High: core features broken
+    if (msg.includes('calculation') || msg.includes('dose')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('fetch') || msg.includes('network')) return CONFIG.SEVERITY.MEDIUM;
+    if (msg.includes('typeerror') || msg.includes('referenceerror')) return CONFIG.SEVERITY.MEDIUM;
+
+    // Default
+    return CONFIG.SEVERITY.LOW;
+  }
+
+  // ─── Utility: Collect context ───
+  function collectContext() {
+    return {
+      page: getPageName(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      online: navigator.onLine,
+      timestamp: new Date().toISOString(),
+      sessionId: sessionStorage.getItem('sessionId') || 'unknown',
+      screenSize: `${screen.width}x${screen.height}`,
+      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+      language: navigator.language,
+      standalone: window.matchMedia('(display-mode: standalone)').matches,
+      memoryUsage: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
+      appVersion: CONFIG.APP_VERSION
+    };
+  }
+
+  // ─── Toast UI ───
+  function createToastContainer() {
+    if (toastContainer) return toastContainer;
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'iv-error-toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+      max-width: 90vw;
+    `;
+    document.body.appendChild(toastContainer);
+    return toastContainer;
+  }
+
+  function showToast(message, severity) {
+    if (!document.body) return; // Not ready yet
+
+    const container = createToastContainer();
+    const toast = document.createElement('div');
+
+    const colors = {
+      low: { bg: '#f0f4f8', border: '#94a3b8', text: '#475569', icon: 'ℹ️' },
+      medium: { bg: '#fef9c3', border: '#f59e0b', text: '#92400e', icon: '⚠️' },
+      high: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', icon: '🔴' },
+      critical: { bg: '#fecaca', border: '#dc2626', text: '#7f1d1d', icon: '🚨' }
+    };
+    const c = colors[severity] || colors.medium;
+
+    toast.style.cssText = `
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 13px;
+      color: ${c.text};
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      max-width: 100%;
+      text-align: center;
+      line-height: 1.4;
+    `;
+
+    // User-friendly message (not raw error)
+    const userMsg = severity === 'critical' || severity === 'high'
+      ? `${c.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`
+      : `${c.icon} เกิดข้อผิดพลาดเล็กน้อย`;
+
+    toast.textContent = userMsg;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, CONFIG.TOAST_DURATION_MS);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    });
+  }
+
+  // ─── LocalStorage Log ───
+  function saveToLog(entry) {
+    try {
+      let log = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      log.unshift(entry);
+      if (log.length > CONFIG.MAX_LOG_ENTRIES) {
+        log = log.slice(0, CONFIG.MAX_LOG_ENTRIES);
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_LOG, JSON.stringify(log));
+    } catch (e) {
+      // localStorage full or unavailable — silently fail
+    }
+  }
+
+  // ─── Queue for GAS reporting ───
+  function addToQueue(entry) {
+    try {
+      let queue = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+      queue.push(entry);
+      if (queue.length > CONFIG.MAX_QUEUE_SIZE) {
+        queue = queue.slice(-CONFIG.MAX_QUEUE_SIZE); // Keep newest
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_QUEUE, JSON.stringify(queue));
+    } catch (e) { /* silently fail */ }
+  }
+
+  function getQueue() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function clearQueue() {
+    try {
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Send to GAS ───
+  function sendToGAS(entries) {
+    if (!navigator.onLine || entries.length === 0) return;
+    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return;
+
+    rateLimitCount += entries.length;
+
+    const payload = JSON.stringify({
+      type: 'error_report',
+      errors: entries,
+      batch_size: entries.length,
+      reported_at: new Date().toISOString()
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(CONFIG.GAS_URL, payload);
+      } else {
+        fetch(CONFIG.GAS_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors',
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Flush queue ───
+  function flushQueue() {
+    const queue = getQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    sendToGAS(queue);
+    clearQueue();
+  }
+
+  // ─── Core: Process error ───
+  function processError(errorInfo) {
+    const fp = errorFingerprint(errorInfo.message, errorInfo.source, errorInfo.line);
+    if (isDuplicate(fp)) return;
+
+    const severity = classifySeverity(errorInfo);
+    const context = collectContext();
+
+    const entry = {
+      ...errorInfo,
+      severity,
+      context,
+      fingerprint: fp,
+      id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    };
+
+    // 1. Console log (always)
+    console.error(`[ErrorTracker] ${severity.toUpperCase()}:`, errorInfo.message, entry);
+
+    // 2. Save to localStorage log
+    saveToLog(entry);
+
+    // 3. Show toast (only for medium+ severity)
+    if (severity !== CONFIG.SEVERITY.LOW) {
+      showToast(errorInfo.message, severity);
+    }
+
+    // 4. Queue for GAS reporting
+    addToQueue(entry);
+
+    // 5. If critical or high, flush immediately
+    if (severity === CONFIG.SEVERITY.CRITICAL || severity === CONFIG.SEVERITY.HIGH) {
+      flushQueue();
+    }
+  }
+
+  // ─── Global Error Handlers ───
+
+  // Catch synchronous errors
+  window.onerror = function (message, source, line, col, error) {
+    processError({
+      type: 'runtime_error',
+      message: String(message),
+      source: source || 'unknown',
+      line: line || 0,
+      col: col || 0,
+      stack: error ? error.stack : 'N/A'
+    });
+    return false; // Don't suppress default console error
+  };
+
+  // Catch unhandled promise rejections
+  window.addEventListener('unhandledrejection', function (event) {
+    const reason = event.reason;
+    processError({
+      type: 'unhandled_rejection',
+      message: reason ? (reason.message || String(reason)) : 'Unknown rejection',
+      source: 'Promise',
+      line: 0,
+      col: 0,
+      stack: reason && reason.stack ? reason.stack : 'N/A'
+    });
+  });
+
+  // Catch resource loading errors (images, scripts, etc.)
+  window.addEventListener('error', function (event) {
+    if (event.target && event.target !== window) {
+      const tag = event.target.tagName || 'unknown';
+      const src = event.target.src || event.target.href || 'unknown';
+      processError({
+        type: 'resource_error',
+        message: `Failed to load ${tag}: ${src}`,
+        source: src,
+        line: 0,
+        col: 0,
+        stack: 'N/A'
+      });
+    }
+  }, true); // Capture phase to catch resource errors
+
+  // ─── Service Worker error messages ───
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'SW_ERROR') {
+        processError({
+          type: 'service_worker_error',
+          message: event.data.error.message,
+          source: event.data.error.filename || 'sw.js',
+          line: event.data.error.lineno || 0,
+          col: 0,
+          stack: 'Service Worker context'
+        });
+      }
+    });
+  }
+
+  // ─── Network error monitoring ───
+  window.addEventListener('online', function () {
+    // Flush queued errors when back online
+    setTimeout(flushQueue, 2000);
+  });
+
+  // ─── Periodic flush ───
+  flushTimer = setInterval(flushQueue, CONFIG.FLUSH_INTERVAL_MS);
+
+  // ─── Rate limit reset ───
+  setInterval(function () {
+    rateLimitCount = 0;
+  }, 60000);
+
+  // ─── Public API (for manual error reporting) ───
+  window.IVErrorTracker = {
+    /**
+     * Manually report an error
+     * @param {string} message - Error description
+     * @param {string} severity - 'low'|'medium'|'high'|'critical'
+     * @param {object} extra - Additional context
+     */
+    report: function (message, severity, extra) {
+      processError({
+        type: 'manual_report',
+        message: String(message),
+        source: getPageName(),
+        line: 0,
+        col: 0,
+        stack: new Error().stack || 'N/A',
+        extra: extra || {}
+      });
+    },
+
+    /**
+     * Get error log from localStorage
+     * @returns {Array} Error entries
+     */
+    getLog: function () {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      } catch (e) {
+        return [];
+      }
+    },
+
+    /**
+     * Clear error log
+     */
+    clearLog: function () {
+      localStorage.removeItem(CONFIG.LS_ERROR_LOG);
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+      console.log('[ErrorTracker] Log cleared');
+    },
+
+    /**
+     * Force flush queued errors to GAS
+     */
+    flush: flushQueue,
+
+    /**
+     * Get current queue size
+     */
+    queueSize: function () {
+      return getQueue().length;
+    }
+  };
+
+  // ─── Initial flush on load ───
+  window.addEventListener('load', function () {
+    // Flush any queued errors from previous sessions
+    setTimeout(flushQueue, 3000);
+  });
+
+  console.log('[ErrorTracker] Initialized — v1.0 | Page:', getPageName());
+})();
+
+// ============================================================
+// IV DrugRef PWA v5.0 — Core Utilities
+// Shared across all pages
+// ============================================================
+
+/* global window */
+'use strict';
+
+var IVDrugRef = (function() {
+
+  // ============================================================
+  // CLINICAL CALCULATORS
+  // ============================================================
+
+  /**
+   * Ideal Body Weight (Devine formula)
+   * @param {number} ht - Height in cm
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} IBW in kg
+   */
+  function calcIBW(ht, sex) {
+    if (!ht || ht <= 0) return 0;
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  /**
+   * Adjusted Body Weight (for obesity)
+   * @param {number} wt - Actual weight in kg
+   * @param {number} ibw - Ideal body weight in kg
+   * @returns {number} ABW in kg
+   */
+  function calcABW(wt, ibw) {
+    return ibw + 0.4 * (wt - ibw);
+  }
+
+  /**
+   * Body Mass Index
+   * @param {number} wt - Weight in kg
+   * @param {number} ht - Height in cm
+   * @returns {number} BMI in kg/m²
+   */
+  function calcBMI(wt, ht) {
+    if (!ht || ht <= 0) return 0;
+    return wt / ((ht / 100) ** 2);
+  }
+
+  /**
+   * Body Surface Area (Mosteller formula)
+   * @param {number} ht - Height in cm
+   * @param {number} wt - Weight in kg
+   * @returns {number} BSA in m²
+   */
+  function calcBSA(ht, wt) {
+    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
+    return Math.sqrt((ht * wt) / 3600);
+  }
+
+  /**
+   * Cockcroft-Gault CrCl with automatic weight adjustment
+   * Uses ABW if patient is obese (>130% IBW)
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
+   * @returns {number} CrCl in mL/min, minimum 5
+   */
+  function calcCockcroftGault(age, wt, scr, sex, ht) {
+    if (scr <= 0) return 0;
+    let useWt = wt;
+    if (ht && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
+    }
+    let crcl = ((140 - age) * useWt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.max(Math.round(crcl * 10) / 10, 5);
+  }
+
+  /**
+   * Cockcroft-Gault with raw TBW (no obesity adjustment)
+   * Used for comparison and non-adjusted dosing
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} CrCl in mL/min
+   */
+  function calcCG_raw(age, wt, scr, sex) {
+    if (scr <= 0) return 0;
+    let crcl = ((140 - age) * wt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.round(crcl * 10) / 10;
+  }
+
+  /**
+   * Bedside Schwartz equation (pediatric eGFR)
+   * For ages 1-17 years
+   * @param {number} ht - Height in cm
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcSchwartz(ht, scr) {
+    if (scr <= 0 || !ht || ht <= 0) return 0;
+    return Math.round((0.413 * ht / scr) * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 equation (race-free)
+   * Returns indexed eGFR for standardized BSA (1.73m²)
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcCKDEPI2021(age, scr, sex) {
+    let eGFR;
+    if (sex === 'F') {
+      const kappa = 0.7;
+      const alpha = scr <= kappa ? -0.241 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age) * 1.012;
+    } else {
+      const kappa = 0.9;
+      const alpha = scr <= kappa ? -0.302 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age);
+    }
+    return Math.round(eGFR * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 de-indexed for drug dosing
+   * Converts indexed eGFR to non-indexed using patient BSA
+   * Per KDIGO 2024 recommendations for personalized dosing
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} bsa - Body surface area in m²
+   * @returns {number} Non-indexed eGFR in mL/min
+   */
+  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
+    const indexed = calcCKDEPI2021(age, scr, sex);
+    return Math.round(indexed * bsa / 1.73 * 10) / 10;
+  }
+
+  /**
+   * Get CKD stage classification from GFR value
+   * @param {number} gfr - Glomerular filtration rate in mL/min
+   * @returns {Object} Stage info with stage code, Thai label, and CSS class
+   */
+  function getCKDStage(gfr) {
+    if (gfr >= 90) return { stage: 'G1', label: 'ปกติ/สูง', cls: 'stage-1' };
+    if (gfr >= 60) return { stage: 'G2', label: 'ลดลงเล็กน้อย', cls: 'stage-2' };
+    if (gfr >= 45) return { stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', cls: 'stage-3a' };
+    if (gfr >= 30) return { stage: 'G3b', label: 'ลดลงปานกลาง-มาก', cls: 'stage-3b' };
+    if (gfr >= 15) return { stage: 'G4', label: 'ลดลงมาก', cls: 'stage-4' };
+    return { stage: 'G5', label: 'ไตวาย', cls: 'stage-5' };
+  }
+
+  /**
+   * Build comprehensive patient object from form elements
+   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
+   * @param {Object} fieldIds - Optional custom field ID mapping
+   * @returns {Object} Complete patient data object
+   */
+  function getPatientFromForm(fieldIds) {
+    // Default field IDs matching standard form layout
+    const ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    }, fieldIds || {});
+
+    const getVal = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? (parseFloat(el.value) || def) : def;
+    };
+    const getStr = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? el.value : def;
+    };
+
+    const age = getVal(ids.age, 55);
+    const wt = getVal(ids.wt, 70);
+    const ht = getVal(ids.ht, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = getVal(ids.scr, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
+
+    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
+    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
+    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
+    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
+    const isObese = wt > ibw * 1.3;
+    const isUnderweight = wt < ibw;
+    const isPediatric = age < 18;
+
+    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
+    let crcl;
+    if (isPediatric && ht > 0) {
+      crcl = calcSchwartz(ht, scr);
+    } else {
+      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
+    }
+
+    return {
+      age, wt, ht, sex, scr, alb, dialysis,
+      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
+      crcl
+    };
+  }
+
+
+  // ============================================================
+  // ANALYTICS
+  // ============================================================
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  let _reqCount = 0;
+
+  /**
+   * Get anonymous session ID from localStorage
+   * @returns {string} Session ID or empty string
+   */
+  function getSessionId() {
+    return localStorage.getItem('anonSessionId') || '';
+  }
+
+  /**
+   * Get anonymous user ID from localStorage
+   * @returns {string} User ID or empty string
+   */
+  function getUserId() {
+    return localStorage.getItem('anonUserId') || '';
+  }
+
+  /**
+   * Check if user has consented to analytics
+   * @returns {boolean} True if analytics consent is given
+   */
+  function hasAnalyticsConsent() {
+    return localStorage.getItem('analyticsConsent') === 'true';
+  }
+
+  /**
+   * Send analytics event via sendBeacon or fetch
+   * Rate limited to 40 requests per page session
+   * @param {Object} data - Event data to send
+   */
+  function sendAnalytics(data) {
+    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (_reqCount >= 40) return;
+    _reqCount++;
+    try {
+      const payload = JSON.stringify({
+        ...data,
+        session_id: getSessionId(),
+        user_id: getUserId()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(ANALYTICS_URL, payload);
+      } else {
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
+   * Track page view with automatic entry/exit timing
+   * Sends page_view events on entry and exit with duration
+   * @param {string} pageName - Name/identifier of current page
+   * @returns {Object} Tracking object with sendExit function and metadata
+   */
+  function trackPageView(pageName) {
+    const enterTime = Date.now();
+    const fromPage = (function() {
+      const ref = document.referrer || '';
+      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+      if (ref.includes('calculator.html')) return 'calculator';
+      if (ref.includes('tdm.html')) return 'tdm';
+      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
+      if (ref.includes('compatibility.html')) return 'compatibility';
+      if (ref.includes('dashboard.html')) return 'dashboard';
+      return ref ? 'external' : 'direct';
+    })();
+
+    // Send entry event
+    sendAnalytics({
+      type: 'page_view', page: pageName, action: 'enter',
+      from_page: fromPage, referrer: document.referrer || 'direct'
+    });
+
+    // Track exit event (sent only once)
+    let exitSent = false;
+    function sendExit(extraData) {
+      if (exitSent) return;
+      exitSent = true;
+      sendAnalytics({
+        type: 'page_view', page: pageName, action: 'leave',
+        duration_sec: Math.round((Date.now() - enterTime) / 1000),
+        from_page: fromPage,
+        ...(extraData || {})
+      });
+    }
+
+    // Send exit on page unload or visibility change
+    window.addEventListener('beforeunload', () => sendExit());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendExit();
+    });
+
+    return { sendExit, fromPage, enterTime };
+  }
+
+
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
+
+  /**
+   * Register service worker for offline support and caching
+   * Non-blocking registration with console logging
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    }
+  }
+
+
+  // ============================================================
+  // UTILITY HELPERS
+  // ============================================================
+
+  /**
+   * Generate random anonymous ID using crypto API
+   * @param {number} len - Length in hex characters (default 16)
+   * @returns {string} Random hex string
+   */
+  function generateId(len) {
+    len = len || 16;
+    const arr = new Uint8Array(len / 2);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Debounce function to limit function execution
+   * @param {Function} fn - Function to debounce
+   * @param {number} ms - Debounce delay in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  /**
+   * Format number with specified decimal precision
+   * @param {number} n - Number to format
+   * @param {number} decimals - Number of decimal places (default 1)
+   * @returns {string} Formatted number string
+   */
+  function fmt(n, decimals) {
+    decimals = decimals !== undefined ? decimals : 1;
+    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
+  }
+
+  /**
+   * Version and app name constants
+   */
+  const VERSION = '5.0.0';
+  const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+  return {
+    // Version info
+    VERSION,
+    APP_NAME,
+
+    // Clinical calculators
+    calcIBW,
+    calcABW,
+    calcBMI,
+    calcBSA,
+    calcCockcroftGault,
+    calcCG_raw,
+    calcSchwartz,
+    calcCKDEPI2021,
+    calcCKDEPI2021_nonindexed,
+    getCKDStage,
+    getPatientFromForm,
+
+    // Analytics
+    sendAnalytics,
+    trackPageView,
+    getSessionId,
+    getUserId,
+    hasAnalyticsConsent,
+
+    // Service Worker
+    registerSW,
+
+    // Utility helpers
+    generateId,
+    debounce,
+    fmt
+  };
+})();
+
+// ============================================================
+// AUTO-INITIALIZATION
+// ============================================================
+// Register service worker on page load
+document.addEventListener('DOMContentLoaded', () => {
+  IVDrugRef.registerSW();
+});
+
+(function() {
+  'use strict';
+
+  // ====== Drug Definitions ======
+  const CALC_DRUGS = [
+    {
+      id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🧬 Bayesian TDM →</a>',
+      badges: ['badge-renal'],
+      calc: function(pt) {
+        const dose_low = Math.round(pt.wt * 15 / 250) * 250;
+        const dose_high = Math.round(pt.wt * 20 / 250) * 250;
+        const dose = Math.round(pt.wt * 15 / 250) * 250;
+        let freq = 'q12h', freqNote = '', dailyDose = 0;
+        if (pt.crcl > 80) { freq = 'q8-12h'; freqNote = 'CrCl >80'; dailyDose = dose * 3; }
+        else if (pt.crcl > 50) { freq = 'q12h'; freqNote = 'CrCl 50-80'; dailyDose = dose * 2; }
+        else if (pt.crcl > 30) { freq = 'q24h'; freqNote = 'CrCl 30-50'; dailyDose = dose; }
+        else if (pt.crcl > 10) { freq = 'q24-48h'; freqNote = 'CrCl 10-30'; dailyDose = dose; }
+        else { freq = 'q48-72h'; freqNote = 'CrCl <10 / HD'; dailyDose = dose * 0.5; }
+        const vol = dose <= 1000 ? 200 : 250;
+        const rate_mgmin = 10;
+        const infuse_min = Math.ceil(dose / rate_mgmin);
+        const rate_mlhr = Math.round(vol / (infuse_min / 60));
+        const ke = 0.00083 * pt.crcl + 0.0044;
+        const vd = 0.7 * pt.wt;
+        const estAUC = dailyDose > 0 ? Math.round(dailyDose / (ke * vd)) : 0;
+        let aucNote = '';
+        if (estAUC > 0) {
+          if (estAUC >= 400 && estAUC <= 600) aucNote = '✅ อยู่ใน target (400-600)';
+          else if (estAUC < 400) aucNote = '⚠ ต่ำกว่า target → พิจารณาเพิ่ม dose/frequency';
+          else aucNote = '⚠ สูงกว่า target → เสี่ยง nephrotoxicity';
+        }
+        const renalTable = '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;">'
+          + '<tr style="background:#e6f1fb;"><th style="padding:4px 6px;text-align:left;border:1px solid #85B7EB;">CrCl (mL/min)</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Interval</th><th style="padding:4px 6px;border:1px solid #85B7EB;">Daily dose</th></tr>'
+          + `<tr${pt.crcl>80?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">>80</td><td style="padding:4px 6px;border:1px solid #ddd;">q8-12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 2-3/day</td></tr>`
+          + `<tr${pt.crcl>50&&pt.crcl<=80?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">50-80</td><td style="padding:4px 6px;border:1px solid #ddd;">q12h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 2/day</td></tr>`
+          + `<tr${pt.crcl>30&&pt.crcl<=50?' style="background:#dcfce7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">30-50</td><td style="padding:4px 6px;border:1px solid #ddd;">q24h</td><td style="padding:4px 6px;border:1px solid #ddd;">${dose}mg x 1/day</td></tr>`
+          + `<tr${pt.crcl>10&&pt.crcl<=30?' style="background:#fef3c7;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;">10-30</td><td style="padding:4px 6px;border:1px solid #ddd;">q24-48h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose by level</td></tr>`
+          + `<tr${pt.crcl<=10?' style="background:#fef2f2;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;"><10 / HD</td><td style="padding:4px 6px;border:1px solid #ddd;">q48-72h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose when trough <15-20</td></tr>`
+          + '</table>';
+        return {
+          title: `Vancomycin ${dose} mg IV ${freq}`,
+          details: [
+            { l: 'Weight-based dose', v: `15-20 mg/kg = ${dose_low}–${dose_high} mg` },
+            { l: 'Recommended dose', v: `${dose} mg` },
+            { l: 'Frequency', v: `${freq} (${freqNote}, CrCl ${pt.crcl.toFixed(0)} mL/min)` },
+            { l: 'Daily total', v: `~${dailyDose} mg/day` },
+            { l: 'Dilution', v: `${dose} mg ใน NSS ${vol} mL` },
+            { l: 'Max rate', v: `≤${rate_mgmin} mg/min → infuse ≥${infuse_min} min` },
+            { l: 'Infusion rate', v: `${rate_mlhr} mL/hr` },
+            { l: 'Est. AUC₂₄', v: `~${estAUC} mg·hr/L ${aucNote}` },
+          ],
+          info: `<strong>📋 Renal dose adjustment (CrCl ${pt.crcl.toFixed(0)}):</strong>${renalTable}<br><strong>TDM:</strong> AUC/MIC target 400-600 (preferred) | Trough 15-20 mcg/mL (ถ้าไม่มี AUC)<br>เจาะ trough ก่อน dose ที่ 4 (steady state)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🧬 ใช้ Bayesian TDM Hub สำหรับ AUC-guided dosing →</a><br><strong>Monitor:</strong> SCr daily, CBC, Red Man Syndrome → infuse ≥60 min/g<br><strong>⚠:</strong> ห้ามให้ line เดียวกับ Pip/Tazo (↑nephrotoxicity)<br><strong>HD:</strong> Re-dose 15-25 mg/kg post-HD, เจาะ pre-HD level`,
+          infoType: 'blue'
+        };
+      }
+    },
+    {
+      id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      badges: ['badge-renal'],
+      calc: function(pt) {
+        const dose = Math.round(pt.wt * 15);
+        const dose_ext = Math.round(pt.wt * 20);
+        let freq = 'q24h', freqNote = '';
+        if (pt.crcl >= 60) { freq = 'q24h'; }
+        else if (pt.crcl >= 40) { freq = 'q36h'; freqNote = 'CrCl 40-60'; }
+        else if (pt.crcl >= 20) { freq = 'q48h'; freqNote = 'CrCl 20-40'; }
+        else { freq = 'by level'; freqNote = 'CrCl <20 → dose by serum level'; }
+        return {
+          title: `Amikacin ${dose} mg IV ${freq}`,
+          details: [
+            { l: 'Conventional dose', v: `15 mg/kg = ${dose} mg q8-12h` },
+            { l: 'Extended-interval', v: `15-20 mg/kg = ${dose}–${dose_ext} mg ${freq}` },
+            { l: 'Frequency adj', v: freq + (freqNote ? ` (${freqNote})` : '') },
+            { l: 'Dilution', v: `ใน NSS/D5W 100-200 mL` },
+            { l: 'Infuse over', v: `30-60 min` },
+          ],
+          info: `<strong>TDM:</strong> Peak 20-35 mcg/mL (extended) | Trough <5 mcg/mL<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr, audiometry, vestibular fn<br><strong>⚠:</strong> ห้ามผสมกับ Beta-lactams ใน syringe/bag เดียวกัน`,
+          infoType: 'blue'
+        };
+      }
+    },
+    {
+      id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      badges: ['badge-renal'],
+      calc: function(pt) {
+        const dose_conv = (pt.wt * 1.7).toFixed(0);
+        const dose_ext = Math.round(pt.wt * 5);
+        let freq = 'q24h';
+        if (pt.crcl >= 60) freq = 'q24h';
+        else if (pt.crcl >= 40) freq = 'q36h';
+        else if (pt.crcl >= 20) freq = 'q48h';
+        else freq = 'by level';
+        return {
+          title: `Gentamicin ${dose_ext} mg IV ${freq}`,
+          details: [
+            { l: 'Conventional', v: `1-1.7 mg/kg q8h = ${dose_conv} mg q8h` },
+            { l: 'Extended-interval', v: `5-7 mg/kg q24h = ${dose_ext} mg ${freq}` },
+            { l: 'Dilution', v: `ใน NSS/D5W 50-200 mL` },
+            { l: 'Infuse over', v: `30-60 min` },
+          ],
+          info: `<strong>TDM:</strong> Hartford nomogram (extended) หรือ Peak 5-10 / Trough <1<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Hartford nomogram + PK →</a><br><strong>Monitor:</strong> SCr daily, audiometry<br><strong>Intrathecal:</strong> 4-8 mg/day (ventriculitis)`,
+          infoType: 'blue'
+        };
+      }
+    },
+    {
+      id: 'colistin', name: 'Colistimethate (CMS)', sub: '150 mg CBA/vial (~2 MIU)',
+      badges: ['badge-renal'],
+      calc: function(pt) {
+        const ibw = pt.sex === 'M' ? 50 + 0.9*(pt.ht-152.4) : 45.5 + 0.9*(pt.ht-152.4);
+        const useWt = pt.ht ? (pt.wt > ibw*1.2 ? (ibw + 0.4*(pt.wt - ibw)).toFixed(0) : pt.wt) : pt.wt;
+        const loading = 300;
+        let maintTotal, maintFreq;
+        if (pt.crcl >= 70) { maintTotal = 300; maintFreq = '150 mg CBA q12h'; }
+        else if (pt.crcl >= 50) { maintTotal = 230; maintFreq = '115 mg CBA q12h'; }
+        else if (pt.crcl >= 30) { maintTotal = 170; maintFreq = '85 mg CBA q12h'; }
+        else { maintTotal = 130; maintFreq = '130 mg CBA q24h (or by level)'; }
+        return {
+          title: `CMS loading ${loading} mg CBA → ${maintFreq}`,
+          details: [
+            { l: 'Loading dose', v: `300 mg CBA (~9 MIU) IV over 30-60 min` },
+            { l: 'Maintenance', v: maintFreq },
+            { l: 'Daily total', v: `${maintTotal} mg CBA/day` },
+            { l: 'Dilution', v: `ใน NSS/D5W 100-250 mL` },
+            { l: 'Infuse over', v: `30-60 min` },
+            { l: 'Unit conversion', v: `1 MIU ≈ 33.3 mg CBA ≈ 80 mg CMS` },
+          ],
+          info: `<strong>⚠ Nephrotoxicity สูง → hydrate well</strong><br><strong>Monitor:</strong> SCr daily, UO, neurotoxicity signs<br><strong>IT/IVT:</strong> 10 mg CBA/day (ventriculitis)<br><strong>Adjust:</strong> ${pt.ht ? `IBW=${ibw.toFixed(0)}kg, adjusted wt=${useWt}kg` : 'ใส่ส่วนสูงเพื่อคำนวณ IBW'}`,
+          infoType: 'amber'
+        };
+      }
+    },
+    {
+      id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      badges: ['badge-loading'],
+      calc: function(pt) {
+        const dose = Math.round(pt.wt * 20);
+        const maxRate = pt.age >= 65 ? 25 : 50;
+        const infuseMin = Math.ceil(dose / maxRate);
+        return {
+          title: `Phenytoin ${dose} mg IV loading`,
+          details: [
+            { l: 'Loading dose', v: `20 mg/kg = ${dose} mg` },
+            { l: 'Max rate', v: `≤${maxRate} mg/min ${pt.age >= 65 ? '(สูงอายุ)' : ''}` },
+            { l: 'Infuse over', v: `≥${infuseMin} min ใน NSS เท่านั้น!` },
+            { l: 'Concentration', v: `≤6.7 mg/mL (dilute ใน NSS 50-100 mL)` },
+            { l: 'Filter', v: `ต้องใช้ 0.22 μm in-line filter` },
+          ],
+          info: `<strong>⚠ ใช้ NSS เท่านั้น! ห้าม D5W → ตกตะกอน!</strong><br><strong>Monitor:</strong> ECG continuous, BP q5-15min, IV site (purple glove)<br><strong>Level:</strong> Total 10-20 mcg/mL | Free 1-2 mcg/mL<br><strong>ตรวจ:</strong> Free phenytoin ถ้า albumin <3.5<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ Winter-Tozer correction + dose prediction →</a>`,
+          infoType: 'red'
+        };
+      }
+    },
+    {
+      id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      badges: ['badge-loading'],
+      calc: function(pt) {
+        const dose30 = Math.round(pt.wt * 30);
+        const dose40 = Math.round(pt.wt * 40);
+        const maintRate = (pt.wt * 1.5).toFixed(0);
+        return {
+          title: `Valproate ${dose30}–${dose40} mg IV loading`,
+          details: [
+            { l: 'Loading dose', v: `30-40 mg/kg = ${dose30}–${dose40} mg` },
+            { l: 'Rate', v: `IV over 15-30 min (max 6 mg/kg/min)` },
+            { l: 'Maintenance', v: `1-2 mg/kg/hr = ${maintRate}–${Math.round(pt.wt*2)} mg/hr CI` },
+            { l: 'Alternative', v: `IV→PO: 15-20 mg/kg/day div q8-12h` },
+          ],
+          info: `<strong>⚠ ห้ามใช้ร่วม Meropenem/Carbapenem เด็ดขาด! (ลด VPA 60-100%)</strong><br><strong>Level:</strong> 50-100 mcg/mL (SE: 80-120)<br><strong>Monitor:</strong> LFTs, CBC+Plt, ammonia, amylase<br><strong>CI:</strong> Hepatic disease, pregnancy (Cat X)<br><a href="tdm.html" style="color:#38bdf8;font-weight:700;">🎯 ใช้ TDM Hub สำหรับ free level correction + dose adjustment →</a>`,
+          infoType: 'red'
+        };
+      }
+    },
+    {
+      id: 'levetiracetam', name: 'Levetiracetam loading', sub: '500 mg/5 mL',
+      badges: ['badge-loading'],
+      calc: function(pt) {
+        const dose = Math.round(pt.wt * 60 / 500) * 500;
+        const doseMax = Math.min(dose, 4500);
+        let maint = '1000-1500 mg IV q12h';
+        if (pt.crcl < 30) maint = '250-500 mg IV q12h (CrCl <30)';
+        else if (pt.crcl < 50) maint = '500-750 mg IV q12h (CrCl 30-50)';
+        else if (pt.crcl < 80) maint = '500-1000 mg IV q12h (CrCl 50-80)';
+        return {
+          title: `Levetiracetam ${doseMax} mg IV loading`,
+          details: [
+            { l: 'Loading dose (SE)', v: `60 mg/kg = ${dose} mg (max 4500 mg)` },
+            { l: 'Recommended', v: `${doseMax} mg IV over 10-15 min` },
+            { l: 'Maintenance', v: maint },
+            { l: 'Switch PO', v: `IV ↔ PO 1:1 ratio` },
+          ],
+          info: `<strong>ข้อดี:</strong> No significant drug interactions, safe ใน hepatic impairment<br><strong>SE:</strong> behavioral (irritability, aggression)<br><strong>Monitor:</strong> Seizure freq, SCr, mood/behavior`,
+          infoType: 'blue'
+        };
+      }
+    },
+    {
+      id: 'alteplase', name: 'Alteplase (rt-PA)', sub: 'Actilyse 50 mg/50 mL',
+      badges: ['badge-stroke'],
+      calc: function(pt) {
+        const totalDose = Math.min(pt.wt * 0.9, 90).toFixed(1);
+        const bolus = (totalDose * 0.1).toFixed(1);
+        const infusion = (totalDose * 0.9).toFixed(1);
+        return {
+          title: `Alteplase ${totalDose} mg (stroke protocol)`,
+          details: [
+            { l: 'Total dose', v: `0.9 mg/kg = ${totalDose} mg (max 90 mg)` },
+            { l: '10% bolus', v: `${bolus} mg IV push over 1 min` },
+            { l: '90% infusion', v: `${infusion} mg IV infusion over 60 min` },
+            { l: 'Concentration', v: `1 mg/mL (reconstituted)` },
+          ],
+          info: `<strong>⚠ Door-to-needle <60 min!</strong><br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr หลังให้<br><strong>BP:</strong> q15min x 2hr → q30min x 6hr → q1h x 16hr<br><strong>CT brain:</strong> 24 hr post-dose<br><strong>เตรียม:</strong> Cryoprecipitate, TXA สำหรับ bleeding`,
+          infoType: 'red'
+        };
+      }
+    },
+    {
+      id: 'tenecteplase', name: 'Tenecteplase', sub: 'Metalyse',
+      badges: ['badge-stroke'],
+      calc: function(pt) {
+        let dose_ami;
+        if (pt.wt < 60) dose_ami = 30;
+        else if (pt.wt < 70) dose_ami = 35;
+        else if (pt.wt < 80) dose_ami = 40;
+        else if (pt.wt < 90) dose_ami = 45;
+        else dose_ami = 50;
+        const dose_stroke = Math.min(pt.wt * 0.25, 25).toFixed(1);
+        return {
+          title: `Tenecteplase — single IV bolus`,
+          details: [
+            { l: 'Stroke dose', v: `0.25 mg/kg = ${dose_stroke} mg (max 25 mg)` },
+            { l: 'AMI dose', v: `${dose_ami} mg (weight-tiered)` },
+            { l: 'Route', v: `Single IV bolus over 5-10 sec` },
+            { l: 'Concentration', v: `5 mg/mL (reconstituted)` },
+            { l: 'Volume (stroke)', v: `${(dose_stroke / 5).toFixed(1)} mL` },
+          ],
+          info: `<strong>ข้อดี:</strong> Single bolus → ง่ายกว่า Alteplase<br><strong>Evidence:</strong> TASTE, AcT trials สำหรับ stroke<br><strong>Monitor:</strong> NIHSS, BP q15min, bleeding<br><strong>ห้าม:</strong> Heparin/Antiplatelet 24 hr`,
+          infoType: 'blue'
+        };
+      }
+    },
+  ];
+
+  // ====== CrCl Calculator ======
+  function calcIBW(ht, sex) {
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  function getCrCl() {
+    const age = parseFloat(document.getElementById('ptAge').value) || 65;
+    const wt = parseFloat(document.getElementById('ptWt').value) || 70;
+    const scr = parseFloat(document.getElementById('ptScr').value) || 1.0;
+    const sex = document.getElementById('ptSex').value;
+    const ht = parseFloat(document.getElementById('ptHt').value) || 0;
+    if (scr <= 0) return 0;
+
+    if (age < 18 && ht > 0) {
+      return IVDrugRef.calcSchwartz(ht, scr);
+    }
+
+    let useWt = wt;
+    if (ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = ibw + 0.4 * (wt - ibw);
+      else if (wt < ibw) useWt = wt;
+    }
+    return IVDrugRef.calcCockcroftGault(age, useWt, scr, sex);
+  }
+
+  function getPatient() {
+    const age = parseFloat(document.getElementById('ptAge').value) || 65;
+    const wt = parseFloat(document.getElementById('ptWt').value) || 70;
+    const ht = parseFloat(document.getElementById('ptHt').value) || 0;
+    const sex = document.getElementById('ptSex').value;
+    const scr = parseFloat(document.getElementById('ptScr').value) || 1.0;
+    return { wt, age, sex, scr, ht, crcl: getCrCl() };
+  }
+
+  function updateCrCl() {
+    const age = parseFloat(document.getElementById('ptAge').value) || 65;
+    const wt = parseFloat(document.getElementById('ptWt').value) || 70;
+    const ht = parseFloat(document.getElementById('ptHt').value) || 0;
+    const sex = document.getElementById('ptSex').value;
+    const scr = parseFloat(document.getElementById('ptScr').value) || 1.0;
+    const crcl = getCrCl();
+    const isPed = age < 18;
+    const bodyBox = document.getElementById('bodyCompInfo');
+    const warn = document.getElementById('crclWarning');
+    const crclLabel = document.getElementById('crclLabel');
+
+    if (isPed && ht > 0) {
+      crclLabel.textContent = 'eGFR (Bedside Schwartz):';
+      document.getElementById('crclValue').textContent = crcl.toFixed(1) + ' mL/min/1.73m²';
+    } else {
+      crclLabel.textContent = 'CrCl (Cockcroft-Gault):';
+      document.getElementById('crclValue').textContent = crcl.toFixed(1) + ' mL/min';
+    }
+
+    if (!isPed && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      const bmi = wt / ((ht / 100) ** 2);
+      const abw = ibw + 0.4 * (wt - ibw);
+      const isObese = wt > ibw * 1.3;
+      const isElderly = age >= 65 && scr < 0.7;
+      const crcl_raw = ((140 - age) * wt) / (72 * scr) * (sex === 'F' ? 0.85 : 1);
+
+      if (isObese || isElderly) {
+        bodyBox.style.display = 'block';
+        let html = '<div class="info-box blue" style="font-size:11px;line-height:1.6;">';
+        html += `<strong>📐 Body Comp:</strong> BMI ${bmi.toFixed(1)} | IBW ${ibw.toFixed(1)} kg | ABW ${abw.toFixed(1)} kg<br>`;
+        if (isObese) {
+          html += `<strong>⚠ Obesity (TBW>${Math.round(ibw*1.3)}kg):</strong> CG ปรับใช้ ABW ${abw.toFixed(1)} kg (TBW ${wt} → CrCl overestimate ~${Math.round(crcl_raw - crcl)} mL/min)`;
+        }
+        if (isElderly) {
+          html += `${isObese ? '<br>' : ''}<strong>👴 Elderly + SCr ${scr}:</strong> Low SCr อาจ overestimate CrCl จาก low muscle mass — พิจารณาใช้ clinical judgment`;
+        }
+        html += '</div>';
+        bodyBox.innerHTML = html;
+      } else {
+        bodyBox.style.display = 'none';
+      }
+    } else if (isPed) {
+      bodyBox.style.display = 'block';
+      bodyBox.innerHTML = ht > 0
+        ? '<div class="info-box blue" style="font-size:11px;"><strong>👶 Pediatric:</strong> ใช้ Bedside Schwartz (0.413 × Ht / SCr) — CG ไม่เหมาะสำหรับเด็ก<br>⚠ Dosing guidelines ด้านล่างเป็นของผู้ใหญ่ — กรุณาตรวจสอบ pediatric dosing แยก</div>'
+        : '<div class="info-box amber" style="font-size:11px;"><strong>👶 Pediatric:</strong> กรุณาใส่ส่วนสูงเพื่อคำนวณ eGFR (Schwartz) — CG ไม่เหมาะสำหรับเด็ก</div>';
+    } else {
+      bodyBox.style.display = 'none';
+    }
+
+    if (crcl < 30) {
+      warn.style.display = 'block';
+      warn.innerHTML = '<div class="info-box red"><strong>⚠ CrCl <30 mL/min</strong> — ปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing</div>';
+    } else if (crcl < 50) {
+      warn.style.display = 'block';
+      warn.innerHTML = '<div class="info-box amber"><strong>CrCl 30-50 mL/min</strong> — ยาบางตัวต้องปรับขนาด/interval</div>';
+    } else {
+      warn.style.display = 'none';
+    }
+  }
+
+  // ====== Drug Selection ======
+  let selectedDrug = null;
+
+  function renderDrugGrid() {
+    const grid = document.getElementById('drugGrid');
+    grid.innerHTML = CALC_DRUGS.map(d => `
+      <div class="drug-card ${selectedDrug === d.id ? 'active' : ''}" onclick="selectDrug('${d.id}')">
+        <div class="drug-name">${d.name}</div>
+        <div class="drug-sub">${d.sub}</div>
+        ${d.badges.map(b => `<span class="badge ${b}">${b.replace('badge-','')}</span>`).join(' ')}
+      </div>
+    `).join('');
+  }
+
+  function selectDrug(id) {
+    selectedDrug = id;
+    lastSelectedDrugForTracking = CALC_DRUGS.find(d => d.id === id)?.name || null;
+    renderDrugGrid();
+    calculate();
+  }
+
+  function calculate() {
+    const sec = document.getElementById('outputSection');
+    const body = document.getElementById('outputBody');
+    const header = document.getElementById('outputHeader');
+    if (!selectedDrug) { sec.style.display = 'none'; return; }
+
+    const drug = CALC_DRUGS.find(d => d.id === selectedDrug);
+    if (!drug) return;
+
+    const pt = getPatient();
+    const result = drug.calc(pt);
+
+    header.innerHTML = `📊 ${drug.name}`;
+    body.innerHTML = `
+      <div style="padding:16px;">
+        <div class="result-box">
+          <div class="result-title">Recommended</div>
+          <div class="result-value" style="font-size:20px;">${result.title}</div>
+        </div>
+        <div style="margin-top:14px;">
+          ${result.details.map(d => `<div class="detail-row"><span class="detail-label">${d.l}</span><span class="detail-value">${d.v}</span></div>`).join('')}
+        </div>
+        <div class="info-box ${result.infoType}" style="margin-top:14px;">${result.info}</div>
+      </div>
+    `;
+    sec.style.display = 'block';
+    sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    if (typeof trackCalcUsage === 'function') {
+      trackCalcUsage(drug.name, pt, result);
+    }
+  }
+
+  // ====== Analytics ======
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+
+  const CALC_SESSION_ID = (() => {
+    const today = new Date().toISOString().substring(0, 10);
+    let id = localStorage.getItem('anonSessionId');
+    let idDate = localStorage.getItem('anonSessionDate');
+    if (!id || idDate !== today) {
+      id = 'u' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      localStorage.setItem('anonSessionId', id);
+      localStorage.setItem('anonSessionDate', today);
+    }
+    return id;
+  })();
+
+  const CALC_USER_ID = (() => {
+    let uid = localStorage.getItem('anonUserId');
+    if (!uid) {
+      uid = 'p' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+      localStorage.setItem('anonUserId', uid);
+    }
+    return uid;
+  })();
+
+  let calcReqCount = 0;
+  function sendCalcAnalytics(data) {
+    if (!ANALYTICS_URL || localStorage.getItem('analyticsConsent') !== 'true') return;
+    if (calcReqCount >= 40) return;
+    calcReqCount++;
+    try {
+      const payload = JSON.stringify({ ...data, session_id: CALC_SESSION_ID, user_id: CALC_USER_ID });
+      if (navigator.sendBeacon) navigator.sendBeacon(ANALYTICS_URL, payload);
+      else fetch(ANALYTICS_URL, { method:'POST', body:payload, keepalive:true }).catch(()=>{});
+    } catch(e) {}
+  }
+
+  const PAGE_ENTER_TIME = Date.now();
+  const FROM_PAGE = (() => {
+    const ref = document.referrer || '';
+    if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+    if (ref.includes('tdm.html')) return 'tdm';
+    if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+    return ref ? 'external' : 'direct';
+  })();
+
+  let calcPageViewSent = false;
+  function sendCalcPageLeave(){
+    if(calcPageViewSent)return;
+    calcPageViewSent = true;
+    const dur = Math.round((Date.now() - PAGE_ENTER_TIME) / 1000);
+    IVDrugRef.sendAnalytics({
+      type: 'page_view',
+      page: 'calculator',
+      action: 'leave',
+      duration_sec: dur,
+      from_page: FROM_PAGE,
+      last_drug_selected: selectedDrug || 'none'
+    });
+  }
+
+  let lastSelectedDrugForTracking = null;
+  const calcTracked = {};
+
+  function trackCalcUsage(drugName, pt, result) {
+    if (drugName !== lastSelectedDrugForTracking) return;
+    lastSelectedDrugForTracking = null;
+
+    const key = drugName + '_' + Math.floor(Date.now() / 30000);
+    if (calcTracked[key]) return;
+    calcTracked[key] = true;
+    IVDrugRef.sendAnalytics({
+      type: 'dose_calc',
+      drug_name: drugName,
+      weight_kg: pt.wt,
+      height_cm: pt.ht || '',
+      age: pt.age,
+      sex: pt.sex,
+      scr: pt.scr,
+      crcl: pt.crcl.toFixed(1),
+      dose_recommended: result.title,
+      details: JSON.stringify(result.details.map(d => d.l + ': ' + d.v))
+    });
+  }
+
+  // ====== Expose to window ======
+  window.selectDrug = selectDrug;
+  window.calculate = calculate;
+  window.renderDrugGrid = renderDrugGrid;
+  window.updateCrCl = updateCrCl;
+
+  // ====== Init ======
+  document.addEventListener('DOMContentLoaded', function() {
+    IVDrugRef.trackPageView('calculator');
+    updateCrCl();
+    renderDrugGrid();
+  });
+
+  window.addEventListener('beforeunload', sendCalcPageLeave);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') sendCalcPageLeave();
+  });
+
+})();
+
 </script>
 <script src="translations-en.js"></script>
 <script src="i18n.js"></script>

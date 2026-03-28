@@ -344,7 +344,2157 @@
 <script src="translations-en.js"></script>
 
 <script>
-!function(){"use strict";const e="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",t="iv_drugref_error_log",n="iv_drugref_error_queue",o="low",r="medium",i="high",a="critical";let s=[],l=0,c=null,d=null;function u(){return(window.location.pathname.split("/").pop()||"index.html").replace(".html","")}function g(){try{return JSON.parse(localStorage.getItem(n)||"[]")}catch(e){return[]}}function m(){const t=g();0!==t.length&&navigator.onLine&&(function(t){if(!navigator.onLine||0===t.length)return;if(l>=10)return;l+=t.length;const n=JSON.stringify({type:"error_report",errors:t,batch_size:t.length,reported_at:(new Date).toISOString()});try{navigator.sendBeacon?navigator.sendBeacon(e,n):fetch(e,{method:"POST",body:n,mode:"no-cors",keepalive:!0}).catch(()=>{})}catch(e){}}(t),function(){try{localStorage.removeItem(n)}catch(e){}}())}function p(e){const l=`${e.message}|${e.source}|${e.line}`;if(function(e){const t=Date.now();return s=s.filter(e=>t-e.time<6e4),!!s.some(t=>t.fp===e)||(s.push({fp:e,time:t}),!1)}(l))return;const c=function(e){const t=(e.message||"").toLowerCase();return t.includes("drugs")&&t.includes("undefined")||t.includes("json")&&t.includes("parse")?a:t.includes("security")||t.includes("cors")||t.includes("calculation")||t.includes("dose")?i:t.includes("fetch")||t.includes("network")||t.includes("typeerror")||t.includes("referenceerror")?r:o}(e),g={page:u(),url:window.location.href,userAgent:navigator.userAgent,online:navigator.onLine,timestamp:(new Date).toISOString(),sessionId:sessionStorage.getItem("sessionId")||"unknown",screenSize:`${screen.width}x${screen.height}`,viewportSize:`${window.innerWidth}x${window.innerHeight}`,language:navigator.language,standalone:window.matchMedia("(display-mode: standalone)").matches,memoryUsage:navigator.deviceMemory?`${navigator.deviceMemory}GB`:"N/A",appVersion:"5.0.0"},p={...e,severity:c,context:g,fingerprint:l,id:`err_${Date.now()}_${Math.random().toString(36).substr(2,6)}`};console.error(`[ErrorTracker] ${c.toUpperCase()}:`,e.message,p),function(e){try{let n=JSON.parse(localStorage.getItem(t)||"[]");n.unshift(e),n.length>50&&(n=n.slice(0,50)),localStorage.setItem(t,JSON.stringify(n))}catch(e){}}(p),c!==o&&function(e,t){if(!document.body)return;const n=d||(d=document.createElement("div"),d.id="iv-error-toast-container",d.style.cssText="\n      position: fixed;\n      bottom: 80px;\n      left: 50%;\n      transform: translateX(-50%);\n      z-index: 99999;\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      align-items: center;\n      pointer-events: none;\n      max-width: 90vw;\n    ",document.body.appendChild(d),d),o=document.createElement("div"),r={low:{bg:"#f0f4f8",border:"#94a3b8",text:"#475569",icon:"ℹ️"},medium:{bg:"#fef9c3",border:"#f59e0b",text:"#92400e",icon:"⚠️"},high:{bg:"#fee2e2",border:"#ef4444",text:"#991b1b",icon:"🔴"},critical:{bg:"#fecaca",border:"#dc2626",text:"#7f1d1d",icon:"🚨"}},i=r[t]||r.medium;o.style.cssText=`\n      background: ${i.bg};\n      border: 1px solid ${i.border};\n      border-radius: 12px;\n      padding: 10px 16px;\n      font-family: 'IBM Plex Sans Thai', sans-serif;\n      font-size: 13px;\n      color: ${i.text};\n      box-shadow: 0 4px 16px rgba(0,0,0,0.12);\n      pointer-events: auto;\n      opacity: 0;\n      transform: translateY(10px);\n      transition: all 0.3s ease;\n      max-width: 100%;\n      text-align: center;\n      line-height: 1.4;\n    `;const a="critical"===t||"high"===t?`${i.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`:`${i.icon} เกิดข้อผิดพลาดเล็กน้อย`;o.textContent=a,n.appendChild(o),requestAnimationFrame(()=>{o.style.opacity="1",o.style.transform="translateY(0)"}),setTimeout(()=>{o.style.opacity="0",o.style.transform="translateY(10px)",setTimeout(()=>o.remove(),300)},5e3),o.addEventListener("click",()=>{o.style.opacity="0",setTimeout(()=>o.remove(),300)})}(e.message,c),function(e){try{let t=JSON.parse(localStorage.getItem(n)||"[]");t.push(e),t.length>20&&(t=t.slice(-20)),localStorage.setItem(n,JSON.stringify(t))}catch(e){}}(p),c!==a&&c!==i||m()}window.onerror=function(e,t,n,o,r){return p({type:"runtime_error",message:String(e),source:t||"unknown",line:n||0,col:o||0,stack:r?r.stack:"N/A"}),!1},window.addEventListener("unhandledrejection",function(e){const t=e.reason;p({type:"unhandled_rejection",message:t?t.message||String(t):"Unknown rejection",source:"Promise",line:0,col:0,stack:t&&t.stack?t.stack:"N/A"})}),window.addEventListener("error",function(e){if(e.target&&e.target!==window){const t=e.target.tagName||"unknown",n=e.target.src||e.target.href||"unknown";p({type:"resource_error",message:`Failed to load ${t}: ${n}`,source:n,line:0,col:0,stack:"N/A"})}},!0),"serviceWorker"in navigator&&navigator.serviceWorker.addEventListener("message",function(e){e.data&&"SW_ERROR"===e.data.type&&p({type:"service_worker_error",message:e.data.error.message,source:e.data.error.filename||"sw.js",line:e.data.error.lineno||0,col:0,stack:"Service Worker context"})}),window.addEventListener("online",function(){setTimeout(m,2e3)}),c=setInterval(m,3e4),setInterval(function(){l=0},6e4),window.IVErrorTracker={report:function(e,t,n){p({type:"manual_report",message:String(e),source:u(),line:0,col:0,stack:(new Error).stack||"N/A",extra:n||{}})},getLog:function(){try{return JSON.parse(localStorage.getItem(t)||"[]")}catch(e){return[]}},clearLog:function(){localStorage.removeItem(t),localStorage.removeItem(n),console.log("[ErrorTracker] Log cleared")},flush:m,queueSize:function(){return g().length}},window.addEventListener("load",function(){setTimeout(m,3e3)}),console.log("[ErrorTracker] Initialized — v1.0 | Page:",u())}();var IVDrugRef=function(){function e(e,t){if(!e||e<=0)return 0;const n=e/2.54;return"M"===t?50+2.3*(n-60):45.5+2.3*(n-60)}function t(e,t){return t+.4*(e-t)}function n(e,t){return!t||t<=0?0:e/(t/100)**2}function o(e,t){return!e||!t||e<=0||t<=0?0:Math.sqrt(e*t/3600)}function r(n,o,r,i,a){if(r<=0)return 0;let s=o;if(a&&a>0){const n=e(a,i);o>1.3*n&&(s=t(o,n))}let l=(140-n)*s/(72*r);return"F"===i&&(l*=.85),Math.max(Math.round(10*l)/10,5)}function i(e,t){return t<=0||!e||e<=0?0:Math.round(.413*e/t*10)/10}function a(e,t,n){let o;if("F"===n){const n=.7,r=t<=n?-.241:-1.2;o=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)*1.012}else{const n=.9,r=t<=n?-.302:-1.2;o=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)}return Math.round(10*o)/10}const s="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec";let l=0;function c(){return localStorage.getItem("anonSessionId")||""}function d(){return localStorage.getItem("anonUserId")||""}function u(){return"true"===localStorage.getItem("analyticsConsent")}function g(e){if(u()&&!(l>=40)){l++;try{const t=JSON.stringify({...e,session_id:c(),user_id:d()});navigator.sendBeacon?navigator.sendBeacon(s,t):fetch(s,{method:"POST",body:t,keepalive:!0}).catch(()=>{})}catch(e){}}}return{VERSION:"5.0.0",APP_NAME:"IV DrugRef",calcIBW:e,calcABW:t,calcBMI:n,calcBSA:o,calcCockcroftGault:r,calcCG_raw:function(e,t,n,o){if(n<=0)return 0;let r=(140-e)*t/(72*n);return"F"===o&&(r*=.85),Math.round(10*r)/10},calcSchwartz:i,calcCKDEPI2021:a,calcCKDEPI2021_nonindexed:function(e,t,n,o){const r=a(e,t,n);return Math.round(r*o/1.73*10)/10},getCKDStage:function(e){return e>=90?{stage:"G1",label:"ปกติ/สูง",cls:"stage-1"}:e>=60?{stage:"G2",label:"ลดลงเล็กน้อย",cls:"stage-2"}:e>=45?{stage:"G3a",label:"ลดลงเล็กน้อย-ปานกลาง",cls:"stage-3a"}:e>=30?{stage:"G3b",label:"ลดลงปานกลาง-มาก",cls:"stage-3b"}:e>=15?{stage:"G4",label:"ลดลงมาก",cls:"stage-4"}:{stage:"G5",label:"ไตวาย",cls:"stage-5"}},getPatientFromForm:function(a){const s=Object.assign({age:"ptAge",wt:"ptWt",ht:"ptHt",sex:"ptSex",scr:"ptScr",alb:"ptAlb",dialysis:"ptDialysis"},a||{}),l=(e,t)=>{const n=document.getElementById(e);return n&&parseFloat(n.value)||t},c=(e,t)=>{const n=document.getElementById(e);return n?n.value:t},d=l(s.age,55),u=l(s.wt,70),g=l(s.ht,170),m=c(s.sex,"M"),p=l(s.scr,1),f=l(s.alb,4),v=c(s.dialysis,"none"),y=Math.round(10*e(g,m))/10,h=Math.round(10*t(u,y))/10,b=Math.round(10*n(u,g))/10,w=Math.round(100*o(g,u))/100,I=u>1.3*y,E=u<y,$=d<18;let x;return x=</body>&g>0?i(g,p):r(d,u,p,m,g),{age:d,wt:u,ht:g,sex:m,scr:p,alb:f,dialysis:v,ibw:y,abw:h,bmi:b,bsa:w,isObese:I,isUnderweight:E,isPediatric:$,crcl:x}},sendAnalytics:g,trackPageView:function(e){const t=Date.now(),n=function(){const e=document.referrer||"";return e.includes("index.html")||e.endsWith("iv-drugref/")?"drugref":e.includes("calculator.html")?"calculator":e.includes("tdm.html")?"tdm":e.includes("vanco-tdm.html")?"vanco-tdm":e.includes("renal-dosing.html")?"renal-dosing":e.includes("compatibility.html")?"compatibility":e.includes("dashboard.html")?"dashboard":e?"external":"direct"}();g({type:"page_view",page:e,action:"enter",from_page:n,referrer:document.referrer||"direct"});let o=!1;function r(r){o||(o=!0,g({type:"page_view",page:e,action:"leave",duration_sec:Math.round((Date.now()-t)/1e3),from_page:n,...r||{}}))}return window.addEventListener("beforeunload",()=>r()),document.addEventListener("visibilitychange",()=>{"hidden"===document.visibilityState&&r()}),{sendExit:r,fromPage:n,enterTime:t}},getSessionId:c,getUserId:d,hasAnalyticsConsent:u,registerSW:function(){"serviceWorker"in navigator&&navigator.serviceWorker.register("sw.js").then(e=>console.log("[SW] Registered:",e.scope)).catch(e=>console.warn("[SW] Registration failed:",e))},generateId:function(e){e=e||16;const t=new Uint8Array(e/2);return crypto.getRandomValues(t),Array.from(t,e=>e.toString(16).padStart(2,"0")).join("")},debounce:function(e,t){let n;return function(...o){clearTimeout(n),n=setTimeout(()=>e.apply(this,o),t)}},fmt:function(e,t){return t=void 0!==t?t:1,(Math.round(e*Math.pow(10,t))/Math.pow(10,t)).toFixed(t)}}}();document.addEventListener("DOMContentLoaded",()=>{IVDrugRef.registerSW()}),function(){"use strict";const e="ivdrug_admin_";let t,n={user:null,myRole:"editor",drugs:[],auditLog:[],adminUsers:[],currentPage:1,auditPage:1,sortField:"id",sortDir:"asc",editingId:null,importData:null};function o(){return{scriptUrl:localStorage.getItem(e+"scriptUrl")||"",clientId:localStorage.getItem(e+"clientId")||"",allowedEmails:(localStorage.getItem(e+"allowedEmails")||"").split(",").map(e=>e.trim()).filter(Boolean)}}function r(){const e=o();if(!e.clientId)return a({name:"Admin (Setup)",email:"setup@local",picture:""}),$("settings"),void L("กรุณาตั้งค่า Google Client ID และ Script URL ก่อน","info");google.accounts.id.initialize({client_id:e.clientId,callback:i,auto_select:!0}),google.accounts.id.renderButton(document.querySelector(".google-btn"),{theme:"outline",size:"large",text:"signin_with",shape:"pill"}),google.accounts.id.prompt()}function i(e){const t=function(e){const t=e.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(decodeURIComponent(atob(t).split("").map(e=>"%"+("00"+e.charCodeAt(0).toString(16)).slice(-2)).join("")))}(e.credential),r=o();if(r.allowedEmails.length>0&&!r.allowedEmails.includes(t.email)){const e=document.getElementById("auth-error");return e.textContent=`❌ ${t.email} ไม่มีสิทธิ์เข้าถึง — ติดต่อ admin`,void(e.style.display="block")}n.user={name:t.name,email:t.email,picture:t.picture},a(n.user)}function a(e){document.getElementById("auth-screen").style.display="none",document.getElementById("app").style.display="block",document.getElementById("user-name").textContent=e.name,document.getElementById("user-photo").src=e.picture||'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>',l(),async function(){try{const e=await s("getAudit");n.auditLog=e.log||[],I()}catch(e){console.error("Audit load error:",e)}}(),E()}async function s(e,t={}){const r=o();if(!r.scriptUrl)throw L("กรุณาตั้งค่า Script URL ก่อน","error"),new Error("No script URL");const i=["getDrugs","getAudit","getCategories","getUsers"].includes(e),a=new URL(r.scriptUrl);if(a.searchParams.set("action",e),a.searchParams.set("user",n.user?.email||"unknown"),i){Object.entries(t).forEach(([e,t])=>a.searchParams.set(e,t));const e=await fetch(a.toString()),n=await e.json();if(n.permissionDenied)throw L("❌ "+(n.error||"ไม่มีสิทธิ์"),"error"),new Error(n.error||"Permission denied");return n}const s=JSON.stringify(t);a.searchParams.set("data",s);const l=a.toString();if(l.length<6e3){console.log(`[API] ${e} via GET (${l.length} chars)`);const t=await fetch(l),n=await t.json();if(n.permissionDenied)throw L("❌ "+(n.error||"ไม่มีสิทธิ์"),"error"),new Error(n.error||"Permission denied");return n}console.log(`[API] ${e} via POST no-cors (payload: ${s.length} chars)`);const c=r.scriptUrl+"?action="+e+"&user="+encodeURIComponent(n.user?.email||"unknown");return await fetch(c,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:s}),await new Promise(e=>setTimeout(e,1e3)),{success:!0,message:"Sent (POST no-cors)"}}async function l(){B("กำลังโหลดข้อมูลยา...");try{const e=await s("getDrugs");n.drugs=e.drugs||[],e.myRole&&(n.myRole=e.myRole),function(){const e=new Set;n.drugs.forEach(t=>{(t.categories||[]).forEach(t=>e.add(t.trim().toLowerCase()))});const t=document.getElementById("filter-category"),o=t.value;t.innerHTML='<option value="">ทุกหมวดหมู่</option>',[...e].sort().forEach(e=>{t.innerHTML+=`<option value="${e}">${e}</option>`}),t.value=o}(),d(),g(),function(){const e=n.drugs.filter(e=>"pending"===e.status).length,t=document.getElementById("pending-count");t.textContent=e,t.style.display=e>0?"inline-flex":"none"}(),function(){const e=c()?"🔑 Admin":"📝 Editor",t=document.getElementById("user-name");t&&!t.dataset.roleApplied&&(t.innerHTML=x(n.user?.name||"")+` <span style="font-size:10px;background:${c()?"var(--purple-bg)":"var(--primary-bg)"};color:${c()?"#6d28d9":"#0369a1"};padding:2px 8px;border-radius:50px;font-weight:600">${e}</span>`,t.dataset.roleApplied="1"),document.querySelectorAll('[data-tab="import"]').forEach(e=>e.style.display=c()?"":"none"),document.querySelectorAll('[data-tab="settings"]').forEach(e=>e.style.display=c()?"":"none"),document.querySelectorAll('[data-tab="users"]').forEach(e=>e.style.display=c()?"":"none");const o=document.getElementById("btn-save-approve");o&&(o.style.display=c()?"inline-flex":"none"),y()}()}catch(t){if(console.error(t),t.message&&t.message.includes("ไม่มีสิทธิ์"))return void L("❌ คุณไม่มีสิทธิ์เข้าถึงระบบนี้ — ติดต่อ Admin","error");const o=localStorage.getItem(e+"drugsCache");o&&(n.drugs=JSON.parse(o),d(),g(),L("โหลดจาก cache — ไม่สามารถเชื่อมต่อ server","info"))}D()}function c(){return"admin"===n.myRole}function d(){const e=n.drugs.length,t=n.drugs.filter(e=>"approved"===e.status).length,o=n.drugs.filter(e=>"pending"===e.status).length,r=n.drugs.filter(e=>"draft"===e.status).length,i=n.drugs.filter(e=>e.had).length;document.getElementById("stats-row").innerHTML=`\n    <div class="stat-card"><div class="stat-label">ยาทั้งหมด</div><div class="stat-value primary">${e}</div></div>\n    <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-value success">${t}</div></div>\n    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value warning">${o}</div></div>\n    <div class="stat-card"><div class="stat-label">Draft</div><div class="stat-value">${r}</div></div>\n    <div class="stat-card"><div class="stat-label">High-Alert</div><div class="stat-value danger">${i}</div></div>\n  `}function u(){const e=document.getElementById("drug-search").value.toLowerCase(),t=document.getElementById("filter-status").value,o=document.getElementById("filter-category").value;let r=n.drugs.filter(n=>!(e&&!n.generic?.toLowerCase().includes(e)&&!n.trade?.toLowerCase().includes(e)||t&&n.status!==t||o&&!(n.categories||[]).some(e=>e.toLowerCase()===o)));return r.sort((e,t)=>{let o=e[n.sortField]||"",r=t[n.sortField]||"";return"string"==typeof o&&(o=o.toLowerCase()),"string"==typeof r&&(r=r.toLowerCase()),o<r?"asc"===n.sortDir?-1:1:o>r?"asc"===n.sortDir?1:-1:0}),r}function g(){const e=u(),t=e.length,o=Math.ceil(t/25);n.currentPage>o&&(n.currentPage=Math.max(1,o));const r=25*(n.currentPage-1),i=e.slice(r,r+25);document.getElementById("drug-tbody").innerHTML=i.map(e=>`\n    <tr>\n      <td style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">${e.id||"—"}</td>\n      <td>\n        <div class="drug-name">${x(e.generic||"")}</div>\n        ${e.had?'<span class="badge badge-had" style="font-size:10px">⚠ HAD</span>':""}\n      </td>\n      <td class="drug-trade">${x(e.trade||"—")}</td>\n      <td>${(e.categories||[]).map(e=>`<span class="badge badge-cat">${x(e)}</span>`).join("")}</td>\n      <td><span class="badge ${"E"===e.ed?"badge-ed":"badge-ned"}">${e.ed||"—"}</span></td>\n      <td>${e.had?"⚠️":"—"}</td>\n      <td><span class="badge badge-${e.status||"draft"}">${e.status||"draft"}</span></td>\n      <td>\n        <div class="actions-cell">\n          <button class="btn btn-sm btn-outline" onclick="editDrug(${e.id})" title="แก้ไข">✏️</button>\n          <button class="btn btn-sm btn-outline" onclick="previewDrugById(${e.id})" title="Preview">👁</button>\n          ${c()&&"pending"===e.status?`<button class="btn btn-sm btn-success" onclick="approveDrug(${e.id})" title="อนุมัติ">✅</button>`:""}\n          ${c()?`<button class="btn btn-sm btn-outline" onclick="deleteDrug(${e.id})" title="ลบ" style="color:var(--danger)">🗑</button>`:""}\n        </div>\n      </td>\n    </tr>\n  `).join("");const a=document.getElementById("pagination");if(o<=1)return void(a.innerHTML="");let s=`<span style="color:var(--text-muted);font-size:12px">${t} รายการ</span>`;s+=`<button class="page-btn" onclick="goPage(${n.currentPage-1})" ${n.currentPage<=1?"disabled":""}>‹</button>`;for(let e=1;e<=o;e++)o>7&&Math.abs(e-n.currentPage)>2&&1!==e&&e!==o?e!==n.currentPage-3&&e!==n.currentPage+3||(s+="<span>…</span>"):s+=`<button class="page-btn ${e===n.currentPage?"active":""}" onclick="goPage(${e})">${e}</button>`;s+=`<button class="page-btn" onclick="goPage(${n.currentPage+1})" ${n.currentPage>=o?"disabled":""}>›</button>`,a.innerHTML=s}function m(e=null){n.editingId=e?e.id:null,document.getElementById("modal-title").textContent=e?`แก้ไข: ${e.generic}`:"เพิ่มยาใหม่",h(!1);const t={"f-generic":e?.generic||"","f-trade":e?.trade||"","f-strength":e?.strength||"","f-ed":e?.ed||"E","f-categories":(e?.categories||[]).join(", "),"f-reconst-solvent":e?.reconst?.solvent||"","f-reconst-volume":e?.reconst?.volume||"","f-reconst-conc":e?.reconst?.conc||"","f-dil-diluent":e?.dilution?.diluent||"","f-dil-volume":e?.dilution?.volume||"","f-dil-conc":e?.dilution?.finalConc||"","f-admin-route":e?.admin?.route||"","f-admin-rate":e?.admin?.rate||"","f-stab-reconst":e?.stability?.reconst||"","f-stab-diluted":e?.stability?.diluted||"","f-stab-storage":e?.stability?.storage||"","f-compat-ysite":e?.compat?.ysite||"","f-compat-incompat":e?.compat?.incompat||"","f-precautions":e?.precautions||"","f-monitoring":(e?.monitoring||[]).join(", "),"f-ref":e?.ref||""};Object.entries(t).forEach(([e,t])=>{const n=document.getElementById(e);n&&(n.value=t)}),document.getElementById("f-had").checked=e?.had||!1;const o=document.getElementById("btn-save-approve");o&&(o.style.display=c()?"inline-flex":"none"),document.getElementById("drug-modal").classList.add("open")}function p(){document.getElementById("drug-modal").classList.remove("open"),n.editingId=null}function f(){return{generic:document.getElementById("f-generic").value.trim(),trade:document.getElementById("f-trade").value.trim(),strength:document.getElementById("f-strength").value.trim(),ed:document.getElementById("f-ed").value,categories:document.getElementById("f-categories").value.split(",").map(e=>e.trim()).filter(Boolean),had:document.getElementById("f-had").checked,reconst:{solvent:document.getElementById("f-reconst-solvent").value.trim(),volume:document.getElementById("f-reconst-volume").value.trim(),conc:document.getElementById("f-reconst-conc").value.trim()},dilution:{diluent:document.getElementById("f-dil-diluent").value.trim(),volume:document.getElementById("f-dil-volume").value.trim(),finalConc:document.getElementById("f-dil-conc").value.trim()},admin:{route:document.getElementById("f-admin-route").value.trim(),rate:document.getElementById("f-admin-rate").value.trim()},stability:{reconst:document.getElementById("f-stab-reconst").value.trim(),diluted:document.getElementById("f-stab-diluted").value.trim(),storage:document.getElementById("f-stab-storage").value.trim()},compat:{ysite:document.getElementById("f-compat-ysite").value.trim(),incompat:document.getElementById("f-compat-incompat").value.trim()},precautions:document.getElementById("f-precautions").value.trim(),monitoring:document.getElementById("f-monitoring").value.split(",").map(e=>e.trim()).filter(Boolean),ref:document.getElementById("f-ref").value.trim()}}async function v(e){if(!c())return void L("❌ Editor ไม่มีสิทธิ์อนุมัติยา","error");const t=n.drugs.find(t=>t.id===e);if(confirm(`อนุมัติ "${t?.generic}"?\n\nยานี้จะถูก publish ไปยัง production app`)){B("กำลังอนุมัติ...");try{await s("approveDrug",{id:e,approver:n.user?.email}),L(`✅ อนุมัติ ${t?.generic} แล้ว — จะปรากฏใน app หลัก`,"success"),await l()}catch(e){L("เกิดข้อผิดพลาด: "+e.message,"error")}D()}}function y(){const e=n.drugs.filter(e=>"pending"===e.status),t=document.getElementById("pending-list");0!==e.length?t.innerHTML=e.map(e=>`\n    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--shadow)">\n      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">\n        <div>\n          <strong style="font-size:16px">${x(e.generic)}</strong>\n          <span style="color:var(--text-muted);margin-left:8px">${x(e.trade||"")}</span>\n          ${e.had?'<span class="badge badge-had" style="margin-left:8px">⚠ HAD</span>':""}\n        </div>\n        <div style="display:flex;gap:8px">\n          <button class="btn btn-sm btn-outline" onclick="editDrug(${e.id})">✏️ แก้ไข</button>\n          ${c()?`<button class="btn btn-sm btn-success" onclick="approveDrug(${e.id})">✅ อนุมัติ</button>`:""}\n          ${c()?`<button class="btn btn-sm btn-danger" onclick="rejectDrug(${e.id}, prompt('เหตุผลที่ส่งกลับ:'))">↩️ ส่งกลับ</button>`:'<span class="badge badge-pending">รอ Admin อนุมัติ</span>'}\n        </div>\n      </div>\n      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;font-size:12px;color:var(--text-muted)">\n        <div><strong>Strength:</strong> ${x(e.strength||"—")}</div>\n        <div><strong>Route:</strong> ${x(e.admin?.route||"—")}</div>\n        <div><strong>Rate:</strong> ${x(e.admin?.rate||"—")}</div>\n        <div><strong>Categories:</strong> ${(e.categories||[]).join(", ")||"—"}</div>\n      </div>\n    </div>\n  `).join(""):t.innerHTML='<div style="text-align:center;padding:48px;color:var(--text-muted)">✅ ไม่มียาที่รออนุมัติ</div>'}function h(e){document.getElementById("form-view").style.display=e?"none":"block",document.getElementById("preview-view").style.display=e?"block":"none",document.getElementById("btn-tab-form").style.background=e?"transparent":"var(--primary)",document.getElementById("btn-tab-form").style.color=e?"var(--text-muted)":"white",document.getElementById("btn-tab-preview").style.background=e?"var(--primary)":"transparent",document.getElementById("btn-tab-preview").style.color=e?"white":"var(--text-muted)",e&&function(e){const t=document.getElementById("preview-card");t.className="preview-card"+(e.had?" had-pulse":"");const n=[];(e.reconst?.solvent||e.reconst?.volume||e.reconst?.conc)&&n.push({title:"Reconstitution",content:[e.reconst.solvent,e.reconst.volume?`Volume: ${e.reconst.volume}`:"",e.reconst.conc?`Conc: ${e.reconst.conc}`:""].filter(Boolean).join(" — ")}),(e.dilution?.diluent||e.dilution?.volume||e.dilution?.finalConc)&&n.push({title:"Dilution",content:[e.dilution.diluent,e.dilution.volume?`Volume: ${e.dilution.volume}`:"",e.dilution.finalConc?`Final: ${e.dilution.finalConc}`:""].filter(Boolean).join(" — ")}),(e.admin?.route||e.admin?.rate)&&n.push({title:"Administration",content:[e.admin.route,e.admin.rate].filter(Boolean).join(" — ")}),(e.stability?.reconst||e.stability?.diluted||e.stability?.storage)&&n.push({title:"Stability",content:[e.stability.reconst?`Reconst: ${e.stability.reconst}`:"",e.stability.diluted?`Diluted: ${e.stability.diluted}`:"",e.stability.storage?`Storage: ${e.stability.storage}`:""].filter(Boolean).join(" | ")}),e.compat?.ysite&&n.push({title:"Y-site Compatible",content:e.compat.ysite}),e.compat?.incompat&&n.push({title:"Incompatible",content:e.compat.incompat}),e.precautions&&n.push({title:"Precautions",content:e.precautions}),e.monitoring?.length&&n.push({title:"Monitoring",content:e.monitoring.join(", ")}),t.innerHTML=`\n    <div class="preview-card-header">\n      <div>\n        <h3>${x(e.generic||"Drug Name")}</h3>\n        <div class="trade">${x(e.trade||"")}</div>\n        <div class="strength">${x(e.strength||"")}</div>\n      </div>\n    </div>\n    <div class="preview-card-badges">\n      ${e.had?'<span class="badge badge-had">⚠ High-Alert Drug</span>':""}\n      <span class="badge ${"E"===e.ed?"badge-ed":"badge-ned"}">${"E"===e.ed?"ED":"NED"}</span>\n      ${(e.categories||[]).map(e=>`<span class="badge badge-cat">${x(e)}</span>`).join("")}\n    </div>\n    ${n.map(e=>`\n      <div class="preview-section">\n        <div class="preview-section-title">${e.title}</div>\n        <div class="preview-section-content">${x(e.content)}</div>\n      </div>\n    `).join("")}\n    ${e.ref?`<div style="padding:8px 20px;font-size:11px;color:var(--text-light);border-top:1px solid var(--border)">📚 ${x(e.ref)}</div>`:""}\n  `}(f())}function b(e){const t=e.target.files[0];if(!t)return;const n=t.name.split(".").pop().toLowerCase();if("csv"===n)Papa.parse(t,{header:!0,skipEmptyLines:!0,complete:e=>{w(e.data,t.name)},error:e=>{L("CSV parse error: "+e.message,"error")}});else if("xlsx"===n||"xls"===n){const e=new FileReader;e.onload=e=>{const n=XLSX.read(e.target.result,{type:"array"}),o=n.Sheets[n.SheetNames[0]];w(XLSX.utils.sheet_to_json(o),t.name)},e.readAsArrayBuffer(t)}else L("ไม่รองรับไฟล์นามสกุล ."+n,"error")}function w(e,t){if(!e||0===e.length)return void L("ไฟล์ว่างเปล่า","error");n.importData=e.map((e,t)=>({_row:t+2,generic:e["Generic Name"]||e.generic||e.Generic||"",trade:e["Trade Name"]||e.trade||e.Trade||"",strength:e.Strength||e.strength||"",ed:e.ED||e.ed||e["ED/NED"]||"N",categories:(e.Categories||e.categories||"").split(",").map(e=>e.trim()).filter(Boolean),had:["true","1","yes","Y"].includes(String(e.HAD||e.had||"").toLowerCase()),reconst:{solvent:e["Reconst Solvent"]||e.reconst_solvent||"",volume:e["Reconst Volume"]||e.reconst_volume||"",conc:e["Reconst Conc"]||e.reconst_conc||""},dilution:{diluent:e.Diluent||e.diluent||"",volume:e["Dilution Volume"]||e.dilution_volume||"",finalConc:e["Final Conc"]||e.final_conc||""},admin:{route:e.Route||e.route||"",rate:e.Rate||e.rate||""},stability:{reconst:e["Stability Reconst"]||e.stability_reconst||"",diluted:e["Stability Diluted"]||e.stability_diluted||"",storage:e.Storage||e.storage||""},compat:{ysite:e["Y-site Compatible"]||e.ysite||"",incompat:e.Incompatible||e.incompat||""},precautions:e.Precautions||e.precautions||"",monitoring:(e.Monitoring||e.monitoring||"").split(",").map(e=>e.trim()).filter(Boolean),ref:e.Reference||e.ref||"",status:"draft"}));const o=[];n.importData.forEach((e,t)=>{e.generic||o.push(`Row ${e._row}: ไม่มี Generic Name`)});const r=n.importData.filter(e=>e.generic);document.getElementById("import-preview-area").innerHTML=`\n    <div class="import-status ${o.length?"error":"success"}" style="margin-top:16px">\n      📄 ${t} — พบ ${e.length} rows, valid ${r.length} rows\n      ${o.length?`<br>⚠️ ${o.length} errors: ${o.slice(0,3).join("; ")}${o.length>3?"...":""}`:""}\n    </div>\n    <div class="import-preview">\n      <div class="table-wrap" style="margin-top:12px">\n        <table class="drug-table">\n          <thead><tr><th>Row</th><th>Generic</th><th>Trade</th><th>Strength</th><th>ED</th><th>HAD</th><th>Categories</th></tr></thead>\n          <tbody>\n            ${r.slice(0,50).map(e=>`\n              <tr>\n                <td>${e._row}</td>\n                <td class="drug-name">${x(e.generic)}</td>\n                <td class="drug-trade">${x(e.trade)}</td>\n                <td>${x(e.strength)}</td>\n                <td><span class="badge ${"E"===e.ed?"badge-ed":"badge-ned"}">${e.ed}</span></td>\n                <td>${e.had?"⚠️":"—"}</td>\n                <td>${e.categories.map(e=>`<span class="badge badge-cat">${x(e)}</span>`).join("")}</td>\n              </tr>\n            `).join("")}\n            ${r.length>50?`<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">... และอีก ${r.length-50} รายการ</td></tr>`:""}\n          </tbody>\n        </table>\n      </div>\n    </div>\n  `,r.length>0&&(document.getElementById("btn-import-confirm").style.display="inline-flex")}function I(){const e=document.getElementById("audit-filter-action").value,t=document.getElementById("audit-date-from").value,o=document.getElementById("audit-date-to").value;let r=n.auditLog.filter(n=>!(e&&n.action!==e||t&&n.timestamp<t||o&&n.timestamp>o+"T23:59:59"));const i=r.length,a=Math.ceil(i/30),s=30*(n.auditPage-1),l=r.slice(s,s+30),c=document.getElementById("audit-timeline");if(0===l.length)return void(c.innerHTML='<div style="text-align:center;padding:48px;color:var(--text-muted)">ไม่มีรายการ</div>');c.innerHTML=l.map(e=>{return`\n    <div class="audit-item ${e.action}">\n      <div class="audit-meta">\n        <span>${S(e.timestamp)}</span>\n        <span>👤 ${x(e.user||"unknown")}</span>\n      </div>\n      <div class="audit-action">\n        ${t=e.action,{create:"🆕",edit:"✏️",delete:"🗑",approve:"✅",reject:"↩️",import:"📥"}[t]||"📝"} ${function(e){return{create:"สร้างใหม่",edit:"แก้ไข",delete:"ลบ",approve:"อนุมัติ",reject:"ส่งกลับ",import:"Import"}[e]||e}(e.action)}: <strong>${x(e.drugName||"")}</strong>\n        ${e.drugId?`<span style="font-family:var(--mono);font-size:11px;color:var(--text-light)">#${e.drugId}</span>`:""}\n      </div>\n      ${e.details?`<div class="audit-details">${x(e.details)}</div>`:""}\n    </div>\n  `;var t}).join("");const d=document.getElementById("audit-pagination");if(a<=1)return void(d.innerHTML="");let u="";for(let e=1;e<=a;e++)u+=`<button class="page-btn ${e===n.auditPage?"active":""}" onclick="auditGoPage(${e})">${e}</button>`;d.innerHTML=u}function E(){const e=o();document.getElementById("setting-script-url").value=e.scriptUrl,document.getElementById("setting-client-id").value=e.clientId,document.getElementById("setting-allowed-emails").value=e.allowedEmails.join(", ")}function $(e){c()||!["import","settings","users"].includes(e)?(document.querySelectorAll(".tab-btn").forEach(t=>t.classList.toggle("active",t.dataset.tab===e)),document.querySelectorAll(".panel").forEach(t=>t.classList.toggle("active",t.id===`panel-${e}`)),"pending"===e&&y(),"audit"===e&&I(),"users"===e&&async function(){try{const e=await s("getUsers");n.adminUsers=e.users||[],e.myRole&&(n.myRole=e.myRole),function(){const e=document.getElementById("users-tbody");e&&(0!==n.adminUsers.length?e.innerHTML=n.adminUsers.map(e=>{const t=e.email.toLowerCase()===(n.user?.email||"").toLowerCase(),o="admin"===e.role?'<span class="badge" style="background:var(--purple-bg);color:#6d28d9">🔑 Admin</span>':'<span class="badge" style="background:var(--primary-bg);color:#0369a1">📝 Editor</span>';return`\n      <tr>\n        <td style="font-size:13px">${x(e.email)} ${t?'<span style="font-size:10px;color:var(--success)">(คุณ)</span>':""}</td>\n        <td style="font-size:13px">${x(e.name||"—")}</td>\n        <td>${o}</td>\n        <td style="font-size:12px;color:var(--text-muted)">${x(e.addedBy||"—")}</td>\n        <td style="font-size:12px;color:var(--text-muted)">${e.addedDate?S(e.addedDate):"—"}</td>\n        <td>\n          <div class="actions-cell">\n            ${t?'<span style="font-size:11px;color:var(--text-muted)">—</span>':`\n              <button class="btn btn-sm btn-outline" onclick="changeRole('${x(e.email)}', '${"admin"===e.role?"editor":"admin"}')" title="เปลี่ยน role">\n                ${"admin"===e.role?"📝 → Editor":"🔑 → Admin"}\n              </button>\n              <button class="btn btn-sm btn-outline" onclick="removeUser('${x(e.email)}')" title="ลบผู้ใช้" style="color:var(--danger)">🗑</button>\n            `}\n          </div>\n        </td>\n      </tr>\n    `}).join(""):e.innerHTML='<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">ยังไม่มีผู้ใช้ — เพิ่มผู้ใช้คนแรก</td></tr>')}()}catch(e){console.error("loadUsers error:",e)}}()):L("❌ คุณไม่มีสิทธิ์เข้าถึงส่วนนี้","error")}function x(e){const t=document.createElement("div");return t.textContent=e,t.innerHTML}function S(e){return e?new Date(e).toLocaleString("th-TH",{dateStyle:"short",timeStyle:"short"}):"—"}function B(e){document.getElementById("loading-text").textContent=e||"กำลังโหลด...",document.getElementById("loading").classList.add("show")}function D(){document.getElementById("loading").classList.remove("show")}function L(e,t="info"){const n=document.getElementById("toast-container"),o=document.createElement("div");o.className=`toast ${t}`,o.textContent=e,n.appendChild(o),setTimeout(()=>{o.style.opacity="0",o.style.transform="translateY(10px)",setTimeout(()=>o.remove(),300)},4e3)}document.addEventListener("DOMContentLoaded",()=>{document.getElementById("drug-search")?.addEventListener("input",()=>{clearTimeout(t),t=setTimeout(()=>{n.currentPage=1,g()},250)})}),document.addEventListener("DOMContentLoaded",()=>{if(function(){const e=document.getElementById("import-zone");e.addEventListener("dragover",t=>{t.preventDefault(),e.classList.add("dragover")}),e.addEventListener("dragleave",()=>e.classList.remove("dragover")),e.addEventListener("drop",t=>{t.preventDefault(),e.classList.remove("dragover"),t.dataTransfer.files.length&&b({target:{files:t.dataTransfer.files}})})}(),"undefined"!=typeof google&&google.accounts)r();else{const e=setInterval(()=>{"undefined"!=typeof google&&google.accounts&&(clearInterval(e),r())},200);setTimeout(()=>{clearInterval(e),o().clientId||(a({name:"Admin (Setup)",email:"setup@local",picture:""}),$("settings"))},3e3)}}),window.initGoogleAuth=r,window.handleCredentialResponse=i,window.signIn=function(){if(!o().clientId)return a({name:"Admin (Setup)",email:"setup@local",picture:""}),void $("settings");google.accounts.id.prompt()},window.signOut=function(){google.accounts.id.disableAutoSelect(),n.user=null,document.getElementById("app").style.display="none",document.getElementById("auth-screen").style.display="flex"},window.switchTab=$,window.openDrugModal=m,window.closeDrugModal=p,window.saveDrug=async function(e){const t=f();if(!t.generic)return void L("กรุณากรอก Generic Name","error");"approved"===e&&(e="pending"),c()||["draft","pending"].includes(e)||(e="draft"),t.status=e,B("กำลังบันทึก...");const o="pending"===e?"⏳ รออนุมัติ":"📝 Draft";try{let e;return n.editingId?(t.id=n.editingId,await s("updateDrug",t),e=n.editingId,L(`แก้ไข ${t.generic} สำเร็จ — ${o}`,"success")):(e=(await s("createDrug",t)).id,L(`เพิ่ม ${t.generic} สำเร็จ — ${o}`,"success")),p(),await l(),e}catch(e){return L("เกิดข้อผิดพลาด: "+e.message,"error"),null}finally{D()}},window.editDrug=function(e){const t=n.drugs.find(t=>t.id===e);t&&m(t)},window.deleteDrug=async function(e){if(!c())return void L("❌ Editor ไม่มีสิทธิ์ลบยา","error");const t=n.drugs.find(t=>t.id===e);if(confirm(`ยืนยันลบ "${t?.generic||e}"?\n\nข้อมูลจะถูกย้ายไป Audit Log`)){B("กำลังลบ...");try{await s("deleteDrug",{id:e}),L(`ลบ ${t?.generic} แล้ว`,"success"),await l()}catch(e){L("เกิดข้อผิดพลาด: "+e.message,"error")}D()}},window.approveDrug=void 0!==v?v:function(){},window.handleImportFile=b,window.confirmImport=async function(){const e=(n.importData||[]).filter(e=>e.generic);if(0!==e.length&&confirm(`ยืนยัน import ${e.length} รายการ?\n\nทุกรายการจะถูกตั้งเป็น "draft"`)){B(`กำลัง import ${e.length} รายการ...`);try{await async function(e,t){let n=0,o=0;for(let e=0;e<t.length;e++){B(`กำลัง import ${e+1}/${t.length} — ${t[e].generic}...`);try{const o=t[e];o.status="draft",await s("createDrug",o),n++}catch(n){console.error(`Failed to import drug ${e}:`,t[e].generic,n),o++}e%3==2&&await new Promise(e=>setTimeout(e,300))}return o>0&&L(`⚠️ Import: สำเร็จ ${n}, ล้มเหลว ${o}`,"warning"),{success:!0,count:n}}(0,e),L(`✅ Import ${e.length} รายการสำเร็จ`,"success"),n.importData=null,document.getElementById("import-preview-area").innerHTML="",document.getElementById("btn-import-confirm").style.display="none",await l(),$("drugs")}catch(e){L("เกิดข้อผิดพลาด: "+e.message,"error")}D()}},window.downloadTemplate=function(){const e=["Generic Name","Trade Name","Strength","ED","Categories","HAD","Reconst Solvent","Reconst Volume","Reconst Conc","Diluent","Dilution Volume","Final Conc","Route","Rate","Stability Reconst","Stability Diluted","Storage","Y-site Compatible","Incompatible","Precautions","Monitoring","Reference"].join(",")+"\n"+["vancomycin","Vancocin","500 mg/vial","E","antibiotic","false","SWFI","10 mL","50 mg/mL","NSS or D5W","200 mL","2.5-5 mg/mL","IV infusion","over 60 min","96 hr at RT","96 hr at RT","15-25°C","Amikacin, Cefepime","Ceftriaxone, Heparin","Red man syndrome: infuse over ≥60 min","SCr, BUN, Trough level, WBC","Lexicomp 2025"].map(e=>`"${e}"`).join(",")+"\n",t=new Blob(["\ufeff"+e],{type:"text/csv;charset=utf-8;"}),n=URL.createObjectURL(t),o=document.createElement("a");o.href=n,o.download="iv_drugref_import_template.csv",o.click(),URL.revokeObjectURL(n),L("ดาวน์โหลด template แล้ว","info")},window.exportData="undefined"!=typeof exportData?exportData:function(){},window.saveSettings=function(){var t;t={scriptUrl:document.getElementById("setting-script-url").value.trim(),clientId:document.getElementById("setting-client-id").value.trim(),allowedEmails:document.getElementById("setting-allowed-emails").value.split(",").map(e=>e.trim()).filter(Boolean)},localStorage.setItem(e+"scriptUrl",t.scriptUrl),localStorage.setItem(e+"clientId",t.clientId),localStorage.setItem(e+"allowedEmails",t.allowedEmails.join(",")),L("💾 บันทึกการตั้งค่าแล้ว — reload เพื่อใช้งาน Google Sign-in","success")},window.filterDrugs="undefined"!=typeof filterDrugs?filterDrugs:u,window.loadSettingsUI=E,window.renderAuditLog=I,window.sortTable=function(e){n.sortField===e?n.sortDir="asc"===n.sortDir?"desc":"asc":(n.sortField=e,n.sortDir="asc"),g()},window.goPage=function(e){const t=Math.ceil(u().length/25);e<1||e>t||(n.currentPage=e,g(),document.querySelector(".table-wrap").scrollIntoView({behavior:"smooth"}))},window.auditGoPage=function(e){n.auditPage=e,I()},window.togglePreview=h,window.previewDrugById=function(e){const t=n.drugs.find(t=>t.id===e);t&&(m(t),setTimeout(()=>h(!0),50))},window.renderPendingList=y,window.toast=L}();
+// ============================================================================
+// IV DrugRef PWA — Error Tracker v1.0
+// Hybrid error tracking: client-side capture + GAS remote reporting
+// ============================================================================
+// Features:
+// - Global error capture (window.onerror, unhandledrejection)
+// - Non-intrusive toast notification for users
+// - In-memory error log with localStorage persistence for debugging
+// - Offline queue → auto-flush to GAS when back online
+// - Deduplication (same error within 60s = skip)
+// - Rate limiting (max 10 reports per minute to GAS)
+// - Email alert for critical errors via GAS
+// ============================================================================
+
+(function () {
+  'use strict';
+
+  // ─── Configuration ───
+  const CONFIG = {
+    // GAS endpoint (same as analytics)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
+
+    // LocalStorage keys
+    LS_ERROR_LOG: 'iv_drugref_error_log',
+    LS_ERROR_QUEUE: 'iv_drugref_error_queue',
+
+    // Limits
+    MAX_LOG_ENTRIES: 50,        // Keep last 50 errors in localStorage
+    MAX_QUEUE_SIZE: 20,         // Max queued errors before flush
+    DEDUP_WINDOW_MS: 60000,     // 60s dedup window
+    RATE_LIMIT_PER_MIN: 10,     // Max 10 reports/minute to GAS
+    TOAST_DURATION_MS: 5000,    // Toast visible for 5s
+    FLUSH_INTERVAL_MS: 30000,   // Auto-flush queue every 30s
+
+    // Severity levels
+    SEVERITY: {
+      LOW: 'low',           // Minor UI glitch
+      MEDIUM: 'medium',     // Feature broken but app usable
+      HIGH: 'high',         // Core feature broken
+      CRITICAL: 'critical'  // App crash / data corruption
+    },
+
+    // App metadata
+    APP_VERSION: '5.0.0',
+    APP_NAME: 'IV DrugRef PWA'
+  };
+
+  // ─── State ───
+  let recentErrors = [];        // For dedup tracking
+  let rateLimitCount = 0;       // Reports sent this minute
+  let flushTimer = null;
+  let toastContainer = null;
+
+  // ─── Utility: Get current page name ───
+  function getPageName() {
+    const path = window.location.pathname;
+    const file = path.split('/').pop() || 'index.html';
+    return file.replace('.html', '');
+  }
+
+  // ─── Utility: Generate error fingerprint for dedup ───
+  function errorFingerprint(message, source, line) {
+    return `${message}|${source}|${line}`;
+  }
+
+  // ─── Utility: Check dedup ───
+  function isDuplicate(fingerprint) {
+    const now = Date.now();
+    // Clean old entries
+    recentErrors = recentErrors.filter(e => now - e.time < CONFIG.DEDUP_WINDOW_MS);
+    // Check if exists
+    if (recentErrors.some(e => e.fp === fingerprint)) return true;
+    recentErrors.push({ fp: fingerprint, time: now });
+    return false;
+  }
+
+  // ─── Utility: Classify severity ───
+  function classifySeverity(error) {
+    const msg = (error.message || '').toLowerCase();
+
+    // Critical: data corruption, security, crashes
+    if (msg.includes('drugs') && msg.includes('undefined')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('json') && msg.includes('parse')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
+
+    // High: core features broken
+    if (msg.includes('calculation') || msg.includes('dose')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('fetch') || msg.includes('network')) return CONFIG.SEVERITY.MEDIUM;
+    if (msg.includes('typeerror') || msg.includes('referenceerror')) return CONFIG.SEVERITY.MEDIUM;
+
+    // Default
+    return CONFIG.SEVERITY.LOW;
+  }
+
+  // ─── Utility: Collect context ───
+  function collectContext() {
+    return {
+      page: getPageName(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      online: navigator.onLine,
+      timestamp: new Date().toISOString(),
+      sessionId: sessionStorage.getItem('sessionId') || 'unknown',
+      screenSize: `${screen.width}x${screen.height}`,
+      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+      language: navigator.language,
+      standalone: window.matchMedia('(display-mode: standalone)').matches,
+      memoryUsage: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
+      appVersion: CONFIG.APP_VERSION
+    };
+  }
+
+  // ─── Toast UI ───
+  function createToastContainer() {
+    if (toastContainer) return toastContainer;
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'iv-error-toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+      max-width: 90vw;
+    `;
+    document.body.appendChild(toastContainer);
+    return toastContainer;
+  }
+
+  function showToast(message, severity) {
+    if (!document.body) return; // Not ready yet
+
+    const container = createToastContainer();
+    const toast = document.createElement('div');
+
+    const colors = {
+      low: { bg: '#f0f4f8', border: '#94a3b8', text: '#475569', icon: 'ℹ️' },
+      medium: { bg: '#fef9c3', border: '#f59e0b', text: '#92400e', icon: '⚠️' },
+      high: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', icon: '🔴' },
+      critical: { bg: '#fecaca', border: '#dc2626', text: '#7f1d1d', icon: '🚨' }
+    };
+    const c = colors[severity] || colors.medium;
+
+    toast.style.cssText = `
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 13px;
+      color: ${c.text};
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      max-width: 100%;
+      text-align: center;
+      line-height: 1.4;
+    `;
+
+    // User-friendly message (not raw error)
+    const userMsg = severity === 'critical' || severity === 'high'
+      ? `${c.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`
+      : `${c.icon} เกิดข้อผิดพลาดเล็กน้อย`;
+
+    toast.textContent = userMsg;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, CONFIG.TOAST_DURATION_MS);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    });
+  }
+
+  // ─── LocalStorage Log ───
+  function saveToLog(entry) {
+    try {
+      let log = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      log.unshift(entry);
+      if (log.length > CONFIG.MAX_LOG_ENTRIES) {
+        log = log.slice(0, CONFIG.MAX_LOG_ENTRIES);
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_LOG, JSON.stringify(log));
+    } catch (e) {
+      // localStorage full or unavailable — silently fail
+    }
+  }
+
+  // ─── Queue for GAS reporting ───
+  function addToQueue(entry) {
+    try {
+      let queue = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+      queue.push(entry);
+      if (queue.length > CONFIG.MAX_QUEUE_SIZE) {
+        queue = queue.slice(-CONFIG.MAX_QUEUE_SIZE); // Keep newest
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_QUEUE, JSON.stringify(queue));
+    } catch (e) { /* silently fail */ }
+  }
+
+  function getQueue() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function clearQueue() {
+    try {
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Send to GAS ───
+  function sendToGAS(entries) {
+    if (!navigator.onLine || entries.length === 0) return;
+    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return;
+
+    rateLimitCount += entries.length;
+
+    const payload = JSON.stringify({
+      type: 'error_report',
+      errors: entries,
+      batch_size: entries.length,
+      reported_at: new Date().toISOString()
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(CONFIG.GAS_URL, payload);
+      } else {
+        fetch(CONFIG.GAS_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors',
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Flush queue ───
+  function flushQueue() {
+    const queue = getQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    sendToGAS(queue);
+    clearQueue();
+  }
+
+  // ─── Core: Process error ───
+  function processError(errorInfo) {
+    const fp = errorFingerprint(errorInfo.message, errorInfo.source, errorInfo.line);
+    if (isDuplicate(fp)) return;
+
+    const severity = classifySeverity(errorInfo);
+    const context = collectContext();
+
+    const entry = {
+      ...errorInfo,
+      severity,
+      context,
+      fingerprint: fp,
+      id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    };
+
+    // 1. Console log (always)
+    console.error(`[ErrorTracker] ${severity.toUpperCase()}:`, errorInfo.message, entry);
+
+    // 2. Save to localStorage log
+    saveToLog(entry);
+
+    // 3. Show toast (only for medium+ severity)
+    if (severity !== CONFIG.SEVERITY.LOW) {
+      showToast(errorInfo.message, severity);
+    }
+
+    // 4. Queue for GAS reporting
+    addToQueue(entry);
+
+    // 5. If critical or high, flush immediately
+    if (severity === CONFIG.SEVERITY.CRITICAL || severity === CONFIG.SEVERITY.HIGH) {
+      flushQueue();
+    }
+  }
+
+  // ─── Global Error Handlers ───
+
+  // Catch synchronous errors
+  window.onerror = function (message, source, line, col, error) {
+    processError({
+      type: 'runtime_error',
+      message: String(message),
+      source: source || 'unknown',
+      line: line || 0,
+      col: col || 0,
+      stack: error ? error.stack : 'N/A'
+    });
+    return false; // Don't suppress default console error
+  };
+
+  // Catch unhandled promise rejections
+  window.addEventListener('unhandledrejection', function (event) {
+    const reason = event.reason;
+    processError({
+      type: 'unhandled_rejection',
+      message: reason ? (reason.message || String(reason)) : 'Unknown rejection',
+      source: 'Promise',
+      line: 0,
+      col: 0,
+      stack: reason && reason.stack ? reason.stack : 'N/A'
+    });
+  });
+
+  // Catch resource loading errors (images, scripts, etc.)
+  window.addEventListener('error', function (event) {
+    if (event.target && event.target !== window) {
+      const tag = event.target.tagName || 'unknown';
+      const src = event.target.src || event.target.href || 'unknown';
+      processError({
+        type: 'resource_error',
+        message: `Failed to load ${tag}: ${src}`,
+        source: src,
+        line: 0,
+        col: 0,
+        stack: 'N/A'
+      });
+    }
+  }, true); // Capture phase to catch resource errors
+
+  // ─── Service Worker error messages ───
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'SW_ERROR') {
+        processError({
+          type: 'service_worker_error',
+          message: event.data.error.message,
+          source: event.data.error.filename || 'sw.js',
+          line: event.data.error.lineno || 0,
+          col: 0,
+          stack: 'Service Worker context'
+        });
+      }
+    });
+  }
+
+  // ─── Network error monitoring ───
+  window.addEventListener('online', function () {
+    // Flush queued errors when back online
+    setTimeout(flushQueue, 2000);
+  });
+
+  // ─── Periodic flush ───
+  flushTimer = setInterval(flushQueue, CONFIG.FLUSH_INTERVAL_MS);
+
+  // ─── Rate limit reset ───
+  setInterval(function () {
+    rateLimitCount = 0;
+  }, 60000);
+
+  // ─── Public API (for manual error reporting) ───
+  window.IVErrorTracker = {
+    /**
+     * Manually report an error
+     * @param {string} message - Error description
+     * @param {string} severity - 'low'|'medium'|'high'|'critical'
+     * @param {object} extra - Additional context
+     */
+    report: function (message, severity, extra) {
+      processError({
+        type: 'manual_report',
+        message: String(message),
+        source: getPageName(),
+        line: 0,
+        col: 0,
+        stack: new Error().stack || 'N/A',
+        extra: extra || {}
+      });
+    },
+
+    /**
+     * Get error log from localStorage
+     * @returns {Array} Error entries
+     */
+    getLog: function () {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      } catch (e) {
+        return [];
+      }
+    },
+
+    /**
+     * Clear error log
+     */
+    clearLog: function () {
+      localStorage.removeItem(CONFIG.LS_ERROR_LOG);
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+      console.log('[ErrorTracker] Log cleared');
+    },
+
+    /**
+     * Force flush queued errors to GAS
+     */
+    flush: flushQueue,
+
+    /**
+     * Get current queue size
+     */
+    queueSize: function () {
+      return getQueue().length;
+    }
+  };
+
+  // ─── Initial flush on load ───
+  window.addEventListener('load', function () {
+    // Flush any queued errors from previous sessions
+    setTimeout(flushQueue, 3000);
+  });
+
+  console.log('[ErrorTracker] Initialized — v1.0 | Page:', getPageName());
+})();
+
+// ============================================================
+// IV DrugRef PWA v5.0 — Core Utilities
+// Shared across all pages
+// ============================================================
+
+/* global window */
+'use strict';
+
+var IVDrugRef = (function() {
+
+  // ============================================================
+  // CLINICAL CALCULATORS
+  // ============================================================
+
+  /**
+   * Ideal Body Weight (Devine formula)
+   * @param {number} ht - Height in cm
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} IBW in kg
+   */
+  function calcIBW(ht, sex) {
+    if (!ht || ht <= 0) return 0;
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  /**
+   * Adjusted Body Weight (for obesity)
+   * @param {number} wt - Actual weight in kg
+   * @param {number} ibw - Ideal body weight in kg
+   * @returns {number} ABW in kg
+   */
+  function calcABW(wt, ibw) {
+    return ibw + 0.4 * (wt - ibw);
+  }
+
+  /**
+   * Body Mass Index
+   * @param {number} wt - Weight in kg
+   * @param {number} ht - Height in cm
+   * @returns {number} BMI in kg/m²
+   */
+  function calcBMI(wt, ht) {
+    if (!ht || ht <= 0) return 0;
+    return wt / ((ht / 100) ** 2);
+  }
+
+  /**
+   * Body Surface Area (Mosteller formula)
+   * @param {number} ht - Height in cm
+   * @param {number} wt - Weight in kg
+   * @returns {number} BSA in m²
+   */
+  function calcBSA(ht, wt) {
+    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
+    return Math.sqrt((ht * wt) / 3600);
+  }
+
+  /**
+   * Cockcroft-Gault CrCl with automatic weight adjustment
+   * Uses ABW if patient is obese (>130% IBW)
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
+   * @returns {number} CrCl in mL/min, minimum 5
+   */
+  function calcCockcroftGault(age, wt, scr, sex, ht) {
+    if (scr <= 0) return 0;
+    let useWt = wt;
+    if (ht && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
+    }
+    let crcl = ((140 - age) * useWt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.max(Math.round(crcl * 10) / 10, 5);
+  }
+
+  /**
+   * Cockcroft-Gault with raw TBW (no obesity adjustment)
+   * Used for comparison and non-adjusted dosing
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} CrCl in mL/min
+   */
+  function calcCG_raw(age, wt, scr, sex) {
+    if (scr <= 0) return 0;
+    let crcl = ((140 - age) * wt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.round(crcl * 10) / 10;
+  }
+
+  /**
+   * Bedside Schwartz equation (pediatric eGFR)
+   * For ages 1-17 years
+   * @param {number} ht - Height in cm
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcSchwartz(ht, scr) {
+    if (scr <= 0 || !ht || ht <= 0) return 0;
+    return Math.round((0.413 * ht / scr) * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 equation (race-free)
+   * Returns indexed eGFR for standardized BSA (1.73m²)
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcCKDEPI2021(age, scr, sex) {
+    let eGFR;
+    if (sex === 'F') {
+      const kappa = 0.7;
+      const alpha = scr <= kappa ? -0.241 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age) * 1.012;
+    } else {
+      const kappa = 0.9;
+      const alpha = scr <= kappa ? -0.302 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age);
+    }
+    return Math.round(eGFR * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 de-indexed for drug dosing
+   * Converts indexed eGFR to non-indexed using patient BSA
+   * Per KDIGO 2024 recommendations for personalized dosing
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} bsa - Body surface area in m²
+   * @returns {number} Non-indexed eGFR in mL/min
+   */
+  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
+    const indexed = calcCKDEPI2021(age, scr, sex);
+    return Math.round(indexed * bsa / 1.73 * 10) / 10;
+  }
+
+  /**
+   * Get CKD stage classification from GFR value
+   * @param {number} gfr - Glomerular filtration rate in mL/min
+   * @returns {Object} Stage info with stage code, Thai label, and CSS class
+   */
+  function getCKDStage(gfr) {
+    if (gfr >= 90) return { stage: 'G1', label: 'ปกติ/สูง', cls: 'stage-1' };
+    if (gfr >= 60) return { stage: 'G2', label: 'ลดลงเล็กน้อย', cls: 'stage-2' };
+    if (gfr >= 45) return { stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', cls: 'stage-3a' };
+    if (gfr >= 30) return { stage: 'G3b', label: 'ลดลงปานกลาง-มาก', cls: 'stage-3b' };
+    if (gfr >= 15) return { stage: 'G4', label: 'ลดลงมาก', cls: 'stage-4' };
+    return { stage: 'G5', label: 'ไตวาย', cls: 'stage-5' };
+  }
+
+  /**
+   * Build comprehensive patient object from form elements
+   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
+   * @param {Object} fieldIds - Optional custom field ID mapping
+   * @returns {Object} Complete patient data object
+   */
+  function getPatientFromForm(fieldIds) {
+    // Default field IDs matching standard form layout
+    const ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    }, fieldIds || {});
+
+    const getVal = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? (parseFloat(el.value) || def) : def;
+    };
+    const getStr = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? el.value : def;
+    };
+
+    const age = getVal(ids.age, 55);
+    const wt = getVal(ids.wt, 70);
+    const ht = getVal(ids.ht, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = getVal(ids.scr, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
+
+    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
+    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
+    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
+    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
+    const isObese = wt > ibw * 1.3;
+    const isUnderweight = wt < ibw;
+    const isPediatric = age < 18;
+
+    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
+    let crcl;
+    if (isPediatric && ht > 0) {
+      crcl = calcSchwartz(ht, scr);
+    } else {
+      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
+    }
+
+    return {
+      age, wt, ht, sex, scr, alb, dialysis,
+      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
+      crcl
+    };
+  }
+
+
+  // ============================================================
+  // ANALYTICS
+  // ============================================================
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  let _reqCount = 0;
+
+  /**
+   * Get anonymous session ID from localStorage
+   * @returns {string} Session ID or empty string
+   */
+  function getSessionId() {
+    return localStorage.getItem('anonSessionId') || '';
+  }
+
+  /**
+   * Get anonymous user ID from localStorage
+   * @returns {string} User ID or empty string
+   */
+  function getUserId() {
+    return localStorage.getItem('anonUserId') || '';
+  }
+
+  /**
+   * Check if user has consented to analytics
+   * @returns {boolean} True if analytics consent is given
+   */
+  function hasAnalyticsConsent() {
+    return localStorage.getItem('analyticsConsent') === 'true';
+  }
+
+  /**
+   * Send analytics event via sendBeacon or fetch
+   * Rate limited to 40 requests per page session
+   * @param {Object} data - Event data to send
+   */
+  function sendAnalytics(data) {
+    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (_reqCount >= 40) return;
+    _reqCount++;
+    try {
+      const payload = JSON.stringify({
+        ...data,
+        session_id: getSessionId(),
+        user_id: getUserId()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(ANALYTICS_URL, payload);
+      } else {
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
+   * Track page view with automatic entry/exit timing
+   * Sends page_view events on entry and exit with duration
+   * @param {string} pageName - Name/identifier of current page
+   * @returns {Object} Tracking object with sendExit function and metadata
+   */
+  function trackPageView(pageName) {
+    const enterTime = Date.now();
+    const fromPage = (function() {
+      const ref = document.referrer || '';
+      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+      if (ref.includes('calculator.html')) return 'calculator';
+      if (ref.includes('tdm.html')) return 'tdm';
+      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
+      if (ref.includes('compatibility.html')) return 'compatibility';
+      if (ref.includes('dashboard.html')) return 'dashboard';
+      return ref ? 'external' : 'direct';
+    })();
+
+    // Send entry event
+    sendAnalytics({
+      type: 'page_view', page: pageName, action: 'enter',
+      from_page: fromPage, referrer: document.referrer || 'direct'
+    });
+
+    // Track exit event (sent only once)
+    let exitSent = false;
+    function sendExit(extraData) {
+      if (exitSent) return;
+      exitSent = true;
+      sendAnalytics({
+        type: 'page_view', page: pageName, action: 'leave',
+        duration_sec: Math.round((Date.now() - enterTime) / 1000),
+        from_page: fromPage,
+        ...(extraData || {})
+      });
+    }
+
+    // Send exit on page unload or visibility change
+    window.addEventListener('beforeunload', () => sendExit());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendExit();
+    });
+
+    return { sendExit, fromPage, enterTime };
+  }
+
+
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
+
+  /**
+   * Register service worker for offline support and caching
+   * Non-blocking registration with console logging
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    }
+  }
+
+
+  // ============================================================
+  // UTILITY HELPERS
+  // ============================================================
+
+  /**
+   * Generate random anonymous ID using crypto API
+   * @param {number} len - Length in hex characters (default 16)
+   * @returns {string} Random hex string
+   */
+  function generateId(len) {
+    len = len || 16;
+    const arr = new Uint8Array(len / 2);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Debounce function to limit function execution
+   * @param {Function} fn - Function to debounce
+   * @param {number} ms - Debounce delay in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  /**
+   * Format number with specified decimal precision
+   * @param {number} n - Number to format
+   * @param {number} decimals - Number of decimal places (default 1)
+   * @returns {string} Formatted number string
+   */
+  function fmt(n, decimals) {
+    decimals = decimals !== undefined ? decimals : 1;
+    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
+  }
+
+  /**
+   * Version and app name constants
+   */
+  const VERSION = '5.0.0';
+  const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+  return {
+    // Version info
+    VERSION,
+    APP_NAME,
+
+    // Clinical calculators
+    calcIBW,
+    calcABW,
+    calcBMI,
+    calcBSA,
+    calcCockcroftGault,
+    calcCG_raw,
+    calcSchwartz,
+    calcCKDEPI2021,
+    calcCKDEPI2021_nonindexed,
+    getCKDStage,
+    getPatientFromForm,
+
+    // Analytics
+    sendAnalytics,
+    trackPageView,
+    getSessionId,
+    getUserId,
+    hasAnalyticsConsent,
+
+    // Service Worker
+    registerSW,
+
+    // Utility helpers
+    generateId,
+    debounce,
+    fmt
+  };
+})();
+
+// ============================================================
+// AUTO-INITIALIZATION
+// ============================================================
+// Register service worker on page load
+document.addEventListener('DOMContentLoaded', () => {
+  IVDrugRef.registerSW();
+});
+
+// ============================================================
+// IV DrugRef PWA v5.0 — Admin Module
+// Extracted from V4.7.0, wrapped in IIFE for modular architecture
+// ============================================================
+
+(function() {
+'use strict';
+
+/* ═══════════════════════════════════════════
+   CONFIG & STATE
+   ═══════════════════════════════════════════ */
+const LS_PREFIX = 'ivdrug_admin_';
+const ITEMS_PER_PAGE = 25;
+
+let state = {
+  user: null,
+  myRole: 'editor', // 'admin' or 'editor' — set after getDrugs
+  drugs: [],
+  auditLog: [],
+  adminUsers: [],
+  currentPage: 1,
+  auditPage: 1,
+  sortField: 'id',
+  sortDir: 'asc',
+  editingId: null,
+  importData: null,
+};
+
+function getConfig() {
+  return {
+    scriptUrl: localStorage.getItem(LS_PREFIX + 'scriptUrl') || '',
+    clientId: localStorage.getItem(LS_PREFIX + 'clientId') || '',
+    allowedEmails: (localStorage.getItem(LS_PREFIX + 'allowedEmails') || '').split(',').map(e => e.trim()).filter(Boolean),
+  };
+}
+function saveConfig(cfg) {
+  localStorage.setItem(LS_PREFIX + 'scriptUrl', cfg.scriptUrl);
+  localStorage.setItem(LS_PREFIX + 'clientId', cfg.clientId);
+  localStorage.setItem(LS_PREFIX + 'allowedEmails', cfg.allowedEmails.join(','));
+}
+
+/* ═══════════════════════════════════════════
+   AUTHENTICATION — Google Identity Services
+   ═══════════════════════════════════════════ */
+function initGoogleAuth() {
+  const cfg = getConfig();
+  if (!cfg.clientId) {
+    // First-time setup: show app directly with settings
+    showApp({ name: 'Admin (Setup)', email: 'setup@local', picture: '' });
+    switchTab('settings');
+    toast('กรุณาตั้งค่า Google Client ID และ Script URL ก่อน', 'info');
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: cfg.clientId,
+    callback: handleCredentialResponse,
+    auto_select: true,
+  });
+  google.accounts.id.renderButton(document.querySelector('.google-btn'), {
+    theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill',
+  });
+  google.accounts.id.prompt();
+}
+
+function handleCredentialResponse(response) {
+  const payload = parseJwt(response.credential);
+  const cfg = getConfig();
+  if (cfg.allowedEmails.length > 0 && !cfg.allowedEmails.includes(payload.email)) {
+    const err = document.getElementById('auth-error');
+    err.textContent = `❌ ${payload.email} ไม่มีสิทธิ์เข้าถึง — ติดต่อ admin`;
+    err.style.display = 'block';
+    return;
+  }
+  state.user = { name: payload.name, email: payload.email, picture: payload.picture };
+  showApp(state.user);
+}
+
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(decodeURIComponent(atob(base64).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+}
+
+function signIn() {
+  const cfg = getConfig();
+  if (!cfg.clientId) {
+    showApp({ name: 'Admin (Setup)', email: 'setup@local', picture: '' });
+    switchTab('settings');
+    return;
+  }
+  google.accounts.id.prompt();
+}
+
+function signOut() {
+  google.accounts.id.disableAutoSelect();
+  state.user = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+function showApp(user) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-name').textContent = user.name;
+  document.getElementById('user-photo').src = user.picture || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>';
+  loadDrugs();
+  loadAuditLog();
+  loadSettingsUI();
+}
+
+/* ═══════════════════════════════════════════
+   API COMMUNICATION
+   ═══════════════════════════════════════════ */
+/**
+ * API Communication Strategy:
+ * - READ (getDrugs, getAudit): GET request (CORS works fine with GAS redirect)
+ * - WRITE (small payload <6KB): GET with ?data=JSON parameter
+ * - WRITE (large payload ≥6KB): POST with no-cors (fire-and-forget)
+ *   The POST reaches doPost on the server, but we can't read the response
+ *   due to CORS on the redirect. We assume success and verify via GET after.
+ */
+async function apiCall(action, data = {}) {
+  const cfg = getConfig();
+  if (!cfg.scriptUrl) {
+    toast('กรุณาตั้งค่า Script URL ก่อน', 'error');
+    throw new Error('No script URL');
+  }
+
+  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers'].includes(action);
+  const url = new URL(cfg.scriptUrl);
+  url.searchParams.set('action', action);
+  url.searchParams.set('user', state.user?.email || 'unknown');
+
+  if (isRead) {
+    Object.entries(data).forEach(([k, v]) => url.searchParams.set(k, v));
+    const res = await fetch(url.toString());
+    const json = await res.json();
+    if (json.permissionDenied) {
+      toast('❌ ' + (json.error || 'ไม่มีสิทธิ์'), 'error');
+      throw new Error(json.error || 'Permission denied');
+    }
+    return json;
+  }
+
+  // WRITE: check URL length
+  const jsonData = JSON.stringify(data);
+  url.searchParams.set('data', jsonData);
+  const fullUrl = url.toString();
+
+  if (fullUrl.length < 6000) {
+    // Small payload → use GET (we can read the response)
+    console.log(`[API] ${action} via GET (${fullUrl.length} chars)`);
+    const res = await fetch(fullUrl);
+    const json = await res.json();
+    if (json.permissionDenied) {
+      toast('❌ ' + (json.error || 'ไม่มีสิทธิ์'), 'error');
+      throw new Error(json.error || 'Permission denied');
+    }
+    return json;
+  }
+
+  // Large payload → use POST no-cors (fire-and-forget)
+  console.log(`[API] ${action} via POST no-cors (payload: ${jsonData.length} chars)`);
+  const postUrl = cfg.scriptUrl + '?action=' + action +
+    '&user=' + encodeURIComponent(state.user?.email || 'unknown');
+
+  await fetch(postUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: jsonData,
+  });
+
+  // no-cors POST returns opaque response, but server processed it
+  // Add small delay to let GAS finish writing
+  await new Promise(r => setTimeout(r, 1000));
+  return { success: true, message: 'Sent (POST no-cors)' };
+}
+
+async function testConnection() {
+  const pre = document.getElementById('test-result');
+  pre.style.display = 'block';
+  pre.textContent = '🔄 กำลังทดสอบ...\n';
+  const cfg = getConfig();
+
+  if (!cfg.scriptUrl) {
+    pre.textContent += '❌ ไม่มี Script URL\n';
+    return;
+  }
+
+  pre.textContent += `📎 URL: ${cfg.scriptUrl}\n`;
+  pre.textContent += `📎 URL ends with /exec: ${cfg.scriptUrl.endsWith('/exec')}\n\n`;
+
+  // Test 1: Simple GET (getDrugs)
+  try {
+    pre.textContent += '── Test 1: GET getDrugs ──\n';
+    const url = cfg.scriptUrl + '?action=getDrugs';
+    pre.textContent += `URL: ${url}\n`;
+    const res = await fetch(url);
+    pre.textContent += `Status: ${res.status} ${res.statusText}\n`;
+    pre.textContent += `Redirected: ${res.redirected}\n`;
+    pre.textContent += `URL after redirect: ${res.url}\n`;
+    const text = await res.text();
+    pre.textContent += `Response (first 500 chars):\n${text.substring(0, 500)}\n`;
+
+    try {
+      const json = JSON.parse(text);
+      pre.textContent += `\n✅ Valid JSON! drugs count: ${json.drugs?.length || 0}\n`;
+    } catch {
+      pre.textContent += `\n⚠️ Response is NOT valid JSON — อาจเป็นหน้า HTML error\n`;
+      pre.textContent += `Hint: ถ้าเห็น HTML = ต้อง deploy ใหม่เป็น version ใหม่\n`;
+    }
+  } catch (err) {
+    pre.textContent += `❌ Fetch failed: ${err.message}\n`;
+    pre.textContent += `\n📌 วิธีแก้:\n`;
+    pre.textContent += `1. ไปที่ Apps Script → Deploy → Manage deployments\n`;
+    pre.textContent += `2. กด ✏️ แก้ไข → เลือก "New version"\n`;
+    pre.textContent += `3. Who has access: "Anyone"\n`;
+    pre.textContent += `4. กด Deploy\n`;
+    pre.textContent += `5. ถ้า URL เปลี่ยน ให้ copy URL ใหม่มาใส่\n`;
+  }
+
+  // Test 2: Write test (createDrug with test data)
+  try {
+    pre.textContent += '\n── Test 2: GET with data param (write test) ──\n';
+    const testData = { generic: '__TEST__', status: 'draft' };
+    const url = cfg.scriptUrl + '?action=createDrug&user=test&data=' + encodeURIComponent(JSON.stringify(testData));
+    pre.textContent += `URL length: ${url.length} chars\n`;
+    const res = await fetch(url);
+    const text = await res.text();
+    pre.textContent += `Status: ${res.status}\n`;
+    pre.textContent += `Response: ${text.substring(0, 300)}\n`;
+
+    try {
+      const json = JSON.parse(text);
+      if (json.success) {
+        pre.textContent += `✅ Write test PASSED! Created test drug ID: ${json.id}\n`;
+        pre.textContent += `🧹 ลบ test drug...\n`;
+        // Clean up
+        const delUrl = cfg.scriptUrl + '?action=deleteDrug&user=test&data=' + encodeURIComponent(JSON.stringify({ id: json.id }));
+        await fetch(delUrl);
+        pre.textContent += `✅ Cleaned up\n`;
+      } else {
+        pre.textContent += `⚠️ Write returned: ${JSON.stringify(json)}\n`;
+      }
+    } catch {
+      pre.textContent += `⚠️ Write response is not valid JSON\n`;
+    }
+  } catch (err) {
+    pre.textContent += `❌ Write test failed: ${err.message}\n`;
+  }
+
+  pre.textContent += '\n══ ทดสอบเสร็จแล้ว ══';
+}
+
+// Import drugs one-by-one via createDrug GET (guaranteed to work)
+async function apiCallChunked(action, drugs) {
+  let success = 0, failed = 0;
+
+  for (let i = 0; i < drugs.length; i++) {
+    showLoading(`กำลัง import ${i + 1}/${drugs.length} — ${drugs[i].generic}...`);
+    try {
+      // Send each drug individually via createDrug (small payload = GET works)
+      const d = drugs[i];
+      d.status = 'draft';
+      await apiCall('createDrug', d);
+      success++;
+    } catch (err) {
+      console.error(`Failed to import drug ${i}:`, drugs[i].generic, err);
+      failed++;
+    }
+    // Small delay every 3 drugs to not overwhelm GAS
+    if (i % 3 === 2) await new Promise(r => setTimeout(r, 300));
+  }
+
+  if (failed > 0) {
+    toast(`⚠️ Import: สำเร็จ ${success}, ล้มเหลว ${failed}`, 'warning');
+  }
+  return { success: true, count: success };
+}
+
+/* ═══════════════════════════════════════════
+   DRUG LIST OPERATIONS
+   ═══════════════════════════════════════════ */
+async function loadDrugs() {
+  showLoading('กำลังโหลดข้อมูลยา...');
+  try {
+    const result = await apiCall('getDrugs');
+    state.drugs = result.drugs || [];
+    // Capture role from backend response
+    if (result.myRole) {
+      state.myRole = result.myRole;
+    }
+    populateCategories();
+    renderStats();
+    renderDrugTable();
+    updatePendingCount();
+    applyRoleUI(); // ซ่อน/แสดง UI ตาม role
+  } catch (e) {
+    console.error(e);
+    if (e.message && e.message.includes('ไม่มีสิทธิ์')) {
+      toast('❌ คุณไม่มีสิทธิ์เข้าถึงระบบนี้ — ติดต่อ Admin', 'error');
+      return;
+    }
+    // Fallback: load from localStorage cache
+    const cached = localStorage.getItem(LS_PREFIX + 'drugsCache');
+    if (cached) {
+      state.drugs = JSON.parse(cached);
+      renderStats();
+      renderDrugTable();
+      toast('โหลดจาก cache — ไม่สามารถเชื่อมต่อ server', 'info');
+    }
+  }
+  hideLoading();
+}
+
+/* ═══════════════════════════════════════════
+   ROLE-BASED UI — ซ่อน/แสดง element ตาม role
+   ═══════════════════════════════════════════ */
+function isAdmin() { return state.myRole === 'admin'; }
+
+function applyRoleUI() {
+  // แสดง role badge ข้าง user name
+  const roleTag = isAdmin() ? '🔑 Admin' : '📝 Editor';
+  const nameEl = document.getElementById('user-name');
+  if (nameEl && !nameEl.dataset.roleApplied) {
+    nameEl.innerHTML = escHtml(state.user?.name || '') + ` <span style="font-size:10px;background:${isAdmin() ? 'var(--purple-bg)' : 'var(--primary-bg)'};color:${isAdmin() ? '#6d28d9' : '#0369a1'};padding:2px 8px;border-radius:50px;font-weight:600">${roleTag}</span>`;
+    nameEl.dataset.roleApplied = '1';
+  }
+
+  // ซ่อน tabs ที่ editor ไม่มีสิทธิ์
+  document.querySelectorAll('[data-tab="import"]').forEach(el => el.style.display = isAdmin() ? '' : 'none');
+  document.querySelectorAll('[data-tab="settings"]').forEach(el => el.style.display = isAdmin() ? '' : 'none');
+  document.querySelectorAll('[data-tab="users"]').forEach(el => el.style.display = isAdmin() ? '' : 'none');
+
+  // ปุ่ม "บันทึกและอนุมัติ" เฉพาะ Admin
+  const btnSaveApprove = document.getElementById('btn-save-approve');
+  if (btnSaveApprove) btnSaveApprove.style.display = isAdmin() ? 'inline-flex' : 'none';
+
+  // ซ่อนปุ่ม "รออนุมัติ" tab สำหรับ editor (ดูได้แต่ approve/reject ไม่ได้)
+  // → editor ยังเห็น tab ได้แต่ปุ่ม approve/reject จะไม่แสดง (จัดการใน renderPendingList)
+
+  // re-render ถ้ากำลังดู pending
+  renderPendingList();
+}
+
+function renderStats() {
+  const total = state.drugs.length;
+  const approved = state.drugs.filter(d => d.status === 'approved').length;
+  const pending = state.drugs.filter(d => d.status === 'pending').length;
+  const drafts = state.drugs.filter(d => d.status === 'draft').length;
+  const had = state.drugs.filter(d => d.had).length;
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-label">ยาทั้งหมด</div><div class="stat-value primary">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-value success">${approved}</div></div>
+    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value warning">${pending}</div></div>
+    <div class="stat-card"><div class="stat-label">Draft</div><div class="stat-value">${drafts}</div></div>
+    <div class="stat-card"><div class="stat-label">High-Alert</div><div class="stat-value danger">${had}</div></div>
+  `;
+}
+
+function populateCategories() {
+  const cats = new Set();
+  state.drugs.forEach(d => {
+    (d.categories || []).forEach(c => cats.add(c.trim().toLowerCase()));
+  });
+  const sel = document.getElementById('filter-category');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">ทุกหมวดหมู่</option>';
+  [...cats].sort().forEach(c => {
+    sel.innerHTML += `<option value="${c}">${c}</option>`;
+  });
+  sel.value = current;
+}
+
+function getFilteredDrugs() {
+  const q = document.getElementById('drug-search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const cat = document.getElementById('filter-category').value;
+
+  let list = state.drugs.filter(d => {
+    if (q && !d.generic?.toLowerCase().includes(q) && !d.trade?.toLowerCase().includes(q)) return false;
+    if (status && d.status !== status) return false;
+    if (cat && !(d.categories || []).some(c => c.toLowerCase() === cat)) return false;
+    return true;
+  });
+
+  // Sort
+  list.sort((a, b) => {
+    let va = a[state.sortField] || '', vb = b[state.sortField] || '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return state.sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return state.sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  return list;
+}
+
+function renderDrugTable() {
+  const filtered = getFilteredDrugs();
+  const total = filtered.length;
+  const pages = Math.ceil(total / ITEMS_PER_PAGE);
+  if (state.currentPage > pages) state.currentPage = Math.max(1, pages);
+
+  const start = (state.currentPage - 1) * ITEMS_PER_PAGE;
+  const page = filtered.slice(start, start + ITEMS_PER_PAGE);
+
+  const tbody = document.getElementById('drug-tbody');
+  tbody.innerHTML = page.map(d => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">${d.id || '—'}</td>
+      <td>
+        <div class="drug-name">${escHtml(d.generic || '')}</div>
+        ${d.had ? '<span class="badge badge-had" style="font-size:10px">⚠ HAD</span>' : ''}
+      </td>
+      <td class="drug-trade">${escHtml(d.trade || '—')}</td>
+      <td>${(d.categories || []).map(c => `<span class="badge badge-cat">${escHtml(c)}</span>`).join('')}</td>
+      <td><span class="badge ${d.ed === 'E' ? 'badge-ed' : 'badge-ned'}">${d.ed || '—'}</span></td>
+      <td>${d.had ? '⚠️' : '—'}</td>
+      <td><span class="badge badge-${d.status || 'draft'}">${d.status || 'draft'}</span></td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn btn-sm btn-outline" onclick="editDrug(${d.id})" title="แก้ไข">✏️</button>
+          <button class="btn btn-sm btn-outline" onclick="previewDrugById(${d.id})" title="Preview">👁</button>
+          ${isAdmin() && d.status === 'pending' ? `<button class="btn btn-sm btn-success" onclick="approveDrug(${d.id})" title="อนุมัติ">✅</button>` : ''}
+          ${isAdmin() ? `<button class="btn btn-sm btn-outline" onclick="deleteDrug(${d.id})" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  // Pagination
+  const pag = document.getElementById('pagination');
+  if (pages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<span style="color:var(--text-muted);font-size:12px">${total} รายการ</span>`;
+  html += `<button class="page-btn" onclick="goPage(${state.currentPage - 1})" ${state.currentPage <= 1 ? 'disabled' : ''}>‹</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && Math.abs(i - state.currentPage) > 2 && i !== 1 && i !== pages) {
+      if (i === state.currentPage - 3 || i === state.currentPage + 3) html += '<span>…</span>';
+      continue;
+    }
+    html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${state.currentPage + 1})" ${state.currentPage >= pages ? 'disabled' : ''}>›</button>`;
+  pag.innerHTML = html;
+}
+
+function goPage(p) {
+  const pages = Math.ceil(getFilteredDrugs().length / ITEMS_PER_PAGE);
+  if (p < 1 || p > pages) return;
+  state.currentPage = p;
+  renderDrugTable();
+  document.querySelector('.table-wrap').scrollIntoView({ behavior: 'smooth' });
+}
+
+function sortTable(field) {
+  if (state.sortField === field) {
+    state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    state.sortField = field;
+    state.sortDir = 'asc';
+  }
+  renderDrugTable();
+}
+
+// Debounced search
+let searchTimer;
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('drug-search')?.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { state.currentPage = 1; renderDrugTable(); }, 250);
+  });
+});
+
+/* ═══════════════════════════════════════════
+   DRUG FORM MODAL
+   ═══════════════════════════════════════════ */
+function openDrugModal(drug = null) {
+  state.editingId = drug ? drug.id : null;
+  document.getElementById('modal-title').textContent = drug ? `แก้ไข: ${drug.generic}` : 'เพิ่มยาใหม่';
+  togglePreview(false);
+
+  // Populate form
+  const fields = {
+    'f-generic': drug?.generic || '',
+    'f-trade': drug?.trade || '',
+    'f-strength': drug?.strength || '',
+    'f-ed': drug?.ed || 'E',
+    'f-categories': (drug?.categories || []).join(', '),
+    'f-reconst-solvent': drug?.reconst?.solvent || '',
+    'f-reconst-volume': drug?.reconst?.volume || '',
+    'f-reconst-conc': drug?.reconst?.conc || '',
+    'f-dil-diluent': drug?.dilution?.diluent || '',
+    'f-dil-volume': drug?.dilution?.volume || '',
+    'f-dil-conc': drug?.dilution?.finalConc || '',
+    'f-admin-route': drug?.admin?.route || '',
+    'f-admin-rate': drug?.admin?.rate || '',
+    'f-stab-reconst': drug?.stability?.reconst || '',
+    'f-stab-diluted': drug?.stability?.diluted || '',
+    'f-stab-storage': drug?.stability?.storage || '',
+    'f-compat-ysite': drug?.compat?.ysite || '',
+    'f-compat-incompat': drug?.compat?.incompat || '',
+    'f-precautions': drug?.precautions || '',
+    'f-monitoring': (drug?.monitoring || []).join(', '),
+    'f-ref': drug?.ref || '',
+  };
+  Object.entries(fields).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  document.getElementById('f-had').checked = drug?.had || false;
+
+  // แสดง/ซ่อนปุ่ม "บันทึกและอนุมัติ" ตาม role
+  const btnSaveApprove = document.getElementById('btn-save-approve');
+  if (btnSaveApprove) {
+    btnSaveApprove.style.display = isAdmin() ? 'inline-flex' : 'none';
+  }
+
+  document.getElementById('drug-modal').classList.add('open');
+}
+
+function closeDrugModal() {
+  document.getElementById('drug-modal').classList.remove('open');
+  state.editingId = null;
+}
+
+function editDrug(id) {
+  const drug = state.drugs.find(d => d.id === id);
+  if (drug) openDrugModal(drug);
+}
+
+function getFormData() {
+  return {
+    generic: document.getElementById('f-generic').value.trim(),
+    trade: document.getElementById('f-trade').value.trim(),
+    strength: document.getElementById('f-strength').value.trim(),
+    ed: document.getElementById('f-ed').value,
+    categories: document.getElementById('f-categories').value.split(',').map(s => s.trim()).filter(Boolean),
+    had: document.getElementById('f-had').checked,
+    reconst: {
+      solvent: document.getElementById('f-reconst-solvent').value.trim(),
+      volume: document.getElementById('f-reconst-volume').value.trim(),
+      conc: document.getElementById('f-reconst-conc').value.trim(),
+    },
+    dilution: {
+      diluent: document.getElementById('f-dil-diluent').value.trim(),
+      volume: document.getElementById('f-dil-volume').value.trim(),
+      finalConc: document.getElementById('f-dil-conc').value.trim(),
+    },
+    admin: {
+      route: document.getElementById('f-admin-route').value.trim(),
+      rate: document.getElementById('f-admin-rate').value.trim(),
+    },
+    stability: {
+      reconst: document.getElementById('f-stab-reconst').value.trim(),
+      diluted: document.getElementById('f-stab-diluted').value.trim(),
+      storage: document.getElementById('f-stab-storage').value.trim(),
+    },
+    compat: {
+      ysite: document.getElementById('f-compat-ysite').value.trim(),
+      incompat: document.getElementById('f-compat-incompat').value.trim(),
+    },
+    precautions: document.getElementById('f-precautions').value.trim(),
+    monitoring: document.getElementById('f-monitoring').value.split(',').map(s => s.trim()).filter(Boolean),
+    ref: document.getElementById('f-ref').value.trim(),
+  };
+}
+
+async function saveDrug(status) {
+  const data = getFormData();
+  if (!data.generic) {
+    toast('กรุณากรอก Generic Name', 'error');
+    return;
+  }
+
+  // ═══ ENFORCE: ห้าม set approved ตรงๆ — ต้องผ่าน saveDrugAndApprove() ═══
+  if (status === 'approved') {
+    status = 'pending';
+  }
+  // Editor สามารถบันทึกเป็น draft หรือ pending เท่านั้น
+  if (!isAdmin() && !['draft', 'pending'].includes(status)) {
+    status = 'draft';
+  }
+  data.status = status;
+  showLoading('กำลังบันทึก...');
+
+  const statusLabel = status === 'pending' ? '⏳ รออนุมัติ' : '📝 Draft';
+  try {
+    let resultId;
+    if (state.editingId) {
+      data.id = state.editingId;
+      const result = await apiCall('updateDrug', data);
+      resultId = state.editingId;
+      toast(`แก้ไข ${data.generic} สำเร็จ — ${statusLabel}`, 'success');
+    } else {
+      const result = await apiCall('createDrug', data);
+      resultId = result.id;
+      toast(`เพิ่ม ${data.generic} สำเร็จ — ${statusLabel}`, 'success');
+    }
+    closeDrugModal();
+    await loadDrugs();
+    return resultId;
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+    return null;
+  } finally {
+    hideLoading();
+  }
+}
+
+/**
+ * Admin-only: บันทึกยาแล้วอนุมัติในขั้นตอนเดียว
+ * ทำงาน 2 step: createDrug (status=pending) → approveDrug
+ * ทำให้ audit log บันทึกทั้ง create + approve แยกกัน
+ */
+async function saveDrugAndApprove() {
+  if (!isAdmin()) {
+    toast('❌ เฉพาะ Admin เท่านั้นที่อนุมัติได้', 'error');
+    return;
+  }
+
+  const data = getFormData();
+  if (!data.generic) {
+    toast('กรุณากรอก Generic Name', 'error');
+    return;
+  }
+
+  data.status = 'pending'; // ต้องเป็น pending ก่อน → แล้วค่อย approve
+  showLoading('กำลังบันทึกและอนุมัติ...');
+
+  try {
+    let drugId;
+    if (state.editingId) {
+      data.id = state.editingId;
+      await apiCall('updateDrug', data);
+      drugId = state.editingId;
+    } else {
+      const result = await apiCall('createDrug', data);
+      drugId = result.id;
+    }
+
+    // Step 2: Approve
+    await apiCall('approveDrug', { id: drugId, approver: state.user?.email });
+    toast(`✅ ${data.generic} — บันทึกและอนุมัติแล้ว (pending → approved)`, 'success');
+    closeDrugModal();
+    await loadDrugs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+async function deleteDrug(id) {
+  if (!isAdmin()) { toast('❌ Editor ไม่มีสิทธิ์ลบยา', 'error'); return; }
+  const drug = state.drugs.find(d => d.id === id);
+  if (!confirm(`ยืนยันลบ "${drug?.generic || id}"?\n\nข้อมูลจะถูกย้ายไป Audit Log`)) return;
+
+  showLoading('กำลังลบ...');
+  try {
+    await apiCall('deleteDrug', { id });
+    toast(`ลบ ${drug?.generic} แล้ว`, 'success');
+    await loadDrugs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+/* ═══════════════════════════════════════════
+   APPROVAL WORKFLOW
+   ═══════════════════════════════════════════ */
+async function approveDrug(id) {
+  if (!isAdmin()) { toast('❌ Editor ไม่มีสิทธิ์อนุมัติยา', 'error'); return; }
+  const drug = state.drugs.find(d => d.id === id);
+  if (!confirm(`อนุมัติ "${drug?.generic}"?\n\nยานี้จะถูก publish ไปยัง production app`)) return;
+
+  showLoading('กำลังอนุมัติ...');
+  try {
+    await apiCall('approveDrug', { id, approver: state.user?.email });
+    toast(`✅ อนุมัติ ${drug?.generic} แล้ว — จะปรากฏใน app หลัก`, 'success');
+    await loadDrugs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+async function rejectDrug(id, reason) {
+  if (!isAdmin()) { toast('❌ Editor ไม่มีสิทธิ์ส่งกลับยา', 'error'); return; }
+  showLoading('กำลังส่งกลับ...');
+  try {
+    await apiCall('rejectDrug', { id, reason, reviewer: state.user?.email });
+    toast('ส่งกลับแก้ไขแล้ว', 'info');
+    await loadDrugs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+function updatePendingCount() {
+  const count = state.drugs.filter(d => d.status === 'pending').length;
+  const badge = document.getElementById('pending-count');
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'inline-flex' : 'none';
+}
+
+function renderPendingList() {
+  const pending = state.drugs.filter(d => d.status === 'pending');
+  const el = document.getElementById('pending-list');
+
+  if (pending.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted)">✅ ไม่มียาที่รออนุมัติ</div>';
+    return;
+  }
+
+  el.innerHTML = pending.map(d => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--shadow)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <strong style="font-size:16px">${escHtml(d.generic)}</strong>
+          <span style="color:var(--text-muted);margin-left:8px">${escHtml(d.trade || '')}</span>
+          ${d.had ? '<span class="badge badge-had" style="margin-left:8px">⚠ HAD</span>' : ''}
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-outline" onclick="editDrug(${d.id})">✏️ แก้ไข</button>
+          ${isAdmin() ? `<button class="btn btn-sm btn-success" onclick="approveDrug(${d.id})">✅ อนุมัติ</button>` : ''}
+          ${isAdmin() ? `<button class="btn btn-sm btn-danger" onclick="rejectDrug(${d.id}, prompt('เหตุผลที่ส่งกลับ:'))">↩️ ส่งกลับ</button>` : '<span class="badge badge-pending">รอ Admin อนุมัติ</span>'}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;font-size:12px;color:var(--text-muted)">
+        <div><strong>Strength:</strong> ${escHtml(d.strength || '—')}</div>
+        <div><strong>Route:</strong> ${escHtml(d.admin?.route || '—')}</div>
+        <div><strong>Rate:</strong> ${escHtml(d.admin?.rate || '—')}</div>
+        <div><strong>Categories:</strong> ${(d.categories||[]).join(', ') || '—'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════
+   PREVIEW CARD
+   ═══════════════════════════════════════════ */
+function togglePreview(showPreview) {
+  document.getElementById('form-view').style.display = showPreview ? 'none' : 'block';
+  document.getElementById('preview-view').style.display = showPreview ? 'block' : 'none';
+  document.getElementById('btn-tab-form').style.background = showPreview ? 'transparent' : 'var(--primary)';
+  document.getElementById('btn-tab-form').style.color = showPreview ? 'var(--text-muted)' : 'white';
+  document.getElementById('btn-tab-preview').style.background = showPreview ? 'var(--primary)' : 'transparent';
+  document.getElementById('btn-tab-preview').style.color = showPreview ? 'white' : 'var(--text-muted)';
+
+  if (showPreview) renderPreviewCard(getFormData());
+}
+
+function previewDrugById(id) {
+  const drug = state.drugs.find(d => d.id === id);
+  if (drug) {
+    openDrugModal(drug);
+    setTimeout(() => togglePreview(true), 50);
+  }
+}
+
+function renderPreviewCard(d) {
+  const card = document.getElementById('preview-card');
+  card.className = 'preview-card' + (d.had ? ' had-pulse' : '');
+
+  const sections = [];
+  if (d.reconst?.solvent || d.reconst?.volume || d.reconst?.conc) {
+    sections.push({ title: 'Reconstitution', content: [d.reconst.solvent, d.reconst.volume ? `Volume: ${d.reconst.volume}` : '', d.reconst.conc ? `Conc: ${d.reconst.conc}` : ''].filter(Boolean).join(' — ') });
+  }
+  if (d.dilution?.diluent || d.dilution?.volume || d.dilution?.finalConc) {
+    sections.push({ title: 'Dilution', content: [d.dilution.diluent, d.dilution.volume ? `Volume: ${d.dilution.volume}` : '', d.dilution.finalConc ? `Final: ${d.dilution.finalConc}` : ''].filter(Boolean).join(' — ') });
+  }
+  if (d.admin?.route || d.admin?.rate) {
+    sections.push({ title: 'Administration', content: [d.admin.route, d.admin.rate].filter(Boolean).join(' — ') });
+  }
+  if (d.stability?.reconst || d.stability?.diluted || d.stability?.storage) {
+    sections.push({ title: 'Stability', content: [d.stability.reconst ? `Reconst: ${d.stability.reconst}` : '', d.stability.diluted ? `Diluted: ${d.stability.diluted}` : '', d.stability.storage ? `Storage: ${d.stability.storage}` : ''].filter(Boolean).join(' | ') });
+  }
+  if (d.compat?.ysite) {
+    sections.push({ title: 'Y-site Compatible', content: d.compat.ysite });
+  }
+  if (d.compat?.incompat) {
+    sections.push({ title: 'Incompatible', content: d.compat.incompat });
+  }
+  if (d.precautions) {
+    sections.push({ title: 'Precautions', content: d.precautions });
+  }
+  if (d.monitoring?.length) {
+    sections.push({ title: 'Monitoring', content: d.monitoring.join(', ') });
+  }
+
+  card.innerHTML = `
+    <div class="preview-card-header">
+      <div>
+        <h3>${escHtml(d.generic || 'Drug Name')}</h3>
+        <div class="trade">${escHtml(d.trade || '')}</div>
+        <div class="strength">${escHtml(d.strength || '')}</div>
+      </div>
+    </div>
+    <div class="preview-card-badges">
+      ${d.had ? '<span class="badge badge-had">⚠ High-Alert Drug</span>' : ''}
+      <span class="badge ${d.ed === 'E' ? 'badge-ed' : 'badge-ned'}">${d.ed === 'E' ? 'ED' : 'NED'}</span>
+      ${(d.categories || []).map(c => `<span class="badge badge-cat">${escHtml(c)}</span>`).join('')}
+    </div>
+    ${sections.map(s => `
+      <div class="preview-section">
+        <div class="preview-section-title">${s.title}</div>
+        <div class="preview-section-content">${escHtml(s.content)}</div>
+      </div>
+    `).join('')}
+    ${d.ref ? `<div style="padding:8px 20px;font-size:11px;color:var(--text-light);border-top:1px solid var(--border)">📚 ${escHtml(d.ref)}</div>` : ''}
+  `;
+}
+
+/* ═══════════════════════════════════════════
+   BULK IMPORT
+   ═══════════════════════════════════════════ */
+function setupImportZone() {
+  const zone = document.getElementById('import-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleImportFile({ target: { files: e.dataTransfer.files } });
+  });
+}
+
+function handleImportFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'csv') {
+    Papa.parse(file, {
+      header: true, skipEmptyLines: true,
+      complete: (result) => { processImportData(result.data, file.name); },
+      error: (err) => { toast('CSV parse error: ' + err.message, 'error'); }
+    });
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(sheet);
+      processImportData(data, file.name);
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    toast('ไม่รองรับไฟล์นามสกุล .' + ext, 'error');
+  }
+}
+
+function processImportData(data, filename) {
+  if (!data || data.length === 0) {
+    toast('ไฟล์ว่างเปล่า', 'error');
+    return;
+  }
+
+  // Map columns to drug schema
+  state.importData = data.map((row, i) => ({
+    _row: i + 2,
+    generic: row['Generic Name'] || row['generic'] || row['Generic'] || '',
+    trade: row['Trade Name'] || row['trade'] || row['Trade'] || '',
+    strength: row['Strength'] || row['strength'] || '',
+    ed: row['ED'] || row['ed'] || row['ED/NED'] || 'N',
+    categories: (row['Categories'] || row['categories'] || '').split(',').map(s => s.trim()).filter(Boolean),
+    had: ['true','1','yes','Y'].includes(String(row['HAD'] || row['had'] || '').toLowerCase()),
+    reconst: {
+      solvent: row['Reconst Solvent'] || row['reconst_solvent'] || '',
+      volume: row['Reconst Volume'] || row['reconst_volume'] || '',
+      conc: row['Reconst Conc'] || row['reconst_conc'] || '',
+    },
+    dilution: {
+      diluent: row['Diluent'] || row['diluent'] || '',
+      volume: row['Dilution Volume'] || row['dilution_volume'] || '',
+      finalConc: row['Final Conc'] || row['final_conc'] || '',
+    },
+    admin: {
+      route: row['Route'] || row['route'] || '',
+      rate: row['Rate'] || row['rate'] || '',
+    },
+    stability: {
+      reconst: row['Stability Reconst'] || row['stability_reconst'] || '',
+      diluted: row['Stability Diluted'] || row['stability_diluted'] || '',
+      storage: row['Storage'] || row['storage'] || '',
+    },
+    compat: {
+      ysite: row['Y-site Compatible'] || row['ysite'] || '',
+      incompat: row['Incompatible'] || row['incompat'] || '',
+    },
+    precautions: row['Precautions'] || row['precautions'] || '',
+    monitoring: (row['Monitoring'] || row['monitoring'] || '').split(',').map(s => s.trim()).filter(Boolean),
+    ref: row['Reference'] || row['ref'] || '',
+    status: 'draft',
+  }));
+
+  // Validate
+  const errors = [];
+  state.importData.forEach((d, i) => {
+    if (!d.generic) errors.push(`Row ${d._row}: ไม่มี Generic Name`);
+  });
+
+  const valid = state.importData.filter(d => d.generic);
+
+  // Show preview
+  const area = document.getElementById('import-preview-area');
+  area.innerHTML = `
+    <div class="import-status ${errors.length ? 'error' : 'success'}" style="margin-top:16px">
+      📄 ${filename} — พบ ${data.length} rows, valid ${valid.length} rows
+      ${errors.length ? `<br>⚠️ ${errors.length} errors: ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? '...' : ''}` : ''}
+    </div>
+    <div class="import-preview">
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead><tr><th>Row</th><th>Generic</th><th>Trade</th><th>Strength</th><th>ED</th><th>HAD</th><th>Categories</th></tr></thead>
+          <tbody>
+            ${valid.slice(0, 50).map(d => `
+              <tr>
+                <td>${d._row}</td>
+                <td class="drug-name">${escHtml(d.generic)}</td>
+                <td class="drug-trade">${escHtml(d.trade)}</td>
+                <td>${escHtml(d.strength)}</td>
+                <td><span class="badge ${d.ed === 'E' ? 'badge-ed' : 'badge-ned'}">${d.ed}</span></td>
+                <td>${d.had ? '⚠️' : '—'}</td>
+                <td>${d.categories.map(c => `<span class="badge badge-cat">${escHtml(c)}</span>`).join('')}</td>
+              </tr>
+            `).join('')}
+            ${valid.length > 50 ? `<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">... และอีก ${valid.length - 50} รายการ</td></tr>` : ''}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  if (valid.length > 0) {
+    document.getElementById('btn-import-confirm').style.display = 'inline-flex';
+  }
+}
+
+async function confirmImport() {
+  const valid = (state.importData || []).filter(d => d.generic);
+  if (valid.length === 0) return;
+
+  if (!confirm(`ยืนยัน import ${valid.length} รายการ?\n\nทุกรายการจะถูกตั้งเป็น "draft"`)) return;
+
+  showLoading(`กำลัง import ${valid.length} รายการ...`);
+  try {
+    await apiCallChunked('bulkImport', valid, 15);
+    toast(`✅ Import ${valid.length} รายการสำเร็จ`, 'success');
+    state.importData = null;
+    document.getElementById('import-preview-area').innerHTML = '';
+    document.getElementById('btn-import-confirm').style.display = 'none';
+    await loadDrugs();
+    switchTab('drugs');
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+function downloadTemplate() {
+  const headers = ['Generic Name','Trade Name','Strength','ED','Categories','HAD','Reconst Solvent','Reconst Volume','Reconst Conc','Diluent','Dilution Volume','Final Conc','Route','Rate','Stability Reconst','Stability Diluted','Storage','Y-site Compatible','Incompatible','Precautions','Monitoring','Reference'];
+  const example = ['vancomycin','Vancocin','500 mg/vial','E','antibiotic','false','SWFI','10 mL','50 mg/mL','NSS or D5W','200 mL','2.5-5 mg/mL','IV infusion','over 60 min','96 hr at RT','96 hr at RT','15-25°C','Amikacin, Cefepime','Ceftriaxone, Heparin','Red man syndrome: infuse over ≥60 min','SCr, BUN, Trough level, WBC','Lexicomp 2025'];
+
+  const csv = headers.join(',') + '\n' + example.map(v => `"${v}"`).join(',') + '\n';
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'iv_drugref_import_template.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('ดาวน์โหลด template แล้ว', 'info');
+}
+
+/* ═══════════════════════════════════════════
+   AUDIT LOG
+   ═══════════════════════════════════════════ */
+async function loadAuditLog() {
+  try {
+    const result = await apiCall('getAudit');
+    state.auditLog = result.log || [];
+    renderAuditLog();
+  } catch (e) {
+    console.error('Audit load error:', e);
+  }
+}
+
+function renderAuditLog() {
+  const actionFilter = document.getElementById('audit-filter-action').value;
+  const dateFrom = document.getElementById('audit-date-from').value;
+  const dateTo = document.getElementById('audit-date-to').value;
+
+  let log = state.auditLog.filter(entry => {
+    if (actionFilter && entry.action !== actionFilter) return false;
+    if (dateFrom && entry.timestamp < dateFrom) return false;
+    if (dateTo && entry.timestamp > dateTo + 'T23:59:59') return false;
+    return true;
+  });
+
+  const perPage = 30;
+  const total = log.length;
+  const pages = Math.ceil(total / perPage);
+  const start = (state.auditPage - 1) * perPage;
+  const page = log.slice(start, start + perPage);
+
+  const timeline = document.getElementById('audit-timeline');
+  if (page.length === 0) {
+    timeline.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted)">ไม่มีรายการ</div>';
+    return;
+  }
+
+  timeline.innerHTML = page.map(e => `
+    <div class="audit-item ${e.action}">
+      <div class="audit-meta">
+        <span>${formatDate(e.timestamp)}</span>
+        <span>👤 ${escHtml(e.user || 'unknown')}</span>
+      </div>
+      <div class="audit-action">
+        ${actionIcon(e.action)} ${actionLabel(e.action)}: <strong>${escHtml(e.drugName || '')}</strong>
+        ${e.drugId ? `<span style="font-family:var(--mono);font-size:11px;color:var(--text-light)">#${e.drugId}</span>` : ''}
+      </div>
+      ${e.details ? `<div class="audit-details">${escHtml(e.details)}</div>` : ''}
+    </div>
+  `).join('');
+
+  // Pagination
+  const pag = document.getElementById('audit-pagination');
+  if (pages <= 1) { pag.innerHTML = ''; return; }
+  let html = '';
+  for (let i = 1; i <= pages; i++) {
+    html += `<button class="page-btn ${i === state.auditPage ? 'active' : ''}" onclick="auditGoPage(${i})">${i}</button>`;
+  }
+  pag.innerHTML = html;
+}
+
+function auditGoPage(p) { state.auditPage = p; renderAuditLog(); }
+
+function actionIcon(a) {
+  return { create: '🆕', edit: '✏️', delete: '🗑', approve: '✅', reject: '↩️', import: '📥' }[a] || '📝';
+}
+function actionLabel(a) {
+  return { create: 'สร้างใหม่', edit: 'แก้ไข', delete: 'ลบ', approve: 'อนุมัติ', reject: 'ส่งกลับ', import: 'Import' }[a] || a;
+}
+
+/* ═══════════════════════════════════════════
+   USER MANAGEMENT (admin only)
+   ═══════════════════════════════════════════ */
+async function loadUsers() {
+  try {
+    const result = await apiCall('getUsers');
+    state.adminUsers = result.users || [];
+    if (result.myRole) state.myRole = result.myRole;
+    renderUsersTable();
+  } catch (e) {
+    console.error('loadUsers error:', e);
+  }
+}
+
+function renderUsersTable() {
+  const tbody = document.getElementById('users-tbody');
+  if (!tbody) return;
+
+  if (state.adminUsers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">ยังไม่มีผู้ใช้ — เพิ่มผู้ใช้คนแรก</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = state.adminUsers.map(u => {
+    const isMe = u.email.toLowerCase() === (state.user?.email || '').toLowerCase();
+    const roleBadge = u.role === 'admin'
+      ? '<span class="badge" style="background:var(--purple-bg);color:#6d28d9">🔑 Admin</span>'
+      : '<span class="badge" style="background:var(--primary-bg);color:#0369a1">📝 Editor</span>';
+    return `
+      <tr>
+        <td style="font-size:13px">${escHtml(u.email)} ${isMe ? '<span style="font-size:10px;color:var(--success)">(คุณ)</span>' : ''}</td>
+        <td style="font-size:13px">${escHtml(u.name || '—')}</td>
+        <td>${roleBadge}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${escHtml(u.addedBy || '—')}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${u.addedDate ? formatDate(u.addedDate) : '—'}</td>
+        <td>
+          <div class="actions-cell">
+            ${!isMe ? `
+              <button class="btn btn-sm btn-outline" onclick="changeRole('${escHtml(u.email)}', '${u.role === 'admin' ? 'editor' : 'admin'}')" title="เปลี่ยน role">
+                ${u.role === 'admin' ? '📝 → Editor' : '🔑 → Admin'}
+              </button>
+              <button class="btn btn-sm btn-outline" onclick="removeUser('${escHtml(u.email)}')" title="ลบผู้ใช้" style="color:var(--danger)">🗑</button>
+            ` : '<span style="font-size:11px;color:var(--text-muted)">—</span>'}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function addUser() {
+  const email = document.getElementById('new-user-email').value.trim();
+  const name = document.getElementById('new-user-name').value.trim();
+  const role = document.getElementById('new-user-role').value;
+
+  if (!email) { toast('กรุณากรอก email', 'error'); return; }
+
+  showLoading('กำลังเพิ่มผู้ใช้...');
+  try {
+    const result = await apiCall('setUserRole', { email, name, role });
+    if (result.error) {
+      toast('❌ ' + result.error, 'error');
+    } else {
+      toast(`✅ เพิ่ม ${email} เป็น ${role} แล้ว`, 'success');
+      document.getElementById('new-user-email').value = '';
+      document.getElementById('new-user-name').value = '';
+      await loadUsers();
+    }
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+async function changeRole(email, newRole) {
+  if (!confirm(`เปลี่ยน ${email} เป็น ${newRole}?`)) return;
+
+  showLoading('กำลังเปลี่ยน role...');
+  try {
+    await apiCall('setUserRole', { email, role: newRole });
+    toast(`✅ ${email} → ${newRole}`, 'success');
+    await loadUsers();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+async function removeUser(email) {
+  if (!confirm(`ลบ ${email} ออกจากระบบ?\n\nผู้ใช้นี้จะไม่สามารถเข้า admin ได้อีก`)) return;
+
+  showLoading('กำลังลบผู้ใช้...');
+  try {
+    await apiCall('removeUser', { email });
+    toast(`🗑 ลบ ${email} แล้ว`, 'success');
+    await loadUsers();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+/* ═══════════════════════════════════════════
+   SETTINGS
+   ═══════════════════════════════════════════ */
+function loadSettingsUI() {
+  const cfg = getConfig();
+  document.getElementById('setting-script-url').value = cfg.scriptUrl;
+  document.getElementById('setting-client-id').value = cfg.clientId;
+  document.getElementById('setting-allowed-emails').value = cfg.allowedEmails.join(', ');
+}
+
+function saveSettings() {
+  const cfg = {
+    scriptUrl: document.getElementById('setting-script-url').value.trim(),
+    clientId: document.getElementById('setting-client-id').value.trim(),
+    allowedEmails: document.getElementById('setting-allowed-emails').value.split(',').map(e => e.trim()).filter(Boolean),
+  };
+  saveConfig(cfg);
+  toast('💾 บันทึกการตั้งค่าแล้ว — reload เพื่อใช้งาน Google Sign-in', 'success');
+}
+
+/* ═══════════════════════════════════════════
+   TAB NAVIGATION
+   ═══════════════════════════════════════════ */
+function switchTab(tab) {
+  // Editor ไม่สามารถเข้า tab ที่ถูกจำกัด
+  if (!isAdmin() && ['import', 'settings', 'users'].includes(tab)) {
+    toast('❌ คุณไม่มีสิทธิ์เข้าถึงส่วนนี้', 'error');
+    return;
+  }
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+  if (tab === 'pending') renderPendingList();
+  if (tab === 'audit') renderAuditLog();
+  if (tab === 'users') loadUsers();
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY FUNCTIONS
+   ═══════════════════════════════════════════ */
+function escHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function formatDate(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'กำลังโหลด...';
+  document.getElementById('loading').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; setTimeout(() => el.remove(), 300); }, 4000);
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  setupImportZone();
+  // Init Google Auth after GIS library loads
+  if (typeof google !== 'undefined' && google.accounts) {
+    initGoogleAuth();
+  } else {
+    // GIS not loaded yet — wait
+    const check = setInterval(() => {
+      if (typeof google !== 'undefined' && google.accounts) {
+        clearInterval(check);
+        initGoogleAuth();
+      }
+    }, 200);
+    // Fallback: allow local access after 3s if GIS fails
+    setTimeout(() => {
+      clearInterval(check);
+      const cfg = getConfig();
+      if (!cfg.clientId) {
+        showApp({ name: 'Admin (Setup)', email: 'setup@local', picture: '' });
+        switchTab('settings');
+      }
+    }, 3000);
+  }
+});
+
+// ═══════════════════════════════════════════
+// EXPOSE TO WINDOW (for onclick handlers)
+// ═══════════════════════════════════════════
+window.initGoogleAuth = initGoogleAuth;
+window.handleCredentialResponse = handleCredentialResponse;
+window.signIn = signIn;
+window.signOut = signOut;
+window.switchTab = switchTab;
+window.openDrugModal = openDrugModal;
+window.closeDrugModal = closeDrugModal;
+window.saveDrug = saveDrug;
+window.editDrug = editDrug;
+window.deleteDrug = deleteDrug;
+window.approveDrug = typeof approveDrug !== "undefined" ? approveDrug : function(){};
+window.handleImportFile = handleImportFile;
+window.confirmImport = confirmImport;
+window.downloadTemplate = downloadTemplate;
+window.exportData = typeof exportData !== "undefined" ? exportData : function(){};
+window.saveSettings = saveSettings;
+window.filterDrugs = typeof filterDrugs !== "undefined" ? filterDrugs : getFilteredDrugs;
+window.loadSettingsUI = loadSettingsUI;
+window.renderAuditLog = renderAuditLog;
+window.sortTable = sortTable;
+window.goPage = goPage;
+window.auditGoPage = auditGoPage;
+window.togglePreview = togglePreview;
+window.previewDrugById = previewDrugById;
+window.renderPendingList = renderPendingList;
+window.toast = toast;
+
+})();
+
 </script>
 </body>
 </html>

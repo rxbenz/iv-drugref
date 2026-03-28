@@ -71,7 +71,1652 @@
 </nav>
 
 <script>
-!function(){"use strict";const e="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",t="iv_drugref_error_log",n="iv_drugref_error_queue",o="low",r="medium",a="high",i="critical";let s=[],c=0,l=null,d=null;function u(){return(window.location.pathname.split("/").pop()||"index.html").replace(".html","")}function g(){try{return JSON.parse(localStorage.getItem(n)||"[]")}catch(e){return[]}}function m(){const t=g();0!==t.length&&navigator.onLine&&(function(t){if(!navigator.onLine||0===t.length)return;if(c>=10)return;c+=t.length;const n=JSON.stringify({type:"error_report",errors:t,batch_size:t.length,reported_at:(new Date).toISOString()});try{navigator.sendBeacon?navigator.sendBeacon(e,n):fetch(e,{method:"POST",body:n,mode:"no-cors",keepalive:!0}).catch(()=>{})}catch(e){}}(t),function(){try{localStorage.removeItem(n)}catch(e){}}())}function p(e){const c=`${e.message}|${e.source}|${e.line}`;if(function(e){const t=Date.now();return s=s.filter(e=>t-e.time<6e4),!!s.some(t=>t.fp===e)||(s.push({fp:e,time:t}),!1)}(c))return;const l=function(e){const t=(e.message||"").toLowerCase();return t.includes("drugs")&&t.includes("undefined")||t.includes("json")&&t.includes("parse")?i:t.includes("security")||t.includes("cors")||t.includes("calculation")||t.includes("dose")?a:t.includes("fetch")||t.includes("network")||t.includes("typeerror")||t.includes("referenceerror")?r:o}(e),g={page:u(),url:window.location.href,userAgent:navigator.userAgent,online:navigator.onLine,timestamp:(new Date).toISOString(),sessionId:sessionStorage.getItem("sessionId")||"unknown",screenSize:`${screen.width}x${screen.height}`,viewportSize:`${window.innerWidth}x${window.innerHeight}`,language:navigator.language,standalone:window.matchMedia("(display-mode: standalone)").matches,memoryUsage:navigator.deviceMemory?`${navigator.deviceMemory}GB`:"N/A",appVersion:"5.0.0"},p={...e,severity:l,context:g,fingerprint:c,id:`err_${Date.now()}_${Math.random().toString(36).substr(2,6)}`};console.error(`[ErrorTracker] ${l.toUpperCase()}:`,e.message,p),function(e){try{let n=JSON.parse(localStorage.getItem(t)||"[]");n.unshift(e),n.length>50&&(n=n.slice(0,50)),localStorage.setItem(t,JSON.stringify(n))}catch(e){}}(p),l!==o&&function(e,t){if(!document.body)return;const n=d||(d=document.createElement("div"),d.id="iv-error-toast-container",d.style.cssText="\n      position: fixed;\n      bottom: 80px;\n      left: 50%;\n      transform: translateX(-50%);\n      z-index: 99999;\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      align-items: center;\n      pointer-events: none;\n      max-width: 90vw;\n    ",document.body.appendChild(d),d),o=document.createElement("div"),r={low:{bg:"#f0f4f8",border:"#94a3b8",text:"#475569",icon:"ℹ️"},medium:{bg:"#fef9c3",border:"#f59e0b",text:"#92400e",icon:"⚠️"},high:{bg:"#fee2e2",border:"#ef4444",text:"#991b1b",icon:"🔴"},critical:{bg:"#fecaca",border:"#dc2626",text:"#7f1d1d",icon:"🚨"}},a=r[t]||r.medium;o.style.cssText=`\n      background: ${a.bg};\n      border: 1px solid ${a.border};\n      border-radius: 12px;\n      padding: 10px 16px;\n      font-family: 'IBM Plex Sans Thai', sans-serif;\n      font-size: 13px;\n      color: ${a.text};\n      box-shadow: 0 4px 16px rgba(0,0,0,0.12);\n      pointer-events: auto;\n      opacity: 0;\n      transform: translateY(10px);\n      transition: all 0.3s ease;\n      max-width: 100%;\n      text-align: center;\n      line-height: 1.4;\n    `;const i="critical"===t||"high"===t?`${a.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`:`${a.icon} เกิดข้อผิดพลาดเล็กน้อย`;o.textContent=i,n.appendChild(o),requestAnimationFrame(()=>{o.style.opacity="1",o.style.transform="translateY(0)"}),setTimeout(()=>{o.style.opacity="0",o.style.transform="translateY(10px)",setTimeout(()=>o.remove(),300)},5e3),o.addEventListener("click",()=>{o.style.opacity="0",setTimeout(()=>o.remove(),300)})}(e.message,l),function(e){try{let t=JSON.parse(localStorage.getItem(n)||"[]");t.push(e),t.length>20&&(t=t.slice(-20)),localStorage.setItem(n,JSON.stringify(t))}catch(e){}}(p),l!==i&&l!==a||m()}window.onerror=function(e,t,n,o,r){return p({type:"runtime_error",message:String(e),source:t||"unknown",line:n||0,col:o||0,stack:r?r.stack:"N/A"}),!1},window.addEventListener("unhandledrejection",function(e){const t=e.reason;p({type:"unhandled_rejection",message:t?t.message||String(t):"Unknown rejection",source:"Promise",line:0,col:0,stack:t&&t.stack?t.stack:"N/A"})}),window.addEventListener("error",function(e){if(e.target&&e.target!==window){const t=e.target.tagName||"unknown",n=e.target.src||e.target.href||"unknown";p({type:"resource_error",message:`Failed to load ${t}: ${n}`,source:n,line:0,col:0,stack:"N/A"})}},!0),"serviceWorker"in navigator&&navigator.serviceWorker.addEventListener("message",function(e){e.data&&"SW_ERROR"===e.data.type&&p({type:"service_worker_error",message:e.data.error.message,source:e.data.error.filename||"sw.js",line:e.data.error.lineno||0,col:0,stack:"Service Worker context"})}),window.addEventListener("online",function(){setTimeout(m,2e3)}),l=setInterval(m,3e4),setInterval(function(){c=0},6e4),window.IVErrorTracker={report:function(e,t,n){p({type:"manual_report",message:String(e),source:u(),line:0,col:0,stack:(new Error).stack||"N/A",extra:n||{}})},getLog:function(){try{return JSON.parse(localStorage.getItem(t)||"[]")}catch(e){return[]}},clearLog:function(){localStorage.removeItem(t),localStorage.removeItem(n),console.log("[ErrorTracker] Log cleared")},flush:m,queueSize:function(){return g().length}},window.addEventListener("load",function(){setTimeout(m,3e3)}),console.log("[ErrorTracker] Initialized — v1.0 | Page:",u())}();var IVDrugRef=function(){function e(e,t){if(!e||e<=0)return 0;const n=e/2.54;return"M"===t?50+2.3*(n-60):45.5+2.3*(n-60)}function t(e,t){return t+.4*(e-t)}function n(e,t){return!t||t<=0?0:e/(t/100)**2}function o(e,t){return!e||!t||e<=0||t<=0?0:Math.sqrt(e*t/3600)}function r(n,o,r,a,i){if(r<=0)return 0;let s=o;if(i&&i>0){const n=e(i,a);o>1.3*n&&(s=t(o,n))}let c=(140-n)*s/(72*r);return"F"===a&&(c*=.85),Math.max(Math.round(10*c)/10,5)}function a(e,t){return t<=0||!e||e<=0?0:Math.round(.413*e/t*10)/10}function i(e,t,n){let o;if("F"===n){const n=.7,r=t<=n?-.241:-1.2;o=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)*1.012}else{const n=.9,r=t<=n?-.302:-1.2;o=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)}return Math.round(10*o)/10}const s="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec";let c=0;function l(){return localStorage.getItem("anonSessionId")||""}function d(){return localStorage.getItem("anonUserId")||""}function u(){return"true"===localStorage.getItem("analyticsConsent")}function g(e){if(u()&&!(c>=40)){c++;try{const t=JSON.stringify({...e,session_id:l(),user_id:d()});navigator.sendBeacon?navigator.sendBeacon(s,t):fetch(s,{method:"POST",body:t,keepalive:!0}).catch(()=>{})}catch(e){}}}return{VERSION:"5.0.0",APP_NAME:"IV DrugRef",calcIBW:e,calcABW:t,calcBMI:n,calcBSA:o,calcCockcroftGault:r,calcCG_raw:function(e,t,n,o){if(n<=0)return 0;let r=(140-e)*t/(72*n);return"F"===o&&(r*=.85),Math.round(10*r)/10},calcSchwartz:a,calcCKDEPI2021:i,calcCKDEPI2021_nonindexed:function(e,t,n,o){const r=i(e,t,n);return Math.round(r*o/1.73*10)/10},getCKDStage:function(e){return e>=90?{stage:"G1",label:"ปกติ/สูง",cls:"stage-1"}:e>=60?{stage:"G2",label:"ลดลงเล็กน้อย",cls:"stage-2"}:e>=45?{stage:"G3a",label:"ลดลงเล็กน้อย-ปานกลาง",cls:"stage-3a"}:e>=30?{stage:"G3b",label:"ลดลงปานกลาง-มาก",cls:"stage-3b"}:e>=15?{stage:"G4",label:"ลดลงมาก",cls:"stage-4"}:{stage:"G5",label:"ไตวาย",cls:"stage-5"}},getPatientFromForm:function(i){const s=Object.assign({age:"ptAge",wt:"ptWt",ht:"ptHt",sex:"ptSex",scr:"ptScr",alb:"ptAlb",dialysis:"ptDialysis"},i||{}),c=(e,t)=>{const n=document.getElementById(e);return n&&parseFloat(n.value)||t},l=(e,t)=>{const n=document.getElementById(e);return n?n.value:t},d=c(s.age,55),u=c(s.wt,70),g=c(s.ht,170),m=l(s.sex,"M"),p=c(s.scr,1),v=c(s.alb,4),f=l(s.dialysis,"none"),h=Math.round(10*e(g,m))/10,y=Math.round(10*t(u,h))/10,b=Math.round(10*n(u,g))/10,w=Math.round(100*o(g,u))/100,x=u>1.3*h,S=u<h,I=d<18;let $;return $=I&&g>0?a(g,p):r(d,u,p,m,g),{age:d,wt:u,ht:g,sex:m,scr:p,alb:v,dialysis:f,ibw:h,abw:y,bmi:b,bsa:w,isObese:x,isUnderweight:S,isPediatric:I,crcl:$}},sendAnalytics:g,trackPageView:function(e){const t=Date.now(),n=function(){const e=document.referrer||"";return e.includes("index.html")||e.endsWith("iv-drugref/")?"drugref":e.includes("calculator.html")?"calculator":e.includes("tdm.html")?"tdm":e.includes("vanco-tdm.html")?"vanco-tdm":e.includes("renal-dosing.html")?"renal-dosing":e.includes("compatibility.html")?"compatibility":e.includes("dashboard.html")?"dashboard":e?"external":"direct"}();g({type:"page_view",page:e,action:"enter",from_page:n,referrer:document.referrer||"direct"});let o=!1;function r(r){o||(o=!0,g({type:"page_view",page:e,action:"leave",duration_sec:Math.round((Date.now()-t)/1e3),from_page:n,...r||{}}))}return window.addEventListener("beforeunload",()=>r()),document.addEventListener("visibilitychange",()=>{"hidden"===document.visibilityState&&r()}),{sendExit:r,fromPage:n,enterTime:t}},getSessionId:l,getUserId:d,hasAnalyticsConsent:u,registerSW:function(){"serviceWorker"in navigator&&navigator.serviceWorker.register("sw.js").then(e=>console.log("[SW] Registered:",e.scope)).catch(e=>console.warn("[SW] Registration failed:",e))},generateId:function(e){e=e||16;const t=new Uint8Array(e/2);return crypto.getRandomValues(t),Array.from(t,e=>e.toString(16).padStart(2,"0")).join("")},debounce:function(e,t){let n;return function(...o){clearTimeout(n),n=setTimeout(()=>e.apply(this,o),t)}},fmt:function(e,t){return t=void 0!==t?t:1,(Math.round(e*Math.pow(10,t))/Math.pow(10,t)).toFixed(t)}}}();document.addEventListener("DOMContentLoaded",()=>{IVDrugRef.registerSW()}),function(){"use strict";document.addEventListener("DOMContentLoaded",function(){IVDrugRef.trackPageView("vanco-tdm")});const e=[{id:"buelga",name:"Buelga 2005",pop:"General adults",ref:"Antimicrob Agents Chemother 2005;49:4934-41",clFn:e=>.0048*e,vdFn:e=>.65*e,omega_cl:.25,omega_vd:.15,sigma:.1},{id:"roberts",name:"Roberts 2011",pop:"ICU / Critically ill",ref:"Antimicrob Agents Chemother 2011;55:2704-9",clFn:e=>.024*e+1.93,vdFn:e=>.511*e,omega_cl:.3,omega_vd:.2,sigma:.12},{id:"goti",name:"Goti 2018",pop:"Hospitalized adults",ref:"Clin Pharmacokinet 2018;57:367-82",clFn:e=>.0154*e+.32,vdFn:e=>.7*e,omega_cl:.22,omega_vd:.18,sigma:.08},{id:"adane",name:"Adane 2015",pop:"Obese (BMI ≥30)",ref:"Pharmacotherapy 2015;35:127-139",clFn:e=>.0169*e+.94,vdFn:(e,t,n)=>{if(!t||t<=0)return.55*e;const o=t/2.54,r="M"===n?50+2.3*(o-60):45.5+2.3*(o-60);return.55*(e>1.3*r?r+.4*(e-r):e)},omega_cl:.28,omega_vd:.22,sigma:.11,useABW:!0},{id:"bourguignon",name:"Bourguignon 2016",pop:"Elderly (≥80 yr)",ref:"Antimicrob Agents Chemother 2016;60:4563-7",clFn:e=>.0117*e+.28,vdFn:e=>.52*e,omega_cl:.35,omega_vd:.2,sigma:.13}];function t(){return{wt:+document.getElementById("ptWt").value||70,age:+document.getElementById("ptAge").value||55,sex:document.getElementById("ptSex").value,scr:+document.getElementById("ptScr").value||1,ht:+document.getElementById("ptHt").value||170}}function n(){const e=t();let n=function(e,t,n,o,r){if(n<=0)return 0;let a=t;if(r&&r>0){const e=r/2.54,n="M"===o?50+2.3*(e-60):45.5+2.3*(e-60);t>1.3*n&&(a=n+.4*(t-n))}let i=(140-e)*a/(72*n);return"F"===o&&(i*=.85),Math.max(i,5)}(e.age,e.wt,e.scr,e.sex,e.ht).toFixed(1)+" mL/min";if(e.ht>0){const t=e.ht/2.54,o="M"===e.sex?50+2.3*(t-60):45.5+2.3*(t-60);e.wt>1.3*o&&(n+=" (ABW)"),e.age>=65&&e.scr<.7&&(n+=" ⚠elderly")}document.getElementById("ptCrCl").value=n}let o=[{amount:1e3,interval:12,infusion:1,nDoses:3,dateTime:""}],r=[{value:15,dateTime:""}],a=null;function i(e){return e&&a?(new Date(e).getTime()-a)/36e5:0}function s(){o[0]?.dateTime&&(a=new Date(o[0].dateTime).getTime())}function c(){return s(),o.map(e=>({amount:e.amount,interval:e.interval,infusion:e.infusion,nDoses:e.nDoses,startTime:i(e.dateTime)}))}function l(){return s(),r.map(e=>({value:e.value,time:i(e.dateTime)}))}function d(){s();let e=document.getElementById("samplingAdvice");if(!e){const t=document.createElement("div");t.className="card",t.id="samplingAdviceCard",t.innerHTML='<div class="card-head">📍 SAMPLING ADEQUACY</div><div class="card-body" id="samplingAdvice"></div>';const n=document.getElementById("levelList")?.closest(".card");n&&n.after(t),e=document.getElementById("samplingAdvice")}if(!e||!a)return void(e&&(e.innerHTML='<div style="font-size:12px;color:var(--text3)">กรุณากรอกเวลาให้ยาก่อน</div>'));let t="";const n=function(){const e=c(),t=l(),n=[];let o=0,r=0;for(const t of e)o+=t.nDoses,r=Math.max(r,t.startTime+(t.nDoses-1)*t.interval+t.infusion);const a=e[e.length-1],i=a?a.startTime+3*a.interval:0;for(const r of t){r.time<i&&o>=1&&n.push({type:"pre-ss",severity:"amber",msg:`⚠ Level ที่ ${r.value.toFixed(1)} mcg/mL เจาะก่อน steady state (ก่อน dose ที่ 4) — ผล Bayesian อาจไม่แม่นยำ`});let a=!1;for(const t of e)for(let e=1;e<t.nDoses;e++){const n=t.startTime+e*t.interval-r.time;n>=0&&n<=1&&(a=!0)}r.value<25&&!a&&1===t.length&&n.push({type:"not-trough",severity:"amber",msg:`📍 Level ${r.value.toFixed(1)} อาจไม่ใช่ true trough — true trough ควรเจาะ ≤30 นาทีก่อน dose ถัดไป (Bayesian MAP ยังทำงานได้จาก random level)`})}return n}();for(const e of n)t+=`<div class="info-box ${e.severity}" style="font-size:11px">${e.msg}</div>`;const o=function(){const e=c();if(0===e.length)return[];const t=e[e.length-1],n=t.startTime+3*t.interval,o=[],r=n-.5;if(r>0&&a){const e=new Date(a+36e5*r);o.push({type:"trough",time:r,dt:e,label:`Trough: ${e.toLocaleString("th-TH",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})} (30 นาทีก่อน dose #${Math.round(n/t.interval)+1})`})}const i=n+t.infusion+1;if(i>0&&a){const e=new Date(a+36e5*i);o.push({type:"peak",time:i,dt:e,label:`Peak: ${e.toLocaleString("th-TH",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})} (1 hr หลัง infusion dose #${Math.round(n/t.interval)+1})`})}return o}();if(o.length>0){t+='<div style="font-size:11px;color:var(--text2);margin-top:8px"><strong>📋 แนะนำเวลาเจาะ (at steady state):</strong></div>';for(const e of o)t+=`<div style="font-size:12px;padding:6px 8px;margin-top:4px;background:var(--bg);border-radius:6px;border:1px solid var(--card-border)">\n        <span style="color:var(--${"trough"===e.type?"purple":"blue"})">${"trough"===e.type?"🔻":"🔺"}</span> ${e.label}</div>`}const r=c();if(r.length>0){r[r.length-1];let e=0;for(const t of r)e+=t.nDoses;const n=4,o=e>=n;t+=`<div style="margin-top:10px;font-size:11px;color:var(--text2)"><strong>📊 Steady-State Progress:</strong> ${e} / ${n} doses (${o?"✅ ถึง SS แล้ว":"⏳ ยังไม่ถึง SS"})</div>\n    <div class="progress" style="margin:4px 0"><div class="progress-bar" style="width:${Math.min(e/n*100,100)}%;background:${o?"var(--green)":"var(--amber)"}"></div></div>`}n.length||-1!==t.indexOf("แนะนำ")||(t='<div style="font-size:12px;color:var(--green)">✅ ยังไม่พบปัญหาเรื่อง sampling</div>'),e.innerHTML=t}const u="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",g=localStorage.getItem("anonSessionId")||"",m=localStorage.getItem("anonUserId")||"";let p=0;!function(e){if(u&&"true"===localStorage.getItem("analyticsConsent")&&!(p>=20)){p++;try{const t=JSON.stringify({...e,session_id:g,user_id:m});navigator.sendBeacon?navigator.sendBeacon(u,t):fetch(u,{method:"POST",body:t,keepalive:!0}).catch(()=>{})}catch(e){}}}({type:"calc_visit",page:"vanco-tdm",referrer:document.referrer||"direct",drugs_available:"Vancomycin"}),["ptWt","ptAge","ptSex","ptScr","ptHt"].forEach(e=>{const t=document.getElementById(e);t&&t.addEventListener("input",n)}),["optDose","optInterval","optInfusion"].forEach(e=>{const t=document.getElementById(e);t&&t.addEventListener("input",()=>{})}),window.addEventListener("resize",()=>{}),n(),o[0].dateTime||(o[0].dateTime=function(e=0){const t=new Date;return t.setHours(t.getHours()-24+e),t.setMinutes(0,0,0),t.toISOString().slice(0,16)}(0)),document.getElementById("doseList").innerHTML=o.map((e,t)=>`\n    <div class="dose-entry"><div class="dose-entry-head"><span>Dose #${t+1}</span>${o.length>1?`<button onclick="doses.splice(${t},1);renderDoses()">×</button>`:""}</div>\n    <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${e.amount}" min="100" max="4000" step="250" onchange="doses[${t}].amount=+this.value"></div>\n    <div class="field"><label>Interval (hr)</label><input type="number" value="${e.interval}" min="4" max="72" onchange="doses[${t}].interval=+this.value"></div>\n    <div class="field"><label>Infusion (hr)</label><input type="number" value="${e.infusion}" min="0.5" max="4" step="0.5" onchange="doses[${t}].infusion=+this.value"></div></div>\n    <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${e.dateTime}" onchange="doses[${t}].dateTime=this.value;updateReferenceTime();renderSamplingAdvice()"></div>\n    <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${e.nDoses}" min="1" max="50" onchange="doses[${t}].nDoses=+this.value;renderSamplingAdvice()"></div></div></div>`).join(""),d(),document.getElementById("levelList").innerHTML=r.map((e,t)=>`\n    <div class="level-entry"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${t+1} (mcg/mL)</label><input type="number" value="${e.value}" min="0.1" max="100" step="0.1" onchange="levels[${t}].value=+this.value"></div>\n    <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${e.dateTime}" onchange="levels[${t}].dateTime=this.value;renderSamplingAdvice()"></div></div>\n    ${r.length>1?`<button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);margin-top:6px" onclick="levels.splice(${t},1);renderLevels()">ลบ</button>`:""}</div>`).join(""),d(),function(){const n=function(e){e||(e=t());const n=e.ht||170,o=n/2.54,r="M"===e.sex?50+2.3*(o-60):45.5+2.3*(o-60);return e.wt/(n/100)**2>=30||e.wt>1.3*r?"adane":e.age>=80?"bourguignon":null}(),o=[{id:"auto",name:"Auto-select",pop:"Best fit (lowest OFV)"},...e];if(document.getElementById("modelSelect").innerHTML=o.map(e=>{const t=e.id===n;return`<div class="model-card ${"auto"===e.id?"active":""}" onclick="selectedModel='${e.id}';renderModelSelect()">\n      <div class="mc-name">${e.name} ${t?'<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>':""}</div>\n      <div class="mc-sub">${e.pop}${e.ref?" — "+e.ref:""}</div></div>`}).join(""),n){const e=t(),o=e.wt/(e.ht/100)**2;let r="";"adane"===n?r=`<strong>⚠ BMI ${o.toFixed(1)} → แนะนำ Adane 2015 (Obesity model)</strong><br>Model นี้ใช้ ABW สำหรับ Vd + CrCl ที่ adjusted → แม่นยำกว่า general models ในคนอ้วน`:"bourguignon"===n&&(r=`<strong>👴 อายุ ${e.age} ปี → แนะนำ Bourguignon 2016 (Elderly model)</strong><br>Validated ในผู้ป่วย >80 ปี ที่มี CL ต่ำกว่า general population`),document.getElementById("modelSelect").innerHTML+=`<div class="info-box amber" style="font-size:11px;margin-top:8px">${r}</div>`}}()}();
+// ============================================================================
+// IV DrugRef PWA — Error Tracker v1.0
+// Hybrid error tracking: client-side capture + GAS remote reporting
+// ============================================================================
+// Features:
+// - Global error capture (window.onerror, unhandledrejection)
+// - Non-intrusive toast notification for users
+// - In-memory error log with localStorage persistence for debugging
+// - Offline queue → auto-flush to GAS when back online
+// - Deduplication (same error within 60s = skip)
+// - Rate limiting (max 10 reports per minute to GAS)
+// - Email alert for critical errors via GAS
+// ============================================================================
+
+(function () {
+  'use strict';
+
+  // ─── Configuration ───
+  const CONFIG = {
+    // GAS endpoint (same as analytics)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
+
+    // LocalStorage keys
+    LS_ERROR_LOG: 'iv_drugref_error_log',
+    LS_ERROR_QUEUE: 'iv_drugref_error_queue',
+
+    // Limits
+    MAX_LOG_ENTRIES: 50,        // Keep last 50 errors in localStorage
+    MAX_QUEUE_SIZE: 20,         // Max queued errors before flush
+    DEDUP_WINDOW_MS: 60000,     // 60s dedup window
+    RATE_LIMIT_PER_MIN: 10,     // Max 10 reports/minute to GAS
+    TOAST_DURATION_MS: 5000,    // Toast visible for 5s
+    FLUSH_INTERVAL_MS: 30000,   // Auto-flush queue every 30s
+
+    // Severity levels
+    SEVERITY: {
+      LOW: 'low',           // Minor UI glitch
+      MEDIUM: 'medium',     // Feature broken but app usable
+      HIGH: 'high',         // Core feature broken
+      CRITICAL: 'critical'  // App crash / data corruption
+    },
+
+    // App metadata
+    APP_VERSION: '5.0.0',
+    APP_NAME: 'IV DrugRef PWA'
+  };
+
+  // ─── State ───
+  let recentErrors = [];        // For dedup tracking
+  let rateLimitCount = 0;       // Reports sent this minute
+  let flushTimer = null;
+  let toastContainer = null;
+
+  // ─── Utility: Get current page name ───
+  function getPageName() {
+    const path = window.location.pathname;
+    const file = path.split('/').pop() || 'index.html';
+    return file.replace('.html', '');
+  }
+
+  // ─── Utility: Generate error fingerprint for dedup ───
+  function errorFingerprint(message, source, line) {
+    return `${message}|${source}|${line}`;
+  }
+
+  // ─── Utility: Check dedup ───
+  function isDuplicate(fingerprint) {
+    const now = Date.now();
+    // Clean old entries
+    recentErrors = recentErrors.filter(e => now - e.time < CONFIG.DEDUP_WINDOW_MS);
+    // Check if exists
+    if (recentErrors.some(e => e.fp === fingerprint)) return true;
+    recentErrors.push({ fp: fingerprint, time: now });
+    return false;
+  }
+
+  // ─── Utility: Classify severity ───
+  function classifySeverity(error) {
+    const msg = (error.message || '').toLowerCase();
+
+    // Critical: data corruption, security, crashes
+    if (msg.includes('drugs') && msg.includes('undefined')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('json') && msg.includes('parse')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
+
+    // High: core features broken
+    if (msg.includes('calculation') || msg.includes('dose')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('fetch') || msg.includes('network')) return CONFIG.SEVERITY.MEDIUM;
+    if (msg.includes('typeerror') || msg.includes('referenceerror')) return CONFIG.SEVERITY.MEDIUM;
+
+    // Default
+    return CONFIG.SEVERITY.LOW;
+  }
+
+  // ─── Utility: Collect context ───
+  function collectContext() {
+    return {
+      page: getPageName(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      online: navigator.onLine,
+      timestamp: new Date().toISOString(),
+      sessionId: sessionStorage.getItem('sessionId') || 'unknown',
+      screenSize: `${screen.width}x${screen.height}`,
+      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+      language: navigator.language,
+      standalone: window.matchMedia('(display-mode: standalone)').matches,
+      memoryUsage: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
+      appVersion: CONFIG.APP_VERSION
+    };
+  }
+
+  // ─── Toast UI ───
+  function createToastContainer() {
+    if (toastContainer) return toastContainer;
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'iv-error-toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+      max-width: 90vw;
+    `;
+    document.body.appendChild(toastContainer);
+    return toastContainer;
+  }
+
+  function showToast(message, severity) {
+    if (!document.body) return; // Not ready yet
+
+    const container = createToastContainer();
+    const toast = document.createElement('div');
+
+    const colors = {
+      low: { bg: '#f0f4f8', border: '#94a3b8', text: '#475569', icon: 'ℹ️' },
+      medium: { bg: '#fef9c3', border: '#f59e0b', text: '#92400e', icon: '⚠️' },
+      high: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', icon: '🔴' },
+      critical: { bg: '#fecaca', border: '#dc2626', text: '#7f1d1d', icon: '🚨' }
+    };
+    const c = colors[severity] || colors.medium;
+
+    toast.style.cssText = `
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 13px;
+      color: ${c.text};
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      max-width: 100%;
+      text-align: center;
+      line-height: 1.4;
+    `;
+
+    // User-friendly message (not raw error)
+    const userMsg = severity === 'critical' || severity === 'high'
+      ? `${c.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`
+      : `${c.icon} เกิดข้อผิดพลาดเล็กน้อย`;
+
+    toast.textContent = userMsg;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, CONFIG.TOAST_DURATION_MS);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    });
+  }
+
+  // ─── LocalStorage Log ───
+  function saveToLog(entry) {
+    try {
+      let log = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      log.unshift(entry);
+      if (log.length > CONFIG.MAX_LOG_ENTRIES) {
+        log = log.slice(0, CONFIG.MAX_LOG_ENTRIES);
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_LOG, JSON.stringify(log));
+    } catch (e) {
+      // localStorage full or unavailable — silently fail
+    }
+  }
+
+  // ─── Queue for GAS reporting ───
+  function addToQueue(entry) {
+    try {
+      let queue = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+      queue.push(entry);
+      if (queue.length > CONFIG.MAX_QUEUE_SIZE) {
+        queue = queue.slice(-CONFIG.MAX_QUEUE_SIZE); // Keep newest
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_QUEUE, JSON.stringify(queue));
+    } catch (e) { /* silently fail */ }
+  }
+
+  function getQueue() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function clearQueue() {
+    try {
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Send to GAS ───
+  function sendToGAS(entries) {
+    if (!navigator.onLine || entries.length === 0) return;
+    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return;
+
+    rateLimitCount += entries.length;
+
+    const payload = JSON.stringify({
+      type: 'error_report',
+      errors: entries,
+      batch_size: entries.length,
+      reported_at: new Date().toISOString()
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(CONFIG.GAS_URL, payload);
+      } else {
+        fetch(CONFIG.GAS_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors',
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Flush queue ───
+  function flushQueue() {
+    const queue = getQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    sendToGAS(queue);
+    clearQueue();
+  }
+
+  // ─── Core: Process error ───
+  function processError(errorInfo) {
+    const fp = errorFingerprint(errorInfo.message, errorInfo.source, errorInfo.line);
+    if (isDuplicate(fp)) return;
+
+    const severity = classifySeverity(errorInfo);
+    const context = collectContext();
+
+    const entry = {
+      ...errorInfo,
+      severity,
+      context,
+      fingerprint: fp,
+      id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    };
+
+    // 1. Console log (always)
+    console.error(`[ErrorTracker] ${severity.toUpperCase()}:`, errorInfo.message, entry);
+
+    // 2. Save to localStorage log
+    saveToLog(entry);
+
+    // 3. Show toast (only for medium+ severity)
+    if (severity !== CONFIG.SEVERITY.LOW) {
+      showToast(errorInfo.message, severity);
+    }
+
+    // 4. Queue for GAS reporting
+    addToQueue(entry);
+
+    // 5. If critical or high, flush immediately
+    if (severity === CONFIG.SEVERITY.CRITICAL || severity === CONFIG.SEVERITY.HIGH) {
+      flushQueue();
+    }
+  }
+
+  // ─── Global Error Handlers ───
+
+  // Catch synchronous errors
+  window.onerror = function (message, source, line, col, error) {
+    processError({
+      type: 'runtime_error',
+      message: String(message),
+      source: source || 'unknown',
+      line: line || 0,
+      col: col || 0,
+      stack: error ? error.stack : 'N/A'
+    });
+    return false; // Don't suppress default console error
+  };
+
+  // Catch unhandled promise rejections
+  window.addEventListener('unhandledrejection', function (event) {
+    const reason = event.reason;
+    processError({
+      type: 'unhandled_rejection',
+      message: reason ? (reason.message || String(reason)) : 'Unknown rejection',
+      source: 'Promise',
+      line: 0,
+      col: 0,
+      stack: reason && reason.stack ? reason.stack : 'N/A'
+    });
+  });
+
+  // Catch resource loading errors (images, scripts, etc.)
+  window.addEventListener('error', function (event) {
+    if (event.target && event.target !== window) {
+      const tag = event.target.tagName || 'unknown';
+      const src = event.target.src || event.target.href || 'unknown';
+      processError({
+        type: 'resource_error',
+        message: `Failed to load ${tag}: ${src}`,
+        source: src,
+        line: 0,
+        col: 0,
+        stack: 'N/A'
+      });
+    }
+  }, true); // Capture phase to catch resource errors
+
+  // ─── Service Worker error messages ───
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'SW_ERROR') {
+        processError({
+          type: 'service_worker_error',
+          message: event.data.error.message,
+          source: event.data.error.filename || 'sw.js',
+          line: event.data.error.lineno || 0,
+          col: 0,
+          stack: 'Service Worker context'
+        });
+      }
+    });
+  }
+
+  // ─── Network error monitoring ───
+  window.addEventListener('online', function () {
+    // Flush queued errors when back online
+    setTimeout(flushQueue, 2000);
+  });
+
+  // ─── Periodic flush ───
+  flushTimer = setInterval(flushQueue, CONFIG.FLUSH_INTERVAL_MS);
+
+  // ─── Rate limit reset ───
+  setInterval(function () {
+    rateLimitCount = 0;
+  }, 60000);
+
+  // ─── Public API (for manual error reporting) ───
+  window.IVErrorTracker = {
+    /**
+     * Manually report an error
+     * @param {string} message - Error description
+     * @param {string} severity - 'low'|'medium'|'high'|'critical'
+     * @param {object} extra - Additional context
+     */
+    report: function (message, severity, extra) {
+      processError({
+        type: 'manual_report',
+        message: String(message),
+        source: getPageName(),
+        line: 0,
+        col: 0,
+        stack: new Error().stack || 'N/A',
+        extra: extra || {}
+      });
+    },
+
+    /**
+     * Get error log from localStorage
+     * @returns {Array} Error entries
+     */
+    getLog: function () {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      } catch (e) {
+        return [];
+      }
+    },
+
+    /**
+     * Clear error log
+     */
+    clearLog: function () {
+      localStorage.removeItem(CONFIG.LS_ERROR_LOG);
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+      console.log('[ErrorTracker] Log cleared');
+    },
+
+    /**
+     * Force flush queued errors to GAS
+     */
+    flush: flushQueue,
+
+    /**
+     * Get current queue size
+     */
+    queueSize: function () {
+      return getQueue().length;
+    }
+  };
+
+  // ─── Initial flush on load ───
+  window.addEventListener('load', function () {
+    // Flush any queued errors from previous sessions
+    setTimeout(flushQueue, 3000);
+  });
+
+  console.log('[ErrorTracker] Initialized — v1.0 | Page:', getPageName());
+})();
+
+// ============================================================
+// IV DrugRef PWA v5.0 — Core Utilities
+// Shared across all pages
+// ============================================================
+
+/* global window */
+'use strict';
+
+var IVDrugRef = (function() {
+
+  // ============================================================
+  // CLINICAL CALCULATORS
+  // ============================================================
+
+  /**
+   * Ideal Body Weight (Devine formula)
+   * @param {number} ht - Height in cm
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} IBW in kg
+   */
+  function calcIBW(ht, sex) {
+    if (!ht || ht <= 0) return 0;
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  /**
+   * Adjusted Body Weight (for obesity)
+   * @param {number} wt - Actual weight in kg
+   * @param {number} ibw - Ideal body weight in kg
+   * @returns {number} ABW in kg
+   */
+  function calcABW(wt, ibw) {
+    return ibw + 0.4 * (wt - ibw);
+  }
+
+  /**
+   * Body Mass Index
+   * @param {number} wt - Weight in kg
+   * @param {number} ht - Height in cm
+   * @returns {number} BMI in kg/m²
+   */
+  function calcBMI(wt, ht) {
+    if (!ht || ht <= 0) return 0;
+    return wt / ((ht / 100) ** 2);
+  }
+
+  /**
+   * Body Surface Area (Mosteller formula)
+   * @param {number} ht - Height in cm
+   * @param {number} wt - Weight in kg
+   * @returns {number} BSA in m²
+   */
+  function calcBSA(ht, wt) {
+    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
+    return Math.sqrt((ht * wt) / 3600);
+  }
+
+  /**
+   * Cockcroft-Gault CrCl with automatic weight adjustment
+   * Uses ABW if patient is obese (>130% IBW)
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
+   * @returns {number} CrCl in mL/min, minimum 5
+   */
+  function calcCockcroftGault(age, wt, scr, sex, ht) {
+    if (scr <= 0) return 0;
+    let useWt = wt;
+    if (ht && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
+    }
+    let crcl = ((140 - age) * useWt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.max(Math.round(crcl * 10) / 10, 5);
+  }
+
+  /**
+   * Cockcroft-Gault with raw TBW (no obesity adjustment)
+   * Used for comparison and non-adjusted dosing
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} CrCl in mL/min
+   */
+  function calcCG_raw(age, wt, scr, sex) {
+    if (scr <= 0) return 0;
+    let crcl = ((140 - age) * wt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.round(crcl * 10) / 10;
+  }
+
+  /**
+   * Bedside Schwartz equation (pediatric eGFR)
+   * For ages 1-17 years
+   * @param {number} ht - Height in cm
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcSchwartz(ht, scr) {
+    if (scr <= 0 || !ht || ht <= 0) return 0;
+    return Math.round((0.413 * ht / scr) * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 equation (race-free)
+   * Returns indexed eGFR for standardized BSA (1.73m²)
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcCKDEPI2021(age, scr, sex) {
+    let eGFR;
+    if (sex === 'F') {
+      const kappa = 0.7;
+      const alpha = scr <= kappa ? -0.241 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age) * 1.012;
+    } else {
+      const kappa = 0.9;
+      const alpha = scr <= kappa ? -0.302 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age);
+    }
+    return Math.round(eGFR * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 de-indexed for drug dosing
+   * Converts indexed eGFR to non-indexed using patient BSA
+   * Per KDIGO 2024 recommendations for personalized dosing
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} bsa - Body surface area in m²
+   * @returns {number} Non-indexed eGFR in mL/min
+   */
+  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
+    const indexed = calcCKDEPI2021(age, scr, sex);
+    return Math.round(indexed * bsa / 1.73 * 10) / 10;
+  }
+
+  /**
+   * Get CKD stage classification from GFR value
+   * @param {number} gfr - Glomerular filtration rate in mL/min
+   * @returns {Object} Stage info with stage code, Thai label, and CSS class
+   */
+  function getCKDStage(gfr) {
+    if (gfr >= 90) return { stage: 'G1', label: 'ปกติ/สูง', cls: 'stage-1' };
+    if (gfr >= 60) return { stage: 'G2', label: 'ลดลงเล็กน้อย', cls: 'stage-2' };
+    if (gfr >= 45) return { stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', cls: 'stage-3a' };
+    if (gfr >= 30) return { stage: 'G3b', label: 'ลดลงปานกลาง-มาก', cls: 'stage-3b' };
+    if (gfr >= 15) return { stage: 'G4', label: 'ลดลงมาก', cls: 'stage-4' };
+    return { stage: 'G5', label: 'ไตวาย', cls: 'stage-5' };
+  }
+
+  /**
+   * Build comprehensive patient object from form elements
+   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
+   * @param {Object} fieldIds - Optional custom field ID mapping
+   * @returns {Object} Complete patient data object
+   */
+  function getPatientFromForm(fieldIds) {
+    // Default field IDs matching standard form layout
+    const ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    }, fieldIds || {});
+
+    const getVal = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? (parseFloat(el.value) || def) : def;
+    };
+    const getStr = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? el.value : def;
+    };
+
+    const age = getVal(ids.age, 55);
+    const wt = getVal(ids.wt, 70);
+    const ht = getVal(ids.ht, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = getVal(ids.scr, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
+
+    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
+    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
+    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
+    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
+    const isObese = wt > ibw * 1.3;
+    const isUnderweight = wt < ibw;
+    const isPediatric = age < 18;
+
+    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
+    let crcl;
+    if (isPediatric && ht > 0) {
+      crcl = calcSchwartz(ht, scr);
+    } else {
+      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
+    }
+
+    return {
+      age, wt, ht, sex, scr, alb, dialysis,
+      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
+      crcl
+    };
+  }
+
+
+  // ============================================================
+  // ANALYTICS
+  // ============================================================
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  let _reqCount = 0;
+
+  /**
+   * Get anonymous session ID from localStorage
+   * @returns {string} Session ID or empty string
+   */
+  function getSessionId() {
+    return localStorage.getItem('anonSessionId') || '';
+  }
+
+  /**
+   * Get anonymous user ID from localStorage
+   * @returns {string} User ID or empty string
+   */
+  function getUserId() {
+    return localStorage.getItem('anonUserId') || '';
+  }
+
+  /**
+   * Check if user has consented to analytics
+   * @returns {boolean} True if analytics consent is given
+   */
+  function hasAnalyticsConsent() {
+    return localStorage.getItem('analyticsConsent') === 'true';
+  }
+
+  /**
+   * Send analytics event via sendBeacon or fetch
+   * Rate limited to 40 requests per page session
+   * @param {Object} data - Event data to send
+   */
+  function sendAnalytics(data) {
+    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (_reqCount >= 40) return;
+    _reqCount++;
+    try {
+      const payload = JSON.stringify({
+        ...data,
+        session_id: getSessionId(),
+        user_id: getUserId()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(ANALYTICS_URL, payload);
+      } else {
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
+   * Track page view with automatic entry/exit timing
+   * Sends page_view events on entry and exit with duration
+   * @param {string} pageName - Name/identifier of current page
+   * @returns {Object} Tracking object with sendExit function and metadata
+   */
+  function trackPageView(pageName) {
+    const enterTime = Date.now();
+    const fromPage = (function() {
+      const ref = document.referrer || '';
+      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+      if (ref.includes('calculator.html')) return 'calculator';
+      if (ref.includes('tdm.html')) return 'tdm';
+      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
+      if (ref.includes('compatibility.html')) return 'compatibility';
+      if (ref.includes('dashboard.html')) return 'dashboard';
+      return ref ? 'external' : 'direct';
+    })();
+
+    // Send entry event
+    sendAnalytics({
+      type: 'page_view', page: pageName, action: 'enter',
+      from_page: fromPage, referrer: document.referrer || 'direct'
+    });
+
+    // Track exit event (sent only once)
+    let exitSent = false;
+    function sendExit(extraData) {
+      if (exitSent) return;
+      exitSent = true;
+      sendAnalytics({
+        type: 'page_view', page: pageName, action: 'leave',
+        duration_sec: Math.round((Date.now() - enterTime) / 1000),
+        from_page: fromPage,
+        ...(extraData || {})
+      });
+    }
+
+    // Send exit on page unload or visibility change
+    window.addEventListener('beforeunload', () => sendExit());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendExit();
+    });
+
+    return { sendExit, fromPage, enterTime };
+  }
+
+
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
+
+  /**
+   * Register service worker for offline support and caching
+   * Non-blocking registration with console logging
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    }
+  }
+
+
+  // ============================================================
+  // UTILITY HELPERS
+  // ============================================================
+
+  /**
+   * Generate random anonymous ID using crypto API
+   * @param {number} len - Length in hex characters (default 16)
+   * @returns {string} Random hex string
+   */
+  function generateId(len) {
+    len = len || 16;
+    const arr = new Uint8Array(len / 2);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Debounce function to limit function execution
+   * @param {Function} fn - Function to debounce
+   * @param {number} ms - Debounce delay in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  /**
+   * Format number with specified decimal precision
+   * @param {number} n - Number to format
+   * @param {number} decimals - Number of decimal places (default 1)
+   * @returns {string} Formatted number string
+   */
+  function fmt(n, decimals) {
+    decimals = decimals !== undefined ? decimals : 1;
+    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
+  }
+
+  /**
+   * Version and app name constants
+   */
+  const VERSION = '5.0.0';
+  const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+  return {
+    // Version info
+    VERSION,
+    APP_NAME,
+
+    // Clinical calculators
+    calcIBW,
+    calcABW,
+    calcBMI,
+    calcBSA,
+    calcCockcroftGault,
+    calcCG_raw,
+    calcSchwartz,
+    calcCKDEPI2021,
+    calcCKDEPI2021_nonindexed,
+    getCKDStage,
+    getPatientFromForm,
+
+    // Analytics
+    sendAnalytics,
+    trackPageView,
+    getSessionId,
+    getUserId,
+    hasAnalyticsConsent,
+
+    // Service Worker
+    registerSW,
+
+    // Utility helpers
+    generateId,
+    debounce,
+    fmt
+  };
+})();
+
+// ============================================================
+// AUTO-INITIALIZATION
+// ============================================================
+// Register service worker on page load
+document.addEventListener('DOMContentLoaded', () => {
+  IVDrugRef.registerSW();
+});
+
+(function() {
+  'use strict';
+
+  // Track page view when module loads
+  document.addEventListener('DOMContentLoaded', function() {
+    IVDrugRef.trackPageView('vanco-tdm');
+  });
+
+// ============================================================
+// VANCOMYCIN BAYESIAN TDM v2.0
+// 3 PK Models + MAP (Nelder-Mead) + MCMC (Metropolis-Hastings)
+// ============================================================
+
+const PK_MODELS = [
+  { id:'buelga', name:'Buelga 2005', pop:'General adults',
+    ref:'Antimicrob Agents Chemother 2005;49:4934-41',
+    clFn:(crcl)=>0.0048*crcl, vdFn:(wt)=>0.65*wt,
+    omega_cl:0.25, omega_vd:0.15, sigma:0.10 },
+  { id:'roberts', name:'Roberts 2011', pop:'ICU / Critically ill',
+    ref:'Antimicrob Agents Chemother 2011;55:2704-9',
+    clFn:(crcl)=>0.024*crcl+1.93, vdFn:(wt)=>0.511*wt,
+    omega_cl:0.30, omega_vd:0.20, sigma:0.12 },
+  { id:'goti', name:'Goti 2018', pop:'Hospitalized adults',
+    ref:'Clin Pharmacokinet 2018;57:367-82',
+    clFn:(crcl)=>0.0154*crcl+0.32, vdFn:(wt)=>0.70*wt,
+    omega_cl:0.22, omega_vd:0.18, sigma:0.08 },
+  { id:'adane', name:'Adane 2015', pop:'Obese (BMI ≥30)',
+    ref:'Pharmacotherapy 2015;35:127-139',
+    // 1-comp model: CL = 0.0169*CrCl + 0.94, Vd = 0.55*ABW (adjusted body weight)
+    clFn:(crcl)=>0.0169*crcl+0.94, vdFn:(wt,ht,sex)=>{
+      if(!ht||ht<=0) return 0.55*wt;
+      const htIn=ht/2.54; const ibw=sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);
+      const abw = wt > ibw*1.3 ? ibw+0.4*(wt-ibw) : wt;
+      return 0.55*abw;
+    },
+    omega_cl:0.28, omega_vd:0.22, sigma:0.11,
+    useABW:true },
+  { id:'bourguignon', name:'Bourguignon 2016', pop:'Elderly (≥80 yr)',
+    ref:'Antimicrob Agents Chemother 2016;60:4563-7',
+    // CL = 0.0117*CrCl + 0.28, Vd = 0.52*TBW
+    clFn:(crcl)=>0.0117*crcl+0.28, vdFn:(wt)=>0.52*wt,
+    omega_cl:0.35, omega_vd:0.20, sigma:0.13 }
+];
+
+let selectedModel='auto', currentPK=null, mcmcSamples=[], allModelResults=[];
+
+// --- Helpers ---
+function cockcroft(age,wt,scr,sex,ht){
+  if(scr<=0) return 0;
+  let useWt=wt;
+  if(ht&&ht>0){const htIn=ht/2.54;const ibw=sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(wt>ibw*1.3)useWt=ibw+0.4*(wt-ibw);}
+  let c=((140-age)*useWt)/(72*scr);if(sex==='F')c*=0.85;return Math.max(c,5);
+}
+function getPatient(){return{wt:+(document.getElementById('ptWt').value)||70,age:+(document.getElementById('ptAge').value)||55,sex:document.getElementById('ptSex').value,scr:+(document.getElementById('ptScr').value)||1,ht:+(document.getElementById('ptHt').value)||170};}
+function updateCrCl(){
+  const p=getPatient();
+  const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);
+  let label=crcl.toFixed(1)+' mL/min';
+  if(p.ht>0){const htIn=p.ht/2.54;const ibw=p.sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(p.wt>ibw*1.3)label+=' (ABW)';if(p.age>=65&&p.scr<0.7)label+=' ⚠elderly';}
+  document.getElementById('ptCrCl').value=label;
+}
+
+// --- Dose & Level State (datetime-based) ---
+// Internal: all times stored as hours from first dose (t=0)
+// UI: user enters date + clock time, system converts
+let doses=[{amount:1000,interval:12,infusion:1,nDoses:3,dateTime:''}];
+let levels=[{value:15,dateTime:''}];
+let referenceTime=null; // epoch ms of first dose
+
+function getDefaultDateTime(offsetHrs=0){
+  const d=new Date();d.setHours(d.getHours()-24+offsetHrs);d.setMinutes(0,0,0);
+  return d.toISOString().slice(0,16); // yyyy-MM-ddTHH:mm
+}
+
+function dtToHours(dtStr){
+  if(!dtStr||!referenceTime) return 0;
+  return (new Date(dtStr).getTime()-referenceTime)/3600000;
+}
+
+function updateReferenceTime(){
+  if(doses[0]?.dateTime){
+    referenceTime=new Date(doses[0].dateTime).getTime();
+  }
+}
+
+function buildDoseHist(){
+  updateReferenceTime();
+  return doses.map(d=>({
+    amount:d.amount, interval:d.interval, infusion:d.infusion, nDoses:d.nDoses,
+    startTime: dtToHours(d.dateTime)
+  }));
+}
+
+function buildLevels(){
+  updateReferenceTime();
+  return levels.map(l=>({
+    value:l.value, time: dtToHours(l.dateTime)
+  }));
+}
+
+// --- Sampling Adequacy Analysis ---
+function analyzeSampling(){
+  const dh=buildDoseHist(), lvls=buildLevels();
+  const warnings=[];
+
+  // Count total doses given
+  let totalDoses=0, lastDoseEnd=0;
+  for(const d of dh){
+    totalDoses+=d.nDoses;
+    lastDoseEnd=Math.max(lastDoseEnd, d.startTime + (d.nDoses-1)*d.interval + d.infusion);
+  }
+
+  // Steady state check (≥4 doses at same interval)
+  const lastEntry=dh[dh.length-1];
+  const approxSS = lastEntry ? lastEntry.startTime + 3*lastEntry.interval : 0; // ~4th dose
+  
+  for(const lv of lvls){
+    if(lv.time < approxSS && totalDoses>=1){
+      warnings.push({type:'pre-ss', severity:'amber',
+        msg:`⚠ Level ที่ ${lv.value.toFixed(1)} mcg/mL เจาะก่อน steady state (ก่อน dose ที่ 4) — ผล Bayesian อาจไม่แม่นยำ`});
+    }
+
+    // True trough check: should be ≤30min before next dose
+    let isTrueTrough=false;
+    for(const d of dh){
+      for(let n=1;n<d.nDoses;n++){
+        const nextDoseTime=d.startTime+n*d.interval;
+        const diff=nextDoseTime-lv.time;
+        if(diff>=0 && diff<=1) isTrueTrough=true; // within 1hr before next dose
+      }
+    }
+    // Check if it looks like a trough (value typically <25)
+    if(lv.value<25 && !isTrueTrough && lvls.length===1){
+      warnings.push({type:'not-trough', severity:'amber',
+        msg:`📍 Level ${lv.value.toFixed(1)} อาจไม่ใช่ true trough — true trough ควรเจาะ ≤30 นาทีก่อน dose ถัดไป (Bayesian MAP ยังทำงานได้จาก random level)`});
+    }
+  }
+
+  return warnings;
+}
+
+// Recommend optimal sampling times
+function getRecommendedSamplingTimes(){
+  const dh=buildDoseHist();
+  if(dh.length===0) return [];
+  const lastEntry=dh[dh.length-1];
+  const ssStart = lastEntry.startTime + 3*lastEntry.interval; // 4th dose
+  const recs=[];
+  
+  // Trough: 30 min before 4th dose or later dose
+  const troughTime = ssStart - 0.5;
+  if(troughTime>0 && referenceTime){
+    const trDt = new Date(referenceTime + troughTime*3600000);
+    recs.push({type:'trough', time:troughTime, dt:trDt,
+      label:`Trough: ${trDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (30 นาทีก่อน dose #${Math.round(ssStart/lastEntry.interval)+1})`});
+  }
+
+  // Peak: 1-2 hr after end of 4th dose infusion
+  const peakTime = ssStart + lastEntry.infusion + 1;
+  if(peakTime>0 && referenceTime){
+    const pkDt = new Date(referenceTime + peakTime*3600000);
+    recs.push({type:'peak', time:peakTime, dt:pkDt,
+      label:`Peak: ${pkDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (1 hr หลัง infusion dose #${Math.round(ssStart/lastEntry.interval)+1})`});
+  }
+
+  return recs;
+}
+
+function renderDoses(){
+  if(!doses[0].dateTime) doses[0].dateTime=getDefaultDateTime(0);
+  document.getElementById('doseList').innerHTML=doses.map((d,i)=>`
+    <div class="dose-entry"><div class="dose-entry-head"><span>Dose #${i+1}</span>${doses.length>1?`<button onclick="doses.splice(${i},1);renderDoses()">×</button>`:''}</div>
+    <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${d.amount}" min="100" max="4000" step="250" onchange="doses[${i}].amount=+this.value"></div>
+    <div class="field"><label>Interval (hr)</label><input type="number" value="${d.interval}" min="4" max="72" onchange="doses[${i}].interval=+this.value"></div>
+    <div class="field"><label>Infusion (hr)</label><input type="number" value="${d.infusion}" min="0.5" max="4" step="0.5" onchange="doses[${i}].infusion=+this.value"></div></div>
+    <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${d.dateTime}" onchange="doses[${i}].dateTime=this.value;updateReferenceTime();renderSamplingAdvice()"></div>
+    <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${d.nDoses}" min="1" max="50" onchange="doses[${i}].nDoses=+this.value;renderSamplingAdvice()"></div></div></div>`).join('');
+  renderSamplingAdvice();
+}
+function addDose(){const l=doses[doses.length-1];const nextDt=l.dateTime?new Date(new Date(l.dateTime).getTime()+l.interval*l.nDoses*3600000).toISOString().slice(0,16):'';doses.push({amount:l.amount,interval:l.interval,infusion:l.infusion,nDoses:1,dateTime:nextDt});renderDoses();}
+
+function renderLevels(){
+  document.getElementById('levelList').innerHTML=levels.map((l,i)=>`
+    <div class="level-entry"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${i+1} (mcg/mL)</label><input type="number" value="${l.value}" min="0.1" max="100" step="0.1" onchange="levels[${i}].value=+this.value"></div>
+    <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${l.dateTime}" onchange="levels[${i}].dateTime=this.value;renderSamplingAdvice()"></div></div>
+    ${levels.length>1?`<button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);margin-top:6px" onclick="levels.splice(${i},1);renderLevels()">ลบ</button>`:''}</div>`).join('');
+  renderSamplingAdvice();
+}
+function addLevel(){const nextDt=doses[0]?.dateTime?new Date(new Date(doses[0].dateTime).getTime()+35.5*3600000).toISOString().slice(0,16):'';levels.push({value:10,dateTime:nextDt});renderLevels();}
+
+// --- Sampling Advice Panel ---
+function renderSamplingAdvice(){
+  updateReferenceTime();
+  let adviceEl=document.getElementById('samplingAdvice');
+  if(!adviceEl){
+    const card=document.createElement('div');card.className='card';card.id='samplingAdviceCard';
+    card.innerHTML='<div class="card-head">📍 SAMPLING ADEQUACY</div><div class="card-body" id="samplingAdvice"></div>';
+    const levelCard=document.getElementById('levelList')?.closest('.card');
+    if(levelCard)levelCard.after(card);
+    adviceEl=document.getElementById('samplingAdvice');
+  }
+  if(!adviceEl||!referenceTime){if(adviceEl)adviceEl.innerHTML='<div style="font-size:12px;color:var(--text3)">กรุณากรอกเวลาให้ยาก่อน</div>';return;}
+
+  let html='';
+
+  // Warnings
+  const warns=analyzeSampling();
+  for(const w of warns){
+    html+=`<div class="info-box ${w.severity}" style="font-size:11px">${w.msg}</div>`;
+  }
+
+  // Recommended times
+  const recs=getRecommendedSamplingTimes();
+  if(recs.length>0){
+    html+='<div style="font-size:11px;color:var(--text2);margin-top:8px"><strong>📋 แนะนำเวลาเจาะ (at steady state):</strong></div>';
+    for(const r of recs){
+      html+=`<div style="font-size:12px;padding:6px 8px;margin-top:4px;background:var(--bg);border-radius:6px;border:1px solid var(--card-border)">
+        <span style="color:var(--${r.type==='trough'?'purple':'blue'})">${r.type==='trough'?'🔻':'🔺'}</span> ${r.label}</div>`;
+    }
+  }
+
+  // Steady-state timeline
+  const dh=buildDoseHist();
+  if(dh.length>0){
+    const lastEntry=dh[dh.length-1];
+    let totalDoses=0;for(const d of dh)totalDoses+=d.nDoses;
+    const ssAt=4; // doses needed for SS
+    const atSS=totalDoses>=ssAt;
+    const progress=Math.min(totalDoses/ssAt*100,100);
+    const barColor=atSS?'var(--green)':'var(--amber)';
+    html+=`<div style="margin-top:10px;font-size:11px;color:var(--text2)"><strong>📊 Steady-State Progress:</strong> ${totalDoses} / ${ssAt} doses (${atSS?'✅ ถึง SS แล้ว':'⏳ ยังไม่ถึง SS'})</div>
+    <div class="progress" style="margin:4px 0"><div class="progress-bar" style="width:${progress}%;background:${barColor}"></div></div>`;
+  }
+
+  if(!warns.length && html.indexOf('แนะนำ')===-1) html='<div style="font-size:12px;color:var(--green)">✅ ยังไม่พบปัญหาเรื่อง sampling</div>';
+
+  adviceEl.innerHTML=html;
+}
+
+// --- Model Selection UI ---
+function getRecommendedModel(pt){
+  if(!pt) pt=getPatient();
+  const ht=pt.ht||170, htIn=ht/2.54;
+  const ibw = pt.sex==='M' ? 50+2.3*(htIn-60) : 45.5+2.3*(htIn-60);
+  const bmi = pt.wt / ((ht/100)**2);
+  if(bmi >= 30 || pt.wt > ibw*1.3) return 'adane';
+  if(pt.age >= 80) return 'bourguignon';
+  return null; // auto is fine
+}
+
+function renderModelSelect(){
+  const recModel = getRecommendedModel();
+  const all=[{id:'auto',name:'Auto-select',pop:'Best fit (lowest OFV)'},...PK_MODELS];
+  document.getElementById('modelSelect').innerHTML=all.map(m=>{
+    const isRec = m.id===recModel;
+    return `<div class="model-card ${selectedModel===m.id?'active':''}" onclick="selectedModel='${m.id}';renderModelSelect()">
+      <div class="mc-name">${m.name} ${isRec?'<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>':''}</div>
+      <div class="mc-sub">${m.pop}${m.ref?' — '+m.ref:''}</div></div>`;
+  }).join('');
+  // Show recommendation info
+  if(recModel){
+    const pt=getPatient();
+    const bmi = pt.wt/((pt.ht/100)**2);
+    let msg='';
+    if(recModel==='adane') msg=`<strong>⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Obesity model)</strong><br>Model นี้ใช้ ABW สำหรับ Vd + CrCl ที่ adjusted → แม่นยำกว่า general models ในคนอ้วน`;
+    else if(recModel==='bourguignon') msg=`<strong>👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly model)</strong><br>Validated ในผู้ป่วย >80 ปี ที่มี CL ต่ำกว่า general population`;
+    document.getElementById('modelSelect').innerHTML+=`<div class="info-box amber" style="font-size:11px;margin-top:8px">${msg}</div>`;
+  }
+}
+
+// ============================================================
+// PK ENGINE: 1-compartment, zero-order infusion, superposition
+// ============================================================
+function predictConc(t,cl,vd,doseHist){
+  const ke=cl/vd; let conc=0;
+  for(const dh of doseHist){
+    for(let n=0;n<dh.nDoses;n++){
+      const tS=dh.startTime+n*dh.interval, tE=tS+dh.infusion, k0=dh.amount/dh.infusion;
+      if(t<=tS)continue;
+      if(t<=tE) conc+=(k0/(ke*vd))*(1-Math.exp(-ke*(t-tS)));
+      else conc+=(k0/(ke*vd))*(1-Math.exp(-ke*dh.infusion))*Math.exp(-ke*(t-tE));
+    }
+  }
+  return conc;
+}
+
+function calcAUC_ss(cl,vd,dose,interval,infusion){
+  // Numeric integration at steady-state using accumulation factor
+  const ke=cl/vd, k0=dose/infusion, acc=1/(1-Math.exp(-ke*interval));
+  const N=300; const dt=interval/N; let auc=0;
+  for(let i=0;i<N;i++){
+    const t=i*dt+dt/2; // midpoint
+    let c;
+    if(t<=infusion){
+      const cInf=(k0/(ke*vd))*(1-Math.exp(-ke*t));
+      const cCarry=(k0/(ke*vd))*(1-Math.exp(-ke*infusion))*Math.exp(-ke*(interval-infusion+t))*(acc-1);
+      c=cInf+Math.max(cCarry,0);
+    } else {
+      const cEnd=(k0/(ke*vd))*(1-Math.exp(-ke*infusion))*acc;
+      c=cEnd*Math.exp(-ke*(t-infusion));
+    }
+    auc+=Math.max(c,0)*dt;
+  }
+  return auc;
+}
+
+// Steady-state peak & trough
+function ssPeakTrough(cl,vd,dose,interval,infusion){
+  const ke=cl/vd, k0=dose/infusion, acc=1/(1-Math.exp(-ke*interval));
+  const peak=(k0/(ke*vd))*(1-Math.exp(-ke*infusion))*acc;
+  const trough=peak*Math.exp(-ke*(interval-infusion));
+  return {peak,trough};
+}
+
+// ============================================================
+// BAYESIAN MAP: Grid search + Nelder-Mead
+// ============================================================
+function bayesianMAP(pt,doseHist,measuredLevels,model){
+  const crcl=cockcroft(pt.age,pt.wt,pt.scr,pt.sex,pt.ht);
+  const popCL=model.clFn(crcl), popVd=model.vdFn(pt.wt,pt.ht,pt.sex);
+
+  function obj(cl,vd){
+    if(cl<=0||vd<=0)return 1e10;
+    const eCL=Math.log(cl/popCL),eVd=Math.log(vd/popVd);
+    let o=eCL*eCL/model.omega_cl+eVd*eVd/model.omega_vd;
+    for(const lv of measuredLevels){
+      const pred=predictConc(lv.time,cl,vd,doseHist);
+      if(pred<=0)return 1e10;
+      o+=Math.pow(Math.log(lv.value)-Math.log(pred),2)/model.sigma;
+    }
+    return o;
+  }
+
+  // Grid search
+  let bCL=popCL,bVd=popVd,bObj=obj(popCL,popVd);
+  for(let ci=0.3;ci<=3;ci+=0.1)for(let vi=0.5;vi<=2;vi+=0.1){
+    const o=obj(popCL*ci,popVd*vi);if(o<bObj){bObj=o;bCL=popCL*ci;bVd=popVd*vi;}
+  }
+
+  // Nelder-Mead
+  let sx=[{cl:bCL,vd:bVd},{cl:bCL*1.05,vd:bVd},{cl:bCL,vd:bVd*1.05}];
+  const f=p=>obj(p.cl,p.vd);
+  for(let it=0;it<300;it++){
+    sx.sort((a,b)=>f(a)-f(b));
+    const cx=(sx[0].cl+sx[1].cl)/2,cy=(sx[0].vd+sx[1].vd)/2;
+    const r={cl:2*cx-sx[2].cl,vd:2*cy-sx[2].vd},fr=f(r);
+    if(fr<f(sx[0])){const e={cl:3*cx-2*sx[2].cl,vd:3*cy-2*sx[2].vd};sx[2]=f(e)<fr?e:r;}
+    else if(fr<f(sx[1]))sx[2]=r;
+    else{const c2={cl:(cx+sx[2].cl)/2,vd:(cy+sx[2].vd)/2};
+      if(f(c2)<f(sx[2]))sx[2]=c2;
+      else{sx[1]={cl:(sx[0].cl+sx[1].cl)/2,vd:(sx[0].vd+sx[1].vd)/2};sx[2]={cl:(sx[0].cl+sx[2].cl)/2,vd:(sx[0].vd+sx[2].vd)/2};}
+    }
+    if(Math.abs(f(sx[0])-f(sx[2]))<1e-10)break;
+  }
+  sx.sort((a,b)=>f(a)-f(b));
+  const r=sx[0];
+  return{cl:r.cl,vd:r.vd,ke:r.cl/r.vd,halflife:Math.LN2/(r.cl/r.vd),popCL,popVd,crcl,objValue:f(r),
+    method:measuredLevels.length>0?'Bayesian MAP':'Population PK',model:model.name,modelId:model.id};
+}
+
+// ============================================================
+// MCMC: Metropolis-Hastings (async batched)
+// ============================================================
+function runMCMC(pt,doseHist,measuredLevels,model,mapR,nSamp,cb){
+  const crcl=cockcroft(pt.age,pt.wt,pt.scr,pt.sex,pt.ht);
+  const popCL=model.clFn(crcl),popVd=model.vdFn(pt.wt,pt.ht,pt.sex);
+
+  function logPost(cl,vd){
+    if(cl<=0||vd<=0)return -1e10;
+    let lp=-0.5*(Math.pow(Math.log(cl/popCL),2)/model.omega_cl+Math.pow(Math.log(vd/popVd),2)/model.omega_vd);
+    for(const lv of measuredLevels){
+      const pred=predictConc(lv.time,cl,vd,doseHist);
+      if(pred<=0)return -1e10;
+      lp-=0.5*Math.pow(Math.log(lv.value)-Math.log(pred),2)/model.sigma;
+    }
+    return lp;
+  }
+
+  const samples=[];
+  let cl=mapR.cl,vd=mapR.vd,lp=logPost(cl,vd);
+  const sdCL=Math.sqrt(model.omega_cl)*popCL*0.15;
+  const sdVd=Math.sqrt(model.omega_vd)*popVd*0.15;
+  let accepted=0;
+  const burnin=Math.floor(nSamp*0.3), total=nSamp+burnin;
+  let batch=0; const batchSz=100;
+
+  function step(){
+    const end=Math.min(batch+batchSz,total);
+    for(let i=batch;i<end;i++){
+      // Normal proposal via Box-Muller
+      const u1=Math.random(),u2=Math.random();
+      const z1=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+      const z2=Math.sqrt(-2*Math.log(u1))*Math.sin(2*Math.PI*u2);
+      const pCL=cl+z1*sdCL*2.4, pVd=vd+z2*sdVd*2.4;
+      const pLP=logPost(pCL,pVd);
+      if(Math.log(Math.random())<pLP-lp){cl=pCL;vd=pVd;lp=pLP;accepted++;}
+      if(i>=burnin)samples.push({cl,vd,ke:cl/vd});
+    }
+    batch=end;
+    const pct=Math.round(batch/total*100);
+    document.getElementById('mcmcBar').style.width=pct+'%';
+    document.getElementById('mcmcStatus').textContent='MCMC '+pct+'% ('+samples.length+'/'+nSamp+' samples)';
+    if(batch<total)setTimeout(step,0);
+    else cb(samples,accepted/total);
+  }
+  step();
+}
+
+// ============================================================
+// GRAPH: Canvas with CI band
+// ============================================================
+function drawGraph(pk,doseHist,measuredLvls,optDose,optInterval,optInfusion,mcmc){
+  const canvas=document.getElementById('pkGraph'),ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1,rect=canvas.getBoundingClientRect();
+  canvas.width=rect.width*dpr;canvas.height=320*dpr;ctx.scale(dpr,dpr);
+  const W=rect.width,H=320;
+
+  // Time range
+  let maxTime=0;
+  for(const d of doseHist)maxTime=Math.max(maxTime,d.startTime+d.interval*d.nDoses+d.interval);
+  maxTime=Math.max(maxTime,48);
+  const totalTime=maxTime+optInterval*3, maxConc=60;
+  const pad={left:48,right:16,top:16,bottom:36};
+  const gW=W-pad.left-pad.right,gH=H-pad.top-pad.bottom;
+  const tX=t=>pad.left+(t/totalTime)*gW, cY=c=>pad.top+gH-(Math.min(c,maxConc)/maxConc)*gH;
+
+  // Background
+  ctx.fillStyle='#0f172a';ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=0.5;
+  for(let t=0;t<=totalTime;t+=12){ctx.beginPath();ctx.moveTo(tX(t),pad.top);ctx.lineTo(tX(t),H-pad.bottom);ctx.stroke();}
+  for(let c=0;c<=maxConc;c+=10){ctx.beginPath();ctx.moveTo(pad.left,cY(c));ctx.lineTo(W-pad.right,cY(c));ctx.stroke();}
+
+  // Target zone (trough 10-20)
+  ctx.fillStyle='rgba(74,222,128,.06)';ctx.fillRect(pad.left,cY(20),gW,cY(10)-cY(20));
+  ctx.strokeStyle='rgba(74,222,128,.15)';ctx.setLineDash([3,3]);
+  [10,20].forEach(c=>{ctx.beginPath();ctx.moveTo(pad.left,cY(c));ctx.lineTo(W-pad.right,cY(c));ctx.stroke();});
+  ctx.setLineDash([]);
+
+  // Axes labels
+  ctx.fillStyle='#64748b';ctx.font='10px "DM Sans"';ctx.textAlign='center';
+  for(let t=0;t<=totalTime;t+=12)ctx.fillText(t+'h',tX(t),H-pad.bottom+14);
+  ctx.textAlign='right';
+  for(let c=0;c<=maxConc;c+=10)ctx.fillText(c,pad.left-5,cY(c)+3);
+  ctx.save();ctx.translate(11,H/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('mcg/mL',0,0);ctx.restore();
+
+  // 90% CI band from MCMC
+  if(mcmc&&mcmc.length>20){
+    const step=totalTime/200;
+    for(let t=0;t<=maxTime;t+=step){
+      const concs=[];
+      for(let si=0;si<mcmc.length;si+=Math.max(1,Math.floor(mcmc.length/300))){
+        concs.push(predictConc(t,mcmc[si].cl,mcmc[si].vd,doseHist));
+      }
+      concs.sort((a,b)=>a-b);
+      const lo=concs[Math.floor(concs.length*0.05)],hi=concs[Math.floor(concs.length*0.95)];
+      ctx.fillStyle='rgba(56,189,248,0.1)';
+      const x1=tX(t),x2=tX(t+step);
+      ctx.fillRect(x1,cY(hi),x2-x1,cY(lo)-cY(hi));
+    }
+  }
+
+  // Current regimen curve (blue)
+  ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.beginPath();let first=true;
+  for(let t=0;t<=maxTime;t+=0.3){const c=predictConc(t,pk.cl,pk.vd,doseHist);const x=tX(t),y=cY(c);if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);}
+  ctx.stroke();
+
+  // Proposed regimen (green dashed)
+  const optStart=maxTime;
+  const optDH=[{amount:optDose,interval:optInterval,infusion:optInfusion,startTime:optStart,nDoses:3}];
+  const carryConc=predictConc(maxTime,pk.cl,pk.vd,doseHist);
+  ctx.strokeStyle='#4ade80';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.beginPath();first=true;
+  for(let t=optStart;t<=totalTime;t+=0.3){
+    const cNew=predictConc(t,pk.cl,pk.vd,optDH);
+    const cCarry=carryConc*Math.exp(-pk.ke*(t-optStart));
+    const x=tX(t),y=cY(cNew+cCarry);
+    if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);
+  }
+  ctx.stroke();ctx.setLineDash([]);
+
+  // Transition line
+  ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=1;ctx.setLineDash([2,2]);
+  ctx.beginPath();ctx.moveTo(tX(maxTime),pad.top);ctx.lineTo(tX(maxTime),H-pad.bottom);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='9px "DM Sans"';ctx.textAlign='center';
+  ctx.fillText('→ proposed',tX(maxTime)+28,pad.top+10);
+
+  // Measured levels
+  for(const lv of measuredLvls){
+    const x=tX(lv.time),y=cY(lv.value);
+    ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#0f172a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#fbbf24';ctx.font='bold 10px "JetBrains Mono"';ctx.textAlign='center';
+    ctx.fillText(lv.value.toFixed(1),x,y-9);
+  }
+}
+
+// ============================================================
+// MAIN RUN
+// ============================================================
+function runBayesian(){
+  const pt=getPatient();
+  const doseHist=buildDoseHist();
+  const measuredLvls=buildLevels();
+
+  // Validate datetime inputs
+  if(!referenceTime){alert('กรุณากรอกเวลาให้ยา dose แรกก่อน');return;}
+  for(const lv of measuredLvls){
+    if(lv.time<=0){alert('กรุณากรอกเวลาเจาะ level ให้ถูกต้อง (ต้องหลังให้ยา dose แรก)');return;}
+  }
+
+  // MAP for all models
+  allModelResults=PK_MODELS.map(m=>{
+    const pk=bayesianMAP(pt,doseHist,measuredLvls,m);
+    const lastD=doseHist[doseHist.length-1];
+    const auc24=calcAUC_ss(pk.cl,pk.vd,lastD.amount,lastD.interval,lastD.infusion)*(24/lastD.interval);
+    const ss=ssPeakTrough(pk.cl,pk.vd,lastD.amount,lastD.interval,lastD.infusion);
+    return{...pk,auc24,ssPeak:ss.peak,ssTrough:ss.trough};
+  });
+
+  // Select best
+  let bestIdx=0;
+  if(selectedModel==='auto'){
+    bestIdx=allModelResults.reduce((bi,r,i)=>r.objValue<allModelResults[bi].objValue?i:bi,0);
+  } else {
+    bestIdx=PK_MODELS.findIndex(m=>m.id===selectedModel);
+    if(bestIdx<0)bestIdx=0;
+  }
+  currentPK=allModelResults[bestIdx];
+  const bestModel=PK_MODELS[bestIdx];
+
+  // Model comparison
+  document.getElementById('modelCompare').innerHTML='<div class="model-grid">'+allModelResults.map((r,i)=>{
+    const cls=r.auc24>=400&&r.auc24<=600?'green':(r.auc24<400?'amber':'red');
+    return`<div class="model-card ${i===bestIdx?'active':''}" onclick="selectedModel='${PK_MODELS[i].id}';runBayesian()">
+      <div class="mc-name">${r.model} ${i===bestIdx?'⭐':''}</div>
+      <div class="mc-sub">${PK_MODELS[i].pop}</div>
+      <div class="mc-auc" style="color:var(--${cls})">AUC₂₄ ${r.auc24.toFixed(0)}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px">CL ${r.cl.toFixed(2)} | Vd ${r.vd.toFixed(1)} | t½ ${r.halflife.toFixed(1)}h</div>
+      <div style="font-size:10px;color:var(--text3)">OFV ${r.objValue.toFixed(2)}</div></div>`;
+  }).join('')+'</div>';
+
+  // Start MCMC
+  document.getElementById('mcmcProgress').style.display='block';
+  document.getElementById('resultsSection').style.display='none';
+
+  runMCMC(pt,doseHist,measuredLvls,bestModel,currentPK,2000,function(samples,acceptRate){
+    mcmcSamples=samples;
+    document.getElementById('mcmcProgress').style.display='none';
+    document.getElementById('resultsSection').style.display='block';
+
+    // AUC CI from MCMC
+    const lastD=doseHist[doseHist.length-1];
+    const aucArr=samples.map(s=>calcAUC_ss(s.cl,s.vd,lastD.amount,lastD.interval,lastD.infusion)*(24/lastD.interval)).sort((a,b)=>a-b);
+    const aucMAP=currentPK.auc24;
+    const aucLo=aucArr[Math.floor(aucArr.length*0.05)];
+    const aucHi=aucArr[Math.floor(aucArr.length*0.95)];
+
+    // CL CI
+    const clArr=samples.map(s=>s.cl).sort((a,b)=>a-b);
+    const clLo=clArr[Math.floor(clArr.length*0.05)],clHi=clArr[Math.floor(clArr.length*0.95)];
+    const keArr=samples.map(s=>s.ke).sort((a,b)=>a-b);
+    const keLo=keArr[Math.floor(keArr.length*0.05)],keHi=keArr[Math.floor(keArr.length*0.95)];
+
+    let aucCls='green',aucMsg='✅ AUC₂₄ อยู่ใน target range (400-600)';
+    if(aucMAP<400){aucCls='amber';aucMsg='⚠ ต่ำกว่า target → อาจ subtherapeutic';}
+    else if(aucMAP>600){aucCls='red';aucMsg='⚠ สูงกว่า target → เสี่ยง nephrotoxicity';}
+
+    document.getElementById('aucResult').innerHTML=`
+      <div class="result-box ${aucCls}">
+        <div class="result-title">AUC₂₄/MIC (${currentPK.model})</div>
+        <div class="result-value" style="color:var(--${aucCls})">${aucMAP.toFixed(0)}</div>
+        <div class="result-sub" style="color:var(--${aucCls})">${aucMsg}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">90% CI: <span class="ci-badge" style="background:var(--${aucCls}-dim);color:var(--${aucCls})">${aucLo.toFixed(0)} — ${aucHi.toFixed(0)}</span></div>
+      </div>`;
+
+    document.getElementById('pkStats').innerHTML=`
+      <div class="stat"><div class="stat-label">SS Peak</div><div class="stat-val" style="color:var(--blue)">${currentPK.ssPeak.toFixed(1)}</div></div>
+      <div class="stat"><div class="stat-label">SS Trough</div><div class="stat-val" style="color:var(--purple)">${currentPK.ssTrough.toFixed(1)}</div></div>
+      <div class="stat"><div class="stat-label">t½</div><div class="stat-val">${currentPK.halflife.toFixed(1)}h</div></div>
+      <div class="stat"><div class="stat-label">Accept</div><div class="stat-val">${(acceptRate*100).toFixed(0)}%</div></div>`;
+
+    document.getElementById('ciInfo').innerHTML=`
+      <div class="info-box cyan" style="font-size:11px"><b>90% Credible Intervals (${samples.length} MCMC samples):</b><br>
+      AUC₂₄: ${aucLo.toFixed(0)}–${aucHi.toFixed(0)} &nbsp;|&nbsp; CL: ${clLo.toFixed(3)}–${clHi.toFixed(3)} L/hr &nbsp;|&nbsp; Ke: ${keLo.toFixed(4)}–${keHi.toFixed(4)} hr⁻¹</div>`;
+
+    document.getElementById('pkTable').innerHTML=`
+      <tr><td>Method</td><td style="color:var(--blue)">${currentPK.method} + MCMC</td></tr>
+      <tr><td>PK Model</td><td>${currentPK.model}</td></tr>
+      <tr><td>CrCl</td><td>${currentPK.crcl.toFixed(1)} mL/min</td></tr>
+      <tr><td>CL (MAP)</td><td>${currentPK.cl.toFixed(3)} L/hr</td></tr>
+      <tr><td>Vd (MAP)</td><td>${currentPK.vd.toFixed(1)} L</td></tr>
+      <tr><td>Ke</td><td>${currentPK.ke.toFixed(4)} hr⁻¹</td></tr>
+      <tr><td>Half-life</td><td>${currentPK.halflife.toFixed(1)} hr</td></tr>
+      <tr><td>Pop CL</td><td>${currentPK.popCL.toFixed(3)} L/hr</td></tr>
+      <tr><td>Pop Vd</td><td>${currentPK.popVd.toFixed(1)} L</td></tr>
+      <tr><td>OFV</td><td>${currentPK.objValue.toFixed(4)}</td></tr>
+      <tr><td>MCMC samples</td><td>${samples.length} (accept ${(acceptRate*100).toFixed(1)}%)</td></tr>`;
+
+    document.getElementById('optDose').value=lastD.amount;
+    document.getElementById('optInterval').value=lastD.interval;
+    document.getElementById('optInfusion').value=lastD.infusion;
+    updateOptimizer();
+    genDoseOpts();
+    document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'});
+
+    // v5.1: track TDM usage with full data
+    if (typeof trackTDMResult === 'function') {
+      trackTDMResult(
+        currentPK.model,
+        aucMAP, aucLo, aucHi, acceptRate,
+        pt, currentPK, doseHist, measuredLvls
+      );
+    }
+  });
+}
+
+// ============================================================
+// DOSE OPTIMIZER
+// ============================================================
+function updateOptimizer(){
+  if(!currentPK)return;
+  const od=+document.getElementById('optDose').value,oi=+document.getElementById('optInterval').value,oif=+document.getElementById('optInfusion').value;
+  document.getElementById('optDoseVal').textContent=od+' mg';
+  document.getElementById('optIntervalVal').textContent='q'+oi+'h';
+  document.getElementById('optInfusionVal').textContent=oif+' hr';
+  const auc24=calcAUC_ss(currentPK.cl,currentPK.vd,od,oi,oif)*(24/oi);
+  const ss=ssPeakTrough(currentPK.cl,currentPK.vd,od,oi,oif);
+  let cls='green',msg='✅ In target';if(auc24<400){cls='amber';msg='⚠ Below';}else if(auc24>600){cls='red';msg='⚠ Above';}
+  const vol=od<=1000?200:250;
+  document.getElementById('optResult').innerHTML=`
+    <div class="result-box ${cls}" style="padding:10px">
+      <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--${cls})">AUC₂₄ = ${auc24.toFixed(0)} ${msg}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">Peak ${ss.peak.toFixed(1)} | Trough ${ss.trough.toFixed(1)} | ${od}mg in NSS ${vol}mL → ${Math.round(vol/oif)} mL/hr</div>
+    </div>`;
+  drawGraph(currentPK,buildDoseHist(),buildLevels(),od,oi,oif,mcmcSamples);
+}
+
+function genDoseOpts(){
+  if(!currentPK)return;
+  const qs=[8,12,24,36,48],ds=[500,750,1000,1250,1500,1750,2000];let opts=[];
+  for(const q of qs)for(const d of ds){
+    const auc=calcAUC_ss(currentPK.cl,currentPK.vd,d,q,1)*(24/q);
+    if(auc>=300&&auc<=750){
+      const ss=ssPeakTrough(currentPK.cl,currentPK.vd,d,q,1);
+      opts.push({dose:d,q,auc,tr:ss.trough,pk:ss.peak,ok:auc>=400&&auc<=600});
+    }
+  }
+  opts.sort((a,b)=>Math.abs(a.auc-500)-Math.abs(b.auc-500));
+  opts=opts.slice(0,6);
+  document.getElementById('doseCompare').innerHTML=opts.map(o=>{
+    const c=o.ok?'green':(o.auc<400?'amber':'red');
+    return`<div class="dose-option" onclick="document.getElementById('optDose').value=${o.dose};document.getElementById('optInterval').value=${o.q};updateOptimizer();genDoseOpts()">
+      <div class="opt-dose">${o.dose} mg q${o.q}h</div>
+      <div class="opt-auc">AUC₂₄ ${o.auc.toFixed(0)} | Pk ${o.pk.toFixed(1)} | Tr ${o.tr.toFixed(1)}</div>
+      <span class="opt-badge" style="background:var(--${c}-dim);color:var(--${c})">${o.ok?'In target':o.auc<400?'Below':'Above'}</span></div>`;
+  }).join('');
+}
+
+// ============================================================
+// ANALYTICS (shared IDs with index.html via localStorage)
+// ============================================================
+const TDM_ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+const TDM_SID = localStorage.getItem('anonSessionId') || '';
+const TDM_UID = localStorage.getItem('anonUserId') || '';
+let tdmReqCount = 0;
+
+function sendTDMAnalytics(data) {
+  if (!TDM_ANALYTICS_URL || localStorage.getItem('analyticsConsent') !== 'true') return;
+  if (tdmReqCount >= 20) return;
+  tdmReqCount++;
+  try {
+    const payload = JSON.stringify({ ...data, session_id: TDM_SID, user_id: TDM_UID });
+    if (navigator.sendBeacon) navigator.sendBeacon(TDM_ANALYTICS_URL, payload);
+    else fetch(TDM_ANALYTICS_URL, { method:'POST', body:payload, keepalive:true }).catch(()=>{});
+  } catch(e) {}
+}
+
+// Track page visit
+sendTDMAnalytics({
+  type: 'calc_visit',
+  page: 'vanco-tdm',
+  referrer: document.referrer || 'direct',
+  drugs_available: 'Vancomycin'
+});
+
+// Track TDM result (called after MCMC completes) — v5.1 full schema
+let tdmResultTracked = false;
+function trackTDMResult(model, aucMAP, aucLo, aucHi, acceptRate, pt, pkResult, doseHist, measuredLvls) {
+  if (tdmResultTracked) return;
+  tdmResultTracked = true;
+  
+  const lastD = doseHist[doseHist.length-1];
+  const crcl = cockcroft(pt.age,pt.wt,pt.scr,pt.sex,pt.ht);
+  const htIn = (pt.ht||170)/2.54;
+  const ibw = pt.sex==='M' ? 50+2.3*(htIn-60) : 45.5+2.3*(htIn-60);
+  const bmi = pt.wt / (((pt.ht||170)/100)**2);
+  const isObese = pt.wt > ibw * 1.3;
+  const abw = ibw + 0.4*(pt.wt - ibw);
+
+  // Sampling adequacy
+  let totalDoses=0;for(const d of doseHist)totalDoses+=d.nDoses;
+  const atSS = totalDoses >= 4;
+  const samplingWarnings = [];
+  if(!atSS) samplingWarnings.push('pre-steady-state');
+  
+  // Interpretation
+  let interp = 'therapeutic';
+  if(aucMAP < 400) interp = 'subtherapeutic';
+  else if(aucMAP > 600) interp = 'supratherapeutic';
+  
+  sendTDMAnalytics({
+    type: 'tdm_usage',
+    drug_name: 'Vancomycin',
+    action: 'calculation',
+    model: model,
+    auc_result: aucMAP,
+    auc_ci_lo: aucLo,
+    auc_ci_hi: aucHi,
+    interpretation: interp,
+    ss_peak: pkResult.ssPeak ? pkResult.ssPeak.toFixed(1) : '',
+    ss_trough: pkResult.ssTrough ? pkResult.ssTrough.toFixed(1) : '',
+    dose: lastD.amount + 'mg q' + lastD.interval + 'h',
+    cl_map: pkResult.cl ? pkResult.cl.toFixed(4) : '',
+    vd_map: pkResult.vd ? pkResult.vd.toFixed(1) : '',
+    halflife: pkResult.halflife ? pkResult.halflife.toFixed(1) : '',
+    ke: pkResult.ke ? pkResult.ke.toFixed(5) : '',
+    mcmc_accept: acceptRate ? (acceptRate*100).toFixed(1) : '',
+    // Full patient info
+    weight_kg: pt.wt,
+    height_cm: pt.ht || '',
+    age: pt.age,
+    sex: pt.sex,
+    scr: pt.scr,
+    crcl: crcl.toFixed(1),
+    albumin: '',
+    dialysis: '',
+    dosing_weight: isObese ? abw.toFixed(1) : pt.wt,
+    ibw: ibw.toFixed(1),
+    // Obesity/elderly flags (new v5.1)
+    bmi: bmi.toFixed(1),
+    obesity_flag: isObese ? 'obese' : 'normal',
+    elderly_flag: pt.age >= 80 ? 'elderly_80+' : (pt.age >= 65 ? 'elderly_65+' : 'adult'),
+    at_steady_state: atSS ? 'yes' : 'no',
+    sampling_warnings: samplingWarnings.join(',') || 'none',
+    total_doses_given: totalDoses,
+    // Raw data
+    measured_levels: JSON.stringify(measuredLvls.map(l=>({value:l.value,time:l.time.toFixed(1)}))),
+    num_levels: measuredLvls.length,
+    dose_history: JSON.stringify(doseHist.map(d=>({amount:d.amount,interval:d.interval,infusion:d.infusion,start:d.startTime.toFixed(1),n:d.nDoses}))),
+    num_dose_entries: doseHist.length
+  });
+}
+
+  // Event listeners
+  ['ptWt','ptAge','ptSex','ptScr','ptHt'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input',updateCrCl);
+  });
+  ['optDose','optInterval','optInfusion'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input',()=>{updateOptimizer();genDoseOpts();});
+  });
+  window.addEventListener('resize',()=>{if(currentPK)updateOptimizer();});
+
+  // Init
+  updateCrCl();
+  renderDoses();
+  renderLevels();
+  renderModelSelect();
+
+})();
+
 </script>
 <script src="translations-en.js"></script>
 <script src="i18n.js"></script>

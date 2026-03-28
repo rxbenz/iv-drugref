@@ -303,7 +303,2464 @@
 </nav>
 
 <script>
-!function(){"use strict";const e="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",t="iv_drugref_error_log",n="iv_drugref_error_queue",o="low",a="medium",i="high",l="critical";let r=[],s=0,d=null,c=null;function u(){return(window.location.pathname.split("/").pop()||"index.html").replace(".html","")}function m(){try{return JSON.parse(localStorage.getItem(n)||"[]")}catch(e){return[]}}function v(){const t=m();0!==t.length&&navigator.onLine&&(function(t){if(!navigator.onLine||0===t.length)return;if(s>=10)return;s+=t.length;const n=JSON.stringify({type:"error_report",errors:t,batch_size:t.length,reported_at:(new Date).toISOString()});try{navigator.sendBeacon?navigator.sendBeacon(e,n):fetch(e,{method:"POST",body:n,mode:"no-cors",keepalive:!0}).catch(()=>{})}catch(e){}}(t),function(){try{localStorage.removeItem(n)}catch(e){}}())}function g(e){const s=`${e.message}|${e.source}|${e.line}`;if(function(e){const t=Date.now();return r=r.filter(e=>t-e.time<6e4),!!r.some(t=>t.fp===e)||(r.push({fp:e,time:t}),!1)}(s))return;const d=function(e){const t=(e.message||"").toLowerCase();return t.includes("drugs")&&t.includes("undefined")||t.includes("json")&&t.includes("parse")?l:t.includes("security")||t.includes("cors")||t.includes("calculation")||t.includes("dose")?i:t.includes("fetch")||t.includes("network")||t.includes("typeerror")||t.includes("referenceerror")?a:o}(e),m={page:u(),url:window.location.href,userAgent:navigator.userAgent,online:navigator.onLine,timestamp:(new Date).toISOString(),sessionId:sessionStorage.getItem("sessionId")||"unknown",screenSize:`${screen.width}x${screen.height}`,viewportSize:`${window.innerWidth}x${window.innerHeight}`,language:navigator.language,standalone:window.matchMedia("(display-mode: standalone)").matches,memoryUsage:navigator.deviceMemory?`${navigator.deviceMemory}GB`:"N/A",appVersion:"5.0.0"},g={...e,severity:d,context:m,fingerprint:s,id:`err_${Date.now()}_${Math.random().toString(36).substr(2,6)}`};console.error(`[ErrorTracker] ${d.toUpperCase()}:`,e.message,g),function(e){try{let n=JSON.parse(localStorage.getItem(t)||"[]");n.unshift(e),n.length>50&&(n=n.slice(0,50)),localStorage.setItem(t,JSON.stringify(n))}catch(e){}}(g),d!==o&&function(e,t){if(!document.body)return;const n=c||(c=document.createElement("div"),c.id="iv-error-toast-container",c.style.cssText="\n      position: fixed;\n      bottom: 80px;\n      left: 50%;\n      transform: translateX(-50%);\n      z-index: 99999;\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      align-items: center;\n      pointer-events: none;\n      max-width: 90vw;\n    ",document.body.appendChild(c),c),o=document.createElement("div"),a={low:{bg:"#f0f4f8",border:"#94a3b8",text:"#475569",icon:"ℹ️"},medium:{bg:"#fef9c3",border:"#f59e0b",text:"#92400e",icon:"⚠️"},high:{bg:"#fee2e2",border:"#ef4444",text:"#991b1b",icon:"🔴"},critical:{bg:"#fecaca",border:"#dc2626",text:"#7f1d1d",icon:"🚨"}},i=a[t]||a.medium;o.style.cssText=`\n      background: ${i.bg};\n      border: 1px solid ${i.border};\n      border-radius: 12px;\n      padding: 10px 16px;\n      font-family: 'IBM Plex Sans Thai', sans-serif;\n      font-size: 13px;\n      color: ${i.text};\n      box-shadow: 0 4px 16px rgba(0,0,0,0.12);\n      pointer-events: auto;\n      opacity: 0;\n      transform: translateY(10px);\n      transition: all 0.3s ease;\n      max-width: 100%;\n      text-align: center;\n      line-height: 1.4;\n    `;const l="critical"===t||"high"===t?`${i.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`:`${i.icon} เกิดข้อผิดพลาดเล็กน้อย`;o.textContent=l,n.appendChild(o),requestAnimationFrame(()=>{o.style.opacity="1",o.style.transform="translateY(0)"}),setTimeout(()=>{o.style.opacity="0",o.style.transform="translateY(10px)",setTimeout(()=>o.remove(),300)},5e3),o.addEventListener("click",()=>{o.style.opacity="0",setTimeout(()=>o.remove(),300)})}(e.message,d),function(e){try{let t=JSON.parse(localStorage.getItem(n)||"[]");t.push(e),t.length>20&&(t=t.slice(-20)),localStorage.setItem(n,JSON.stringify(t))}catch(e){}}(g),d!==l&&d!==i||v()}window.onerror=function(e,t,n,o,a){return g({type:"runtime_error",message:String(e),source:t||"unknown",line:n||0,col:o||0,stack:a?a.stack:"N/A"}),!1},window.addEventListener("unhandledrejection",function(e){const t=e.reason;g({type:"unhandled_rejection",message:t?t.message||String(t):"Unknown rejection",source:"Promise",line:0,col:0,stack:t&&t.stack?t.stack:"N/A"})}),window.addEventListener("error",function(e){if(e.target&&e.target!==window){const t=e.target.tagName||"unknown",n=e.target.src||e.target.href||"unknown";g({type:"resource_error",message:`Failed to load ${t}: ${n}`,source:n,line:0,col:0,stack:"N/A"})}},!0),"serviceWorker"in navigator&&navigator.serviceWorker.addEventListener("message",function(e){e.data&&"SW_ERROR"===e.data.type&&g({type:"service_worker_error",message:e.data.error.message,source:e.data.error.filename||"sw.js",line:e.data.error.lineno||0,col:0,stack:"Service Worker context"})}),window.addEventListener("online",function(){setTimeout(v,2e3)}),d=setInterval(v,3e4),setInterval(function(){s=0},6e4),window.IVErrorTracker={report:function(e,t,n){g({type:"manual_report",message:String(e),source:u(),line:0,col:0,stack:(new Error).stack||"N/A",extra:n||{}})},getLog:function(){try{return JSON.parse(localStorage.getItem(t)||"[]")}catch(e){return[]}},clearLog:function(){localStorage.removeItem(t),localStorage.removeItem(n),console.log("[ErrorTracker] Log cleared")},flush:v,queueSize:function(){return m().length}},window.addEventListener("load",function(){setTimeout(v,3e3)}),console.log("[ErrorTracker] Initialized — v1.0 | Page:",u())}();var IVDrugRef=function(){function e(e,t){if(!e||e<=0)return 0;const n=e/2.54;return"M"===t?50+2.3*(n-60):45.5+2.3*(n-60)}function t(e,t){return t+.4*(e-t)}function n(e,t){return!t||t<=0?0:e/(t/100)**2}function o(e,t){return!e||!t||e<=0||t<=0?0:Math.sqrt(e*t/3600)}function a(n,o,a,i,l){if(a<=0)return 0;let r=o;if(l&&l>0){const n=e(l,i);o>1.3*n&&(r=t(o,n))}let s=(140-n)*r/(72*a);return"F"===i&&(s*=.85),Math.max(Math.round(10*s)/10,5)}function i(e,t){return t<=0||!e||e<=0?0:Math.round(.413*e/t*10)/10}function l(e,t,n){let o;if("F"===n){const n=.7,a=t<=n?-.241:-1.2;o=142*Math.pow(Math.min(t/n,1),a)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)*1.012}else{const n=.9,a=t<=n?-.302:-1.2;o=142*Math.pow(Math.min(t/n,1),a)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)}return Math.round(10*o)/10}const r="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec";let s=0;function d(){return localStorage.getItem("anonSessionId")||""}function c(){return localStorage.getItem("anonUserId")||""}function u(){return"true"===localStorage.getItem("analyticsConsent")}function m(e){if(u()&&!(s>=40)){s++;try{const t=JSON.stringify({...e,session_id:d(),user_id:c()});navigator.sendBeacon?navigator.sendBeacon(r,t):fetch(r,{method:"POST",body:t,keepalive:!0}).catch(()=>{})}catch(e){}}}return{VERSION:"5.0.0",APP_NAME:"IV DrugRef",calcIBW:e,calcABW:t,calcBMI:n,calcBSA:o,calcCockcroftGault:a,calcCG_raw:function(e,t,n,o){if(n<=0)return 0;let a=(140-e)*t/(72*n);return"F"===o&&(a*=.85),Math.round(10*a)/10},calcSchwartz:i,calcCKDEPI2021:l,calcCKDEPI2021_nonindexed:function(e,t,n,o){const a=l(e,t,n);return Math.round(a*o/1.73*10)/10},getCKDStage:function(e){return e>=90?{stage:"G1",label:"ปกติ/สูง",cls:"stage-1"}:e>=60?{stage:"G2",label:"ลดลงเล็กน้อย",cls:"stage-2"}:e>=45?{stage:"G3a",label:"ลดลงเล็กน้อย-ปานกลาง",cls:"stage-3a"}:e>=30?{stage:"G3b",label:"ลดลงปานกลาง-มาก",cls:"stage-3b"}:e>=15?{stage:"G4",label:"ลดลงมาก",cls:"stage-4"}:{stage:"G5",label:"ไตวาย",cls:"stage-5"}},getPatientFromForm:function(l){const r=Object.assign({age:"ptAge",wt:"ptWt",ht:"ptHt",sex:"ptSex",scr:"ptScr",alb:"ptAlb",dialysis:"ptDialysis"},l||{}),s=(e,t)=>{const n=document.getElementById(e);return n&&parseFloat(n.value)||t},d=(e,t)=>{const n=document.getElementById(e);return n?n.value:t},c=s(r.age,55),u=s(r.wt,70),m=s(r.ht,170),v=d(r.sex,"M"),g=s(r.scr,1),h=s(r.alb,4),p=d(r.dialysis,"none"),f=Math.round(10*e(m,v))/10,b=Math.round(10*t(u,f))/10,x=Math.round(10*n(u,m))/10,y=Math.round(100*o(m,u))/100,M=u>1.3*f,$=u<f,T=c<18;let I;return I=T&&m>0?i(m,g):a(c,u,g,v,m),{age:c,wt:u,ht:m,sex:v,scr:g,alb:h,dialysis:p,ibw:f,abw:b,bmi:x,bsa:y,isObese:M,isUnderweight:$,isPediatric:T,crcl:I}},sendAnalytics:m,trackPageView:function(e){const t=Date.now(),n=function(){const e=document.referrer||"";return e.includes("index.html")||e.endsWith("iv-drugref/")?"drugref":e.includes("calculator.html")?"calculator":e.includes("tdm.html")?"tdm":e.includes("vanco-tdm.html")?"vanco-tdm":e.includes("renal-dosing.html")?"renal-dosing":e.includes("compatibility.html")?"compatibility":e.includes("dashboard.html")?"dashboard":e?"external":"direct"}();m({type:"page_view",page:e,action:"enter",from_page:n,referrer:document.referrer||"direct"});let o=!1;function a(a){o||(o=!0,m({type:"page_view",page:e,action:"leave",duration_sec:Math.round((Date.now()-t)/1e3),from_page:n,...a||{}}))}return window.addEventListener("beforeunload",()=>a()),document.addEventListener("visibilitychange",()=>{"hidden"===document.visibilityState&&a()}),{sendExit:a,fromPage:n,enterTime:t}},getSessionId:d,getUserId:c,hasAnalyticsConsent:u,registerSW:function(){"serviceWorker"in navigator&&navigator.serviceWorker.register("sw.js").then(e=>console.log("[SW] Registered:",e.scope)).catch(e=>console.warn("[SW] Registration failed:",e))},generateId:function(e){e=e||16;const t=new Uint8Array(e/2);return crypto.getRandomValues(t),Array.from(t,e=>e.toString(16).padStart(2,"0")).join("")},debounce:function(e,t){let n;return function(...o){clearTimeout(n),n=setTimeout(()=>e.apply(this,o),t)}},fmt:function(e,t){return t=void 0!==t?t:1,(Math.round(e*Math.pow(10,t))/Math.pow(10,t)).toFixed(t)}}}();document.addEventListener("DOMContentLoaded",()=>{IVDrugRef.registerSW()});const TDMHub=function(){function e(){const e=IVDrugRef.getPatientFromForm({age:"ptAge",wt:"ptWt",ht:"ptHt",sex:"ptSex",scr:"ptScr",alb:"ptAlb",dialysis:"ptDialysis"});return{...e,alb:e.albumin||4,dialysis:e.dialysisStatus||"none",crcl:0}}function t(){const t=e();if(t.age<18&&t.ht>0)t.crcl=IVDrugRef.calcSchwartz(t.ht,t.scr),document.getElementById("ptCrCl").value=t.crcl.toFixed(1)+" mL/min/1.73m² (Schwartz)";else{t.crcl=IVDrugRef.calcCockcroftGault(t.age,t.wt,t.scr,t.sex,t.ht);let e=t.crcl.toFixed(1)+" mL/min";if(t.ht>0){const n="M"===t.sex?50+2.3*(t.ht/2.54-60):45.5+2.3*(t.ht/2.54-60);t.wt>1.3*n&&(e+=" (ABW)"),t.age>=65&&t.scr<.7&&(e+=" ⚠elderly")}document.getElementById("ptCrCl").value=e}return t}let n="vancomycin";const o=function(){const n=[{id:"buelga",name:"Buelga 2005",pop:"General adults",ref:"Antimicrob Agents Chemother 2005;49:4934-41",clFn:e=>.0048*e,vdFn:(e,t,n)=>.65*e,omega_cl:.25,omega_vd:.15,sigma:.1},{id:"roberts",name:"Roberts 2011",pop:"ICU / Critically ill",ref:"Antimicrob Agents Chemother 2011;55:2704-9",clFn:e=>.024*e+1.93,vdFn:(e,t,n)=>.511*e,omega_cl:.3,omega_vd:.2,sigma:.12},{id:"goti",name:"Goti 2018",pop:"Hospitalized adults",ref:"Clin Pharmacokinet 2018;57:367-82",clFn:e=>.0154*e+.32,vdFn:(e,t,n)=>.7*e,omega_cl:.22,omega_vd:.18,sigma:.08},{id:"adane",name:"Adane 2015",pop:"Obese (BMI ≥30)",ref:"Pharmacotherapy 2015;35:127-139",clFn:e=>.0169*e+.94,vdFn:(e,t,n)=>{if(!t||t<=0)return.55*e;const o=t/2.54,a="M"===n?50+2.3*(o-60):45.5+2.3*(o-60);return.55*(e>1.3*a?a+.4*(e-a):e)},omega_cl:.28,omega_vd:.22,sigma:.11},{id:"bourguignon",name:"Bourguignon 2016",pop:"Elderly (≥80 yr)",ref:"Antimicrob Agents Chemother 2016;60:4563-7",clFn:e=>.0117*e+.28,vdFn:(e,t,n)=>.52*e,omega_cl:.35,omega_vd:.2,sigma:.13}];let o="auto",a=null,i=[],l=[],r=[{amount:1e3,interval:12,infusion:1,nDoses:3,dateTime:""}],s=[{value:15,dateTime:""}],d=null;function c(e){return e&&d?(new Date(e).getTime()-d)/36e5:0}function u(){r[0]?.dateTime&&(d=new Date(r[0].dateTime).getTime())}function m(){return u(),r.map(e=>({amount:e.amount,interval:e.interval,infusion:e.infusion,nDoses:e.nDoses,startTime:c(e.dateTime)}))}function v(){return u(),s.map(e=>({value:e.value,time:c(e.dateTime)}))}function g(){let e=document.getElementById("vancoSamplingAdvice");if(!e){const t=document.createElement("div");t.className="card",t.innerHTML='<div class="card-head">📍 SAMPLING ADEQUACY</div><div class="card-body" id="vancoSamplingAdvice"></div>';const n=document.getElementById("vancoLevelList")?.closest(".card");n&&n.after(t),e=document.getElementById("vancoSamplingAdvice")}if(!e||!d)return void(e&&(e.innerHTML='<div style="font-size:12px;color:var(--text3)">กรุณากรอกเวลาให้ยาก่อน</div>'));let t="";const n=function(){const e=m(),t=v(),n=[];let o=0;for(const t of e)o+=t.nDoses;const a=e[e.length-1],i=a?a.startTime+3*a.interval:0;for(const a of t){a.time<i&&o>=1&&n.push({s:"amber",m:`⚠ Level ${a.value.toFixed(1)} เจาะก่อน steady state (ก่อน dose ที่ 4)`});let l=!1;for(const t of e)for(let e=1;e<t.nDoses;e++)t.startTime+e*t.interval-a.time>=0&&t.startTime+e*t.interval-a.time<=1&&(l=!0);a.value<25&&!l&&1===t.length&&n.push({s:"amber",m:`📍 Level ${a.value.toFixed(1)} อาจไม่ใช่ true trough (Bayesian ยังทำงานได้จาก random level)`})}return n}();for(const e of n)t+=`<div class="info-box ${e.s}" style="font-size:11px">${e.m}</div>`;const o=function(){const e=m();if(!e.length||!d)return[];const t=e[e.length-1],n=t.startTime+3*t.interval,o=[],a=n-.5;if(a>0){const e=new Date(d+36e5*a);o.push({type:"trough",label:`Trough: ${e.toLocaleString("th-TH",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})} (30 นาทีก่อน dose #${Math.round(n/t.interval)+1})`})}const i=n+t.infusion+1;if(i>0){const e=new Date(d+36e5*i);o.push({type:"peak",label:`Peak: ${e.toLocaleString("th-TH",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})} (1 hr หลัง infusion)`})}return o}();if(o.length){t+='<div style="font-size:11px;color:var(--text2);margin-top:6px"><strong>📋 แนะนำเวลาเจาะ:</strong></div>';for(const e of o)t+=`<div style="font-size:12px;padding:4px 8px;margin-top:3px;background:var(--bg);border-radius:6px;border:1px solid var(--card-border)"><span style="color:var(--${"trough"===e.type?"purple":"blue"})">${"trough"===e.type?"🔻":"🔺"}</span> ${e.label}</div>`}const a=m();let i=0;for(const e of a)i+=e.nDoses;t+=`<div style="margin-top:8px;font-size:11px;color:var(--text2)"><strong>📊 SS Progress:</strong> ${i}/4 doses ${i>=4?"✅":"⏳"}</div><div class="progress" style="margin:3px 0"><div class="progress-bar" style="width:${Math.min(i/4*100,100)}%;background:${i>=4?"var(--green)":"var(--amber)"}"></div></div>`,e.innerHTML=t}function h(e,t,n,o){const a=t/n;let i=0;for(const t of o)for(let o=0;o<t.nDoses;o++){const l=t.startTime+o*t.interval,r=l+t.infusion,s=t.amount/t.infusion;e<=l||(i+=e<=r?s/(a*n)*(1-Math.exp(-a*(e-l))):s/(a*n)*(1-Math.exp(-a*t.infusion))*Math.exp(-a*(e-r)))}return i}function p(e,t,n,o,a){const i=e/t,l=n/a,r=1/(1-Math.exp(-i*o)),s=o/300;let d=0;for(let e=0;e<300;e++){const n=e*s+s/2;let c;c=n<=a?l/(i*t)*(1-Math.exp(-i*n))+l/(i*t)*(1-Math.exp(-i*a))*Math.exp(-i*(o-a+n))*Math.max(r-1,0):l/(i*t)*(1-Math.exp(-i*a))*r*Math.exp(-i*(n-a)),d+=Math.max(c,0)*s}return d}function f(e,t,n,o,a){const i=e/t,l=n/a,r=1/(1-Math.exp(-i*o)),s=l/(i*t)*(1-Math.exp(-i*a))*r;return{peak:s,trough:s*Math.exp(-i*(o-a))}}function b(){r[0].dateTime||(r[0].dateTime=function(e=0){const t=new Date;return t.setHours(t.getHours()-24+e),t.setMinutes(0,0,0),t.toISOString().slice(0,16)}(0));const e=document.getElementById("vancoDoseList");e&&(e.innerHTML=r.map((e,t)=>`\n        <div class="entry-row"><div class="entry-head"><span>Dose #${t+1}</span>${r.length>1?`<button onclick="TDMHub.VancoTDM_removeDose(${t})">×</button>`:""}</div>\n        <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${e.amount}" min="100" max="4000" step="250" onchange="TDMHub.VancoTDM_setDose(${t},'amount',+this.value)"></div>\n        <div class="field"><label>Interval (hr)</label><input type="number" value="${e.interval}" min="4" max="72" onchange="TDMHub.VancoTDM_setDose(${t},'interval',+this.value)"></div>\n        <div class="field"><label>Infusion (hr)</label><input type="number" value="${e.infusion}" min="0.5" max="4" step="0.5" onchange="TDMHub.VancoTDM_setDose(${t},'infusion',+this.value)"></div></div>\n        <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${e.dateTime}" onchange="TDMHub.VancoTDM_setDose(${t},'dateTime',this.value)"></div>\n        <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${e.nDoses}" min="1" max="50" onchange="TDMHub.VancoTDM_setDose(${t},'nDoses',+this.value)"></div></div></div>`).join(""),g())}function x(){const e=document.getElementById("vancoLevelList");e&&(e.innerHTML=s.map((e,t)=>`\n        <div class="entry-row"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${t+1} (mcg/mL)</label><input type="number" value="${e.value}" min="0.1" max="100" step="0.1" onchange="TDMHub.VancoTDM_setLevel(${t},'value',+this.value)"></div>\n        <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${e.dateTime||""}" onchange="TDMHub.VancoTDM_setLevel(${t},'dateTime',this.value)"></div></div>\n        ${s.length>1?`<button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="TDMHub.VancoTDM_removeLevel(${t})">ลบ</button>`:""}</div>`).join(""),g())}function y(){const t=e(),a=t.wt/(t.ht/100)**2,i=a>=30?"adane":t.age>=80?"bourguignon":null,l=[{id:"auto",name:"Auto-select",pop:"Best fit (lowest OFV)"},...n],r=document.getElementById("vancoModelSelect");if(r&&(r.innerHTML=l.map(e=>`\n        <div class="model-card ${o===e.id?"active":""}" onclick="TDMHub.VancoTDM_setModel('${e.id}')">\n          <div class="mc-name">${e.name} ${e.id===i?'<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>':""}</div><div class="mc-sub">${e.pop}</div></div>`).join(""),i)){let e="adane"===i?`⚠ BMI ${a.toFixed(1)} → แนะนำ Adane 2015 (Obesity model)`:`👴 อายุ ${t.age} ปี → แนะนำ Bourguignon 2016 (Elderly model)`;r.innerHTML+=`<div class="info-box amber" style="font-size:11px;margin-top:6px">${e}</div>`}}function M(){if(!a)return;const e=+document.getElementById("vancoOptDose").value,t=+document.getElementById("vancoOptInterval").value,n=+document.getElementById("vancoOptInfusion").value;document.getElementById("vancoOptDoseVal").textContent=e+" mg",document.getElementById("vancoOptIntervalVal").textContent="q"+t+"h",document.getElementById("vancoOptInfusionVal").textContent=n+" hr";const o=p(a.cl,a.vd,e,t,n)*(24/t),l=f(a.cl,a.vd,e,t,n);let r="green",s="✅ In target";o<400?(r="amber",s="⚠ Below target"):o>600&&(r="red",s="⚠ Above target");const d=e<=1e3?200:250;document.getElementById("vancoOptResult").innerHTML=`\n        <div class="result-box ${r}" style="padding:10px">\n          <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--${r})">AUC₂₄ = ${o.toFixed(0)} ${s}</div>\n          <div style="font-size:12px;color:var(--text2);margin-top:4px">Peak ${l.peak.toFixed(1)} | Trough ${l.trough.toFixed(1)} | ${e}mg in NSS ${d}mL → ${Math.round(d/n)} mL/hr</div>\n        </div>`,function(e,t,n,o,a,i,l){const r=document.getElementById("vancoGraph");if(!r)return;const s=r.getContext("2d"),d=window.devicePixelRatio||1,c=r.getBoundingClientRect();r.width=c.width*d,r.height=320*d,s.scale(d,d);const u=c.width,m=320;let v=0;for(const e of t)v=Math.max(v,e.startTime+e.interval*e.nDoses+e.interval);v=Math.max(v,48);const g=v+3*a,p=48,f=u-p-16,b=e=>p+e/g*f,x=e=>284-Math.min(e,60)/60*268;s.fillStyle="#0b1120",s.fillRect(0,0,u,m),s.strokeStyle="rgba(255,255,255,.04)",s.lineWidth=.5;for(let e=0;e<=g;e+=12)s.beginPath(),s.moveTo(b(e),16),s.lineTo(b(e),284),s.stroke();for(let e=0;e<=60;e+=10)s.beginPath(),s.moveTo(p,x(e)),s.lineTo(u-16,x(e)),s.stroke();s.fillStyle="rgba(74,222,128,.05)",s.fillRect(p,x(20),f,x(10)-x(20)),s.strokeStyle="rgba(74,222,128,.12)",s.setLineDash([3,3]),[10,20].forEach(e=>{s.beginPath(),s.moveTo(p,x(e)),s.lineTo(u-16,x(e)),s.stroke()}),s.setLineDash([]),s.fillStyle="#475569",s.font='10px "DM Sans"',s.textAlign="center";for(let e=0;e<=g;e+=12)s.fillText(e+"h",b(e),298);s.textAlign="right";for(let e=0;e<=60;e+=10)s.fillText(e,43,x(e)+3);if(s.save(),s.translate(11,160),s.rotate(-Math.PI/2),s.textAlign="center",s.fillText("mcg/mL",0,0),s.restore(),l&&l.length>20){const e=g/200;for(let n=0;n<=v;n+=e){const o=[];for(let e=0;e<l.length;e+=Math.max(1,Math.floor(l.length/300)))o.push(h(n,l[e].cl,l[e].vd,t));o.sort((e,t)=>e-t);const a=o[Math.floor(.05*o.length)],i=o[Math.floor(.95*o.length)];s.fillStyle="rgba(56,189,248,0.08)",s.fillRect(b(n),x(i),b(n+e)-b(n),x(a)-x(i))}}s.strokeStyle="#38bdf8",s.lineWidth=2,s.beginPath();let y=!0;for(let n=0;n<=v;n+=.3){const o=h(n,e.cl,e.vd,t),a=b(n),i=x(o);y?(s.moveTo(a,i),y=!1):s.lineTo(a,i)}s.stroke();const M=v,$=[{amount:o,interval:a,infusion:i,startTime:M,nDoses:3}],T=h(v,e.cl,e.vd,t);s.strokeStyle="#4ade80",s.lineWidth=1.5,s.setLineDash([5,3]),s.beginPath(),y=!0;for(let t=M;t<=g;t+=.3){const n=h(t,e.cl,e.vd,$),o=T*Math.exp(-e.ke*(t-M)),a=b(t),i=x(n+o);y?(s.moveTo(a,i),y=!1):s.lineTo(a,i)}s.stroke(),s.setLineDash([]),s.strokeStyle="rgba(255,255,255,.08)",s.lineWidth=1,s.setLineDash([2,2]),s.beginPath(),s.moveTo(b(v),16),s.lineTo(b(v),284),s.stroke(),s.setLineDash([]),s.fillStyle="rgba(255,255,255,.25)",s.font='9px "DM Sans"',s.textAlign="center",s.fillText("→ proposed",b(v)+28,26);for(const e of n){const t=b(e.time),n=x(e.value);s.fillStyle="#fbbf24",s.beginPath(),s.arc(t,n,5,0,2*Math.PI),s.fill(),s.strokeStyle="#0b1120",s.lineWidth=1.5,s.beginPath(),s.arc(t,n,5,0,2*Math.PI),s.stroke(),s.fillStyle="#fbbf24",s.font='bold 10px "JetBrains Mono"',s.textAlign="center",s.fillText(e.value.toFixed(1),t,n-9)}}(a,m(),v(),e,t,n,i)}function $(){if(!a)return;const e=[8,12,24,36,48],t=[500,750,1e3,1250,1500,1750,2e3];let n=[];for(const o of e)for(const e of t){const t=p(a.cl,a.vd,e,o,1)*(24/o);if(t>=300&&t<=750){const i=f(a.cl,a.vd,e,o,1);n.push({dose:e,q:o,auc:t,tr:i.trough,pk:i.peak,ok:t>=400&&t<=600})}}n.sort((e,t)=>Math.abs(e.auc-500)-Math.abs(t.auc-500)),n=n.slice(0,6);const o=document.getElementById("vancoDoseCompare");o&&(o.innerHTML=n.map(e=>{const t=e.ok?"green":e.auc<400?"amber":"red";return`<div class="dose-option" onclick="document.getElementById('vancoOptDose').value=${e.dose};document.getElementById('vancoOptInterval').value=${e.q};TDMHub.VancoTDM_updateOpt()">\n          <div class="opt-dose">${e.dose} mg q${e.q}h</div>\n          <div class="opt-auc">AUC₂₄ ${e.auc.toFixed(0)} | Pk ${e.pk.toFixed(1)} | Tr ${e.tr.toFixed(1)}</div>\n          <span class="opt-badge" style="background:var(--${t}-dim);color:var(--${t})">${e.ok?"In target":e.auc<400?"Below":"Above"}</span></div>`}).join(""))}return{init(){b(),x(),y()},addDose(){const e=r[r.length-1],t=e.dateTime?new Date(new Date(e.dateTime).getTime()+e.interval*e.nDoses*36e5).toISOString().slice(0,16):"";r.push({amount:e.amount,interval:e.interval,infusion:e.infusion,nDoses:1,dateTime:t}),b()},removeDose(e){r.splice(e,1),b()},setDose(e,t,n){r[e][t]=n},addLevel(){const e=r[0]?.dateTime?new Date(new Date(r[0].dateTime).getTime()+1278e5).toISOString().slice(0,16):"";s.push({value:10,dateTime:e}),x()},removeLevel(e){s.splice(e,1),x()},setLevel(e,t,n){s[e][t]=n},setModel(e){o=e,y()},updateOpt(){M(),$()},run(){const e=t();if(u(),!d)return void alert("กรุณากรอกเวลาให้ยา dose แรกก่อน");const c=m(),g=v();l=n.map(t=>{const n=function(e,t,n,o){const a=IVDrugRef.calcCockcroftGault(e.age,e.wt,e.scr,e.sex,e.ht),i=o.clFn(a),l=o.vdFn(e.wt,e.ht,e.sex);function r(e,a){if(e<=0||a<=0)return 1e10;let r=Math.pow(Math.log(e/i),2)/o.omega_cl+Math.pow(Math.log(a/l),2)/o.omega_vd;for(const i of n){const n=h(i.time,e,a,t);if(n<=0)return 1e10;r+=Math.pow(Math.log(i.value)-Math.log(n),2)/o.sigma}return r}let s=i,d=l,c=r(i,l);for(let e=.3;e<=3;e+=.1)for(let t=.5;t<=2;t+=.1){const n=r(i*e,l*t);n<c&&(c=n,s=i*e,d=l*t)}let u=[{cl:s,vd:d},{cl:1.05*s,vd:d},{cl:s,vd:1.05*d}];const m=e=>r(e.cl,e.vd);for(let e=0;e<300;e++){u.sort((e,t)=>m(e)-m(t));const e=(u[0].cl+u[1].cl)/2,t=(u[0].vd+u[1].vd)/2,n={cl:2*e-u[2].cl,vd:2*t-u[2].vd},o=m(n);if(o<m(u[0])){const a={cl:3*e-2*u[2].cl,vd:3*t-2*u[2].vd};u[2]=m(a)<o?a:n}else if(o<m(u[1]))u[2]=n;else{const n={cl:(e+u[2].cl)/2,vd:(t+u[2].vd)/2};m(n)<m(u[2])?u[2]=n:(u[1]={cl:(u[0].cl+u[1].cl)/2,vd:(u[0].vd+u[1].vd)/2},u[2]={cl:(u[0].cl+u[2].cl)/2,vd:(u[0].vd+u[2].vd)/2})}if(Math.abs(m(u[0])-m(u[2]))<1e-10)break}u.sort((e,t)=>m(e)-m(t));const v=u[0];return{cl:v.cl,vd:v.vd,ke:v.cl/v.vd,halflife:Math.LN2/(v.cl/v.vd),popCL:i,popVd:l,crcl:a,objValue:m(v),method:n.length>0?"Bayesian MAP":"Population PK",model:o.name,modelId:o.id}}(e,c,g,t),o=c[c.length-1],a=p(n.cl,n.vd,o.amount,o.interval,o.infusion)*(24/o.interval),i=f(n.cl,n.vd,o.amount,o.interval,o.infusion);return{...n,auc24:a,ssPeak:i.peak,ssTrough:i.trough}});let b=0;"auto"===o?b=l.reduce((e,t,n)=>t.objValue<l[e].objValue?n:e,0):(b=n.findIndex(e=>e.id===o),b<0&&(b=0)),a=l[b];const x=n[b],y=document.getElementById("vancoModelCompare");y&&(y.innerHTML='<div class="model-grid">'+l.map((e,t)=>{const o=e.auc24>=400&&e.auc24<=600?"green":e.auc24<400?"amber":"red";return`<div class="model-card ${t===b?"active":""}" onclick="TDMHub.VancoTDM_setModel('${n[t].id}');TDMHub.VancoTDM_run()">\n              <div class="mc-name">${e.model} ${t===b?"⭐":""}</div><div class="mc-sub">${n[t].pop}</div>\n              <div class="mc-auc" style="color:var(--${o})">AUC₂₄ ${e.auc24.toFixed(0)}</div>\n              <div style="font-size:10px;color:var(--text3);margin-top:3px">CL ${e.cl.toFixed(2)} | Vd ${e.vd.toFixed(1)} | t½ ${e.halflife.toFixed(1)}h</div>\n              <div style="font-size:10px;color:var(--text3)">OFV ${e.objValue.toFixed(2)}</div></div>`}).join("")+"</div>");const T=document.getElementById("vancoMcmcProgress"),I=document.getElementById("vancoResults");T&&(T.style.display="block"),I&&(I.style.display="none"),function(e,t,n,o,a,i,l){const r=IVDrugRef.calcCockcroftGault(e.age,e.wt,e.scr,e.sex,e.ht),s=o.clFn(r),d=o.vdFn(e.wt,e.ht,e.sex);function c(e,a){if(e<=0||a<=0)return-1e10;let i=-.5*(Math.pow(Math.log(e/s),2)/o.omega_cl+Math.pow(Math.log(a/d),2)/o.omega_vd);for(const l of n){const n=h(l.time,e,a,t);if(n<=0)return-1e10;i-=.5*Math.pow(Math.log(l.value)-Math.log(n),2)/o.sigma}return i}const u=[];let m=a.cl,v=a.vd,g=c(m,v);const p=Math.sqrt(o.omega_cl)*s*.15,f=Math.sqrt(o.omega_vd)*d*.15;let b=0;const x=Math.floor(600),y=i+x;let M=0;!function e(){const t=Math.min(M+100,y);for(let e=M;e<t;e++){const t=Math.random(),n=Math.random(),o=Math.sqrt(-2*Math.log(t))*Math.cos(2*Math.PI*n),a=Math.sqrt(-2*Math.log(t))*Math.sin(2*Math.PI*n),i=m+o*p*2.4,l=v+a*f*2.4,r=c(i,l);Math.log(Math.random())<r-g&&(m=i,v=l,g=r,b++),e>=x&&u.push({cl:m,vd:v,ke:m/v})}M=t;const n=Math.round(M/y*100),o=document.getElementById("vancoMcmcBar"),a=document.getElementById("vancoMcmcStatus");o&&(o.style.width=n+"%"),a&&(a.textContent="MCMC "+n+"% ("+u.length+"/"+i+" samples)"),M<y?setTimeout(e,0):l(u,b/y)}()}(e,c,g,x,a,2e3,function(t,n){i=t,T&&(T.style.display="none"),I&&(I.style.display="block");const o=m()[m().length-1],l=t.map(e=>p(e.cl,e.vd,o.amount,o.interval,o.infusion)*(24/o.interval)).sort((e,t)=>e-t),d=a.auc24,c=l[Math.floor(.05*l.length)],u=l[Math.floor(.95*l.length)],v=t.map(e=>e.cl).sort((e,t)=>e-t),g=v[Math.floor(.05*v.length)],h=v[Math.floor(.95*v.length)];let f="green",b="✅ AUC₂₄ อยู่ใน target range (400-600)";d<400?(f="amber",b="⚠ ต่ำกว่า target → อาจ subtherapeutic"):d>600&&(f="red",b="⚠ สูงกว่า target → เสี่ยง nephrotoxicity");const x=document.getElementById("vancoAucResult");x&&(x.innerHTML=`\n              <div class="result-box ${f}"><div class="result-title">AUC₂₄/MIC (${a.model})</div>\n              <div class="result-value" style="color:var(--${f})">${d.toFixed(0)}</div>\n              <div class="result-sub" style="color:var(--${f})">${b}</div>\n              <div style="font-size:11px;color:var(--text2);margin-top:6px">90% CI: <span class="ci-badge" style="background:var(--${f}-dim);color:var(--${f})">${c.toFixed(0)} — ${u.toFixed(0)}</span></div></div>`);const y=document.getElementById("vancoPkStats");y&&(y.innerHTML=`\n              <div class="stat"><div class="stat-label">SS Peak</div><div class="stat-val" style="color:var(--blue)">${a.ssPeak.toFixed(1)}</div></div>\n              <div class="stat"><div class="stat-label">SS Trough</div><div class="stat-val" style="color:var(--purple)">${a.ssTrough.toFixed(1)}</div></div>\n              <div class="stat"><div class="stat-label">t½</div><div class="stat-val">${a.halflife.toFixed(1)}h</div></div>\n              <div class="stat"><div class="stat-label">Accept</div><div class="stat-val">${(100*n).toFixed(0)}%</div></div>`);const w=document.getElementById("vancoCiInfo");w&&(w.innerHTML=`\n              <div class="info-box cyan" style="font-size:11px"><b>90% Credible Intervals (${t.length} MCMC samples):</b><br>\n              AUC₂₄: ${c.toFixed(0)}–${u.toFixed(0)} | CL: ${g.toFixed(3)}–${h.toFixed(3)} L/hr</div>`);const D=document.getElementById("vancoPkTable");D&&(D.innerHTML=`\n              <tr><td>Method</td><td style="color:var(--blue)">${a.method} + MCMC</td></tr>\n              <tr><td>PK Model</td><td>${a.model}</td></tr>\n              <tr><td>CrCl</td><td>${a.crcl.toFixed(1)} mL/min</td></tr>\n              <tr><td>CL (MAP)</td><td>${a.cl.toFixed(3)} L/hr</td></tr>\n              <tr><td>Vd (MAP)</td><td>${a.vd.toFixed(1)} L</td></tr>\n              <tr><td>Ke</td><td>${a.ke.toFixed(4)} hr⁻¹</td></tr>\n              <tr><td>Half-life</td><td>${a.halflife.toFixed(1)} hr</td></tr>\n              <tr><td>OFV</td><td>${a.objValue.toFixed(4)}</td></tr>`),document.getElementById("vancoOptDose").value=o.amount,document.getElementById("vancoOptInterval").value=o.interval,document.getElementById("vancoOptInfusion").value=o.infusion,M(),$();const E=document.getElementById("vancoResults");E&&E.scrollIntoView({behavior:"smooth"}),IVDrugRef.sendAnalytics({type:"tdm_usage",drug_name:"Vancomycin",action:"calculation",model:a.model,auc_result:d.toFixed(0),auc_ci_lo:c.toFixed(0),auc_ci_hi:u.toFixed(0),interpretation:d>=400&&d<=600?"therapeutic":d<400?"subtherapeutic":"supratherapeutic",ss_peak:a.ssPeak.toFixed(1),ss_trough:a.ssTrough.toFixed(1),cl_map:a.cl.toFixed(3),vd_map:a.vd.toFixed(1),halflife:a.halflife.toFixed(1),dose:o.amount+"mg q"+o.interval+"h",mcmc_accept:(100*n).toFixed(0),weight_kg:e.wt,height_cm:e.ht,age:e.age,sex:e.sex,scr:e.scr,crcl:a.crcl.toFixed(0),albumin:e.alb,dialysis:e.dialysis,measured_levels:JSON.stringify(s.map(e=>({value:e.value,time:e.time}))),num_levels:s.length,dose_history:JSON.stringify(r.map(e=>({amount:e.amount,interval:e.interval,infusion:e.infusion,start:e.startTime,n:e.nDoses}))),num_dose_entries:r.length})})}}}(),a=function(){function e(e,t,n,o,a){return n>=e/(o*a)?1/0:e*n/((t+n)*o*a)}return{run(){const n=t(),o=+document.getElementById("phenyLevel").value||0,a=+document.getElementById("phenyFree").value||0,i=+document.getElementById("phenyDose").value||300;if(o<=0)return void alert("กรุณาใส่ค่า Phenytoin level");const l=function(e,t,n,o){let a,i;return"none"!==o?(a=e/(.1*t+.1),i=`${e} / (0.1 × ${t} + 0.1)`):n<15?(a=e/(.1*t+.1),i=`${e} / (0.1 × ${t} + 0.1) [uremia]`):t<3.5?(a=e/(.2*t+.1),i=`${e} / (0.2 × ${t} + 0.1)`):(a=e,i="No correction needed (Alb ≥3.5, normal renal)"),{corrected:a,equation:i}}(o,n.alb,n.crcl,n.dialysis),r=(s=n.alb,d=n.crcl,"none"!==n.dialysis||d<15||s<2.5?.2:s<3.5?.15:.1);var s,d;const c=o*r,u=document.getElementById("phenyCorrection");u&&(u.innerHTML=`\n            <div class="result-box ${l.corrected>=10&&l.corrected<=20?"green":l.corrected<10?"amber":"red"}">\n              <div class="result-title">Corrected Total Phenytoin</div>\n              <div class="result-value" style="color:var(--${l.corrected>=10&&l.corrected<=20?"green":l.corrected<10?"amber":"red"})">${l.corrected.toFixed(1)} mcg/mL</div>\n              <div class="result-sub">Measured: ${o} mcg/mL → Corrected: ${l.corrected.toFixed(1)} mcg/mL</div>\n            </div>\n            <div class="info-box cyan" style="font-size:11px;margin-top:8px">\n              <b>Winter-Tozer equation:</b> ${l.equation}<br>\n              Albumin: ${n.alb} g/dL | CrCl: ${n.crcl.toFixed(0)} mL/min | Dialysis: ${n.dialysis}<br>\n              Est. free fraction: ${(100*r).toFixed(0)}% → Est. free level: ${c.toFixed(1)} mcg/mL\n              ${a>0?`<br><b>Actual free level:</b> ${a} mcg/mL (fraction: ${(a/o*100).toFixed(1)}%)`:""}\n            </div>`);const m=l.corrected;let v="green",g="";m<10?(v="amber",g="⚠ SUBTHERAPEUTIC — พิจารณาเพิ่ม dose"):m<=20?(v="green",g="✅ THERAPEUTIC (10-20 mcg/mL)"):m<=25?(v="amber",g="⚠ BORDERLINE TOXIC — monitor closely"):(v="red",g="🚨 TOXIC — หยุดยา/ลด dose ทันที");const h=document.getElementById("phenyInterpretation");h&&(h.innerHTML=`\n            <div class="result-box ${v}"><div class="result-value" style="font-size:22px;color:var(--${v})">${g}</div>\n            <div style="font-size:12px;color:var(--text2);margin-top:8px">Corrected level: ${m.toFixed(1)} mcg/mL | Target: 10-20 mcg/mL (total) | 1-2 mcg/mL (free)</div></div>\n            <div class="info-box amber" style="font-size:11px;margin-top:8px">\n              <b>Toxicity signs by level:</b><br>\n              >20: Nystagmus | >30: Ataxia, slurred speech | >40: Lethargy, confusion | >50: Coma, seizures\n            </div>`);const p=function(e,t,n){const o=.92*e*1,a=7*n,i=t*(a/o-1);return{method1:{Vmax:o*(4+t)/t,Km:4,label:"Orbit (Km fixed=4)"},method2:{Vmax:a,Km:Math.max(i,.5),label:"Orbit (Vmax fixed=7×wt)"},population:{Vmax:a,Km:4,label:"Population"},S:.92,F:1}}(i,m,n.wt),f=document.getElementById("phenyMM");f&&(f.innerHTML='\n            <div class="info-box purple" style="font-size:11px">\n              <b>Michaelis-Menten kinetics:</b> Phenytoin follows non-linear (saturable) kinetics<br>\n              Small dose changes → disproportionately large level changes near saturation<br>\n              Orbit method: ใช้ 1 steady-state level เพื่อ estimate Vmax/Km\n            </div>');const b=document.getElementById("phenyPkTable");function x(){const t=+document.getElementById("phenyTargetCss").value||15,n=document.getElementById("phenyTargetVal");n&&(n.textContent=t+" mcg/mL");const o=e(p.method1.Vmax,p.method1.Km,t,p.S,p.F),a=e(p.method2.Vmax,p.method2.Km,t,p.S,p.F),l=e=>25*Math.round(e/25),r=document.getElementById("phenyDosePredict");r&&(r.innerHTML=`\n              <div class="result-box blue" style="padding:10px">\n                <div class="result-title">Predicted Dose for Css ${t} mcg/mL</div>\n                <div class="result-value" style="font-size:22px;color:var(--blue)">${isFinite(o)?l(o):">800"} mg/day</div>\n                <div style="font-size:11px;color:var(--text2);margin-top:4px">\n                  Method 1 (Km fixed): ${isFinite(o)?o.toFixed(0):"N/A"} mg/day |\n                  Method 2 (Vmax fixed): ${isFinite(a)?a.toFixed(0):"N/A"} mg/day\n                </div>\n              </div>`);const s=[8,10,12,15,18,20];let d="";for(const n of s){const o=e(p.method1.Vmax,p.method1.Km,n,p.S,p.F),a=e(p.method2.Vmax,p.method2.Km,n,p.S,p.F);d+=`<tr class="${n===Math.round(t)?"highlight":""}"><td>${n}</td><td>${isFinite(o)?l(o):"—"}</td><td>${isFinite(a)?l(a):"—"}</td></tr>`}const c=document.getElementById("phenyDoseTable");c&&(c.innerHTML=`\n              <table class="correction-table"><tr><th>Target Css</th><th>Dose (Km fixed)</th><th>Dose (Vmax fixed)</th></tr>${d}</table>\n              <div class="info-box amber" style="font-size:11px;margin-top:8px">\n                <b>⚠ Phenytoin dose changes:</b> เปลี่ยนครั้งละ ≤50-100 mg/day เท่านั้น<br>\n                เจาะ level 5-7 วันหลังเปลี่ยน dose (t½ variable, 12-36h)<br>\n                ≥2 steady-state levels at different doses → more accurate Vmax/Km (2-point method)\n              </div>`),function(e,t,n,o,a){const i=document.getElementById("phenyGraph");if(!i)return;const l=i.getContext("2d"),r=window.devicePixelRatio||1,s=i.getBoundingClientRect();i.width=s.width*r,i.height=280*r,l.scale(r,r);const d=s.width,c=280,u=d-48-16,m=800,v=e=>48+e/m*u,g=e=>244-Math.min(e,40)/40*228;l.fillStyle="#0b1120",l.fillRect(0,0,d,c),l.strokeStyle="rgba(255,255,255,.04)",l.lineWidth=.5;for(let e=0;e<=m;e+=100)l.beginPath(),l.moveTo(v(e),16),l.lineTo(v(e),244),l.stroke();for(let e=0;e<=40;e+=5)l.beginPath(),l.moveTo(48,g(e)),l.lineTo(d-16,g(e)),l.stroke();l.fillStyle="rgba(74,222,128,.05)",l.fillRect(48,g(20),u,g(10)-g(20));const h=[e.method1,e.method2],p=["#38bdf8","#a78bfa"];if(h.forEach((e,o)=>{l.strokeStyle=p[o],l.lineWidth=1.5,1===o&&l.setLineDash([5,3]),l.beginPath();let a=!0;for(let o=10;o<=m;o+=2){const i=e.Km*o*t*n/(e.Vmax-o*t*n);if(i<=0||i>80)continue;const r=v(o),s=g(i);a?(l.moveTo(r,s),a=!1):l.lineTo(r,s)}l.stroke(),l.setLineDash([])}),a>0){const e=v(o),t=g(a);l.fillStyle="#fbbf24",l.beginPath(),l.arc(e,t,6,0,2*Math.PI),l.fill(),l.strokeStyle="#0b1120",l.lineWidth=2,l.beginPath(),l.arc(e,t,6,0,2*Math.PI),l.stroke(),l.fillStyle="#fbbf24",l.font='bold 10px "JetBrains Mono"',l.textAlign="center",l.fillText(`${a.toFixed(1)}`,e,t-10)}l.fillStyle="#475569",l.font='10px "DM Sans"',l.textAlign="center";for(let e=0;e<=m;e+=100)l.fillText(e+"mg",v(e),258);l.textAlign="right";for(let e=0;e<=40;e+=10)l.fillText(e,43,g(e)+3);l.save(),l.translate(11,140),l.rotate(-Math.PI/2),l.textAlign="center",l.fillText("Css (mcg/mL)",0,0),l.restore(),l.fillStyle="#475569",l.font='10px "DM Sans"',l.textAlign="center",l.fillText("Daily Dose (mg)",d/2,276)}(p,p.S,p.F,i,m)}b&&(b.innerHTML=`\n            <tr><td>Method</td><td colspan="2" style="color:var(--blue)">Orbit (1-point estimate)</td></tr>\n            <tr><td></td><td style="color:var(--blue);text-align:left">Km fixed</td><td style="color:var(--purple);text-align:right">Vmax fixed</td></tr>\n            <tr><td>Vmax</td><td style="text-align:left">${p.method1.Vmax.toFixed(0)} mg/day</td><td>${p.population.Vmax.toFixed(0)} mg/day</td></tr>\n            <tr><td>Km</td><td style="text-align:left">${p.method1.Km.toFixed(1)} mcg/mL</td><td>${p.method2.Km.toFixed(1)} mcg/mL</td></tr>\n            <tr><td>Salt factor (S)</td><td colspan="2">${p.S}</td></tr>\n            <tr><td>Current Css</td><td colspan="2">${m.toFixed(1)} mcg/mL</td></tr>`);const y=document.getElementById("phenyTargetCss");y&&(y.oninput=x);const M=document.getElementById("phenyResults");M&&(M.style.display="block"),x();const $=document.getElementById("phenyResults");<!-- BUILD:JS -->&$.scrollIntoView({behavior:"smooth"}),IVDrugRef.sendAnalytics({type:"tdm_usage",drug_name:"Phenytoin",action:"calculation",level:o,corrected_level:l.corrected.toFixed(1),free_level:a>0?a:c.toFixed(1),free_level_source:a>0?"measured":"estimated",free_fraction:(100*r).toFixed(0),correction_applied:n.alb<3.5||n.crcl<15||"none"!==n.dialysis?"yes":"none",interpretation:m>=10&&m<=20?"therapeutic":m<10?"subtherapeutic":m<=25?"borderline_toxic":"toxic",dose:i,vmax_est:p.method1.Vmax.toFixed(0),km:p.method1.Km.toFixed(1),weight_kg:n.wt,height_cm:n.ht,age:n.age,sex:n.sex,scr:n.scr,crcl:n.crcl.toFixed(0),albumin:n.alb,dialysis:n.dialysis})}}}(),i=function(){const e={amikacin:{name:"Amikacin",extDose:{low:15,high:20,unit:"mg/kg"},convDose:{low:5,high:7.5,unit:"mg/kg q8h"},peak_target:{ext:{low:56,high:64},conv:{low:20,high:35}},trough_target:{ext:"<1",conv:"<5"},popKe:e=>.00293*e+.014,popVd:e=>.25*e},gentamicin:{name:"Gentamicin",extDose:{low:5,high:7,unit:"mg/kg"},convDose:{low:1,high:1.7,unit:"mg/kg q8h"},peak_target:{ext:{low:16,high:24},conv:{low:5,high:10}},trough_target:{ext:"<1",conv:"<1-2"},popKe:e=>.00293*e+.014,popVd:e=>.25*e}};function n(e,t){return"M"===t?50+2.3*(e/2.54-60):45.5+2.3*(e/2.54-60)}function o(e,t){return e>1.2*t?t+.4*(e-t):e}function a(e,t){if(e<t[0].t||e>t[t.length-1].t)return null;for(let n=0;n<t.length-1;n++)if(e>=t[n].t&&e<=t[n+1].t){const o=(e-t[n].t)/(t[n+1].t-t[n].t);return t[n].v+o*(t[n+1].v-t[n].v)}return null}return{updateUI(){const a=document.getElementById("agDrug").value,i=e[a],l=t(),r=n(l.ht,l.sex),s=o(l.wt,r),d=50*Math.round(s*i.extDose.low/50),c=document.getElementById("agDose");c&&(c.value=d)},run(){const i=t(),l=document.getElementById("agDrug").value,r=document.getElementById("agStrategy").value,s=+document.getElementById("agDose").value||0,d=+document.getElementById("agPeak").value||0,c=+document.getElementById("agTrough").value||0,u=+document.getElementById("agRandom").value||0,m=+document.getElementById("agRandomTime").value||8,v=+document.getElementById("agInfusion").value||.5,g=e[l],h=n(i.ht,i.sex),p=o(i.wt,h),f=g.popKe(i.crcl),b=g.popVd(p),x=Math.LN2/f;let y=null;"extended"===r&&u>0&&(y=function(e,t,n){if(!t||!n)return null;if("gentamicin"===e){if(n>=6&&n<=14){const e=a(n,[{t:6,v:9},{t:8,v:6},{t:12,v:2},{t:14,v:.5}]),o=a(n,[{t:8,v:9},{t:12,v:4},{t:14,v:2}]),i=a(n,[{t:12,v:9},{t:14,v:4}]);return t<e?{interval:24,zone:"q24h",color:"green"}:null!==o&&t<o?{interval:36,zone:"q36h",color:"amber"}:null!==i&&t<i?{interval:48,zone:"q48h",color:"red"}:{interval:48,zone:"Hold / recheck",color:"red"}}}else if(n>=6&&n<=14){const e=a(n,[{t:6,v:14},{t:8,v:9},{t:12,v:3.5},{t:14,v:1.5}]),o=a(n,[{t:8,v:14},{t:12,v:7},{t:14,v:3.5}]),i=a(n,[{t:12,v:14},{t:14,v:7}]);return t<e?{interval:24,zone:"q24h",color:"green"}:null!==o&&t<o?{interval:36,zone:"q36h",color:"amber"}:null!==i&&t<i?{interval:48,zone:"q48h",color:"red"}:{interval:48,zone:"Hold / recheck",color:"red"}}return null}(l,u,m));const M=document.getElementById("agNomogram");M&&(M.innerHTML=y?`<div class="result-box ${y.color}">\n              <div class="result-title">Hartford Nomogram Result</div>\n              <div class="result-value" style="font-size:24px;color:var(--${y.color})">${y.zone}</div>\n              <div class="result-sub">Level ${u} mcg/mL at ${m}h post-dose → recommend ${y.zone}</div>\n            </div>`:'<div class="info-box amber">ใส่ Random level + time เพื่อใช้ Hartford nomogram (extended-interval dosing)</div>');let $=f,T=b,I=x,w="Population estimate";if(d>0&&c>0&&d>c){const e=v+.5,t=y?y.interval-.5:"extended"===r?23.5:7.5;$=Math.log(d/c)/(t-e),I=Math.LN2/$,T=s/(d/Math.exp(.5*-$)*(1-Math.exp(-$*("extended"===r?24:8)))),(T<=0||T>200*i.wt)&&(T=b),w="Calculated from measured levels"}const D="extended"===r?y?y.interval:24:8,E=s/v,F=1/(1-Math.exp(-$*D)),L=E/($*T)*(1-Math.exp(-$*v))*F,k=L*Math.exp(-$*(D-v)),S=document.getElementById("agPkResult");S&&(S.innerHTML=`\n            <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">\n              <div class="stat"><div class="stat-label">Est. Peak</div><div class="stat-val" style="color:var(--blue)">${L.toFixed(1)}</div></div>\n              <div class="stat"><div class="stat-label">Est. Trough</div><div class="stat-val" style="color:${k<("amikacin"===l?5:2)?"var(--green)":"var(--red)"}">${k.toFixed(1)}</div></div>\n              <div class="stat"><div class="stat-label">t½</div><div class="stat-val">${I.toFixed(1)}h</div></div>\n            </div>`);const _=document.getElementById("agPkTable");_&&(_.innerHTML=`\n            <tr><td>Drug</td><td style="color:var(--blue)">${g.name}</td></tr>\n            <tr><td>Strategy</td><td>${"extended"===r?"Extended-interval (ODA)":"Conventional (MDD)"}</td></tr>\n            <tr><td>PK source</td><td>${w}</td></tr>\n            <tr><td>Dosing weight</td><td>${p.toFixed(1)} kg ${i.wt>1.2*h?"(ABW)":"(TBW)"}</td></tr>\n            <tr><td>IBW</td><td>${h.toFixed(1)} kg</td></tr>\n            <tr><td>Ke</td><td>${$.toFixed(4)} hr⁻¹</td></tr>\n            <tr><td>Vd</td><td>${T.toFixed(1)} L (${(T/p).toFixed(2)} L/kg)</td></tr>\n            <tr><td>Half-life</td><td>${I.toFixed(1)} hr</td></tr>\n            <tr><td>Interval</td><td>q${D}h</td></tr>`);const B="extended"===r?g.peak_target.ext:g.peak_target.conv,A=50*Math.round(p*g.extDose.low/50),P=50*Math.round(p*g.extDose.high/50),C=document.getElementById("agDoseRec");C&&(C.innerHTML=`\n            <div class="result-box blue" style="padding:12px">\n              <div class="result-title">Recommended Dose</div>\n              <div class="result-value" style="font-size:20px;color:var(--blue)">${A}–${P} mg q${D}h</div>\n              <div style="font-size:12px;color:var(--text2);margin-top:6px">\n                ${g.extDose.low}–${g.extDose.high} mg/kg × ${p.toFixed(0)}kg | Infuse over ${60*v} min\n              </div>\n            </div>\n            <div class="info-box blue" style="font-size:11px">\n              <b>Target levels (${"extended"===r?"Extended":"Conventional"}):</b><br>\n              Peak: ${B.low}–${B.high} mcg/mL | Trough: ${g.trough_target["extended"===r?"ext":"conv"]} mcg/mL<br>\n              <b>Next level timing:</b> Random level 6-14h post-dose (Hartford) หรือ Peak 30 min post-inf + Trough 30 min pre-dose<br>\n              <b>Monitor:</b> SCr daily, audiometry weekly, vestibular function\n            </div>`),function(e,t,n,o,a,i){const l=document.getElementById("agGraph");if(!l)return;const r=l.getContext("2d"),s=window.devicePixelRatio||1,d=l.getBoundingClientRect();l.width=d.width*s,l.height=280*s,r.scale(s,s);const c=d.width,u=280,m=c-48-16,v=3*n,g="amikacin"===e?80:30,h=e=>48+e/v*m,p=e=>244-Math.min(e,g)/g*228;r.fillStyle="#0b1120",r.fillRect(0,0,c,u),r.strokeStyle="rgba(255,255,255,.04)",r.lineWidth=.5;for(let e=0;e<=v;e+=Math.max(4,n/4))r.beginPath(),r.moveTo(h(e),16),r.lineTo(h(e),244),r.stroke();for(let e=0;e<=g;e+=10)r.beginPath(),r.moveTo(48,p(e)),r.lineTo(c-16,p(e)),r.stroke();r.strokeStyle="#38bdf8",r.lineWidth=2,r.beginPath();const f=t/o;let b=!0;for(let e=0;e<=v;e+=.2){let t=0;for(let l=0;l<3;l++){const r=l*n,s=r+o;e<=r||(t+=e<=s?f/(a*i)*(1-Math.exp(-a*(e-r))):f/(a*i)*(1-Math.exp(-a*o))*Math.exp(-a*(e-s)))}const l=h(e),s=p(t);b?(r.moveTo(l,s),b=!1):r.lineTo(l,s)}r.stroke(),r.fillStyle="#475569",r.font='10px "DM Sans"',r.textAlign="center";for(let e=0;e<=v;e+=Math.max(4,n/4))r.fillText(e+"h",h(e),258);r.textAlign="right";for(let e=0;e<=g;e+=10)r.fillText(e,43,p(e)+3);r.save(),r.translate(11,140),r.rotate(-Math.PI/2),r.textAlign="center",r.fillText("mcg/mL",0,0),r.restore()}(l,s,D,v,$,T);const V=document.getElementById("agResults");V&&(V.style.display="block"),V&&V.scrollIntoView({behavior:"smooth"}),IVDrugRef.sendAnalytics({type:"tdm_usage",drug_name:g.name,action:"calculation",strategy:r,dose:s+"mg q"+D+"h",interval:D,nomogram_result:y?y.zone:"N/A",est_peak:L.toFixed(1),est_trough:k.toFixed(1),interpretation:k<("amikacin"===l?5:2)?"therapeutic":"elevated_trough",ke:$.toFixed(4),vd:T.toFixed(1),halflife:I.toFixed(1),pk_source:w,dosing_weight:p.toFixed(1),ibw:h.toFixed(1),measured_peak:d||"",measured_trough:c||"",measured_random:u||"",random_time:m||"",infusion_duration:v,weight_kg:i.wt,height_cm:i.ht,age:i.age,sex:i.sex,scr:i.scr,crcl:i.crcl.toFixed(0),albumin:i.alb,dialysis:i.dialysis})}}}(),l=function(){function e(e,t){const n=t<3.5?4/t*1.2:1,o=e>75?1+.003*(e-75):1;return Math.min(.1*n*o,.5)}return{run(){const n=t(),o=+document.getElementById("vpaLevel").value||0,a=+document.getElementById("vpaFree").value||0,i=+document.getElementById("vpaDose").value||0,l=document.getElementById("vpaForm").value,r=document.getElementById("vpaIndication").value;if(o<=0)return void alert("กรุณาใส่ค่า Valproate level");const s=e(o,n.alb),d=o*s,c=function(t,n){return n>=3.5?t:t*(e(t,n)/.1)}(o,n.alb),u={epilepsy:{total:{low:50,high:100},free:{low:5,high:15},label:"Epilepsy"},SE:{total:{low:80,high:120},free:{low:10,high:20},label:"Status Epilepticus"},bipolar:{total:{low:50,high:125},free:{low:5,high:15},label:"Bipolar"},migraine:{total:{low:50,high:100},free:{low:5,high:15},label:"Migraine"}}[r],m=document.getElementById("vpaFreeCorrection");m&&(m.innerHTML=`\n            <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">\n              <div class="stat"><div class="stat-label">Total VPA</div><div class="stat-val" style="color:var(--blue)">${o}</div><div style="font-size:10px;color:var(--text3)">mcg/mL</div></div>\n              <div class="stat"><div class="stat-label">Est. Free VPA</div><div class="stat-val" style="color:var(--purple)">${a>0?a.toFixed(1):d.toFixed(1)}</div><div style="font-size:10px;color:var(--text3)">${a>0?"measured":"estimated"}</div></div>\n              <div class="stat"><div class="stat-label">Free Fraction</div><div class="stat-val" style="color:var(--cyan)">${a>0?(a/o*100).toFixed(0):(100*s).toFixed(0)}%</div><div style="font-size:10px;color:var(--text3)">${a>0?"actual":"estimated"}</div></div>\n            </div>\n            ${n.alb<3.5?`<div class="info-box amber" style="font-size:11px"><b>⚠ Hypoalbuminemia (Alb ${n.alb}):</b> Free fraction เพิ่มขึ้น → total level อาจ misleading<br>\n            Corrected total ≈ ${c.toFixed(0)} mcg/mL | ควรเจาะ free VPA level เพื่อ accuracy<br>\n            Total level ${o} อาจ underestimate pharmacological activity</div>`:""}\n            ${o>75?'<div class="info-box purple" style="font-size:11px"><b>Saturable protein binding:</b> ที่ total VPA >75 mcg/mL free fraction จะเพิ่มขึ้น non-linearly<br>ควรพิจารณา free VPA level เพื่อ dose optimization</div>':""}`);const v=a>0?a:d;let g="green",h="";o<u.total.low?(g="amber",h=`⚠ SUBTHERAPEUTIC — ต่ำกว่า target ${u.label} (${u.total.low}-${u.total.high})`):o<=u.total.high?(g="green",h=`✅ THERAPEUTIC (${u.total.low}-${u.total.high} mcg/mL for ${u.label})`):o<=150?(g="amber",h="⚠ SUPRATHERAPEUTIC — สูงกว่า target, monitor toxicity"):(g="red",h="🚨 TOXIC — พิจารณาลด dose/หยุดยา");const p=document.getElementById("vpaInterpretation");function f(){const e=+document.getElementById("vpaTarget").value||75,t=document.getElementById("vpaTargetVal");t&&(t.textContent=e+" mcg/mL");const a=100*Math.round(i*(e/o)/100),r=60*n.wt;let s="";s="DR"===l?`${a}mg/day ÷ 2-3 doses (Depakote DR)`:"ER"===l?`${a}mg/day ÷ 1 dose (Depakote ER, round to 250/500)`:"syrup"===l?`${a}mg/day ÷ 3 doses (Syrup/Solution)`:`${a}mg/day (IV → switch PO when able)`;const d=document.getElementById("vpaDoseRec");d&&(d.innerHTML=`\n              <div class="result-box blue" style="padding:12px">\n                <div class="result-title">Predicted Dose for Target ${e} mcg/mL</div>\n                <div class="result-value" style="font-size:22px;color:var(--blue)">${a} mg/day</div>\n                <div style="font-size:12px;color:var(--text2);margin-top:4px">${s}</div>\n              </div>\n              <div class="info-box teal" style="font-size:11px">\n                <b>Linear proportion:</b> New dose = ${i} × (${e}/${o}) = ${(i*e/o).toFixed(0)} mg/day<br>\n                <b>Max dose:</b> ~60 mg/kg/day = ${r.toFixed(0)} mg/day<br>\n                <b>Next level:</b> 3-5 วัน after dose change (trough, before AM dose)<br>\n                <b>DR→ER conversion:</b> ER dose = DR dose × 1.1-1.2 (ER ↓ bioavailability ~10-20%)\n              </div>`)}p&&(p.innerHTML=`\n            <div class="result-box ${g}">\n              <div class="result-value" style="font-size:20px;color:var(--${g})">${h}</div>\n              <div style="font-size:12px;color:var(--text2);margin-top:6px">\n                Total: ${o} mcg/mL | Free: ${v.toFixed(1)} mcg/mL (target free: ${u.free.low}-${u.free.high})\n              </div>\n            </div>\n            <div class="info-box red" style="font-size:11px;margin-top:8px">\n              <b>Toxicity signs:</b> N/V, tremor, sedation, thrombocytopenia<br>\n              >100: ataxia, confusion | >150: coma risk<br>\n              <b>Check:</b> Ammonia (hyperammonemia สามารถเกิดได้ทุก level), LFTs, CBC+Plt\n            </div>`);const b=document.getElementById("vpaTarget");b&&(b.oninput=f);const x=document.getElementById("vpaInteractions");x&&(x.innerHTML='\n            <div class="info-box red" style="font-size:11px">\n              <b>🚨 CONTRAINDICATED combinations:</b><br>\n              • <b>Meropenem/Carbapenem:</b> ลด VPA level 60-100%! ห้ามให้ร่วมกัน<br>\n              • <b>Hepatotoxic drugs + mitochondrial disease:</b> Fatal hepatotoxicity risk\n            </div>\n            <div class="info-box amber" style="font-size:11px">\n              <b>⚠ Significant interactions:</b><br>\n              • <b>Lamotrigine:</b> VPA ↑ LTG level 2× → ลด LTG dose 50%<br>\n              • <b>Phenobarbital:</b> VPA ↑ PB level<br>\n              • <b>Phenytoin:</b> Complex (VPA ↑ free PHT, ↓ total PHT; PHT ↓ VPA)<br>\n              • <b>Warfarin/ASA:</b> ↑ free VPA, ↑ bleeding risk (Plt inhibition + protein displacement)<br>\n              • <b>Topiramate:</b> ↑ ammonia (both hyperammonemic)\n            </div>\n            <div class="info-box blue" style="font-size:11px">\n              <b>Monitoring checklist:</b><br>\n              • LFTs: baseline + periodic (q3-6 months)<br>\n              • CBC + Platelets: baseline + periodic<br>\n              • Ammonia: if symptoms (lethargy, vomiting, confusion)<br>\n              • VPA level: 3-5 days after dose change, trough preferred<br>\n              • Free VPA level: if albumin low, VPA >75, uremia, pregnancy, elderly\n            </div>');const y=document.getElementById("vpaResults");y&&(y.style.display="block"),f(),y&&y.scrollIntoView({behavior:"smooth"}),IVDrugRef.sendAnalytics({type:"tdm_usage",drug_name:"Valproate",action:"calculation",level:o,free_level:a>0?a:d.toFixed(1),free_fraction:(a>0?a/o*100:100*s).toFixed(0),corrected_total:n.alb<3.5?c.toFixed(0):o,interpretation:o<u.total.low?"subtherapeutic":o<=u.total.high?"therapeutic":o<=150?"supratherapeutic":"toxic",dose:i+"mg/d",indication:r,formulation:l,hypoalbumin:n.alb<3.5?"yes":"no",free_level_source:a>0?"measured":"estimated",weight_kg:n.wt,height_cm:n.ht,age:n.age,sex:n.sex,scr:n.scr,crcl:n.crcl.toFixed(0),albumin:n.alb,dialysis:n.dialysis})}}}();function r(){const e=+document.getElementById("phenyLevel").value||0;if(e<=0)return;const n=t(),o=n.alb,a=n.crcl;let i,l;"none"!==n.dialysis||a<15?(i=e/(.1*o+.1),l=`${e} / (0.1 × ${o} + 0.1) = ${i.toFixed(1)}`):o<3.5?(i=e/(.2*o+.1),l=`${e} / (0.2 × ${o} + 0.1) = ${i.toFixed(1)}`):(i=e,l="No correction needed");const r=document.getElementById("phenyCorrection");r&&(r.innerHTML=`\n        <div class="result-box ${i>=10&&i<=20?"green":i<10?"amber":"red"}">\n          <div class="result-title">Corrected Total Phenytoin (Winter-Tozer)</div>\n          <div class="result-value" style="color:var(--${i>=10&&i<=20?"green":i<10?"amber":"red"})">${i.toFixed(1)} mcg/mL</div>\n          <div class="result-sub">Measured: ${e} → Corrected: ${i.toFixed(1)} | Alb: ${o} | CrCl: ${a.toFixed(0)}</div>\n        </div>\n        <div class="info-box cyan" style="font-size:11px"><b>Formula:</b> ${l}</div>`)}return{init:function(){function e(){t(),o.init(),i.updateUI(),["ptWt","ptAge","ptScr","ptHt","ptAlb"].forEach(e=>{const n=document.getElementById(e);n&&n.addEventListener("input",()=>{t(),r()})}),["ptSex","ptDialysis"].forEach(e=>{const n=document.getElementById(e);n&&n.addEventListener("change",()=>{t(),r()})}),["phenyLevel","phenyFree"].forEach(e=>{const t=document.getElementById(e);t&&t.addEventListener("input",r)}),["vancoOptDose","vancoOptInterval","vancoOptInfusion"].forEach(e=>{const t=document.getElementById(e);t&&t.addEventListener("input",()=>{o.updateOpt()})}),window.addEventListener("resize",()=>{"vancomycin"===n&&o.updateOpt()}),r(),IVDrugRef.trackPageView("tdm")}"loading"===document.readyState?document.addEventListener("DOMContentLoaded",e):e()},switchDrug:function(e){n=e,document.querySelectorAll(".drug-tab").forEach(e=>e.classList.remove("active")),document.querySelectorAll(".drug-section").forEach(e=>e.classList.remove("active"));const t=document.querySelectorAll(".drug-tab"),o=["vancomycin","phenytoin","aminoglycoside","valproate"].indexOf(e);o>=0&&t[o].classList.add("active"),document.getElementById("sec_"+e).classList.add("active")},VancoTDM_run:()=>o.run(),VancoTDM_init:()=>o.init(),VancoTDM_addDose:()=>o.addDose(),VancoTDM_removeDose:e=>o.removeDose(e),VancoTDM_setDose:(e,t,n)=>o.setDose(e,t,n),VancoTDM_addLevel:()=>o.addLevel(),VancoTDM_removeLevel:e=>o.removeLevel(e),VancoTDM_setLevel:(e,t,n)=>o.setLevel(e,t,n),VancoTDM_setModel:e=>o.setModel(e),VancoTDM_updateOpt:()=>o.updateOpt(),PhenytoinTDM_run:()=>a.run(),AminoglycosideTDM_updateUI:()=>i.updateUI(),AminoglycosideTDM_run:()=>i.run(),ValproateTDM_run:()=>l.run(),updateCrCl:t,getPatient:e}}();"loading"===document.readyState?document.addEventListener("DOMContentLoaded",()=>TDMHub.init()):TDMHub.init();
+// ============================================================================
+// IV DrugRef PWA — Error Tracker v1.0
+// Hybrid error tracking: client-side capture + GAS remote reporting
+// ============================================================================
+// Features:
+// - Global error capture (window.onerror, unhandledrejection)
+// - Non-intrusive toast notification for users
+// - In-memory error log with localStorage persistence for debugging
+// - Offline queue → auto-flush to GAS when back online
+// - Deduplication (same error within 60s = skip)
+// - Rate limiting (max 10 reports per minute to GAS)
+// - Email alert for critical errors via GAS
+// ============================================================================
+
+(function () {
+  'use strict';
+
+  // ─── Configuration ───
+  const CONFIG = {
+    // GAS endpoint (same as analytics)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
+
+    // LocalStorage keys
+    LS_ERROR_LOG: 'iv_drugref_error_log',
+    LS_ERROR_QUEUE: 'iv_drugref_error_queue',
+
+    // Limits
+    MAX_LOG_ENTRIES: 50,        // Keep last 50 errors in localStorage
+    MAX_QUEUE_SIZE: 20,         // Max queued errors before flush
+    DEDUP_WINDOW_MS: 60000,     // 60s dedup window
+    RATE_LIMIT_PER_MIN: 10,     // Max 10 reports/minute to GAS
+    TOAST_DURATION_MS: 5000,    // Toast visible for 5s
+    FLUSH_INTERVAL_MS: 30000,   // Auto-flush queue every 30s
+
+    // Severity levels
+    SEVERITY: {
+      LOW: 'low',           // Minor UI glitch
+      MEDIUM: 'medium',     // Feature broken but app usable
+      HIGH: 'high',         // Core feature broken
+      CRITICAL: 'critical'  // App crash / data corruption
+    },
+
+    // App metadata
+    APP_VERSION: '5.0.0',
+    APP_NAME: 'IV DrugRef PWA'
+  };
+
+  // ─── State ───
+  let recentErrors = [];        // For dedup tracking
+  let rateLimitCount = 0;       // Reports sent this minute
+  let flushTimer = null;
+  let toastContainer = null;
+
+  // ─── Utility: Get current page name ───
+  function getPageName() {
+    const path = window.location.pathname;
+    const file = path.split('/').pop() || 'index.html';
+    return file.replace('.html', '');
+  }
+
+  // ─── Utility: Generate error fingerprint for dedup ───
+  function errorFingerprint(message, source, line) {
+    return `${message}|${source}|${line}`;
+  }
+
+  // ─── Utility: Check dedup ───
+  function isDuplicate(fingerprint) {
+    const now = Date.now();
+    // Clean old entries
+    recentErrors = recentErrors.filter(e => now - e.time < CONFIG.DEDUP_WINDOW_MS);
+    // Check if exists
+    if (recentErrors.some(e => e.fp === fingerprint)) return true;
+    recentErrors.push({ fp: fingerprint, time: now });
+    return false;
+  }
+
+  // ─── Utility: Classify severity ───
+  function classifySeverity(error) {
+    const msg = (error.message || '').toLowerCase();
+
+    // Critical: data corruption, security, crashes
+    if (msg.includes('drugs') && msg.includes('undefined')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('json') && msg.includes('parse')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
+
+    // High: core features broken
+    if (msg.includes('calculation') || msg.includes('dose')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('fetch') || msg.includes('network')) return CONFIG.SEVERITY.MEDIUM;
+    if (msg.includes('typeerror') || msg.includes('referenceerror')) return CONFIG.SEVERITY.MEDIUM;
+
+    // Default
+    return CONFIG.SEVERITY.LOW;
+  }
+
+  // ─── Utility: Collect context ───
+  function collectContext() {
+    return {
+      page: getPageName(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      online: navigator.onLine,
+      timestamp: new Date().toISOString(),
+      sessionId: sessionStorage.getItem('sessionId') || 'unknown',
+      screenSize: `${screen.width}x${screen.height}`,
+      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+      language: navigator.language,
+      standalone: window.matchMedia('(display-mode: standalone)').matches,
+      memoryUsage: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
+      appVersion: CONFIG.APP_VERSION
+    };
+  }
+
+  // ─── Toast UI ───
+  function createToastContainer() {
+    if (toastContainer) return toastContainer;
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'iv-error-toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+      max-width: 90vw;
+    `;
+    document.body.appendChild(toastContainer);
+    return toastContainer;
+  }
+
+  function showToast(message, severity) {
+    if (!document.body) return; // Not ready yet
+
+    const container = createToastContainer();
+    const toast = document.createElement('div');
+
+    const colors = {
+      low: { bg: '#f0f4f8', border: '#94a3b8', text: '#475569', icon: 'ℹ️' },
+      medium: { bg: '#fef9c3', border: '#f59e0b', text: '#92400e', icon: '⚠️' },
+      high: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', icon: '🔴' },
+      critical: { bg: '#fecaca', border: '#dc2626', text: '#7f1d1d', icon: '🚨' }
+    };
+    const c = colors[severity] || colors.medium;
+
+    toast.style.cssText = `
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 13px;
+      color: ${c.text};
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      max-width: 100%;
+      text-align: center;
+      line-height: 1.4;
+    `;
+
+    // User-friendly message (not raw error)
+    const userMsg = severity === 'critical' || severity === 'high'
+      ? `${c.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`
+      : `${c.icon} เกิดข้อผิดพลาดเล็กน้อย`;
+
+    toast.textContent = userMsg;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, CONFIG.TOAST_DURATION_MS);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    });
+  }
+
+  // ─── LocalStorage Log ───
+  function saveToLog(entry) {
+    try {
+      let log = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      log.unshift(entry);
+      if (log.length > CONFIG.MAX_LOG_ENTRIES) {
+        log = log.slice(0, CONFIG.MAX_LOG_ENTRIES);
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_LOG, JSON.stringify(log));
+    } catch (e) {
+      // localStorage full or unavailable — silently fail
+    }
+  }
+
+  // ─── Queue for GAS reporting ───
+  function addToQueue(entry) {
+    try {
+      let queue = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+      queue.push(entry);
+      if (queue.length > CONFIG.MAX_QUEUE_SIZE) {
+        queue = queue.slice(-CONFIG.MAX_QUEUE_SIZE); // Keep newest
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_QUEUE, JSON.stringify(queue));
+    } catch (e) { /* silently fail */ }
+  }
+
+  function getQueue() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function clearQueue() {
+    try {
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Send to GAS ───
+  function sendToGAS(entries) {
+    if (!navigator.onLine || entries.length === 0) return;
+    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return;
+
+    rateLimitCount += entries.length;
+
+    const payload = JSON.stringify({
+      type: 'error_report',
+      errors: entries,
+      batch_size: entries.length,
+      reported_at: new Date().toISOString()
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(CONFIG.GAS_URL, payload);
+      } else {
+        fetch(CONFIG.GAS_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors',
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Flush queue ───
+  function flushQueue() {
+    const queue = getQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    sendToGAS(queue);
+    clearQueue();
+  }
+
+  // ─── Core: Process error ───
+  function processError(errorInfo) {
+    const fp = errorFingerprint(errorInfo.message, errorInfo.source, errorInfo.line);
+    if (isDuplicate(fp)) return;
+
+    const severity = classifySeverity(errorInfo);
+    const context = collectContext();
+
+    const entry = {
+      ...errorInfo,
+      severity,
+      context,
+      fingerprint: fp,
+      id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    };
+
+    // 1. Console log (always)
+    console.error(`[ErrorTracker] ${severity.toUpperCase()}:`, errorInfo.message, entry);
+
+    // 2. Save to localStorage log
+    saveToLog(entry);
+
+    // 3. Show toast (only for medium+ severity)
+    if (severity !== CONFIG.SEVERITY.LOW) {
+      showToast(errorInfo.message, severity);
+    }
+
+    // 4. Queue for GAS reporting
+    addToQueue(entry);
+
+    // 5. If critical or high, flush immediately
+    if (severity === CONFIG.SEVERITY.CRITICAL || severity === CONFIG.SEVERITY.HIGH) {
+      flushQueue();
+    }
+  }
+
+  // ─── Global Error Handlers ───
+
+  // Catch synchronous errors
+  window.onerror = function (message, source, line, col, error) {
+    processError({
+      type: 'runtime_error',
+      message: String(message),
+      source: source || 'unknown',
+      line: line || 0,
+      col: col || 0,
+      stack: error ? error.stack : 'N/A'
+    });
+    return false; // Don't suppress default console error
+  };
+
+  // Catch unhandled promise rejections
+  window.addEventListener('unhandledrejection', function (event) {
+    const reason = event.reason;
+    processError({
+      type: 'unhandled_rejection',
+      message: reason ? (reason.message || String(reason)) : 'Unknown rejection',
+      source: 'Promise',
+      line: 0,
+      col: 0,
+      stack: reason && reason.stack ? reason.stack : 'N/A'
+    });
+  });
+
+  // Catch resource loading errors (images, scripts, etc.)
+  window.addEventListener('error', function (event) {
+    if (event.target && event.target !== window) {
+      const tag = event.target.tagName || 'unknown';
+      const src = event.target.src || event.target.href || 'unknown';
+      processError({
+        type: 'resource_error',
+        message: `Failed to load ${tag}: ${src}`,
+        source: src,
+        line: 0,
+        col: 0,
+        stack: 'N/A'
+      });
+    }
+  }, true); // Capture phase to catch resource errors
+
+  // ─── Service Worker error messages ───
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'SW_ERROR') {
+        processError({
+          type: 'service_worker_error',
+          message: event.data.error.message,
+          source: event.data.error.filename || 'sw.js',
+          line: event.data.error.lineno || 0,
+          col: 0,
+          stack: 'Service Worker context'
+        });
+      }
+    });
+  }
+
+  // ─── Network error monitoring ───
+  window.addEventListener('online', function () {
+    // Flush queued errors when back online
+    setTimeout(flushQueue, 2000);
+  });
+
+  // ─── Periodic flush ───
+  flushTimer = setInterval(flushQueue, CONFIG.FLUSH_INTERVAL_MS);
+
+  // ─── Rate limit reset ───
+  setInterval(function () {
+    rateLimitCount = 0;
+  }, 60000);
+
+  // ─── Public API (for manual error reporting) ───
+  window.IVErrorTracker = {
+    /**
+     * Manually report an error
+     * @param {string} message - Error description
+     * @param {string} severity - 'low'|'medium'|'high'|'critical'
+     * @param {object} extra - Additional context
+     */
+    report: function (message, severity, extra) {
+      processError({
+        type: 'manual_report',
+        message: String(message),
+        source: getPageName(),
+        line: 0,
+        col: 0,
+        stack: new Error().stack || 'N/A',
+        extra: extra || {}
+      });
+    },
+
+    /**
+     * Get error log from localStorage
+     * @returns {Array} Error entries
+     */
+    getLog: function () {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      } catch (e) {
+        return [];
+      }
+    },
+
+    /**
+     * Clear error log
+     */
+    clearLog: function () {
+      localStorage.removeItem(CONFIG.LS_ERROR_LOG);
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+      console.log('[ErrorTracker] Log cleared');
+    },
+
+    /**
+     * Force flush queued errors to GAS
+     */
+    flush: flushQueue,
+
+    /**
+     * Get current queue size
+     */
+    queueSize: function () {
+      return getQueue().length;
+    }
+  };
+
+  // ─── Initial flush on load ───
+  window.addEventListener('load', function () {
+    // Flush any queued errors from previous sessions
+    setTimeout(flushQueue, 3000);
+  });
+
+  console.log('[ErrorTracker] Initialized — v1.0 | Page:', getPageName());
+})();
+
+// ============================================================
+// IV DrugRef PWA v5.0 — Core Utilities
+// Shared across all pages
+// ============================================================
+
+/* global window */
+'use strict';
+
+var IVDrugRef = (function() {
+
+  // ============================================================
+  // CLINICAL CALCULATORS
+  // ============================================================
+
+  /**
+   * Ideal Body Weight (Devine formula)
+   * @param {number} ht - Height in cm
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} IBW in kg
+   */
+  function calcIBW(ht, sex) {
+    if (!ht || ht <= 0) return 0;
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  /**
+   * Adjusted Body Weight (for obesity)
+   * @param {number} wt - Actual weight in kg
+   * @param {number} ibw - Ideal body weight in kg
+   * @returns {number} ABW in kg
+   */
+  function calcABW(wt, ibw) {
+    return ibw + 0.4 * (wt - ibw);
+  }
+
+  /**
+   * Body Mass Index
+   * @param {number} wt - Weight in kg
+   * @param {number} ht - Height in cm
+   * @returns {number} BMI in kg/m²
+   */
+  function calcBMI(wt, ht) {
+    if (!ht || ht <= 0) return 0;
+    return wt / ((ht / 100) ** 2);
+  }
+
+  /**
+   * Body Surface Area (Mosteller formula)
+   * @param {number} ht - Height in cm
+   * @param {number} wt - Weight in kg
+   * @returns {number} BSA in m²
+   */
+  function calcBSA(ht, wt) {
+    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
+    return Math.sqrt((ht * wt) / 3600);
+  }
+
+  /**
+   * Cockcroft-Gault CrCl with automatic weight adjustment
+   * Uses ABW if patient is obese (>130% IBW)
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
+   * @returns {number} CrCl in mL/min, minimum 5
+   */
+  function calcCockcroftGault(age, wt, scr, sex, ht) {
+    if (scr <= 0) return 0;
+    let useWt = wt;
+    if (ht && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
+    }
+    let crcl = ((140 - age) * useWt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.max(Math.round(crcl * 10) / 10, 5);
+  }
+
+  /**
+   * Cockcroft-Gault with raw TBW (no obesity adjustment)
+   * Used for comparison and non-adjusted dosing
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} CrCl in mL/min
+   */
+  function calcCG_raw(age, wt, scr, sex) {
+    if (scr <= 0) return 0;
+    let crcl = ((140 - age) * wt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.round(crcl * 10) / 10;
+  }
+
+  /**
+   * Bedside Schwartz equation (pediatric eGFR)
+   * For ages 1-17 years
+   * @param {number} ht - Height in cm
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcSchwartz(ht, scr) {
+    if (scr <= 0 || !ht || ht <= 0) return 0;
+    return Math.round((0.413 * ht / scr) * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 equation (race-free)
+   * Returns indexed eGFR for standardized BSA (1.73m²)
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcCKDEPI2021(age, scr, sex) {
+    let eGFR;
+    if (sex === 'F') {
+      const kappa = 0.7;
+      const alpha = scr <= kappa ? -0.241 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age) * 1.012;
+    } else {
+      const kappa = 0.9;
+      const alpha = scr <= kappa ? -0.302 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age);
+    }
+    return Math.round(eGFR * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 de-indexed for drug dosing
+   * Converts indexed eGFR to non-indexed using patient BSA
+   * Per KDIGO 2024 recommendations for personalized dosing
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} bsa - Body surface area in m²
+   * @returns {number} Non-indexed eGFR in mL/min
+   */
+  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
+    const indexed = calcCKDEPI2021(age, scr, sex);
+    return Math.round(indexed * bsa / 1.73 * 10) / 10;
+  }
+
+  /**
+   * Get CKD stage classification from GFR value
+   * @param {number} gfr - Glomerular filtration rate in mL/min
+   * @returns {Object} Stage info with stage code, Thai label, and CSS class
+   */
+  function getCKDStage(gfr) {
+    if (gfr >= 90) return { stage: 'G1', label: 'ปกติ/สูง', cls: 'stage-1' };
+    if (gfr >= 60) return { stage: 'G2', label: 'ลดลงเล็กน้อย', cls: 'stage-2' };
+    if (gfr >= 45) return { stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', cls: 'stage-3a' };
+    if (gfr >= 30) return { stage: 'G3b', label: 'ลดลงปานกลาง-มาก', cls: 'stage-3b' };
+    if (gfr >= 15) return { stage: 'G4', label: 'ลดลงมาก', cls: 'stage-4' };
+    return { stage: 'G5', label: 'ไตวาย', cls: 'stage-5' };
+  }
+
+  /**
+   * Build comprehensive patient object from form elements
+   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
+   * @param {Object} fieldIds - Optional custom field ID mapping
+   * @returns {Object} Complete patient data object
+   */
+  function getPatientFromForm(fieldIds) {
+    // Default field IDs matching standard form layout
+    const ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    }, fieldIds || {});
+
+    const getVal = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? (parseFloat(el.value) || def) : def;
+    };
+    const getStr = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? el.value : def;
+    };
+
+    const age = getVal(ids.age, 55);
+    const wt = getVal(ids.wt, 70);
+    const ht = getVal(ids.ht, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = getVal(ids.scr, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
+
+    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
+    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
+    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
+    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
+    const isObese = wt > ibw * 1.3;
+    const isUnderweight = wt < ibw;
+    const isPediatric = age < 18;
+
+    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
+    let crcl;
+    if (isPediatric && ht > 0) {
+      crcl = calcSchwartz(ht, scr);
+    } else {
+      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
+    }
+
+    return {
+      age, wt, ht, sex, scr, alb, dialysis,
+      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
+      crcl
+    };
+  }
+
+
+  // ============================================================
+  // ANALYTICS
+  // ============================================================
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  let _reqCount = 0;
+
+  /**
+   * Get anonymous session ID from localStorage
+   * @returns {string} Session ID or empty string
+   */
+  function getSessionId() {
+    return localStorage.getItem('anonSessionId') || '';
+  }
+
+  /**
+   * Get anonymous user ID from localStorage
+   * @returns {string} User ID or empty string
+   */
+  function getUserId() {
+    return localStorage.getItem('anonUserId') || '';
+  }
+
+  /**
+   * Check if user has consented to analytics
+   * @returns {boolean} True if analytics consent is given
+   */
+  function hasAnalyticsConsent() {
+    return localStorage.getItem('analyticsConsent') === 'true';
+  }
+
+  /**
+   * Send analytics event via sendBeacon or fetch
+   * Rate limited to 40 requests per page session
+   * @param {Object} data - Event data to send
+   */
+  function sendAnalytics(data) {
+    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (_reqCount >= 40) return;
+    _reqCount++;
+    try {
+      const payload = JSON.stringify({
+        ...data,
+        session_id: getSessionId(),
+        user_id: getUserId()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(ANALYTICS_URL, payload);
+      } else {
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
+   * Track page view with automatic entry/exit timing
+   * Sends page_view events on entry and exit with duration
+   * @param {string} pageName - Name/identifier of current page
+   * @returns {Object} Tracking object with sendExit function and metadata
+   */
+  function trackPageView(pageName) {
+    const enterTime = Date.now();
+    const fromPage = (function() {
+      const ref = document.referrer || '';
+      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+      if (ref.includes('calculator.html')) return 'calculator';
+      if (ref.includes('tdm.html')) return 'tdm';
+      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
+      if (ref.includes('compatibility.html')) return 'compatibility';
+      if (ref.includes('dashboard.html')) return 'dashboard';
+      return ref ? 'external' : 'direct';
+    })();
+
+    // Send entry event
+    sendAnalytics({
+      type: 'page_view', page: pageName, action: 'enter',
+      from_page: fromPage, referrer: document.referrer || 'direct'
+    });
+
+    // Track exit event (sent only once)
+    let exitSent = false;
+    function sendExit(extraData) {
+      if (exitSent) return;
+      exitSent = true;
+      sendAnalytics({
+        type: 'page_view', page: pageName, action: 'leave',
+        duration_sec: Math.round((Date.now() - enterTime) / 1000),
+        from_page: fromPage,
+        ...(extraData || {})
+      });
+    }
+
+    // Send exit on page unload or visibility change
+    window.addEventListener('beforeunload', () => sendExit());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendExit();
+    });
+
+    return { sendExit, fromPage, enterTime };
+  }
+
+
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
+
+  /**
+   * Register service worker for offline support and caching
+   * Non-blocking registration with console logging
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    }
+  }
+
+
+  // ============================================================
+  // UTILITY HELPERS
+  // ============================================================
+
+  /**
+   * Generate random anonymous ID using crypto API
+   * @param {number} len - Length in hex characters (default 16)
+   * @returns {string} Random hex string
+   */
+  function generateId(len) {
+    len = len || 16;
+    const arr = new Uint8Array(len / 2);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Debounce function to limit function execution
+   * @param {Function} fn - Function to debounce
+   * @param {number} ms - Debounce delay in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  /**
+   * Format number with specified decimal precision
+   * @param {number} n - Number to format
+   * @param {number} decimals - Number of decimal places (default 1)
+   * @returns {string} Formatted number string
+   */
+  function fmt(n, decimals) {
+    decimals = decimals !== undefined ? decimals : 1;
+    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
+  }
+
+  /**
+   * Version and app name constants
+   */
+  const VERSION = '5.0.0';
+  const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+  return {
+    // Version info
+    VERSION,
+    APP_NAME,
+
+    // Clinical calculators
+    calcIBW,
+    calcABW,
+    calcBMI,
+    calcBSA,
+    calcCockcroftGault,
+    calcCG_raw,
+    calcSchwartz,
+    calcCKDEPI2021,
+    calcCKDEPI2021_nonindexed,
+    getCKDStage,
+    getPatientFromForm,
+
+    // Analytics
+    sendAnalytics,
+    trackPageView,
+    getSessionId,
+    getUserId,
+    hasAnalyticsConsent,
+
+    // Service Worker
+    registerSW,
+
+    // Utility helpers
+    generateId,
+    debounce,
+    fmt
+  };
+})();
+
+// ============================================================
+// AUTO-INITIALIZATION
+// ============================================================
+// Register service worker on page load
+document.addEventListener('DOMContentLoaded', () => {
+  IVDrugRef.registerSW();
+});
+
+// ============================================================
+// IV DrugRef PWA v5.0 — TDM Hub Module
+// Therapeutic Drug Monitoring for Vancomycin, Phenytoin,
+// Aminoglycosides, and Valproate
+// ============================================================
+
+'use strict';
+
+const TDMHub = (function() {
+
+  // ============================================================
+  // PATIENT DATA & CrCl CALCULATION
+  // ============================================================
+
+  /**
+   * Retrieve patient data from form elements, including TDM-specific fields
+   * Falls back to IVDrugRef.getPatientFromForm() for base fields
+   * @returns {Object} Patient object with wt, age, sex, scr, ht, alb, crcl, dialysis
+   */
+  function getPatient() {
+    // Use base patient extraction from core.js
+    const basePatient = IVDrugRef.getPatientFromForm({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    });
+
+    // Ensure TDM-specific fields are present
+    return {
+      ...basePatient,
+      alb: basePatient.albumin || 4.0,
+      dialysis: basePatient.dialysisStatus || 'none',
+      crcl: 0 // Will be calculated in updateCrCl()
+    };
+  }
+
+  /**
+   * Update CrCl based on patient parameters
+   * Uses IVDrugRef.calcCockcroftGault() for adult patients
+   * Uses IVDrugRef.calcSchwartz() for pediatric patients
+   * @returns {Object} Updated patient object
+   */
+  function updateCrCl() {
+    const p = getPatient();
+    const isPed = p.age < 18;
+
+    if (isPed && p.ht > 0) {
+      p.crcl = IVDrugRef.calcSchwartz(p.ht, p.scr);
+      document.getElementById('ptCrCl').value = p.crcl.toFixed(1) + ' mL/min/1.73m² (Schwartz)';
+    } else {
+      p.crcl = IVDrugRef.calcCockcroftGault(p.age, p.wt, p.scr, p.sex, p.ht);
+      let label = p.crcl.toFixed(1) + ' mL/min';
+
+      // Show ABW flag if obese
+      if (p.ht > 0) {
+        const ibw = p.sex === 'M' ? 50 + 2.3 * (p.ht / 2.54 - 60) : 45.5 + 2.3 * (p.ht / 2.54 - 60);
+        if (p.wt > ibw * 1.3) label += ' (ABW)';
+        if (p.age >= 65 && p.scr < 0.7) label += ' ⚠elderly';
+      }
+      document.getElementById('ptCrCl').value = label;
+    }
+    return p;
+  }
+
+  // ============================================================
+  // DRUG TAB SWITCHING
+  // ============================================================
+
+  let activeDrug = 'vancomycin';
+
+  function switchDrug(drug) {
+    activeDrug = drug;
+    document.querySelectorAll('.drug-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.drug-section').forEach(s => s.classList.remove('active'));
+    const tabs = document.querySelectorAll('.drug-tab');
+    const idx = ['vancomycin', 'phenytoin', 'aminoglycoside', 'valproate'].indexOf(drug);
+    if (idx >= 0) tabs[idx].classList.add('active');
+    document.getElementById('sec_' + drug).classList.add('active');
+  }
+
+  // ============================================================
+  // VANCOMYCIN — Bayesian MAP + MCMC
+  // (Ported from vanco-tdm.html)
+  // ============================================================
+
+  const VancoTDM = (function() {
+    const PK_MODELS = [
+      {
+        id: 'buelga', name: 'Buelga 2005', pop: 'General adults',
+        ref: 'Antimicrob Agents Chemother 2005;49:4934-41',
+        clFn: crcl => 0.0048 * crcl, vdFn: (wt, ht, sex) => 0.65 * wt,
+        omega_cl: 0.25, omega_vd: 0.15, sigma: 0.10
+      },
+      {
+        id: 'roberts', name: 'Roberts 2011', pop: 'ICU / Critically ill',
+        ref: 'Antimicrob Agents Chemother 2011;55:2704-9',
+        clFn: crcl => 0.024 * crcl + 1.93, vdFn: (wt, ht, sex) => 0.511 * wt,
+        omega_cl: 0.30, omega_vd: 0.20, sigma: 0.12
+      },
+      {
+        id: 'goti', name: 'Goti 2018', pop: 'Hospitalized adults',
+        ref: 'Clin Pharmacokinet 2018;57:367-82',
+        clFn: crcl => 0.0154 * crcl + 0.32, vdFn: (wt, ht, sex) => 0.70 * wt,
+        omega_cl: 0.22, omega_vd: 0.18, sigma: 0.08
+      },
+      {
+        id: 'adane', name: 'Adane 2015', pop: 'Obese (BMI ≥30)',
+        ref: 'Pharmacotherapy 2015;35:127-139',
+        clFn: crcl => 0.0169 * crcl + 0.94, vdFn: (wt, ht, sex) => {
+          if (!ht || ht <= 0) return 0.55 * wt;
+          const htIn = ht / 2.54, ibw = sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+          return 0.55 * (wt > ibw * 1.3 ? ibw + 0.4 * (wt - ibw) : wt);
+        },
+        omega_cl: 0.28, omega_vd: 0.22, sigma: 0.11
+      },
+      {
+        id: 'bourguignon', name: 'Bourguignon 2016', pop: 'Elderly (≥80 yr)',
+        ref: 'Antimicrob Agents Chemother 2016;60:4563-7',
+        clFn: crcl => 0.0117 * crcl + 0.28, vdFn: (wt, ht, sex) => 0.52 * wt,
+        omega_cl: 0.35, omega_vd: 0.20, sigma: 0.13
+      }
+    ];
+
+    let selectedModel = 'auto', currentPK = null, mcmcSamples = [], allModelResults = [];
+    let doses = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 3, dateTime: '' }];
+    let levels = [{ value: 15, dateTime: '' }];
+    let refTime = null;
+
+    function getDefaultDT(off = 0) {
+      const d = new Date();
+      d.setHours(d.getHours() - 24 + off);
+      d.setMinutes(0, 0, 0);
+      return d.toISOString().slice(0, 16);
+    }
+
+    function dtH(dt) {
+      return (!dt || !refTime) ? 0 : (new Date(dt).getTime() - refTime) / 3600000;
+    }
+
+    function updateRef() {
+      if (doses[0]?.dateTime) refTime = new Date(doses[0].dateTime).getTime();
+    }
+
+    function buildDH() {
+      updateRef();
+      return doses.map(d => ({
+        amount: d.amount, interval: d.interval, infusion: d.infusion, nDoses: d.nDoses,
+        startTime: dtH(d.dateTime)
+      }));
+    }
+
+    function buildLV() {
+      updateRef();
+      return levels.map(l => ({ value: l.value, time: dtH(l.dateTime) }));
+    }
+
+    // Sampling adequacy checks
+    function checkSampling() {
+      const dh = buildDH(), lvs = buildLV(), warns = [];
+      let totalD = 0;
+      for (const d of dh) totalD += d.nDoses;
+      const lastE = dh[dh.length - 1], ssAt = lastE ? lastE.startTime + 3 * lastE.interval : 0;
+
+      for (const lv of lvs) {
+        if (lv.time < ssAt && totalD >= 1)
+          warns.push({ s: 'amber', m: `⚠ Level ${lv.value.toFixed(1)} เจาะก่อน steady state (ก่อน dose ที่ 4)` });
+        let isTr = false;
+        for (const d of dh)
+          for (let n = 1; n < d.nDoses; n++)
+            if (d.startTime + n * d.interval - lv.time >= 0 && d.startTime + n * d.interval - lv.time <= 1)
+              isTr = true;
+        if (lv.value < 25 && !isTr && lvs.length === 1)
+          warns.push({ s: 'amber', m: `📍 Level ${lv.value.toFixed(1)} อาจไม่ใช่ true trough (Bayesian ยังทำงานได้จาก random level)` });
+      }
+      return warns;
+    }
+
+    function getRecTimes() {
+      const dh = buildDH();
+      if (!dh.length || !refTime) return [];
+      const le = dh[dh.length - 1], ss = le.startTime + 3 * le.interval, recs = [];
+      const trT = ss - 0.5;
+      if (trT > 0) {
+        const d = new Date(refTime + trT * 3600000);
+        recs.push({ type: 'trough', label: `Trough: ${d.toLocaleString('th-TH', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} (30 นาทีก่อน dose #${Math.round(ss / le.interval) + 1})` });
+      }
+      const pkT = ss + le.infusion + 1;
+      if (pkT > 0) {
+        const d = new Date(refTime + pkT * 3600000);
+        recs.push({ type: 'peak', label: `Peak: ${d.toLocaleString('th-TH', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} (1 hr หลัง infusion)` });
+      }
+      return recs;
+    }
+
+    function renderSamplingAdvice() {
+      let el = document.getElementById('vancoSamplingAdvice');
+      if (!el) {
+        const c = document.createElement('div');
+        c.className = 'card';
+        c.innerHTML = '<div class="card-head">📍 SAMPLING ADEQUACY</div><div class="card-body" id="vancoSamplingAdvice"></div>';
+        const lc = document.getElementById('vancoLevelList')?.closest('.card');
+        if (lc) lc.after(c);
+        el = document.getElementById('vancoSamplingAdvice');
+      }
+      if (!el || !refTime) {
+        if (el) el.innerHTML = '<div style="font-size:12px;color:var(--text3)">กรุณากรอกเวลาให้ยาก่อน</div>';
+        return;
+      }
+      let h = '';
+      const ws = checkSampling();
+      for (const w of ws) h += `<div class="info-box ${w.s}" style="font-size:11px">${w.m}</div>`;
+      const recs = getRecTimes();
+      if (recs.length) {
+        h += '<div style="font-size:11px;color:var(--text2);margin-top:6px"><strong>📋 แนะนำเวลาเจาะ:</strong></div>';
+        for (const r of recs)
+          h += `<div style="font-size:12px;padding:4px 8px;margin-top:3px;background:var(--bg);border-radius:6px;border:1px solid var(--card-border)"><span style="color:var(--${r.type === 'trough' ? 'purple' : 'blue'})">${r.type === 'trough' ? '🔻' : '🔺'}</span> ${r.label}</div>`;
+      }
+      const dh = buildDH();
+      let totalD = 0;
+      for (const d of dh) totalD += d.nDoses;
+      const prog = Math.min(totalD / 4 * 100, 100);
+      h += `<div style="margin-top:8px;font-size:11px;color:var(--text2)"><strong>📊 SS Progress:</strong> ${totalD}/4 doses ${totalD >= 4 ? '✅' : '⏳'}</div><div class="progress" style="margin:3px 0"><div class="progress-bar" style="width:${prog}%;background:${totalD >= 4 ? 'var(--green)' : 'var(--amber)'}"></div></div>`;
+      el.innerHTML = h;
+    }
+
+    // PK prediction (1-compartment model)
+    function predictConc(t, cl, vd, doseHist) {
+      const ke = cl / vd;
+      let conc = 0;
+      for (const dh of doseHist) {
+        for (let n = 0; n < dh.nDoses; n++) {
+          const tS = dh.startTime + n * dh.interval, tE = tS + dh.infusion, k0 = dh.amount / dh.infusion;
+          if (t <= tS) continue;
+          if (t <= tE) conc += (k0 / (ke * vd)) * (1 - Math.exp(-ke * (t - tS)));
+          else conc += (k0 / (ke * vd)) * (1 - Math.exp(-ke * dh.infusion)) * Math.exp(-ke * (t - tE));
+        }
+      }
+      return conc;
+    }
+
+    function calcAUC_ss(cl, vd, dose, interval, infusion) {
+      const ke = cl / vd, k0 = dose / infusion, acc = 1 / (1 - Math.exp(-ke * interval));
+      const N = 300, dt = interval / N;
+      let auc = 0;
+      for (let i = 0; i < N; i++) {
+        const t = i * dt + dt / 2;
+        let c;
+        if (t <= infusion) {
+          c = (k0 / (ke * vd)) * (1 - Math.exp(-ke * t)) + (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion)) * Math.exp(-ke * (interval - infusion + t)) * Math.max(acc - 1, 0);
+        } else {
+          c = (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion)) * acc * Math.exp(-ke * (t - infusion));
+        }
+        auc += Math.max(c, 0) * dt;
+      }
+      return auc;
+    }
+
+    function ssPeakTrough(cl, vd, dose, interval, infusion) {
+      const ke = cl / vd, k0 = dose / infusion, acc = 1 / (1 - Math.exp(-ke * interval));
+      const peak = (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion)) * acc;
+      const trough = peak * Math.exp(-ke * (interval - infusion));
+      return { peak, trough };
+    }
+
+    // Bayesian MAP estimation with grid search + Nelder-Mead
+    function bayesianMAP(pt, doseHist, measuredLevels, model) {
+      const crcl = IVDrugRef.calcCockcroftGault(pt.age, pt.wt, pt.scr, pt.sex, pt.ht);
+      const popCL = model.clFn(crcl), popVd = model.vdFn(pt.wt, pt.ht, pt.sex);
+
+      function obj(cl, vd) {
+        if (cl <= 0 || vd <= 0) return 1e10;
+        let o = Math.pow(Math.log(cl / popCL), 2) / model.omega_cl + Math.pow(Math.log(vd / popVd), 2) / model.omega_vd;
+        for (const lv of measuredLevels) {
+          const pred = predictConc(lv.time, cl, vd, doseHist);
+          if (pred <= 0) return 1e10;
+          o += Math.pow(Math.log(lv.value) - Math.log(pred), 2) / model.sigma;
+        }
+        return o;
+      }
+
+      // Grid search
+      let bCL = popCL, bVd = popVd, bObj = obj(popCL, popVd);
+      for (let ci = 0.3; ci <= 3; ci += 0.1)
+        for (let vi = 0.5; vi <= 2; vi += 0.1) {
+          const o = obj(popCL * ci, popVd * vi);
+          if (o < bObj) { bObj = o; bCL = popCL * ci; bVd = popVd * vi; }
+        }
+
+      // Nelder-Mead optimization
+      let sx = [{ cl: bCL, vd: bVd }, { cl: bCL * 1.05, vd: bVd }, { cl: bCL, vd: bVd * 1.05 }];
+      const f = p => obj(p.cl, p.vd);
+      for (let it = 0; it < 300; it++) {
+        sx.sort((a, b) => f(a) - f(b));
+        const cx = (sx[0].cl + sx[1].cl) / 2, cy = (sx[0].vd + sx[1].vd) / 2;
+        const r = { cl: 2 * cx - sx[2].cl, vd: 2 * cy - sx[2].vd }, fr = f(r);
+        if (fr < f(sx[0])) {
+          const e = { cl: 3 * cx - 2 * sx[2].cl, vd: 3 * cy - 2 * sx[2].vd };
+          sx[2] = f(e) < fr ? e : r;
+        } else if (fr < f(sx[1]))
+          sx[2] = r;
+        else {
+          const c2 = { cl: (cx + sx[2].cl) / 2, vd: (cy + sx[2].vd) / 2 };
+          if (f(c2) < f(sx[2]))
+            sx[2] = c2;
+          else {
+            sx[1] = { cl: (sx[0].cl + sx[1].cl) / 2, vd: (sx[0].vd + sx[1].vd) / 2 };
+            sx[2] = { cl: (sx[0].cl + sx[2].cl) / 2, vd: (sx[0].vd + sx[2].vd) / 2 };
+          }
+        }
+        if (Math.abs(f(sx[0]) - f(sx[2])) < 1e-10) break;
+      }
+      sx.sort((a, b) => f(a) - f(b));
+      const r = sx[0];
+      return {
+        cl: r.cl, vd: r.vd, ke: r.cl / r.vd, halflife: Math.LN2 / (r.cl / r.vd),
+        popCL, popVd, crcl, objValue: f(r),
+        method: measuredLevels.length > 0 ? 'Bayesian MAP' : 'Population PK',
+        model: model.name, modelId: model.id
+      };
+    }
+
+    // MCMC sampling (adaptive random walk)
+    function runMCMC(pt, doseHist, measuredLevels, model, mapR, nSamp, cb) {
+      const crcl = IVDrugRef.calcCockcroftGault(pt.age, pt.wt, pt.scr, pt.sex, pt.ht);
+      const popCL = model.clFn(crcl), popVd = model.vdFn(pt.wt, pt.ht, pt.sex);
+
+      function logPost(cl, vd) {
+        if (cl <= 0 || vd <= 0) return -1e10;
+        let lp = -0.5 * (Math.pow(Math.log(cl / popCL), 2) / model.omega_cl + Math.pow(Math.log(vd / popVd), 2) / model.omega_vd);
+        for (const lv of measuredLevels) {
+          const pred = predictConc(lv.time, cl, vd, doseHist);
+          if (pred <= 0) return -1e10;
+          lp -= 0.5 * Math.pow(Math.log(lv.value) - Math.log(pred), 2) / model.sigma;
+        }
+        return lp;
+      }
+
+      const samples = [];
+      let cl = mapR.cl, vd = mapR.vd, lp = logPost(cl, vd);
+      const sdCL = Math.sqrt(model.omega_cl) * popCL * 0.15, sdVd = Math.sqrt(model.omega_vd) * popVd * 0.15;
+      let accepted = 0;
+      const burnin = Math.floor(nSamp * 0.3), total = nSamp + burnin;
+      let batch = 0;
+      const batchSz = 100;
+
+      function step() {
+        const end = Math.min(batch + batchSz, total);
+        for (let i = batch; i < end; i++) {
+          const u1 = Math.random(), u2 = Math.random();
+          const z1 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+          const z2 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
+          const pCL = cl + z1 * sdCL * 2.4, pVd = vd + z2 * sdVd * 2.4;
+          const pLP = logPost(pCL, pVd);
+          if (Math.log(Math.random()) < pLP - lp) { cl = pCL; vd = pVd; lp = pLP; accepted++; }
+          if (i >= burnin) samples.push({ cl, vd, ke: cl / vd });
+        }
+        batch = end;
+        const pct = Math.round(batch / total * 100);
+        const barEl = document.getElementById('vancoMcmcBar');
+        const statusEl = document.getElementById('vancoMcmcStatus');
+        if (barEl) barEl.style.width = pct + '%';
+        if (statusEl) statusEl.textContent = 'MCMC ' + pct + '% (' + samples.length + '/' + nSamp + ' samples)';
+        if (batch < total) setTimeout(step, 0);
+        else cb(samples, accepted / total);
+      }
+      step();
+    }
+
+    // Graph rendering with concentration curves
+    function drawGraph(pk, doseHist, measuredLvls, optDose, optInterval, optInfusion, mcmc) {
+      const canvas = document.getElementById('vancoGraph');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1, rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = 320 * dpr;
+      ctx.scale(dpr, dpr);
+      const W = rect.width, H = 320;
+
+      let maxTime = 0;
+      for (const d of doseHist) maxTime = Math.max(maxTime, d.startTime + d.interval * d.nDoses + d.interval);
+      maxTime = Math.max(maxTime, 48);
+
+      const totalTime = maxTime + optInterval * 3, maxConc = 60;
+      const pad = { left: 48, right: 16, top: 16, bottom: 36 };
+      const gW = W - pad.left - pad.right, gH = H - pad.top - pad.bottom;
+      const tX = t => pad.left + (t / totalTime) * gW, cY = c => pad.top + gH - (Math.min(c, maxConc) / maxConc) * gH;
+
+      // Background and grid
+      ctx.fillStyle = '#0b1120';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(255,255,255,.04)';
+      ctx.lineWidth = 0.5;
+      for (let t = 0; t <= totalTime; t += 12) {
+        ctx.beginPath();
+        ctx.moveTo(tX(t), pad.top);
+        ctx.lineTo(tX(t), H - pad.bottom);
+        ctx.stroke();
+      }
+      for (let c = 0; c <= maxConc; c += 10) {
+        ctx.beginPath();
+        ctx.moveTo(pad.left, cY(c));
+        ctx.lineTo(W - pad.right, cY(c));
+        ctx.stroke();
+      }
+
+      // Therapeutic zone (10-20 mcg/mL)
+      ctx.fillStyle = 'rgba(74,222,128,.05)';
+      ctx.fillRect(pad.left, cY(20), gW, cY(10) - cY(20));
+      ctx.strokeStyle = 'rgba(74,222,128,.12)';
+      ctx.setLineDash([3, 3]);
+      [10, 20].forEach(c => {
+        ctx.beginPath();
+        ctx.moveTo(pad.left, cY(c));
+        ctx.lineTo(W - pad.right, cY(c));
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+
+      // Axis labels
+      ctx.fillStyle = '#475569';
+      ctx.font = '10px "DM Sans"';
+      ctx.textAlign = 'center';
+      for (let t = 0; t <= totalTime; t += 12) ctx.fillText(t + 'h', tX(t), H - pad.bottom + 14);
+      ctx.textAlign = 'right';
+      for (let c = 0; c <= maxConc; c += 10) ctx.fillText(c, pad.left - 5, cY(c) + 3);
+      ctx.save();
+      ctx.translate(11, H / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.fillText('mcg/mL', 0, 0);
+      ctx.restore();
+
+      // MCMC credible interval shading
+      if (mcmc && mcmc.length > 20) {
+        const st = totalTime / 200;
+        for (let t = 0; t <= maxTime; t += st) {
+          const concs = [];
+          for (let si = 0; si < mcmc.length; si += Math.max(1, Math.floor(mcmc.length / 300)))
+            concs.push(predictConc(t, mcmc[si].cl, mcmc[si].vd, doseHist));
+          concs.sort((a, b) => a - b);
+          const lo = concs[Math.floor(concs.length * 0.05)], hi = concs[Math.floor(concs.length * 0.95)];
+          ctx.fillStyle = 'rgba(56,189,248,0.08)';
+          ctx.fillRect(tX(t), cY(hi), tX(t + st) - tX(t), cY(lo) - cY(hi));
+        }
+      }
+
+      // MAP concentration curve
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      let first = true;
+      for (let t = 0; t <= maxTime; t += 0.3) {
+        const c = predictConc(t, pk.cl, pk.vd, doseHist);
+        const x = tX(t), y = cY(c);
+        if (first) {
+          ctx.moveTo(x, y);
+          first = false;
+        } else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Proposed dosing curve
+      const optStart = maxTime;
+      const optDH = [{ amount: optDose, interval: optInterval, infusion: optInfusion, startTime: optStart, nDoses: 3 }];
+      const carryConc = predictConc(maxTime, pk.cl, pk.vd, doseHist);
+      ctx.strokeStyle = '#4ade80';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      first = true;
+      for (let t = optStart; t <= totalTime; t += 0.3) {
+        const cNew = predictConc(t, pk.cl, pk.vd, optDH), cCarry = carryConc * Math.exp(-pk.ke * (t - optStart));
+        const x = tX(t), y = cY(cNew + cCarry);
+        if (first) {
+          ctx.moveTo(x, y);
+          first = false;
+        } else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Transition line
+      ctx.strokeStyle = 'rgba(255,255,255,.08)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(tX(maxTime), pad.top);
+      ctx.lineTo(tX(maxTime), H - pad.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(255,255,255,.25)';
+      ctx.font = '9px "DM Sans"';
+      ctx.textAlign = 'center';
+      ctx.fillText('→ proposed', tX(maxTime) + 28, pad.top + 10);
+
+      // Measured levels as markers
+      for (const lv of measuredLvls) {
+        const x = tX(lv.time), y = cY(lv.value);
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0b1120';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 10px "JetBrains Mono"';
+        ctx.textAlign = 'center';
+        ctx.fillText(lv.value.toFixed(1), x, y - 9);
+      }
+    }
+
+    function renderDoses() {
+      if (!doses[0].dateTime) doses[0].dateTime = getDefaultDT(0);
+      const el = document.getElementById('vancoDoseList');
+      if (!el) return;
+      el.innerHTML = doses.map((d, i) => `
+        <div class="entry-row"><div class="entry-head"><span>Dose #${i + 1}</span>${doses.length > 1 ? `<button onclick="TDMHub.VancoTDM_removeDose(${i})">×</button>` : ''}</div>
+        <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${d.amount}" min="100" max="4000" step="250" onchange="TDMHub.VancoTDM_setDose(${i},'amount',+this.value)"></div>
+        <div class="field"><label>Interval (hr)</label><input type="number" value="${d.interval}" min="4" max="72" onchange="TDMHub.VancoTDM_setDose(${i},'interval',+this.value)"></div>
+        <div class="field"><label>Infusion (hr)</label><input type="number" value="${d.infusion}" min="0.5" max="4" step="0.5" onchange="TDMHub.VancoTDM_setDose(${i},'infusion',+this.value)"></div></div>
+        <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${d.dateTime}" onchange="TDMHub.VancoTDM_setDose(${i},'dateTime',this.value)"></div>
+        <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${d.nDoses}" min="1" max="50" onchange="TDMHub.VancoTDM_setDose(${i},'nDoses',+this.value)"></div></div></div>`).join('');
+      renderSamplingAdvice();
+    }
+
+    function renderLevels() {
+      const el = document.getElementById('vancoLevelList');
+      if (!el) return;
+      el.innerHTML = levels.map((l, i) => `
+        <div class="entry-row"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${i + 1} (mcg/mL)</label><input type="number" value="${l.value}" min="0.1" max="100" step="0.1" onchange="TDMHub.VancoTDM_setLevel(${i},'value',+this.value)"></div>
+        <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${l.dateTime || ''}" onchange="TDMHub.VancoTDM_setLevel(${i},'dateTime',this.value)"></div></div>
+        ${levels.length > 1 ? `<button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="TDMHub.VancoTDM_removeLevel(${i})">ลบ</button>` : ''}</div>`).join('');
+      renderSamplingAdvice();
+    }
+
+    function renderModelSelect() {
+      const pt = getPatient();
+      const bmi = pt.wt / ((pt.ht / 100) ** 2);
+      const recModel = bmi >= 30 ? 'adane' : pt.age >= 80 ? 'bourguignon' : null;
+      const all = [{ id: 'auto', name: 'Auto-select', pop: 'Best fit (lowest OFV)' }, ...PK_MODELS];
+      const el = document.getElementById('vancoModelSelect');
+      if (!el) return;
+      el.innerHTML = all.map(m => `
+        <div class="model-card ${selectedModel === m.id ? 'active' : ''}" onclick="TDMHub.VancoTDM_setModel('${m.id}')">
+          <div class="mc-name">${m.name} ${m.id === recModel ? '<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>' : ''}</div><div class="mc-sub">${m.pop}</div></div>`).join('');
+      if (recModel) {
+        let msg = recModel === 'adane' ? `⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Obesity model)` : `👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly model)`;
+        el.innerHTML += `<div class="info-box amber" style="font-size:11px;margin-top:6px">${msg}</div>`;
+      }
+    }
+
+    function updateOptimizer() {
+      if (!currentPK) return;
+      const od = +document.getElementById('vancoOptDose').value;
+      const oi = +document.getElementById('vancoOptInterval').value;
+      const oif = +document.getElementById('vancoOptInfusion').value;
+      document.getElementById('vancoOptDoseVal').textContent = od + ' mg';
+      document.getElementById('vancoOptIntervalVal').textContent = 'q' + oi + 'h';
+      document.getElementById('vancoOptInfusionVal').textContent = oif + ' hr';
+
+      const auc24 = calcAUC_ss(currentPK.cl, currentPK.vd, od, oi, oif) * (24 / oi);
+      const ss = ssPeakTrough(currentPK.cl, currentPK.vd, od, oi, oif);
+      let cls = 'green', msg = '✅ In target';
+      if (auc24 < 400) { cls = 'amber'; msg = '⚠ Below target'; }
+      else if (auc24 > 600) { cls = 'red'; msg = '⚠ Above target'; }
+
+      const vol = od <= 1000 ? 200 : 250;
+      document.getElementById('vancoOptResult').innerHTML = `
+        <div class="result-box ${cls}" style="padding:10px">
+          <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--${cls})">AUC₂₄ = ${auc24.toFixed(0)} ${msg}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">Peak ${ss.peak.toFixed(1)} | Trough ${ss.trough.toFixed(1)} | ${od}mg in NSS ${vol}mL → ${Math.round(vol / oif)} mL/hr</div>
+        </div>`;
+
+      drawGraph(currentPK, buildDH(), buildLV(), od, oi, oif, mcmcSamples);
+    }
+
+    function genDoseOpts() {
+      if (!currentPK) return;
+      const qs = [8, 12, 24, 36, 48], ds = [500, 750, 1000, 1250, 1500, 1750, 2000];
+      let opts = [];
+      for (const q of qs)
+        for (const d of ds) {
+          const auc = calcAUC_ss(currentPK.cl, currentPK.vd, d, q, 1) * (24 / q);
+          if (auc >= 300 && auc <= 750) {
+            const ss = ssPeakTrough(currentPK.cl, currentPK.vd, d, q, 1);
+            opts.push({ dose: d, q, auc, tr: ss.trough, pk: ss.peak, ok: auc >= 400 && auc <= 600 });
+          }
+        }
+      opts.sort((a, b) => Math.abs(a.auc - 500) - Math.abs(b.auc - 500));
+      opts = opts.slice(0, 6);
+      const el = document.getElementById('vancoDoseCompare');
+      if (!el) return;
+      el.innerHTML = opts.map(o => {
+        const c = o.ok ? 'green' : (o.auc < 400 ? 'amber' : 'red');
+        return `<div class="dose-option" onclick="document.getElementById('vancoOptDose').value=${o.dose};document.getElementById('vancoOptInterval').value=${o.q};TDMHub.VancoTDM_updateOpt()">
+          <div class="opt-dose">${o.dose} mg q${o.q}h</div>
+          <div class="opt-auc">AUC₂₄ ${o.auc.toFixed(0)} | Pk ${o.pk.toFixed(1)} | Tr ${o.tr.toFixed(1)}</div>
+          <span class="opt-badge" style="background:var(--${c}-dim);color:var(--${c})">${o.ok ? 'In target' : o.auc < 400 ? 'Below' : 'Above'}</span></div>`;
+      }).join('');
+    }
+
+    return {
+      init() { renderDoses(); renderLevels(); renderModelSelect(); },
+      addDose() {
+        const l = doses[doses.length - 1];
+        const nextDt = l.dateTime ? new Date(new Date(l.dateTime).getTime() + l.interval * l.nDoses * 3600000).toISOString().slice(0, 16) : '';
+        doses.push({ amount: l.amount, interval: l.interval, infusion: l.infusion, nDoses: 1, dateTime: nextDt });
+        renderDoses();
+      },
+      removeDose(i) { doses.splice(i, 1); renderDoses(); },
+      setDose(i, k, v) { doses[i][k] = v; },
+      addLevel() {
+        const nextDt = doses[0]?.dateTime ? new Date(new Date(doses[0].dateTime).getTime() + 35.5 * 3600000).toISOString().slice(0, 16) : '';
+        levels.push({ value: 10, dateTime: nextDt });
+        renderLevels();
+      },
+      removeLevel(i) { levels.splice(i, 1); renderLevels(); },
+      setLevel(i, k, v) { levels[i][k] = v; },
+      setModel(id) { selectedModel = id; renderModelSelect(); },
+      updateOpt() { updateOptimizer(); genDoseOpts(); },
+      run() {
+        const pt = updateCrCl();
+        updateRef();
+        if (!refTime) { alert('กรุณากรอกเวลาให้ยา dose แรกก่อน'); return; }
+
+        const doseHist = buildDH(), measuredLvls = buildLV();
+        allModelResults = PK_MODELS.map(m => {
+          const pk = bayesianMAP(pt, doseHist, measuredLvls, m);
+          const lastD = doseHist[doseHist.length - 1];
+          const auc24 = calcAUC_ss(pk.cl, pk.vd, lastD.amount, lastD.interval, lastD.infusion) * (24 / lastD.interval);
+          const ss = ssPeakTrough(pk.cl, pk.vd, lastD.amount, lastD.interval, lastD.infusion);
+          return { ...pk, auc24, ssPeak: ss.peak, ssTrough: ss.trough };
+        });
+
+        let bestIdx = 0;
+        if (selectedModel === 'auto')
+          bestIdx = allModelResults.reduce((bi, r, i) => r.objValue < allModelResults[bi].objValue ? i : bi, 0);
+        else {
+          bestIdx = PK_MODELS.findIndex(m => m.id === selectedModel);
+          if (bestIdx < 0) bestIdx = 0;
+        }
+        currentPK = allModelResults[bestIdx];
+        const bestModel = PK_MODELS[bestIdx];
+
+        const el = document.getElementById('vancoModelCompare');
+        if (el)
+          el.innerHTML = '<div class="model-grid">' + allModelResults.map((r, i) => {
+            const cls = r.auc24 >= 400 && r.auc24 <= 600 ? 'green' : (r.auc24 < 400 ? 'amber' : 'red');
+            return `<div class="model-card ${i === bestIdx ? 'active' : ''}" onclick="TDMHub.VancoTDM_setModel('${PK_MODELS[i].id}');TDMHub.VancoTDM_run()">
+              <div class="mc-name">${r.model} ${i === bestIdx ? '⭐' : ''}</div><div class="mc-sub">${PK_MODELS[i].pop}</div>
+              <div class="mc-auc" style="color:var(--${cls})">AUC₂₄ ${r.auc24.toFixed(0)}</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">CL ${r.cl.toFixed(2)} | Vd ${r.vd.toFixed(1)} | t½ ${r.halflife.toFixed(1)}h</div>
+              <div style="font-size:10px;color:var(--text3)">OFV ${r.objValue.toFixed(2)}</div></div>`;
+          }).join('') + '</div>';
+
+        const progEl = document.getElementById('vancoMcmcProgress');
+        const resEl = document.getElementById('vancoResults');
+        if (progEl) progEl.style.display = 'block';
+        if (resEl) resEl.style.display = 'none';
+
+        runMCMC(pt, doseHist, measuredLvls, bestModel, currentPK, 2000, function(samples, acceptRate) {
+          mcmcSamples = samples;
+          if (progEl) progEl.style.display = 'none';
+          if (resEl) resEl.style.display = 'block';
+
+          const lastD = buildDH()[buildDH().length - 1];
+          const aucArr = samples.map(s => calcAUC_ss(s.cl, s.vd, lastD.amount, lastD.interval, lastD.infusion) * (24 / lastD.interval)).sort((a, b) => a - b);
+          const aucMAP = currentPK.auc24;
+          const aucLo = aucArr[Math.floor(aucArr.length * 0.05)], aucHi = aucArr[Math.floor(aucArr.length * 0.95)];
+          const clArr = samples.map(s => s.cl).sort((a, b) => a - b);
+          const clLo = clArr[Math.floor(clArr.length * 0.05)], clHi = clArr[Math.floor(clArr.length * 0.95)];
+
+          let aucCls = 'green', aucMsg = '✅ AUC₂₄ อยู่ใน target range (400-600)';
+          if (aucMAP < 400) { aucCls = 'amber'; aucMsg = '⚠ ต่ำกว่า target → อาจ subtherapeutic'; }
+          else if (aucMAP > 600) { aucCls = 'red'; aucMsg = '⚠ สูงกว่า target → เสี่ยง nephrotoxicity'; }
+
+          const aucEl = document.getElementById('vancoAucResult');
+          if (aucEl)
+            aucEl.innerHTML = `
+              <div class="result-box ${aucCls}"><div class="result-title">AUC₂₄/MIC (${currentPK.model})</div>
+              <div class="result-value" style="color:var(--${aucCls})">${aucMAP.toFixed(0)}</div>
+              <div class="result-sub" style="color:var(--${aucCls})">${aucMsg}</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:6px">90% CI: <span class="ci-badge" style="background:var(--${aucCls}-dim);color:var(--${aucCls})">${aucLo.toFixed(0)} — ${aucHi.toFixed(0)}</span></div></div>`;
+
+          const pkEl = document.getElementById('vancoPkStats');
+          if (pkEl)
+            pkEl.innerHTML = `
+              <div class="stat"><div class="stat-label">SS Peak</div><div class="stat-val" style="color:var(--blue)">${currentPK.ssPeak.toFixed(1)}</div></div>
+              <div class="stat"><div class="stat-label">SS Trough</div><div class="stat-val" style="color:var(--purple)">${currentPK.ssTrough.toFixed(1)}</div></div>
+              <div class="stat"><div class="stat-label">t½</div><div class="stat-val">${currentPK.halflife.toFixed(1)}h</div></div>
+              <div class="stat"><div class="stat-label">Accept</div><div class="stat-val">${(acceptRate * 100).toFixed(0)}%</div></div>`;
+
+          const ciEl = document.getElementById('vancoCiInfo');
+          if (ciEl)
+            ciEl.innerHTML = `
+              <div class="info-box cyan" style="font-size:11px"><b>90% Credible Intervals (${samples.length} MCMC samples):</b><br>
+              AUC₂₄: ${aucLo.toFixed(0)}–${aucHi.toFixed(0)} | CL: ${clLo.toFixed(3)}–${clHi.toFixed(3)} L/hr</div>`;
+
+          const tblEl = document.getElementById('vancoPkTable');
+          if (tblEl)
+            tblEl.innerHTML = `
+              <tr><td>Method</td><td style="color:var(--blue)">${currentPK.method} + MCMC</td></tr>
+              <tr><td>PK Model</td><td>${currentPK.model}</td></tr>
+              <tr><td>CrCl</td><td>${currentPK.crcl.toFixed(1)} mL/min</td></tr>
+              <tr><td>CL (MAP)</td><td>${currentPK.cl.toFixed(3)} L/hr</td></tr>
+              <tr><td>Vd (MAP)</td><td>${currentPK.vd.toFixed(1)} L</td></tr>
+              <tr><td>Ke</td><td>${currentPK.ke.toFixed(4)} hr⁻¹</td></tr>
+              <tr><td>Half-life</td><td>${currentPK.halflife.toFixed(1)} hr</td></tr>
+              <tr><td>OFV</td><td>${currentPK.objValue.toFixed(4)}</td></tr>`;
+
+          document.getElementById('vancoOptDose').value = lastD.amount;
+          document.getElementById('vancoOptInterval').value = lastD.interval;
+          document.getElementById('vancoOptInfusion').value = lastD.infusion;
+          updateOptimizer();
+          genDoseOpts();
+
+          const resScrollEl = document.getElementById('vancoResults');
+          if (resScrollEl) resScrollEl.scrollIntoView({ behavior: 'smooth' });
+
+          // Analytics tracking
+          IVDrugRef.sendAnalytics({
+            type: 'tdm_usage', drug_name: 'Vancomycin', action: 'calculation',
+            model: currentPK.model, auc_result: aucMAP.toFixed(0),
+            auc_ci_lo: aucLo.toFixed(0), auc_ci_hi: aucHi.toFixed(0),
+            interpretation: aucMAP >= 400 && aucMAP <= 600 ? 'therapeutic' : (aucMAP < 400 ? 'subtherapeutic' : 'supratherapeutic'),
+            ss_peak: currentPK.ssPeak.toFixed(1), ss_trough: currentPK.ssTrough.toFixed(1),
+            cl_map: currentPK.cl.toFixed(3), vd_map: currentPK.vd.toFixed(1), halflife: currentPK.halflife.toFixed(1),
+            dose: lastD.amount + 'mg q' + lastD.interval + 'h', mcmc_accept: (acceptRate * 100).toFixed(0),
+            weight_kg: pt.wt, height_cm: pt.ht, age: pt.age, sex: pt.sex,
+            scr: pt.scr, crcl: currentPK.crcl.toFixed(0), albumin: pt.alb, dialysis: pt.dialysis,
+            measured_levels: JSON.stringify(levels.map(l => ({ value: l.value, time: l.time }))),
+            num_levels: levels.length,
+            dose_history: JSON.stringify(doses.map(d => ({ amount: d.amount, interval: d.interval, infusion: d.infusion, start: d.startTime, n: d.nDoses }))),
+            num_dose_entries: doses.length
+          });
+        });
+      }
+    };
+  })();
+
+  // ============================================================
+  // PHENYTOIN — Winter-Tozer + Michaelis-Menten
+  // ============================================================
+
+  const PhenytoinTDM = (function() {
+    function winterTozer(totalLevel, albumin, crcl, dialysis) {
+      let corrected, equation;
+      if (dialysis !== 'none') {
+        corrected = totalLevel / (0.1 * albumin + 0.1);
+        equation = `${totalLevel} / (0.1 × ${albumin} + 0.1)`;
+      } else if (crcl < 15) {
+        corrected = totalLevel / (0.1 * albumin + 0.1);
+        equation = `${totalLevel} / (0.1 × ${albumin} + 0.1) [uremia]`;
+      } else if (albumin < 3.5) {
+        corrected = totalLevel / (0.2 * albumin + 0.1);
+        equation = `${totalLevel} / (0.2 × ${albumin} + 0.1)`;
+      } else {
+        corrected = totalLevel;
+        equation = 'No correction needed (Alb ≥3.5, normal renal)';
+      }
+      return { corrected, equation };
+    }
+
+    function estimateFreeFraction(albumin, crcl, dialysis) {
+      if (dialysis !== 'none') return 0.20;
+      if (crcl < 15) return 0.20;
+      if (albumin < 2.5) return 0.20;
+      if (albumin < 3.5) return 0.15;
+      return 0.10;
+    }
+
+    function mmDoseForCss(Vmax, Km, targetCss, S, F) {
+      if (targetCss >= Vmax / (S * F)) return Infinity;
+      return (Vmax * targetCss) / ((Km + targetCss) * S * F);
+    }
+
+    function estimateMM(currentDose, currentCss, wt) {
+      const S = 0.92, F = 1.0;
+      const R = currentDose * S * F;
+      const popVmax = 7 * wt, popKm = 4;
+      const Vmax_est = R * (popKm + currentCss) / currentCss;
+      const Km_est = currentCss * (popVmax / R - 1);
+      return {
+        method1: { Vmax: Vmax_est, Km: popKm, label: 'Orbit (Km fixed=4)' },
+        method2: { Vmax: popVmax, Km: Math.max(Km_est, 0.5), label: 'Orbit (Vmax fixed=7×wt)' },
+        population: { Vmax: popVmax, Km: popKm, label: 'Population' },
+        S, F
+      };
+    }
+
+    function drawGraph(mm, S, F, currentDose, currentCss) {
+      const canvas = document.getElementById('phenyGraph');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1, rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = 280 * dpr;
+      ctx.scale(dpr, dpr);
+      const W = rect.width, H = 280;
+      const pad = { left: 48, right: 16, top: 16, bottom: 36 };
+      const gW = W - pad.left - pad.right, gH = H - pad.top - pad.bottom;
+      const maxDose = 800, maxCss = 40;
+      const dX = d => pad.left + (d / maxDose) * gW, cY = c => pad.top + gH - (Math.min(c, maxCss) / maxCss) * gH;
+
+      ctx.fillStyle = '#0b1120';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(255,255,255,.04)';
+      ctx.lineWidth = 0.5;
+      for (let d = 0; d <= maxDose; d += 100) {
+        ctx.beginPath();
+        ctx.moveTo(dX(d), pad.top);
+        ctx.lineTo(dX(d), H - pad.bottom);
+        ctx.stroke();
+      }
+      for (let c = 0; c <= maxCss; c += 5) {
+        ctx.beginPath();
+        ctx.moveTo(pad.left, cY(c));
+        ctx.lineTo(W - pad.right, cY(c));
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'rgba(74,222,128,.05)';
+      ctx.fillRect(pad.left, cY(20), gW, cY(10) - cY(20));
+
+      const methods = [mm.method1, mm.method2];
+      const colors = ['#38bdf8', '#a78bfa'];
+      methods.forEach((m, mi) => {
+        ctx.strokeStyle = colors[mi];
+        ctx.lineWidth = 1.5;
+        if (mi === 1) ctx.setLineDash([5, 3]);
+        ctx.beginPath();
+        let first = true;
+        for (let d = 10; d <= maxDose; d += 2) {
+          const css = (m.Km * d * S * F) / (m.Vmax - d * S * F);
+          if (css <= 0 || css > maxCss * 2) continue;
+          const x = dX(d), y = cY(css);
+          if (first) {
+            ctx.moveTo(x, y);
+            first = false;
+          } else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+
+      if (currentCss > 0) {
+        const x = dX(currentDose), y = cY(currentCss);
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0b1120';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 10px "JetBrains Mono"';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${currentCss.toFixed(1)}`, x, y - 10);
+      }
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '10px "DM Sans"';
+      ctx.textAlign = 'center';
+      for (let d = 0; d <= maxDose; d += 100) ctx.fillText(d + 'mg', dX(d), H - pad.bottom + 14);
+      ctx.textAlign = 'right';
+      for (let c = 0; c <= maxCss; c += 10) ctx.fillText(c, pad.left - 5, cY(c) + 3);
+      ctx.save();
+      ctx.translate(11, H / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.fillText('Css (mcg/mL)', 0, 0);
+      ctx.restore();
+      ctx.fillStyle = '#475569';
+      ctx.font = '10px "DM Sans"';
+      ctx.textAlign = 'center';
+      ctx.fillText('Daily Dose (mg)', W / 2, H - 4);
+    }
+
+    return {
+      run() {
+        const pt = updateCrCl();
+        const totalLevel = +(document.getElementById('phenyLevel').value) || 0;
+        const freeLevel = +(document.getElementById('phenyFree').value) || 0;
+        const currentDose = +(document.getElementById('phenyDose').value) || 300;
+
+        if (totalLevel <= 0) { alert('กรุณาใส่ค่า Phenytoin level'); return; }
+
+        const wt = winterTozer(totalLevel, pt.alb, pt.crcl, pt.dialysis);
+        const freeFrac = estimateFreeFraction(pt.alb, pt.crcl, pt.dialysis);
+        const estFree = totalLevel * freeFrac;
+
+        const corrEl = document.getElementById('phenyCorrection');
+        if (corrEl)
+          corrEl.innerHTML = `
+            <div class="result-box ${wt.corrected >= 10 && wt.corrected <= 20 ? 'green' : (wt.corrected < 10 ? 'amber' : 'red')}">
+              <div class="result-title">Corrected Total Phenytoin</div>
+              <div class="result-value" style="color:var(--${wt.corrected >= 10 && wt.corrected <= 20 ? 'green' : (wt.corrected < 10 ? 'amber' : 'red')})">${wt.corrected.toFixed(1)} mcg/mL</div>
+              <div class="result-sub">Measured: ${totalLevel} mcg/mL → Corrected: ${wt.corrected.toFixed(1)} mcg/mL</div>
+            </div>
+            <div class="info-box cyan" style="font-size:11px;margin-top:8px">
+              <b>Winter-Tozer equation:</b> ${wt.equation}<br>
+              Albumin: ${pt.alb} g/dL | CrCl: ${pt.crcl.toFixed(0)} mL/min | Dialysis: ${pt.dialysis}<br>
+              Est. free fraction: ${(freeFrac * 100).toFixed(0)}% → Est. free level: ${estFree.toFixed(1)} mcg/mL
+              ${freeLevel > 0 ? `<br><b>Actual free level:</b> ${freeLevel} mcg/mL (fraction: ${(freeLevel / totalLevel * 100).toFixed(1)}%)` : ''}
+            </div>`;
+
+        const useCss = wt.corrected;
+        let interpCls = 'green', interpMsg = '';
+        if (useCss < 10) { interpCls = 'amber'; interpMsg = '⚠ SUBTHERAPEUTIC — พิจารณาเพิ่ม dose'; }
+        else if (useCss <= 20) { interpCls = 'green'; interpMsg = '✅ THERAPEUTIC (10-20 mcg/mL)'; }
+        else if (useCss <= 25) { interpCls = 'amber'; interpMsg = '⚠ BORDERLINE TOXIC — monitor closely'; }
+        else { interpCls = 'red'; interpMsg = '🚨 TOXIC — หยุดยา/ลด dose ทันที'; }
+
+        const interpEl = document.getElementById('phenyInterpretation');
+        if (interpEl)
+          interpEl.innerHTML = `
+            <div class="result-box ${interpCls}"><div class="result-value" style="font-size:22px;color:var(--${interpCls})">${interpMsg}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:8px">Corrected level: ${useCss.toFixed(1)} mcg/mL | Target: 10-20 mcg/mL (total) | 1-2 mcg/mL (free)</div></div>
+            <div class="info-box amber" style="font-size:11px;margin-top:8px">
+              <b>Toxicity signs by level:</b><br>
+              >20: Nystagmus | >30: Ataxia, slurred speech | >40: Lethargy, confusion | >50: Coma, seizures
+            </div>`;
+
+        const mm = estimateMM(currentDose, useCss, pt.wt);
+
+        const mmEl = document.getElementById('phenyMM');
+        if (mmEl)
+          mmEl.innerHTML = `
+            <div class="info-box purple" style="font-size:11px">
+              <b>Michaelis-Menten kinetics:</b> Phenytoin follows non-linear (saturable) kinetics<br>
+              Small dose changes → disproportionately large level changes near saturation<br>
+              Orbit method: ใช้ 1 steady-state level เพื่อ estimate Vmax/Km
+            </div>`;
+
+        const tblEl = document.getElementById('phenyPkTable');
+        if (tblEl)
+          tblEl.innerHTML = `
+            <tr><td>Method</td><td colspan="2" style="color:var(--blue)">Orbit (1-point estimate)</td></tr>
+            <tr><td></td><td style="color:var(--blue);text-align:left">Km fixed</td><td style="color:var(--purple);text-align:right">Vmax fixed</td></tr>
+            <tr><td>Vmax</td><td style="text-align:left">${mm.method1.Vmax.toFixed(0)} mg/day</td><td>${mm.population.Vmax.toFixed(0)} mg/day</td></tr>
+            <tr><td>Km</td><td style="text-align:left">${mm.method1.Km.toFixed(1)} mcg/mL</td><td>${mm.method2.Km.toFixed(1)} mcg/mL</td></tr>
+            <tr><td>Salt factor (S)</td><td colspan="2">${mm.S}</td></tr>
+            <tr><td>Current Css</td><td colspan="2">${useCss.toFixed(1)} mcg/mL</td></tr>`;
+
+        function updateDosePredict() {
+          const target = +(document.getElementById('phenyTargetCss').value) || 15;
+          const valEl = document.getElementById('phenyTargetVal');
+          if (valEl) valEl.textContent = target + ' mcg/mL';
+
+          const d1 = mmDoseForCss(mm.method1.Vmax, mm.method1.Km, target, mm.S, mm.F);
+          const d2 = mmDoseForCss(mm.method2.Vmax, mm.method2.Km, target, mm.S, mm.F);
+          const round25 = d => Math.round(d / 25) * 25;
+
+          const predEl = document.getElementById('phenyDosePredict');
+          if (predEl)
+            predEl.innerHTML = `
+              <div class="result-box blue" style="padding:10px">
+                <div class="result-title">Predicted Dose for Css ${target} mcg/mL</div>
+                <div class="result-value" style="font-size:22px;color:var(--blue)">${isFinite(d1) ? round25(d1) : '>800'} mg/day</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:4px">
+                  Method 1 (Km fixed): ${isFinite(d1) ? d1.toFixed(0) : 'N/A'} mg/day |
+                  Method 2 (Vmax fixed): ${isFinite(d2) ? d2.toFixed(0) : 'N/A'} mg/day
+                </div>
+              </div>`;
+
+          const targets = [8, 10, 12, 15, 18, 20];
+          let rows = '';
+          for (const t of targets) {
+            const dd1 = mmDoseForCss(mm.method1.Vmax, mm.method1.Km, t, mm.S, mm.F);
+            const dd2 = mmDoseForCss(mm.method2.Vmax, mm.method2.Km, t, mm.S, mm.F);
+            const hl = t === Math.round(target) ? 'highlight' : '';
+            rows += `<tr class="${hl}"><td>${t}</td><td>${isFinite(dd1) ? round25(dd1) : '—'}</td><td>${isFinite(dd2) ? round25(dd2) : '—'}</td></tr>`;
+          }
+
+          const tblDoseEl = document.getElementById('phenyDoseTable');
+          if (tblDoseEl)
+            tblDoseEl.innerHTML = `
+              <table class="correction-table"><tr><th>Target Css</th><th>Dose (Km fixed)</th><th>Dose (Vmax fixed)</th></tr>${rows}</table>
+              <div class="info-box amber" style="font-size:11px;margin-top:8px">
+                <b>⚠ Phenytoin dose changes:</b> เปลี่ยนครั้งละ ≤50-100 mg/day เท่านั้น<br>
+                เจาะ level 5-7 วันหลังเปลี่ยน dose (t½ variable, 12-36h)<br>
+                ≥2 steady-state levels at different doses → more accurate Vmax/Km (2-point method)
+              </div>`;
+
+          drawGraph(mm, mm.S, mm.F, currentDose, useCss);
+        }
+
+        const targetEl = document.getElementById('phenyTargetCss');
+        if (targetEl) targetEl.oninput = updateDosePredict;
+
+        const resEl = document.getElementById('phenyResults');
+        if (resEl) resEl.style.display = 'block';
+        updateDosePredict();
+
+        const scrollEl = document.getElementById('phenyResults');
+        if (scrollEl) scrollEl.scrollIntoView({ behavior: 'smooth' });
+
+        IVDrugRef.sendAnalytics({
+          type: 'tdm_usage', drug_name: 'Phenytoin', action: 'calculation',
+          level: totalLevel, corrected_level: wt.corrected.toFixed(1),
+          free_level: freeLevel > 0 ? freeLevel : estFree.toFixed(1),
+          free_level_source: freeLevel > 0 ? 'measured' : 'estimated',
+          free_fraction: (freeFrac * 100).toFixed(0),
+          correction_applied: pt.alb < 3.5 || pt.crcl < 15 || pt.dialysis !== 'none' ? 'yes' : 'none',
+          interpretation: useCss >= 10 && useCss <= 20 ? 'therapeutic' : (useCss < 10 ? 'subtherapeutic' : (useCss <= 25 ? 'borderline_toxic' : 'toxic')),
+          dose: currentDose, vmax_est: mm.method1.Vmax.toFixed(0), km: mm.method1.Km.toFixed(1),
+          weight_kg: pt.wt, height_cm: pt.ht, age: pt.age, sex: pt.sex,
+          scr: pt.scr, crcl: pt.crcl.toFixed(0), albumin: pt.alb, dialysis: pt.dialysis
+        });
+      }
+    };
+  })();
+
+  // ============================================================
+  // AMINOGLYCOSIDES — Hartford Nomogram + 1-compartment PK
+  // ============================================================
+
+  const AminoglycosideTDM = (function() {
+    const PARAMS = {
+      amikacin: {
+        name: 'Amikacin',
+        extDose: { low: 15, high: 20, unit: 'mg/kg' },
+        convDose: { low: 5, high: 7.5, unit: 'mg/kg q8h' },
+        peak_target: { ext: { low: 56, high: 64 }, conv: { low: 20, high: 35 } },
+        trough_target: { ext: '<1', conv: '<5' },
+        popKe: crcl => 0.00293 * crcl + 0.014,
+        popVd: wt => 0.25 * wt
+      },
+      gentamicin: {
+        name: 'Gentamicin',
+        extDose: { low: 5, high: 7, unit: 'mg/kg' },
+        convDose: { low: 1, high: 1.7, unit: 'mg/kg q8h' },
+        peak_target: { ext: { low: 16, high: 24 }, conv: { low: 5, high: 10 } },
+        trough_target: { ext: '<1', conv: '<1-2' },
+        popKe: crcl => 0.00293 * crcl + 0.014,
+        popVd: wt => 0.25 * wt
+      }
+    };
+
+    function getIBW(ht, sex) {
+      if (sex === 'M') return 50 + 2.3 * ((ht / 2.54) - 60);
+      return 45.5 + 2.3 * ((ht / 2.54) - 60);
+    }
+
+    function getDosingWeight(wt, ibw) {
+      if (wt > ibw * 1.2) return ibw + 0.4 * (wt - ibw);
+      return wt;
+    }
+
+    function interpolateNomo(t, points) {
+      if (t < points[0].t || t > points[points.length - 1].t) return null;
+      for (let i = 0; i < points.length - 1; i++) {
+        if (t >= points[i].t && t <= points[i + 1].t) {
+          const frac = (t - points[i].t) / (points[i + 1].t - points[i].t);
+          return points[i].v + frac * (points[i + 1].v - points[i].v);
+        }
+      }
+      return null;
+    }
+
+    function hartfordNomogram(drug, randomLevel, randomTime) {
+      const p = PARAMS[drug];
+      if (!randomLevel || !randomTime) return null;
+
+      if (drug === 'gentamicin') {
+        if (randomTime >= 6 && randomTime <= 14) {
+          const q24 = interpolateNomo(randomTime, [{ t: 6, v: 9 }, { t: 8, v: 6 }, { t: 12, v: 2 }, { t: 14, v: 0.5 }]);
+          const q36 = interpolateNomo(randomTime, [{ t: 8, v: 9 }, { t: 12, v: 4 }, { t: 14, v: 2 }]);
+          const q48 = interpolateNomo(randomTime, [{ t: 12, v: 9 }, { t: 14, v: 4 }]);
+
+          if (randomLevel < q24) return { interval: 24, zone: 'q24h', color: 'green' };
+          if (q36 !== null && randomLevel < q36) return { interval: 36, zone: 'q36h', color: 'amber' };
+          if (q48 !== null && randomLevel < q48) return { interval: 48, zone: 'q48h', color: 'red' };
+          return { interval: 48, zone: 'Hold / recheck', color: 'red' };
+        }
+      } else {
+        if (randomTime >= 6 && randomTime <= 14) {
+          const q24 = interpolateNomo(randomTime, [{ t: 6, v: 14 }, { t: 8, v: 9 }, { t: 12, v: 3.5 }, { t: 14, v: 1.5 }]);
+          const q36 = interpolateNomo(randomTime, [{ t: 8, v: 14 }, { t: 12, v: 7 }, { t: 14, v: 3.5 }]);
+          const q48 = interpolateNomo(randomTime, [{ t: 12, v: 14 }, { t: 14, v: 7 }]);
+
+          if (randomLevel < q24) return { interval: 24, zone: 'q24h', color: 'green' };
+          if (q36 !== null && randomLevel < q36) return { interval: 36, zone: 'q36h', color: 'amber' };
+          if (q48 !== null && randomLevel < q48) return { interval: 48, zone: 'q48h', color: 'red' };
+          return { interval: 48, zone: 'Hold / recheck', color: 'red' };
+        }
+      }
+      return null;
+    }
+
+    function drawAGGraph(drug, dose, interval, infDuration, ke, vd) {
+      const canvas = document.getElementById('agGraph');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1, rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = 280 * dpr;
+      ctx.scale(dpr, dpr);
+      const W = rect.width, H = 280;
+      const pad = { left: 48, right: 16, top: 16, bottom: 36 };
+      const gW = W - pad.left - pad.right, gH = H - pad.top - pad.bottom;
+      const totalTime = interval * 3;
+      const maxConc = drug === 'amikacin' ? 80 : 30;
+      const tX = t => pad.left + (t / totalTime) * gW, cY = c => pad.top + gH - (Math.min(c, maxConc) / maxConc) * gH;
+
+      ctx.fillStyle = '#0b1120';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(255,255,255,.04)';
+      ctx.lineWidth = 0.5;
+      for (let t = 0; t <= totalTime; t += Math.max(4, interval / 4)) {
+        ctx.beginPath();
+        ctx.moveTo(tX(t), pad.top);
+        ctx.lineTo(tX(t), H - pad.bottom);
+        ctx.stroke();
+      }
+      for (let c = 0; c <= maxConc; c += 10) {
+        ctx.beginPath();
+        ctx.moveTo(pad.left, cY(c));
+        ctx.lineTo(W - pad.right, cY(c));
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const k0 = dose / infDuration;
+      let first = true;
+      for (let t = 0; t <= totalTime; t += 0.2) {
+        let conc = 0;
+        for (let n = 0; n < 3; n++) {
+          const tStart = n * interval, tEnd = tStart + infDuration;
+          if (t <= tStart) continue;
+          if (t <= tEnd) conc += (k0 / (ke * vd)) * (1 - Math.exp(-ke * (t - tStart)));
+          else conc += (k0 / (ke * vd)) * (1 - Math.exp(-ke * infDuration)) * Math.exp(-ke * (t - tEnd));
+        }
+        const x = tX(t), y = cY(conc);
+        if (first) {
+          ctx.moveTo(x, y);
+          first = false;
+        } else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '10px "DM Sans"';
+      ctx.textAlign = 'center';
+      for (let t = 0; t <= totalTime; t += Math.max(4, interval / 4)) ctx.fillText(t + 'h', tX(t), H - pad.bottom + 14);
+      ctx.textAlign = 'right';
+      for (let c = 0; c <= maxConc; c += 10) ctx.fillText(c, pad.left - 5, cY(c) + 3);
+      ctx.save();
+      ctx.translate(11, H / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.fillText('mcg/mL', 0, 0);
+      ctx.restore();
+    }
+
+    return {
+      updateUI() {
+        const drug = document.getElementById('agDrug').value;
+        const p = PARAMS[drug];
+        const pt = updateCrCl();
+        const ibw = getIBW(pt.ht, pt.sex);
+        const dw = getDosingWeight(pt.wt, ibw);
+        const extDose = Math.round(dw * p.extDose.low / 50) * 50;
+        const el = document.getElementById('agDose');
+        if (el) el.value = extDose;
+      },
+      run() {
+        const pt = updateCrCl();
+        const drug = document.getElementById('agDrug').value;
+        const strategy = document.getElementById('agStrategy').value;
+        const dose = +(document.getElementById('agDose').value) || 0;
+        const peak = +(document.getElementById('agPeak').value) || 0;
+        const trough = +(document.getElementById('agTrough').value) || 0;
+        const randomLvl = +(document.getElementById('agRandom').value) || 0;
+        const randomTime = +(document.getElementById('agRandomTime').value) || 8;
+        const infDuration = +(document.getElementById('agInfusion').value) || 0.5;
+
+        const p = PARAMS[drug];
+        const ibw = getIBW(pt.ht, pt.sex);
+        const dw = getDosingWeight(pt.wt, ibw);
+        const popKe = p.popKe(pt.crcl);
+        const popVd = p.popVd(dw);
+        const popHL = Math.LN2 / popKe;
+
+        let nomoResult = null;
+        if (strategy === 'extended' && randomLvl > 0) {
+          nomoResult = hartfordNomogram(drug, randomLvl, randomTime);
+        }
+
+        const nomoEl = document.getElementById('agNomogram');
+        if (nomoEl)
+          nomoEl.innerHTML = nomoResult ?
+            `<div class="result-box ${nomoResult.color}">
+              <div class="result-title">Hartford Nomogram Result</div>
+              <div class="result-value" style="font-size:24px;color:var(--${nomoResult.color})">${nomoResult.zone}</div>
+              <div class="result-sub">Level ${randomLvl} mcg/mL at ${randomTime}h post-dose → recommend ${nomoResult.zone}</div>
+            </div>` :
+            `<div class="info-box amber">ใส่ Random level + time เพื่อใช้ Hartford nomogram (extended-interval dosing)</div>`;
+
+        let ke = popKe, vd = popVd, hl = popHL, pkSource = 'Population estimate';
+        if (peak > 0 && trough > 0 && peak > trough) {
+          const peakTime = infDuration + 0.5;
+          const troughTime = nomoResult ? nomoResult.interval - 0.5 : (strategy === 'extended' ? 23.5 : 7.5);
+          ke = Math.log(peak / trough) / (troughTime - peakTime);
+          hl = Math.LN2 / ke;
+          vd = dose / ((peak / (Math.exp(-ke * 0.5))) * (1 - Math.exp(-ke * (strategy === 'extended' ? 24 : 8))));
+          if (vd <= 0 || vd > 200 * pt.wt) vd = popVd;
+          pkSource = 'Calculated from measured levels';
+        }
+
+        const interval = strategy === 'extended' ? (nomoResult ? nomoResult.interval : 24) : 8;
+        const k0 = dose / infDuration;
+        const acc = 1 / (1 - Math.exp(-ke * interval));
+        const ssPeak = (k0 / (ke * vd)) * (1 - Math.exp(-ke * infDuration)) * acc;
+        const ssTrough = ssPeak * Math.exp(-ke * (interval - infDuration));
+        const auc24 = dose / (ke * vd) * (24 / interval) * acc;
+
+        const pkResEl = document.getElementById('agPkResult');
+        if (pkResEl)
+          pkResEl.innerHTML = `
+            <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+              <div class="stat"><div class="stat-label">Est. Peak</div><div class="stat-val" style="color:var(--blue)">${ssPeak.toFixed(1)}</div></div>
+              <div class="stat"><div class="stat-label">Est. Trough</div><div class="stat-val" style="color:${ssTrough < (drug === 'amikacin' ? 5 : 2) ? 'var(--green)' : 'var(--red)'}">${ssTrough.toFixed(1)}</div></div>
+              <div class="stat"><div class="stat-label">t½</div><div class="stat-val">${hl.toFixed(1)}h</div></div>
+            </div>`;
+
+        const pkTblEl = document.getElementById('agPkTable');
+        if (pkTblEl)
+          pkTblEl.innerHTML = `
+            <tr><td>Drug</td><td style="color:var(--blue)">${p.name}</td></tr>
+            <tr><td>Strategy</td><td>${strategy === 'extended' ? 'Extended-interval (ODA)' : 'Conventional (MDD)'}</td></tr>
+            <tr><td>PK source</td><td>${pkSource}</td></tr>
+            <tr><td>Dosing weight</td><td>${dw.toFixed(1)} kg ${pt.wt > ibw * 1.2 ? '(ABW)' : '(TBW)'}</td></tr>
+            <tr><td>IBW</td><td>${ibw.toFixed(1)} kg</td></tr>
+            <tr><td>Ke</td><td>${ke.toFixed(4)} hr⁻¹</td></tr>
+            <tr><td>Vd</td><td>${vd.toFixed(1)} L (${(vd / dw).toFixed(2)} L/kg)</td></tr>
+            <tr><td>Half-life</td><td>${hl.toFixed(1)} hr</td></tr>
+            <tr><td>Interval</td><td>q${interval}h</td></tr>`;
+
+        const targetPeak = strategy === 'extended' ? p.peak_target.ext : p.peak_target.conv;
+        const recDoseLow = Math.round(dw * p.extDose.low / 50) * 50;
+        const recDoseHigh = Math.round(dw * p.extDose.high / 50) * 50;
+
+        const doseRecEl = document.getElementById('agDoseRec');
+        if (doseRecEl)
+          doseRecEl.innerHTML = `
+            <div class="result-box blue" style="padding:12px">
+              <div class="result-title">Recommended Dose</div>
+              <div class="result-value" style="font-size:20px;color:var(--blue)">${recDoseLow}–${recDoseHigh} mg q${interval}h</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:6px">
+                ${p.extDose.low}–${p.extDose.high} mg/kg × ${dw.toFixed(0)}kg | Infuse over ${infDuration * 60} min
+              </div>
+            </div>
+            <div class="info-box blue" style="font-size:11px">
+              <b>Target levels (${strategy === 'extended' ? 'Extended' : 'Conventional'}):</b><br>
+              Peak: ${targetPeak.low}–${targetPeak.high} mcg/mL | Trough: ${p.trough_target[strategy === 'extended' ? 'ext' : 'conv']} mcg/mL<br>
+              <b>Next level timing:</b> Random level 6-14h post-dose (Hartford) หรือ Peak 30 min post-inf + Trough 30 min pre-dose<br>
+              <b>Monitor:</b> SCr daily, audiometry weekly, vestibular function
+            </div>`;
+
+        drawAGGraph(drug, dose, interval, infDuration, ke, vd);
+        const agResEl = document.getElementById('agResults');
+        if (agResEl) agResEl.style.display = 'block';
+        if (agResEl) agResEl.scrollIntoView({ behavior: 'smooth' });
+
+        IVDrugRef.sendAnalytics({
+          type: 'tdm_usage', drug_name: p.name, action: 'calculation',
+          strategy, dose: dose + 'mg q' + interval + 'h', interval: interval,
+          nomogram_result: nomoResult ? nomoResult.zone : 'N/A',
+          est_peak: ssPeak.toFixed(1), est_trough: ssTrough.toFixed(1),
+          interpretation: ssTrough < (drug === 'amikacin' ? 5 : 2) ? 'therapeutic' : 'elevated_trough',
+          ke: ke.toFixed(4), vd: vd.toFixed(1), halflife: hl.toFixed(1), pk_source: pkSource,
+          dosing_weight: dw.toFixed(1), ibw: ibw.toFixed(1),
+          measured_peak: peak || '', measured_trough: trough || '',
+          measured_random: randomLvl || '', random_time: randomTime || '',
+          infusion_duration: infDuration,
+          weight_kg: pt.wt, height_cm: pt.ht, age: pt.age, sex: pt.sex,
+          scr: pt.scr, crcl: pt.crcl.toFixed(0), albumin: pt.alb, dialysis: pt.dialysis
+        });
+      }
+    };
+  })();
+
+  // ============================================================
+  // VALPROATE — Free level correction + dose-level relationship
+  // ============================================================
+
+  const ValproateTDM = (function() {
+    function estimateFreeFraction(totalVPA, albumin) {
+      const baseFree = 0.10;
+      const albFactor = albumin < 3.5 ? (4.0 / albumin) * 1.2 : 1.0;
+      const concFactor = totalVPA > 75 ? 1 + (totalVPA - 75) * 0.003 : 1.0;
+      return Math.min(baseFree * albFactor * concFactor, 0.50);
+    }
+
+    function correctedTotal(totalVPA, albumin) {
+      if (albumin >= 3.5) return totalVPA;
+      const ff_normal = 0.10;
+      const ff_patient = estimateFreeFraction(totalVPA, albumin);
+      return totalVPA * (ff_patient / ff_normal);
+    }
+
+    return {
+      run() {
+        const pt = updateCrCl();
+        const totalVPA = +(document.getElementById('vpaLevel').value) || 0;
+        const freeVPA = +(document.getElementById('vpaFree').value) || 0;
+        const currentDose = +(document.getElementById('vpaDose').value) || 0;
+        const form = document.getElementById('vpaForm').value;
+        const indication = document.getElementById('vpaIndication').value;
+
+        if (totalVPA <= 0) { alert('กรุณาใส่ค่า Valproate level'); return; }
+
+        const ff = estimateFreeFraction(totalVPA, pt.alb);
+        const estFree = totalVPA * ff;
+        const corrTotal = correctedTotal(totalVPA, pt.alb);
+
+        const targets = {
+          epilepsy: { total: { low: 50, high: 100 }, free: { low: 5, high: 15 }, label: 'Epilepsy' },
+          SE: { total: { low: 80, high: 120 }, free: { low: 10, high: 20 }, label: 'Status Epilepticus' },
+          bipolar: { total: { low: 50, high: 125 }, free: { low: 5, high: 15 }, label: 'Bipolar' },
+          migraine: { total: { low: 50, high: 100 }, free: { low: 5, high: 15 }, label: 'Migraine' }
+        };
+        const target = targets[indication];
+
+        const freeEl = document.getElementById('vpaFreeCorrection');
+        if (freeEl)
+          freeEl.innerHTML = `
+            <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
+              <div class="stat"><div class="stat-label">Total VPA</div><div class="stat-val" style="color:var(--blue)">${totalVPA}</div><div style="font-size:10px;color:var(--text3)">mcg/mL</div></div>
+              <div class="stat"><div class="stat-label">Est. Free VPA</div><div class="stat-val" style="color:var(--purple)">${freeVPA > 0 ? freeVPA.toFixed(1) : estFree.toFixed(1)}</div><div style="font-size:10px;color:var(--text3)">${freeVPA > 0 ? 'measured' : 'estimated'}</div></div>
+              <div class="stat"><div class="stat-label">Free Fraction</div><div class="stat-val" style="color:var(--cyan)">${freeVPA > 0 ? (freeVPA / totalVPA * 100).toFixed(0) : (ff * 100).toFixed(0)}%</div><div style="font-size:10px;color:var(--text3)">${freeVPA > 0 ? 'actual' : 'estimated'}</div></div>
+            </div>
+            ${pt.alb < 3.5 ? `<div class="info-box amber" style="font-size:11px"><b>⚠ Hypoalbuminemia (Alb ${pt.alb}):</b> Free fraction เพิ่มขึ้น → total level อาจ misleading<br>
+            Corrected total ≈ ${corrTotal.toFixed(0)} mcg/mL | ควรเจาะ free VPA level เพื่อ accuracy<br>
+            Total level ${totalVPA} อาจ underestimate pharmacological activity</div>` : ''}
+            ${totalVPA > 75 ? `<div class="info-box purple" style="font-size:11px"><b>Saturable protein binding:</b> ที่ total VPA >${'75'} mcg/mL free fraction จะเพิ่มขึ้น non-linearly<br>ควรพิจารณา free VPA level เพื่อ dose optimization</div>` : ''}`;
+
+        const useFree = freeVPA > 0 ? freeVPA : estFree;
+        let interpCls = 'green', interpMsg = '';
+        if (totalVPA < target.total.low) { interpCls = 'amber'; interpMsg = `⚠ SUBTHERAPEUTIC — ต่ำกว่า target ${target.label} (${target.total.low}-${target.total.high})`; }
+        else if (totalVPA <= target.total.high) { interpCls = 'green'; interpMsg = `✅ THERAPEUTIC (${target.total.low}-${target.total.high} mcg/mL for ${target.label})`; }
+        else if (totalVPA <= 150) { interpCls = 'amber'; interpMsg = `⚠ SUPRATHERAPEUTIC — สูงกว่า target, monitor toxicity`; }
+        else { interpCls = 'red'; interpMsg = '🚨 TOXIC — พิจารณาลด dose/หยุดยา'; }
+
+        const interpEl = document.getElementById('vpaInterpretation');
+        if (interpEl)
+          interpEl.innerHTML = `
+            <div class="result-box ${interpCls}">
+              <div class="result-value" style="font-size:20px;color:var(--${interpCls})">${interpMsg}</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:6px">
+                Total: ${totalVPA} mcg/mL | Free: ${useFree.toFixed(1)} mcg/mL (target free: ${target.free.low}-${target.free.high})
+              </div>
+            </div>
+            <div class="info-box red" style="font-size:11px;margin-top:8px">
+              <b>Toxicity signs:</b> N/V, tremor, sedation, thrombocytopenia<br>
+              >100: ataxia, confusion | >150: coma risk<br>
+              <b>Check:</b> Ammonia (hyperammonemia สามารถเกิดได้ทุก level), LFTs, CBC+Plt
+            </div>`;
+
+        function updateDoseRec() {
+          const targetLevel = +(document.getElementById('vpaTarget').value) || 75;
+          const valEl = document.getElementById('vpaTargetVal');
+          if (valEl) valEl.textContent = targetLevel + ' mcg/mL';
+
+          const newDose = Math.round(currentDose * (targetLevel / totalVPA) / 100) * 100;
+          const maxDoseDay = 60 * pt.wt;
+
+          let scheduleText = '';
+          if (form === 'DR') scheduleText = `${newDose}mg/day ÷ 2-3 doses (Depakote DR)`;
+          else if (form === 'ER') scheduleText = `${newDose}mg/day ÷ 1 dose (Depakote ER, round to 250/500)`;
+          else if (form === 'syrup') scheduleText = `${newDose}mg/day ÷ 3 doses (Syrup/Solution)`;
+          else scheduleText = `${newDose}mg/day (IV → switch PO when able)`;
+
+          const doseEl = document.getElementById('vpaDoseRec');
+          if (doseEl)
+            doseEl.innerHTML = `
+              <div class="result-box blue" style="padding:12px">
+                <div class="result-title">Predicted Dose for Target ${targetLevel} mcg/mL</div>
+                <div class="result-value" style="font-size:22px;color:var(--blue)">${newDose} mg/day</div>
+                <div style="font-size:12px;color:var(--text2);margin-top:4px">${scheduleText}</div>
+              </div>
+              <div class="info-box teal" style="font-size:11px">
+                <b>Linear proportion:</b> New dose = ${currentDose} × (${targetLevel}/${totalVPA}) = ${(currentDose * targetLevel / totalVPA).toFixed(0)} mg/day<br>
+                <b>Max dose:</b> ~60 mg/kg/day = ${maxDoseDay.toFixed(0)} mg/day<br>
+                <b>Next level:</b> 3-5 วัน after dose change (trough, before AM dose)<br>
+                <b>DR→ER conversion:</b> ER dose = DR dose × 1.1-1.2 (ER ↓ bioavailability ~10-20%)
+              </div>`;
+        }
+
+        const targetEl = document.getElementById('vpaTarget');
+        if (targetEl) targetEl.oninput = updateDoseRec;
+
+        const interEl = document.getElementById('vpaInteractions');
+        if (interEl)
+          interEl.innerHTML = `
+            <div class="info-box red" style="font-size:11px">
+              <b>🚨 CONTRAINDICATED combinations:</b><br>
+              • <b>Meropenem/Carbapenem:</b> ลด VPA level 60-100%! ห้ามให้ร่วมกัน<br>
+              • <b>Hepatotoxic drugs + mitochondrial disease:</b> Fatal hepatotoxicity risk
+            </div>
+            <div class="info-box amber" style="font-size:11px">
+              <b>⚠ Significant interactions:</b><br>
+              • <b>Lamotrigine:</b> VPA ↑ LTG level 2× → ลด LTG dose 50%<br>
+              • <b>Phenobarbital:</b> VPA ↑ PB level<br>
+              • <b>Phenytoin:</b> Complex (VPA ↑ free PHT, ↓ total PHT; PHT ↓ VPA)<br>
+              • <b>Warfarin/ASA:</b> ↑ free VPA, ↑ bleeding risk (Plt inhibition + protein displacement)<br>
+              • <b>Topiramate:</b> ↑ ammonia (both hyperammonemic)
+            </div>
+            <div class="info-box blue" style="font-size:11px">
+              <b>Monitoring checklist:</b><br>
+              • LFTs: baseline + periodic (q3-6 months)<br>
+              • CBC + Platelets: baseline + periodic<br>
+              • Ammonia: if symptoms (lethargy, vomiting, confusion)<br>
+              • VPA level: 3-5 days after dose change, trough preferred<br>
+              • Free VPA level: if albumin low, VPA >75, uremia, pregnancy, elderly
+            </div>`;
+
+        const vpaResEl = document.getElementById('vpaResults');
+        if (vpaResEl) vpaResEl.style.display = 'block';
+        updateDoseRec();
+
+        if (vpaResEl) vpaResEl.scrollIntoView({ behavior: 'smooth' });
+
+        IVDrugRef.sendAnalytics({
+          type: 'tdm_usage', drug_name: 'Valproate', action: 'calculation',
+          level: totalVPA, free_level: freeVPA > 0 ? freeVPA : estFree.toFixed(1),
+          free_fraction: (freeVPA > 0 ? (freeVPA / totalVPA * 100) : (ff * 100)).toFixed(0),
+          corrected_total: pt.alb < 3.5 ? corrTotal.toFixed(0) : totalVPA,
+          interpretation: totalVPA < target.total.low ? 'subtherapeutic' : (totalVPA <= target.total.high ? 'therapeutic' : (totalVPA <= 150 ? 'supratherapeutic' : 'toxic')),
+          dose: currentDose + 'mg/d', indication, formulation: form,
+          hypoalbumin: pt.alb < 3.5 ? 'yes' : 'no',
+          free_level_source: freeVPA > 0 ? 'measured' : 'estimated',
+          weight_kg: pt.wt, height_cm: pt.ht, age: pt.age, sex: pt.sex,
+          scr: pt.scr, crcl: pt.crcl.toFixed(0), albumin: pt.alb, dialysis: pt.dialysis
+        });
+      }
+    };
+  })();
+
+  // ============================================================
+  // PHENYTOIN AUTO-UPDATE on patient change
+  // ============================================================
+
+  function updatePhenyCorrection() {
+    const totalLevel = +(document.getElementById('phenyLevel').value) || 0;
+    if (totalLevel <= 0) return;
+    const pt = updateCrCl();
+    const alb = pt.alb, crcl = pt.crcl, dialysis = pt.dialysis;
+
+    let corrected, formula;
+    if (dialysis !== 'none' || crcl < 15) {
+      corrected = totalLevel / (0.1 * alb + 0.1);
+      formula = `${totalLevel} / (0.1 × ${alb} + 0.1) = ${corrected.toFixed(1)}`;
+    } else if (alb < 3.5) {
+      corrected = totalLevel / (0.2 * alb + 0.1);
+      formula = `${totalLevel} / (0.2 × ${alb} + 0.1) = ${corrected.toFixed(1)}`;
+    } else {
+      corrected = totalLevel;
+      formula = 'No correction needed';
+    }
+
+    const el = document.getElementById('phenyCorrection');
+    if (el)
+      el.innerHTML = `
+        <div class="result-box ${corrected >= 10 && corrected <= 20 ? 'green' : (corrected < 10 ? 'amber' : 'red')}">
+          <div class="result-title">Corrected Total Phenytoin (Winter-Tozer)</div>
+          <div class="result-value" style="color:var(--${corrected >= 10 && corrected <= 20 ? 'green' : (corrected < 10 ? 'amber' : 'red')})">${corrected.toFixed(1)} mcg/mL</div>
+          <div class="result-sub">Measured: ${totalLevel} → Corrected: ${corrected.toFixed(1)} | Alb: ${alb} | CrCl: ${crcl.toFixed(0)}</div>
+        </div>
+        <div class="info-box cyan" style="font-size:11px"><b>Formula:</b> ${formula}</div>`;
+  }
+
+  // ============================================================
+  // INITIALIZATION & EVENT LISTENERS
+  // ============================================================
+
+  function init() {
+    // Wrap in DOMContentLoaded to ensure DOM is ready
+    function onReady() {
+      updateCrCl();
+      VancoTDM.init();
+      AminoglycosideTDM.updateUI();
+
+      // Patient field listeners
+      ['ptWt', 'ptAge', 'ptScr', 'ptHt', 'ptAlb'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => {
+          updateCrCl();
+          updatePhenyCorrection();
+        });
+      });
+
+      ['ptSex', 'ptDialysis'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => {
+          updateCrCl();
+          updatePhenyCorrection();
+        });
+      });
+
+      // Phenytoin auto-update
+      ['phenyLevel', 'phenyFree'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updatePhenyCorrection);
+      });
+
+      // Vancomycin optimizer listeners
+      ['vancoOptDose', 'vancoOptInterval', 'vancoOptInfusion'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => { VancoTDM.updateOpt(); });
+      });
+
+      // Window resize for responsive graphs
+      window.addEventListener('resize', () => {
+        if (activeDrug === 'vancomycin') VancoTDM.updateOpt();
+      });
+
+      // Initial phenytoin correction display
+      updatePhenyCorrection();
+
+      // Track page view
+      IVDrugRef.trackPageView('tdm');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', onReady);
+    } else {
+      onReady();
+    }
+  }
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+
+  return {
+    // Initialization
+    init: init,
+
+    // Drug switching
+    switchDrug: switchDrug,
+
+    // Vancomycin TDM module
+    VancoTDM_run: () => VancoTDM.run(),
+    VancoTDM_init: () => VancoTDM.init(),
+    VancoTDM_addDose: () => VancoTDM.addDose(),
+    VancoTDM_removeDose: (i) => VancoTDM.removeDose(i),
+    VancoTDM_setDose: (i, k, v) => VancoTDM.setDose(i, k, v),
+    VancoTDM_addLevel: () => VancoTDM.addLevel(),
+    VancoTDM_removeLevel: (i) => VancoTDM.removeLevel(i),
+    VancoTDM_setLevel: (i, k, v) => VancoTDM.setLevel(i, k, v),
+    VancoTDM_setModel: (id) => VancoTDM.setModel(id),
+    VancoTDM_updateOpt: () => VancoTDM.updateOpt(),
+
+    // Phenytoin TDM module
+    PhenytoinTDM_run: () => PhenytoinTDM.run(),
+
+    // Aminoglycoside TDM module
+    AminoglycosideTDM_updateUI: () => AminoglycosideTDM.updateUI(),
+    AminoglycosideTDM_run: () => AminoglycosideTDM.run(),
+
+    // Valproate TDM module
+    ValproateTDM_run: () => ValproateTDM.run(),
+
+    // Utilities
+    updateCrCl: updateCrCl,
+    getPatient: getPatient
+  };
+})();
+
+// Initialize on DOM load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => TDMHub.init());
+} else {
+  TDMHub.init();
+}
+
 </script>
 <script src="translations-en.js"></script>
 <script src="i18n.js"></script>

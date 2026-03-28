@@ -181,7 +181,1426 @@
 <div class="toast" id="toast"></div>
 
 <script>
-!function(){"use strict";const e="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",t="iv_drugref_error_log",n="iv_drugref_error_queue",a="low",r="medium",o="high",s="critical";let i=[],l=0,c=null,d=null;function u(){return(window.location.pathname.split("/").pop()||"index.html").replace(".html","")}function g(){try{return JSON.parse(localStorage.getItem(n)||"[]")}catch(e){return[]}}function m(){const t=g();0!==t.length&&navigator.onLine&&(function(t){if(!navigator.onLine||0===t.length)return;if(l>=10)return;l+=t.length;const n=JSON.stringify({type:"error_report",errors:t,batch_size:t.length,reported_at:(new Date).toISOString()});try{navigator.sendBeacon?navigator.sendBeacon(e,n):fetch(e,{method:"POST",body:n,mode:"no-cors",keepalive:!0}).catch(()=>{})}catch(e){}}(t),function(){try{localStorage.removeItem(n)}catch(e){}}())}function p(e){const l=`${e.message}|${e.source}|${e.line}`;if(function(e){const t=Date.now();return i=i.filter(e=>t-e.time<6e4),!!i.some(t=>t.fp===e)||(i.push({fp:e,time:t}),!1)}(l))return;const c=function(e){const t=(e.message||"").toLowerCase();return t.includes("drugs")&&t.includes("undefined")||t.includes("json")&&t.includes("parse")?s:t.includes("security")||t.includes("cors")||t.includes("calculation")||t.includes("dose")?o:t.includes("fetch")||t.includes("network")||t.includes("typeerror")||t.includes("referenceerror")?r:a}(e),g={page:u(),url:window.location.href,userAgent:navigator.userAgent,online:navigator.onLine,timestamp:(new Date).toISOString(),sessionId:sessionStorage.getItem("sessionId")||"unknown",screenSize:`${screen.width}x${screen.height}`,viewportSize:`${window.innerWidth}x${window.innerHeight}`,language:navigator.language,standalone:window.matchMedia("(display-mode: standalone)").matches,memoryUsage:navigator.deviceMemory?`${navigator.deviceMemory}GB`:"N/A",appVersion:"5.0.0"},p={...e,severity:c,context:g,fingerprint:l,id:`err_${Date.now()}_${Math.random().toString(36).substr(2,6)}`};console.error(`[ErrorTracker] ${c.toUpperCase()}:`,e.message,p),function(e){try{let n=JSON.parse(localStorage.getItem(t)||"[]");n.unshift(e),n.length>50&&(n=n.slice(0,50)),localStorage.setItem(t,JSON.stringify(n))}catch(e){}}(p),c!==a&&function(e,t){if(!document.body)return;const n=d||(d=document.createElement("div"),d.id="iv-error-toast-container",d.style.cssText="\n      position: fixed;\n      bottom: 80px;\n      left: 50%;\n      transform: translateX(-50%);\n      z-index: 99999;\n      display: flex;\n      flex-direction: column;\n      gap: 8px;\n      align-items: center;\n      pointer-events: none;\n      max-width: 90vw;\n    ",document.body.appendChild(d),d),a=document.createElement("div"),r={low:{bg:"#f0f4f8",border:"#94a3b8",text:"#475569",icon:"ℹ️"},medium:{bg:"#fef9c3",border:"#f59e0b",text:"#92400e",icon:"⚠️"},high:{bg:"#fee2e2",border:"#ef4444",text:"#991b1b",icon:"🔴"},critical:{bg:"#fecaca",border:"#dc2626",text:"#7f1d1d",icon:"🚨"}},o=r[t]||r.medium;a.style.cssText=`\n      background: ${o.bg};\n      border: 1px solid ${o.border};\n      border-radius: 12px;\n      padding: 10px 16px;\n      font-family: 'IBM Plex Sans Thai', sans-serif;\n      font-size: 13px;\n      color: ${o.text};\n      box-shadow: 0 4px 16px rgba(0,0,0,0.12);\n      pointer-events: auto;\n      opacity: 0;\n      transform: translateY(10px);\n      transition: all 0.3s ease;\n      max-width: 100%;\n      text-align: center;\n      line-height: 1.4;\n    `;const s="critical"===t||"high"===t?`${o.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`:`${o.icon} เกิดข้อผิดพลาดเล็กน้อย`;a.textContent=s,n.appendChild(a),requestAnimationFrame(()=>{a.style.opacity="1",a.style.transform="translateY(0)"}),setTimeout(()=>{a.style.opacity="0",a.style.transform="translateY(10px)",setTimeout(()=>a.remove(),300)},5e3),a.addEventListener("click",()=>{a.style.opacity="0",setTimeout(()=>a.remove(),300)})}(e.message,c),function(e){try{let t=JSON.parse(localStorage.getItem(n)||"[]");t.push(e),t.length>20&&(t=t.slice(-20)),localStorage.setItem(n,JSON.stringify(t))}catch(e){}}(p),c!==s&&c!==o||m()}window.onerror=function(e,t,n,a,r){return p({type:"runtime_error",message:String(e),source:t||"unknown",line:n||0,col:a||0,stack:r?r.stack:"N/A"}),!1},window.addEventListener("unhandledrejection",function(e){const t=e.reason;p({type:"unhandled_rejection",message:t?t.message||String(t):"Unknown rejection",source:"Promise",line:0,col:0,stack:t&&t.stack?t.stack:"N/A"})}),window.addEventListener("error",function(e){if(e.target&&e.target!==window){const t=e.target.tagName||"unknown",n=e.target.src||e.target.href||"unknown";p({type:"resource_error",message:`Failed to load ${t}: ${n}`,source:n,line:0,col:0,stack:"N/A"})}},!0),"serviceWorker"in navigator&&navigator.serviceWorker.addEventListener("message",function(e){e.data&&"SW_ERROR"===e.data.type&&p({type:"service_worker_error",message:e.data.error.message,source:e.data.error.filename||"sw.js",line:e.data.error.lineno||0,col:0,stack:"Service Worker context"})}),window.addEventListener("online",function(){setTimeout(m,2e3)}),c=setInterval(m,3e4),setInterval(function(){l=0},6e4),window.IVErrorTracker={report:function(e,t,n){p({type:"manual_report",message:String(e),source:u(),line:0,col:0,stack:(new Error).stack||"N/A",extra:n||{}})},getLog:function(){try{return JSON.parse(localStorage.getItem(t)||"[]")}catch(e){return[]}},clearLog:function(){localStorage.removeItem(t),localStorage.removeItem(n),console.log("[ErrorTracker] Log cleared")},flush:m,queueSize:function(){return g().length}},window.addEventListener("load",function(){setTimeout(m,3e3)}),console.log("[ErrorTracker] Initialized — v1.0 | Page:",u())}();var IVDrugRef=function(){function e(e,t){if(!e||e<=0)return 0;const n=e/2.54;return"M"===t?50+2.3*(n-60):45.5+2.3*(n-60)}function t(e,t){return t+.4*(e-t)}function n(e,t){return!t||t<=0?0:e/(t/100)**2}function a(e,t){return!e||!t||e<=0||t<=0?0:Math.sqrt(e*t/3600)}function r(n,a,r,o,s){if(r<=0)return 0;let i=a;if(s&&s>0){const n=e(s,o);a>1.3*n&&(i=t(a,n))}let l=(140-n)*i/(72*r);return"F"===o&&(l*=.85),Math.max(Math.round(10*l)/10,5)}function o(e,t){return t<=0||!e||e<=0?0:Math.round(.413*e/t*10)/10}function s(e,t,n){let a;if("F"===n){const n=.7,r=t<=n?-.241:-1.2;a=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)*1.012}else{const n=.9,r=t<=n?-.302:-1.2;a=142*Math.pow(Math.min(t/n,1),r)*Math.pow(Math.max(t/n,1),-1.2)*Math.pow(.9938,e)}return Math.round(10*a)/10}const i="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec";let l=0;function c(){return localStorage.getItem("anonSessionId")||""}function d(){return localStorage.getItem("anonUserId")||""}function u(){return"true"===localStorage.getItem("analyticsConsent")}function g(e){if(u()&&!(l>=40)){l++;try{const t=JSON.stringify({...e,session_id:c(),user_id:d()});navigator.sendBeacon?navigator.sendBeacon(i,t):fetch(i,{method:"POST",body:t,keepalive:!0}).catch(()=>{})}catch(e){}}}return{VERSION:"5.0.0",APP_NAME:"IV DrugRef",calcIBW:e,calcABW:t,calcBMI:n,calcBSA:a,calcCockcroftGault:r,calcCG_raw:function(e,t,n,a){if(n<=0)return 0;let r=(140-e)*t/(72*n);return"F"===a&&(r*=.85),Math.round(10*r)/10},calcSchwartz:o,calcCKDEPI2021:s,calcCKDEPI2021_nonindexed:function(e,t,n,a){const r=s(e,t,n);return Math.round(r*a/1.73*10)/10},getCKDStage:function(e){return e>=90?{stage:"G1",label:"ปกติ/สูง",cls:"stage-1"}:e>=60?{stage:"G2",label:"ลดลงเล็กน้อย",cls:"stage-2"}:e>=45?{stage:"G3a",label:"ลดลงเล็กน้อย-ปานกลาง",cls:"stage-3a"}:e>=30?{stage:"G3b",label:"ลดลงปานกลาง-มาก",cls:"stage-3b"}:e>=15?{stage:"G4",label:"ลดลงมาก",cls:"stage-4"}:{stage:"G5",label:"ไตวาย",cls:"stage-5"}},getPatientFromForm:function(s){const i=Object.assign({age:"ptAge",wt:"ptWt",ht:"ptHt",sex:"ptSex",scr:"ptScr",alb:"ptAlb",dialysis:"ptDialysis"},s||{}),l=(e,t)=>{const n=document.getElementById(e);return n&&parseFloat(n.value)||t},c=(e,t)=>{const n=document.getElementById(e);return n?n.value:t},d=l(i.age,55),u=l(i.wt,70),g=l(i.ht,170),m=c(i.sex,"M"),p=l(i.scr,1),b=l(i.alb,4),f=c(i.dialysis,"none"),h=Math.round(10*e(g,m))/10,y=Math.round(10*t(u,h))/10,v=Math.round(10*n(u,g))/10,S=Math.round(100*a(g,u))/100,w=u>1.3*h,_=u<h,k=d<18;let C;return C=k&&g>0?o(g,p):r(d,u,p,m,g),{age:d,wt:u,ht:g,sex:m,scr:p,alb:b,dialysis:f,ibw:h,abw:y,bmi:v,bsa:S,isObese:w,isUnderweight:_,isPediatric:k,crcl:C}},sendAnalytics:g,trackPageView:function(e){const t=Date.now(),n=function(){const e=document.referrer||"";return e.includes("index.html")||e.endsWith("iv-drugref/")?"drugref":e.includes("calculator.html")?"calculator":e.includes("tdm.html")?"tdm":e.includes("vanco-tdm.html")?"vanco-tdm":e.includes("renal-dosing.html")?"renal-dosing":e.includes("compatibility.html")?"compatibility":e.includes("dashboard.html")?"dashboard":e?"external":"direct"}();g({type:"page_view",page:e,action:"enter",from_page:n,referrer:document.referrer||"direct"});let a=!1;function r(r){a||(a=!0,g({type:"page_view",page:e,action:"leave",duration_sec:Math.round((Date.now()-t)/1e3),from_page:n,...r||{}}))}return window.addEventListener("beforeunload",()=>r()),document.addEventListener("visibilitychange",()=>{"hidden"===document.visibilityState&&r()}),{sendExit:r,fromPage:n,enterTime:t}},getSessionId:c,getUserId:d,hasAnalyticsConsent:u,registerSW:function(){"serviceWorker"in navigator&&navigator.serviceWorker.register("sw.js").then(e=>console.log("[SW] Registered:",e.scope)).catch(e=>console.warn("[SW] Registration failed:",e))},generateId:function(e){e=e||16;const t=new Uint8Array(e/2);return crypto.getRandomValues(t),Array.from(t,e=>e.toString(16).padStart(2,"0")).join("")},debounce:function(e,t){let n;return function(...a){clearTimeout(n),n=setTimeout(()=>e.apply(this,a),t)}},fmt:function(e,t){return t=void 0!==t?t:1,(Math.round(e*Math.pow(10,t))/Math.pow(10,t)).toFixed(t)}}}();document.addEventListener("DOMContentLoaded",()=>{IVDrugRef.registerSW()}),function(){"use strict";let e=localStorage.getItem("analyticsUrl")||"",t={},n=null,a={},r={},o=null,s=!1;const i={blue:"#38bdf8",cyan:"#22d3ee",green:"#34d399",amber:"#fbbf24",purple:"#a78bfa",red:"#f87171",pink:"#f472b6",slate:"#546380",teal:"#2dd4bf"},l={responsive:!0,plugins:{legend:{labels:{color:"#8899b4",font:{family:"Noto Sans Thai",size:10}}}},scales:{x:{ticks:{color:"#546380",font:{size:9}},grid:{color:"rgba(26,37,64,0.5)"}},y:{ticks:{color:"#546380",font:{size:9}},grid:{color:"rgba(26,37,64,0.5)"},beginAtZero:!0}}},c={abx:"Antibiotics",av:"Antivirals",ac:"Anticoagulants",misc:"Others"},d={abx:i.blue,av:i.purple,ac:i.pink,misc:i.green},u={G1:"#34d399",G2:"#6ee7b7",G3a:"#fbbf24",G3b:"#f59e0b",G4:"#fb923c",G5:"#f87171"},g={therapeutic:i.green,subtherapeutic:i.amber,supratherapeutic:i.red,toxic:i.pink,borderline_toxic:"#fb923c",elevated_trough:i.red};function m(e,n){var a;t[a=e]&&(t[a].destroy(),delete t[a]);const r=document.getElementById(e)?.getContext("2d");r&&(t[e]=new Chart(r,n))}function p(e,t){a[e]===t?delete a[e]:a[e]=t,b(),w()}function b(){document.getElementById("filterBadges").innerHTML=Object.entries(a).map(([e,t])=>`<span class="filter-badge" onclick="removeFilter('${e}')">${e}: ${t} <span class="x">✕</span></span>`).join("")}function f(e,t){if(void 0!==e[t]&&null!==e[t]&&""!==String(e[t]).trim())return String(e[t]);const n=String(e.session_id||"").trim();return n&&r[n]&&r[n][t]?r[n][t]:""}document.querySelectorAll(".tab").forEach(e=>e.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active")),document.querySelectorAll(".tab-panel").forEach(e=>e.classList.remove("active")),e.classList.add("active"),document.getElementById("panel-"+e.dataset.tab).classList.add("active")}));const h={drug:["drug_name","drug_clicked","drug_id"],platform:["platform"],class:["drug_class"],formula:["formula_used"],stage:["ckd_stage"],interpretation:["interpretation"],role:["role"],user:["user_id","session_id"]};function y(e){const t=document.getElementById("dateFrom").value,n=document.getElementById("dateTo").value,r=document.getElementById("globalSearch").value.trim().toLowerCase(),o=function(e){const t=e.slice(0,Math.min(e.length,30)),n={};for(const e of Object.keys(a)){if("user"===e||"platform"===e){n[e]=!0;continue}const a=h[e]||[];n[e]=t.some(e=>a.some(t=>void 0!==e[t]&&null!==e[t]&&""!==String(e[t]).trim()))}return n}(e);return e.filter(e=>{if(t||n){const a=String(e.timestamp||"").substring(0,10);if(a){if(t&&a<t)return!1;if(n&&a>n)return!1}}for(const[t,n]of Object.entries(a))if(o[t])if("drug"===t){if(!v(e,n))return!1}else if("platform"===t){if(f(e,"platform")!==n)return!1}else if("class"===t){if(String(e.drug_class||"")!==n)return!1}else if("formula"===t){if(String(e.formula_used||"")!==n)return!1}else if("stage"===t){if(String(e.ckd_stage||"")!==n)return!1}else if("interpretation"===t){if(String(e.interpretation||"")!==n)return!1}else if("role"===t){if(String(e.role||"")!==n)return!1}else if("user"===t&&String(e.user_id||e.session_id||"")!==n)return!1;return!(r&&!Object.values(e).join(" ").toLowerCase().includes(r))})}function v(e,t){const n=t.toLowerCase();return String(e.drug_name||"").toLowerCase()===n||String(e.drug_clicked||"").toLowerCase()===n||String(e.drug_id||"").toLowerCase()===n}async function S(){if(!e)return document.getElementById("statusMsg").textContent="กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ",void(document.getElementById("statusMsg").style.display="block");document.getElementById("statusMsg").textContent="⏳ กำลังโหลด raw data...",document.getElementById("statusMsg").style.display="block";try{const a=await fetch(e+"?action=raw"),o=await a.json();if(o.error)throw new Error(o.error);n=o,t=n.sessions,r={},(t||[]).forEach(e=>{const t=String(e.session_id||"").trim();t&&(r[t]={platform:String(e.platform||""),user_id:String(e.user_id||"")})}),document.getElementById("statusMsg").style.display="none",w(),j("✅ โหลดข้อมูลสำเร็จ ("+(n?Object.values(n).reduce((e,t)=>e+(Array.isArray(t)?t.length:0),0):0)+" rows)")}catch(e){document.getElementById("statusMsg").innerHTML=`<div class="error">❌ ${e.message}</div>`}var t}function w(){if(!n)return;const e=y(n.sessions||[]),t=y(n.searches||[]),a=y(n.surveys||[]),r=y(n.doseCalcs||[]),o=y(n.drugExpands||[]),s=y(n.tdmUsage||[]),p=y(n.pageViews||[]),b=y(n.renalDosing||[]),f=y(n.compatUsage||[]);!function(e,t,n,a,r,o){const s=C([...e,...t],"user_id"),c=t.map(e=>parseInt(e.time_to_click_ms)).filter(e=>!isNaN(e)&&e>0&&e<3e5),d=c.length>0?(c.reduce((e,t)=>e+t,0)/c.length/1e3).toFixed(1):"—";document.getElementById("overviewStats").innerHTML=[I("👤",e.length.toLocaleString(),"Sessions","blue"),I("🧑‍⚕️",s.size.toLocaleString(),"Unique Users","green"),I("🔍",t.length.toLocaleString(),"Searches","cyan"),I("⏱",d,"Avg Search (s)","amber"),I("🧮",a.length.toLocaleString(),"Dose Calcs","pink"),I("🎯",r.length.toLocaleString(),"TDM Calcs","red"),I("🔗",o.length.toLocaleString(),"Compat Checks","purple")].join("");const u=function(e){const t={};e.forEach(e=>{const n=String(e.timestamp||"").substring(0,10),a=String(e.user_id||e.session_id||"").trim();n&&"undefined"!==n&&a&&(t[n]||(t[n]=new Set),t[n].add(a))});const n={};for(const[e,a]of Object.entries(t))n[e]=a.size;return n}([...e,...t]),g=Object.keys(u).sort().slice(-30);m("dauChart",{type:"line",data:{labels:g.map(e=>e.substring(5)),datasets:[{label:"DAU",data:g.map(e=>u[e]),borderColor:i.cyan,backgroundColor:"rgba(34,211,238,0.06)",fill:!0,tension:.35,pointRadius:2,borderWidth:2}]},options:{...l,plugins:{legend:{display:!1}}}});const p=_(e,"platform");m("platformChart",{type:"doughnut",data:{labels:Object.keys(p),datasets:[{data:Object.values(p),backgroundColor:[i.blue,i.green,i.amber,i.purple]}]},options:{responsive:!0,plugins:{legend:{position:"bottom",labels:{color:"#8899b4",font:{size:10}}}}}}),L("platformChart","platform");const b=[0,0,0,0,0,0];c.forEach(e=>{const t=e/1e3;t<5?b[0]++:t<10?b[1]++:t<20?b[2]++:t<30?b[3]++:t<60?b[4]++:b[5]++}),m("timeChart",{type:"bar",data:{labels:["<5s","5-10s","10-20s","20-30s","30-60s",">60s"],datasets:[{data:b,backgroundColor:i.cyan,borderRadius:4}]},options:{...l,plugins:{legend:{display:!1}}}})}(e,t,0,r,s,f),function(e,t){x("topDrugsTable",k(_(e,"drug_clicked")),i.cyan,"drug");x("topExpandsTable",k(_(t,"drug_name")),i.purple,"drug");const n=_(e,"filter_used");m("filterChart",{type:"bar",data:{labels:Object.keys(n),datasets:[{data:Object.values(n),backgroundColor:i.blue,borderRadius:4}]},options:{...l,indexAxis:"y",plugins:{legend:{display:!1}}}});const a=_(t,"source");m("srcChart",{type:"doughnut",data:{labels:Object.keys(a),datasets:[{data:Object.values(a),backgroundColor:[i.blue,i.green,i.amber]}]},options:{responsive:!0,plugins:{legend:{position:"bottom",labels:{color:"#8899b4",font:{size:10}}}}}})}(t,o),function(e){const t=C(e,"user_id"),n=_(e,"drug_name"),a=_(e,"interpretation");document.getElementById("tdmStats").innerHTML=[I("🎯",e.length.toLocaleString(),"TDM Total","red"),I("👤",t.size.toLocaleString(),"Users","cyan"),I("🧬",(n.Vancomycin||0).toLocaleString(),"Vancomycin","blue"),I("⚡",(n.Phenytoin||0).toLocaleString(),"Phenytoin","purple"),I("💉",((n.Amikacin||0)+(n.Gentamicin||0)).toLocaleString(),"AG","green"),I("🧠",(n.Valproate||0).toLocaleString(),"VPA","amber")].join("");const r=Object.keys(n).sort((e,t)=>(n[t]||0)-(n[e]||0));m("tdmDrugChart",{type:"bar",data:{labels:r,datasets:[{data:r.map(e=>n[e]),backgroundColor:[i.blue,i.purple,i.green,i.teal,i.amber,i.pink].slice(0,r.length),borderRadius:6}]},options:{...l,plugins:{legend:{display:!1}}}}),L("tdmDrugChart","drug");const o=Object.keys(a);m("tdmInterpChart",{type:"doughnut",data:{labels:o,datasets:[{data:Object.values(a),backgroundColor:o.map(e=>g[e]||i.slate)}]},options:{responsive:!0,plugins:{legend:{position:"bottom",labels:{color:"#8899b4",font:{size:10}}}}}}),L("tdmInterpChart","interpretation");const s=E(e),c=Object.keys(s).sort().slice(-30);m("tdmDayChart",{type:"bar",data:{labels:c.map(e=>e.substring(5)),datasets:[{data:c.map(e=>s[e]),backgroundColor:i.red,borderRadius:3}]},options:{...l,plugins:{legend:{display:!1}}}})}(s),function(e){const t=C(e,"user_id"),n=_(e,"formula_used"),a=_(e,"ckd_stage"),r=Object.entries(n).sort((e,t)=>t[1]-e[1]),o=(a.G4||0)+(a.G5||0);document.getElementById("renalStats").innerHTML=[I("🧬",e.length.toLocaleString(),"Lookups","teal"),I("👤",t.size.toLocaleString(),"Users","green"),I("📊",r.length>0?r[0][0].includes("Cockcroft")?"CG":"CKD-EPI":"—","Top Formula","blue"),I("⚠",o.toLocaleString(),"Severe CKD (G4-5)","amber")].join(""),x("renalDrugsTable",k(_(e,"drug_name"),15),i.teal,"drug");const s=_(e,"drug_class"),g=Object.keys(s);m("renalClassChart",{type:"doughnut",data:{labels:g.map(e=>c[e]||e),datasets:[{data:Object.values(s),backgroundColor:g.map(e=>d[e]||i.slate),borderWidth:0}]},options:{responsive:!0,plugins:{legend:{labels:{color:"#8899b4",font:{size:10}}}}}}),L("renalClassChart","class",Object.fromEntries(g.map(e=>[c[e]||e,e]))),m("renalFormulaChart",{type:"doughnut",data:{labels:Object.keys(n),datasets:[{data:Object.values(n),backgroundColor:[i.blue,i.green,i.amber],borderWidth:0}]},options:{responsive:!0,plugins:{legend:{labels:{color:"#8899b4",font:{size:10}}}}}}),L("renalFormulaChart","formula");const p=Object.keys(a).sort();m("renalStageChart",{type:"bar",data:{labels:p,datasets:[{label:"Lookups",data:p.map(e=>a[e]),backgroundColor:p.map(e=>u[e]||i.slate),borderRadius:5}]},options:{...l,plugins:{legend:{display:!1}}}}),L("renalStageChart","stage");const b=E(e),f=Object.keys(b).sort().slice(-30);m("renalDayChart",{type:"line",data:{labels:f.map(e=>e.substring(5)),datasets:[{label:"Lookups",data:f.map(e=>b[e]),borderColor:i.teal,backgroundColor:"rgba(45,212,191,0.08)",fill:!0,tension:.3,pointRadius:3}]},options:{...l,plugins:{legend:{display:!1}}}})}(b),function(e){const t=C(e,"user_id"),n=e.filter(e=>"pair"===e.mode),a=e.filter(e=>"multi"===e.mode),r=e.filter(e=>"incompatible"===e.result_status||"has_incompatible"===e.result_status);document.getElementById("compatStats").innerHTML=[I("🔗",e.length.toLocaleString(),"Total Checks","purple"),I("👤",t.size.toLocaleString(),"Unique Users","blue"),I("💊",n.length.toLocaleString(),"Pair Checks","cyan"),I("🔬",a.length.toLocaleString(),"Multi Checks","teal"),I("❌",r.length.toLocaleString(),"Incompatible","red")].join("");const o=_(e,"mode");m("compatModeChart",{type:"doughnut",data:{labels:Object.keys(o),datasets:[{data:Object.values(o),backgroundColor:["#0ea5e9","#7c3aed","#d97706","#059669","#dc2626"]}]},options:{responsive:!0,plugins:{legend:{position:"bottom",labels:{color:"#8899b4",font:{size:10}}}}}});const s={};n.forEach(e=>{const t=[e.drug_a,e.drug_b].filter(Boolean).sort().join(" + ");t&&(s[t]=(s[t]||0)+1)});const i=Object.entries(s).sort((e,t)=>t[1]-e[1]).slice(0,10);m("compatDrugChart",{type:"bar",data:{labels:i.map(e=>e[0].length>25?e[0].substring(0,25)+"…":e[0]),datasets:[{label:"Checks",data:i.map(e=>e[1]),backgroundColor:"#7c3aed",borderRadius:4}]},options:{...l,indexAxis:"y",plugins:{legend:{display:!1}}}});const c=E(e),d=Object.keys(c).sort();m("compatDayChart",{type:"line",data:{labels:d.map(e=>e.substring(5)),datasets:[{label:"Compat Checks",data:d.map(e=>c[e]),borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,0.1)",fill:!0,tension:.3,pointRadius:3}]},options:{...l,plugins:{legend:{display:!1}}}})}(f),function(e){const t=C(e,"user_id"),n=_(e,"drug_name"),a=_(e,"dose_unit"),r=_(e,"user_id"),o=Object.keys(n).length;document.getElementById("doseCalcStats").innerHTML=[I("🧮",e.length.toLocaleString(),"Total Calcs","pink"),I("👤",t.size.toLocaleString(),"Unique Users","cyan"),I("💊",o.toLocaleString(),"Unique Drugs","purple"),I("📊",e.length>0?(e.length/Math.max(t.size,1)).toFixed(1):"—","Avg Calcs/User","amber")].join("");const s=Object.keys(n).sort((e,t)=>(n[t]||0)-(n[e]||0)).slice(0,15);m("dcDrugChart",{type:"bar",data:{labels:s,datasets:[{data:s.map(e=>n[e]),backgroundColor:i.pink,borderRadius:6}]},options:{...l,plugins:{legend:{display:!1}}}}),L("dcDrugChart","drug");const c=Object.keys(a);m("dcUnitChart",{type:"doughnut",data:{labels:c.length?c:["—"],datasets:[{data:c.length?Object.values(a):[1],backgroundColor:[i.blue,i.green,i.amber,i.purple,i.red,i.teal]}]},options:{responsive:!0,plugins:{legend:{position:"bottom",labels:{color:"#8899b4",font:{size:10}}}}}});const d=Object.entries(r).sort((e,t)=>t[1]-e[1]).slice(0,10);m("dcUserChart",{type:"bar",data:{labels:d.map(e=>e[0].length>12?e[0].substring(0,12)+"…":e[0]),datasets:[{label:"Calcs",data:d.map(e=>e[1]),backgroundColor:i.cyan,borderRadius:4}]},options:{...l,indexAxis:"y",plugins:{legend:{display:!1}}}});const u=e.map(e=>parseFloat(e.weight_kg)).filter(e=>!isNaN(e)&&e>0&&e<300),g=[0,0,0,0,0,0],p=[i.red,i.amber,i.green,i.cyan,i.blue,i.purple];u.forEach(e=>{e<40?g[0]++:e<50?g[1]++:e<60?g[2]++:e<70?g[3]++:e<80?g[4]++:g[5]++}),m("dcWeightChart",{type:"bar",data:{labels:["<40","40-50","50-60","60-70","70-80",">80"],datasets:[{label:"Patients",data:g,backgroundColor:p,borderRadius:4}]},options:{...l,plugins:{legend:{display:!1}}}});const b=E(e),f=Object.keys(b).sort().slice(-30);m("dcDayChart",{type:"line",data:{labels:f.map(e=>e.substring(5)),datasets:[{label:"Dose Calcs",data:f.map(e=>b[e]),borderColor:i.pink,backgroundColor:"rgba(244,114,182,0.08)",fill:!0,tension:.3,pointRadius:3}]},options:{...l,plugins:{legend:{display:!1}}}})}(r),function(e){const t=e.filter(e=>e.sat_5_overall&&""!==e.sat_5_overall),n=e.filter(e=>void 0!==e.sus_score&&""!==e.sus_score),a=t.length>0?(t.reduce((e,t)=>e+parseFloat(t.sat_5_overall),0)/t.length).toFixed(1):"—",r=n.length>0?(n.reduce((e,t)=>e+parseFloat(t.sus_score),0)/n.length).toFixed(1):"—",o=_(e,"role"),s=_(e,"department"),c=e.filter(e=>e.sat_5_overall&&""!==e.sat_5_overall&&void 0!==e.sus_score&&""!==e.sus_score).length;document.getElementById("surveyStats").innerHTML=[I("📋",e.length.toLocaleString(),"Surveys","purple"),I("⭐",a,"Avg Satisfaction","amber"),I("📊",r,"Avg SUS","green"),I("✅",t.length.toLocaleString(),"Satisfaction Done","blue"),I("📋",n.length.toLocaleString(),"SUS Done","cyan"),I("🔁",c.toLocaleString(),"Both Phases","pink")].join("");m("satChart",{type:"bar",data:{labels:["ค้นหาง่าย","ถูกต้อง","เร็วขึ้น","แนะนำ","โดยรวม"],datasets:[{data:["sat_1_easy_to_find","sat_2_accurate","sat_3_faster","sat_4_recommend","sat_5_overall"].map(t=>{const n=e.map(e=>parseFloat(e[t])).filter(e=>!isNaN(e));return n.length>0?n.reduce((e,t)=>e+t,0)/n.length:0}),backgroundColor:i.amber,borderRadius:4}]},options:{...l,plugins:{legend:{display:!1}},scales:{...l.scales,y:{...l.scales.y,max:5}}}});const d=Object.keys(o);m("roleChart",{type:"doughnut",data:{labels:d.length?d:["—"],datasets:[{data:d.length?Object.values(o):[1],backgroundColor:[i.blue,i.green,i.amber,i.purple,i.red]}]},options:{responsive:!0,plugins:{legend:{position:"bottom",labels:{color:"#8899b4",font:{size:10}}}}}}),L("roleChart","role");const u=Object.keys(s),g=Object.values(s);m("deptChart",{type:"bar",data:{labels:u.length?u:["—"],datasets:[{data:g.length?g:[0],backgroundColor:i.green,borderRadius:4}]},options:{...l,indexAxis:"y",plugins:{legend:{display:!1}}}});const p=document.getElementById("susEmptyMsg"),b=document.getElementById("susChart");if(n.length>=5){p.style.display="none",b.style.display="";const e=[0,0,0,0,0],t=["0-20","21-40","41-60","61-80","81-100"],a=[i.red,i.amber,"#fb923c",i.green,i.cyan];n.forEach(t=>{const n=parseFloat(t.sus_score);n<=20?e[0]++:n<=40?e[1]++:n<=60?e[2]++:n<=80?e[3]++:e[4]++}),m("susChart",{type:"bar",data:{labels:t,datasets:[{label:"SUS Responses",data:e,backgroundColor:a,borderRadius:4}]},options:{...l,plugins:{legend:{display:!1}}}})}else b.style.display="none",p.style.display=""}(a),function(e,t,n,a,r){const o=C(e,"user_id");document.getElementById("journeyStats").innerHTML=[I("📄",e.length.toLocaleString(),"Page Views","cyan"),I("👤",o.size.toLocaleString(),"Users","blue")].join("");const s=_(e,"page");m("pvChart",{type:"bar",data:{labels:Object.keys(s),datasets:[{data:Object.values(s),backgroundColor:i.cyan,borderRadius:5}]},options:{...l,plugins:{legend:{display:!1}}}});const c={},d={};e.forEach(e=>{const t=String(e.session_id||"");t&&(d[t]||(d[t]=[]),d[t].push(e))});for(const e of Object.values(d)){e.sort((e,t)=>String(e.timestamp||"").localeCompare(String(t.timestamp||"")));for(let t=0;t<e.length-1;t++){const n=`${e[t].page}→${e[t+1].page}`;c[n]=(c[n]||0)+1}}const u=Object.entries(c).sort((e,t)=>t[1]-e[1]).slice(0,15);m("flowChart",{type:"bar",data:{labels:u.map(e=>e[0]),datasets:[{data:u.map(e=>e[1]),backgroundColor:i.blue,borderRadius:3}]},options:{...l,indexAxis:"y",plugins:{legend:{display:!1}}}});const g={},p=(e,t)=>e.forEach(e=>{const n=String(e.user_id||e.session_id||"").trim();n&&(g[n]||(g[n]=[]),g[n].push({type:t,time:e.timestamp,detail:e.drug_name||e.drug_clicked||e.page||e.query||"—"}))});p(e,"page_view"),p(n,"search"),p(a,"dose_calc"),p(r,"tdm_calc");for(const e in g)g[e].sort((e,t)=>String(e.time||"").localeCompare(String(t.time||"")));window._journeyUsers=g;const b=Object.keys(g).slice(0,50);document.getElementById("userList").innerHTML=b.length?b.map(e=>`<span class="user-pill" onclick="addFilter('user','${e}')">${e.substring(0,12)}…</span>`).join(""):'<div class="empty-msg">ยังไม่มีข้อมูล</div>'}(p,0,t,r,s),document.getElementById("footerInfo").textContent=`Filtered: ${e.length+t.length+s.length+b.length+f.length} rows | Dashboard v6`}function _(e,t){const n={};return e.forEach(e=>{const a=String(e[t]||"").trim();a&&"undefined"!==a&&(n[a]=(n[a]||0)+1)}),n}function k(e,t=20){return Object.entries(e).sort((e,t)=>t[1]-e[1]).slice(0,t).map(([e,t])=>({drug:e,count:t}))}function C(e,t){const n=new Set;return e.forEach(e=>{const a=String(e[t]||e.session_id||"").trim();a&&n.add(a)}),n}function E(e){const t={};return e.forEach(e=>{const n=String(e.timestamp||"").substring(0,10);n&&"undefined"!==n&&(t[n]=(t[n]||0)+1)}),t}function I(e,t,n,a){return`<div class="stat ${a}"><div class="stat-icon">${e}</div><div class="stat-val">${t}</div><div class="stat-lbl">${n}</div></div>`}function x(e,t,n,r){const o=document.getElementById(e);if(!t||!t.length)return void(o.innerHTML='<div class="empty-msg"><div class="icon">📭</div>ยังไม่มีข้อมูล</div>');const s=t[0]?.count||1,l=a.drug?.toLowerCase();o.innerHTML=`<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>${t.map((e,t)=>`<tr class="clickable ${l===e.drug.toLowerCase()?"highlight":""}" onclick="addFilter('${r||"drug"}','${e.drug.replace(/'/g,"\\'")}')"><td class="rank">${t+1}</td><td class="drug-name">${e.drug}</td><td class="count">${e.count}</td><td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(e.count/s*100).toFixed(0)}%;background:${n||i.cyan}"></div></div></td></tr>`).join("")}</tbody></table>`}function L(e,n,a){const r=document.getElementById(e);r&&(r.onclick=function(r){const o=t[e];if(!o)return;const s=o.getElementsAtEventForMode(r,"nearest",{intersect:!0},!1);if(s.length>0){const e=s[0].index,t=o.data.labels[e],r=a&&a[t]||t;p(n,r)}})}function j(e){const t=document.getElementById("toast");t.textContent=e,t.classList.add("show"),setTimeout(()=>t.classList.remove("show"),2200)}window.toggleSetup=function(){document.getElementById("setupBanner").classList.toggle("show"),document.getElementById("scriptUrl").value=e},window.saveUrl=function(){e=document.getElementById("scriptUrl").value.trim(),localStorage.setItem("analyticsUrl",e),document.getElementById("setupBanner").classList.remove("show"),S()},window.addFilter=p,window.removeFilter=function(e){delete a[e],b(),w()},window.clearAllFilters=function(){a={},document.getElementById("dateFrom").value="",document.getElementById("dateTo").value="",document.getElementById("globalSearch").value="",b(),w(),j("✕ ล้าง filter แล้ว")},window.fetchRaw=S,window.xprt=function(e){const n=t[e];if(!n)return;const a=document.createElement("a");a.download=`IV_DrugRef_${e}.png`,a.href=n.toBase64Image(),a.click(),j("📷 Exported")},window.exportCSV=async function(t){if(!e)return alert("ตั้งค่า URL ก่อน");try{const n=await fetch(e+"?action=export&sheet="+t),a=await n.json();if(a.error)return alert(a.error);if(!a.length)return alert("ไม่มีข้อมูล");const r=Object.keys(a[0]),o=[r.join(","),...a.map(e=>r.map(t=>`"${String(e[t]||"").replace(/"/g,'""')}"`).join(","))].join("\n"),s=new Blob(["\ufeff"+o],{type:"text/csv;charset=utf-8;"}),i=document.createElement("a");i.href=URL.createObjectURL(s),i.download=`IV_DrugRef_${t}_${(new Date).toISOString().substring(0,10)}.csv`,i.click(),j("📥 Exported "+t)}catch(e){alert("Failed: "+e.message)}},window.toggleAR=function(){s=!s;const e=document.getElementById("arBtn"),t=document.getElementById("arDot");s?(e.textContent="⏱ Auto: ON",e.classList.add("active-state"),t.style.display="inline",o=setInterval(S,6e4),j("⏱ Auto-refresh ON")):(e.textContent="⏱ Auto: OFF",e.classList.remove("active-state"),t.style.display="none",o&&clearInterval(o),j("⏱ Auto-refresh OFF"))},window.toast=j,window.showTimeline=function e(){const t=document.getElementById("journeyUid").value.trim(),n=document.getElementById("userTimeline");if(!t)return void(n.innerHTML='<div class="empty-msg">กรุณาพิมพ์ user_id</div>');let a=window._journeyUsers?.[t];if(!a){const a=Object.keys(window._journeyUsers||{}).find(e=>e.includes(t));return a?(document.getElementById("journeyUid").value=a,e()):void(n.innerHTML='<div class="empty-msg">ไม่พบข้อมูล</div>')}const r={page_view:"📄 Page",search:"🔍 Search",dose_calc:"🧮 Dose",tdm_calc:"🎯 TDM"},o={page_view:"var(--accent-blue)",search:"var(--accent-cyan)",dose_calc:"var(--accent-purple)",tdm_calc:"var(--accent-red)"};n.innerHTML=`<div style="font-size:11px;color:var(--accent-cyan);font-weight:600;margin:8px 0">🗺 ${t} (${a.length} events)</div><div class="timeline">${a.map(e=>`<div class="tl-item ${e.type}"><div class="tl-time">${e.time?e.time.substring(0,19).replace("T"," "):""}</div><div class="tl-type" style="color:${o[e.type]||""}">${r[e.type]||e.type}</div><div class="tl-detail">${e.detail||"—"}</div></div>`).join("")}</div>`};const O=(new Date).toISOString().substring(0,10),M=new Date(Date.now()-2592e6).toISOString().substring(0,10);document.getElementById("dateFrom").value=M,document.getElementById("dateTo").value=O,e&&S()}();
+// ============================================================================
+// IV DrugRef PWA — Error Tracker v1.0
+// Hybrid error tracking: client-side capture + GAS remote reporting
+// ============================================================================
+// Features:
+// - Global error capture (window.onerror, unhandledrejection)
+// - Non-intrusive toast notification for users
+// - In-memory error log with localStorage persistence for debugging
+// - Offline queue → auto-flush to GAS when back online
+// - Deduplication (same error within 60s = skip)
+// - Rate limiting (max 10 reports per minute to GAS)
+// - Email alert for critical errors via GAS
+// ============================================================================
+
+(function () {
+  'use strict';
+
+  // ─── Configuration ───
+  const CONFIG = {
+    // GAS endpoint (same as analytics)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
+
+    // LocalStorage keys
+    LS_ERROR_LOG: 'iv_drugref_error_log',
+    LS_ERROR_QUEUE: 'iv_drugref_error_queue',
+
+    // Limits
+    MAX_LOG_ENTRIES: 50,        // Keep last 50 errors in localStorage
+    MAX_QUEUE_SIZE: 20,         // Max queued errors before flush
+    DEDUP_WINDOW_MS: 60000,     // 60s dedup window
+    RATE_LIMIT_PER_MIN: 10,     // Max 10 reports/minute to GAS
+    TOAST_DURATION_MS: 5000,    // Toast visible for 5s
+    FLUSH_INTERVAL_MS: 30000,   // Auto-flush queue every 30s
+
+    // Severity levels
+    SEVERITY: {
+      LOW: 'low',           // Minor UI glitch
+      MEDIUM: 'medium',     // Feature broken but app usable
+      HIGH: 'high',         // Core feature broken
+      CRITICAL: 'critical'  // App crash / data corruption
+    },
+
+    // App metadata
+    APP_VERSION: '5.0.0',
+    APP_NAME: 'IV DrugRef PWA'
+  };
+
+  // ─── State ───
+  let recentErrors = [];        // For dedup tracking
+  let rateLimitCount = 0;       // Reports sent this minute
+  let flushTimer = null;
+  let toastContainer = null;
+
+  // ─── Utility: Get current page name ───
+  function getPageName() {
+    const path = window.location.pathname;
+    const file = path.split('/').pop() || 'index.html';
+    return file.replace('.html', '');
+  }
+
+  // ─── Utility: Generate error fingerprint for dedup ───
+  function errorFingerprint(message, source, line) {
+    return `${message}|${source}|${line}`;
+  }
+
+  // ─── Utility: Check dedup ───
+  function isDuplicate(fingerprint) {
+    const now = Date.now();
+    // Clean old entries
+    recentErrors = recentErrors.filter(e => now - e.time < CONFIG.DEDUP_WINDOW_MS);
+    // Check if exists
+    if (recentErrors.some(e => e.fp === fingerprint)) return true;
+    recentErrors.push({ fp: fingerprint, time: now });
+    return false;
+  }
+
+  // ─── Utility: Classify severity ───
+  function classifySeverity(error) {
+    const msg = (error.message || '').toLowerCase();
+
+    // Critical: data corruption, security, crashes
+    if (msg.includes('drugs') && msg.includes('undefined')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('json') && msg.includes('parse')) return CONFIG.SEVERITY.CRITICAL;
+    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
+
+    // High: core features broken
+    if (msg.includes('calculation') || msg.includes('dose')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('fetch') || msg.includes('network')) return CONFIG.SEVERITY.MEDIUM;
+    if (msg.includes('typeerror') || msg.includes('referenceerror')) return CONFIG.SEVERITY.MEDIUM;
+
+    // Default
+    return CONFIG.SEVERITY.LOW;
+  }
+
+  // ─── Utility: Collect context ───
+  function collectContext() {
+    return {
+      page: getPageName(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      online: navigator.onLine,
+      timestamp: new Date().toISOString(),
+      sessionId: sessionStorage.getItem('sessionId') || 'unknown',
+      screenSize: `${screen.width}x${screen.height}`,
+      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+      language: navigator.language,
+      standalone: window.matchMedia('(display-mode: standalone)').matches,
+      memoryUsage: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
+      appVersion: CONFIG.APP_VERSION
+    };
+  }
+
+  // ─── Toast UI ───
+  function createToastContainer() {
+    if (toastContainer) return toastContainer;
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'iv-error-toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+      max-width: 90vw;
+    `;
+    document.body.appendChild(toastContainer);
+    return toastContainer;
+  }
+
+  function showToast(message, severity) {
+    if (!document.body) return; // Not ready yet
+
+    const container = createToastContainer();
+    const toast = document.createElement('div');
+
+    const colors = {
+      low: { bg: '#f0f4f8', border: '#94a3b8', text: '#475569', icon: 'ℹ️' },
+      medium: { bg: '#fef9c3', border: '#f59e0b', text: '#92400e', icon: '⚠️' },
+      high: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', icon: '🔴' },
+      critical: { bg: '#fecaca', border: '#dc2626', text: '#7f1d1d', icon: '🚨' }
+    };
+    const c = colors[severity] || colors.medium;
+
+    toast.style.cssText = `
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 13px;
+      color: ${c.text};
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      max-width: 100%;
+      text-align: center;
+      line-height: 1.4;
+    `;
+
+    // User-friendly message (not raw error)
+    const userMsg = severity === 'critical' || severity === 'high'
+      ? `${c.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`
+      : `${c.icon} เกิดข้อผิดพลาดเล็กน้อย`;
+
+    toast.textContent = userMsg;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, CONFIG.TOAST_DURATION_MS);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    });
+  }
+
+  // ─── LocalStorage Log ───
+  function saveToLog(entry) {
+    try {
+      let log = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      log.unshift(entry);
+      if (log.length > CONFIG.MAX_LOG_ENTRIES) {
+        log = log.slice(0, CONFIG.MAX_LOG_ENTRIES);
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_LOG, JSON.stringify(log));
+    } catch (e) {
+      // localStorage full or unavailable — silently fail
+    }
+  }
+
+  // ─── Queue for GAS reporting ───
+  function addToQueue(entry) {
+    try {
+      let queue = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+      queue.push(entry);
+      if (queue.length > CONFIG.MAX_QUEUE_SIZE) {
+        queue = queue.slice(-CONFIG.MAX_QUEUE_SIZE); // Keep newest
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_QUEUE, JSON.stringify(queue));
+    } catch (e) { /* silently fail */ }
+  }
+
+  function getQueue() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function clearQueue() {
+    try {
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Send to GAS ───
+  function sendToGAS(entries) {
+    if (!navigator.onLine || entries.length === 0) return;
+    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return;
+
+    rateLimitCount += entries.length;
+
+    const payload = JSON.stringify({
+      type: 'error_report',
+      errors: entries,
+      batch_size: entries.length,
+      reported_at: new Date().toISOString()
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(CONFIG.GAS_URL, payload);
+      } else {
+        fetch(CONFIG.GAS_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors',
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Flush queue ───
+  function flushQueue() {
+    const queue = getQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    sendToGAS(queue);
+    clearQueue();
+  }
+
+  // ─── Core: Process error ───
+  function processError(errorInfo) {
+    const fp = errorFingerprint(errorInfo.message, errorInfo.source, errorInfo.line);
+    if (isDuplicate(fp)) return;
+
+    const severity = classifySeverity(errorInfo);
+    const context = collectContext();
+
+    const entry = {
+      ...errorInfo,
+      severity,
+      context,
+      fingerprint: fp,
+      id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    };
+
+    // 1. Console log (always)
+    console.error(`[ErrorTracker] ${severity.toUpperCase()}:`, errorInfo.message, entry);
+
+    // 2. Save to localStorage log
+    saveToLog(entry);
+
+    // 3. Show toast (only for medium+ severity)
+    if (severity !== CONFIG.SEVERITY.LOW) {
+      showToast(errorInfo.message, severity);
+    }
+
+    // 4. Queue for GAS reporting
+    addToQueue(entry);
+
+    // 5. If critical or high, flush immediately
+    if (severity === CONFIG.SEVERITY.CRITICAL || severity === CONFIG.SEVERITY.HIGH) {
+      flushQueue();
+    }
+  }
+
+  // ─── Global Error Handlers ───
+
+  // Catch synchronous errors
+  window.onerror = function (message, source, line, col, error) {
+    processError({
+      type: 'runtime_error',
+      message: String(message),
+      source: source || 'unknown',
+      line: line || 0,
+      col: col || 0,
+      stack: error ? error.stack : 'N/A'
+    });
+    return false; // Don't suppress default console error
+  };
+
+  // Catch unhandled promise rejections
+  window.addEventListener('unhandledrejection', function (event) {
+    const reason = event.reason;
+    processError({
+      type: 'unhandled_rejection',
+      message: reason ? (reason.message || String(reason)) : 'Unknown rejection',
+      source: 'Promise',
+      line: 0,
+      col: 0,
+      stack: reason && reason.stack ? reason.stack : 'N/A'
+    });
+  });
+
+  // Catch resource loading errors (images, scripts, etc.)
+  window.addEventListener('error', function (event) {
+    if (event.target && event.target !== window) {
+      const tag = event.target.tagName || 'unknown';
+      const src = event.target.src || event.target.href || 'unknown';
+      processError({
+        type: 'resource_error',
+        message: `Failed to load ${tag}: ${src}`,
+        source: src,
+        line: 0,
+        col: 0,
+        stack: 'N/A'
+      });
+    }
+  }, true); // Capture phase to catch resource errors
+
+  // ─── Service Worker error messages ───
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'SW_ERROR') {
+        processError({
+          type: 'service_worker_error',
+          message: event.data.error.message,
+          source: event.data.error.filename || 'sw.js',
+          line: event.data.error.lineno || 0,
+          col: 0,
+          stack: 'Service Worker context'
+        });
+      }
+    });
+  }
+
+  // ─── Network error monitoring ───
+  window.addEventListener('online', function () {
+    // Flush queued errors when back online
+    setTimeout(flushQueue, 2000);
+  });
+
+  // ─── Periodic flush ───
+  flushTimer = setInterval(flushQueue, CONFIG.FLUSH_INTERVAL_MS);
+
+  // ─── Rate limit reset ───
+  setInterval(function () {
+    rateLimitCount = 0;
+  }, 60000);
+
+  // ─── Public API (for manual error reporting) ───
+  window.IVErrorTracker = {
+    /**
+     * Manually report an error
+     * @param {string} message - Error description
+     * @param {string} severity - 'low'|'medium'|'high'|'critical'
+     * @param {object} extra - Additional context
+     */
+    report: function (message, severity, extra) {
+      processError({
+        type: 'manual_report',
+        message: String(message),
+        source: getPageName(),
+        line: 0,
+        col: 0,
+        stack: new Error().stack || 'N/A',
+        extra: extra || {}
+      });
+    },
+
+    /**
+     * Get error log from localStorage
+     * @returns {Array} Error entries
+     */
+    getLog: function () {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      } catch (e) {
+        return [];
+      }
+    },
+
+    /**
+     * Clear error log
+     */
+    clearLog: function () {
+      localStorage.removeItem(CONFIG.LS_ERROR_LOG);
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+      console.log('[ErrorTracker] Log cleared');
+    },
+
+    /**
+     * Force flush queued errors to GAS
+     */
+    flush: flushQueue,
+
+    /**
+     * Get current queue size
+     */
+    queueSize: function () {
+      return getQueue().length;
+    }
+  };
+
+  // ─── Initial flush on load ───
+  window.addEventListener('load', function () {
+    // Flush any queued errors from previous sessions
+    setTimeout(flushQueue, 3000);
+  });
+
+  console.log('[ErrorTracker] Initialized — v1.0 | Page:', getPageName());
+})();
+
+// ============================================================
+// IV DrugRef PWA v5.0 — Core Utilities
+// Shared across all pages
+// ============================================================
+
+/* global window */
+'use strict';
+
+var IVDrugRef = (function() {
+
+  // ============================================================
+  // CLINICAL CALCULATORS
+  // ============================================================
+
+  /**
+   * Ideal Body Weight (Devine formula)
+   * @param {number} ht - Height in cm
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} IBW in kg
+   */
+  function calcIBW(ht, sex) {
+    if (!ht || ht <= 0) return 0;
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  /**
+   * Adjusted Body Weight (for obesity)
+   * @param {number} wt - Actual weight in kg
+   * @param {number} ibw - Ideal body weight in kg
+   * @returns {number} ABW in kg
+   */
+  function calcABW(wt, ibw) {
+    return ibw + 0.4 * (wt - ibw);
+  }
+
+  /**
+   * Body Mass Index
+   * @param {number} wt - Weight in kg
+   * @param {number} ht - Height in cm
+   * @returns {number} BMI in kg/m²
+   */
+  function calcBMI(wt, ht) {
+    if (!ht || ht <= 0) return 0;
+    return wt / ((ht / 100) ** 2);
+  }
+
+  /**
+   * Body Surface Area (Mosteller formula)
+   * @param {number} ht - Height in cm
+   * @param {number} wt - Weight in kg
+   * @returns {number} BSA in m²
+   */
+  function calcBSA(ht, wt) {
+    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
+    return Math.sqrt((ht * wt) / 3600);
+  }
+
+  /**
+   * Cockcroft-Gault CrCl with automatic weight adjustment
+   * Uses ABW if patient is obese (>130% IBW)
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
+   * @returns {number} CrCl in mL/min, minimum 5
+   */
+  function calcCockcroftGault(age, wt, scr, sex, ht) {
+    if (scr <= 0) return 0;
+    let useWt = wt;
+    if (ht && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
+    }
+    let crcl = ((140 - age) * useWt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.max(Math.round(crcl * 10) / 10, 5);
+  }
+
+  /**
+   * Cockcroft-Gault with raw TBW (no obesity adjustment)
+   * Used for comparison and non-adjusted dosing
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} CrCl in mL/min
+   */
+  function calcCG_raw(age, wt, scr, sex) {
+    if (scr <= 0) return 0;
+    let crcl = ((140 - age) * wt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.round(crcl * 10) / 10;
+  }
+
+  /**
+   * Bedside Schwartz equation (pediatric eGFR)
+   * For ages 1-17 years
+   * @param {number} ht - Height in cm
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcSchwartz(ht, scr) {
+    if (scr <= 0 || !ht || ht <= 0) return 0;
+    return Math.round((0.413 * ht / scr) * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 equation (race-free)
+   * Returns indexed eGFR for standardized BSA (1.73m²)
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcCKDEPI2021(age, scr, sex) {
+    let eGFR;
+    if (sex === 'F') {
+      const kappa = 0.7;
+      const alpha = scr <= kappa ? -0.241 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age) * 1.012;
+    } else {
+      const kappa = 0.9;
+      const alpha = scr <= kappa ? -0.302 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age);
+    }
+    return Math.round(eGFR * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 de-indexed for drug dosing
+   * Converts indexed eGFR to non-indexed using patient BSA
+   * Per KDIGO 2024 recommendations for personalized dosing
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} bsa - Body surface area in m²
+   * @returns {number} Non-indexed eGFR in mL/min
+   */
+  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
+    const indexed = calcCKDEPI2021(age, scr, sex);
+    return Math.round(indexed * bsa / 1.73 * 10) / 10;
+  }
+
+  /**
+   * Get CKD stage classification from GFR value
+   * @param {number} gfr - Glomerular filtration rate in mL/min
+   * @returns {Object} Stage info with stage code, Thai label, and CSS class
+   */
+  function getCKDStage(gfr) {
+    if (gfr >= 90) return { stage: 'G1', label: 'ปกติ/สูง', cls: 'stage-1' };
+    if (gfr >= 60) return { stage: 'G2', label: 'ลดลงเล็กน้อย', cls: 'stage-2' };
+    if (gfr >= 45) return { stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', cls: 'stage-3a' };
+    if (gfr >= 30) return { stage: 'G3b', label: 'ลดลงปานกลาง-มาก', cls: 'stage-3b' };
+    if (gfr >= 15) return { stage: 'G4', label: 'ลดลงมาก', cls: 'stage-4' };
+    return { stage: 'G5', label: 'ไตวาย', cls: 'stage-5' };
+  }
+
+  /**
+   * Build comprehensive patient object from form elements
+   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
+   * @param {Object} fieldIds - Optional custom field ID mapping
+   * @returns {Object} Complete patient data object
+   */
+  function getPatientFromForm(fieldIds) {
+    // Default field IDs matching standard form layout
+    const ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    }, fieldIds || {});
+
+    const getVal = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? (parseFloat(el.value) || def) : def;
+    };
+    const getStr = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? el.value : def;
+    };
+
+    const age = getVal(ids.age, 55);
+    const wt = getVal(ids.wt, 70);
+    const ht = getVal(ids.ht, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = getVal(ids.scr, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
+
+    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
+    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
+    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
+    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
+    const isObese = wt > ibw * 1.3;
+    const isUnderweight = wt < ibw;
+    const isPediatric = age < 18;
+
+    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
+    let crcl;
+    if (isPediatric && ht > 0) {
+      crcl = calcSchwartz(ht, scr);
+    } else {
+      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
+    }
+
+    return {
+      age, wt, ht, sex, scr, alb, dialysis,
+      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
+      crcl
+    };
+  }
+
+
+  // ============================================================
+  // ANALYTICS
+  // ============================================================
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  let _reqCount = 0;
+
+  /**
+   * Get anonymous session ID from localStorage
+   * @returns {string} Session ID or empty string
+   */
+  function getSessionId() {
+    return localStorage.getItem('anonSessionId') || '';
+  }
+
+  /**
+   * Get anonymous user ID from localStorage
+   * @returns {string} User ID or empty string
+   */
+  function getUserId() {
+    return localStorage.getItem('anonUserId') || '';
+  }
+
+  /**
+   * Check if user has consented to analytics
+   * @returns {boolean} True if analytics consent is given
+   */
+  function hasAnalyticsConsent() {
+    return localStorage.getItem('analyticsConsent') === 'true';
+  }
+
+  /**
+   * Send analytics event via sendBeacon or fetch
+   * Rate limited to 40 requests per page session
+   * @param {Object} data - Event data to send
+   */
+  function sendAnalytics(data) {
+    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (_reqCount >= 40) return;
+    _reqCount++;
+    try {
+      const payload = JSON.stringify({
+        ...data,
+        session_id: getSessionId(),
+        user_id: getUserId()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(ANALYTICS_URL, payload);
+      } else {
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
+   * Track page view with automatic entry/exit timing
+   * Sends page_view events on entry and exit with duration
+   * @param {string} pageName - Name/identifier of current page
+   * @returns {Object} Tracking object with sendExit function and metadata
+   */
+  function trackPageView(pageName) {
+    const enterTime = Date.now();
+    const fromPage = (function() {
+      const ref = document.referrer || '';
+      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+      if (ref.includes('calculator.html')) return 'calculator';
+      if (ref.includes('tdm.html')) return 'tdm';
+      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
+      if (ref.includes('compatibility.html')) return 'compatibility';
+      if (ref.includes('dashboard.html')) return 'dashboard';
+      return ref ? 'external' : 'direct';
+    })();
+
+    // Send entry event
+    sendAnalytics({
+      type: 'page_view', page: pageName, action: 'enter',
+      from_page: fromPage, referrer: document.referrer || 'direct'
+    });
+
+    // Track exit event (sent only once)
+    let exitSent = false;
+    function sendExit(extraData) {
+      if (exitSent) return;
+      exitSent = true;
+      sendAnalytics({
+        type: 'page_view', page: pageName, action: 'leave',
+        duration_sec: Math.round((Date.now() - enterTime) / 1000),
+        from_page: fromPage,
+        ...(extraData || {})
+      });
+    }
+
+    // Send exit on page unload or visibility change
+    window.addEventListener('beforeunload', () => sendExit());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendExit();
+    });
+
+    return { sendExit, fromPage, enterTime };
+  }
+
+
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
+
+  /**
+   * Register service worker for offline support and caching
+   * Non-blocking registration with console logging
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    }
+  }
+
+
+  // ============================================================
+  // UTILITY HELPERS
+  // ============================================================
+
+  /**
+   * Generate random anonymous ID using crypto API
+   * @param {number} len - Length in hex characters (default 16)
+   * @returns {string} Random hex string
+   */
+  function generateId(len) {
+    len = len || 16;
+    const arr = new Uint8Array(len / 2);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Debounce function to limit function execution
+   * @param {Function} fn - Function to debounce
+   * @param {number} ms - Debounce delay in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  /**
+   * Format number with specified decimal precision
+   * @param {number} n - Number to format
+   * @param {number} decimals - Number of decimal places (default 1)
+   * @returns {string} Formatted number string
+   */
+  function fmt(n, decimals) {
+    decimals = decimals !== undefined ? decimals : 1;
+    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
+  }
+
+  /**
+   * Version and app name constants
+   */
+  const VERSION = '5.0.0';
+  const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+  return {
+    // Version info
+    VERSION,
+    APP_NAME,
+
+    // Clinical calculators
+    calcIBW,
+    calcABW,
+    calcBMI,
+    calcBSA,
+    calcCockcroftGault,
+    calcCG_raw,
+    calcSchwartz,
+    calcCKDEPI2021,
+    calcCKDEPI2021_nonindexed,
+    getCKDStage,
+    getPatientFromForm,
+
+    // Analytics
+    sendAnalytics,
+    trackPageView,
+    getSessionId,
+    getUserId,
+    hasAnalyticsConsent,
+
+    // Service Worker
+    registerSW,
+
+    // Utility helpers
+    generateId,
+    debounce,
+    fmt
+  };
+})();
+
+// ============================================================
+// AUTO-INITIALIZATION
+// ============================================================
+// Register service worker on page load
+document.addEventListener('DOMContentLoaded', () => {
+  IVDrugRef.registerSW();
+});
+
+(function() {
+  'use strict';
+
+  // ============================================================
+  // IV DrugRef Dashboard v6 — Cross-Filter Engine
+  // ============================================================
+
+  let SCRIPT_URL = localStorage.getItem('analyticsUrl') || '';
+  let charts = {};
+  let RAW = null;        // raw data from GAS {sessions,searches,surveys,...}
+  let FILTERS = {};      // active cross-filters: {drug:'Vancomycin', platform:'iOS', ...}
+  let SESSION_MAP = {};  // session_id → {platform, user_id} lookup for cross-tab filtering
+  let _arTimer = null, _arOn = false;
+
+  const C = {blue:'#38bdf8',cyan:'#22d3ee',green:'#34d399',amber:'#fbbf24',purple:'#a78bfa',red:'#f87171',pink:'#f472b6',slate:'#546380',teal:'#2dd4bf'};
+  const CD = {responsive:true,plugins:{legend:{labels:{color:'#8899b4',font:{family:'Noto Sans Thai',size:10}}}},scales:{x:{ticks:{color:'#546380',font:{size:9}},grid:{color:'rgba(26,37,64,0.5)'}},y:{ticks:{color:'#546380',font:{size:9}},grid:{color:'rgba(26,37,64,0.5)'},beginAtZero:true}}};
+  const RENAL_CLS = {abx:'Antibiotics',av:'Antivirals',ac:'Anticoagulants',misc:'Others'};
+  const RENAL_CLR = {abx:C.blue,av:C.purple,ac:C.pink,misc:C.green};
+  const STG_CLR = {G1:'#34d399',G2:'#6ee7b7',G3a:'#fbbf24',G3b:'#f59e0b',G4:'#fb923c',G5:'#f87171'};
+  const INTERP_CLR = {therapeutic:C.green,subtherapeutic:C.amber,supratherapeutic:C.red,toxic:C.pink,borderline_toxic:'#fb923c',elevated_trough:C.red};
+
+  // Tab navigation
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  }));
+
+  // Setup
+  function toggleSetup(){document.getElementById('setupBanner').classList.toggle('show');document.getElementById('scriptUrl').value=SCRIPT_URL;}
+  function saveUrl(){SCRIPT_URL=document.getElementById('scriptUrl').value.trim();localStorage.setItem('analyticsUrl',SCRIPT_URL);document.getElementById('setupBanner').classList.remove('show');fetchRaw();}
+
+  // Chart helpers
+  function dc(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
+  function mc(id,cfg){dc(id);const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;charts[id]=new Chart(ctx,cfg);}
+  function xprt(id){const c=charts[id];if(!c)return;const a=document.createElement('a');a.download=`IV_DrugRef_${id}.png`;a.href=c.toBase64Image();a.click();toast('📷 Exported');}
+
+  // ============================================================
+  // CROSS-FILTER ENGINE
+  // ============================================================
+  function addFilter(key, val) {
+    if (FILTERS[key] === val) { delete FILTERS[key]; } // toggle off
+    else { FILTERS[key] = val; }
+    renderFilterBadges();
+    reRender();
+  }
+
+  function removeFilter(key) { delete FILTERS[key]; renderFilterBadges(); reRender(); }
+  function clearAllFilters() { FILTERS = {}; document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value=''; document.getElementById('globalSearch').value=''; renderFilterBadges(); reRender(); toast('✕ ล้าง filter แล้ว'); }
+
+  function renderFilterBadges() {
+    const el = document.getElementById('filterBadges');
+    el.innerHTML = Object.entries(FILTERS).map(([k,v]) => `<span class="filter-badge" onclick="removeFilter('${k}')">${k}: ${v} <span class="x">✕</span></span>`).join('');
+  }
+
+  // Build session lookup map for cross-tab filtering
+  function buildSessionMap(sessions) {
+    SESSION_MAP = {};
+    (sessions || []).forEach(s => {
+      const sid = String(s.session_id || '').trim();
+      if (sid) SESSION_MAP[sid] = { platform: String(s.platform || ''), user_id: String(s.user_id || '') };
+    });
+  }
+
+  // Resolve a field from the row, or fall back to SESSION_MAP
+  function resolveField(r, field) {
+    if (r[field] !== undefined && r[field] !== null && String(r[field]).trim() !== '') return String(r[field]);
+    const sid = String(r.session_id || '').trim();
+    if (sid && SESSION_MAP[sid] && SESSION_MAP[sid][field]) return SESSION_MAP[sid][field];
+    return '';
+  }
+
+  // Filter key → fields that make this filter applicable
+  const FILTER_FIELDS = { drug:['drug_name','drug_clicked','drug_id'], platform:['platform'], class:['drug_class'], formula:['formula_used'], stage:['ckd_stage'], interpretation:['interpretation'], role:['role'], user:['user_id','session_id'] };
+
+  // Detect which filters apply to this dataset
+  function detectApplicableFilters(rows) {
+    const sample = rows.slice(0, Math.min(rows.length, 30));
+    const applicable = {};
+    for (const key of Object.keys(FILTERS)) {
+      if (key === 'user' || key === 'platform') { applicable[key] = true; continue; }
+      const fields = FILTER_FIELDS[key] || [];
+      applicable[key] = sample.some(r => fields.some(f => r[f] !== undefined && r[f] !== null && String(r[f]).trim() !== ''));
+    }
+    return applicable;
+  }
+
+  // Apply all filters to a row array (with cross-tab resolution)
+  function applyFilters(rows) {
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    const q = document.getElementById('globalSearch').value.trim().toLowerCase();
+    const applicable = detectApplicableFilters(rows);
+
+    return rows.filter(r => {
+      if (from || to) {
+        const ts = String(r.timestamp || '').substring(0, 10);
+        if (ts) { if (from && ts < from) return false; if (to && ts > to) return false; }
+      }
+      for (const [key, val] of Object.entries(FILTERS)) {
+        if (!applicable[key]) continue;
+        if (key === 'drug') { if (!matchDrug(r, val)) return false; }
+        else if (key === 'platform') { if (resolveField(r, 'platform') !== val) return false; }
+        else if (key === 'class') { if (String(r.drug_class || '') !== val) return false; }
+        else if (key === 'formula') { if (String(r.formula_used || '') !== val) return false; }
+        else if (key === 'stage') { if (String(r.ckd_stage || '') !== val) return false; }
+        else if (key === 'interpretation') { if (String(r.interpretation || '') !== val) return false; }
+        else if (key === 'role') { if (String(r.role || '') !== val) return false; }
+        else if (key === 'user') { if (String(r.user_id||r.session_id||'') !== val) return false; }
+      }
+      if (q) {
+        const txt = Object.values(r).join(' ').toLowerCase();
+        if (!txt.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function matchDrug(r, drug) {
+    const d = drug.toLowerCase();
+    return (String(r.drug_name||'').toLowerCase()===d || String(r.drug_clicked||'').toLowerCase()===d || String(r.drug_id||'').toLowerCase()===d);
+  }
+
+  // ============================================================
+  // FETCH RAW
+  // ============================================================
+  async function fetchRaw() {
+    if (!SCRIPT_URL) { document.getElementById('statusMsg').textContent='กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ'; document.getElementById('statusMsg').style.display='block'; return; }
+    document.getElementById('statusMsg').textContent='⏳ กำลังโหลด raw data...'; document.getElementById('statusMsg').style.display='block';
+    try {
+      const res = await fetch(SCRIPT_URL+'?action=raw');
+      const d = await res.json();
+      if (d.error) throw new Error(d.error);
+      RAW = d;
+      buildSessionMap(RAW.sessions);
+      document.getElementById('statusMsg').style.display='none';
+      reRender();
+      toast('✅ โหลดข้อมูลสำเร็จ ('+totalRows()+' rows)');
+    } catch(err) { document.getElementById('statusMsg').innerHTML=`<div class="error">❌ ${err.message}</div>`; }
+  }
+
+  function totalRows() { if(!RAW)return 0; return Object.values(RAW).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0); }
+
+  // ============================================================
+  // RE-RENDER (called whenever filters change)
+  // ============================================================
+  function reRender() {
+    if (!RAW) return;
+    const sessions = applyFilters(RAW.sessions||[]);
+    const searches = applyFilters(RAW.searches||[]);
+    const surveys = applyFilters(RAW.surveys||[]);
+    const doseCalcs = applyFilters(RAW.doseCalcs||[]);
+    const drugExpands = applyFilters(RAW.drugExpands||[]);
+    const tdmUsage = applyFilters(RAW.tdmUsage||[]);
+    const pageViews = applyFilters(RAW.pageViews||[]);
+    const renalDosing = applyFilters(RAW.renalDosing||[]);
+    const compatUsage = applyFilters(RAW.compatUsage||[]);
+
+    renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage);
+    renderDrugs(searches, drugExpands);
+    renderTDM(tdmUsage);
+    renderRenal(renalDosing);
+    renderCompat(compatUsage);
+    renderDoseCalc(doseCalcs);
+    renderSurvey(surveys);
+    renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage);
+    document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length+searches.length+tdmUsage.length+renalDosing.length+compatUsage.length} rows | Dashboard v6`;
+  }
+
+  // ============================================================
+  // AGGREGATION HELPERS
+  // ============================================================
+  function countBy(arr, key) { const m={}; arr.forEach(r=>{ const v=String(r[key]||'').trim(); if(v&&v!=='undefined') m[v]=(m[v]||0)+1; }); return m; }
+  function topN(map, n=20) { return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>({drug:k,count:v})); }
+  function uniqueSet(arr, key) { const s=new Set(); arr.forEach(r=>{ const v=String(r[key]||r.session_id||'').trim(); if(v) s.add(v); }); return s; }
+  function dailyCount(arr) { const m={}; arr.forEach(r=>{ const d=String(r.timestamp||'').substring(0,10); if(d&&d!=='undefined') m[d]=(m[d]||0)+1; }); return m; }
+  function dailyUnique(arr) { const m={}; arr.forEach(r=>{ const d=String(r.timestamp||'').substring(0,10); const u=String(r.user_id||r.session_id||'').trim(); if(d&&d!=='undefined'&&u){ if(!m[d])m[d]=new Set(); m[d].add(u); } }); const out={}; for(const[k,v] of Object.entries(m)) out[k]=v.size; return out; }
+
+  function statBox(icon,val,label,color) { return `<div class="stat ${color}"><div class="stat-icon">${icon}</div><div class="stat-val">${val}</div><div class="stat-lbl">${label}</div></div>`; }
+
+  function buildClickTable(cid, rows, barColor, filterKey) {
+    const el = document.getElementById(cid);
+    if (!rows || !rows.length) { el.innerHTML='<div class="empty-msg"><div class="icon">📭</div>ยังไม่มีข้อมูล</div>'; return; }
+    const mx = rows[0]?.count||1;
+    const activeD = FILTERS.drug?.toLowerCase();
+    el.innerHTML=`<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>${rows.map((d,i)=>{
+      const hl = activeD===d.drug.toLowerCase()?'highlight':'';
+      return `<tr class="clickable ${hl}" onclick="addFilter('${filterKey||'drug'}','${d.drug.replace(/'/g,"\\'")}')"><td class="rank">${i+1}</td><td class="drug-name">${d.drug}</td><td class="count">${d.count}</td><td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count/mx*100).toFixed(0)}%;background:${barColor||C.cyan}"></div></div></td></tr>`;
+    }).join('')}</tbody></table>`;
+  }
+
+  // Click handler for Chart.js charts — cross filter on click
+  function addChartClick(chartId, filterKey, labelMap) {
+    const el = document.getElementById(chartId);
+    if (!el) return;
+    el.onclick = function(evt) {
+      const c = charts[chartId];
+      if (!c) return;
+      const pts = c.getElementsAtEventForMode(evt, 'nearest', {intersect:true}, false);
+      if (pts.length > 0) {
+        const idx = pts[0].index;
+        const label = c.data.labels[idx];
+        const val = labelMap ? (labelMap[label] || label) : label;
+        addFilter(filterKey, val);
+      }
+    };
+  }
+
+  // ============================================================
+  // RENDER: OVERVIEW
+  // ============================================================
+  function renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage) {
+    const users = uniqueSet([...sessions,...searches], 'user_id');
+    const times = searches.map(r=>parseInt(r.time_to_click_ms)).filter(t=>!isNaN(t)&&t>0&&t<300000);
+    const avgT = times.length>0 ? (times.reduce((a,b)=>a+b,0)/times.length/1000).toFixed(1) : '—';
+
+    document.getElementById('overviewStats').innerHTML = [
+      statBox('👤',sessions.length.toLocaleString(),'Sessions','blue'),
+      statBox('🧑‍⚕️',users.size.toLocaleString(),'Unique Users','green'),
+      statBox('🔍',searches.length.toLocaleString(),'Searches','cyan'),
+      statBox('⏱',avgT,'Avg Search (s)','amber'),
+      statBox('🧮',doseCalcs.length.toLocaleString(),'Dose Calcs','pink'),
+      statBox('🎯',tdmUsage.length.toLocaleString(),'TDM Calcs','red'),
+      statBox('🔗',compatUsage.length.toLocaleString(),'Compat Checks','purple'),
+    ].join('');
+
+    // DAU
+    const dau = dailyUnique([...sessions,...searches]);
+    const dauDays = Object.keys(dau).sort().slice(-30);
+    mc('dauChart',{type:'line',data:{labels:dauDays.map(d=>d.substring(5)),datasets:[{label:'DAU',data:dauDays.map(d=>dau[d]),borderColor:C.cyan,backgroundColor:'rgba(34,211,238,0.06)',fill:true,tension:0.35,pointRadius:2,borderWidth:2}]},options:{...CD,plugins:{legend:{display:false}}}});
+
+    // Platform
+    const plat = countBy(sessions,'platform');
+    mc('platformChart',{type:'doughnut',data:{labels:Object.keys(plat),datasets:[{data:Object.values(plat),backgroundColor:[C.blue,C.green,C.amber,C.purple]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
+    addChartClick('platformChart','platform');
+
+    // Time dist
+    const bk = [0,0,0,0,0,0]; times.forEach(t=>{const s=t/1000; if(s<5)bk[0]++;else if(s<10)bk[1]++;else if(s<20)bk[2]++;else if(s<30)bk[3]++;else if(s<60)bk[4]++;else bk[5]++;});
+    mc('timeChart',{type:'bar',data:{labels:['<5s','5-10s','10-20s','20-30s','30-60s','>60s'],datasets:[{data:bk,backgroundColor:C.cyan,borderRadius:4}]},options:{...CD,plugins:{legend:{display:false}}}});
+  }
+
+  // ============================================================
+  // RENDER: DRUGS
+  // ============================================================
+  function renderDrugs(searches, drugExpands) {
+    const drugCount = countBy(searches, 'drug_clicked');
+    buildClickTable('topDrugsTable', topN(drugCount), C.cyan, 'drug');
+    const expCount = countBy(drugExpands, 'drug_name');
+    buildClickTable('topExpandsTable', topN(expCount), C.purple, 'drug');
+
+    const filters = countBy(searches, 'filter_used');
+    mc('filterChart',{type:'bar',data:{labels:Object.keys(filters),datasets:[{data:Object.values(filters),backgroundColor:C.blue,borderRadius:4}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+
+    const src = countBy(drugExpands,'source');
+    mc('srcChart',{type:'doughnut',data:{labels:Object.keys(src),datasets:[{data:Object.values(src),backgroundColor:[C.blue,C.green,C.amber]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
+  }
+
+  // ============================================================
+  // RENDER: TDM
+  // ============================================================
+  function renderTDM(tdm) {
+    const users = uniqueSet(tdm,'user_id');
+    const byDrug = countBy(tdm,'drug_name');
+    const byInterp = countBy(tdm,'interpretation');
+
+    document.getElementById('tdmStats').innerHTML = [
+      statBox('🎯',tdm.length.toLocaleString(),'TDM Total','red'),
+      statBox('👤',users.size.toLocaleString(),'Users','cyan'),
+      statBox('🧬',(byDrug['Vancomycin']||0).toLocaleString(),'Vancomycin','blue'),
+      statBox('⚡',(byDrug['Phenytoin']||0).toLocaleString(),'Phenytoin','purple'),
+      statBox('💉',((byDrug['Amikacin']||0)+(byDrug['Gentamicin']||0)).toLocaleString(),'AG','green'),
+      statBox('🧠',(byDrug['Valproate']||0).toLocaleString(),'VPA','amber'),
+    ].join('');
+
+    const dNames = Object.keys(byDrug).sort((a,b)=>(byDrug[b]||0)-(byDrug[a]||0));
+    mc('tdmDrugChart',{type:'bar',data:{labels:dNames,datasets:[{data:dNames.map(n=>byDrug[n]),backgroundColor:[C.blue,C.purple,C.green,C.teal,C.amber,C.pink].slice(0,dNames.length),borderRadius:6}]},options:{...CD,plugins:{legend:{display:false}}}});
+    addChartClick('tdmDrugChart','drug');
+
+    const iLabels = Object.keys(byInterp);
+    mc('tdmInterpChart',{type:'doughnut',data:{labels:iLabels,datasets:[{data:Object.values(byInterp),backgroundColor:iLabels.map(l=>INTERP_CLR[l]||C.slate)}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
+    addChartClick('tdmInterpChart','interpretation');
+
+    const byDay = dailyCount(tdm);
+    const days = Object.keys(byDay).sort().slice(-30);
+    mc('tdmDayChart',{type:'bar',data:{labels:days.map(d=>d.substring(5)),datasets:[{data:days.map(d=>byDay[d]),backgroundColor:C.red,borderRadius:3}]},options:{...CD,plugins:{legend:{display:false}}}});
+  }
+
+  // ============================================================
+  // RENDER: RENAL
+  // ============================================================
+  function renderRenal(renal) {
+    const users = uniqueSet(renal,'user_id');
+    const byFormula = countBy(renal,'formula_used');
+    const byStage = countBy(renal,'ckd_stage');
+    const fe = Object.entries(byFormula).sort((a,b)=>b[1]-a[1]);
+    const severe = (byStage['G4']||0)+(byStage['G5']||0);
+
+    document.getElementById('renalStats').innerHTML = [
+      statBox('🧬',renal.length.toLocaleString(),'Lookups','teal'),
+      statBox('👤',users.size.toLocaleString(),'Users','green'),
+      statBox('📊',fe.length>0?(fe[0][0].includes('Cockcroft')?'CG':'CKD-EPI'):'—','Top Formula','blue'),
+      statBox('⚠',severe.toLocaleString(),'Severe CKD (G4-5)','amber'),
+    ].join('');
+
+    const byDrug = countBy(renal,'drug_name');
+    buildClickTable('renalDrugsTable', topN(byDrug,15), C.teal, 'drug');
+
+    const byClass = countBy(renal,'drug_class');
+    const clLabels = Object.keys(byClass);
+    mc('renalClassChart',{type:'doughnut',data:{labels:clLabels.map(k=>RENAL_CLS[k]||k),datasets:[{data:Object.values(byClass),backgroundColor:clLabels.map(k=>RENAL_CLR[k]||C.slate),borderWidth:0}]},options:{responsive:true,plugins:{legend:{labels:{color:'#8899b4',font:{size:10}}}}}});
+    addChartClick('renalClassChart','class',Object.fromEntries(clLabels.map(k=>[RENAL_CLS[k]||k,k])));
+
+    mc('renalFormulaChart',{type:'doughnut',data:{labels:Object.keys(byFormula),datasets:[{data:Object.values(byFormula),backgroundColor:[C.blue,C.green,C.amber],borderWidth:0}]},options:{responsive:true,plugins:{legend:{labels:{color:'#8899b4',font:{size:10}}}}}});
+    addChartClick('renalFormulaChart','formula');
+
+    const stL = Object.keys(byStage).sort();
+    mc('renalStageChart',{type:'bar',data:{labels:stL,datasets:[{label:'Lookups',data:stL.map(k=>byStage[k]),backgroundColor:stL.map(k=>STG_CLR[k]||C.slate),borderRadius:5}]},options:{...CD,plugins:{legend:{display:false}}}});
+    addChartClick('renalStageChart','stage');
+
+    const byDay = dailyCount(renal);
+    const days = Object.keys(byDay).sort().slice(-30);
+    mc('renalDayChart',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Lookups',data:days.map(d=>byDay[d]),borderColor:C.teal,backgroundColor:'rgba(45,212,191,0.08)',fill:true,tension:0.3,pointRadius:3}]},options:{...CD,plugins:{legend:{display:false}}}});
+  }
+
+  // ============================================================
+  // RENDER: Compat
+  // ============================================================
+  function renderCompat(compat) {
+    const users = uniqueSet(compat, 'user_id');
+    const pairChecks = compat.filter(r => r.mode === 'pair');
+    const multiChecks = compat.filter(r => r.mode === 'multi');
+    const incompats = compat.filter(r => r.result_status === 'incompatible' || r.result_status === 'has_incompatible');
+
+    document.getElementById('compatStats').innerHTML = [
+      statBox('🔗', compat.length.toLocaleString(), 'Total Checks', 'purple'),
+      statBox('👤', users.size.toLocaleString(), 'Unique Users', 'blue'),
+      statBox('💊', pairChecks.length.toLocaleString(), 'Pair Checks', 'cyan'),
+      statBox('🔬', multiChecks.length.toLocaleString(), 'Multi Checks', 'teal'),
+      statBox('❌', incompats.length.toLocaleString(), 'Incompatible', 'red')
+    ].join('');
+
+    // Mode chart (pair vs multi vs matrix_view)
+    const modeCount = countBy(compat, 'mode');
+    mc('compatModeChart',{type:'doughnut',data:{labels:Object.keys(modeCount),datasets:[{data:Object.values(modeCount),backgroundColor:['#0ea5e9','#7c3aed','#d97706','#059669','#dc2626']}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
+
+    // Top drug pairs
+    const drugPairs = {};
+    pairChecks.forEach(r => {
+      const pair = [r.drug_a, r.drug_b].filter(Boolean).sort().join(' + ');
+      if (pair) drugPairs[pair] = (drugPairs[pair] || 0) + 1;
+    });
+    const topPairs = Object.entries(drugPairs).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    mc('compatDrugChart',{type:'bar',data:{labels:topPairs.map(p=>p[0].length>25?p[0].substring(0,25)+'…':p[0]),datasets:[{label:'Checks',data:topPairs.map(p=>p[1]),backgroundColor:'#7c3aed',borderRadius:4}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+
+    // Daily usage
+    const daily = dailyCount(compat);
+    const days = Object.keys(daily).sort();
+    mc('compatDayChart',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Compat Checks',data:days.map(d=>daily[d]),borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.1)',fill:true,tension:0.3,pointRadius:3}]},options:{...CD,plugins:{legend:{display:false}}}});
+  }
+
+  // ============================================================
+  // RENDER: DOSE CALC
+  // ============================================================
+  function renderDoseCalc(doseCalcs) {
+    const users = uniqueSet(doseCalcs, 'user_id');
+    const byDrug = countBy(doseCalcs, 'drug_name');
+    const byUnit = countBy(doseCalcs, 'dose_unit');
+    const byUser = countBy(doseCalcs, 'user_id');
+    const uniqueDrugs = Object.keys(byDrug).length;
+
+    // Stats
+    document.getElementById('doseCalcStats').innerHTML = [
+      statBox('🧮', doseCalcs.length.toLocaleString(), 'Total Calcs', 'pink'),
+      statBox('👤', users.size.toLocaleString(), 'Unique Users', 'cyan'),
+      statBox('💊', uniqueDrugs.toLocaleString(), 'Unique Drugs', 'purple'),
+      statBox('📊', doseCalcs.length > 0 ? (doseCalcs.length / Math.max(users.size, 1)).toFixed(1) : '—', 'Avg Calcs/User', 'amber'),
+    ].join('');
+
+    // Top drugs bar chart
+    const drugNames = Object.keys(byDrug).sort((a, b) => (byDrug[b] || 0) - (byDrug[a] || 0)).slice(0, 15);
+    mc('dcDrugChart', {type: 'bar', data: {labels: drugNames, datasets: [{data: drugNames.map(n => byDrug[n]), backgroundColor: C.pink, borderRadius: 6}]}, options: {...CD, plugins: {legend: {display: false}}}});
+    addChartClick('dcDrugChart', 'drug');
+
+    // Dose unit doughnut
+    const unitLabels = Object.keys(byUnit);
+    mc('dcUnitChart', {type: 'doughnut', data: {labels: unitLabels.length ? unitLabels : ['—'], datasets: [{data: unitLabels.length ? Object.values(byUnit) : [1], backgroundColor: [C.blue, C.green, C.amber, C.purple, C.red, C.teal]}]}, options: {responsive: true, plugins: {legend: {position: 'bottom', labels: {color: '#8899b4', font: {size: 10}}}}}});
+
+    // Top users bar chart
+    const topUsers = Object.entries(byUser).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    mc('dcUserChart', {type: 'bar', data: {labels: topUsers.map(u => u[0].length > 12 ? u[0].substring(0, 12) + '…' : u[0]), datasets: [{label: 'Calcs', data: topUsers.map(u => u[1]), backgroundColor: C.cyan, borderRadius: 4}]}, options: {...CD, indexAxis: 'y', plugins: {legend: {display: false}}}});
+
+    // Weight distribution histogram
+    const weights = doseCalcs.map(r => parseFloat(r.weight_kg)).filter(w => !isNaN(w) && w > 0 && w < 300);
+    const wBuckets = [0, 0, 0, 0, 0, 0];
+    const wLabels = ['<40', '40-50', '50-60', '60-70', '70-80', '>80'];
+    const wColors = [C.red, C.amber, C.green, C.cyan, C.blue, C.purple];
+    weights.forEach(w => {
+      if (w < 40) wBuckets[0]++; else if (w < 50) wBuckets[1]++; else if (w < 60) wBuckets[2]++; else if (w < 70) wBuckets[3]++; else if (w < 80) wBuckets[4]++; else wBuckets[5]++;
+    });
+    mc('dcWeightChart', {type: 'bar', data: {labels: wLabels, datasets: [{label: 'Patients', data: wBuckets, backgroundColor: wColors, borderRadius: 4}]}, options: {...CD, plugins: {legend: {display: false}}}});
+
+    // Daily usage line chart
+    const byDay = dailyCount(doseCalcs);
+    const days = Object.keys(byDay).sort().slice(-30);
+    mc('dcDayChart', {type: 'line', data: {labels: days.map(d => d.substring(5)), datasets: [{label: 'Dose Calcs', data: days.map(d => byDay[d]), borderColor: C.pink, backgroundColor: 'rgba(244,114,182,0.08)', fill: true, tension: 0.3, pointRadius: 3}]}, options: {...CD, plugins: {legend: {display: false}}}});
+  }
+
+  // ============================================================
+  // RENDER: SURVEY
+  // ============================================================
+  function renderSurvey(surveys) {
+    const satRows = surveys.filter(r=>r.sat_5_overall&&r.sat_5_overall!=='');
+    const susRows = surveys.filter(r=>r.sus_score!==undefined&&r.sus_score!=='');
+    const avgSat = satRows.length>0?(satRows.reduce((s,r)=>s+parseFloat(r.sat_5_overall),0)/satRows.length).toFixed(1):'—';
+    const avgSus = susRows.length>0?(susRows.reduce((s,r)=>s+parseFloat(r.sus_score),0)/susRows.length).toFixed(1):'—';
+    const byRole = countBy(surveys,'role');
+    const byDept = countBy(surveys,'department');
+    const bothPhases = surveys.filter(r=>r.sat_5_overall&&r.sat_5_overall!==''&&r.sus_score!==undefined&&r.sus_score!=='').length;
+
+    document.getElementById('surveyStats').innerHTML = [
+      statBox('📋',surveys.length.toLocaleString(),'Surveys','purple'),
+      statBox('⭐',avgSat,'Avg Satisfaction','amber'),
+      statBox('📊',avgSus,'Avg SUS','green'),
+      statBox('✅',satRows.length.toLocaleString(),'Satisfaction Done','blue'),
+      statBox('📋',susRows.length.toLocaleString(),'SUS Done','cyan'),
+      statBox('🔁',bothPhases.toLocaleString(),'Both Phases','pink'),
+    ].join('');
+
+    const satKeys=['sat_1_easy_to_find','sat_2_accurate','sat_3_faster','sat_4_recommend','sat_5_overall'];
+    const satLabels=['ค้นหาง่าย','ถูกต้อง','เร็วขึ้น','แนะนำ','โดยรวม'];
+    const satAvgs=satKeys.map(k=>{const vals=surveys.map(r=>parseFloat(r[k])).filter(v=>!isNaN(v));return vals.length>0?(vals.reduce((a,b)=>a+b,0)/vals.length):0;});
+    mc('satChart',{type:'bar',data:{labels:satLabels,datasets:[{data:satAvgs,backgroundColor:C.amber,borderRadius:4}]},options:{...CD,plugins:{legend:{display:false}},scales:{...CD.scales,y:{...CD.scales.y,max:5}}}});
+
+    const rLabels=Object.keys(byRole);
+    mc('roleChart',{type:'doughnut',data:{labels:rLabels.length?rLabels:['—'],datasets:[{data:rLabels.length?Object.values(byRole):[1],backgroundColor:[C.blue,C.green,C.amber,C.purple,C.red]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
+    addChartClick('roleChart','role');
+
+    // Department bar chart
+    const dLabels=Object.keys(byDept), dData=Object.values(byDept);
+    mc('deptChart',{type:'bar',data:{labels:dLabels.length?dLabels:['—'],datasets:[{data:dData.length?dData:[0],backgroundColor:C.green,borderRadius:4}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+
+    // SUS Score distribution (histogram-style)
+    const susEmptyMsg = document.getElementById('susEmptyMsg');
+    const susCanvas = document.getElementById('susChart');
+    if (susRows.length >= 5) {
+      susEmptyMsg.style.display = 'none';
+      susCanvas.style.display = '';
+      // Bucket SUS scores: 0-20, 21-40, 41-60, 61-80, 81-100
+      const buckets = [0,0,0,0,0];
+      const bucketLabels = ['0-20','21-40','41-60','61-80','81-100'];
+      const bucketColors = [C.red,C.amber,'#fb923c',C.green,C.cyan];
+      susRows.forEach(r=>{
+        const s = parseFloat(r.sus_score);
+        if (s<=20) buckets[0]++; else if (s<=40) buckets[1]++; else if (s<=60) buckets[2]++; else if (s<=80) buckets[3]++; else buckets[4]++;
+      });
+      mc('susChart',{type:'bar',data:{labels:bucketLabels,datasets:[{label:'SUS Responses',data:buckets,backgroundColor:bucketColors,borderRadius:4}]},options:{...CD,plugins:{legend:{display:false}}}});
+    } else {
+      susCanvas.style.display = 'none';
+      susEmptyMsg.style.display = '';
+    }
+  }
+
+  // ============================================================
+  // RENDER: JOURNEY
+  // ============================================================
+  function renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage) {
+    const users = uniqueSet(pageViews,'user_id');
+
+    document.getElementById('journeyStats').innerHTML = [
+      statBox('📄',pageViews.length.toLocaleString(),'Page Views','cyan'),
+      statBox('👤',users.size.toLocaleString(),'Users','blue'),
+    ].join('');
+
+    const byPage = countBy(pageViews,'page');
+    const pLabels=Object.keys(byPage);
+    mc('pvChart',{type:'bar',data:{labels:pLabels,datasets:[{data:Object.values(byPage),backgroundColor:C.cyan,borderRadius:5}]},options:{...CD,plugins:{legend:{display:false}}}});
+
+    // Flow
+    const flows={};
+    const pvBySession={};
+    pageViews.forEach(r=>{const sid=String(r.session_id||'');if(sid){if(!pvBySession[sid])pvBySession[sid]=[];pvBySession[sid].push(r);}});
+    for(const evts of Object.values(pvBySession)){evts.sort((a,b)=>String(a.timestamp||'').localeCompare(String(b.timestamp||'')));for(let i=0;i<evts.length-1;i++){const key=`${evts[i].page}→${evts[i+1].page}`;flows[key]=(flows[key]||0)+1;}}
+    const flowTop=Object.entries(flows).sort((a,b)=>b[1]-a[1]).slice(0,15);
+    mc('flowChart',{type:'bar',data:{labels:flowTop.map(f=>f[0]),datasets:[{data:flowTop.map(f=>f[1]),backgroundColor:C.blue,borderRadius:3}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+
+    // User list
+    const allUsers = {};
+    const addEvts = (arr,type)=>arr.forEach(r=>{const uid=String(r.user_id||r.session_id||'').trim();if(!uid)return;if(!allUsers[uid])allUsers[uid]=[];allUsers[uid].push({type,time:r.timestamp,detail:r.drug_name||r.drug_clicked||r.page||r.query||'—'});});
+    addEvts(pageViews,'page_view');addEvts(searches,'search');addEvts(doseCalcs,'dose_calc');addEvts(tdmUsage,'tdm_calc');
+    for(const uid in allUsers) allUsers[uid].sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
+    window._journeyUsers = allUsers;
+
+    const uids = Object.keys(allUsers).slice(0,50);
+    document.getElementById('userList').innerHTML = uids.length
+      ? uids.map(u=>`<span class="user-pill" onclick="addFilter('user','${u}')">${u.substring(0,12)}…</span>`).join('')
+      : '<div class="empty-msg">ยังไม่มีข้อมูล</div>';
+  }
+
+  function showTimeline() {
+    const uid = document.getElementById('journeyUid').value.trim();
+    const el = document.getElementById('userTimeline');
+    if (!uid) { el.innerHTML='<div class="empty-msg">กรุณาพิมพ์ user_id</div>'; return; }
+    let events = window._journeyUsers?.[uid];
+    if (!events) { const match=Object.keys(window._journeyUsers||{}).find(k=>k.includes(uid));if(match){document.getElementById('journeyUid').value=match;return showTimeline();}el.innerHTML='<div class="empty-msg">ไม่พบข้อมูล</div>';return; }
+    const typeL={page_view:'📄 Page',search:'🔍 Search',dose_calc:'🧮 Dose',tdm_calc:'🎯 TDM'};
+    const typeC={page_view:'var(--accent-blue)',search:'var(--accent-cyan)',dose_calc:'var(--accent-purple)',tdm_calc:'var(--accent-red)'};
+    el.innerHTML=`<div style="font-size:11px;color:var(--accent-cyan);font-weight:600;margin:8px 0">🗺 ${uid} (${events.length} events)</div><div class="timeline">${events.map(ev=>`<div class="tl-item ${ev.type}"><div class="tl-time">${ev.time?ev.time.substring(0,19).replace('T',' '):''}</div><div class="tl-type" style="color:${typeC[ev.type]||''}">${typeL[ev.type]||ev.type}</div><div class="tl-detail">${ev.detail||'—'}</div></div>`).join('')}</div>`;
+  }
+
+  // ============================================================
+  // Export CSV
+  // ============================================================
+  async function exportCSV(sheet) {
+    if (!SCRIPT_URL) return alert('ตั้งค่า URL ก่อน');
+    try { const res=await fetch(SCRIPT_URL+'?action=export&sheet='+sheet);const data=await res.json();if(data.error)return alert(data.error);if(!data.length)return alert('ไม่มีข้อมูล');
+    const h=Object.keys(data[0]);const csv=[h.join(','),...data.map(r=>h.map(k=>`"${String(r[k]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
+    const b=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`IV_DrugRef_${sheet}_${new Date().toISOString().substring(0,10)}.csv`;a.click();toast('📥 Exported '+sheet);
+    } catch(e){alert('Failed: '+e.message);}
+  }
+
+  // Auto-refresh
+  function toggleAR(){_arOn=!_arOn;const b=document.getElementById('arBtn'),d=document.getElementById('arDot');if(_arOn){b.textContent='⏱ Auto: ON';b.classList.add('active-state');d.style.display='inline';_arTimer=setInterval(fetchRaw,60000);toast('⏱ Auto-refresh ON');}else{b.textContent='⏱ Auto: OFF';b.classList.remove('active-state');d.style.display='none';if(_arTimer)clearInterval(_arTimer);toast('⏱ Auto-refresh OFF');}}
+
+  // Toast
+  function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+  // Expose functions to window for onclick handlers
+  window.toggleSetup = toggleSetup;
+  window.saveUrl = saveUrl;
+  window.addFilter = addFilter;
+  window.removeFilter = removeFilter;
+  window.clearAllFilters = clearAllFilters;
+  window.fetchRaw = fetchRaw;
+  window.xprt = xprt;
+  window.exportCSV = exportCSV;
+  window.toggleAR = toggleAR;
+  window.toast = toast;
+  window.showTimeline = showTimeline;
+
+  // Init on page load
+  const today=new Date().toISOString().substring(0,10);
+  const ago=new Date(Date.now()-30*86400000).toISOString().substring(0,10);
+  document.getElementById('dateFrom').value=ago;
+  document.getElementById('dateTo').value=today;
+  if(SCRIPT_URL)fetchRaw();
+})();
+
 </script>
 <script src="translations-en.js"></script>
 <script src="i18n.js"></script>

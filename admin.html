@@ -26,12 +26,1261 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Stylesheets -->
-<style>
-@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap);*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;background:var(--bg-primary);color:var(--text-primary)}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:0 0}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#94a3b8}.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid #e2e8f0;padding-bottom:env(safe-area-inset-bottom,0)}.bottom-nav-inner{max-width:600px;margin:0 auto;display:flex;justify-content:space-around;padding:6px 0 4px}.bottom-nav a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:10px;font-weight:500;gap:2px;transition:color .2s;padding:4px 8px}.bottom-nav a .nav-icon{font-size:18px;line-height:1}.bottom-nav a .nav-label{font-size:10px}.bottom-nav a:hover{color:#0ea5e9}.bottom-nav a.nav-active{color:#0ea5e9;font-weight:600}.theme-dark .bottom-nav{background:rgba(11,17,32,.92);border-top-color:#1e3050}.theme-dark .bottom-nav a{color:#64748b}.theme-dark .bottom-nav a.nav-active,.theme-dark .bottom-nav a:hover{color:#38bdf8}.nav-back{display:inline-flex;align-items:center;gap:4px;color:#0ea5e9;text-decoration:none;font-size:14px;font-weight:500}.nav-back svg{width:16px;height:16px}.field label{font-size:11px;color:#64748b;display:block;margin-bottom:4px;font-weight:500}.field input,.field select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;font-weight:500;font-family:inherit;background:#fff;color:#1e293b}.field input:focus,.field select:focus{outline:0;border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,.12)}.section{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:16px;overflow:hidden}.section-header{padding:12px 16px;font-size:13px;font-weight:600;color:#0ea5e9;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;gap:8px}.field-grid{display:grid;gap:12px;padding:16px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.container{max-width:640px;margin:0 auto;padding:16px 16px 90px}.badge{font-family:'JetBrains Mono',monospace;letter-spacing:.3px}.badge-had{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)}.badge-ed{background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.2)}.badge-ned{background:rgba(217,119,6,.08);color:#d97706;border:1px solid rgba(217,119,6,.2)}.disclaimer{text-align:center;font-size:11px;color:#dc2626;padding:12px 16px;font-weight:500;background:#fef2f2;border-radius:8px;margin-top:16px}.info-box{border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;margin-top:12px}.info-box.blue{background:#e6f1fb;color:#0c447c}.info-box.amber{background:#fef3c7;color:#92400e}.info-box.red{background:#fef2f2;color:#991b1b}.btn{border-radius:6px;font-family:inherit;border:1px solid var(--border,rgba(255,255,255,.08));background:var(--bg-card,rgba(255,255,255,.06));color:var(--text-secondary,#94a3b8);display:inline-flex;align-items:center;gap:4px}.btn:hover{background:var(--bg-card-hover,rgba(255,255,255,.1));color:var(--text-primary,#f1f5f9);border-color:var(--border-focus,rgba(255,255,255,.15))}.btn.primary{background:linear-gradient(135deg,var(--accent-cyan,#22d3ee),var(--accent-blue,#38bdf8));color:#0f172a;border-color:transparent}.btn.primary:hover{box-shadow:0 2px 12px rgba(56,189,248,.25);transform:translateY(-1px)}.btn.sm{padding:4px 8px;font-size:10px}.theme-light .btn{background:rgba(0,0,0,.04);color:var(--text-secondary,#64748b);border-color:var(--border,#e2e8f0)}.theme-light .btn:hover{background:rgba(0,0,0,.08);color:var(--text-primary,#1e293b)}@media (max-width:480px){.container{padding:16px 14px 90px}}:root{--bg-primary:#f0f4f8;--bg-secondary:#e2e8f0;--bg-card:#ffffff;--bg-card-hover:#f8fafc;--bg-input:#ffffff;--border:#e2e8f0;--border-focus:#0ea5e9;--text-primary:#1e293b;--text-secondary:#64748b;--text-muted:#94a3b8;--accent-blue:#0ea5e9;--accent-cyan:#0891b2;--accent-emerald:#059669;--accent-green:#059669;--accent-amber:#d97706;--accent-red:#dc2626;--accent-pink:#db2777;--accent-purple:#7c3aed;--had-bg:rgba(220,38,38,0.04);--had-border:rgba(220,38,38,0.2);--had-glow:rgba(220,38,38,0.08);--tag-bg:rgba(14,165,233,0.06);--tag-border:rgba(14,165,233,0.15);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:24px;--accent-teal:#0d9488;--border-glow:rgba(14,165,233,0.15);--font-mono:'JetBrains Mono',monospace;--font-sans:'DM Sans','IBM Plex Sans Thai',sans-serif;--shadow-sm:0 1px 2px rgba(0,0,0,0.04);--shadow-md:0 4px 12px rgba(0,0,0,0.06);--shadow-lg:0 8px 24px rgba(0,0,0,0.08);--shadow-glow:0 0 0 3px rgba(14,165,233,0.08)}body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#cbd5e1 .5px,transparent .5px);background-size:24px 24px;opacity:.3;pointer-events:none;z-index:0}.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border)}.header-inner{max-width:900px;margin:0 auto;padding:14px 20px}.header-simple{background:#fff;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}.header-simple a{color:var(--accent-blue);text-decoration:none;font-size:14px;font-weight:500}.header-simple h1{font-size:16px;font-weight:600;flex:1}.header-pill{font-size:11px;font-weight:600;color:#38bdf8;background:#1e293b;border:1.5px solid #38bdf8;padding:5px 12px;border-radius:20px;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:.2s}.header-pill:hover{background:#334155;box-shadow:0 0 12px rgba(56,189,248,.2)}:root{--bg:#f8fafc;--surface:#ffffff;--surface-alt:#f1f5f9;--border:#e2e8f0;--border-focus:#0ea5e9;--text:#0f172a;--text-muted:#64748b;--text-light:#94a3b8;--primary:#0ea5e9;--primary-hover:#0284c7;--primary-bg:#e0f2fe;--success:#10b981;--success-bg:#d1fae5;--warning:#f59e0b;--warning-bg:#fef3c7;--danger:#ef4444;--danger-bg:#fee2e2;--purple:#8b5cf6;--purple-bg:#ede9fe;--had-red:#dc2626;--had-bg:#fef2f2;--radius:12px;--radius-sm:8px;--radius-xs:6px;--shadow:0 1px 3px rgba(0, 0, 0, 0.06),0 1px 2px rgba(0, 0, 0, 0.04);--shadow-md:0 4px 6px -1px rgba(0, 0, 0, 0.07),0 2px 4px -2px rgba(0, 0, 0, 0.05);--shadow-lg:0 10px 15px -3px rgba(0, 0, 0, 0.08),0 4px 6px -4px rgba(0, 0, 0, 0.04);--font:'Plus Jakarta Sans','IBM Plex Sans Thai',sans-serif;--mono:'JetBrains Mono',monospace}#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0ea5e9 0,#6366f1 100%)}.auth-card{background:var(--surface);border-radius:20px;padding:48px;text-align:center;max-width:420px;width:90%;box-shadow:var(--shadow-lg)}.auth-card h1{font-size:24px;font-weight:700;margin-bottom:8px}.auth-card p{color:var(--text-muted);margin-bottom:32px;font-size:14px}.auth-logo{font-size:48px;margin-bottom:16px;display:block}.google-btn{display:inline-flex;align-items:center;gap:12px;background:var(--surface);border:2px solid var(--border);border-radius:50px;padding:12px 32px;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;font-family:var(--font);color:var(--text)}.google-btn:hover{border-color:var(--primary);box-shadow:var(--shadow-md)}.google-btn svg{width:20px;height:20px}.auth-error{color:var(--danger);margin-top:16px;font-size:13px;display:none}#app{display:none}.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}.topbar-brand{font-weight:700;font-size:18px;white-space:nowrap}.topbar-brand span{color:var(--primary)}.topbar-spacer{flex:1}.topbar-user{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted)}.topbar-user img{width:32px;height:32px;border-radius:50%}.topbar-signout{background:0 0;border:1px solid var(--border);border-radius:var(--radius-xs);padding:6px 14px;font-size:12px;cursor:pointer;font-family:var(--font);color:var(--text-muted);transition:.15s}.topbar-signout:hover{border-color:var(--danger);color:var(--danger)}.tabs{display:flex;gap:4px;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--border)}.tab-btn{padding:8px 20px;border-radius:50px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:var(--font);background:0 0;color:var(--text-muted);transition:.15s}.tab-btn:hover{background:var(--surface-alt)}.tab-btn.active{background:var(--primary);color:#fff}.tab-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--warning);color:#fff;font-size:10px;min-width:18px;height:18px;border-radius:9px;margin-left:6px;padding:0 5px;font-weight:700}.main{padding:24px;max-width:1400px;margin:0 auto}.panel{display:none}.panel.active{display:block}.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}.stat-card{background:var(--surface);border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow)}.stat-label{font-size:12px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px}.stat-value{font-size:28px;font-weight:700;margin-top:4px}.stat-value.primary{color:var(--primary)}.stat-value.success{color:var(--success)}.stat-value.warning{color:var(--warning)}.stat-value.danger{color:var(--danger)}.stat-value.purple{color:var(--purple)}.toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center}.search-box{flex:1;min-width:240px;padding:10px 16px 10px 40px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);outline:0;transition:border .15s;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") 14px center no-repeat}.search-box:focus{border-color:var(--primary)}.filter-select{padding:10px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);background:var(--surface);cursor:pointer;outline:0}.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font);border:none;cursor:pointer;transition:.15s;white-space:nowrap}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-hover)}.btn-success{background:var(--success);color:#fff}.btn-success:hover{opacity:.9}.btn-warning{background:var(--warning);color:#fff}.btn-warning:hover{opacity:.9}.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{opacity:.9}.btn-outline{background:var(--surface);color:var(--text-muted);border:2px solid var(--border)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}.btn-sm{padding:6px 12px;font-size:12px}.btn-icon{padding:8px;min-width:36px;justify-content:center}.table-wrap{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}.drug-table{width:100%;border-collapse:collapse;font-size:13px}.drug-table thead{background:var(--surface-alt)}.drug-table th{padding:12px 16px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}.drug-table th:hover{color:var(--primary)}.drug-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle}.drug-table tr:last-child td{border-bottom:none}.drug-table tr:hover td{background:#f8fafc}.drug-name{font-weight:600}.drug-trade{color:var(--text-muted);font-size:12px}.badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600}.badge-approved{background:var(--success-bg);color:#065f46}.badge-pending{background:var(--warning-bg);color:#92400e}.badge-draft{background:var(--surface-alt);color:var(--text-muted)}.badge-had{background:var(--had-bg);color:var(--had-red)}.badge-ed{background:var(--primary-bg);color:#0369a1}.badge-ned{background:var(--surface-alt);color:var(--text-muted)}.badge-cat{background:var(--purple-bg);color:#6d28d9;margin:1px 2px}.actions-cell{display:flex;gap:6px}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;backdrop-filter:blur(4px)}.modal-overlay.open{display:flex}.modal{background:var(--surface);border-radius:16px;width:100%;max-width:900px;box-shadow:var(--shadow-lg);margin-top:24px;margin-bottom:24px}.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}.modal-header h2{font-size:18px;font-weight:700}.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--surface-alt);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:.15s}.modal-close:hover{background:var(--danger-bg);color:var(--danger)}.modal-body{padding:24px;max-height:70vh;overflow-y:auto}.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.form-group{display:flex;flex-direction:column;gap:4px}.form-group.full{grid-column:1/-1}.form-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}.form-input,.form-select,.form-textarea{padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius-xs);font-size:14px;font-family:var(--font);outline:0;transition:border .15s;background:var(--surface);width:100%}.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary)}.form-textarea{resize:vertical;min-height:80px}.form-section{grid-column:1/-1;font-size:14px;font-weight:700;color:var(--primary);border-bottom:2px solid var(--primary-bg);padding-bottom:6px;margin-top:8px}.form-check{display:flex;align-items:center;gap:8px;font-size:14px}.form-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary);cursor:pointer}.preview-container{background:var(--surface-alt);border-radius:var(--radius);padding:20px;margin-top:16px}.preview-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;max-width:500px;margin:0 auto;box-shadow:var(--shadow)}.preview-card-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start}.preview-card-header h3{font-size:16px;font-weight:700}.preview-card-header .trade{color:var(--text-muted);font-size:13px}.preview-card-header .strength{color:var(--primary);font-size:12px;font-weight:600}.preview-card-badges{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 12px}.preview-section{padding:12px 20px;border-top:1px solid var(--border)}.preview-section-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;margin-bottom:4px}.preview-section-content{font-size:13px;line-height:1.5}.had-pulse{animation:2s ease-in-out infinite hadPulse;border-left:4px solid var(--had-red)}@keyframes hadPulse{0%,100%{border-left-color:var(--had-red)}50%{border-left-color:transparent}}.import-zone{border:3px dashed var(--border);border-radius:var(--radius);padding:48px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface)}.import-zone.dragover,.import-zone:hover{border-color:var(--primary);background:var(--primary-bg)}.import-zone-icon{font-size:48px;margin-bottom:12px}.import-zone-text{font-size:15px;font-weight:600}.import-zone-sub{font-size:12px;color:var(--text-muted);margin-top:4px}.import-preview{margin-top:20px;max-height:400px;overflow:auto}.import-status{padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-top:12px}.import-status.success{background:var(--success-bg);color:#065f46}.import-status.error{background:var(--danger-bg);color:#991b1b}.audit-timeline{position:relative;padding-left:24px}.audit-timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}.audit-item{position:relative;padding:12px 16px;margin-bottom:12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px}.audit-item::before{content:'';position:absolute;left:-20px;top:18px;width:10px;height:10px;border-radius:50%;background:var(--primary);border:2px solid var(--surface)}.audit-item.create::before{background:var(--success)}.audit-item.edit::before{background:var(--warning)}.audit-item.delete::before{background:var(--danger)}.audit-item.approve::before{background:var(--purple)}.audit-meta{display:flex;gap:12px;font-size:11px;color:var(--text-muted);margin-bottom:4px}.audit-action{font-weight:600}.audit-details{color:var(--text-muted);margin-top:4px}.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;font-size:13px}.page-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface);cursor:pointer;font-family:var(--font);font-size:13px}.page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}.page-btn:hover:not(.active){border-color:var(--primary)}.toast-container{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:8px}.toast{padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:#fff;box-shadow:var(--shadow-lg);animation:.3s toastIn;min-width:280px}.toast.success{background:var(--success)}.toast.error{background:var(--danger)}.toast.info{background:var(--primary)}@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.spinner{width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:.6s linear infinite spin;display:inline-block}@keyframes spin{to{transform:rotate(360deg)}}.loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-weight:600}.loading-overlay.show{display:flex}@media (max-width:768px){.form-grid{grid-template-columns:1fr}.topbar{padding:10px 16px}.main{padding:16px}.tabs{overflow-x:auto;padding:8px 16px}.toolbar{flex-direction:column}.search-box{min-width:100%}.stats-row{grid-template-columns:1fr 1fr}}
-</style>
-</head>
+  <!-- Bundled Stylesheets -->
+  <style>
+/* ============================================================
+   IV DrugRef PWA v5.0 — Shared Styles
+   ============================================================ */
 
+/* Google Fonts */
+
+/* ---- CSS Reset ---- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+/* ---- Typography ---- */
+body {
+  font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ---- Bottom Navigation (shared across ALL pages) ---- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid #e2e8f0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.bottom-nav-inner {
+  max-width: 600px; margin: 0 auto;
+  display: flex; justify-content: space-around;
+  padding: 6px 0 4px;
+}
+.bottom-nav a {
+  display: flex; flex-direction: column; align-items: center;
+  text-decoration: none; color: #94a3b8; font-size: 10px;
+  font-weight: 500; gap: 2px; transition: color 0.2s;
+  padding: 4px 8px;
+}
+.bottom-nav a .nav-icon { font-size: 18px; line-height: 1; }
+.bottom-nav a .nav-label { font-size: 10px; }
+.bottom-nav a:hover { color: #0ea5e9; }
+.bottom-nav a.nav-active { color: #0ea5e9; font-weight: 600; }
+
+/* ---- Dark theme bottom nav override ---- */
+.theme-dark .bottom-nav {
+  background: rgba(11,17,32,0.92);
+  border-top-color: #1e3050;
+}
+.theme-dark .bottom-nav a { color: #64748b; }
+.theme-dark .bottom-nav a:hover { color: #38bdf8; }
+.theme-dark .bottom-nav a.nav-active { color: #38bdf8; }
+
+/* ---- Common nav back button ---- */
+.nav-back {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: #0ea5e9; text-decoration: none; font-size: 14px; font-weight: 500;
+}
+.nav-back svg { width: 16px; height: 16px; }
+
+/* ---- Common form field styles ---- */
+.field label {
+  font-size: 11px; color: #64748b; display: block;
+  margin-bottom: 4px; font-weight: 500;
+}
+.field input, .field select {
+  width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: #1e293b;
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
+}
+
+/* ---- Common section/card styles ---- */
+.section {
+  background: #fff; border-radius: 12px;
+  border: 1px solid #e2e8f0; margin-bottom: 16px; overflow: hidden;
+}
+.section-header {
+  padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0ea5e9;
+  border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px;
+}
+
+/* ---- Layout grids ---- */
+.field-grid { display: grid; gap: 12px; padding: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.container { max-width: 640px; margin: 0 auto; padding: 16px 16px 90px; }
+
+/* ---- Badges ---- */
+.badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px; letter-spacing: 0.3px;
+}
+.badge-had { background: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+.badge-ed { background: rgba(5,150,105,0.08); color: #059669; border: 1px solid rgba(5,150,105,0.2); }
+.badge-ned { background: rgba(217,119,6,0.08); color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+
+/* ---- Disclaimer ---- */
+.disclaimer {
+  text-align: center; font-size: 11px; color: #dc2626; padding: 12px 16px;
+  font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
+}
+
+/* ---- Info boxes ---- */
+.info-box {
+  border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
+}
+.info-box.blue { background: #e6f1fb; color: #0c447c; }
+.info-box.amber { background: #fef3c7; color: #92400e; }
+.info-box.red { background: #fef2f2; color: #991b1b; }
+
+/* ---- Buttons (shared across all pages) ---- */
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  background: var(--bg-card, rgba(255, 255, 255, 0.06));
+  color: var(--text-secondary, #94a3b8);
+  transition: all .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--bg-card-hover, rgba(255, 255, 255, 0.1));
+  color: var(--text-primary, #f1f5f9);
+  border-color: var(--border-focus, rgba(255,255,255,0.15));
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent-cyan, #22d3ee), var(--accent-blue, #38bdf8));
+  color: #0f172a;
+  border-color: transparent;
+}
+
+.btn.primary:hover {
+  box-shadow: 0 2px 12px rgba(56, 189, 248, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn.sm {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+/* Light theme button overrides */
+.theme-light .btn {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary, #64748b);
+  border-color: var(--border, #e2e8f0);
+}
+
+.theme-light .btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary, #1e293b);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+  .container { padding: 16px 14px 90px; }
+}
+/* ============================================================
+   IV DrugRef PWA v5.0 — Light Theme
+   Used by: index, calculator, renal-dosing, compatibility, admin
+   ============================================================ */
+
+:root {
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #e2e8f0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-input: #ffffff;
+  --border: #e2e8f0;
+  --border-focus: #0ea5e9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --accent-blue: #0ea5e9;
+  --accent-cyan: #0891b2;
+  --accent-emerald: #059669;
+  --accent-green: #059669;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
+  --accent-pink: #db2777;
+  --accent-purple: #7c3aed;
+  --had-bg: rgba(220,38,38,0.04);
+  --had-border: rgba(220,38,38,0.2);
+  --had-glow: rgba(220,38,38,0.08);
+  --tag-bg: rgba(14,165,233,0.06);
+  --tag-border: rgba(14,165,233,0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --accent-teal: #0d9488;
+  --border-glow: rgba(14,165,233,0.15);
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-glow: 0 0 0 3px rgba(14,165,233,0.08);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Subtle dot pattern */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, #cbd5e1 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Light Header ---- */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 900px; margin: 0 auto; padding: 14px 20px;
+}
+
+/* Simple header (calculator, renal-dosing) */
+.header-simple {
+  background: #fff; border-bottom: 1px solid var(--border); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100;
+}
+.header-simple a { color: var(--accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
+.header-simple h1 { font-size: 16px; font-weight: 600; flex: 1; }
+
+/* ---- Light theme link pills ---- */
+.header-pill {
+  font-size: 11px; font-weight: 600; color: #38bdf8; background: #1e293b;
+  border: 1.5px solid #38bdf8; padding: 5px 12px; border-radius: 20px;
+  text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+  transition: all .2s;
+}
+.header-pill:hover { background: #334155; box-shadow: 0 0 12px rgba(56,189,248,0.2); }
+/* IV DrugRef Admin Dashboard — CSS Module */
+
+/* ─── CSS Variables ─── */
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --border: #e2e8f0;
+  --border-focus: #0ea5e9;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --primary: #0ea5e9;
+  --primary-hover: #0284c7;
+  --primary-bg: #e0f2fe;
+  --success: #10b981;
+  --success-bg: #d1fae5;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --purple: #8b5cf6;
+  --purple-bg: #ede9fe;
+  --had-red: #dc2626;
+  --had-bg: #fef2f2;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --font: 'Plus Jakarta Sans', 'IBM Plex Sans Thai', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+/* ─── Auth Screen ─── */
+#auth-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+}
+
+.auth-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 48px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-card h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.auth-card p {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  font-size: 14px;
+}
+
+.auth-logo {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  padding: 12px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font);
+  color: var(--text);
+}
+
+.google-btn:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.google-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.auth-error {
+  color: var(--danger);
+  margin-top: 16px;
+  font-size: 13px;
+  display: none;
+}
+
+/* ─── App Shell ─── */
+#app {
+  display: none;
+}
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+
+.topbar-brand {
+  font-weight: 700;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.topbar-brand span {
+  color: var(--primary);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.topbar-user img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.topbar-signout {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.topbar-signout:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab-btn {
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.tab-btn:hover {
+  background: var(--surface-alt);
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--warning);
+  color: white;
+  font-size: 10px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  margin-left: 6px;
+  padding: 0 5px;
+  font-weight: 700;
+}
+
+/* ─── Main Content ─── */
+.main {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+/* ─── Stats Row ─── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.stat-value.primary {
+  color: var(--primary);
+}
+
+.stat-value.success {
+  color: var(--success);
+}
+
+.stat-value.warning {
+  color: var(--warning);
+}
+
+.stat-value.danger {
+  color: var(--danger);
+}
+
+.stat-value.purple {
+  color: var(--purple);
+}
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px 16px 10px 40px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border 0.15s;
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E")
+    14px center no-repeat;
+}
+
+.search-box:focus {
+  border-color: var(--primary);
+}
+
+.filter-select {
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  background: var(--surface);
+  cursor: pointer;
+  outline: none;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-success:hover {
+  opacity: 0.9;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: white;
+}
+
+.btn-warning:hover {
+  opacity: 0.9;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+.btn-outline {
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 2px solid var(--border);
+}
+
+.btn-outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-icon {
+  padding: 8px;
+  min-width: 36px;
+  justify-content: center;
+}
+
+/* ─── Drug Table ─── */
+.table-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.drug-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.drug-table thead {
+  background: var(--surface-alt);
+}
+
+.drug-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.drug-table th:hover {
+  color: var(--primary);
+}
+
+.drug-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.drug-table tr:last-child td {
+  border-bottom: none;
+}
+
+.drug-table tr:hover td {
+  background: #f8fafc;
+}
+
+.drug-name {
+  font-weight: 600;
+}
+
+.drug-trade {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-approved {
+  background: var(--success-bg);
+  color: #065f46;
+}
+
+.badge-pending {
+  background: var(--warning-bg);
+  color: #92400e;
+}
+
+.badge-draft {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+}
+
+.badge-had {
+  background: var(--had-bg);
+  color: var(--had-red);
+}
+
+.badge-ed {
+  background: var(--primary-bg);
+  color: #0369a1;
+}
+
+.badge-ned {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+}
+
+.badge-cat {
+  background: var(--purple-bg);
+  color: #6d28d9;
+  margin: 1px 2px;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+}
+
+/* ─── Modal ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 500;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  box-shadow: var(--shadow-lg);
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-alt);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.modal-close:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ─── Drug Form ─── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border 0.15s;
+  background: var(--surface);
+  width: 100%;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  border-color: var(--primary);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-section {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary-bg);
+  padding-bottom: 6px;
+  margin-top: 8px;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.form-check input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ─── Preview Card ─── */
+.preview-container {
+  background: var(--surface-alt);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.preview-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  max-width: 500px;
+  margin: 0 auto;
+  box-shadow: var(--shadow);
+}
+
+.preview-card-header {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.preview-card-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.preview-card-header .trade {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.preview-card-header .strength {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.preview-card-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 20px 12px;
+}
+
+.preview-section {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.preview-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.preview-section-content {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.had-pulse {
+  animation: hadPulse 2s ease-in-out infinite;
+  border-left: 4px solid var(--had-red);
+}
+
+@keyframes hadPulse {
+  0%,
+  100% {
+    border-left-color: var(--had-red);
+  }
+  50% {
+    border-left-color: transparent;
+  }
+}
+
+/* ─── Bulk Import ─── */
+.import-zone {
+  border: 3px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 48px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+}
+
+.import-zone:hover,
+.import-zone.dragover {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.import-zone-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.import-zone-text {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.import-zone-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.import-preview {
+  margin-top: 20px;
+  max-height: 400px;
+  overflow: auto;
+}
+
+.import-status {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.import-status.success {
+  background: var(--success-bg);
+  color: #065f46;
+}
+
+.import-status.error {
+  background: var(--danger-bg);
+  color: #991b1b;
+}
+
+/* ─── Audit Log ─── */
+.audit-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.audit-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.audit-item {
+  position: relative;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.audit-item::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 18px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid var(--surface);
+}
+
+.audit-item.create::before {
+  background: var(--success);
+}
+
+.audit-item.edit::before {
+  background: var(--warning);
+}
+
+.audit-item.delete::before {
+  background: var(--danger);
+}
+
+.audit-item.approve::before {
+  background: var(--purple);
+}
+
+.audit-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.audit-action {
+  font-weight: 600;
+}
+
+.audit-details {
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ─── Pagination ─── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+.page-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 13px;
+}
+
+.page-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.page-btn:hover:not(.active) {
+  border-color: var(--primary);
+}
+
+/* ─── Toast ─── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 0.3s ease;
+  min-width: 280px;
+}
+
+.toast.success {
+  background: var(--success);
+}
+
+.toast.error {
+  background: var(--danger);
+}
+
+.toast.info {
+  background: var(--primary);
+}
+
+@keyframes toastIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ─── Loading ─── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.loading-overlay.show {
+  display: flex;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .topbar {
+    padding: 10px 16px;
+  }
+  .main {
+    padding: 16px;
+  }
+  .tabs {
+    overflow-x: auto;
+    padding: 8px 16px;
+  }
+  .toolbar {
+    flex-direction: column;
+  }
+  .search-box {
+    min-width: 100%;
+  }
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+  </style>
+</head>
 <body>
 
 <!-- ═══════ AUTH SCREEN ═══════ -->
@@ -102,6 +1351,9 @@
           <option value="pending">⏳ Pending</option>
           <option value="draft">📝 Draft</option>
         </select>
+        <select class="filter-select" id="filter-category" onchange="filterDrugs()">
+          <option value="">ทุกหมวดหมู่</option>
+        </select>
         <button class="btn btn-primary" onclick="openDrugModal()">＋ เพิ่มยาใหม่</button>
         <button class="btn btn-success" onclick="exportData()">📥 ส่งออก CSV</button>
       </div>
@@ -152,13 +1404,61 @@
     <!-- ═══════ PANEL: AUDIT LOG ═══════ -->
     <div class="panel" id="audit-panel">
       <h2 style="margin-bottom:16px">📝 Audit Log</h2>
+      <div class="toolbar" style="margin-bottom:16px">
+        <select class="filter-select" id="audit-filter-action" onchange="renderAuditLog()">
+          <option value="">ทุก Action</option>
+          <option value="create">🆕 สร้างใหม่</option>
+          <option value="edit">✏️ แก้ไข</option>
+          <option value="delete">🗑 ลบ</option>
+          <option value="approve">✅ อนุมัติ</option>
+          <option value="reject">↩️ ส่งกลับ</option>
+          <option value="import">📥 Import</option>
+        </select>
+        <input type="date" class="form-input" id="audit-date-from" onchange="renderAuditLog()" style="width:auto">
+        <input type="date" class="form-input" id="audit-date-to" onchange="renderAuditLog()" style="width:auto">
+      </div>
       <div id="audit-log-container"></div>
+      <div class="pagination" id="audit-pagination"></div>
     </div>
 
     <!-- ═══════ PANEL: USERS ═══════ -->
     <div class="panel" id="users-panel">
       <h2 style="margin-bottom:16px">👥 จัดการผู้ใช้</h2>
-      <div id="admin-users-list"></div>
+      <!-- Add User Form -->
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap">
+        <div class="form-group" style="margin:0;flex:1;min-width:200px">
+          <label class="form-label" style="font-size:12px">Email *</label>
+          <input type="email" class="form-input" id="new-user-email" placeholder="user@hospital.go.th">
+        </div>
+        <div class="form-group" style="margin:0;flex:1;min-width:150px">
+          <label class="form-label" style="font-size:12px">ชื่อ</label>
+          <input type="text" class="form-input" id="new-user-name" placeholder="ชื่อ-สกุล">
+        </div>
+        <div class="form-group" style="margin:0;min-width:120px">
+          <label class="form-label" style="font-size:12px">Role</label>
+          <select class="form-select" id="new-user-role">
+            <option value="editor">📝 Editor</option>
+            <option value="admin">🔑 Admin</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="addUser()">＋ เพิ่มผู้ใช้</button>
+      </div>
+      <!-- Users Table -->
+      <div class="table-wrap">
+        <table class="drug-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>ชื่อ</th>
+              <th>Role</th>
+              <th>เพิ่มโดย</th>
+              <th>วันที่เพิ่ม</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ═══════ PANEL: SETTINGS ═══════ -->
@@ -183,6 +1483,8 @@
           <span style="font-size:11px;color:var(--text-muted)">เฉพาะ email ที่อนุญาตให้เข้า admin</span>
         </div>
         <button class="btn btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
+        <button class="btn btn-outline" onclick="testConnection()" style="margin-left:8px">🔌 ทดสอบการเชื่อมต่อ</button>
+        <pre id="test-result" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px;font-family:var(--mono);white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
       </div>
     </div>
   </div>
@@ -196,7 +1498,15 @@
       <button class="modal-close" onclick="closeDrugModal()">✕</button>
     </div>
     <div class="modal-body">
-      <form id="drug-form" onsubmit="saveDrug(event)">
+      <!-- Form/Preview Toggle Tabs -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button type="button" id="btn-tab-form" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--primary);color:white;border-radius:8px 8px 0 0" onclick="togglePreview(false)">📝 แบบฟอร์ม</button>
+        <button type="button" id="btn-tab-preview" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-muted);border-radius:8px 8px 0 0" onclick="togglePreview(true)">👁 Preview</button>
+      </div>
+
+      <!-- Form View -->
+      <div id="form-view">
+      <form id="drug-form" onsubmit="event.preventDefault(); saveDrug('pending')">
         <div class="form-grid">
           <input type="hidden" id="drug-id">
 
@@ -314,14 +1624,19 @@
           </div>
         </div>
 
-        <div class="preview-container" id="preview-container">
-          <div id="preview-output"></div>
-        </div>
       </form>
+      </div><!-- /form-view -->
+
+      <!-- Preview View -->
+      <div id="preview-view" style="display:none">
+        <div class="preview-card" id="preview-card"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeDrugModal()">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="document.getElementById('drug-form').dispatchEvent(new Event('submit', { bubbles: true }))">💾 บันทึก</button>
+      <button class="btn btn-primary" onclick="saveDrug('draft')">📝 บันทึก Draft</button>
+      <button class="btn btn-warning" onclick="saveDrug('pending')">⏳ ส่งอนุมัติ</button>
+      <button class="btn btn-success" id="btn-save-approve" onclick="saveDrugAndApprove()" style="display:none">✅ บันทึกและอนุมัติ</button>
     </div>
   </div>
 </div>
@@ -343,942 +1658,8 @@
 <script src="i18n.js"></script>
 <script src="translations-en.js"></script>
 
+<!-- ═══════ INLINED ADMIN.JS ═══════ -->
 <script>
-// ============================================================================
-// IV DrugRef PWA — Error Tracker v1.0
-// Hybrid error tracking: client-side capture + GAS remote reporting
-// ============================================================================
-// Features:
-// - Global error capture (window.onerror, unhandledrejection)
-// - Non-intrusive toast notification for users
-// - In-memory error log with localStorage persistence for debugging
-// - Offline queue → auto-flush to GAS when back online
-// - Deduplication (same error within 60s = skip)
-// - Rate limiting (max 10 reports per minute to GAS)
-// - Email alert for critical errors via GAS
-// ============================================================================
-
-(function () {
-  'use strict';
-
-  // ─── Configuration ───
-  const CONFIG = {
-    // GAS endpoint (same as analytics)
-    GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
-
-    // LocalStorage keys
-    LS_ERROR_LOG: 'iv_drugref_error_log',
-    LS_ERROR_QUEUE: 'iv_drugref_error_queue',
-
-    // Limits
-    MAX_LOG_ENTRIES: 50,        // Keep last 50 errors in localStorage
-    MAX_QUEUE_SIZE: 20,         // Max queued errors before flush
-    DEDUP_WINDOW_MS: 60000,     // 60s dedup window
-    RATE_LIMIT_PER_MIN: 10,     // Max 10 reports/minute to GAS
-    TOAST_DURATION_MS: 5000,    // Toast visible for 5s
-    FLUSH_INTERVAL_MS: 30000,   // Auto-flush queue every 30s
-
-    // Severity levels
-    SEVERITY: {
-      LOW: 'low',           // Minor UI glitch
-      MEDIUM: 'medium',     // Feature broken but app usable
-      HIGH: 'high',         // Core feature broken
-      CRITICAL: 'critical'  // App crash / data corruption
-    },
-
-    // App metadata
-    APP_VERSION: '5.0.0',
-    APP_NAME: 'IV DrugRef PWA'
-  };
-
-  // ─── State ───
-  let recentErrors = [];        // For dedup tracking
-  let rateLimitCount = 0;       // Reports sent this minute
-  let flushTimer = null;
-  let toastContainer = null;
-
-  // ─── Utility: Get current page name ───
-  function getPageName() {
-    const path = window.location.pathname;
-    const file = path.split('/').pop() || 'index.html';
-    return file.replace('.html', '');
-  }
-
-  // ─── Utility: Generate error fingerprint for dedup ───
-  // Use message + filename (not full source path or line — those change per build in minified code)
-  function errorFingerprint(message, source) {
-    const filename = String(source || 'unknown').split('/').pop().split('?')[0];
-    const msgNorm = String(message || '').substring(0, 120); // Normalize length for dedup
-    return `${msgNorm}|${filename}`;
-  }
-
-  // ─── Utility: Check dedup ───
-  function isDuplicate(fingerprint) {
-    const now = Date.now();
-    // Clean old entries
-    recentErrors = recentErrors.filter(e => now - e.time < CONFIG.DEDUP_WINDOW_MS);
-    // Check if exists
-    if (recentErrors.some(e => e.fp === fingerprint)) return true;
-    recentErrors.push({ fp: fingerprint, time: now });
-    return false;
-  }
-
-  // ─── Utility: Classify severity ───
-  // Uses exact regex patterns instead of loose includes() to prevent false positives
-  // e.g., "fetching user dose data" won't trigger HIGH just because "dose" appears
-  function classifySeverity(error) {
-    const msg = (error.message || '').toLowerCase();
-    const type = (error.type || '').toLowerCase();
-
-    // Critical: data corruption, JSON parse failure, script crash
-    if (/json\.parse|syntaxerror.*json|unexpected token/.test(msg)) return CONFIG.SEVERITY.CRITICAL;
-    if (/data\s*corruption|corrupt/i.test(msg)) return CONFIG.SEVERITY.CRITICAL;
-    if (/maximum call stack|out of memory|aw,?\s*snap/i.test(msg)) return CONFIG.SEVERITY.CRITICAL;
-
-    // High: null refs, CORS/security blocks, quota exceeded, core calculation errors
-    if (/cannot read propert|null is not|undefined is not a function/.test(msg)) return CONFIG.SEVERITY.HIGH;
-    if (/\bcors\b|blocked by cors|access-control-allow|securityerror/.test(msg)) return CONFIG.SEVERITY.HIGH;
-    if (/quotaexceeded|quota_exceeded/.test(msg)) return CONFIG.SEVERITY.HIGH;
-    if (/dose.*calc.*fail|calc.*error|nan.*result/i.test(msg)) return CONFIG.SEVERITY.HIGH;
-
-    // Medium: network failures, type/reference errors, storage issues
-    if (/\bfetch\b.*fail|networkerror|net::err_|failed to fetch/i.test(msg)) return CONFIG.SEVERITY.MEDIUM;
-    if (type === 'unhandled_rejection') return CONFIG.SEVERITY.MEDIUM;
-    if (/typeerror|referenceerror/.test(msg)) return CONFIG.SEVERITY.MEDIUM;
-    if (type === 'resource_error') return CONFIG.SEVERITY.MEDIUM;
-
-    // Default: everything else
-    return CONFIG.SEVERITY.LOW;
-  }
-
-  // ─── Utility: Collect context (PII-safe) ───
-  function collectContext() {
-    return {
-      page: getPageName(),
-      // Strip query params and hash to avoid leaking user-specific data
-      url: window.location.origin + window.location.pathname,
-      // Truncate UA to just browser name/version (no detailed device fingerprint)
-      userAgent: (function() {
-        var ua = navigator.userAgent || '';
-        var m = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/);
-        return m ? m[0] : ua.substring(0, 50);
-      })(),
-      online: navigator.onLine,
-      timestamp: new Date().toISOString(),
-      sessionId: sessionStorage.getItem('sessionId') || 'unknown',
-      screenSize: `${screen.width}x${screen.height}`,
-      standalone: window.matchMedia('(display-mode: standalone)').matches,
-      appVersion: CONFIG.APP_VERSION
-    };
-  }
-
-  // ─── Toast UI ───
-  function createToastContainer() {
-    if (toastContainer) return toastContainer;
-    toastContainer = document.createElement('div');
-    toastContainer.id = 'iv-error-toast-container';
-    toastContainer.style.cssText = `
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-      pointer-events: none;
-      max-width: 90vw;
-    `;
-    document.body.appendChild(toastContainer);
-    return toastContainer;
-  }
-
-  const MAX_TOASTS = 3; // Prevent toast storm during error cascade
-
-  function showToast(message, severity) {
-    if (!document.body) return; // Not ready yet
-
-    const container = createToastContainer();
-
-    // Limit visible toasts — remove oldest if at max
-    while (container.children.length >= MAX_TOASTS) {
-      container.removeChild(container.firstChild);
-    }
-
-    const toast = document.createElement('div');
-
-    const colors = {
-      low: { bg: '#f0f4f8', border: '#94a3b8', text: '#475569', icon: 'ℹ️' },
-      medium: { bg: '#fef9c3', border: '#f59e0b', text: '#92400e', icon: '⚠️' },
-      high: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', icon: '🔴' },
-      critical: { bg: '#fecaca', border: '#dc2626', text: '#7f1d1d', icon: '🚨' }
-    };
-    const c = colors[severity] || colors.medium;
-
-    toast.style.cssText = `
-      background: ${c.bg};
-      border: 1px solid ${c.border};
-      border-radius: 12px;
-      padding: 10px 16px;
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 13px;
-      color: ${c.text};
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-      pointer-events: auto;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
-      max-width: 100%;
-      text-align: center;
-      line-height: 1.4;
-    `;
-
-    // User-friendly message (not raw error)
-    const userMsg = severity === 'critical' || severity === 'high'
-      ? `${c.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`
-      : `${c.icon} เกิดข้อผิดพลาดเล็กน้อย`;
-
-    toast.textContent = userMsg;
-    container.appendChild(toast);
-
-    // Animate in
-    requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateY(0)';
-    });
-
-    // Auto dismiss
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      setTimeout(() => toast.remove(), 300);
-    }, CONFIG.TOAST_DURATION_MS);
-
-    // Click to dismiss
-    toast.addEventListener('click', () => {
-      toast.style.opacity = '0';
-      setTimeout(() => toast.remove(), 300);
-    });
-  }
-
-  // ─── LocalStorage Log ───
-  function saveToLog(entry) {
-    try {
-      let log = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
-      log.unshift(entry);
-      if (log.length > CONFIG.MAX_LOG_ENTRIES) {
-        log = log.slice(0, CONFIG.MAX_LOG_ENTRIES);
-      }
-      localStorage.setItem(CONFIG.LS_ERROR_LOG, JSON.stringify(log));
-    } catch (e) {
-      // localStorage full or unavailable — silently fail
-    }
-  }
-
-  // ─── Queue for GAS reporting ───
-  function addToQueue(entry) {
-    try {
-      let queue = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
-      queue.push(entry);
-      if (queue.length > CONFIG.MAX_QUEUE_SIZE) {
-        queue = queue.slice(-CONFIG.MAX_QUEUE_SIZE); // Keep newest
-      }
-      localStorage.setItem(CONFIG.LS_ERROR_QUEUE, JSON.stringify(queue));
-    } catch (e) { /* silently fail */ }
-  }
-
-  function getQueue() {
-    try {
-      return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function clearQueue() {
-    try {
-      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
-    } catch (e) { /* silently fail */ }
-  }
-
-  // ─── Send to GAS (returns true on success attempt, false on skip) ───
-  function sendToGAS(entries) {
-    if (!navigator.onLine || entries.length === 0) return false;
-    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return false;
-
-    rateLimitCount += entries.length;
-
-    const payload = JSON.stringify({
-      type: 'error_report',
-      errors: entries,
-      batch_size: entries.length,
-      reported_at: new Date().toISOString()
-    });
-
-    try {
-      if (navigator.sendBeacon) {
-        return navigator.sendBeacon(CONFIG.GAS_URL, payload);
-      } else {
-        fetch(CONFIG.GAS_URL, {
-          method: 'POST',
-          body: payload,
-          mode: 'no-cors',
-          keepalive: true
-        }).catch(() => {}); // Will retry on next flush
-        return true;
-      }
-    } catch (e) { return false; }
-  }
-
-  // ─── Flush queue (only clear on successful send) ───
-  function flushQueue() {
-    const queue = getQueue();
-    if (queue.length === 0 || !navigator.onLine) return;
-
-    const sent = sendToGAS(queue);
-    if (sent) {
-      clearQueue(); // Only clear if send was attempted successfully
-    }
-    // If send failed (rate limit, offline), queue persists for next flush
-  }
-
-  // ─── Core: Process error ───
-  function processError(errorInfo) {
-    const fp = errorFingerprint(errorInfo.message, errorInfo.source);
-    if (isDuplicate(fp)) return;
-
-    const severity = classifySeverity(errorInfo);
-    const context = collectContext();
-
-    const entry = {
-      ...errorInfo,
-      severity,
-      context,
-      fingerprint: fp,
-      id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
-    };
-
-    // 1. Console log (always)
-    console.error(`[ErrorTracker] ${severity.toUpperCase()}:`, errorInfo.message, entry);
-
-    // 2. Save to localStorage log
-    saveToLog(entry);
-
-    // 3. Show toast (only for medium+ severity)
-    if (severity !== CONFIG.SEVERITY.LOW) {
-      showToast(errorInfo.message, severity);
-    }
-
-    // 4. Queue for GAS reporting
-    addToQueue(entry);
-
-    // 5. If critical or high, flush immediately
-    if (severity === CONFIG.SEVERITY.CRITICAL || severity === CONFIG.SEVERITY.HIGH) {
-      flushQueue();
-    }
-  }
-
-  // ─── Global Error Handlers ───
-
-  // Catch synchronous errors
-  window.onerror = function (message, source, line, col, error) {
-    processError({
-      type: 'runtime_error',
-      message: String(message),
-      source: source || 'unknown',
-      line: line || 0,
-      col: col || 0,
-      stack: error ? error.stack : 'N/A'
-    });
-    return false; // Don't suppress default console error
-  };
-
-  // Catch unhandled promise rejections
-  window.addEventListener('unhandledrejection', function (event) {
-    const reason = event.reason;
-    processError({
-      type: 'unhandled_rejection',
-      message: reason ? (reason.message || String(reason)) : 'Unknown rejection',
-      source: 'Promise',
-      line: 0,
-      col: 0,
-      stack: reason && reason.stack ? reason.stack : 'N/A'
-    });
-  });
-
-  // Catch resource loading errors (images, scripts, etc.)
-  window.addEventListener('error', function (event) {
-    if (event.target && event.target !== window) {
-      const tag = event.target.tagName || 'unknown';
-      const src = event.target.src || event.target.href || 'unknown';
-      processError({
-        type: 'resource_error',
-        message: `Failed to load ${tag}: ${src}`,
-        source: src,
-        line: 0,
-        col: 0,
-        stack: 'N/A'
-      });
-    }
-  }, true); // Capture phase to catch resource errors
-
-  // ─── Service Worker error messages ───
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', function (event) {
-      if (event.data && event.data.type === 'SW_ERROR') {
-        processError({
-          type: 'service_worker_error',
-          message: event.data.error.message,
-          source: event.data.error.filename || 'sw.js',
-          line: event.data.error.lineno || 0,
-          col: 0,
-          stack: 'Service Worker context'
-        });
-      }
-    });
-  }
-
-  // ─── Network error monitoring ───
-  window.addEventListener('online', function () {
-    // Flush queued errors when back online
-    setTimeout(flushQueue, 2000);
-  });
-
-  // ─── Periodic flush ───
-  flushTimer = setInterval(flushQueue, CONFIG.FLUSH_INTERVAL_MS);
-
-  // ─── Rate limit reset ───
-  setInterval(function () {
-    rateLimitCount = 0;
-  }, 60000);
-
-  // ─── Public API (for manual error reporting) ───
-  window.IVErrorTracker = {
-    /**
-     * Manually report an error
-     * @param {string} message - Error description
-     * @param {string} severity - 'low'|'medium'|'high'|'critical'
-     * @param {object} extra - Additional context
-     */
-    report: function (message, severity, extra) {
-      processError({
-        type: 'manual_report',
-        message: String(message),
-        source: getPageName(),
-        line: 0,
-        col: 0,
-        stack: new Error().stack || 'N/A',
-        extra: extra || {}
-      });
-    },
-
-    /**
-     * Get error log from localStorage
-     * @returns {Array} Error entries
-     */
-    getLog: function () {
-      try {
-        return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
-      } catch (e) {
-        return [];
-      }
-    },
-
-    /**
-     * Clear error log
-     */
-    clearLog: function () {
-      localStorage.removeItem(CONFIG.LS_ERROR_LOG);
-      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
-      console.log('[ErrorTracker] Log cleared');
-    },
-
-    /**
-     * Force flush queued errors to GAS
-     */
-    flush: flushQueue,
-
-    /**
-     * Get current queue size
-     */
-    queueSize: function () {
-      return getQueue().length;
-    }
-  };
-
-  // ─── Initial flush on load ───
-  window.addEventListener('load', function () {
-    // Flush any queued errors from previous sessions
-    setTimeout(flushQueue, 3000);
-  });
-
-  console.log('[ErrorTracker] Initialized — v1.0 | Page:', getPageName());
-})();
-
-// ============================================================
-// IV DrugRef PWA v5.0 — Core Utilities
-// Shared across all pages
-// ============================================================
-
-/* global window */
-'use strict';
-
-var IVDrugRef = (function() {
-
-  // ============================================================
-  // CLINICAL CALCULATORS
-  // ============================================================
-
-  /**
-   * Ideal Body Weight (Devine formula)
-   * @param {number} ht - Height in cm
-   * @param {string} sex - 'M' or 'F'
-   * @returns {number} IBW in kg
-   */
-  function calcIBW(ht, sex) {
-    if (!ht || ht <= 0) return 0;
-    const htIn = ht / 2.54;
-    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
-  }
-
-  /**
-   * Adjusted Body Weight (for obesity)
-   * @param {number} wt - Actual weight in kg
-   * @param {number} ibw - Ideal body weight in kg
-   * @returns {number} ABW in kg
-   */
-  function calcABW(wt, ibw) {
-    // Guard: if actual weight < IBW, ABW formula can produce inappropriate values
-    // In clinical practice, use actual weight when wt < IBW
-    if (wt <= 0 || ibw <= 0) return wt || 0;
-    if (wt < ibw) return wt; // No adjustment needed if underweight
-    return ibw + 0.4 * (wt - ibw);
-  }
-
-  /**
-   * Body Mass Index
-   * @param {number} wt - Weight in kg
-   * @param {number} ht - Height in cm
-   * @returns {number} BMI in kg/m²
-   */
-  function calcBMI(wt, ht) {
-    if (!ht || ht <= 0) return 0;
-    return wt / ((ht / 100) ** 2);
-  }
-
-  /**
-   * Body Surface Area (Mosteller formula)
-   * @param {number} ht - Height in cm
-   * @param {number} wt - Weight in kg
-   * @returns {number} BSA in m²
-   */
-  function calcBSA(ht, wt) {
-    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
-    return Math.sqrt((ht * wt) / 3600);
-  }
-
-  /**
-   * Cockcroft-Gault CrCl with automatic weight adjustment
-   * Uses ABW if patient is obese (>130% IBW)
-   * @param {number} age - Age in years
-   * @param {number} wt - Actual weight in kg
-   * @param {number} scr - Serum creatinine in mg/dL
-   * @param {string} sex - 'M' or 'F'
-   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
-   * @returns {number} CrCl in mL/min, minimum 5
-   */
-  function calcCockcroftGault(age, wt, scr, sex, ht) {
-    if (scr <= 0) return 0;
-    let useWt = wt;
-    if (ht && ht > 0) {
-      const ibw = calcIBW(ht, sex);
-      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
-    }
-    let crcl = ((140 - age) * useWt) / (72 * scr);
-    if (sex === 'F') crcl *= 0.85;
-    return Math.max(Math.round(crcl * 10) / 10, 5);
-  }
-
-  /**
-   * Cockcroft-Gault with raw TBW (no obesity adjustment)
-   * Used for comparison and non-adjusted dosing
-   * @param {number} age - Age in years
-   * @param {number} wt - Actual weight in kg
-   * @param {number} scr - Serum creatinine in mg/dL
-   * @param {string} sex - 'M' or 'F'
-   * @returns {number} CrCl in mL/min
-   */
-  function calcCG_raw(age, wt, scr, sex) {
-    if (scr <= 0) return 0;
-    let crcl = ((140 - age) * wt) / (72 * scr);
-    if (sex === 'F') crcl *= 0.85;
-    return Math.round(crcl * 10) / 10;
-  }
-
-  /**
-   * Bedside Schwartz equation (pediatric eGFR)
-   * For ages 1-17 years
-   * @param {number} ht - Height in cm
-   * @param {number} scr - Serum creatinine in mg/dL
-   * @returns {number} eGFR in mL/min/1.73m²
-   */
-  function calcSchwartz(ht, scr) {
-    if (scr <= 0 || !ht || ht <= 0) return 0;
-    return Math.round((0.413 * ht / scr) * 10) / 10;
-  }
-
-  /**
-   * CKD-EPI 2021 equation (race-free)
-   * Returns indexed eGFR for standardized BSA (1.73m²)
-   * @param {number} age - Age in years
-   * @param {number} scr - Serum creatinine in mg/dL
-   * @param {string} sex - 'M' or 'F'
-   * @returns {number} eGFR in mL/min/1.73m²
-   */
-  function calcCKDEPI2021(age, scr, sex) {
-    let eGFR;
-    if (sex === 'F') {
-      const kappa = 0.7;
-      const alpha = scr <= kappa ? -0.241 : -1.2;
-      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
-        * Math.pow(Math.max(scr / kappa, 1), -1.2)
-        * Math.pow(0.9938, age) * 1.012;
-    } else {
-      const kappa = 0.9;
-      const alpha = scr <= kappa ? -0.302 : -1.2;
-      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
-        * Math.pow(Math.max(scr / kappa, 1), -1.2)
-        * Math.pow(0.9938, age);
-    }
-    return Math.round(eGFR * 10) / 10;
-  }
-
-  /**
-   * CKD-EPI 2021 de-indexed for drug dosing
-   * Converts indexed eGFR to non-indexed using patient BSA
-   * Per KDIGO 2024 recommendations for personalized dosing
-   * @param {number} age - Age in years
-   * @param {number} scr - Serum creatinine in mg/dL
-   * @param {string} sex - 'M' or 'F'
-   * @param {number} bsa - Body surface area in m²
-   * @returns {number} Non-indexed eGFR in mL/min
-   */
-  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
-    const indexed = calcCKDEPI2021(age, scr, sex);
-    return Math.round(indexed * bsa / 1.73 * 10) / 10;
-  }
-
-  /**
-   * Get CKD stage classification from GFR value
-   * @param {number} gfr - Glomerular filtration rate in mL/min
-   * @returns {Object} Stage info with stage code, Thai label, and CSS class
-   */
-  function getCKDStage(gfr) {
-    // Labels in both Thai (default) and English for i18n support
-    var stages = [
-      { min: 90, stage: 'G1', label: 'ปกติ/สูง', labelEn: 'Normal/High', cls: 'stage-1' },
-      { min: 60, stage: 'G2', label: 'ลดลงเล็กน้อย', labelEn: 'Mildly decreased', cls: 'stage-2' },
-      { min: 45, stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', labelEn: 'Mildly-moderately decreased', cls: 'stage-3a' },
-      { min: 30, stage: 'G3b', label: 'ลดลงปานกลาง-มาก', labelEn: 'Moderately-severely decreased', cls: 'stage-3b' },
-      { min: 15, stage: 'G4', label: 'ลดลงมาก', labelEn: 'Severely decreased', cls: 'stage-4' },
-      { min: -Infinity, stage: 'G5', label: 'ไตวาย', labelEn: 'Kidney failure', cls: 'stage-5' }
-    ];
-    for (var i = 0; i < stages.length; i++) {
-      if (gfr >= stages[i].min) return stages[i];
-    }
-    return stages[stages.length - 1];
-  }
-
-  /**
-   * Build comprehensive patient object from form elements
-   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
-   * @param {Object} fieldIds - Optional custom field ID mapping
-   * @returns {Object} Complete patient data object
-   */
-  function getPatientFromForm(fieldIds) {
-    // Default field IDs matching standard form layout
-    const ids = Object.assign({
-      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
-      alb: 'ptAlb', dialysis: 'ptDialysis'
-    }, fieldIds || {});
-
-    const getVal = (id, def) => {
-      const el = document.getElementById(id);
-      return el ? (parseFloat(el.value) || def) : def;
-    };
-    const getStr = (id, def) => {
-      const el = document.getElementById(id);
-      return el ? el.value : def;
-    };
-
-    const age = getVal(ids.age, 55);
-    const wt = getVal(ids.wt, 70);
-    const ht = getVal(ids.ht, 170);
-    const sex = getStr(ids.sex, 'M');
-    const scr = getVal(ids.scr, 1.0);
-    const alb = getVal(ids.alb, 4.0);
-    const dialysis = getStr(ids.dialysis, 'none');
-
-    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
-    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
-    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
-    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
-    const isObese = wt > ibw * 1.3;
-    const isUnderweight = wt < ibw;
-    const isPediatric = age < 18;
-
-    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
-    let crcl;
-    if (isPediatric && ht > 0) {
-      crcl = calcSchwartz(ht, scr);
-    } else {
-      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
-    }
-
-    return {
-      age, wt, ht, sex, scr, alb, dialysis,
-      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
-      crcl
-    };
-  }
-
-
-  // ============================================================
-  // ANALYTICS
-  // ============================================================
-  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
-  let _reqCount = 0;
-
-  /**
-   * Get anonymous session ID from localStorage
-   * @returns {string} Session ID or empty string
-   */
-  function getSessionId() {
-    return localStorage.getItem('anonSessionId') || '';
-  }
-
-  /**
-   * Get anonymous user ID from localStorage
-   * @returns {string} User ID or empty string
-   */
-  function getUserId() {
-    return localStorage.getItem('anonUserId') || '';
-  }
-
-  /**
-   * Check if user has consented to analytics
-   * @returns {boolean} True if analytics consent is given
-   */
-  function hasAnalyticsConsent() {
-    return localStorage.getItem('analyticsConsent') === 'true';
-  }
-
-  /**
-   * Send analytics event via sendBeacon or fetch
-   * Rate limited to 40 requests per page session
-   * @param {Object} data - Event data to send
-   */
-  function sendAnalytics(data) {
-    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
-    if (_reqCount >= 40) return;
-    _reqCount++;
-    try {
-      const payload = JSON.stringify({
-        ...data,
-        session_id: getSessionId(),
-        user_id: getUserId()
-      });
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(ANALYTICS_URL, payload);
-      } else {
-        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
-      }
-    } catch (e) { /* silent fail */ }
-  }
-
-  /**
-   * Track page view with automatic entry/exit timing
-   * Sends page_view events on entry and exit with duration
-   * @param {string} pageName - Name/identifier of current page
-   * @returns {Object} Tracking object with sendExit function and metadata
-   */
-  function trackPageView(pageName) {
-    const enterTime = Date.now();
-    const fromPage = (function() {
-      const ref = document.referrer || '';
-      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
-      if (ref.includes('calculator.html')) return 'calculator';
-      if (ref.includes('tdm.html')) return 'tdm';
-      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
-      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
-      if (ref.includes('compatibility.html')) return 'compatibility';
-      if (ref.includes('dashboard.html')) return 'dashboard';
-      return ref ? 'external' : 'direct';
-    })();
-
-    // Send entry event
-    sendAnalytics({
-      type: 'page_view', page: pageName, action: 'enter',
-      from_page: fromPage, referrer: document.referrer || 'direct'
-    });
-
-    // Track exit event (sent only once)
-    let exitSent = false;
-    function sendExit(extraData) {
-      if (exitSent) return;
-      exitSent = true;
-      sendAnalytics({
-        type: 'page_view', page: pageName, action: 'leave',
-        duration_sec: Math.round((Date.now() - enterTime) / 1000),
-        from_page: fromPage,
-        ...(extraData || {})
-      });
-    }
-
-    // Send exit on page unload or visibility change
-    // Use named handlers stored on function scope to allow cleanup and prevent accumulation
-    function onBeforeUnload() { sendExit(); }
-    function onVisChange() { if (document.visibilityState === 'hidden') sendExit(); }
-
-    window.addEventListener('beforeunload', onBeforeUnload);
-    document.addEventListener('visibilitychange', onVisChange);
-
-    return {
-      sendExit,
-      fromPage,
-      enterTime,
-      // Allow caller to clean up listeners
-      destroy: function() {
-        sendExit();
-        window.removeEventListener('beforeunload', onBeforeUnload);
-        document.removeEventListener('visibilitychange', onVisChange);
-      }
-    };
-  }
-
-
-  // ============================================================
-  // SERVICE WORKER
-  // ============================================================
-
-  /**
-   * Register service worker for offline support and caching
-   * Non-blocking registration with console logging
-   */
-  function registerSW() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('[SW] Registered:', reg.scope))
-        .catch(err => console.warn('[SW] Registration failed:', err));
-    }
-  }
-
-
-  // ============================================================
-  // UTILITY HELPERS
-  // ============================================================
-
-  /**
-   * Generate random anonymous ID using crypto API
-   * @param {number} len - Length in hex characters (default 16)
-   * @returns {string} Random hex string
-   */
-  function generateId(len) {
-    len = len || 16;
-    // Prefer crypto API, fallback to Math.random for older browsers
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const arr = new Uint8Array(len / 2);
-      crypto.getRandomValues(arr);
-      return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
-    }
-    // Fallback: Math.random-based (less secure but functional)
-    var result = '';
-    for (var i = 0; i < len; i++) {
-      result += Math.floor(Math.random() * 16).toString(16);
-    }
-    return result;
-  }
-
-  /**
-   * Debounce function to limit function execution
-   * @param {Function} fn - Function to debounce
-   * @param {number} ms - Debounce delay in milliseconds
-   * @returns {Function} Debounced function
-   */
-  function debounce(fn, ms) {
-    let t;
-    return function(...args) {
-      clearTimeout(t);
-      t = setTimeout(() => fn.apply(this, args), ms);
-    };
-  }
-
-  /**
-   * Format number with specified decimal precision
-   * @param {number} n - Number to format
-   * @param {number} decimals - Number of decimal places (default 1)
-   * @returns {string} Formatted number string
-   */
-  function fmt(n, decimals) {
-    decimals = decimals !== undefined ? decimals : 1;
-    // Guard against NaN, Infinity, and non-numeric input
-    if (typeof n !== 'number' || !isFinite(n)) return '–';
-    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
-  }
-
-  /**
-   * Version and app name constants
-   */
-  const VERSION = '5.0.0';
-  const APP_NAME = 'IV DrugRef';
-
-  // ============================================================
-  // PUBLIC API
-  // ============================================================
-  return {
-    // Version info
-    VERSION,
-    APP_NAME,
-
-    // Clinical calculators
-    calcIBW,
-    calcABW,
-    calcBMI,
-    calcBSA,
-    calcCockcroftGault,
-    calcCG_raw,
-    calcSchwartz,
-    calcCKDEPI2021,
-    calcCKDEPI2021_nonindexed,
-    getCKDStage,
-    getPatientFromForm,
-
-    // Analytics
-    sendAnalytics,
-    trackPageView,
-    getSessionId,
-    getUserId,
-    hasAnalyticsConsent,
-
-    // Service Worker
-    registerSW,
-
-    // Utility helpers
-    generateId,
-    debounce,
-    fmt
-  };
-})();
-
-// ============================================================
-// AUTO-INITIALIZATION
-// ============================================================
-// Register service worker on page load
-document.addEventListener('DOMContentLoaded', () => {
-  IVDrugRef.registerSW();
-});
-
 // ============================================================
 // IV DrugRef PWA v5.0 — Admin Module
 // Extracted from V4.7.0, wrapped in IIFE for modular architecture
@@ -1337,7 +1718,7 @@ function initGoogleAuth() {
     callback: handleCredentialResponse,
     auto_select: true,
   });
-  google.accounts.id.renderButton(document.querySelector('.google-btn'), {
+  google.accounts.id.renderButton(document.getElementById('google-signin-button'), {
     theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill',
   });
   google.accounts.id.prompt();
@@ -1383,8 +1764,8 @@ function signOut() {
 function showApp(user) {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('user-name').textContent = user.name;
-  document.getElementById('user-photo').src = user.picture || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>';
+  document.getElementById('topbar-user-name').textContent = user.name;
+  document.getElementById('topbar-user-avatar').src = user.picture || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>';
   loadDrugs();
   loadAuditLog();
   loadSettingsUI();
@@ -1604,7 +1985,7 @@ function isAdmin() { return state.myRole === 'admin'; }
 function applyRoleUI() {
   // แสดง role badge ข้าง user name
   const roleTag = isAdmin() ? '🔑 Admin' : '📝 Editor';
-  const nameEl = document.getElementById('user-name');
+  const nameEl = document.getElementById('topbar-user-name');
   if (nameEl && !nameEl.dataset.roleApplied) {
     nameEl.innerHTML = escHtml(state.user?.name || '') + ` <span style="font-size:10px;background:${isAdmin() ? 'var(--purple-bg)' : 'var(--primary-bg)'};color:${isAdmin() ? '#6d28d9' : '#0369a1'};padding:2px 8px;border-radius:50px;font-weight:600">${roleTag}</span>`;
     nameEl.dataset.roleApplied = '1';
@@ -1657,7 +2038,7 @@ function populateCategories() {
 }
 
 function getFilteredDrugs() {
-  const q = document.getElementById('drug-search').value.toLowerCase();
+  const q = document.getElementById('search-drugs').value.toLowerCase();
   const status = document.getElementById('filter-status').value;
   const cat = document.getElementById('filter-category').value;
 
@@ -1690,7 +2071,7 @@ function renderDrugTable() {
   const start = (state.currentPage - 1) * ITEMS_PER_PAGE;
   const page = filtered.slice(start, start + ITEMS_PER_PAGE);
 
-  const tbody = document.getElementById('drug-tbody');
+  const tbody = document.getElementById('drug-table-body');
   tbody.innerHTML = page.map(d => `
     <tr>
       <td style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">${d.id || '—'}</td>
@@ -1748,14 +2129,37 @@ function sortTable(field) {
   renderDrugTable();
 }
 
-// Debounced search
-let searchTimer;
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('drug-search')?.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => { state.currentPage = 1; renderDrugTable(); }, 250);
-  });
-});
+// filterDrugs: triggered by search/filter UI — resets page and re-renders
+function filterDrugs() {
+  state.currentPage = 1;
+  renderDrugTable();
+}
+
+// Export data as CSV
+function exportData() {
+  if (state.drugs.length === 0) {
+    toast('ไม่มีข้อมูลให้ export', 'info');
+    return;
+  }
+  const headers = ['ID','Generic Name','Trade Name','Strength','ED','HAD','Categories','Status','Route','Rate','Reconst Solvent','Reconst Volume','Reconst Conc','Diluent','Dilution Volume','Final Conc','Stability Reconst','Stability Diluted','Storage','Y-site Compatible','Incompatible','Precautions','Monitoring','Reference'];
+  const rows = state.drugs.map(d => [
+    d.id || '', d.generic || '', d.trade || '', d.strength || '', d.ed || '', d.had ? 'Y' : 'N',
+    (d.categories || []).join('; '), d.status || '',
+    d.admin?.route || '', d.admin?.rate || '',
+    d.reconst?.solvent || '', d.reconst?.volume || '', d.reconst?.conc || '',
+    d.dilution?.diluent || '', d.dilution?.volume || '', d.dilution?.finalConc || '',
+    d.stability?.reconst || '', d.stability?.diluted || '', d.stability?.storage || '',
+    d.compat?.ysite || '', d.compat?.incompat || '',
+    d.precautions || '', (d.monitoring || []).join('; '), d.ref || ''
+  ]);
+  const csvContent = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `iv_drugref_export_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('📥 ส่งออก CSV สำเร็จ', 'success');
+}
 
 /* ═══════════════════════════════════════════
    DRUG FORM MODAL
@@ -2189,7 +2593,7 @@ function processImportData(data, filename) {
   const valid = state.importData.filter(d => d.generic);
 
   // Show preview
-  const area = document.getElementById('import-preview-area');
+  const area = document.getElementById('import-preview');
   area.innerHTML = `
     <div class="import-status ${errors.length ? 'error' : 'success'}" style="margin-top:16px">
       📄 ${filename} — พบ ${data.length} rows, valid ${valid.length} rows
@@ -2234,7 +2638,7 @@ async function confirmImport() {
     await apiCallChunked('bulkImport', valid, 15);
     toast(`✅ Import ${valid.length} รายการสำเร็จ`, 'success');
     state.importData = null;
-    document.getElementById('import-preview-area').innerHTML = '';
+    document.getElementById('import-preview').innerHTML = '';
     document.getElementById('btn-import-confirm').style.display = 'none';
     await loadDrugs();
     switchTab('drugs');
@@ -2288,7 +2692,7 @@ function renderAuditLog() {
   const start = (state.auditPage - 1) * perPage;
   const page = log.slice(start, start + perPage);
 
-  const timeline = document.getElementById('audit-timeline');
+  const timeline = document.getElementById('audit-log-container');
   if (page.length === 0) {
     timeline.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted)">ไม่มีรายการ</div>';
     return;
@@ -2434,16 +2838,16 @@ async function removeUser(email) {
    ═══════════════════════════════════════════ */
 function loadSettingsUI() {
   const cfg = getConfig();
-  document.getElementById('setting-script-url').value = cfg.scriptUrl;
-  document.getElementById('setting-client-id').value = cfg.clientId;
-  document.getElementById('setting-allowed-emails').value = cfg.allowedEmails.join(', ');
+  document.getElementById('settings-script-url').value = cfg.scriptUrl;
+  document.getElementById('settings-client-id').value = cfg.clientId;
+  document.getElementById('settings-allowed-emails').value = cfg.allowedEmails.join(', ');
 }
 
 function saveSettings() {
   const cfg = {
-    scriptUrl: document.getElementById('setting-script-url').value.trim(),
-    clientId: document.getElementById('setting-client-id').value.trim(),
-    allowedEmails: document.getElementById('setting-allowed-emails').value.split(',').map(e => e.trim()).filter(Boolean),
+    scriptUrl: document.getElementById('settings-script-url').value.trim(),
+    clientId: document.getElementById('settings-client-id').value.trim(),
+    allowedEmails: document.getElementById('settings-allowed-emails').value.split(',').map(e => e.trim()).filter(Boolean),
   };
   saveConfig(cfg);
   toast('💾 บันทึกการตั้งค่าแล้ว — reload เพื่อใช้งาน Google Sign-in', 'success');
@@ -2459,7 +2863,7 @@ function switchTab(tab) {
     return;
   }
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `${tab}-panel`));
   if (tab === 'pending') renderPendingList();
   if (tab === 'audit') renderAuditLog();
   if (tab === 'users') loadUsers();
@@ -2482,10 +2886,10 @@ function formatDate(ts) {
 
 function showLoading(text) {
   document.getElementById('loading-text').textContent = text || 'กำลังโหลด...';
-  document.getElementById('loading').classList.add('show');
+  document.getElementById('loading-overlay').classList.add('show');
 }
 function hideLoading() {
-  document.getElementById('loading').classList.remove('show');
+  document.getElementById('loading-overlay').classList.remove('show');
 }
 
 function toast(msg, type = 'info') {
@@ -2538,15 +2942,21 @@ window.closeDrugModal = closeDrugModal;
 window.saveDrug = saveDrug;
 window.editDrug = editDrug;
 window.deleteDrug = deleteDrug;
-window.approveDrug = typeof approveDrug !== "undefined" ? approveDrug : function(){};
+window.approveDrug = approveDrug;
+window.rejectDrug = rejectDrug;
+window.saveDrugAndApprove = saveDrugAndApprove;
 window.handleImportFile = handleImportFile;
 window.confirmImport = confirmImport;
 window.downloadTemplate = downloadTemplate;
-window.exportData = typeof exportData !== "undefined" ? exportData : function(){};
+window.exportData = exportData;
 window.saveSettings = saveSettings;
-window.filterDrugs = typeof filterDrugs !== "undefined" ? filterDrugs : getFilteredDrugs;
+window.filterDrugs = filterDrugs;
 window.loadSettingsUI = loadSettingsUI;
 window.renderAuditLog = renderAuditLog;
+window.testConnection = testConnection;
+window.addUser = addUser;
+window.changeRole = changeRole;
+window.removeUser = removeUser;
 window.sortTable = sortTable;
 window.goPage = goPage;
 window.auditGoPage = auditGoPage;
@@ -2556,7 +2966,7 @@ window.renderPendingList = renderPendingList;
 window.toast = toast;
 
 })();
-
 </script>
+
 </body>
 </html>

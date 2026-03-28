@@ -12,7 +12,817 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
   <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
   <style>
-@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap);*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;background:var(--bg-primary);color:var(--text-primary)}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:0 0}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#94a3b8}.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid #e2e8f0;padding-bottom:env(safe-area-inset-bottom,0)}.bottom-nav-inner{max-width:600px;margin:0 auto;display:flex;justify-content:space-around;padding:6px 0 4px}.bottom-nav a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:10px;font-weight:500;gap:2px;transition:color .2s;padding:4px 8px}.bottom-nav a .nav-icon{font-size:18px;line-height:1}.bottom-nav a .nav-label{font-size:10px}.bottom-nav a:hover{color:#0ea5e9}.bottom-nav a.nav-active{color:#0ea5e9;font-weight:600}.theme-dark .bottom-nav{background:rgba(11,17,32,.92);border-top-color:#1e3050}.theme-dark .bottom-nav a{color:#64748b}.theme-dark .bottom-nav a.nav-active,.theme-dark .bottom-nav a:hover{color:#38bdf8}.nav-back{display:inline-flex;align-items:center;gap:4px;color:#0ea5e9;text-decoration:none;font-size:14px;font-weight:500}.nav-back svg{width:16px;height:16px}.field label{font-size:11px;color:#64748b;display:block;margin-bottom:4px;font-weight:500}.field input,.field select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;font-weight:500;font-family:inherit;background:#fff;color:#1e293b}.field input:focus,.field select:focus{outline:0;border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,.12)}.section{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:16px;overflow:hidden}.section-header{padding:12px 16px;font-size:13px;font-weight:600;color:#0ea5e9;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;gap:8px}.field-grid{display:grid;gap:12px;padding:16px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.container{max-width:640px;margin:0 auto;padding:16px 16px 90px}.badge{font-family:'JetBrains Mono',monospace;letter-spacing:.3px}.badge-had{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)}.badge-ed{background:rgba(5,150,105,.08);color:#059669;border:1px solid rgba(5,150,105,.2)}.badge-ned{background:rgba(217,119,6,.08);color:#d97706;border:1px solid rgba(217,119,6,.2)}.disclaimer{text-align:center;font-size:11px;color:#dc2626;padding:12px 16px;font-weight:500;background:#fef2f2;border-radius:8px;margin-top:16px}@media (max-width:480px){.container{padding:16px 14px 90px}}:root{--bg-primary:#f0f4f8;--bg-secondary:#e2e8f0;--bg-card:#ffffff;--bg-card-hover:#f8fafc;--bg-input:#ffffff;--border:#e2e8f0;--border-focus:#0ea5e9;--text-primary:#1e293b;--text-secondary:#64748b;--text-muted:#94a3b8;--accent-blue:#0ea5e9;--accent-cyan:#0891b2;--accent-emerald:#059669;--accent-green:#059669;--accent-amber:#d97706;--accent-red:#dc2626;--accent-pink:#db2777;--accent-purple:#7c3aed;--had-bg:rgba(220,38,38,0.04);--had-border:rgba(220,38,38,0.2);--had-glow:rgba(220,38,38,0.08);--tag-bg:rgba(14,165,233,0.06);--tag-border:rgba(14,165,233,0.15);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 1px 2px rgba(0,0,0,0.04);--shadow-md:0 4px 12px rgba(0,0,0,0.06);--shadow-lg:0 8px 24px rgba(0,0,0,0.08);--shadow-glow:0 0 0 3px rgba(14,165,233,0.08)}body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#cbd5e1 .5px,transparent .5px);background-size:24px 24px;opacity:.3;pointer-events:none;z-index:0}.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border)}.header-inner{max-width:900px;margin:0 auto;padding:14px 20px}.header-simple{background:#fff;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}.header-simple a{color:var(--accent-blue);text-decoration:none;font-size:14px;font-weight:500}.header-simple h1{font-size:16px;font-weight:600;flex:1}.header-pill{font-size:11px;font-weight:600;color:#38bdf8;background:#1e293b;border:1.5px solid #38bdf8;padding:5px 12px;border-radius:20px;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:.2s}.header-pill:hover{background:#334155;box-shadow:0 0 12px rgba(56,189,248,.2)}.renal-results{display:grid;grid-template-columns:1fr 1fr;gap:10px}.renal-result-box{border-radius:10px;padding:10px 14px;cursor:pointer;transition:.2s;border:2px solid transparent}.renal-result-box.active{border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(14,165,233,.1)}.renal-result-box.cg{background:#eff6ff}.renal-result-box.ckd{background:#f0fdf4}.renal-result-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary)}.renal-result-value{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;margin:2px 0}.renal-result-box.cg .renal-result-value{color:#1d4ed8}.renal-result-box.ckd .renal-result-value{color:#15803d}.renal-result-unit{font-size:11px;color:var(--text-secondary)}.renal-result-stage{font-size:11px;font-weight:600;margin-top:2px;padding:2px 8px;border-radius:6px;display:inline-block}.stage-1{background:#dcfce7;color:#166534}.stage-2{background:#d1fae5;color:#065f46}.stage-3a{background:#fef9c3;color:#854d0e}.stage-3b{background:#fef3c7;color:#92400e}.stage-4{background:#fed7aa;color:#9a3412}.stage-5{background:#fecaca;color:#991b1b}.search-box{position:relative;margin:16px 16px 8px}.search-box input{width:100%;padding:10px 12px 10px 36px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:#f8fafc}.search-box input:focus{outline:0;border-color:var(--accent-blue);background:#fff;box-shadow:0 0 0 3px rgba(14,165,233,.1)}.search-box svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-muted);width:18px;height:18px}.filter-tabs{display:flex;gap:6px;padding:8px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.filter-tabs::-webkit-scrollbar{display:none}.filter-tab{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid var(--border);background:#fff;color:var(--text-secondary);transition:.2s}.filter-tab:hover{border-color:var(--accent-blue);color:var(--accent-blue)}.filter-tab.active{background:var(--accent-blue);color:#fff;border-color:var(--accent-blue)}.drug-list{padding:8px 16px 16px}.drug-item{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.2s;background:#fff}.drug-item:hover{border-color:var(--accent-blue);box-shadow:0 1px 4px rgba(14,165,233,.1)}.drug-item.active{border-color:var(--accent-blue);background:#f0f9ff;box-shadow:0 0 0 3px rgba(14,165,233,.08)}.drug-item-header{display:flex;justify-content:space-between;align-items:center}.drug-item-name{font-weight:600;font-size:14px}.drug-item-class{font-size:11px;color:var(--text-secondary)}.drug-item-badges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}.badge{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:500}.badge-abx{background:#dbeafe;color:#1e40af}.badge-av{background:#ede9fe;color:#5b21b6}.badge-ac{background:#fce7f3;color:#9d174d}.badge-misc{background:#f0fdf4;color:#166534}.badge-renal{background:#fef3c7;color:#92400e}.badge-hd{background:#fecaca;color:#991b1b}.recom-section{display:none}.recom-section.visible{display:block}.recom-header-bar{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f4f8}.recom-drug-name{font-weight:700;font-size:16px;color:var(--accent-blue)}.recom-close{cursor:pointer;color:var(--text-muted);font-size:20px;line-height:1;padding:4px}.dose-table-wrap{padding:16px;overflow-x:auto}.dose-table{width:100%;border-collapse:collapse;font-size:12px}.dose-table th{background:#1e293b;color:#e2e8f0;padding:8px 10px;text-align:left;font-weight:600;position:sticky;top:0}.dose-table th:first-child{border-radius:8px 0 0}.dose-table th:last-child{border-radius:0 8px 0 0}.dose-table td{padding:7px 10px;border-bottom:1px solid #f0f4f8;vertical-align:top}.dose-table tr.highlight{background:#dcfce7;font-weight:600}.dose-table tr.highlight-amber{background:#fef9c3;font-weight:600}.dose-table tr.highlight-red{background:#fef2f2;font-weight:600}.dose-table tr:hover:not(.highlight):not(.highlight-amber):not(.highlight-red){background:#f8fafc}.current-dose-box{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #4ade80;border-radius:12px;padding:14px 16px;margin:0 16px 12px;text-align:center}.current-dose-label{font-size:11px;color:#166534;font-weight:500}.current-dose-value{font-size:20px;font-weight:700;color:#166534;font-family:'JetBrains Mono',monospace;margin:4px 0}.current-dose-detail{font-size:12px;color:#166534}.info-box{border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;margin:0 16px 16px}.info-box.blue{background:#e6f1fb;color:#0c447c}.info-box.amber{background:#fef3c7;color:#92400e}.info-box.red{background:#fef2f2;color:#991b1b}.info-box.teal{background:#ccfbf1;color:#134e4a}.ref-box{border-top:1px solid #f0f4f8;padding:12px 16px;font-size:11px;color:var(--text-muted);line-height:1.5}.formula-toggle{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--border)}.formula-btn{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;background:#f8fafc;color:var(--text-secondary);border:none;transition:.2s;font-family:inherit}.formula-btn.active{background:var(--accent-blue);color:#fff}.no-results{padding:24px 16px;text-align:center;color:var(--text-muted);font-size:13px}.body-comp-box{border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6}.body-comp-box.obesity{background:#fff7ed;border:1.5px solid #fb923c}.body-comp-box.underweight{background:#fefce8;border:1.5px solid #facc15}.body-comp-box.elderly{background:#f5f3ff;border:1.5px solid #a78bfa}.body-comp-box.normal{background:#f0fdf4;border:1.5px solid #86efac}.body-comp-title{font-weight:700;font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:5px}.body-comp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0}.body-comp-item{background:rgba(255,255,255,.7);border-radius:6px;padding:6px 8px;text-align:center}.body-comp-item .label{font-size:10px;color:var(--text-muted);font-weight:500}.body-comp-item .value{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace}.body-comp-note{font-size:11px;color:var(--text-secondary);margin-top:4px;padding-top:6px;border-top:1px solid rgba(0,0,0,.06)}.weight-used-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-top:4px}.weight-used-tag.abw{background:#fed7aa;color:#9a3412}.weight-used-tag.ibw{background:#dbeafe;color:#1e40af}.weight-used-tag.tbw{background:#d1fae5;color:#065f46}.pediatric-box{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:2px solid #60a5fa;border-radius:12px;padding:14px 16px}.pediatric-box .title{font-weight:700;font-size:13px;color:#1e40af;margin-bottom:8px;display:flex;align-items:center;gap:6px}.pediatric-result{text-align:center;background:#dbeafe;border-radius:10px;padding:10px;margin:8px 0}.pediatric-result .val{font-size:24px;font-weight:700;color:#1d4ed8;font-family:'JetBrains Mono',monospace}.pediatric-result .unit{font-size:11px;color:#3b82f6}.pediatric-note{font-size:11px;color:#1e3a5f;line-height:1.5;margin-top:6px}.pediatric-block-msg{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12px;color:#991b1b;font-weight:500}@media (max-width:400px){.renal-results{grid-template-columns:1fr}.field-row-3{grid-template-columns:1fr 1fr}}
+/* ============================================================
+   IV DrugRef PWA v5.0 — Shared Styles
+   ============================================================ */
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* ---- CSS Reset ---- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+/* ---- Typography ---- */
+body {
+  font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ---- Bottom Navigation (shared across ALL pages) ---- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid #e2e8f0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.bottom-nav-inner {
+  max-width: 600px; margin: 0 auto;
+  display: flex; justify-content: space-around;
+  padding: 6px 0 4px;
+}
+.bottom-nav a {
+  display: flex; flex-direction: column; align-items: center;
+  text-decoration: none; color: #94a3b8; font-size: 10px;
+  font-weight: 500; gap: 2px; transition: color 0.2s;
+  padding: 4px 8px;
+}
+.bottom-nav a .nav-icon { font-size: 18px; line-height: 1; }
+.bottom-nav a .nav-label { font-size: 10px; }
+.bottom-nav a:hover { color: #0ea5e9; }
+.bottom-nav a.nav-active { color: #0ea5e9; font-weight: 600; }
+
+/* ---- Dark theme bottom nav override ---- */
+.theme-dark .bottom-nav {
+  background: rgba(11,17,32,0.92);
+  border-top-color: #1e3050;
+}
+.theme-dark .bottom-nav a { color: #64748b; }
+.theme-dark .bottom-nav a:hover { color: #38bdf8; }
+.theme-dark .bottom-nav a.nav-active { color: #38bdf8; }
+
+/* ---- Common nav back button ---- */
+.nav-back {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: #0ea5e9; text-decoration: none; font-size: 14px; font-weight: 500;
+}
+.nav-back svg { width: 16px; height: 16px; }
+
+/* ---- Common form field styles ---- */
+.field label {
+  font-size: 11px; color: #64748b; display: block;
+  margin-bottom: 4px; font-weight: 500;
+}
+.field input, .field select {
+  width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: #1e293b;
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
+}
+
+/* ---- Common section/card styles ---- */
+.section {
+  background: #fff; border-radius: 12px;
+  border: 1px solid #e2e8f0; margin-bottom: 16px; overflow: hidden;
+}
+.section-header {
+  padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0ea5e9;
+  border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px;
+}
+
+/* ---- Layout grids ---- */
+.field-grid { display: grid; gap: 12px; padding: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.container { max-width: 640px; margin: 0 auto; padding: 16px 16px 90px; }
+
+/* ---- Badges ---- */
+.badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px; letter-spacing: 0.3px;
+}
+.badge-had { background: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+.badge-ed { background: rgba(5,150,105,0.08); color: #059669; border: 1px solid rgba(5,150,105,0.2); }
+.badge-ned { background: rgba(217,119,6,0.08); color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+
+/* ---- Disclaimer ---- */
+.disclaimer {
+  text-align: center; font-size: 11px; color: #dc2626; padding: 12px 16px;
+  font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
+}
+
+/* ---- Info boxes ---- */
+.info-box {
+  border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
+}
+.info-box.blue { background: #e6f1fb; color: #0c447c; }
+.info-box.amber { background: #fef3c7; color: #92400e; }
+.info-box.red { background: #fef2f2; color: #991b1b; }
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+  .container { padding: 16px 14px 90px; }
+}
+
+/* ============================================================
+   IV DrugRef PWA v5.0 — Light Theme
+   Used by: index, calculator, renal-dosing, compatibility, admin
+   ============================================================ */
+
+:root {
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #e2e8f0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-input: #ffffff;
+  --border: #e2e8f0;
+  --border-focus: #0ea5e9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --accent-blue: #0ea5e9;
+  --accent-cyan: #0891b2;
+  --accent-emerald: #059669;
+  --accent-green: #059669;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
+  --accent-pink: #db2777;
+  --accent-purple: #7c3aed;
+  --had-bg: rgba(220,38,38,0.04);
+  --had-border: rgba(220,38,38,0.2);
+  --had-glow: rgba(220,38,38,0.08);
+  --tag-bg: rgba(14,165,233,0.06);
+  --tag-border: rgba(14,165,233,0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-glow: 0 0 0 3px rgba(14,165,233,0.08);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Subtle dot pattern */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, #cbd5e1 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Light Header ---- */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 900px; margin: 0 auto; padding: 14px 20px;
+}
+
+/* Simple header (calculator, renal-dosing) */
+.header-simple {
+  background: #fff; border-bottom: 1px solid var(--border); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100;
+}
+.header-simple a { color: var(--accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
+.header-simple h1 { font-size: 16px; font-weight: 600; flex: 1; }
+
+/* ---- Light theme link pills ---- */
+.header-pill {
+  font-size: 11px; font-weight: 600; color: #38bdf8; background: #1e293b;
+  border: 1.5px solid #38bdf8; padding: 5px 12px; border-radius: 20px;
+  text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+  transition: all .2s;
+}
+.header-pill:hover { background: #334155; box-shadow: 0 0 12px rgba(56,189,248,0.2); }
+
+/* ============================================================
+   Renal Dosing Page-Specific Styles
+   ============================================================
+   Includes: CrCl/eGFR result boxes, CKD stages, search/filter,
+   drug list, dosing cards, body composition, pediatric mode
+ ============================================================ */
+
+/* CrCl / eGFR Result Boxes */
+.renal-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.renal-result-box {
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all .2s;
+  border: 2px solid transparent;
+}
+
+.renal-result-box.active {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.renal-result-box.cg {
+  background: #eff6ff;
+}
+
+.renal-result-box.ckd {
+  background: #f0fdf4;
+}
+
+.renal-result-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.renal-result-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 2px 0;
+}
+
+.renal-result-box.cg .renal-result-value {
+  color: #1d4ed8;
+}
+
+.renal-result-box.ckd .renal-result-value {
+  color: #15803d;
+}
+
+.renal-result-unit {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.renal-result-stage {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* CKD Stages */
+.stage-1 {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.stage-2 {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.stage-3a {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.stage-3b {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stage-4 {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.stage-5 {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+/* Search & Filter */
+.search-box {
+  position: relative;
+  margin: 16px 16px 8px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #f8fafc;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.search-box svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  width: 18px;
+  height: 18px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-tab {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-secondary);
+  transition: all .2s;
+}
+
+.filter-tab:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.filter-tab.active {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+
+/* Drug List */
+.drug-list {
+  padding: 8px 16px 16px;
+}
+
+.drug-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all .2s;
+  background: #fff;
+}
+
+.drug-item:hover {
+  border-color: var(--accent-blue);
+  box-shadow: 0 1px 4px rgba(14, 165, 233, 0.1);
+}
+
+.drug-item.active {
+  border-color: var(--accent-blue);
+  background: #f0f9ff;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
+}
+
+.drug-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drug-item-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.drug-item-class {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.drug-item-badges {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.badge-abx {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-av {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.badge-ac {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+.badge-misc {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.badge-renal {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-hd {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+/* Recommendation Output */
+.recom-section {
+  display: none;
+}
+
+.recom-section.visible {
+  display: block;
+}
+
+.recom-header-bar {
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.recom-drug-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--accent-blue);
+}
+
+.recom-close {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px;
+}
+
+.dose-table-wrap {
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.dose-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.dose-table th {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.dose-table th:first-child {
+  border-radius: 8px 0 0 0;
+}
+
+.dose-table th:last-child {
+  border-radius: 0 8px 0 0;
+}
+
+.dose-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #f0f4f8;
+  vertical-align: top;
+}
+
+.dose-table tr.highlight {
+  background: #dcfce7;
+  font-weight: 600;
+}
+
+.dose-table tr.highlight-amber {
+  background: #fef9c3;
+  font-weight: 600;
+}
+
+.dose-table tr.highlight-red {
+  background: #fef2f2;
+  font-weight: 600;
+}
+
+.dose-table tr:hover:not(.highlight):not(.highlight-amber):not(.highlight-red) {
+  background: #f8fafc;
+}
+
+.current-dose-box {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #4ade80;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 16px 12px;
+  text-align: center;
+}
+
+.current-dose-label {
+  font-size: 11px;
+  color: #166534;
+  font-weight: 500;
+}
+
+.current-dose-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #166534;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 4px 0;
+}
+
+.current-dose-detail {
+  font-size: 12px;
+  color: #166534;
+}
+
+.info-box {
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 16px 16px;
+}
+
+.info-box.blue {
+  background: #e6f1fb;
+  color: #0c447c;
+}
+
+.info-box.amber {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.info-box.red {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.info-box.teal {
+  background: #ccfbf1;
+  color: #134e4a;
+}
+
+.ref-box {
+  border-top: 1px solid #f0f4f8;
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Formula toggle */
+.formula-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.formula-btn {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #f8fafc;
+  color: var(--text-secondary);
+  border: none;
+  transition: all .2s;
+  font-family: inherit;
+}
+
+.formula-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.no-results {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Body composition info */
+.body-comp-box {
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.body-comp-box.obesity {
+  background: #fff7ed;
+  border: 1.5px solid #fb923c;
+}
+
+.body-comp-box.underweight {
+  background: #fefce8;
+  border: 1.5px solid #facc15;
+}
+
+.body-comp-box.elderly {
+  background: #f5f3ff;
+  border: 1.5px solid #a78bfa;
+}
+
+.body-comp-box.normal {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+}
+
+.body-comp-title {
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.body-comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.body-comp-item {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.body-comp-item .label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.body-comp-item .value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.body-comp-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.weight-used-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.weight-used-tag.abw {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.weight-used-tag.ibw {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.weight-used-tag.tbw {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Pediatric Schwartz box */
+.pediatric-box {
+  background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+  border: 2px solid #60a5fa;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.pediatric-box .title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1e40af;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pediatric-result {
+  text-align: center;
+  background: #dbeafe;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 8px 0;
+}
+
+.pediatric-result .val {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d4ed8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pediatric-result .unit {
+  font-size: 11px;
+  color: #3b82f6;
+}
+
+.pediatric-note {
+  font-size: 11px;
+  color: #1e3a5f;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.pediatric-block-msg {
+  background: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #991b1b;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .renal-results {
+    grid-template-columns: 1fr;
+  }
+
+  .field-row-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1653,6 +2463,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.filterByClass = filterByClass;
     window.selectDrug = selectDrug;
     window.closeDrugRecom = closeDrugRecom;
+    window.recalc = recalc;
+    window.filterDrugs = filterDrugs;
   }
 
   // Wait for DOM to be ready

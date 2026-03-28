@@ -4,7 +4,7 @@
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.0.0';
+const CACHE_NAME = 'iv-drugref-v5.0.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -14,8 +14,10 @@ const URGENT_POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 let urgentPollTimer = null;
 
 // Core assets (app shell) — cached on install
+// Note: CSS and page-specific JS are inlined into HTML by the build system.
+// Only list files that actually exist in the dist/ output.
 const ASSETS_TO_CACHE = [
-  // Pages
+  // Pages (CSS & JS are inlined by build.js)
   './',
   './index.html',
   './calculator.html',
@@ -26,34 +28,12 @@ const ASSETS_TO_CACHE = [
   './dashboard.html',
   './admin.html',
 
-  // Data
+  // Data & config
   './drugs-data.json',
   './manifest.json',
 
-  // CSS modules
-  './css/shared.css',
-  './css/theme-light.css',
-  './css/theme-dark.css',
-  './css/index.css',
-  './css/tdm.css',
-  './css/renal-dosing.css',
-  './css/calculator.css',
-  './css/compatibility.css',
-  './css/dashboard.css',
-  './css/vanco-tdm.css',
-  './css/admin.css',
-
-  // JS modules
-  './js/error-tracker.js',
-  './js/core.js',
-  './js/index.js',
-  './js/tdm.js',
-  './js/renal-dosing.js',
-  './js/calculator.js',
-  './js/compatibility.js',
-  './js/dashboard.js',
-  './js/vanco-tdm.js',
-  './js/admin.js',
+  // Standalone JS (not inlined — loaded separately)
+  './error-tracker.js',
   './i18n.js',
   './translations-en.js',
 

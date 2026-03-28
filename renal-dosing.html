@@ -1055,12 +1055,18 @@ body::before {
     // Critical: data corruption, security, crashes
     if (msg.includes('drugs') && msg.includes('undefined')) return CONFIG.SEVERITY.CRITICAL;
     if (msg.includes('json') && msg.includes('parse')) return CONFIG.SEVERITY.CRITICAL;
-    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('data corruption')) return CONFIG.SEVERITY.CRITICAL;
 
-    // High: core features broken
+    // High: core features broken, null refs, quota errors
+    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
     if (msg.includes('calculation') || msg.includes('dose')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('cannot read propert') || msg.includes('null is not')) return CONFIG.SEVERITY.HIGH;
+    if (msg.includes('quotaexceeded')) return CONFIG.SEVERITY.HIGH;
+
+    // Medium: network, type/reference errors, storage
     if (msg.includes('fetch') || msg.includes('network')) return CONFIG.SEVERITY.MEDIUM;
     if (msg.includes('typeerror') || msg.includes('referenceerror')) return CONFIG.SEVERITY.MEDIUM;
+    if (msg.includes('localstorage') || msg.includes('sessionstorage')) return CONFIG.SEVERITY.MEDIUM;
 
     // Default
     return CONFIG.SEVERITY.LOW;
@@ -1985,8 +1991,8 @@ document.addEventListener('DOMContentLoaded', () => {
     adultSec.style.display = 'block';
 
     // Calculate values using core functions
-    const cg = IVDrugRef.calcCockcroftGault(pt.age, pt.isObese ? pt.abw : pt.wt, pt.scr, pt.sex);
-    const cgRaw = IVDrugRef.calcCockcroftGault(pt.age, pt.wt, pt.scr, pt.sex);
+    const cg = IVDrugRef.calcCockcroftGault(pt.age, pt.wt, pt.scr, pt.sex, pt.ht);
+    const cgRaw = IVDrugRef.calcCG_raw(pt.age, pt.wt, pt.scr, pt.sex);
     const ckdIndexed = IVDrugRef.calcCKDEPI2021(pt.age, pt.scr, pt.sex);
     const ckdNonindexed = IVDrugRef.calcCKDEPI2021_nonindexed(pt.age, pt.scr, pt.sex, pt.bsa);
 

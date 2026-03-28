@@ -3700,7 +3700,7 @@ if (document.readyState === 'loading') {
 }
 
 // ====== Expose to window for onclick handlers in tdm.html ======
-window.switchDrug = switchDrug;
+window.switchDrug = TDMHub.switchDrug;
 window.VancoTDM = {
   addDose: () => TDMHub.VancoTDM_addDose(),
   addLevel: () => TDMHub.VancoTDM_addLevel(),

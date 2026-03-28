@@ -1909,13 +1909,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const pt = getPatient();
     if (activeFormula === 'cg') {
       const useWt = pt.isObese ? pt.abw : pt.wt;
-      return IVDrugRef.calcCG(pt.age, useWt, pt.sex, pt.scr);
+      return IVDrugRef.calcCockcroftGault(pt.age, useWt, pt.scr, pt.sex);
     } else {
       // For dosing use non-indexed version if BSA is atypical
       if (pt.bsa > 2.0 || pt.bsa < 1.5) {
-        return IVDrugRef.calcCKDEPI2021NonIndexed(pt.age, pt.sex, pt.scr);
+        return IVDrugRef.calcCKDEPI2021_nonindexed(pt.age, pt.scr, pt.sex, pt.bsa);
       }
-      return IVDrugRef.calcCKDEPI2021(pt.age, pt.sex, pt.scr);
+      return IVDrugRef.calcCKDEPI2021(pt.age, pt.scr, pt.sex);
     }
   }
 
@@ -1985,10 +1985,10 @@ document.addEventListener('DOMContentLoaded', () => {
     adultSec.style.display = 'block';
 
     // Calculate values using core functions
-    const cg = IVDrugRef.calcCG(pt.age, pt.isObese ? pt.abw : pt.wt, pt.sex, pt.scr);
-    const cgRaw = IVDrugRef.calcCG(pt.age, pt.wt, pt.sex, pt.scr);
-    const ckdIndexed = IVDrugRef.calcCKDEPI2021(pt.age, pt.sex, pt.scr);
-    const ckdNonindexed = IVDrugRef.calcCKDEPI2021NonIndexed(pt.age, pt.sex, pt.scr);
+    const cg = IVDrugRef.calcCockcroftGault(pt.age, pt.isObese ? pt.abw : pt.wt, pt.scr, pt.sex);
+    const cgRaw = IVDrugRef.calcCockcroftGault(pt.age, pt.wt, pt.scr, pt.sex);
+    const ckdIndexed = IVDrugRef.calcCKDEPI2021(pt.age, pt.scr, pt.sex);
+    const ckdNonindexed = IVDrugRef.calcCKDEPI2021_nonindexed(pt.age, pt.scr, pt.sex, pt.bsa);
 
     // Update CG display — show adjusted label if obese
     const cgLabel = pt.isObese ? `CrCl (CG — <span style="color:#ea580c;font-weight:700;">ABW</span>)` : 'CrCl (Cockcroft-Gault)';

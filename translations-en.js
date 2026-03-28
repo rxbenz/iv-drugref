@@ -565,8 +565,112 @@ window.IV_I18N_EN = (function() {
 
     dashboard: {
       _originals: {},
-      apply: function() {},
-      revert: function() { this._originals = {}; }
+      apply: function() {
+        var self = this;
+        // Helper: store original and replace
+        function tr(el, newText, key) {
+          if (!el) return;
+          if (!self._originals[key]) self._originals[key] = el.textContent;
+          el.textContent = newText;
+        }
+        function trPh(el, newPh, key) {
+          if (!el) return;
+          if (!self._originals[key]) self._originals[key] = el.placeholder;
+          el.placeholder = newPh;
+        }
+
+        // Setup banner
+        var setupH3 = document.querySelector('.setup-banner h3');
+        tr(setupH3, '⚙ Google Apps Script URL Setup', 'setupH3');
+        var saveBtn = document.querySelector('.setup-banner button');
+        tr(saveBtn, '💾 Save', 'saveBtn');
+
+        // Toolbar labels
+        var labels = document.querySelectorAll('.toolbar label');
+        labels.forEach(function(lbl) {
+          if (lbl.textContent.trim() === '📅 จาก') tr(lbl, '📅 From', 'lblFrom');
+          if (lbl.textContent.trim() === 'ถึง') tr(lbl, 'To', 'lblTo');
+        });
+
+        // Search placeholder
+        var search = document.getElementById('globalSearch');
+        trPh(search, '🔍 Search drug / user...', 'search');
+
+        // Clear all filters button
+        var clearBtn = document.querySelector('.toolbar .btn.sm');
+        if (clearBtn && /ล้างทั้งหมด/.test(clearBtn.textContent)) {
+          tr(clearBtn, '✕ Clear All', 'clearBtn');
+        }
+
+        // Journey search placeholder
+        var jInput = document.getElementById('journeyUid');
+        trPh(jInput, 'Type user_id...', 'journeyUid');
+
+        // Status message
+        var status = document.getElementById('statusMsg');
+        if (status && /กดปุ่ม/.test(status.textContent)) {
+          tr(status, 'Press ⚙ URL button to connect Google Sheets', 'statusMsg');
+        }
+
+        // SUS empty message
+        var susEmpty = document.getElementById('susEmptyMsg');
+        if (susEmpty && /ต้องการ/.test(susEmpty.textContent)) {
+          tr(susEmpty, '📊 Need SUS data ≥5 responses', 'susEmpty');
+        }
+
+        // Card headers with Thai text
+        document.querySelectorAll('.card-hd').forEach(function(hd) {
+          var t = hd.textContent.trim();
+          if (/Top ยาค้นหาบ่อย/.test(t)) tr(hd, '🔍 Top Searched Drugs', 'topDrugs');
+          if (/Top ยาดูบ่อย/.test(t)) tr(hd, '👁 Top Viewed Drugs', 'topExpands');
+          if (/Filter ใช้บ่อย/.test(t)) tr(hd, '🏷 Most Used Filters', 'topFilters');
+        });
+      },
+      revert: function() {
+        var self = this;
+        // Restore text content
+        var mapping = {
+          'setupH3': '.setup-banner h3',
+          'saveBtn': '.setup-banner button',
+          'clearBtn': null // handled below
+        };
+        Object.keys(mapping).forEach(function(key) {
+          if (!self._originals[key]) return;
+          var sel = mapping[key];
+          if (sel) {
+            var el = document.querySelector(sel);
+            if (el) el.textContent = self._originals[key];
+          }
+        });
+
+        // Restore placeholders
+        ['search', 'journeyUid'].forEach(function(key) {
+          if (!self._originals[key]) return;
+          var el = document.getElementById(key === 'search' ? 'globalSearch' : key);
+          if (el) el.placeholder = self._originals[key];
+        });
+
+        // Restore labels
+        var labels = document.querySelectorAll('.toolbar label');
+        labels.forEach(function(lbl) {
+          if (lbl.textContent.trim() === '📅 From' && self._originals['lblFrom']) lbl.textContent = self._originals['lblFrom'];
+          if (lbl.textContent.trim() === 'To' && self._originals['lblTo']) lbl.textContent = self._originals['lblTo'];
+        });
+
+        // Restore status
+        var status = document.getElementById('statusMsg');
+        if (status && self._originals['statusMsg']) status.textContent = self._originals['statusMsg'];
+
+        // Restore card headers
+        document.querySelectorAll('.card-hd').forEach(function(hd) {
+          var t = hd.textContent.trim();
+          if (/Top Searched/.test(t) && self._originals['topDrugs']) hd.textContent = self._originals['topDrugs'];
+          if (/Top Viewed/.test(t) && self._originals['topExpands']) hd.textContent = self._originals['topExpands'];
+          if (/Most Used Filters/.test(t) && self._originals['topFilters']) hd.textContent = self._originals['topFilters'];
+        });
+
+        this._originals = {};
+      }
     }
   };
 

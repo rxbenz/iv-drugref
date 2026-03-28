@@ -14,903 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
   <style>
-/* ============================================================
-   IV DrugRef PWA v5.0 — Shared Styles
-   ============================================================ */
-
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
-/* ---- CSS Reset ---- */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-
-/* ---- Typography ---- */
-body {
-  font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
-
-/* ---- Scrollbar ---- */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-/* ---- Bottom Navigation (shared across ALL pages) ---- */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid #e2e8f0;
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-.bottom-nav-inner {
-  max-width: 600px; margin: 0 auto;
-  display: flex; justify-content: space-around;
-  padding: 6px 0 4px;
-}
-.bottom-nav a {
-  display: flex; flex-direction: column; align-items: center;
-  text-decoration: none; color: #94a3b8; font-size: 10px;
-  font-weight: 500; gap: 2px; transition: color 0.2s;
-  padding: 4px 8px;
-}
-.bottom-nav a .nav-icon { font-size: 18px; line-height: 1; }
-.bottom-nav a .nav-label { font-size: 10px; }
-.bottom-nav a:hover { color: #0ea5e9; }
-.bottom-nav a.nav-active { color: #0ea5e9; font-weight: 600; }
-
-/* ---- Dark theme bottom nav override ---- */
-.theme-dark .bottom-nav {
-  background: rgba(11,17,32,0.92);
-  border-top-color: #1e3050;
-}
-.theme-dark .bottom-nav a { color: #64748b; }
-.theme-dark .bottom-nav a:hover { color: #38bdf8; }
-.theme-dark .bottom-nav a.nav-active { color: #38bdf8; }
-
-/* ---- Common nav back button ---- */
-.nav-back {
-  display: inline-flex; align-items: center; gap: 4px;
-  color: #0ea5e9; text-decoration: none; font-size: 14px; font-weight: 500;
-}
-.nav-back svg { width: 16px; height: 16px; }
-
-/* ---- Common form field styles ---- */
-.field label {
-  font-size: 11px; color: #64748b; display: block;
-  margin-bottom: 4px; font-weight: 500;
-}
-.field input, .field select {
-  width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
-  font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: #1e293b;
-}
-.field input:focus, .field select:focus {
-  outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
-}
-
-/* ---- Common section/card styles ---- */
-.section {
-  background: #fff; border-radius: 12px;
-  border: 1px solid #e2e8f0; margin-bottom: 16px; overflow: hidden;
-}
-.section-header {
-  padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0ea5e9;
-  border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px;
-}
-
-/* ---- Layout grids ---- */
-.field-grid { display: grid; gap: 12px; padding: 16px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.container { max-width: 640px; margin: 0 auto; padding: 16px 16px 90px; }
-
-/* ---- Badges ---- */
-.badge {
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
-  padding: 3px 8px; border-radius: 4px; letter-spacing: 0.3px;
-}
-.badge-had { background: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
-.badge-ed { background: rgba(5,150,105,0.08); color: #059669; border: 1px solid rgba(5,150,105,0.2); }
-.badge-ned { background: rgba(217,119,6,0.08); color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
-
-/* ---- Disclaimer ---- */
-.disclaimer {
-  text-align: center; font-size: 11px; color: #dc2626; padding: 12px 16px;
-  font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
-}
-
-/* ---- Info boxes ---- */
-.info-box {
-  border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
-}
-.info-box.blue { background: #e6f1fb; color: #0c447c; }
-.info-box.amber { background: #fef3c7; color: #92400e; }
-.info-box.red { background: #fef2f2; color: #991b1b; }
-
-/* ---- Responsive ---- */
-@media (max-width: 480px) {
-  .container { padding: 16px 14px 90px; }
-}
-
-/* ============================================================
-   IV DrugRef PWA v5.0 — Dark Theme
-   Used by: tdm.html, vanco-tdm.html, dashboard.html
-   ============================================================ */
-
-:root {
-  --bg: #0b1120;
-  --bg2: #131c31;
-  --bg3: #1e293b;
-  --bg4: #334155;
-  --card: #151e30;
-  --card-border: #1e3050;
-  --card-hover: #1a2740;
-  --text: #f1f5f9;
-  --text2: #94a3b8;
-  --text3: #64748b;
-  --text4: #475569;
-  --blue: #38bdf8;
-  --blue-dim: rgba(56,189,248,0.10);
-  --blue-glow: rgba(56,189,248,0.20);
-  --green: #4ade80;
-  --green-dim: rgba(74,222,128,0.10);
-  --amber: #fbbf24;
-  --amber-dim: rgba(251,191,36,0.10);
-  --red: #f87171;
-  --red-dim: rgba(248,113,113,0.10);
-  --purple: #a78bfa;
-  --purple-dim: rgba(167,139,250,0.10);
-  --cyan: #22d3ee;
-  --cyan-dim: rgba(34,211,238,0.10);
-  --teal: #2dd4bf;
-  --teal-dim: rgba(45,212,191,0.10);
-  --pink: #f472b6;
-  --pink-dim: rgba(244,114,182,0.10);
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-xs: 6px;
-}
-
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* Subtle grid pattern */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(56,189,248,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56,189,248,0.015) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ---- Dark Header ---- */
-.header {
-  background: rgba(19,28,49,0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--card-border);
-  padding: 0 16px;
-  position: sticky; top: 0; z-index: 200;
-}
-.header-inner {
-  max-width: 800px; margin: 0 auto;
-  display: flex; align-items: center; gap: 10px; height: 52px;
-}
-.header a.back {
-  color: var(--blue); text-decoration: none;
-  display: flex; align-items: center; gap: 3px;
-  font-size: 13px; font-weight: 500;
-}
-
-/* ---- Dark Card ---- */
-.card {
-  background: var(--card); border: 1px solid var(--card-border);
-  border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
-}
-.card-head {
-  padding: 10px 16px; font-size: 12px; font-weight: 600;
-  letter-spacing: 0.5px; color: var(--text2);
-  border-bottom: 1px solid var(--card-border);
-  display: flex; align-items: center; gap: 8px;
-}
-.card-body { padding: 14px 16px; }
-
-/* ---- Dark form fields ---- */
-.dark-field input, .dark-field select {
-  background: var(--bg2); border: 1px solid var(--card-border);
-  color: var(--text); border-radius: var(--radius-sm);
-  padding: 10px 12px; font-size: 14px; font-family: var(--mono);
-  width: 100%; outline: none; transition: border-color 0.2s;
-}
-.dark-field input:focus, .dark-field select:focus {
-  border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-dim);
-}
-.dark-field label {
-  font-size: 11px; color: var(--text3); display: block;
-  margin-bottom: 4px; font-weight: 500;
-}
-
-/* ---- Progress bar ---- */
-.progress { background: var(--bg3); border-radius: 4px; height: 6px; overflow: hidden; }
-.progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
-
-/* ---- Dark info boxes ---- */
-.info-box { border-radius: 8px; padding: 8px 12px; font-size: 11px; line-height: 1.6; margin-top: 6px; }
-.info-box.green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
-.info-box.amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
-.info-box.red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
-.info-box.blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(56,189,248,0.2); }
-
-/* ============================================================
-   Dashboard Analytics Page-Specific Styles
-   ============================================================
-   Includes: Tabs, bento stats, cards, tables, journey timeline,
-   multi-drug results display
- ============================================================ */
-
-/* Setup Banner */
-.setup-banner {
-  max-width: 1440px;
-  margin: 10px auto;
-  padding: 12px 16px;
-  background: rgba(251, 191, 36, 0.06);
-  border: 1px solid rgba(251, 191, 36, 0.15);
-  border-radius: var(--radius-sm);
-  display: none;
-}
-
-.setup-banner.show {
-  display: block;
-}
-
-.setup-banner h3 {
-  font-size: 12px;
-  color: var(--accent-amber);
-  margin-bottom: 5px;
-}
-
-.setup-banner input {
-  width: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 11px;
-  font-family: var(--font-mono);
-  margin-bottom: 5px;
-  background: var(--bg);
-  color: var(--text-primary);
-}
-
-.setup-banner button {
-  background: var(--accent-amber);
-  color: #000;
-  border: none;
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Toolbar */
-.toolbar {
-  max-width: 1440px;
-  margin: 10px auto 0;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.toolbar label {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.toolbar input[type="date"] {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 4px 7px;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-
-.toolbar input[type="date"]:focus {
-  outline: none;
-  border-color: var(--accent-cyan);
-}
-
-.toolbar .search-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 5px 10px;
-  color: var(--text-primary);
-  font-size: 11px;
-  width: 200px;
-}
-
-.toolbar .search-box::placeholder {
-  color: var(--text-muted);
-}
-
-.toolbar .search-box:focus {
-  outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.08);
-}
-
-.toolbar .sep {
-  width: 1px;
-  height: 18px;
-  background: var(--border);
-  margin: 0 2px;
-}
-
-.filter-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(34, 211, 238, 0.1);
-  border: 1px solid rgba(34, 211, 238, 0.25);
-  border-radius: 20px;
-  padding: 3px 10px 3px 8px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--accent-cyan);
-  cursor: pointer;
-  transition: all .15s;
-}
-
-.filter-badge:hover {
-  background: rgba(34, 211, 238, 0.2);
-}
-
-.filter-badge .x {
-  font-size: 12px;
-  margin-left: 2px;
-  opacity: 0.7;
-}
-
-.live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-green);
-  animation: pulse 2s infinite;
-  display: inline-block;
-  margin-right: 4px;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-/* Tabs */
-.tabs {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 10px 24px 0;
-  display: flex;
-  gap: 3px;
-  overflow-x: auto;
-}
-
-.tab {
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 500;
-  padding: 7px 14px;
-  border-radius: 8px 8px 0 0;
-  border: 1px solid transparent;
-  border-bottom: none;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all .15s;
-}
-
-.tab:hover {
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.tab.active {
-  background: var(--bg-card);
-  color: var(--accent-cyan);
-  border-color: var(--border);
-  font-weight: 600;
-}
-
-.content {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 24px 60px;
-  position: relative;
-  z-index: 1;
-}
-
-.tab-panel {
-  display: none;
-  padding-top: 14px;
-}
-
-.tab-panel.active {
-  display: block;
-}
-
-/* Bento Stats */
-.bento {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.stat {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  position: relative;
-  overflow: hidden;
-  transition: all .2s;
-  cursor: default;
-}
-
-.stat:hover {
-  border-color: var(--border-glow);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.stat::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-}
-
-.stat.blue::before {
-  background: var(--accent-blue);
-}
-.stat.green::before {
-  background: var(--accent-green);
-}
-.stat.amber::before {
-  background: var(--accent-amber);
-}
-.stat.purple::before {
-  background: var(--accent-purple);
-}
-.stat.red::before {
-  background: var(--accent-red);
-}
-.stat.cyan::before {
-  background: var(--accent-cyan);
-}
-.stat.pink::before {
-  background: var(--accent-pink);
-}
-.stat.teal::before {
-  background: var(--accent-teal);
-}
-
-.stat-icon {
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.stat-val {
-  font-family: var(--font-mono);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 3px;
-}
-
-.stat.blue .stat-val {
-  color: var(--accent-blue);
-}
-.stat.green .stat-val {
-  color: var(--accent-green);
-}
-.stat.amber .stat-val {
-  color: var(--accent-amber);
-}
-.stat.purple .stat-val {
-  color: var(--accent-purple);
-}
-.stat.red .stat-val {
-  color: var(--accent-red);
-}
-.stat.cyan .stat-val {
-  color: var(--accent-cyan);
-}
-.stat.pink .stat-val {
-  color: var(--accent-pink);
-}
-.stat.teal .stat-val {
-  color: var(--accent-teal);
-}
-
-.stat-lbl {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* Grids */
-.g2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.g3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-@media (max-width: 900px) {
-  .g2,
-  .g3 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Cards */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  position: relative;
-  transition: border-color .2s;
-}
-
-.card:hover {
-  border-color: rgba(34, 211, 238, 0.1);
-}
-
-.card.full {
-  grid-column: 1 / -1;
-}
-
-.card-hd {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.card-hd .em {
-  font-size: 13px;
-}
-
-.card-act {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 3px;
-}
-
-/* Tables */
-.tw {
-  overflow-x: auto;
-  max-height: 380px;
-  overflow-y: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-
-th {
-  padding: 6px 8px;
-  text-align: left;
-  font-weight: 600;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--bg-card);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-td {
-  padding: 5px 8px;
-  border-bottom: 1px solid rgba(26, 37, 64, 0.5);
-}
-
-tr:hover td {
-  background: rgba(255, 255, 255, 0.015);
-}
-
-tr.clickable {
-  cursor: pointer;
-}
-
-tr.clickable:hover td {
-  background: rgba(34, 211, 238, 0.04);
-}
-
-tr.highlight td {
-  background: rgba(34, 211, 238, 0.08) !important;
-}
-
-.rank {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  color: var(--text-muted);
-  width: 24px;
-  font-size: 10px;
-}
-
-.drug-name {
-  font-weight: 500;
-}
-
-.count {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  color: var(--accent-cyan);
-}
-
-.bar-cell {
-  width: 120px;
-}
-
-.mini-bar {
-  height: 14px;
-  background: rgba(56, 189, 248, 0.08);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.mini-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width .5s ease;
-}
-
-/* Status */
-.loading {
-  text-align: center;
-  padding: 50px;
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
-.error {
-  text-align: center;
-  padding: 30px;
-  color: var(--accent-red);
-  font-size: 12px;
-}
-
-.empty-msg {
-  text-align: center;
-  padding: 24px;
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.empty-msg .icon {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.footer-info {
-  text-align: center;
-  padding: 16px;
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-/* Journey Timeline */
-.journey-search {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-
-.journey-search input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
-
-.journey-search input::placeholder {
-  color: var(--text-muted);
-}
-
-.journey-search input:focus {
-  outline: none;
-  border-color: var(--accent-cyan);
-}
-
-.journey-search button {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: none;
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.timeline {
-  position: relative;
-  padding-left: 22px;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--border);
-}
-
-.tl-item {
-  position: relative;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-.tl-item::before {
-  content: '';
-  position: absolute;
-  left: -18px;
-  top: 12px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  background: var(--bg);
-}
-
-.tl-item.page_view::before {
-  background: var(--accent-blue);
-  border-color: var(--accent-blue);
-}
-
-.tl-item.search::before {
-  background: var(--accent-cyan);
-  border-color: var(--accent-cyan);
-}
-
-.tl-item.dose_calc::before {
-  background: var(--accent-purple);
-  border-color: var(--accent-purple);
-}
-
-.tl-item.tdm_calc::before {
-  background: var(--accent-red);
-  border-color: var(--accent-red);
-}
-
-.tl-time {
-  font-size: 9px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-.tl-type {
-  font-size: 10px;
-  font-weight: 600;
-  margin: 2px 0;
-}
-
-.tl-detail {
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.user-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 14px;
-}
-
-.user-pill {
-  padding: 3px 8px;
-  border-radius: 5px;
-  font-size: 10px;
-  font-family: var(--font-mono);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition: all .12s;
-}
-
-.user-pill:hover {
-  border-color: var(--accent-cyan);
-  color: var(--accent-cyan);
-}
-
-.user-pill.active {
-  background: rgba(34, 211, 238, 0.1);
-  border-color: var(--accent-cyan);
-  color: var(--accent-cyan);
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--accent-green);
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 11px;
-  color: var(--accent-green);
-  z-index: 200;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: all .25s;
-  pointer-events: none;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap);*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-family:var(--sans);background:var(--bg);color:var(--text)}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:0 0}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#94a3b8}.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid #e2e8f0;padding-bottom:env(safe-area-inset-bottom,0)}.bottom-nav-inner{max-width:600px;margin:0 auto;display:flex;justify-content:space-around;padding:6px 0 4px}.bottom-nav a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:10px;font-weight:500;gap:2px;transition:color .2s;padding:4px 8px}.bottom-nav a .nav-icon{font-size:18px;line-height:1}.bottom-nav a .nav-label{font-size:10px}.bottom-nav a:hover{color:#0ea5e9}.bottom-nav a.nav-active{color:#0ea5e9;font-weight:600}.theme-dark .bottom-nav{background:rgba(11,17,32,.92);border-top-color:#1e3050}.theme-dark .bottom-nav a{color:#64748b}.theme-dark .bottom-nav a.nav-active,.theme-dark .bottom-nav a:hover{color:#38bdf8}.nav-back{display:inline-flex;align-items:center;gap:4px;color:#0ea5e9;text-decoration:none;font-size:14px;font-weight:500}.nav-back svg{width:16px;height:16px}.field label{font-size:11px;color:#64748b;display:block;margin-bottom:4px;font-weight:500}.field input,.field select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;font-weight:500;font-family:inherit;background:#fff;color:#1e293b}.field input:focus,.field select:focus{outline:0;border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,.12)}.section{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:16px;overflow:hidden}.section-header{padding:12px 16px;font-size:13px;font-weight:600;color:#0ea5e9;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;gap:8px}.field-grid{display:grid;gap:12px;padding:16px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.container{max-width:640px;margin:0 auto;padding:16px 16px 90px}.badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.3px}.badge-had{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)}.badge-ed{background:rgba(5,150,105,.08);color:#059669;border:1px solid rgba(5,150,105,.2)}.badge-ned{background:rgba(217,119,6,.08);color:#d97706;border:1px solid rgba(217,119,6,.2)}.disclaimer{text-align:center;font-size:11px;color:#dc2626;padding:12px 16px;font-weight:500;background:#fef2f2;border-radius:8px;margin-top:16px}.info-box.blue{background:#e6f1fb;color:#0c447c}.info-box.amber{background:#fef3c7;color:#92400e}.info-box.red{background:#fef2f2;color:#991b1b}.btn{padding:6px 12px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border,rgba(255,255,255,.08));background:var(--bg-card,rgba(255,255,255,.06));color:var(--text-secondary,#94a3b8);transition:.15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.btn:hover{background:var(--bg-card-hover,rgba(255,255,255,.1));color:var(--text-primary,#f1f5f9);border-color:var(--border-focus,rgba(255,255,255,.15))}.btn.primary{background:linear-gradient(135deg,var(--accent-cyan,#22d3ee),var(--accent-blue,#38bdf8));color:#0f172a;border-color:transparent}.btn.primary:hover{box-shadow:0 2px 12px rgba(56,189,248,.25);transform:translateY(-1px)}.btn.sm{padding:4px 8px;font-size:10px}.theme-light .btn{background:rgba(0,0,0,.04);color:var(--text-secondary,#64748b);border-color:var(--border,#e2e8f0)}.theme-light .btn:hover{background:rgba(0,0,0,.08);color:var(--text-primary,#1e293b)}@media (max-width:480px){.container{padding:16px 14px 90px}}:root{--bg:#0b1120;--bg2:#131c31;--bg3:#1e293b;--bg4:#334155;--card:#151e30;--card-border:#1e3050;--card-hover:#1a2740;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--blue:#38bdf8;--blue-dim:rgba(56,189,248,0.10);--blue-glow:rgba(56,189,248,0.20);--green:#4ade80;--green-dim:rgba(74,222,128,0.10);--amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);--red:#f87171;--red-dim:rgba(248,113,113,0.10);--purple:#a78bfa;--purple-dim:rgba(167,139,250,0.10);--cyan:#22d3ee;--cyan-dim:rgba(34,211,238,0.10);--teal:#2dd4bf;--teal-dim:rgba(45,212,191,0.10);--pink:#f472b6;--pink-dim:rgba(244,114,182,0.10);--mono:'JetBrains Mono',monospace;--sans:'DM Sans','IBM Plex Sans Thai',sans-serif;--radius:12px;--radius-sm:8px;--radius-xs:6px;--bg-primary:#0b1120;--bg-secondary:#131c31;--bg-card:#151e30;--bg-card-hover:#1a2740;--bg-input:#131c31;--border:#1e3050;--border-focus:#38bdf8;--border-glow:rgba(56,189,248,0.25);--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--accent-blue:#38bdf8;--accent-cyan:#22d3ee;--accent-emerald:#34d399;--accent-green:#4ade80;--accent-amber:#fbbf24;--accent-red:#f87171;--accent-pink:#f472b6;--accent-purple:#a78bfa;--accent-teal:#2dd4bf;--font-mono:'JetBrains Mono',monospace;--font-sans:'DM Sans','IBM Plex Sans Thai',sans-serif;--shadow-sm:0 1px 2px rgba(0,0,0,0.2);--shadow-md:0 4px 12px rgba(0,0,0,0.3);--shadow-lg:0 8px 24px rgba(0,0,0,0.4);--shadow-glow:0 0 0 3px rgba(56,189,248,0.12)}body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}.header{background:rgba(19,28,49,.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--card-border);padding:0 16px;position:sticky;top:0;z-index:200}.header-inner{max-width:1440px;margin:0 auto;display:flex;align-items:center;gap:10px;height:52px;flex-wrap:wrap}.header a.back{color:var(--blue);text-decoration:none;display:flex;align-items:center;gap:3px;font-size:13px;font-weight:500}.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}.card-head{padding:10px 16px;font-size:12px;font-weight:600;letter-spacing:.5px;color:var(--text2);border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:8px}.card-body{padding:14px 16px}.dark-field input,.dark-field select{background:var(--bg2);border:1px solid var(--card-border);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:var(--mono);width:100%;outline:0;transition:border-color .2s}.dark-field input:focus,.dark-field select:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-dim)}.dark-field label{font-size:11px;color:var(--text3);display:block;margin-bottom:4px;font-weight:500}.progress{background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}.progress-bar{height:100%;border-radius:4px;transition:width .5s}.info-box{border-radius:8px;padding:8px 12px;font-size:11px;line-height:1.6;margin-top:6px}.info-box.green{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,.2)}.info-box.amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,.2)}.info-box.red{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,.2)}.info-box.blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(56,189,248,.2)}.setup-banner{max-width:1440px;margin:10px auto;padding:12px 16px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:var(--radius-sm);display:none}.setup-banner.show{display:block}.setup-banner h3{font-size:12px;color:var(--accent-amber);margin-bottom:5px}.setup-banner input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:var(--font-mono);margin-bottom:5px;background:var(--bg);color:var(--text-primary)}.setup-banner button{background:var(--accent-amber);color:#000;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}.toolbar{max-width:1440px;margin:10px auto 0;padding:0 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar label{font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}.toolbar input[type=date]{background:var(--bg-card);border:1px solid var(--border);border-radius:5px;padding:4px 7px;color:var(--text-primary);font-family:var(--font-mono);font-size:10px}.toolbar input[type=date]:focus{outline:0;border-color:var(--accent-cyan)}.toolbar .search-box{background:var(--bg-card);border:1px solid var(--border);border-radius:5px;padding:5px 10px;color:var(--text-primary);font-size:11px;width:200px}.toolbar .search-box::placeholder{color:var(--text-muted)}.toolbar .search-box:focus{outline:0;border-color:var(--accent-cyan);box-shadow:0 0 0 2px rgba(34,211,238,.08)}.toolbar .sep{width:1px;height:18px;background:var(--border);margin:0 2px}.filter-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);border-radius:20px;padding:3px 10px 3px 8px;font-size:10px;font-weight:600;color:var(--accent-cyan);cursor:pointer;transition:.15s}.filter-badge:hover{background:rgba(34,211,238,.2)}.filter-badge .x{font-size:12px;margin-left:2px;opacity:.7}.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-green);animation:2s infinite pulse;display:inline-block;margin-right:4px}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}.tabs{max-width:1440px;margin:0 auto;padding:10px 24px 0;display:flex;gap:3px;overflow-x:auto}.tab{font-family:var(--font-sans);font-size:11px;font-weight:500;padding:7px 14px;border-radius:8px 8px 0 0;border:1px solid transparent;border-bottom:none;background:0 0;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:.15s}.tab:hover{color:var(--text-secondary);background:rgba(255,255,255,.02)}.tab.active{background:var(--bg-card);color:var(--accent-cyan);border-color:var(--border);font-weight:600}.content{max-width:1440px;margin:0 auto;padding:0 24px 60px;position:relative;z-index:1}.tab-panel{display:none;padding-top:14px}.tab-panel.active{display:block}.bento{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:14px}.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;position:relative;overflow:hidden;transition:.2s;cursor:default}.stat:hover{border-color:var(--border-glow);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3)}.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}.stat.blue::before{background:var(--accent-blue)}.stat.green::before{background:var(--accent-green)}.stat.amber::before{background:var(--accent-amber)}.stat.purple::before{background:var(--accent-purple)}.stat.red::before{background:var(--accent-red)}.stat.cyan::before{background:var(--accent-cyan)}.stat.pink::before{background:var(--accent-pink)}.stat.teal::before{background:var(--accent-teal)}.stat-icon{font-size:14px;margin-bottom:6px}.stat-val{font-family:var(--font-mono);font-size:24px;font-weight:700;line-height:1;margin-bottom:3px}.stat.blue .stat-val{color:var(--accent-blue)}.stat.green .stat-val{color:var(--accent-green)}.stat.amber .stat-val{color:var(--accent-amber)}.stat.purple .stat-val{color:var(--accent-purple)}.stat.red .stat-val{color:var(--accent-red)}.stat.cyan .stat-val{color:var(--accent-cyan)}.stat.pink .stat-val{color:var(--accent-pink)}.stat.teal .stat-val{color:var(--accent-teal)}.stat-lbl{font-size:10px;color:var(--text-muted);font-weight:500}.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}@media (max-width:900px){.g2,.g3{grid-template-columns:1fr}}.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;transition:border-color .2s}.card:hover{border-color:rgba(34,211,238,.1)}.card.full{grid-column:1/-1}.card-hd{font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:5px}.card-hd .em{font-size:13px}.card-act{position:absolute;top:12px;right:12px;display:flex;gap:3px}.tw{overflow-x:auto;max-height:380px;overflow-y:auto}table{width:100%;border-collapse:collapse;font-size:11px}th{padding:6px 8px;text-align:left;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-card);font-size:10px;text-transform:uppercase;letter-spacing:.04em}td{padding:5px 8px;border-bottom:1px solid rgba(26,37,64,.5)}tr:hover td{background:rgba(255,255,255,.015)}tr.clickable{cursor:pointer}tr.clickable:hover td{background:rgba(34,211,238,.04)}tr.highlight td{background:rgba(34,211,238,.08)!important}.rank{font-family:var(--font-mono);font-weight:700;color:var(--text-muted);width:24px;font-size:10px}.drug-name{font-weight:500}.count{font-family:var(--font-mono);font-weight:700;color:var(--accent-cyan)}.bar-cell{width:120px}.mini-bar{height:14px;background:rgba(56,189,248,.08);border-radius:3px;overflow:hidden}.mini-bar-fill{height:100%;border-radius:3px;transition:width .5s;will-change:width}.loading{text-align:center;padding:50px;color:var(--text-muted);font-size:12px}.error{text-align:center;padding:30px;color:var(--accent-red);font-size:12px}.empty-msg{text-align:center;padding:24px;color:var(--text-muted);font-size:11px}.empty-msg .icon{font-size:24px;margin-bottom:4px}.footer-info{text-align:center;padding:16px;font-size:10px;color:var(--text-muted)}.journey-search{display:flex;gap:6px;margin-bottom:14px}.journey-search input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-primary);font-family:var(--font-mono);font-size:12px}.journey-search input::placeholder{color:var(--text-muted)}.journey-search input:focus{outline:0;border-color:var(--accent-cyan)}.journey-search button{padding:8px 16px;border-radius:6px;border:none;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-blue));color:#fff;font-weight:600;cursor:pointer;font-size:12px}.timeline{position:relative;padding-left:22px}.timeline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:var(--border)}.tl-item{position:relative;margin-bottom:10px;padding:8px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px}.tl-item::before{content:'';position:absolute;left:-18px;top:12px;width:8px;height:8px;border-radius:50%;border:2px solid var(--border);background:var(--bg)}.tl-item.page_view::before{background:var(--accent-blue);border-color:var(--accent-blue)}.tl-item.search::before{background:var(--accent-cyan);border-color:var(--accent-cyan)}.tl-item.dose_calc::before{background:var(--accent-purple);border-color:var(--accent-purple)}.tl-item.tdm_calc::before{background:var(--accent-red);border-color:var(--accent-red)}.tl-time{font-size:9px;color:var(--text-muted);font-family:var(--font-mono)}.tl-type{font-size:10px;font-weight:600;margin:2px 0}.tl-detail{font-size:11px;color:var(--text-secondary)}.user-list{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px}.user-pill{padding:3px 8px;border-radius:5px;font-size:10px;font-family:var(--font-mono);background:var(--bg-card);border:1px solid var(--border);cursor:pointer;color:var(--text-secondary);transition:.12s}.user-pill:hover{border-color:var(--accent-cyan);color:var(--accent-cyan)}.user-pill.active{background:rgba(34,211,238,.1);border-color:var(--accent-cyan);color:var(--accent-cyan)}.toast{position:fixed;bottom:20px;right:20px;background:var(--bg-card);border:1px solid var(--accent-green);border-radius:8px;padding:8px 14px;font-size:11px;color:var(--accent-green);z-index:200;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:translateY(0)}@media (max-width:768px){.toolbar{flex-wrap:wrap;gap:6px;padding:8px 12px}.toolbar .search-box{width:100%;min-width:0}.header-actions{flex-wrap:wrap;gap:4px}.bento{grid-template-columns:repeat(2,1fr)}.tw{max-height:260px}}@media (max-width:480px){.bento{grid-template-columns:1fr}.tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex-shrink:0}}.tab:focus-visible{outline:2px solid var(--accent-cyan);outline-offset:-2px}.filter-badge:focus-visible{outline:2px solid var(--accent-cyan);outline-offset:1px}.user-pill:focus-visible{outline:2px solid var(--accent-cyan);outline-offset:1px}.btn:focus-visible{outline:2px solid var(--accent-cyan);outline-offset:1px}@media (prefers-reduced-motion:reduce){*,::after,::before{animation-duration:0s!important;animation-iteration-count:1!important;transition-duration:0s!important;scroll-behavior:auto!important}.mini-bar-fill{transition:none!important}}
 </style>
 </head>
 <body class="theme-dark">
@@ -918,32 +22,32 @@ tr.highlight td {
 <div class="header"><div class="header-inner">
   <h1>📊 IV DrugRef Analytics <span class="ver">v6 CROSS-FILTER</span></h1>
   <div class="header-actions">
-    <button class="btn" onclick="toggleSetup()">⚙ URL</button>
-    <button class="btn" onclick="exportCSV('Sessions')">📥 Sessions</button>
-    <button class="btn" onclick="exportCSV('Searches')">📥 Searches</button>
-    <button class="btn" onclick="exportCSV('RenalDosing')">📥 Renal</button>
-    <button class="btn" onclick="exportCSV('TDMUsage')">📥 TDM</button>
-    <button class="btn" onclick="exportCSV('CompatUsage')">📥 Compat</button>
-    <button class="btn primary" onclick="fetchRaw()">🔄 Refresh</button>
+    <button class="btn" id="btnSetup">⚙ URL</button>
+    <button class="btn" id="btnExportSessions" data-export="Sessions">📥 Sessions</button>
+    <button class="btn" id="btnExportSearches" data-export="Searches">📥 Searches</button>
+    <button class="btn" id="btnExportRenal" data-export="RenalDosing">📥 Renal</button>
+    <button class="btn" id="btnExportTDM" data-export="TDMUsage">📥 TDM</button>
+    <button class="btn" id="btnExportCompat" data-export="CompatUsage">📥 Compat</button>
+    <button class="btn primary" id="btnRefresh">🔄 Refresh</button>
   </div>
 </div></div>
 
 <div class="setup-banner" id="setupBanner">
   <h3>⚙ ตั้งค่า Google Apps Script URL</h3>
   <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec" />
-  <button onclick="saveUrl()">💾 บันทึก</button>
+  <button id="btnSaveUrl">💾 บันทึก</button>
 </div>
 
 <div class="toolbar" id="toolbar">
-  <label>📅 จาก</label><input type="date" id="dateFrom" onchange="reRender()">
-  <label>ถึง</label><input type="date" id="dateTo" onchange="reRender()">
+  <label>📅 จาก</label><input type="date" id="dateFrom">
+  <label>ถึง</label><input type="date" id="dateTo">
   <div class="sep"></div>
-  <input type="text" class="search-box" id="globalSearch" placeholder="🔍 ค้นหายา / user..." oninput="reRender()">
+  <input type="text" class="search-box" id="globalSearch" placeholder="🔍 ค้นหายา / user...">
   <div class="sep"></div>
   <div id="filterBadges"></div>
-  <button class="btn sm" onclick="clearAllFilters()">✕ ล้างทั้งหมด</button>
+  <button class="btn sm" id="clearFiltersBtn">✕ ล้างทั้งหมด</button>
   <div class="sep"></div>
-  <button class="btn sm" id="arBtn" onclick="toggleAR()">⏱ Auto: OFF</button>
+  <button class="btn sm" id="arBtn">⏱ Auto: OFF</button>
   <span id="arDot" style="display:none"><span class="live-dot"></span><span style="font-size:10px;color:var(--text-muted)">Live</span></span>
 </div>
 
@@ -964,11 +68,11 @@ tr.highlight td {
 <div class="tab-panel active" id="panel-overview">
   <div class="bento" id="overviewStats"></div>
   <div class="g2">
-    <div class="card full"><div class="card-hd"><span class="em">📈</span> Daily Active Users</div><div class="card-act"><button class="btn sm" onclick="xprt('dauChart')">📷</button></div><canvas id="dauChart" height="65"></canvas></div>
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Daily Active Users</div><div class="card-act"><button class="btn sm" data-xprt="dauChart">📷</button></div><canvas id="dauChart" height="65"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">📱</span> Platform</div><div class="card-act"><button class="btn sm" onclick="xprt('platformChart')">📷</button></div><canvas id="platformChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">⏱</span> Search Time</div><div class="card-act"><button class="btn sm" onclick="xprt('timeChart')">📷</button></div><canvas id="timeChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📱</span> Platform</div><div class="card-act"><button class="btn sm" data-xprt="platformChart">📷</button></div><canvas id="platformChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">⏱</span> Search Time</div><div class="card-act"><button class="btn sm" data-xprt="timeChart">📷</button></div><canvas id="timeChart" height="190"></canvas></div>
   </div>
 </div>
 
@@ -979,8 +83,8 @@ tr.highlight td {
     <div class="card"><div class="card-hd"><span class="em">👁</span> Top ยาดูบ่อย</div><div class="tw" id="topExpandsTable"></div></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">🏷</span> Filter ใช้บ่อย</div><div class="card-act"><button class="btn sm" onclick="xprt('filterChart')">📷</button></div><canvas id="filterChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">📂</span> Expand Source</div><div class="card-act"><button class="btn sm" onclick="xprt('srcChart')">📷</button></div><canvas id="srcChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🏷</span> Filter ใช้บ่อย</div><div class="card-act"><button class="btn sm" data-xprt="filterChart">📷</button></div><canvas id="filterChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📂</span> Expand Source</div><div class="card-act"><button class="btn sm" data-xprt="srcChart">📷</button></div><canvas id="srcChart" height="190"></canvas></div>
   </div>
 </div>
 
@@ -988,11 +92,11 @@ tr.highlight td {
 <div class="tab-panel" id="panel-tdm">
   <div class="bento" id="tdmStats"></div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">📊</span> TDM by Drug</div><div class="card-act"><button class="btn sm" onclick="xprt('tdmDrugChart')">📷</button></div><canvas id="tdmDrugChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">🎯</span> Interpretation</div><div class="card-act"><button class="btn sm" onclick="xprt('tdmInterpChart')">📷</button></div><canvas id="tdmInterpChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> TDM by Drug</div><div class="card-act"><button class="btn sm" data-xprt="tdmDrugChart">📷</button></div><canvas id="tdmDrugChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🎯</span> Interpretation</div><div class="card-act"><button class="btn sm" data-xprt="tdmInterpChart">📷</button></div><canvas id="tdmInterpChart" height="190"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card full"><div class="card-hd"><span class="em">📈</span> TDM by Day</div><div class="card-act"><button class="btn sm" onclick="xprt('tdmDayChart')">📷</button></div><canvas id="tdmDayChart" height="120"></canvas></div>
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> TDM by Day</div><div class="card-act"><button class="btn sm" data-xprt="tdmDayChart">📷</button></div><canvas id="tdmDayChart" height="120"></canvas></div>
   </div>
 </div>
 
@@ -1001,14 +105,14 @@ tr.highlight td {
   <div class="bento" id="renalStats"></div>
   <div class="g2">
     <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drugs</div><div class="tw" id="renalDrugsTable"></div></div>
-    <div class="card"><div class="card-hd"><span class="em">📊</span> Drug Class</div><div class="card-act"><button class="btn sm" onclick="xprt('renalClassChart')">📷</button></div><canvas id="renalClassChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> Drug Class</div><div class="card-act"><button class="btn sm" data-xprt="renalClassChart">📷</button></div><canvas id="renalClassChart" height="190"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">🔬</span> Formula (CG vs CKD-EPI)</div><div class="card-act"><button class="btn sm" onclick="xprt('renalFormulaChart')">📷</button></div><canvas id="renalFormulaChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">🏥</span> CKD Stage</div><div class="card-act"><button class="btn sm" onclick="xprt('renalStageChart')">📷</button></div><canvas id="renalStageChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🔬</span> Formula (CG vs CKD-EPI)</div><div class="card-act"><button class="btn sm" data-xprt="renalFormulaChart">📷</button></div><canvas id="renalFormulaChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🏥</span> CKD Stage</div><div class="card-act"><button class="btn sm" data-xprt="renalStageChart">📷</button></div><canvas id="renalStageChart" height="190"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card full"><div class="card-hd"><span class="em">📈</span> Renal Usage by Day</div><div class="card-act"><button class="btn sm" onclick="xprt('renalDayChart')">📷</button></div><canvas id="renalDayChart" height="120"></canvas></div>
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Renal Usage by Day</div><div class="card-act"><button class="btn sm" data-xprt="renalDayChart">📷</button></div><canvas id="renalDayChart" height="120"></canvas></div>
   </div>
 </div>
 
@@ -1016,11 +120,11 @@ tr.highlight td {
 <div class="tab-panel" id="panel-compat">
   <div id="compatStats" class="bento"></div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">📊</span> Compat by Mode</div><div class="card-act"><button class="btn sm" onclick="xprt('compatModeChart')">📷</button></div><canvas id="compatModeChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drug Pairs</div><div class="card-act"><button class="btn sm" onclick="xprt('compatDrugChart')">📷</button></div><canvas id="compatDrugChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> Compat by Mode</div><div class="card-act"><button class="btn sm" data-xprt="compatModeChart">📷</button></div><canvas id="compatModeChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drug Pairs</div><div class="card-act"><button class="btn sm" data-xprt="compatDrugChart">📷</button></div><canvas id="compatDrugChart" height="190"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card full"><div class="card-hd"><span class="em">📈</span> Compat Usage by Day</div><div class="card-act"><button class="btn sm" onclick="xprt('compatDayChart')">📷</button></div><canvas id="compatDayChart" height="120"></canvas></div>
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Compat Usage by Day</div><div class="card-act"><button class="btn sm" data-xprt="compatDayChart">📷</button></div><canvas id="compatDayChart" height="120"></canvas></div>
   </div>
 </div>
 
@@ -1028,15 +132,15 @@ tr.highlight td {
 <div class="tab-panel" id="panel-dosecalc">
   <div class="bento" id="doseCalcStats"></div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drugs Calculated</div><div class="card-act"><button class="btn sm" onclick="xprt('dcDrugChart')">📷</button></div><canvas id="dcDrugChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">📏</span> Dose Unit Distribution</div><div class="card-act"><button class="btn sm" onclick="xprt('dcUnitChart')">📷</button></div><canvas id="dcUnitChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drugs Calculated</div><div class="card-act"><button class="btn sm" data-xprt="dcDrugChart">📷</button></div><canvas id="dcDrugChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📏</span> Dose Unit Distribution</div><div class="card-act"><button class="btn sm" data-xprt="dcUnitChart">📷</button></div><canvas id="dcUnitChart" height="190"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">👥</span> Top Users</div><div class="card-act"><button class="btn sm" onclick="xprt('dcUserChart')">📷</button></div><canvas id="dcUserChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">⚖</span> Weight Distribution</div><div class="card-act"><button class="btn sm" onclick="xprt('dcWeightChart')">📷</button></div><canvas id="dcWeightChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">👥</span> Top Users</div><div class="card-act"><button class="btn sm" data-xprt="dcUserChart">📷</button></div><canvas id="dcUserChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">⚖</span> Weight Distribution</div><div class="card-act"><button class="btn sm" data-xprt="dcWeightChart">📷</button></div><canvas id="dcWeightChart" height="190"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card full"><div class="card-hd"><span class="em">📈</span> Dose Calcs by Day</div><div class="card-act"><button class="btn sm" onclick="xprt('dcDayChart')">📷</button></div><canvas id="dcDayChart" height="120"></canvas></div>
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Dose Calcs by Day</div><div class="card-act"><button class="btn sm" data-xprt="dcDayChart">📷</button></div><canvas id="dcDayChart" height="120"></canvas></div>
   </div>
 </div>
 
@@ -1044,12 +148,12 @@ tr.highlight td {
 <div class="tab-panel" id="panel-survey">
   <div class="bento" id="surveyStats"></div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">⭐</span> Satisfaction</div><div class="card-act"><button class="btn sm" onclick="xprt('satChart')">📷</button></div><canvas id="satChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">👥</span> Role</div><div class="card-act"><button class="btn sm" onclick="xprt('roleChart')">📷</button></div><canvas id="roleChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">⭐</span> Satisfaction</div><div class="card-act"><button class="btn sm" data-xprt="satChart">📷</button></div><canvas id="satChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">👥</span> Role</div><div class="card-act"><button class="btn sm" data-xprt="roleChart">📷</button></div><canvas id="roleChart" height="190"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">🏥</span> Department</div><div class="card-act"><button class="btn sm" onclick="xprt('deptChart')">📷</button></div><canvas id="deptChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">📊</span> SUS Score Distribution</div><div class="card-act"><button class="btn sm" onclick="xprt('susChart')">📷</button></div><canvas id="susChart" height="190"></canvas><div class="empty-msg" id="susEmptyMsg" style="display:none"><div class="icon">📊</div>ต้องการข้อมูล SUS ≥5 responses</div></div>
+    <div class="card"><div class="card-hd"><span class="em">🏥</span> Department</div><div class="card-act"><button class="btn sm" data-xprt="deptChart">📷</button></div><canvas id="deptChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> SUS Score Distribution</div><div class="card-act"><button class="btn sm" data-xprt="susChart">📷</button></div><canvas id="susChart" height="190"></canvas><div class="empty-msg" id="susEmptyMsg" style="display:none"><div class="icon">📊</div>ต้องการข้อมูล SUS ≥5 responses</div></div>
   </div>
 </div>
 
@@ -1057,15 +161,15 @@ tr.highlight td {
 <div class="tab-panel" id="panel-journey">
   <div class="bento" id="journeyStats"></div>
   <div class="g2">
-    <div class="card"><div class="card-hd"><span class="em">📄</span> Page Visits</div><div class="card-act"><button class="btn sm" onclick="xprt('pvChart')">📷</button></div><canvas id="pvChart" height="190"></canvas></div>
-    <div class="card"><div class="card-hd"><span class="em">🔀</span> Nav Flow (top 15)</div><div class="card-act"><button class="btn sm" onclick="xprt('flowChart')">📷</button></div><canvas id="flowChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📄</span> Page Visits</div><div class="card-act"><button class="btn sm" data-xprt="pvChart">📷</button></div><canvas id="pvChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🔀</span> Nav Flow (top 15)</div><div class="card-act"><button class="btn sm" data-xprt="flowChart">📷</button></div><canvas id="flowChart" height="190"></canvas></div>
   </div>
   <div class="card full" style="margin-top:8px">
     <div class="card-hd"><span class="em">🗺</span> User Timeline</div>
     <div class="user-list" id="userList"></div>
     <div class="journey-search">
       <input type="text" id="journeyUid" placeholder="พิมพ์ user_id...">
-      <button onclick="showTimeline()">🔍</button>
+      <button id="btnShowTimeline">🔍</button>
     </div>
     <div id="userTimeline"></div>
   </div>
@@ -1138,8 +242,11 @@ tr.highlight td {
   }
 
   // ─── Utility: Generate error fingerprint for dedup ───
-  function errorFingerprint(message, source, line) {
-    return `${message}|${source}|${line}`;
+  // Use message + filename (not full source path or line — those change per build in minified code)
+  function errorFingerprint(message, source) {
+    const filename = String(source || 'unknown').split('/').pop().split('?')[0];
+    const msgNorm = String(message || '').substring(0, 120); // Normalize length for dedup
+    return `${msgNorm}|${filename}`;
   }
 
   // ─── Utility: Check dedup ───
@@ -1154,43 +261,50 @@ tr.highlight td {
   }
 
   // ─── Utility: Classify severity ───
+  // Uses exact regex patterns instead of loose includes() to prevent false positives
+  // e.g., "fetching user dose data" won't trigger HIGH just because "dose" appears
   function classifySeverity(error) {
     const msg = (error.message || '').toLowerCase();
+    const type = (error.type || '').toLowerCase();
 
-    // Critical: data corruption, security, crashes
-    if (msg.includes('drugs') && msg.includes('undefined')) return CONFIG.SEVERITY.CRITICAL;
-    if (msg.includes('json') && msg.includes('parse')) return CONFIG.SEVERITY.CRITICAL;
-    if (msg.includes('data corruption')) return CONFIG.SEVERITY.CRITICAL;
+    // Critical: data corruption, JSON parse failure, script crash
+    if (/json\.parse|syntaxerror.*json|unexpected token/.test(msg)) return CONFIG.SEVERITY.CRITICAL;
+    if (/data\s*corruption|corrupt/i.test(msg)) return CONFIG.SEVERITY.CRITICAL;
+    if (/maximum call stack|out of memory|aw,?\s*snap/i.test(msg)) return CONFIG.SEVERITY.CRITICAL;
 
-    // High: core features broken, null refs, quota errors
-    if (msg.includes('security') || msg.includes('cors')) return CONFIG.SEVERITY.HIGH;
-    if (msg.includes('calculation') || msg.includes('dose')) return CONFIG.SEVERITY.HIGH;
-    if (msg.includes('cannot read propert') || msg.includes('null is not')) return CONFIG.SEVERITY.HIGH;
-    if (msg.includes('quotaexceeded')) return CONFIG.SEVERITY.HIGH;
+    // High: null refs, CORS/security blocks, quota exceeded, core calculation errors
+    if (/cannot read propert|null is not|undefined is not a function/.test(msg)) return CONFIG.SEVERITY.HIGH;
+    if (/\bcors\b|blocked by cors|access-control-allow|securityerror/.test(msg)) return CONFIG.SEVERITY.HIGH;
+    if (/quotaexceeded|quota_exceeded/.test(msg)) return CONFIG.SEVERITY.HIGH;
+    if (/dose.*calc.*fail|calc.*error|nan.*result/i.test(msg)) return CONFIG.SEVERITY.HIGH;
 
-    // Medium: network, type/reference errors, storage
-    if (msg.includes('fetch') || msg.includes('network')) return CONFIG.SEVERITY.MEDIUM;
-    if (msg.includes('typeerror') || msg.includes('referenceerror')) return CONFIG.SEVERITY.MEDIUM;
-    if (msg.includes('localstorage') || msg.includes('sessionstorage')) return CONFIG.SEVERITY.MEDIUM;
+    // Medium: network failures, type/reference errors, storage issues
+    if (/\bfetch\b.*fail|networkerror|net::err_|failed to fetch/i.test(msg)) return CONFIG.SEVERITY.MEDIUM;
+    if (type === 'unhandled_rejection') return CONFIG.SEVERITY.MEDIUM;
+    if (/typeerror|referenceerror/.test(msg)) return CONFIG.SEVERITY.MEDIUM;
+    if (type === 'resource_error') return CONFIG.SEVERITY.MEDIUM;
 
-    // Default
+    // Default: everything else
     return CONFIG.SEVERITY.LOW;
   }
 
-  // ─── Utility: Collect context ───
+  // ─── Utility: Collect context (PII-safe) ───
   function collectContext() {
     return {
       page: getPageName(),
-      url: window.location.href,
-      userAgent: navigator.userAgent,
+      // Strip query params and hash to avoid leaking user-specific data
+      url: window.location.origin + window.location.pathname,
+      // Truncate UA to just browser name/version (no detailed device fingerprint)
+      userAgent: (function() {
+        var ua = navigator.userAgent || '';
+        var m = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/);
+        return m ? m[0] : ua.substring(0, 50);
+      })(),
       online: navigator.onLine,
       timestamp: new Date().toISOString(),
       sessionId: sessionStorage.getItem('sessionId') || 'unknown',
       screenSize: `${screen.width}x${screen.height}`,
-      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
-      language: navigator.language,
       standalone: window.matchMedia('(display-mode: standalone)').matches,
-      memoryUsage: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
       appVersion: CONFIG.APP_VERSION
     };
   }
@@ -1217,10 +331,18 @@ tr.highlight td {
     return toastContainer;
   }
 
+  const MAX_TOASTS = 3; // Prevent toast storm during error cascade
+
   function showToast(message, severity) {
     if (!document.body) return; // Not ready yet
 
     const container = createToastContainer();
+
+    // Limit visible toasts — remove oldest if at max
+    while (container.children.length >= MAX_TOASTS) {
+      container.removeChild(container.firstChild);
+    }
+
     const toast = document.createElement('div');
 
     const colors = {
@@ -1317,10 +439,10 @@ tr.highlight td {
     } catch (e) { /* silently fail */ }
   }
 
-  // ─── Send to GAS ───
+  // ─── Send to GAS (returns true on success attempt, false on skip) ───
   function sendToGAS(entries) {
-    if (!navigator.onLine || entries.length === 0) return;
-    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return;
+    if (!navigator.onLine || entries.length === 0) return false;
+    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return false;
 
     rateLimitCount += entries.length;
 
@@ -1333,30 +455,34 @@ tr.highlight td {
 
     try {
       if (navigator.sendBeacon) {
-        navigator.sendBeacon(CONFIG.GAS_URL, payload);
+        return navigator.sendBeacon(CONFIG.GAS_URL, payload);
       } else {
         fetch(CONFIG.GAS_URL, {
           method: 'POST',
           body: payload,
           mode: 'no-cors',
           keepalive: true
-        }).catch(() => {});
+        }).catch(() => {}); // Will retry on next flush
+        return true;
       }
-    } catch (e) { /* silently fail */ }
+    } catch (e) { return false; }
   }
 
-  // ─── Flush queue ───
+  // ─── Flush queue (only clear on successful send) ───
   function flushQueue() {
     const queue = getQueue();
     if (queue.length === 0 || !navigator.onLine) return;
 
-    sendToGAS(queue);
-    clearQueue();
+    const sent = sendToGAS(queue);
+    if (sent) {
+      clearQueue(); // Only clear if send was attempted successfully
+    }
+    // If send failed (rate limit, offline), queue persists for next flush
   }
 
   // ─── Core: Process error ───
   function processError(errorInfo) {
-    const fp = errorFingerprint(errorInfo.message, errorInfo.source, errorInfo.line);
+    const fp = errorFingerprint(errorInfo.message, errorInfo.source);
     if (isDuplicate(fp)) return;
 
     const severity = classifySeverity(errorInfo);
@@ -1560,6 +686,10 @@ var IVDrugRef = (function() {
    * @returns {number} ABW in kg
    */
   function calcABW(wt, ibw) {
+    // Guard: if actual weight < IBW, ABW formula can produce inappropriate values
+    // In clinical practice, use actual weight when wt < IBW
+    if (wt <= 0 || ibw <= 0) return wt || 0;
+    if (wt < ibw) return wt; // No adjustment needed if underweight
     return ibw + 0.4 * (wt - ibw);
   }
 
@@ -1682,12 +812,19 @@ var IVDrugRef = (function() {
    * @returns {Object} Stage info with stage code, Thai label, and CSS class
    */
   function getCKDStage(gfr) {
-    if (gfr >= 90) return { stage: 'G1', label: 'ปกติ/สูง', cls: 'stage-1' };
-    if (gfr >= 60) return { stage: 'G2', label: 'ลดลงเล็กน้อย', cls: 'stage-2' };
-    if (gfr >= 45) return { stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', cls: 'stage-3a' };
-    if (gfr >= 30) return { stage: 'G3b', label: 'ลดลงปานกลาง-มาก', cls: 'stage-3b' };
-    if (gfr >= 15) return { stage: 'G4', label: 'ลดลงมาก', cls: 'stage-4' };
-    return { stage: 'G5', label: 'ไตวาย', cls: 'stage-5' };
+    // Labels in both Thai (default) and English for i18n support
+    var stages = [
+      { min: 90, stage: 'G1', label: 'ปกติ/สูง', labelEn: 'Normal/High', cls: 'stage-1' },
+      { min: 60, stage: 'G2', label: 'ลดลงเล็กน้อย', labelEn: 'Mildly decreased', cls: 'stage-2' },
+      { min: 45, stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', labelEn: 'Mildly-moderately decreased', cls: 'stage-3a' },
+      { min: 30, stage: 'G3b', label: 'ลดลงปานกลาง-มาก', labelEn: 'Moderately-severely decreased', cls: 'stage-3b' },
+      { min: 15, stage: 'G4', label: 'ลดลงมาก', labelEn: 'Severely decreased', cls: 'stage-4' },
+      { min: -Infinity, stage: 'G5', label: 'ไตวาย', labelEn: 'Kidney failure', cls: 'stage-5' }
+    ];
+    for (var i = 0; i < stages.length; i++) {
+      if (gfr >= stages[i].min) return stages[i];
+    }
+    return stages[stages.length - 1];
   }
 
   /**
@@ -1837,12 +974,24 @@ var IVDrugRef = (function() {
     }
 
     // Send exit on page unload or visibility change
-    window.addEventListener('beforeunload', () => sendExit());
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') sendExit();
-    });
+    // Use named handlers stored on function scope to allow cleanup and prevent accumulation
+    function onBeforeUnload() { sendExit(); }
+    function onVisChange() { if (document.visibilityState === 'hidden') sendExit(); }
 
-    return { sendExit, fromPage, enterTime };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    document.addEventListener('visibilitychange', onVisChange);
+
+    return {
+      sendExit,
+      fromPage,
+      enterTime,
+      // Allow caller to clean up listeners
+      destroy: function() {
+        sendExit();
+        window.removeEventListener('beforeunload', onBeforeUnload);
+        document.removeEventListener('visibilitychange', onVisChange);
+      }
+    };
   }
 
 
@@ -1874,9 +1023,18 @@ var IVDrugRef = (function() {
    */
   function generateId(len) {
     len = len || 16;
-    const arr = new Uint8Array(len / 2);
-    crypto.getRandomValues(arr);
-    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+    // Prefer crypto API, fallback to Math.random for older browsers
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const arr = new Uint8Array(len / 2);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // Fallback: Math.random-based (less secure but functional)
+    var result = '';
+    for (var i = 0; i < len; i++) {
+      result += Math.floor(Math.random() * 16).toString(16);
+    }
+    return result;
   }
 
   /**
@@ -1901,6 +1059,8 @@ var IVDrugRef = (function() {
    */
   function fmt(n, decimals) {
     decimals = decimals !== undefined ? decimals : 1;
+    // Guard against NaN, Infinity, and non-numeric input
+    if (typeof n !== 'number' || !isFinite(n)) return '–';
     return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
   }
 
@@ -1960,59 +1120,193 @@ document.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
   // ============================================================
-  // IV DrugRef Dashboard v6 — Cross-Filter Engine
+  // IV DrugRef Dashboard v6.1 — Cross-Filter Engine (Hardened)
+  // Fixes: XSS, performance, memory, error handling, accessibility
   // ============================================================
 
-  let SCRIPT_URL = localStorage.getItem('analyticsUrl') || '';
-  let charts = {};
-  let RAW = null;        // raw data from GAS {sessions,searches,surveys,...}
-  let FILTERS = {};      // active cross-filters: {drug:'Vancomycin', platform:'iOS', ...}
-  let SESSION_MAP = {};  // session_id → {platform, user_id} lookup for cross-tab filtering
-  let _arTimer = null, _arOn = false;
+  // ─── CONSTANTS ─────────────────────────────────────────────
+  const FETCH_TIMEOUT_MS = 15000;        // 15s fetch timeout
+  const AUTO_REFRESH_MS = 60000;         // 60s auto-refresh
+  const DEBOUNCE_MS = 150;               // 150ms debounce for filters
+  const TOAST_DURATION_MS = 2200;        // toast display time
+  const MAX_TIME_TO_CLICK_MS = 300000;   // 5min max for search time metric
+  const DAU_DAYS = 30;                   // days shown in DAU chart
+  const TOP_N_DEFAULT = 20;              // default top-N for tables
+  const FILTER_SAMPLE_SIZE = 50;         // rows to sample for filter detection
+  const MAX_JOURNEY_USERS = 50;          // max users in journey list
+  const MAX_FLOW_ENTRIES = 15;           // max flow entries in chart
 
   const C = {blue:'#38bdf8',cyan:'#22d3ee',green:'#34d399',amber:'#fbbf24',purple:'#a78bfa',red:'#f87171',pink:'#f472b6',slate:'#546380',teal:'#2dd4bf'};
-  const CD = {responsive:true,plugins:{legend:{labels:{color:'#8899b4',font:{family:'Noto Sans Thai',size:10}}}},scales:{x:{ticks:{color:'#546380',font:{size:9}},grid:{color:'rgba(26,37,64,0.5)'}},y:{ticks:{color:'#546380',font:{size:9}},grid:{color:'rgba(26,37,64,0.5)'},beginAtZero:true}}};
+  const CD = {responsive:true,plugins:{legend:{labels:{color:'#8899b4',font:{family:'Noto Sans Thai',size:10}}}},scales:{x:{ticks:{color:'#546380',font:{size:9}},grid:{color:'rgba(26,37,64,0.5)'}},y:{ticks:{color:'#546380',font:{size:9}},grid:{color:'rgba(26,37,64,0.5)'}},beginAtZero:true}};
   const RENAL_CLS = {abx:'Antibiotics',av:'Antivirals',ac:'Anticoagulants',misc:'Others'};
   const RENAL_CLR = {abx:C.blue,av:C.purple,ac:C.pink,misc:C.green};
   const STG_CLR = {G1:'#34d399',G2:'#6ee7b7',G3a:'#fbbf24',G3b:'#f59e0b',G4:'#fb923c',G5:'#f87171'};
   const INTERP_CLR = {therapeutic:C.green,subtherapeutic:C.amber,supratherapeutic:C.red,toxic:C.pink,borderline_toxic:'#fb923c',elevated_trough:C.red};
 
-  // Tab navigation
-  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  // Weight histogram config
+  const WEIGHT_BUCKETS = [
+    { label: '<40', min: -Infinity, max: 40, color: C.red },
+    { label: '40-50', min: 40, max: 50, color: C.amber },
+    { label: '50-60', min: 50, max: 60, color: C.green },
+    { label: '60-70', min: 60, max: 70, color: C.cyan },
+    { label: '70-80', min: 70, max: 80, color: C.blue },
+    { label: '>80', min: 80, max: Infinity, color: C.purple }
+  ];
+
+  // Search time buckets (seconds)
+  const TIME_BUCKETS = [
+    { label: '<5s', max: 5 },
+    { label: '5-10s', max: 10 },
+    { label: '10-20s', max: 20 },
+    { label: '20-30s', max: 30 },
+    { label: '30-60s', max: 60 },
+    { label: '>60s', max: Infinity }
+  ];
+
+  // ─── STATE ─────────────────────────────────────────────────
+  let SCRIPT_URL = localStorage.getItem('analyticsUrl') || '';
+  let charts = {};
+  let RAW = null;
+  let FILTERS = {};
+  let SESSION_MAP = {};
+  let _arTimer = null, _arOn = false;
+  let _journeyUsers = {};
+  let _filterCache = null;     // memoized filter results
+  let _filterCacheKey = null;  // cache invalidation key
+
+  // ─── SECURITY: HTML escaping ───────────────────────────────
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ─── UTILITY: Safe number formatting ───────────────────────
+  function fmtNum(n, decimals) {
+    if (!Number.isFinite(n)) return 'N/A';
+    decimals = decimals !== undefined ? decimals : 1;
+    return n.toFixed(decimals);
+  }
+
+  // ─── UTILITY: Debounce ─────────────────────────────────────
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  // ─── Tab navigation ────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const panel = document.getElementById('panel-' + t.dataset.tab);
+    if (panel) panel.classList.add('active');
   }));
 
-  // Setup
-  function toggleSetup(){document.getElementById('setupBanner').classList.toggle('show');document.getElementById('scriptUrl').value=SCRIPT_URL;}
-  function saveUrl(){SCRIPT_URL=document.getElementById('scriptUrl').value.trim();localStorage.setItem('analyticsUrl',SCRIPT_URL);document.getElementById('setupBanner').classList.remove('show');fetchRaw();}
+  // ─── Setup ─────────────────────────────────────────────────
+  function toggleSetup() {
+    const banner = document.getElementById('setupBanner');
+    banner.classList.toggle('show');
+    document.getElementById('scriptUrl').value = SCRIPT_URL;
+  }
 
-  // Chart helpers
-  function dc(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
-  function mc(id,cfg){dc(id);const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;charts[id]=new Chart(ctx,cfg);}
-  function xprt(id){const c=charts[id];if(!c)return;const a=document.createElement('a');a.download=`IV_DrugRef_${id}.png`;a.href=c.toBase64Image();a.click();toast('📷 Exported');}
+  function saveUrl() {
+    SCRIPT_URL = document.getElementById('scriptUrl').value.trim();
+    // Validate URL protocol
+    if (SCRIPT_URL && !SCRIPT_URL.startsWith('https://')) {
+      toast('⚠️ URL ต้องเป็น HTTPS');
+      return;
+    }
+    localStorage.setItem('analyticsUrl', SCRIPT_URL);
+    document.getElementById('setupBanner').classList.remove('show');
+    fetchRaw();
+  }
+
+  // ─── Chart helpers ─────────────────────────────────────────
+  function dc(k) {
+    if (charts[k]) { charts[k].destroy(); delete charts[k]; }
+  }
+
+  function mc(id, cfg) {
+    dc(id);
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    charts[id] = new Chart(ctx, cfg);
+  }
+
+  function xprt(id) {
+    const c = charts[id];
+    if (!c) return;
+    const a = document.createElement('a');
+    a.download = `IV_DrugRef_${id}.png`;
+    a.href = c.toBase64Image();
+    a.click();
+    toast('📷 Exported');
+  }
 
   // ============================================================
   // CROSS-FILTER ENGINE
   // ============================================================
   function addFilter(key, val) {
-    if (FILTERS[key] === val) { delete FILTERS[key]; } // toggle off
+    // Sanitize inputs
+    key = String(key);
+    val = String(val);
+    if (FILTERS[key] === val) { delete FILTERS[key]; }
     else { FILTERS[key] = val; }
+    _filterCache = null; // invalidate cache
     renderFilterBadges();
-    reRender();
+    debouncedReRender();
   }
 
-  function removeFilter(key) { delete FILTERS[key]; renderFilterBadges(); reRender(); }
-  function clearAllFilters() { FILTERS = {}; document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value=''; document.getElementById('globalSearch').value=''; renderFilterBadges(); reRender(); toast('✕ ล้าง filter แล้ว'); }
+  function removeFilter(key) {
+    delete FILTERS[String(key)];
+    _filterCache = null;
+    renderFilterBadges();
+    debouncedReRender();
+  }
+
+  function clearAllFilters() {
+    FILTERS = {};
+    _filterCache = null;
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    document.getElementById('globalSearch').value = '';
+    renderFilterBadges();
+    debouncedReRender();
+    toast('✕ ล้าง filter แล้ว');
+  }
 
   function renderFilterBadges() {
     const el = document.getElementById('filterBadges');
-    const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    el.innerHTML = Object.entries(FILTERS).map(([k,v]) => `<span class="filter-badge" onclick="removeFilter('${esc(k)}')">${esc(k)}: ${esc(v)} <span class="x">✕</span></span>`).join('');
+    if (!el) return;
+    // Use safe DOM construction instead of innerHTML with onclick
+    el.innerHTML = '';
+    Object.entries(FILTERS).forEach(([k, v]) => {
+      const badge = document.createElement('span');
+      badge.className = 'filter-badge';
+      badge.setAttribute('role', 'button');
+      badge.setAttribute('tabindex', '0');
+      badge.setAttribute('aria-label', `Remove filter ${k}: ${v}`);
+      badge.textContent = `${k}: ${v} `;
+      const x = document.createElement('span');
+      x.className = 'x';
+      x.textContent = '✕';
+      badge.appendChild(x);
+      badge.addEventListener('click', () => removeFilter(k));
+      badge.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); removeFilter(k); } });
+      el.appendChild(badge);
+    });
   }
 
-  // Build session lookup map for cross-tab filtering
+  // Build session lookup map
   function buildSessionMap(sessions) {
     SESSION_MAP = {};
     (sessions || []).forEach(s => {
@@ -2021,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Resolve a field from the row, or fall back to SESSION_MAP
+  // Resolve field with SESSION_MAP fallback
   function resolveField(r, field) {
     if (r[field] !== undefined && r[field] !== null && String(r[field]).trim() !== '') return String(r[field]);
     const sid = String(r.session_id || '').trim();
@@ -2029,12 +1323,10 @@ document.addEventListener('DOMContentLoaded', () => {
     return '';
   }
 
-  // Filter key → fields that make this filter applicable
   const FILTER_FIELDS = { drug:['drug_name','drug_clicked','drug_id'], platform:['platform'], class:['drug_class'], formula:['formula_used'], stage:['ckd_stage'], interpretation:['interpretation'], role:['role'], user:['user_id','session_id'] };
 
-  // Detect which filters apply to this dataset
   function detectApplicableFilters(rows) {
-    const sample = rows.slice(0, Math.min(rows.length, 30));
+    const sample = rows.slice(0, Math.min(rows.length, FILTER_SAMPLE_SIZE));
     const applicable = {};
     for (const key of Object.keys(FILTERS)) {
       if (key === 'user' || key === 'platform') { applicable[key] = true; continue; }
@@ -2044,7 +1336,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return applicable;
   }
 
-  // Apply all filters to a row array (with cross-tab resolution)
   function applyFilters(rows) {
     const from = document.getElementById('dateFrom').value;
     const to = document.getElementById('dateTo').value;
@@ -2065,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (key === 'stage') { if (String(r.ckd_stage || '') !== val) return false; }
         else if (key === 'interpretation') { if (String(r.interpretation || '') !== val) return false; }
         else if (key === 'role') { if (String(r.role || '') !== val) return false; }
-        else if (key === 'user') { if (String(r.user_id||r.session_id||'') !== val) return false; }
+        else if (key === 'user') { if (String(r.user_id || r.session_id || '') !== val) return false; }
       }
       if (q) {
         const txt = Object.values(r).join(' ').toLowerCase();
@@ -2077,85 +1368,224 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function matchDrug(r, drug) {
     const d = drug.toLowerCase();
-    return (String(r.drug_name||'').toLowerCase()===d || String(r.drug_clicked||'').toLowerCase()===d || String(r.drug_id||'').toLowerCase()===d);
+    return (String(r.drug_name || '').toLowerCase() === d || String(r.drug_clicked || '').toLowerCase() === d || String(r.drug_id || '').toLowerCase() === d);
   }
 
   // ============================================================
-  // FETCH RAW
+  // FETCH RAW (with timeout & safe error display)
   // ============================================================
   async function fetchRaw() {
-    if (!SCRIPT_URL) { document.getElementById('statusMsg').textContent='กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ'; document.getElementById('statusMsg').style.display='block'; return; }
-    document.getElementById('statusMsg').textContent='⏳ กำลังโหลด raw data...'; document.getElementById('statusMsg').style.display='block';
+    if (!SCRIPT_URL) {
+      document.getElementById('statusMsg').textContent = 'กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ';
+      document.getElementById('statusMsg').style.display = 'block';
+      return;
+    }
+    document.getElementById('statusMsg').textContent = '⏳ กำลังโหลด raw data...';
+    document.getElementById('statusMsg').style.display = 'block';
+
+    // AbortController for timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
     try {
-      const res = await fetch(SCRIPT_URL+'?action=raw');
+      const res = await fetch(SCRIPT_URL + '?action=raw', { signal: controller.signal });
+      clearTimeout(timeout);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const d = await res.json();
       if (d.error) throw new Error(d.error);
+
+      // Validate response structure
+      if (!d || typeof d !== 'object') throw new Error('Invalid response format');
+
       RAW = d;
+      _filterCache = null;
       buildSessionMap(RAW.sessions);
-      document.getElementById('statusMsg').style.display='none';
+      document.getElementById('statusMsg').style.display = 'none';
       reRender();
-      toast('✅ โหลดข้อมูลสำเร็จ ('+totalRows()+' rows)');
-    } catch(err) { document.getElementById('statusMsg').innerHTML=`<div class="error">❌ ${err.message}</div>`; }
+      toast('✅ โหลดข้อมูลสำเร็จ (' + totalRows() + ' rows)');
+    } catch (err) {
+      clearTimeout(timeout);
+      const msg = document.getElementById('statusMsg');
+      msg.className = 'error';
+      // SAFE: Use textContent instead of innerHTML to prevent XSS
+      msg.textContent = '❌ ' + (err.name === 'AbortError' ? 'Timeout — ลองอีกครั้ง' : err.message);
+      msg.style.display = 'block';
+      // Report to error tracker if available
+      if (window.IVErrorTracker) {
+        window.IVErrorTracker.report('Dashboard fetch failed: ' + err.message, 'high');
+      }
+    }
   }
 
-  function totalRows() { if(!RAW)return 0; return Object.values(RAW).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0); }
+  function totalRows() {
+    if (!RAW) return 0;
+    return Object.values(RAW).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0);
+  }
 
   // ============================================================
-  // RE-RENDER (called whenever filters change)
+  // RE-RENDER (debounced, lazy-tab rendering)
   // ============================================================
+  function getActiveTab() {
+    const active = document.querySelector('.tab.active');
+    return active ? active.dataset.tab : 'overview';
+  }
+
   function reRender() {
     if (!RAW) return;
-    const sessions = applyFilters(RAW.sessions||[]);
-    const searches = applyFilters(RAW.searches||[]);
-    const surveys = applyFilters(RAW.surveys||[]);
-    const doseCalcs = applyFilters(RAW.doseCalcs||[]);
-    const drugExpands = applyFilters(RAW.drugExpands||[]);
-    const tdmUsage = applyFilters(RAW.tdmUsage||[]);
-    const pageViews = applyFilters(RAW.pageViews||[]);
-    const renalDosing = applyFilters(RAW.renalDosing||[]);
-    const compatUsage = applyFilters(RAW.compatUsage||[]);
+    const sessions = applyFilters(RAW.sessions || []);
+    const searches = applyFilters(RAW.searches || []);
+    const surveys = applyFilters(RAW.surveys || []);
+    const doseCalcs = applyFilters(RAW.doseCalcs || []);
+    const drugExpands = applyFilters(RAW.drugExpands || []);
+    const tdmUsage = applyFilters(RAW.tdmUsage || []);
+    const pageViews = applyFilters(RAW.pageViews || []);
+    const renalDosing = applyFilters(RAW.renalDosing || []);
+    const compatUsage = applyFilters(RAW.compatUsage || []);
 
+    // Always render overview + active tab
     renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage);
-    renderDrugs(searches, drugExpands);
-    renderTDM(tdmUsage);
-    renderRenal(renalDosing);
-    renderCompat(compatUsage);
-    renderDoseCalc(doseCalcs);
-    renderSurvey(surveys);
-    renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage);
-    document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length+searches.length+tdmUsage.length+renalDosing.length+compatUsage.length} rows | Dashboard v6`;
+
+    const tab = getActiveTab();
+    if (tab === 'drugs' || tab === 'overview') renderDrugs(searches, drugExpands);
+    if (tab === 'tdm' || tab === 'overview') renderTDM(tdmUsage);
+    if (tab === 'renal' || tab === 'overview') renderRenal(renalDosing);
+    if (tab === 'compat' || tab === 'overview') renderCompat(compatUsage);
+    if (tab === 'dosecalc' || tab === 'overview') renderDoseCalc(doseCalcs);
+    if (tab === 'survey' || tab === 'overview') renderSurvey(surveys);
+    if (tab === 'journey' || tab === 'overview') renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage);
+
+    document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length + searches.length + tdmUsage.length + renalDosing.length + compatUsage.length} rows | Dashboard v6.1`;
   }
+
+  // Debounced version for filter changes
+  const debouncedReRender = debounce(reRender, DEBOUNCE_MS);
+
+  // Re-render active tab on tab change
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    if (RAW) reRender();
+  }));
 
   // ============================================================
   // AGGREGATION HELPERS
   // ============================================================
-  function countBy(arr, key) { const m={}; arr.forEach(r=>{ const v=String(r[key]||'').trim(); if(v&&v!=='undefined') m[v]=(m[v]||0)+1; }); return m; }
-  function topN(map, n=20) { return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>({drug:k,count:v})); }
-  function uniqueSet(arr, key) { const s=new Set(); arr.forEach(r=>{ const v=String(r[key]||r.session_id||'').trim(); if(v) s.add(v); }); return s; }
-  function dailyCount(arr) { const m={}; arr.forEach(r=>{ const d=String(r.timestamp||'').substring(0,10); if(d&&d!=='undefined') m[d]=(m[d]||0)+1; }); return m; }
-  function dailyUnique(arr) { const m={}; arr.forEach(r=>{ const d=String(r.timestamp||'').substring(0,10); const u=String(r.user_id||r.session_id||'').trim(); if(d&&d!=='undefined'&&u){ if(!m[d])m[d]=new Set(); m[d].add(u); } }); const out={}; for(const[k,v] of Object.entries(m)) out[k]=v.size; return out; }
-
-  function statBox(icon,val,label,color) { return `<div class="stat ${color}"><div class="stat-icon">${icon}</div><div class="stat-val">${val}</div><div class="stat-lbl">${label}</div></div>`; }
-
-  function buildClickTable(cid, rows, barColor, filterKey) {
-    const el = document.getElementById(cid);
-    if (!rows || !rows.length) { el.innerHTML='<div class="empty-msg"><div class="icon">📭</div>ยังไม่มีข้อมูล</div>'; return; }
-    const mx = rows[0]?.count||1;
-    const activeD = FILTERS.drug?.toLowerCase();
-    el.innerHTML=`<table><thead><tr><th>#</th><th>ชื่อยา</th><th>ครั้ง</th><th></th></tr></thead><tbody>${rows.map((d,i)=>{
-      const hl = activeD===d.drug.toLowerCase()?'highlight':'';
-      return `<tr class="clickable ${hl}" onclick="addFilter('${filterKey||'drug'}','${d.drug.replace(/'/g,"\\'")}')"><td class="rank">${i+1}</td><td class="drug-name">${d.drug}</td><td class="count">${d.count}</td><td class="bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count/mx*100).toFixed(0)}%;background:${barColor||C.cyan}"></div></div></td></tr>`;
-    }).join('')}</tbody></table>`;
+  function countBy(arr, key) {
+    const m = {};
+    arr.forEach(r => {
+      const v = String(r[key] || '').trim();
+      if (v && v !== 'undefined') m[v] = (m[v] || 0) + 1;
+    });
+    return m;
   }
 
-  // Click handler for Chart.js charts — cross filter on click
+  function topN(map, n) {
+    n = n || TOP_N_DEFAULT;
+    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, n).map(([k, v]) => ({ drug: k, count: v }));
+  }
+
+  function uniqueSet(arr, key) {
+    const s = new Set();
+    arr.forEach(r => {
+      const v = String(r[key] || r.session_id || '').trim();
+      if (v) s.add(v);
+    });
+    return s;
+  }
+
+  function dailyCount(arr) {
+    const m = {};
+    arr.forEach(r => {
+      const d = String(r.timestamp || '').substring(0, 10);
+      if (d && d !== 'undefined') m[d] = (m[d] || 0) + 1;
+    });
+    return m;
+  }
+
+  function dailyUnique(arr) {
+    const m = {};
+    arr.forEach(r => {
+      const d = String(r.timestamp || '').substring(0, 10);
+      const u = String(r.user_id || r.session_id || '').trim();
+      if (d && d !== 'undefined' && u) {
+        if (!m[d]) m[d] = new Set();
+        m[d].add(u);
+      }
+    });
+    const out = {};
+    for (const [k, v] of Object.entries(m)) out[k] = v.size;
+    return out;
+  }
+
+  function statBox(icon, val, label, color) {
+    return `<div class="stat ${esc(color)}"><div class="stat-icon">${icon}</div><div class="stat-val">${esc(String(val))}</div><div class="stat-lbl">${esc(label)}</div></div>`;
+  }
+
+  // ─── SAFE table builder (no XSS) ──────────────────────────
+  function buildClickTable(cid, rows, barColor, filterKey) {
+    const el = document.getElementById(cid);
+    if (!el) return;
+    if (!rows || !rows.length) {
+      el.innerHTML = '<div class="empty-msg"><div class="icon">📭</div>ยังไม่มีข้อมูล</div>';
+      return;
+    }
+    const mx = rows[0]?.count || 1;
+    const activeD = FILTERS.drug?.toLowerCase();
+    const fKey = filterKey || 'drug';
+
+    // Build table using DOM API to prevent XSS
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const theadRow = document.createElement('tr');
+    ['#', 'ชื่อยา', 'ครั้ง', ''].forEach(text => {
+      const th = document.createElement('th');
+      th.textContent = text;
+      theadRow.appendChild(th);
+    });
+    thead.appendChild(theadRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    rows.forEach((d, i) => {
+      const tr = document.createElement('tr');
+      tr.className = 'clickable' + (activeD === d.drug.toLowerCase() ? ' highlight' : '');
+      tr.setAttribute('role', 'button');
+      tr.setAttribute('tabindex', '0');
+      tr.addEventListener('click', () => addFilter(fKey, d.drug));
+      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addFilter(fKey, d.drug); } });
+
+      const tdRank = document.createElement('td');
+      tdRank.className = 'rank';
+      tdRank.textContent = i + 1;
+
+      const tdName = document.createElement('td');
+      tdName.className = 'drug-name';
+      tdName.textContent = d.drug; // textContent = safe
+
+      const tdCount = document.createElement('td');
+      tdCount.className = 'count';
+      tdCount.textContent = d.count;
+
+      const tdBar = document.createElement('td');
+      tdBar.className = 'bar-cell';
+      tdBar.innerHTML = `<div class="mini-bar"><div class="mini-bar-fill" style="width:${(d.count / mx * 100).toFixed(0)}%;background:${barColor || C.cyan}"></div></div>`;
+
+      tr.append(tdRank, tdName, tdCount, tdBar);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    el.innerHTML = '';
+    el.appendChild(table);
+  }
+
+  // Chart click handler
   function addChartClick(chartId, filterKey, labelMap) {
     const el = document.getElementById(chartId);
     if (!el) return;
     el.onclick = function(evt) {
       const c = charts[chartId];
       if (!c) return;
-      const pts = c.getElementsAtEventForMode(evt, 'nearest', {intersect:true}, false);
+      const pts = c.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
       if (pts.length > 0) {
         const idx = pts[0].index;
         const label = c.data.labels[idx];
@@ -2169,33 +1599,39 @@ document.addEventListener('DOMContentLoaded', () => {
   // RENDER: OVERVIEW
   // ============================================================
   function renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage) {
-    const users = uniqueSet([...sessions,...searches], 'user_id');
-    const times = searches.map(r=>parseInt(r.time_to_click_ms)).filter(t=>!isNaN(t)&&t>0&&t<300000);
-    const avgT = times.length>0 ? (times.reduce((a,b)=>a+b,0)/times.length/1000).toFixed(1) : '—';
+    const users = uniqueSet([...sessions, ...searches], 'user_id');
+    const times = searches.map(r => parseInt(r.time_to_click_ms)).filter(t => !isNaN(t) && t > 0 && t < MAX_TIME_TO_CLICK_MS);
+    const avgT = times.length > 0 ? fmtNum(times.reduce((a, b) => a + b, 0) / times.length / 1000) : '—';
 
     document.getElementById('overviewStats').innerHTML = [
-      statBox('👤',sessions.length.toLocaleString(),'Sessions','blue'),
-      statBox('🧑‍⚕️',users.size.toLocaleString(),'Unique Users','green'),
-      statBox('🔍',searches.length.toLocaleString(),'Searches','cyan'),
-      statBox('⏱',avgT,'Avg Search (s)','amber'),
-      statBox('🧮',doseCalcs.length.toLocaleString(),'Dose Calcs','pink'),
-      statBox('🎯',tdmUsage.length.toLocaleString(),'TDM Calcs','red'),
-      statBox('🔗',compatUsage.length.toLocaleString(),'Compat Checks','purple'),
+      statBox('👤', sessions.length.toLocaleString(), 'Sessions', 'blue'),
+      statBox('🧑‍⚕️', users.size.toLocaleString(), 'Unique Users', 'green'),
+      statBox('🔍', searches.length.toLocaleString(), 'Searches', 'cyan'),
+      statBox('⏱', avgT, 'Avg Search (s)', 'amber'),
+      statBox('🧮', doseCalcs.length.toLocaleString(), 'Dose Calcs', 'pink'),
+      statBox('🎯', tdmUsage.length.toLocaleString(), 'TDM Calcs', 'red'),
+      statBox('🔗', compatUsage.length.toLocaleString(), 'Compat Checks', 'purple'),
     ].join('');
 
     // DAU
-    const dau = dailyUnique([...sessions,...searches]);
-    const dauDays = Object.keys(dau).sort().slice(-30);
-    mc('dauChart',{type:'line',data:{labels:dauDays.map(d=>d.substring(5)),datasets:[{label:'DAU',data:dauDays.map(d=>dau[d]),borderColor:C.cyan,backgroundColor:'rgba(34,211,238,0.06)',fill:true,tension:0.35,pointRadius:2,borderWidth:2}]},options:{...CD,plugins:{legend:{display:false}}}});
+    const dau = dailyUnique([...sessions, ...searches]);
+    const dauDays = Object.keys(dau).sort().slice(-DAU_DAYS);
+    mc('dauChart', {type:'line', data:{labels:dauDays.map(d => d.substring(5)), datasets:[{label:'DAU', data:dauDays.map(d => dau[d]), borderColor:C.cyan, backgroundColor:'rgba(34,211,238,0.06)', fill:true, tension:0.35, pointRadius:2, borderWidth:2}]}, options:{...CD, plugins:{legend:{display:false}}}});
 
     // Platform
-    const plat = countBy(sessions,'platform');
-    mc('platformChart',{type:'doughnut',data:{labels:Object.keys(plat),datasets:[{data:Object.values(plat),backgroundColor:[C.blue,C.green,C.amber,C.purple]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
-    addChartClick('platformChart','platform');
+    const plat = countBy(sessions, 'platform');
+    mc('platformChart', {type:'doughnut', data:{labels:Object.keys(plat), datasets:[{data:Object.values(plat), backgroundColor:[C.blue, C.green, C.amber, C.purple]}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
+    addChartClick('platformChart', 'platform');
 
-    // Time dist
-    const bk = [0,0,0,0,0,0]; times.forEach(t=>{const s=t/1000; if(s<5)bk[0]++;else if(s<10)bk[1]++;else if(s<20)bk[2]++;else if(s<30)bk[3]++;else if(s<60)bk[4]++;else bk[5]++;});
-    mc('timeChart',{type:'bar',data:{labels:['<5s','5-10s','10-20s','20-30s','30-60s','>60s'],datasets:[{data:bk,backgroundColor:C.cyan,borderRadius:4}]},options:{...CD,plugins:{legend:{display:false}}}});
+    // Time distribution
+    const bk = new Array(TIME_BUCKETS.length).fill(0);
+    times.forEach(t => {
+      const s = t / 1000;
+      for (let i = 0; i < TIME_BUCKETS.length; i++) {
+        if (s < TIME_BUCKETS[i].max || i === TIME_BUCKETS.length - 1) { bk[i]++; break; }
+      }
+    });
+    mc('timeChart', {type:'bar', data:{labels:TIME_BUCKETS.map(b => b.label), datasets:[{data:bk, backgroundColor:C.cyan, borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}}}});
   }
 
   // ============================================================
@@ -2208,77 +1644,77 @@ document.addEventListener('DOMContentLoaded', () => {
     buildClickTable('topExpandsTable', topN(expCount), C.purple, 'drug');
 
     const filters = countBy(searches, 'filter_used');
-    mc('filterChart',{type:'bar',data:{labels:Object.keys(filters),datasets:[{data:Object.values(filters),backgroundColor:C.blue,borderRadius:4}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+    mc('filterChart', {type:'bar', data:{labels:Object.keys(filters), datasets:[{data:Object.values(filters), backgroundColor:C.blue, borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
 
-    const src = countBy(drugExpands,'source');
-    mc('srcChart',{type:'doughnut',data:{labels:Object.keys(src),datasets:[{data:Object.values(src),backgroundColor:[C.blue,C.green,C.amber]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
+    const src = countBy(drugExpands, 'source');
+    mc('srcChart', {type:'doughnut', data:{labels:Object.keys(src), datasets:[{data:Object.values(src), backgroundColor:[C.blue, C.green, C.amber]}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
   }
 
   // ============================================================
   // RENDER: TDM
   // ============================================================
   function renderTDM(tdm) {
-    const users = uniqueSet(tdm,'user_id');
-    const byDrug = countBy(tdm,'drug_name');
-    const byInterp = countBy(tdm,'interpretation');
+    const users = uniqueSet(tdm, 'user_id');
+    const byDrug = countBy(tdm, 'drug_name');
+    const byInterp = countBy(tdm, 'interpretation');
 
     document.getElementById('tdmStats').innerHTML = [
-      statBox('🎯',tdm.length.toLocaleString(),'TDM Total','red'),
-      statBox('👤',users.size.toLocaleString(),'Users','cyan'),
-      statBox('🧬',(byDrug['Vancomycin']||0).toLocaleString(),'Vancomycin','blue'),
-      statBox('⚡',(byDrug['Phenytoin']||0).toLocaleString(),'Phenytoin','purple'),
-      statBox('💉',((byDrug['Amikacin']||0)+(byDrug['Gentamicin']||0)).toLocaleString(),'AG','green'),
-      statBox('🧠',(byDrug['Valproate']||0).toLocaleString(),'VPA','amber'),
+      statBox('🎯', tdm.length.toLocaleString(), 'TDM Total', 'red'),
+      statBox('👤', users.size.toLocaleString(), 'Users', 'cyan'),
+      statBox('🧬', (byDrug['Vancomycin'] || 0).toLocaleString(), 'Vancomycin', 'blue'),
+      statBox('⚡', (byDrug['Phenytoin'] || 0).toLocaleString(), 'Phenytoin', 'purple'),
+      statBox('💉', ((byDrug['Amikacin'] || 0) + (byDrug['Gentamicin'] || 0)).toLocaleString(), 'AG', 'green'),
+      statBox('🧠', (byDrug['Valproate'] || 0).toLocaleString(), 'VPA', 'amber'),
     ].join('');
 
-    const dNames = Object.keys(byDrug).sort((a,b)=>(byDrug[b]||0)-(byDrug[a]||0));
-    mc('tdmDrugChart',{type:'bar',data:{labels:dNames,datasets:[{data:dNames.map(n=>byDrug[n]),backgroundColor:[C.blue,C.purple,C.green,C.teal,C.amber,C.pink].slice(0,dNames.length),borderRadius:6}]},options:{...CD,plugins:{legend:{display:false}}}});
-    addChartClick('tdmDrugChart','drug');
+    const dNames = Object.keys(byDrug).sort((a, b) => (byDrug[b] || 0) - (byDrug[a] || 0));
+    mc('tdmDrugChart', {type:'bar', data:{labels:dNames, datasets:[{data:dNames.map(n => byDrug[n]), backgroundColor:[C.blue, C.purple, C.green, C.teal, C.amber, C.pink].slice(0, dNames.length), borderRadius:6}]}, options:{...CD, plugins:{legend:{display:false}}}});
+    addChartClick('tdmDrugChart', 'drug');
 
     const iLabels = Object.keys(byInterp);
-    mc('tdmInterpChart',{type:'doughnut',data:{labels:iLabels,datasets:[{data:Object.values(byInterp),backgroundColor:iLabels.map(l=>INTERP_CLR[l]||C.slate)}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
-    addChartClick('tdmInterpChart','interpretation');
+    mc('tdmInterpChart', {type:'doughnut', data:{labels:iLabels, datasets:[{data:Object.values(byInterp), backgroundColor:iLabels.map(l => INTERP_CLR[l] || C.slate)}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
+    addChartClick('tdmInterpChart', 'interpretation');
 
     const byDay = dailyCount(tdm);
-    const days = Object.keys(byDay).sort().slice(-30);
-    mc('tdmDayChart',{type:'bar',data:{labels:days.map(d=>d.substring(5)),datasets:[{data:days.map(d=>byDay[d]),backgroundColor:C.red,borderRadius:3}]},options:{...CD,plugins:{legend:{display:false}}}});
+    const days = Object.keys(byDay).sort().slice(-DAU_DAYS);
+    mc('tdmDayChart', {type:'bar', data:{labels:days.map(d => d.substring(5)), datasets:[{data:days.map(d => byDay[d]), backgroundColor:C.red, borderRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
   }
 
   // ============================================================
   // RENDER: RENAL
   // ============================================================
   function renderRenal(renal) {
-    const users = uniqueSet(renal,'user_id');
-    const byFormula = countBy(renal,'formula_used');
-    const byStage = countBy(renal,'ckd_stage');
-    const fe = Object.entries(byFormula).sort((a,b)=>b[1]-a[1]);
-    const severe = (byStage['G4']||0)+(byStage['G5']||0);
+    const users = uniqueSet(renal, 'user_id');
+    const byFormula = countBy(renal, 'formula_used');
+    const byStage = countBy(renal, 'ckd_stage');
+    const fe = Object.entries(byFormula).sort((a, b) => b[1] - a[1]);
+    const severe = (byStage['G4'] || 0) + (byStage['G5'] || 0);
 
     document.getElementById('renalStats').innerHTML = [
-      statBox('🧬',renal.length.toLocaleString(),'Lookups','teal'),
-      statBox('👤',users.size.toLocaleString(),'Users','green'),
-      statBox('📊',fe.length>0?(fe[0][0].includes('Cockcroft')?'CG':'CKD-EPI'):'—','Top Formula','blue'),
-      statBox('⚠',severe.toLocaleString(),'Severe CKD (G4-5)','amber'),
+      statBox('🧬', renal.length.toLocaleString(), 'Lookups', 'teal'),
+      statBox('👤', users.size.toLocaleString(), 'Users', 'green'),
+      statBox('📊', fe.length > 0 ? (fe[0][0].includes('Cockcroft') ? 'CG' : 'CKD-EPI') : '—', 'Top Formula', 'blue'),
+      statBox('⚠', severe.toLocaleString(), 'Severe CKD (G4-5)', 'amber'),
     ].join('');
 
-    const byDrug = countBy(renal,'drug_name');
-    buildClickTable('renalDrugsTable', topN(byDrug,15), C.teal, 'drug');
+    const byDrug = countBy(renal, 'drug_name');
+    buildClickTable('renalDrugsTable', topN(byDrug, 15), C.teal, 'drug');
 
-    const byClass = countBy(renal,'drug_class');
+    const byClass = countBy(renal, 'drug_class');
     const clLabels = Object.keys(byClass);
-    mc('renalClassChart',{type:'doughnut',data:{labels:clLabels.map(k=>RENAL_CLS[k]||k),datasets:[{data:Object.values(byClass),backgroundColor:clLabels.map(k=>RENAL_CLR[k]||C.slate),borderWidth:0}]},options:{responsive:true,plugins:{legend:{labels:{color:'#8899b4',font:{size:10}}}}}});
-    addChartClick('renalClassChart','class',Object.fromEntries(clLabels.map(k=>[RENAL_CLS[k]||k,k])));
+    mc('renalClassChart', {type:'doughnut', data:{labels:clLabels.map(k => RENAL_CLS[k] || k), datasets:[{data:Object.values(byClass), backgroundColor:clLabels.map(k => RENAL_CLR[k] || C.slate), borderWidth:0}]}, options:{responsive:true, plugins:{legend:{labels:{color:'#8899b4', font:{size:10}}}}}});
+    addChartClick('renalClassChart', 'class', Object.fromEntries(clLabels.map(k => [RENAL_CLS[k] || k, k])));
 
-    mc('renalFormulaChart',{type:'doughnut',data:{labels:Object.keys(byFormula),datasets:[{data:Object.values(byFormula),backgroundColor:[C.blue,C.green,C.amber],borderWidth:0}]},options:{responsive:true,plugins:{legend:{labels:{color:'#8899b4',font:{size:10}}}}}});
-    addChartClick('renalFormulaChart','formula');
+    mc('renalFormulaChart', {type:'doughnut', data:{labels:Object.keys(byFormula), datasets:[{data:Object.values(byFormula), backgroundColor:[C.blue, C.green, C.amber], borderWidth:0}]}, options:{responsive:true, plugins:{legend:{labels:{color:'#8899b4', font:{size:10}}}}}});
+    addChartClick('renalFormulaChart', 'formula');
 
     const stL = Object.keys(byStage).sort();
-    mc('renalStageChart',{type:'bar',data:{labels:stL,datasets:[{label:'Lookups',data:stL.map(k=>byStage[k]),backgroundColor:stL.map(k=>STG_CLR[k]||C.slate),borderRadius:5}]},options:{...CD,plugins:{legend:{display:false}}}});
-    addChartClick('renalStageChart','stage');
+    mc('renalStageChart', {type:'bar', data:{labels:stL, datasets:[{label:'Lookups', data:stL.map(k => byStage[k]), backgroundColor:stL.map(k => STG_CLR[k] || C.slate), borderRadius:5}]}, options:{...CD, plugins:{legend:{display:false}}}});
+    addChartClick('renalStageChart', 'stage');
 
     const byDay = dailyCount(renal);
-    const days = Object.keys(byDay).sort().slice(-30);
-    mc('renalDayChart',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Lookups',data:days.map(d=>byDay[d]),borderColor:C.teal,backgroundColor:'rgba(45,212,191,0.08)',fill:true,tension:0.3,pointRadius:3}]},options:{...CD,plugins:{legend:{display:false}}}});
+    const days = Object.keys(byDay).sort().slice(-DAU_DAYS);
+    mc('renalDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Lookups', data:days.map(d => byDay[d]), borderColor:C.teal, backgroundColor:'rgba(45,212,191,0.08)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
   }
 
   // ============================================================
@@ -2298,23 +1734,20 @@ document.addEventListener('DOMContentLoaded', () => {
       statBox('❌', incompats.length.toLocaleString(), 'Incompatible', 'red')
     ].join('');
 
-    // Mode chart (pair vs multi vs matrix_view)
     const modeCount = countBy(compat, 'mode');
-    mc('compatModeChart',{type:'doughnut',data:{labels:Object.keys(modeCount),datasets:[{data:Object.values(modeCount),backgroundColor:['#0ea5e9','#7c3aed','#d97706','#059669','#dc2626']}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
+    mc('compatModeChart', {type:'doughnut', data:{labels:Object.keys(modeCount), datasets:[{data:Object.values(modeCount), backgroundColor:['#0ea5e9','#7c3aed','#d97706','#059669','#dc2626']}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
 
-    // Top drug pairs
     const drugPairs = {};
     pairChecks.forEach(r => {
       const pair = [r.drug_a, r.drug_b].filter(Boolean).sort().join(' + ');
       if (pair) drugPairs[pair] = (drugPairs[pair] || 0) + 1;
     });
-    const topPairs = Object.entries(drugPairs).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    mc('compatDrugChart',{type:'bar',data:{labels:topPairs.map(p=>p[0].length>25?p[0].substring(0,25)+'…':p[0]),datasets:[{label:'Checks',data:topPairs.map(p=>p[1]),backgroundColor:'#7c3aed',borderRadius:4}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+    const topPairs = Object.entries(drugPairs).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    mc('compatDrugChart', {type:'bar', data:{labels:topPairs.map(p => p[0].length > 25 ? p[0].substring(0, 25) + '…' : p[0]), datasets:[{label:'Checks', data:topPairs.map(p => p[1]), backgroundColor:'#7c3aed', borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
 
-    // Daily usage
     const daily = dailyCount(compat);
     const days = Object.keys(daily).sort();
-    mc('compatDayChart',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Compat Checks',data:days.map(d=>daily[d]),borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.1)',fill:true,tension:0.3,pointRadius:3}]},options:{...CD,plugins:{legend:{display:false}}}});
+    mc('compatDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Compat Checks', data:days.map(d => daily[d]), borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.1)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
   }
 
   // ============================================================
@@ -2327,182 +1760,338 @@ document.addEventListener('DOMContentLoaded', () => {
     const byUser = countBy(doseCalcs, 'user_id');
     const uniqueDrugs = Object.keys(byDrug).length;
 
-    // Stats
     document.getElementById('doseCalcStats').innerHTML = [
       statBox('🧮', doseCalcs.length.toLocaleString(), 'Total Calcs', 'pink'),
       statBox('👤', users.size.toLocaleString(), 'Unique Users', 'cyan'),
       statBox('💊', uniqueDrugs.toLocaleString(), 'Unique Drugs', 'purple'),
-      statBox('📊', doseCalcs.length > 0 ? (doseCalcs.length / Math.max(users.size, 1)).toFixed(1) : '—', 'Avg Calcs/User', 'amber'),
+      statBox('📊', doseCalcs.length > 0 ? fmtNum(doseCalcs.length / Math.max(users.size, 1)) : '—', 'Avg Calcs/User', 'amber'),
     ].join('');
 
-    // Top drugs bar chart
     const drugNames = Object.keys(byDrug).sort((a, b) => (byDrug[b] || 0) - (byDrug[a] || 0)).slice(0, 15);
-    mc('dcDrugChart', {type: 'bar', data: {labels: drugNames, datasets: [{data: drugNames.map(n => byDrug[n]), backgroundColor: C.pink, borderRadius: 6}]}, options: {...CD, plugins: {legend: {display: false}}}});
+    mc('dcDrugChart', {type:'bar', data:{labels:drugNames, datasets:[{data:drugNames.map(n => byDrug[n]), backgroundColor:C.pink, borderRadius:6}]}, options:{...CD, plugins:{legend:{display:false}}}});
     addChartClick('dcDrugChart', 'drug');
 
-    // Dose unit doughnut
     const unitLabels = Object.keys(byUnit);
-    mc('dcUnitChart', {type: 'doughnut', data: {labels: unitLabels.length ? unitLabels : ['—'], datasets: [{data: unitLabels.length ? Object.values(byUnit) : [1], backgroundColor: [C.blue, C.green, C.amber, C.purple, C.red, C.teal]}]}, options: {responsive: true, plugins: {legend: {position: 'bottom', labels: {color: '#8899b4', font: {size: 10}}}}}});
+    mc('dcUnitChart', {type:'doughnut', data:{labels:unitLabels.length ? unitLabels : ['—'], datasets:[{data:unitLabels.length ? Object.values(byUnit) : [1], backgroundColor:[C.blue, C.green, C.amber, C.purple, C.red, C.teal]}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
 
-    // Top users bar chart
     const topUsers = Object.entries(byUser).sort((a, b) => b[1] - a[1]).slice(0, 10);
-    mc('dcUserChart', {type: 'bar', data: {labels: topUsers.map(u => u[0].length > 12 ? u[0].substring(0, 12) + '…' : u[0]), datasets: [{label: 'Calcs', data: topUsers.map(u => u[1]), backgroundColor: C.cyan, borderRadius: 4}]}, options: {...CD, indexAxis: 'y', plugins: {legend: {display: false}}}});
+    mc('dcUserChart', {type:'bar', data:{labels:topUsers.map(u => u[0].length > 12 ? u[0].substring(0, 12) + '…' : u[0]), datasets:[{label:'Calcs', data:topUsers.map(u => u[1]), backgroundColor:C.cyan, borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
 
-    // Weight distribution histogram
+    // Weight distribution
     const weights = doseCalcs.map(r => parseFloat(r.weight_kg)).filter(w => !isNaN(w) && w > 0 && w < 300);
-    const wBuckets = [0, 0, 0, 0, 0, 0];
-    const wLabels = ['<40', '40-50', '50-60', '60-70', '70-80', '>80'];
-    const wColors = [C.red, C.amber, C.green, C.cyan, C.blue, C.purple];
+    const wBuckets = new Array(WEIGHT_BUCKETS.length).fill(0);
     weights.forEach(w => {
-      if (w < 40) wBuckets[0]++; else if (w < 50) wBuckets[1]++; else if (w < 60) wBuckets[2]++; else if (w < 70) wBuckets[3]++; else if (w < 80) wBuckets[4]++; else wBuckets[5]++;
+      for (let i = 0; i < WEIGHT_BUCKETS.length; i++) {
+        if (w < WEIGHT_BUCKETS[i].max || i === WEIGHT_BUCKETS.length - 1) { wBuckets[i]++; break; }
+      }
     });
-    mc('dcWeightChart', {type: 'bar', data: {labels: wLabels, datasets: [{label: 'Patients', data: wBuckets, backgroundColor: wColors, borderRadius: 4}]}, options: {...CD, plugins: {legend: {display: false}}}});
+    mc('dcWeightChart', {type:'bar', data:{labels:WEIGHT_BUCKETS.map(b => b.label), datasets:[{label:'Patients', data:wBuckets, backgroundColor:WEIGHT_BUCKETS.map(b => b.color), borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}}}});
 
-    // Daily usage line chart
     const byDay = dailyCount(doseCalcs);
-    const days = Object.keys(byDay).sort().slice(-30);
-    mc('dcDayChart', {type: 'line', data: {labels: days.map(d => d.substring(5)), datasets: [{label: 'Dose Calcs', data: days.map(d => byDay[d]), borderColor: C.pink, backgroundColor: 'rgba(244,114,182,0.08)', fill: true, tension: 0.3, pointRadius: 3}]}, options: {...CD, plugins: {legend: {display: false}}}});
+    const days = Object.keys(byDay).sort().slice(-DAU_DAYS);
+    mc('dcDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Dose Calcs', data:days.map(d => byDay[d]), borderColor:C.pink, backgroundColor:'rgba(244,114,182,0.08)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
   }
 
   // ============================================================
   // RENDER: SURVEY
   // ============================================================
   function renderSurvey(surveys) {
-    const satRows = surveys.filter(r=>r.sat_5_overall&&r.sat_5_overall!=='');
-    const susRows = surveys.filter(r=>r.sus_score!==undefined&&r.sus_score!=='');
-    const avgSat = satRows.length>0?(satRows.reduce((s,r)=>s+parseFloat(r.sat_5_overall),0)/satRows.length).toFixed(1):'—';
-    const avgSus = susRows.length>0?(susRows.reduce((s,r)=>s+parseFloat(r.sus_score),0)/susRows.length).toFixed(1):'—';
-    const byRole = countBy(surveys,'role');
-    const byDept = countBy(surveys,'department');
-    const bothPhases = surveys.filter(r=>r.sat_5_overall&&r.sat_5_overall!==''&&r.sus_score!==undefined&&r.sus_score!=='').length;
+    const satRows = surveys.filter(r => r.sat_5_overall && r.sat_5_overall !== '');
+    const susRows = surveys.filter(r => r.sus_score !== undefined && r.sus_score !== '');
+    const avgSat = satRows.length > 0 ? fmtNum(satRows.reduce((s, r) => s + parseFloat(r.sat_5_overall), 0) / satRows.length) : '—';
+    const avgSus = susRows.length > 0 ? fmtNum(susRows.reduce((s, r) => s + parseFloat(r.sus_score), 0) / susRows.length) : '—';
+    const byRole = countBy(surveys, 'role');
+    const byDept = countBy(surveys, 'department');
+    const bothPhases = surveys.filter(r => r.sat_5_overall && r.sat_5_overall !== '' && r.sus_score !== undefined && r.sus_score !== '').length;
 
     document.getElementById('surveyStats').innerHTML = [
-      statBox('📋',surveys.length.toLocaleString(),'Surveys','purple'),
-      statBox('⭐',avgSat,'Avg Satisfaction','amber'),
-      statBox('📊',avgSus,'Avg SUS','green'),
-      statBox('✅',satRows.length.toLocaleString(),'Satisfaction Done','blue'),
-      statBox('📋',susRows.length.toLocaleString(),'SUS Done','cyan'),
-      statBox('🔁',bothPhases.toLocaleString(),'Both Phases','pink'),
+      statBox('📋', surveys.length.toLocaleString(), 'Surveys', 'purple'),
+      statBox('⭐', avgSat, 'Avg Satisfaction', 'amber'),
+      statBox('📊', avgSus, 'Avg SUS', 'green'),
+      statBox('✅', satRows.length.toLocaleString(), 'Satisfaction Done', 'blue'),
+      statBox('📋', susRows.length.toLocaleString(), 'SUS Done', 'cyan'),
+      statBox('🔁', bothPhases.toLocaleString(), 'Both Phases', 'pink'),
     ].join('');
 
-    const satKeys=['sat_1_easy_to_find','sat_2_accurate','sat_3_faster','sat_4_recommend','sat_5_overall'];
-    const satLabels=['ค้นหาง่าย','ถูกต้อง','เร็วขึ้น','แนะนำ','โดยรวม'];
-    const satAvgs=satKeys.map(k=>{const vals=surveys.map(r=>parseFloat(r[k])).filter(v=>!isNaN(v));return vals.length>0?(vals.reduce((a,b)=>a+b,0)/vals.length):0;});
-    mc('satChart',{type:'bar',data:{labels:satLabels,datasets:[{data:satAvgs,backgroundColor:C.amber,borderRadius:4}]},options:{...CD,plugins:{legend:{display:false}},scales:{...CD.scales,y:{...CD.scales.y,max:5}}}});
+    const satKeys = ['sat_1_easy_to_find','sat_2_accurate','sat_3_faster','sat_4_recommend','sat_5_overall'];
+    const satLabels = ['ค้นหาง่าย','ถูกต้อง','เร็วขึ้น','แนะนำ','โดยรวม'];
+    const satAvgs = satKeys.map(k => { const vals = surveys.map(r => parseFloat(r[k])).filter(v => !isNaN(v)); return vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0; });
+    mc('satChart', {type:'bar', data:{labels:satLabels, datasets:[{data:satAvgs, backgroundColor:C.amber, borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}}, scales:{...CD.scales, y:{...CD.scales.y, max:5}}}});
 
-    const rLabels=Object.keys(byRole);
-    mc('roleChart',{type:'doughnut',data:{labels:rLabels.length?rLabels:['—'],datasets:[{data:rLabels.length?Object.values(byRole):[1],backgroundColor:[C.blue,C.green,C.amber,C.purple,C.red]}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#8899b4',font:{size:10}}}}}});
-    addChartClick('roleChart','role');
+    const rLabels = Object.keys(byRole);
+    mc('roleChart', {type:'doughnut', data:{labels:rLabels.length ? rLabels : ['—'], datasets:[{data:rLabels.length ? Object.values(byRole) : [1], backgroundColor:[C.blue, C.green, C.amber, C.purple, C.red]}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
+    addChartClick('roleChart', 'role');
 
-    // Department bar chart
-    const dLabels=Object.keys(byDept), dData=Object.values(byDept);
-    mc('deptChart',{type:'bar',data:{labels:dLabels.length?dLabels:['—'],datasets:[{data:dData.length?dData:[0],backgroundColor:C.green,borderRadius:4}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+    const dLabels = Object.keys(byDept), dData = Object.values(byDept);
+    mc('deptChart', {type:'bar', data:{labels:dLabels.length ? dLabels : ['—'], datasets:[{data:dData.length ? dData : [0], backgroundColor:C.green, borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
 
-    // SUS Score distribution (histogram-style)
+    // SUS Score distribution
     const susEmptyMsg = document.getElementById('susEmptyMsg');
     const susCanvas = document.getElementById('susChart');
     if (susRows.length >= 5) {
-      susEmptyMsg.style.display = 'none';
-      susCanvas.style.display = '';
-      // Bucket SUS scores: 0-20, 21-40, 41-60, 61-80, 81-100
-      const buckets = [0,0,0,0,0];
+      if (susEmptyMsg) susEmptyMsg.style.display = 'none';
+      if (susCanvas) susCanvas.style.display = '';
+      const buckets = [0, 0, 0, 0, 0];
       const bucketLabels = ['0-20','21-40','41-60','61-80','81-100'];
-      const bucketColors = [C.red,C.amber,'#fb923c',C.green,C.cyan];
-      susRows.forEach(r=>{
+      const bucketColors = [C.red, C.amber, '#fb923c', C.green, C.cyan];
+      susRows.forEach(r => {
         const s = parseFloat(r.sus_score);
-        if (s<=20) buckets[0]++; else if (s<=40) buckets[1]++; else if (s<=60) buckets[2]++; else if (s<=80) buckets[3]++; else buckets[4]++;
+        if (s <= 20) buckets[0]++; else if (s <= 40) buckets[1]++; else if (s <= 60) buckets[2]++; else if (s <= 80) buckets[3]++; else buckets[4]++;
       });
-      mc('susChart',{type:'bar',data:{labels:bucketLabels,datasets:[{label:'SUS Responses',data:buckets,backgroundColor:bucketColors,borderRadius:4}]},options:{...CD,plugins:{legend:{display:false}}}});
+      mc('susChart', {type:'bar', data:{labels:bucketLabels, datasets:[{label:'SUS Responses', data:buckets, backgroundColor:bucketColors, borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}}}});
     } else {
-      susCanvas.style.display = 'none';
-      susEmptyMsg.style.display = '';
+      dc('susChart'); // properly destroy chart if it exists
+      if (susCanvas) susCanvas.style.display = 'none';
+      if (susEmptyMsg) susEmptyMsg.style.display = '';
     }
   }
 
   // ============================================================
-  // RENDER: JOURNEY
+  // RENDER: JOURNEY (XSS-safe)
   // ============================================================
   function renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage) {
-    const users = uniqueSet(pageViews,'user_id');
+    const users = uniqueSet(pageViews, 'user_id');
 
     document.getElementById('journeyStats').innerHTML = [
-      statBox('📄',pageViews.length.toLocaleString(),'Page Views','cyan'),
-      statBox('👤',users.size.toLocaleString(),'Users','blue'),
+      statBox('📄', pageViews.length.toLocaleString(), 'Page Views', 'cyan'),
+      statBox('👤', users.size.toLocaleString(), 'Users', 'blue'),
     ].join('');
 
-    const byPage = countBy(pageViews,'page');
-    const pLabels=Object.keys(byPage);
-    mc('pvChart',{type:'bar',data:{labels:pLabels,datasets:[{data:Object.values(byPage),backgroundColor:C.cyan,borderRadius:5}]},options:{...CD,plugins:{legend:{display:false}}}});
+    const byPage = countBy(pageViews, 'page');
+    mc('pvChart', {type:'bar', data:{labels:Object.keys(byPage), datasets:[{data:Object.values(byPage), backgroundColor:C.cyan, borderRadius:5}]}, options:{...CD, plugins:{legend:{display:false}}}});
 
     // Flow
-    const flows={};
-    const pvBySession={};
-    pageViews.forEach(r=>{const sid=String(r.session_id||'');if(sid){if(!pvBySession[sid])pvBySession[sid]=[];pvBySession[sid].push(r);}});
-    for(const evts of Object.values(pvBySession)){evts.sort((a,b)=>String(a.timestamp||'').localeCompare(String(b.timestamp||'')));for(let i=0;i<evts.length-1;i++){const key=`${evts[i].page}→${evts[i+1].page}`;flows[key]=(flows[key]||0)+1;}}
-    const flowTop=Object.entries(flows).sort((a,b)=>b[1]-a[1]).slice(0,15);
-    mc('flowChart',{type:'bar',data:{labels:flowTop.map(f=>f[0]),datasets:[{data:flowTop.map(f=>f[1]),backgroundColor:C.blue,borderRadius:3}]},options:{...CD,indexAxis:'y',plugins:{legend:{display:false}}}});
+    const flows = {};
+    const pvBySession = {};
+    pageViews.forEach(r => {
+      const sid = String(r.session_id || '');
+      if (sid) { if (!pvBySession[sid]) pvBySession[sid] = []; pvBySession[sid].push(r); }
+    });
+    for (const evts of Object.values(pvBySession)) {
+      evts.sort((a, b) => String(a.timestamp || '').localeCompare(String(b.timestamp || '')));
+      for (let i = 0; i < evts.length - 1; i++) {
+        const key = `${evts[i].page}→${evts[i + 1].page}`;
+        flows[key] = (flows[key] || 0) + 1;
+      }
+    }
+    const flowTop = Object.entries(flows).sort((a, b) => b[1] - a[1]).slice(0, MAX_FLOW_ENTRIES);
+    mc('flowChart', {type:'bar', data:{labels:flowTop.map(f => f[0]), datasets:[{data:flowTop.map(f => f[1]), backgroundColor:C.blue, borderRadius:3}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
 
-    // User list
+    // User list — build using DOM API (XSS-safe)
     const allUsers = {};
-    const addEvts = (arr,type)=>arr.forEach(r=>{const uid=String(r.user_id||r.session_id||'').trim();if(!uid)return;if(!allUsers[uid])allUsers[uid]=[];allUsers[uid].push({type,time:r.timestamp,detail:r.drug_name||r.drug_clicked||r.page||r.query||'—'});});
-    addEvts(pageViews,'page_view');addEvts(searches,'search');addEvts(doseCalcs,'dose_calc');addEvts(tdmUsage,'tdm_calc');
-    for(const uid in allUsers) allUsers[uid].sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
-    window._journeyUsers = allUsers;
+    const addEvts = (arr, type) => arr.forEach(r => {
+      const uid = String(r.user_id || r.session_id || '').trim();
+      if (!uid) return;
+      if (!allUsers[uid]) allUsers[uid] = [];
+      allUsers[uid].push({ type, time: r.timestamp, detail: String(r.drug_name || r.drug_clicked || r.page || r.query || '—') });
+    });
+    addEvts(pageViews, 'page_view');
+    addEvts(searches, 'search');
+    addEvts(doseCalcs, 'dose_calc');
+    addEvts(tdmUsage, 'tdm_calc');
+    for (const uid in allUsers) allUsers[uid].sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+    _journeyUsers = allUsers;
 
-    const uids = Object.keys(allUsers).slice(0,50);
-    document.getElementById('userList').innerHTML = uids.length
-      ? uids.map(u=>`<span class="user-pill" onclick="addFilter('user','${u}')">${u.substring(0,12)}…</span>`).join('')
-      : '<div class="empty-msg">ยังไม่มีข้อมูล</div>';
+    const uids = Object.keys(allUsers).slice(0, MAX_JOURNEY_USERS);
+    const userListEl = document.getElementById('userList');
+    userListEl.innerHTML = '';
+
+    if (uids.length) {
+      uids.forEach(u => {
+        const pill = document.createElement('span');
+        pill.className = 'user-pill';
+        pill.setAttribute('role', 'button');
+        pill.setAttribute('tabindex', '0');
+        pill.textContent = u.substring(0, 12) + '…';
+        pill.addEventListener('click', () => addFilter('user', u));
+        pill.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addFilter('user', u); } });
+        userListEl.appendChild(pill);
+      });
+    } else {
+      userListEl.innerHTML = '<div class="empty-msg">ยังไม่มีข้อมูล</div>';
+    }
   }
 
+  // ─── SAFE Timeline renderer ────────────────────────────────
   function showTimeline() {
     const uid = document.getElementById('journeyUid').value.trim();
     const el = document.getElementById('userTimeline');
-    if (!uid) { el.innerHTML='<div class="empty-msg">กรุณาพิมพ์ user_id</div>'; return; }
-    let events = window._journeyUsers?.[uid];
-    if (!events) { const match=Object.keys(window._journeyUsers||{}).find(k=>k.includes(uid));if(match){document.getElementById('journeyUid').value=match;return showTimeline();}el.innerHTML='<div class="empty-msg">ไม่พบข้อมูล</div>';return; }
-    const typeL={page_view:'📄 Page',search:'🔍 Search',dose_calc:'🧮 Dose',tdm_calc:'🎯 TDM'};
-    const typeC={page_view:'var(--accent-blue)',search:'var(--accent-cyan)',dose_calc:'var(--accent-purple)',tdm_calc:'var(--accent-red)'};
-    el.innerHTML=`<div style="font-size:11px;color:var(--accent-cyan);font-weight:600;margin:8px 0">🗺 ${uid} (${events.length} events)</div><div class="timeline">${events.map(ev=>`<div class="tl-item ${ev.type}"><div class="tl-time">${ev.time?ev.time.substring(0,19).replace('T',' '):''}</div><div class="tl-type" style="color:${typeC[ev.type]||''}">${typeL[ev.type]||ev.type}</div><div class="tl-detail">${ev.detail||'—'}</div></div>`).join('')}</div>`;
+    if (!uid) { el.textContent = ''; el.innerHTML = '<div class="empty-msg">กรุณาพิมพ์ user_id</div>'; return; }
+
+    let events = _journeyUsers[uid];
+    if (!events) {
+      const match = Object.keys(_journeyUsers).find(k => k.includes(uid));
+      if (match) { document.getElementById('journeyUid').value = match; return showTimeline(); }
+      el.innerHTML = '<div class="empty-msg">ไม่พบข้อมูล</div>';
+      return;
+    }
+
+    const typeL = { page_view: '📄 Page', search: '🔍 Search', dose_calc: '🧮 Dose', tdm_calc: '🎯 TDM' };
+    const typeCls = { page_view: 'page_view', search: 'search', dose_calc: 'dose_calc', tdm_calc: 'tdm_calc' };
+
+    // Build timeline using DOM API (XSS-safe)
+    el.innerHTML = '';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:11px;color:var(--accent-cyan);font-weight:600;margin:8px 0';
+    header.textContent = `🗺 ${uid} (${events.length} events)`;
+    el.appendChild(header);
+
+    const timeline = document.createElement('div');
+    timeline.className = 'timeline';
+
+    events.forEach(ev => {
+      const item = document.createElement('div');
+      item.className = 'tl-item ' + (typeCls[ev.type] || '');
+
+      const time = document.createElement('div');
+      time.className = 'tl-time';
+      time.textContent = ev.time ? ev.time.substring(0, 19).replace('T', ' ') : '';
+
+      const typeName = document.createElement('div');
+      typeName.className = 'tl-type';
+      typeName.textContent = typeL[ev.type] || ev.type;
+
+      const detail = document.createElement('div');
+      detail.className = 'tl-detail';
+      detail.textContent = ev.detail || '—'; // textContent = safe
+
+      item.append(time, typeName, detail);
+      timeline.appendChild(item);
+    });
+
+    el.appendChild(timeline);
   }
 
   // ============================================================
-  // Export CSV
+  // Export CSV (improved: RFC 4180 compliant, toast errors)
   // ============================================================
   async function exportCSV(sheet) {
-    if (!SCRIPT_URL) return alert('ตั้งค่า URL ก่อน');
-    try { const res=await fetch(SCRIPT_URL+'?action=export&sheet='+sheet);const data=await res.json();if(data.error)return alert(data.error);if(!data.length)return alert('ไม่มีข้อมูล');
-    const h=Object.keys(data[0]);const csv=[h.join(','),...data.map(r=>h.map(k=>`"${String(r[k]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
-    const b=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`IV_DrugRef_${sheet}_${new Date().toISOString().substring(0,10)}.csv`;a.click();toast('📥 Exported '+sheet);
-    } catch(e){alert('Failed: '+e.message);}
+    if (!SCRIPT_URL) { toast('⚠️ ตั้งค่า URL ก่อน'); return; }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=export&sheet=' + encodeURIComponent(sheet), { signal: controller.signal });
+      clearTimeout(timeout);
+
+      const data = await res.json();
+      if (data.error) { toast('❌ ' + data.error); return; }
+      if (!Array.isArray(data) || !data.length) { toast('📭 ไม่มีข้อมูล'); return; }
+
+      const h = Object.keys(data[0]);
+      // RFC 4180: escape quotes, newlines, commas
+      const escCSV = (val) => {
+        const s = String(val || '');
+        if (s.includes('"') || s.includes(',') || s.includes('\n') || s.includes('\r')) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      };
+      const csv = [h.map(escCSV).join(','), ...data.map(r => h.map(k => escCSV(r[k])).join(','))].join('\r\n');
+
+      const b = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(b);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `IV_DrugRef_${sheet}_${new Date().toISOString().substring(0, 10)}.csv`;
+      a.click();
+      // Cleanup blob URL to prevent memory leak
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      toast('📥 Exported ' + sheet);
+    } catch (e) {
+      clearTimeout(timeout);
+      toast('❌ Export failed: ' + (e.name === 'AbortError' ? 'Timeout' : e.message));
+      if (window.IVErrorTracker) {
+        window.IVErrorTracker.report('CSV export failed (' + sheet + '): ' + e.message, 'medium');
+      }
+    }
   }
 
-  // Auto-refresh
-  function toggleAR(){_arOn=!_arOn;const b=document.getElementById('arBtn'),d=document.getElementById('arDot');if(_arOn){b.textContent='⏱ Auto: ON';b.classList.add('active-state');d.style.display='inline';_arTimer=setInterval(fetchRaw,60000);toast('⏱ Auto-refresh ON');}else{b.textContent='⏱ Auto: OFF';b.classList.remove('active-state');d.style.display='none';if(_arTimer)clearInterval(_arTimer);toast('⏱ Auto-refresh OFF');}}
+  // ─── Auto-refresh ──────────────────────────────────────────
+  function toggleAR() {
+    _arOn = !_arOn;
+    const b = document.getElementById('arBtn'), d = document.getElementById('arDot');
+    if (_arOn) {
+      b.textContent = '⏱ Auto: ON';
+      b.classList.add('active-state');
+      d.style.display = 'inline';
+      _arTimer = setInterval(fetchRaw, AUTO_REFRESH_MS);
+      toast('⏱ Auto-refresh ON');
+    } else {
+      b.textContent = '⏱ Auto: OFF';
+      b.classList.remove('active-state');
+      d.style.display = 'none';
+      if (_arTimer) { clearInterval(_arTimer); _arTimer = null; }
+      toast('⏱ Auto-refresh OFF');
+    }
+  }
 
-  // Toast
-  function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+  // ─── Toast ─────────────────────────────────────────────────
+  function toast(m) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = m;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), TOAST_DURATION_MS);
+  }
 
-  // Expose functions to window for onclick handlers
-  window.toggleSetup = toggleSetup;
-  window.saveUrl = saveUrl;
+  // ─── Cleanup on unload ─────────────────────────────────────
+  window.addEventListener('beforeunload', () => {
+    if (_arTimer) { clearInterval(_arTimer); _arTimer = null; }
+    _journeyUsers = {};
+    // Destroy all charts
+    Object.keys(charts).forEach(dc);
+  });
+
+  // ─── Expose minimal API to window (for filter engine used by DOM-built handlers) ──
   window.addFilter = addFilter;
   window.removeFilter = removeFilter;
-  window.clearAllFilters = clearAllFilters;
-  window.fetchRaw = fetchRaw;
-  window.xprt = xprt;
-  window.exportCSV = exportCSV;
-  window.toggleAR = toggleAR;
-  window.toast = toast;
-  window.showTimeline = showTimeline;
-  window.reRender = reRender;
 
-  // Init on page load
-  const today=new Date().toISOString().substring(0,10);
-  const ago=new Date(Date.now()-30*86400000).toISOString().substring(0,10);
-  document.getElementById('dateFrom').value=ago;
-  document.getElementById('dateTo').value=today;
-  if(SCRIPT_URL)fetchRaw();
+  // ─── Init: Wire up all event handlers programmatically ─────
+  const today = new Date().toISOString().substring(0, 10);
+  const ago = new Date(Date.now() - DAU_DAYS * 86400000).toISOString().substring(0, 10);
+  document.getElementById('dateFrom').value = ago;
+  document.getElementById('dateTo').value = today;
+
+  // Debounced inputs
+  document.getElementById('globalSearch').oninput = debouncedReRender;
+  document.getElementById('dateFrom').onchange = debouncedReRender;
+  document.getElementById('dateTo').onchange = debouncedReRender;
+
+  // Header buttons
+  var btnSetup = document.getElementById('btnSetup');
+  if (btnSetup) btnSetup.addEventListener('click', toggleSetup);
+  var btnRefresh = document.getElementById('btnRefresh');
+  if (btnRefresh) btnRefresh.addEventListener('click', fetchRaw);
+  var btnSaveUrl = document.getElementById('btnSaveUrl');
+  if (btnSaveUrl) btnSaveUrl.addEventListener('click', saveUrl);
+
+  // Export CSV buttons (data-export attribute)
+  document.querySelectorAll('[data-export]').forEach(function(btn) {
+    btn.addEventListener('click', function() { exportCSV(btn.getAttribute('data-export')); });
+  });
+
+  // Chart screenshot buttons (data-xprt attribute)
+  document.querySelectorAll('[data-xprt]').forEach(function(btn) {
+    btn.addEventListener('click', function() { xprt(btn.getAttribute('data-xprt')); });
+  });
+
+  // Toolbar buttons
+  var clearBtn = document.getElementById('clearFiltersBtn');
+  if (clearBtn) clearBtn.addEventListener('click', clearAllFilters);
+  var arBtn = document.getElementById('arBtn');
+  if (arBtn) arBtn.addEventListener('click', toggleAR);
+
+  // Journey search
+  var btnTimeline = document.getElementById('btnShowTimeline');
+  if (btnTimeline) btnTimeline.addEventListener('click', showTimeline);
+
+  // i18n: listen for language change events
+  document.addEventListener('languageChanged', function() { debouncedReRender(); });
+
+  if (SCRIPT_URL) fetchRaw();
 })();
 
 </script>

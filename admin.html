@@ -1768,11 +1768,17 @@ function showApp(user) {
   document.getElementById('topbar-user-name').textContent = user.name;
   document.getElementById('topbar-user-avatar').src = user.picture || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>';
   loadSettingsUI();
-  // Only load data if Script URL is configured
   const cfg = getConfig();
   if (cfg.scriptUrl) {
+    // Script URL exists → load data from backend (role will be set from response)
     loadDrugs();
     loadAuditLog();
+  } else {
+    // No Script URL → grant temporary admin so user can access Settings tab
+    state.myRole = 'admin';
+    applyRoleUI();
+    switchTab('settings');
+    toast('⚠️ กรุณาตั้งค่า Google Apps Script URL ก่อน', 'warning');
   }
 }
 

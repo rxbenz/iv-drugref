@@ -2761,7 +2761,7 @@ function renderMatrix() {
   else drugs = DRUGS.filter(d => d.c.includes(matrixCat)).sort((a,b) => a.g.localeCompare(b.g)).slice(0, 30);
   
   if (drugs.length < 2) {
-    document.getElementById('matrixScroll').innerHTML = '<p style="color:var(--text3);font-size:13px;padding:20px 0;">ไม่พอสร้าง matrix</p>';
+    var ms = document.getElementById('matrixScroll'); if (ms) ms.innerHTML = '<p style="color:var(--text3);font-size:13px;padding:20px 0;">ไม่พอสร้าง matrix</p>';
     return;
   }
   
@@ -2787,11 +2787,12 @@ function renderMatrix() {
     html += '</tr>';
   });
   html += '</table>';
-  document.getElementById('matrixScroll').innerHTML = html;
+  var msEl = document.getElementById('matrixScroll'); if (msEl) msEl.innerHTML = html;
 }
 
 function showTooltip(e, el) {
   const tip = document.getElementById('matrixTooltip');
+  if (!tip) return;
   const labels = { compatible: '✅ Compatible', incompatible: '❌ Incompatible', variable: '⚠️ Variable', nodata: '❓ No data' };
   tip.innerHTML = `<strong>${el.dataset.a}</strong> + <strong>${el.dataset.b}</strong><br>${labels[el.dataset.s]}`;
   tip.classList.add('show');
@@ -2800,7 +2801,7 @@ function showTooltip(e, el) {
   tip.style.top = (rect.top - 50) + 'px';
 }
 function hideTooltip() {
-  document.getElementById('matrixTooltip').classList.remove('show');
+  var tip = document.getElementById('matrixTooltip'); if (tip) tip.classList.remove('show');
 }
 
 // ===== MULTI-DRUG CHECKER =====

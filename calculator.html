@@ -2108,9 +2108,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Block calculation on hard errors
     if (!validation.allValid) {
-      document.getElementById('crclValue').textContent = '—';
-      document.getElementById('bodyCompInfo').style.display = 'none';
-      document.getElementById('crclWarning').style.display = 'none';
+      var cv = document.getElementById('crclValue'); if (cv) cv.textContent = '—';
+      var bi = document.getElementById('bodyCompInfo'); if (bi) bi.style.display = 'none';
+      var cw = document.getElementById('crclWarning'); if (cw) cw.style.display = 'none';
       return;
     }
 
@@ -2119,13 +2119,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const bodyBox = document.getElementById('bodyCompInfo');
     const warn = document.getElementById('crclWarning');
     const crclLabel = document.getElementById('crclLabel');
+    const crclValue = document.getElementById('crclValue');
 
     if (isPed && ht > 0) {
-      crclLabel.textContent = 'eGFR (Bedside Schwartz):';
-      document.getElementById('crclValue').textContent = crcl.toFixed(1) + ' mL/min/1.73m²';
+      if (crclLabel) crclLabel.textContent = 'eGFR (Bedside Schwartz):';
+      if (crclValue) crclValue.textContent = crcl.toFixed(1) + ' mL/min/1.73m²';
     } else {
-      crclLabel.textContent = 'CrCl (Cockcroft-Gault):';
-      document.getElementById('crclValue').textContent = crcl.toFixed(1) + ' mL/min';
+      if (crclLabel) crclLabel.textContent = 'CrCl (Cockcroft-Gault):';
+      if (crclValue) crclValue.textContent = crcl.toFixed(1) + ' mL/min';
     }
 
     if (!isPed && ht > 0) {

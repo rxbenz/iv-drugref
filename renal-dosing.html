@@ -2386,9 +2386,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isPediatric) return; // locked to Schwartz in pediatric mode
     activeFormula = f;
     document.querySelectorAll('.formula-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.formula-btn[onclick="setFormula('${f}')"]`).classList.add('active');
-    document.getElementById('boxCG').classList.toggle('active', f === 'cg');
-    document.getElementById('boxCKD').classList.toggle('active', f === 'ckd');
+    var activeBtn = document.querySelector(`.formula-btn[onclick="setFormula('${f}')"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+    var boxCG = document.getElementById('boxCG'); if (boxCG) boxCG.classList.toggle('active', f === 'cg');
+    var boxCKD = document.getElementById('boxCKD'); if (boxCKD) boxCKD.classList.toggle('active', f === 'ckd');
     recalc();
   }
 
@@ -2403,12 +2404,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Block calculation on hard errors
     if (!pt.validation.allValid) {
-      document.getElementById('valCG').textContent = '—';
-      document.getElementById('valCKD').textContent = '—';
-      document.getElementById('stageCG').innerHTML = '';
-      document.getElementById('stageCKD').innerHTML = '';
-      document.getElementById('bodyCompBox').style.display = 'none';
-      document.getElementById('renalWarning').innerHTML = '';
+      var el;
+      el = document.getElementById('valCG'); if (el) el.textContent = '—';
+      el = document.getElementById('valCKD'); if (el) el.textContent = '—';
+      el = document.getElementById('stageCG'); if (el) el.textContent = '';
+      el = document.getElementById('stageCKD'); if (el) el.textContent = '';
+      el = document.getElementById('bodyCompBox'); if (el) el.style.display = 'none';
+      el = document.getElementById('renalWarning'); if (el) el.textContent = '';
       return;
     }
 
@@ -2467,28 +2469,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update CG display — show adjusted label if obese
     const cgLabelEl = document.querySelector('#boxCG .renal-result-label');
-    while (cgLabelEl.firstChild) cgLabelEl.removeChild(cgLabelEl.firstChild);
-    if (pt.isObese) {
-      cgLabelEl.appendChild(document.createTextNode('CrCl (CG — '));
-      cgLabelEl.appendChild(IVDrugRef.dom('span', { style: 'color:#ea580c;font-weight:700;', textContent: 'ABW' }));
-      cgLabelEl.appendChild(document.createTextNode(')'));
-    } else {
-      cgLabelEl.textContent = 'CrCl (Cockcroft-Gault)';
+    if (cgLabelEl) {
+      while (cgLabelEl.firstChild) cgLabelEl.removeChild(cgLabelEl.firstChild);
+      if (pt.isObese) {
+        cgLabelEl.appendChild(document.createTextNode('CrCl (CG — '));
+        cgLabelEl.appendChild(IVDrugRef.dom('span', { style: 'color:#ea580c;font-weight:700;', textContent: 'ABW' }));
+        cgLabelEl.appendChild(document.createTextNode(')'));
+      } else {
+        cgLabelEl.textContent = 'CrCl (Cockcroft-Gault)';
+      }
     }
-    document.getElementById('valCG').textContent = cg.toFixed(1);
+    var valCGEl = document.getElementById('valCG'); if (valCGEl) valCGEl.textContent = cg.toFixed(1);
 
     // CKD-EPI show non-indexed for dosing
     const ckdLabelEl = document.querySelector('#boxCKD .renal-result-label');
-    while (ckdLabelEl.firstChild) ckdLabelEl.removeChild(ckdLabelEl.firstChild);
-    if (pt.bsa > 2.0 || pt.bsa < 1.5) {
-      ckdLabelEl.appendChild(document.createTextNode('eGFR (CKD-EPI — '));
-      ckdLabelEl.appendChild(IVDrugRef.dom('span', { style: 'color:#15803d;font-weight:700;', textContent: 'non-indexed' }));
-      ckdLabelEl.appendChild(document.createTextNode(')'));
-    } else {
-      ckdLabelEl.textContent = 'eGFR (CKD-EPI 2021)';
+    if (ckdLabelEl) {
+      while (ckdLabelEl.firstChild) ckdLabelEl.removeChild(ckdLabelEl.firstChild);
+      if (pt.bsa > 2.0 || pt.bsa < 1.5) {
+        ckdLabelEl.appendChild(document.createTextNode('eGFR (CKD-EPI — '));
+        ckdLabelEl.appendChild(IVDrugRef.dom('span', { style: 'color:#15803d;font-weight:700;', textContent: 'non-indexed' }));
+        ckdLabelEl.appendChild(document.createTextNode(')'));
+      } else {
+        ckdLabelEl.textContent = 'eGFR (CKD-EPI 2021)';
+      }
     }
-    document.getElementById('valCKD').textContent = (activeFormula === 'ckd' ? ckdNonindexed : ckdIndexed).toFixed(1);
-    document.querySelector('#boxCKD .renal-result-unit').textContent = activeFormula === 'ckd' ? 'mL/min (non-indexed for dosing)' : 'mL/min/1.73m²';
+    var valCKDEl = document.getElementById('valCKD'); if (valCKDEl) valCKDEl.textContent = (activeFormula === 'ckd' ? ckdNonindexed : ckdIndexed).toFixed(1);
+    var ckdUnitEl = document.querySelector('#boxCKD .renal-result-unit'); if (ckdUnitEl) ckdUnitEl.textContent = activeFormula === 'ckd' ? 'mL/min (non-indexed for dosing)' : 'mL/min/1.73m²';
 
     const stageCG = IVDrugRef.getCKDStage(cg);
     const stageCKD = IVDrugRef.getCKDStage(ckdIndexed);

@@ -2071,7 +2071,7 @@ function updateCrCl(){
   const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);
   let label=crcl.toFixed(1)+' mL/min';
   if(p.ht>0){const htIn=p.ht/2.54;const ibw=p.sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(p.wt>ibw*1.3)label+=' (ABW)';if(p.age>=65&&p.scr<0.7)label+=' ⚠elderly';}
-  document.getElementById('ptCrCl').value=label;
+  var crclEl=document.getElementById('ptCrCl'); if(crclEl) crclEl.value=label;
 }
 
 // --- Dose & Level State (datetime-based) ---
@@ -2427,8 +2427,8 @@ function runMCMC(pt,doseHist,measuredLevels,model,mapR,nSamp,cb){
     }
     batch=end;
     const pct=Math.round(batch/total*100);
-    document.getElementById('mcmcBar').style.width=pct+'%';
-    document.getElementById('mcmcStatus').textContent='MCMC '+pct+'% ('+samples.length+'/'+nSamp+' samples)';
+    var barEl=document.getElementById('mcmcBar'); if(barEl) barEl.style.width=pct+'%';
+    var statEl=document.getElementById('mcmcStatus'); if(statEl) statEl.textContent='MCMC '+pct+'% ('+samples.length+'/'+nSamp+' samples)';
     if(batch<total)setTimeout(step,0);
     else cb(samples,accepted/total);
   }

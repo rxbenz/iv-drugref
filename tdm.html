@@ -1194,6 +1194,9 @@ canvas {
   <div class="drug-tab" data-action="switchDrug" data-drug="phenytoin"><span class="tab-icon">⚡</span>Phenytoin</div>
   <div class="drug-tab" data-action="switchDrug" data-drug="aminoglycoside"><span class="tab-icon">💉</span>Aminoglycosides</div>
   <div class="drug-tab" data-action="switchDrug" data-drug="valproate"><span class="tab-icon">🧠</span>Valproate</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="tacrolimus"><span class="tab-icon">🔬</span>Tacrolimus</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="digoxin"><span class="tab-icon">💜</span>Digoxin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="warfarin"><span class="tab-icon">🩸</span>Warfarin</div>
 </div>
 
 <!-- ============================================================
@@ -1413,6 +1416,246 @@ canvas {
 </div>
 
 <!-- ============================================================
+     TACROLIMUS
+     ============================================================ -->
+<div class="drug-section" id="sec_tacrolimus">
+  <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Trough Level (ng/mL)</label>
+        <input type="number" id="tacroLevel" value="" placeholder="C0 trough" min="0.1" max="60" step="0.1">
+      </div>
+      <div class="field"><label>Dose (mg BID)</label>
+        <input type="number" id="tacroDose" value="2" min="0.25" max="20" step="0.25">
+      </div>
+      <div class="field"><label>Transplant Type</label>
+        <select id="tacroTxType">
+          <option value="kidney">Kidney</option>
+          <option value="liver">Liver</option>
+          <option value="heart">Heart</option>
+          <option value="lung">Lung</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row row-3" style="margin-top:10px">
+      <div class="field"><label>Post-Tx Day</label>
+        <input type="number" id="tacroPostTxDay" value="30" min="1" max="3650" step="1">
+      </div>
+      <div class="field"><label>Hematocrit (%)</label>
+        <input type="number" id="tacroHct" value="33" min="15" max="60" step="1">
+      </div>
+      <div class="field"><label>CYP3A5 Genotype</label>
+        <select id="tacroCYP3A5">
+          <option value="unknown">Unknown</option>
+          <option value="expressor">*1/*1 or *1/*3 (Expressor)</option>
+          <option value="nonexpressor">*3/*3 (Non-expressor)</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-box blue" style="font-size:11px;margin-top:10px">
+      <strong>📍 Sampling Guide:</strong><br>
+      • C0 trough: เจาะก่อนให้ยา dose เช้า (12h post-dose)<br>
+      • ควรเจาะหลัง steady-state (≥3 วันหลังเริ่มยาหรือปรับ dose)<br>
+      • ใช้ whole blood EDTA tube (ห้ามใช้ serum)
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="tacrolimusRun" style="width:100%;padding:14px;font-size:15px">
+      🔬 Calculate Tacrolimus PK
+    </button>
+  </div>
+
+  <div id="tacroResults" style="display:none">
+    <div class="card"><div class="card-head">📊 LEVEL INTERPRETATION</div>
+      <div class="card-body"><div id="tacroInterpretation"></div></div>
+    </div>
+    <div class="card"><div class="card-head">🔬 PK PARAMETERS (Bayesian MAP)</div>
+      <div class="card-body"><div id="tacroPkResult"></div>
+        <table class="pk-table" id="tacroPkTable"></table>
+      </div>
+    </div>
+    <div class="card"><div class="card-head">🎯 DOSE OPTIMIZATION</div>
+      <div class="card-body">
+        <div class="slider-row"><label>Target Trough (ng/mL)</label>
+          <input type="range" id="tacroTargetTrough" min="3" max="20" step="0.5" value="8">
+          <span class="slider-val" id="tacroTargetVal">8 ng/mL</span>
+        </div>
+        <div id="tacroDosePredict"></div>
+        <div id="tacroDoseTable"></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-head">📈 CONCENTRATION-TIME CURVE</div>
+      <div class="card-body">
+        <div class="graph-container"><canvas id="tacroGraph" height="280"></canvas></div>
+        <div id="tacroCiInfo"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DIGOXIN
+     ============================================================ -->
+<div class="drug-section" id="sec_digoxin">
+  <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Serum Digoxin (ng/mL)</label>
+        <input type="number" id="digLevel" value="" placeholder="SDC" min="0.1" max="10" step="0.1">
+      </div>
+      <div class="field"><label>Time Since Last Dose (hr)</label>
+        <input type="number" id="digTimeSinceLastDose" value="12" min="0" max="48" step="0.5">
+      </div>
+      <div class="field"><label>Daily Dose (mcg)</label>
+        <input type="number" id="digDose" value="125" min="31.25" max="500" step="31.25">
+      </div>
+    </div>
+    <div class="row row-3" style="margin-top:10px">
+      <div class="field"><label>Formulation</label>
+        <select id="digFormulation">
+          <option value="tablet">Tablet (F=0.7)</option>
+          <option value="elixir">Elixir (F=0.8)</option>
+          <option value="capsule">Capsule (F=0.9)</option>
+          <option value="iv">IV (F=1.0)</option>
+        </select>
+      </div>
+      <div class="field"><label>Indication</label>
+        <select id="digIndication">
+          <option value="hf">Heart Failure (0.5-0.9)</option>
+          <option value="af">AF Rate Control (0.8-2.0)</option>
+        </select>
+      </div>
+      <div class="field"><label>Concurrent Drugs</label>
+        <select id="digInteraction">
+          <option value="none">None</option>
+          <option value="amiodarone">Amiodarone (↓50% dose)</option>
+          <option value="verapamil">Verapamil (↓25% dose)</option>
+          <option value="quinidine">Quinidine (↓50% dose)</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-box amber" style="font-size:11px;margin-top:10px">
+      <strong>⚠ Distribution Phase:</strong> Digoxin มี distribution phase 6-8 ชั่วโมง<br>
+      ถ้าเจาะเลือด <6h post-dose → ค่าจะสูงผิดปกติ ไม่สะท้อน steady-state<br>
+      <strong>แนะนำ:</strong> เจาะ trough (≥6h post-dose, ideally pre-dose)
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="digoxinRun" style="width:100%;padding:14px;font-size:15px">
+      💜 Calculate Digoxin PK
+    </button>
+  </div>
+
+  <div id="digResults" style="display:none">
+    <div class="card"><div class="card-head">📊 LEVEL INTERPRETATION</div>
+      <div class="card-body"><div id="digInterpretation"></div></div>
+    </div>
+    <div class="card"><div class="card-head">🔬 PK PARAMETERS</div>
+      <div class="card-body"><div id="digPkResult"></div>
+        <table class="pk-table" id="digPkTable"></table>
+      </div>
+    </div>
+    <div class="card"><div class="card-head">🎯 DOSE RECOMMENDATION</div>
+      <div class="card-body"><div id="digDoseRec"></div></div>
+    </div>
+    <div class="card"><div class="card-head">📈 CONCENTRATION-TIME CURVE</div>
+      <div class="card-body">
+        <div class="graph-container"><canvas id="digGraph" height="280"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     WARFARIN
+     ============================================================ -->
+<div class="drug-section" id="sec_warfarin">
+  <div class="card"><div class="card-head">🩸 INR-BASED DOSE ADJUSTMENT</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Current INR</label>
+        <input type="number" id="warINR" value="" placeholder="INR" min="0.5" max="15" step="0.1">
+      </div>
+      <div class="field"><label>Current Weekly Dose (mg)</label>
+        <input type="number" id="warWeeklyDose" value="35" min="1" max="150" step="0.5">
+      </div>
+      <div class="field"><label>Indication</label>
+        <select id="warIndication">
+          <option value="standard">AF/DVT/PE (INR 2.0-3.0)</option>
+          <option value="valve">Mechanical Valve (INR 2.5-3.5)</option>
+        </select>
+      </div>
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:8px 0">
+    <button class="btn btn-primary" data-action="warfarinINRRun" style="width:100%;padding:14px;font-size:15px">
+      🩸 INR Dose Adjustment
+    </button>
+  </div>
+
+  <div id="warINRResults" style="display:none">
+    <div class="card"><div class="card-head">📊 INR INTERPRETATION & DOSE ADJUSTMENT</div>
+      <div class="card-body"><div id="warINRInterpretation"></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><div class="card-head">🧬 PHARMACOGENOMICS-GUIDED DOSING (IWPC)</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>CYP2C9 Genotype</label>
+        <select id="warCYP2C9">
+          <option value="*1/*1">*1/*1 (Normal)</option>
+          <option value="*1/*2">*1/*2 (IM)</option>
+          <option value="*1/*3">*1/*3 (IM)</option>
+          <option value="*2/*2">*2/*2 (PM)</option>
+          <option value="*2/*3">*2/*3 (PM)</option>
+          <option value="*3/*3">*3/*3 (PM)</option>
+        </select>
+      </div>
+      <div class="field"><label>VKORC1 -1639 G>A</label>
+        <select id="warVKORC1">
+          <option value="GG">G/G (Normal dose)</option>
+          <option value="AG">A/G (Lower dose)</option>
+          <option value="AA">A/A (Lowest dose)</option>
+        </select>
+      </div>
+      <div class="field"><label>Race</label>
+        <select id="warRace">
+          <option value="asian">Asian</option>
+          <option value="black">Black</option>
+          <option value="white">White/Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row row-3" style="margin-top:10px">
+      <div class="field"><label>Concurrent Amiodarone</label>
+        <select id="warAmiodarone"><option value="0">No</option><option value="1">Yes</option></select>
+      </div>
+      <div class="field"><label>Enzyme Inducer (Rifampin, CBZ)</label>
+        <select id="warEnzyme"><option value="0">No</option><option value="1">Yes</option></select>
+      </div>
+    </div>
+    <div class="info-box purple" style="font-size:11px;margin-top:10px">
+      <strong>📍 IWPC Algorithm:</strong> International Warfarin Pharmacogenetics Consortium<br>
+      ใช้ข้อมูล genotype + demographics ทำนาย initial weekly dose<br>
+      <em>Ref: IWPC, N Engl J Med 2009;360:753-764</em>
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:8px 0">
+    <button class="btn btn-outline" data-action="warfarinPGxRun" style="width:100%;padding:14px;font-size:15px">
+      🧬 PGx-Guided Initial Dose
+    </button>
+  </div>
+
+  <div id="warPGxResults" style="display:none">
+    <div class="card"><div class="card-head">🧬 PHARMACOGENOMICS DOSING PREDICTION</div>
+      <div class="card-body"><div id="warPGxResult"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
      DISCLAIMER
      ============================================================ -->
 <div class="disclaimer">
@@ -1421,6 +1664,9 @@ canvas {
   Phenytoin: Winter-Tozer correction | Michaelis-Menten kinetics | Ref: Winter's Basic Clinical Pharmacokinetics<br>
   Aminoglycosides: Hartford nomogram + 1-compartment PK | Ref: Nicolau et al. 1995<br>
   Valproate: Free level correction | Ref: Applied Clinical Pharmacokinetics, Bauer 2008<br>
+  Tacrolimus: Bayesian MAP + MCMC | Models: Staatz 2004, Antignac 2007, Han 2013 | Ref: KDIGO Transplant Guidelines<br>
+  Digoxin: 2-compartment PK | Models: Jelliffe 1991, Konishi 2002 | Ref: ACC/AHA/HRS 2023<br>
+  Warfarin: INR-based + IWPC pharmacogenomics | Ref: IWPC NEJM 2009; ACCP Guidelines<br>
   สำหรับบุคลากรทางการแพทย์เท่านั้น
 </div>
 
@@ -2702,7 +2948,7 @@ const TDMHub = (function() {
     document.querySelectorAll('.drug-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.drug-section').forEach(s => s.classList.remove('active'));
     const tabs = document.querySelectorAll('.drug-tab');
-    const idx = ['vancomycin', 'phenytoin', 'aminoglycoside', 'valproate'].indexOf(drug);
+    const idx = ['vancomycin', 'phenytoin', 'aminoglycoside', 'valproate', 'tacrolimus', 'digoxin', 'warfarin'].indexOf(drug);
     if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
     var secEl = document.getElementById('sec_' + drug); if (secEl) secEl.classList.add('active');
   }
@@ -4184,6 +4430,559 @@ const TDMHub = (function() {
   }
 
   // ============================================================
+  // TACROLIMUS — Bayesian MAP + MCMC
+  // ============================================================
+  const TacrolimusTDM = (function() {
+    const TACRO_MODELS = [
+      { id: 'staatz', name: 'Staatz 2004', pop: 'General transplant',
+        ref: 'Br J Clin Pharmacol 2004;57:298-309',
+        clFn: (wt, hct) => 21.1 * Math.pow(wt / 70, 0.75) * Math.pow((hct || 33) / 33, -0.51),
+        vdFn: (wt) => 1.0 * wt, kaFn: () => 4.5, fFn: () => 0.25,
+        omega_cl: 0.36, omega_vd: 0.25, sigma: 0.15 },
+      { id: 'antignac', name: 'Antignac 2007', pop: 'Renal transplant',
+        ref: 'Clin Pharmacokinet 2007;46:85-94',
+        clFn: (wt, hct, postTxDay, cyp3a5) => {
+          let cl = 19.5 * Math.pow(wt / 70, 0.75);
+          if (postTxDay && postTxDay < 14) cl *= 0.75;
+          if (cyp3a5 === 'expressor') cl *= 1.55;
+          return cl;
+        },
+        vdFn: (wt) => 0.95 * wt, kaFn: () => 4.0, fFn: () => 0.23,
+        omega_cl: 0.30, omega_vd: 0.20, sigma: 0.12 },
+      { id: 'han', name: 'Han 2013', pop: 'Asian population',
+        ref: 'Ther Drug Monit 2013;35:209-218',
+        clFn: (wt, hct, postTxDay, cyp3a5) => {
+          let cl = 22.1 * Math.pow(wt / 70, 0.75);
+          if (cyp3a5 === 'expressor') cl *= 1.58;
+          if ((hct || 33) > 35) cl *= 1.12;
+          return cl;
+        },
+        vdFn: (wt) => 1.1 * wt, kaFn: () => 4.48, fFn: () => 0.25,
+        omega_cl: 0.32, omega_vd: 0.22, sigma: 0.14 }
+    ];
+
+    function getTargetRange(txType, postTxDay) {
+      const early = postTxDay <= 90;
+      const ranges = {
+        kidney: early ? [8, 12] : [5, 10],
+        liver:  early ? [10, 15] : [5, 10],
+        heart:  early ? [10, 15] : [5, 10],
+        lung:   early ? [10, 15] : [8, 12],
+        other:  early ? [8, 12] : [5, 10]
+      };
+      return ranges[txType] || ranges.other;
+    }
+
+    function predictTacroConc(t, cl, vd, ka, F, dose, interval) {
+      if (!cl || cl <= 0 || !vd || vd <= 0 || !ka || ka <= 0) return 0;
+      const ke = cl / vd;
+      if (!isFinite(ke) || ke <= 0) return 0;
+      const acc_ke = 1 / (1 - Math.exp(-ke * interval));
+      const acc_ka = 1 / (1 - Math.exp(-ka * interval));
+      const t_mod = t % interval;
+      const c = (F * dose * ka) / (vd * (ka - ke)) *
+        (acc_ke * Math.exp(-ke * t_mod) - acc_ka * Math.exp(-ka * t_mod));
+      return isFinite(c) && c > 0 ? c : 0;
+    }
+
+    function bayesianMAP(pt, troughLevel, dose, interval, model) {
+      const hct = +(document.getElementById('tacroHct')?.value) || 33;
+      const postTxDay = +(document.getElementById('tacroPostTxDay')?.value) || 30;
+      const cyp3a5 = document.getElementById('tacroCYP3A5')?.value || 'unknown';
+      const popCL = model.clFn(pt.wt, hct, postTxDay, cyp3a5);
+      const popVd = model.vdFn(pt.wt);
+      const ka = model.kaFn();
+      const F = model.fFn();
+
+      function obj(cl, vd) {
+        if (cl <= 0 || vd <= 0 || !isFinite(cl) || !isFinite(vd)) return 1e10;
+        let o = Math.pow(Math.log(cl / popCL), 2) / model.omega_cl +
+                Math.pow(Math.log(vd / popVd), 2) / model.omega_vd;
+        if (!isFinite(o)) return 1e10;
+        if (troughLevel > 0) {
+          const pred = predictTacroConc(interval - 0.01, cl, vd, ka, F, dose, interval);
+          if (pred <= 0 || !isFinite(pred)) return 1e10;
+          o += Math.pow(Math.log(troughLevel) - Math.log(pred), 2) / model.sigma;
+        }
+        return isFinite(o) ? o : 1e10;
+      }
+
+      // Grid search + Nelder-Mead (same pattern as Vancomycin)
+      let bCL = popCL, bVd = popVd, bObj = obj(popCL, popVd);
+      for (let ci = 0.3; ci <= 3; ci += 0.15)
+        for (let vi = 0.5; vi <= 2; vi += 0.15) {
+          const o = obj(popCL * ci, popVd * vi);
+          if (o < bObj) { bObj = o; bCL = popCL * ci; bVd = popVd * vi; }
+        }
+      let sx = [{ cl: bCL, vd: bVd }, { cl: bCL * 1.05, vd: bVd }, { cl: bCL, vd: bVd * 1.05 }];
+      const f = p => obj(p.cl, p.vd);
+      for (let it = 0; it < 200; it++) {
+        sx.sort((a, b) => f(a) - f(b));
+        const cx = (sx[0].cl + sx[1].cl) / 2, cy = (sx[0].vd + sx[1].vd) / 2;
+        const r = { cl: 2 * cx - sx[2].cl, vd: 2 * cy - sx[2].vd }, fr = f(r);
+        if (fr < f(sx[0])) { const e = { cl: 3 * cx - 2 * sx[2].cl, vd: 3 * cy - 2 * sx[2].vd }; sx[2] = f(e) < fr ? e : r; }
+        else if (fr < f(sx[1])) sx[2] = r;
+        else { const c2 = { cl: (cx + sx[2].cl) / 2, vd: (cy + sx[2].vd) / 2 }; if (f(c2) < f(sx[2])) sx[2] = c2;
+          else { sx[1] = { cl: (sx[0].cl + sx[1].cl) / 2, vd: (sx[0].vd + sx[1].vd) / 2 }; sx[2] = { cl: (sx[0].cl + sx[2].cl) / 2, vd: (sx[0].vd + sx[2].vd) / 2 }; } }
+        if (Math.abs(f(sx[0]) - f(sx[2])) < 1e-10) break;
+      }
+      sx.sort((a, b) => f(a) - f(b));
+      const r = sx[0]; const ke = r.cl / r.vd;
+      const predTrough = predictTacroConc(interval - 0.01, r.cl, r.vd, ka, F, dose, interval);
+      return {
+        cl: r.cl, vd: r.vd, ke, ka, F, halflife: Math.LN2 / ke, popCL, popVd,
+        predTrough, objValue: f(r),
+        method: troughLevel > 0 ? 'Bayesian MAP' : 'Population PK',
+        model: model.name, modelId: model.id
+      };
+    }
+
+    function runMCMC(pt, troughLevel, dose, interval, model, mapR, nSamp, cb) {
+      const hct = +(document.getElementById('tacroHct')?.value) || 33;
+      const postTxDay = +(document.getElementById('tacroPostTxDay')?.value) || 30;
+      const cyp3a5 = document.getElementById('tacroCYP3A5')?.value || 'unknown';
+      const popCL = model.clFn(pt.wt, hct, postTxDay, cyp3a5);
+      const popVd = model.vdFn(pt.wt);
+      const ka = model.kaFn(), F = model.fFn();
+
+      function logPost(cl, vd) {
+        if (cl <= 0 || vd <= 0 || !isFinite(cl) || !isFinite(vd)) return -1e10;
+        let lp = -0.5 * (Math.pow(Math.log(cl / popCL), 2) / model.omega_cl + Math.pow(Math.log(vd / popVd), 2) / model.omega_vd);
+        if (!isFinite(lp)) return -1e10;
+        if (troughLevel > 0) {
+          const pred = predictTacroConc(interval - 0.01, cl, vd, ka, F, dose, interval);
+          if (pred <= 0 || !isFinite(pred)) return -1e10;
+          lp -= 0.5 * Math.pow(Math.log(troughLevel) - Math.log(pred), 2) / model.sigma;
+        }
+        return isFinite(lp) ? lp : -1e10;
+      }
+
+      const samples = [];
+      let cl = mapR.cl, vd = mapR.vd, lp = logPost(cl, vd);
+      const sdCL = Math.sqrt(model.omega_cl) * popCL * 0.15;
+      const sdVd = Math.sqrt(model.omega_vd) * popVd * 0.15;
+      let accepted = 0;
+      const burnin = Math.floor(nSamp * 0.3), total = nSamp + burnin;
+      let batch = 0; const batchSz = 100;
+
+      function step() {
+        const end = Math.min(batch + batchSz, total);
+        for (let i = batch; i < end; i++) {
+          const u1 = Math.max(Math.random(), 1e-15), u2 = Math.random();
+          const z1 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+          const z2 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
+          const pCL = cl + z1 * sdCL * 2.4, pVd = vd + z2 * sdVd * 2.4;
+          if (!isFinite(pCL) || !isFinite(pVd)) continue;
+          const pLP = logPost(pCL, pVd);
+          if (isFinite(pLP) && pLP > -1e9 && Math.log(Math.random()) < pLP - lp) { cl = pCL; vd = pVd; lp = pLP; accepted++; }
+          if (i >= burnin && cl > 0 && vd > 0 && isFinite(cl) && isFinite(vd)) {
+            const trough = predictTacroConc(interval - 0.01, cl, vd, ka, F, dose, interval);
+            samples.push({ cl, vd, ke: cl / vd, trough });
+          }
+        }
+        batch = end;
+        if (batch < total) setTimeout(step, 0);
+        else cb(samples, accepted / total);
+      }
+      step();
+    }
+
+    return {
+      run() {
+        const pt = updateCrCl();
+        const troughLevel = +(document.getElementById('tacroLevel')?.value) || 0;
+        const dose = +(document.getElementById('tacroDose')?.value) || 2;
+        const interval = 12; // BID
+        const txType = document.getElementById('tacroTxType')?.value || 'kidney';
+        const postTxDay = +(document.getElementById('tacroPostTxDay')?.value) || 30;
+        const target = getTargetRange(txType, postTxDay);
+
+        if (troughLevel <= 0) { alert('กรุณาใส่ trough level'); return; }
+
+        // Run MAP for all models
+        const allResults = TACRO_MODELS.map(m => bayesianMAP(pt, troughLevel, dose, interval, m));
+        let bestIdx = allResults.reduce((bi, r, i) => r.objValue < allResults[bi].objValue ? i : bi, 0);
+        const best = allResults[bestIdx];
+        const bestModel = TACRO_MODELS[bestIdx];
+
+        // Interpretation
+        let cls = 'green', msg = '✅ อยู่ใน target range (' + target[0] + '-' + target[1] + ' ng/mL)';
+        if (troughLevel < target[0]) { cls = 'amber'; msg = '⚠ ต่ำกว่า target → เสี่ยง rejection'; }
+        else if (troughLevel > target[1]) { cls = 'red'; msg = '⚠ สูงกว่า target → เสี่ยง nephrotoxicity'; }
+        if (troughLevel > 20) { cls = 'red'; msg = '🚨 Toxic range → ลด dose ทันที / hold'; }
+
+        const interpEl = document.getElementById('tacroInterpretation');
+        if (interpEl) interpEl.innerHTML =
+          '<div class="result-box ' + cls + '"><div class="result-title">Trough Level (' + bestModel.name + ')</div>' +
+          '<div class="result-value" style="color:var(--' + cls + ')">' + troughLevel.toFixed(1) + ' ng/mL</div>' +
+          '<div class="result-sub" style="color:var(--' + cls + ')">' + msg + '</div>' +
+          '<div style="font-size:11px;margin-top:6px;color:var(--text2)">Target: ' + target[0] + '-' + target[1] + ' ng/mL (' + txType + ', day ' + postTxDay + ')</div></div>';
+
+        // PK Table
+        const pkTableEl = document.getElementById('tacroPkTable');
+        if (pkTableEl) pkTableEl.innerHTML =
+          '<tr><td>Method</td><td style="color:var(--blue)">' + best.method + '</td></tr>' +
+          '<tr><td>Model</td><td>' + best.model + '</td></tr>' +
+          '<tr><td>CL (MAP)</td><td>' + best.cl.toFixed(2) + ' L/hr</td></tr>' +
+          '<tr><td>Vd (MAP)</td><td>' + best.vd.toFixed(1) + ' L</td></tr>' +
+          '<tr><td>t½</td><td>' + best.halflife.toFixed(1) + ' hr</td></tr>' +
+          '<tr><td>Predicted Trough</td><td>' + best.predTrough.toFixed(1) + ' ng/mL</td></tr>' +
+          '<tr><td>Pop CL</td><td>' + best.popCL.toFixed(2) + ' L/hr</td></tr>' +
+          '<tr><td>Pop Vd</td><td>' + best.popVd.toFixed(1) + ' L</td></tr>';
+
+        // MCMC
+        runMCMC(pt, troughLevel, dose, interval, bestModel, best, 1500, function(samples, acceptRate) {
+          const troughArr = samples.map(s => s.trough).filter(v => isFinite(v) && v > 0).sort((a, b) => a - b);
+          const lo = troughArr.length > 0 ? troughArr[Math.floor(troughArr.length * 0.05)] : NaN;
+          const hi = troughArr.length > 0 ? troughArr[Math.floor(troughArr.length * 0.95)] : NaN;
+
+          const ciEl = document.getElementById('tacroCiInfo');
+          if (ciEl) ciEl.innerHTML = '<div class="info-box cyan" style="font-size:11px"><b>90% Credible Interval (' + samples.length + ' MCMC samples):</b><br>' +
+            'Predicted Trough: ' + (isFinite(lo) ? lo.toFixed(1) : '?') + ' – ' + (isFinite(hi) ? hi.toFixed(1) : '?') + ' ng/mL | Accept: ' + (acceptRate * 100).toFixed(0) + '%</div>';
+
+          // Dose optimization table
+          const doseTableEl = document.getElementById('tacroDoseTable');
+          if (doseTableEl) {
+            const doses = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8];
+            let html = '<table class="pk-table"><tr><th>Dose (mg BID)</th><th>Predicted Trough</th><th>Status</th></tr>';
+            for (const d of doses) {
+              const predT = predictTacroConc(interval - 0.01, best.cl, best.vd, best.ka, best.F, d, interval);
+              const inTarget = predT >= target[0] && predT <= target[1];
+              const c = inTarget ? 'green' : (predT < target[0] ? 'amber' : 'red');
+              html += '<tr><td>' + d + ' mg</td><td style="color:var(--' + c + ')">' + predT.toFixed(1) + ' ng/mL</td><td style="color:var(--' + c + ')">' +
+                (inTarget ? '✅ In target' : (predT < target[0] ? '⚠ Below' : '⚠ Above')) + '</td></tr>';
+            }
+            html += '</table>';
+            doseTableEl.innerHTML = html;
+          }
+
+          // Target trough slider
+          const slider = document.getElementById('tacroTargetTrough');
+          const sliderVal = document.getElementById('tacroTargetVal');
+          if (slider && sliderVal) {
+            slider.value = (target[0] + target[1]) / 2;
+            sliderVal.textContent = slider.value + ' ng/mL';
+            slider.oninput = function() {
+              sliderVal.textContent = this.value + ' ng/mL';
+              const targetT = +this.value;
+              // Find dose for target trough by binary search
+              let lo = 0.1, hi = 20;
+              for (let iter = 0; iter < 30; iter++) {
+                const mid = (lo + hi) / 2;
+                const pred = predictTacroConc(interval - 0.01, best.cl, best.vd, best.ka, best.F, mid, interval);
+                if (pred < targetT) lo = mid; else hi = mid;
+              }
+              const recDose = Math.round((lo + hi) / 2 * 4) / 4; // round to 0.25
+              const predEl = document.getElementById('tacroDosePredict');
+              if (predEl) predEl.innerHTML = '<div class="result-box green" style="padding:10px"><div style="font-size:16px;font-weight:700">' +
+                recDose + ' mg BID</div><div style="font-size:11px;color:var(--text2)">Predicted trough: ' +
+                predictTacroConc(interval - 0.01, best.cl, best.vd, best.ka, best.F, recDose, interval).toFixed(1) + ' ng/mL</div></div>';
+            };
+            slider.oninput();
+          }
+        });
+
+        const resEl = document.getElementById('tacroResults');
+        if (resEl) resEl.style.display = 'block';
+        resEl?.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  })();
+
+  // ============================================================
+  // DIGOXIN — 2-compartment PK + level correction
+  // ============================================================
+  const DigoxinTDM = (function() {
+    const DIG_MODELS = [
+      { id: 'jelliffe', name: 'Jelliffe 1991', pop: 'General',
+        // CL (mL/min) = 0.33*IBW + 0.9*CrCl (for CHF) or 1.3*IBW + 0.9*CrCl (normal)
+        clFn: (crcl, wt, hf) => hf ? (0.33 * wt + 0.9 * crcl) * 0.06 : (1.3 * wt + 0.9 * crcl) * 0.06, // convert to L/hr
+        vdFn: (wt) => 7.3 * wt / 1000 * wt, // ~500L for 70kg
+        omega_cl: 0.30, omega_vd: 0.25, sigma: 0.15 },
+      { id: 'konishi', name: 'Konishi 2002', pop: 'Pop PK',
+        clFn: (crcl, wt) => (0.06 * crcl + 0.05 * wt) * 0.06, // L/hr
+        vdFn: (wt) => 6.5 * wt,
+        omega_cl: 0.28, omega_vd: 0.22, sigma: 0.12 }
+    ];
+
+    const F_VALUES = { tablet: 0.7, elixir: 0.8, capsule: 0.9, iv: 1.0 };
+
+    function getTargetRange(indication) {
+      return indication === 'hf' ? [0.5, 0.9] : [0.8, 2.0];
+    }
+
+    return {
+      run() {
+        const pt = updateCrCl();
+        const level = +(document.getElementById('digLevel')?.value) || 0;
+        const timeSince = +(document.getElementById('digTimeSinceLastDose')?.value) || 12;
+        const dailyDose = +(document.getElementById('digDose')?.value) || 125;
+        const formulation = document.getElementById('digFormulation')?.value || 'tablet';
+        const indication = document.getElementById('digIndication')?.value || 'hf';
+        const interaction = document.getElementById('digInteraction')?.value || 'none';
+        const target = getTargetRange(indication);
+        const F = F_VALUES[formulation] || 0.7;
+
+        if (level <= 0) { alert('กรุณาใส่ serum digoxin level'); return; }
+
+        // Distribution phase warning
+        let distributionWarning = '';
+        let correctedLevel = level;
+        if (timeSince < 6) {
+          distributionWarning = '⚠ เจาะเลือดภายใน distribution phase (<6h) — ค่าอาจสูงเกินจริง';
+          // Rough correction: extrapolate to post-distribution
+          const ke_approx = pt.crcl > 0 ? (0.0015 * pt.crcl + 0.0015) : 0.005;
+          correctedLevel = level * Math.exp(-ke_approx * (6 - timeSince));
+        }
+
+        // Interpretation
+        let cls = 'green', msg = '✅ อยู่ใน target range (' + target[0] + '-' + target[1] + ' ng/mL)';
+        if (correctedLevel < target[0]) { cls = 'amber'; msg = '⚠ ต่ำกว่า target → อาจ subtherapeutic'; }
+        else if (correctedLevel > target[1]) { cls = 'red'; msg = '⚠ สูงกว่า target → เสี่ยง toxicity'; }
+        if (correctedLevel > 2.0) { cls = 'red'; msg = '🚨 SDC >2.0 → Digoxin toxicity risk สูง!'; }
+
+        // Drug interaction adjustment
+        let interactionNote = '';
+        let adjFactor = 1.0;
+        if (interaction === 'amiodarone') { adjFactor = 0.5; interactionNote = '⚠ Amiodarone: ลด dose 50% (↑ level ~2 เท่า)'; }
+        else if (interaction === 'verapamil') { adjFactor = 0.75; interactionNote = '⚠ Verapamil: ลด dose 25% (↑ level ~25-35%)'; }
+        else if (interaction === 'quinidine') { adjFactor = 0.5; interactionNote = '⚠ Quinidine: ลด dose 50% (↓ renal clearance + displacement)'; }
+
+        const interpEl = document.getElementById('digInterpretation');
+        if (interpEl) {
+          let html = '<div class="result-box ' + cls + '">' +
+            '<div class="result-title">Serum Digoxin (SDC)</div>' +
+            '<div class="result-value" style="color:var(--' + cls + ')">' + level.toFixed(2) + ' ng/mL</div>' +
+            '<div class="result-sub" style="color:var(--' + cls + ')">' + msg + '</div>';
+          if (distributionWarning) html += '<div class="info-box amber" style="font-size:11px;margin-top:8px">' + distributionWarning +
+            '<br>Estimated post-distribution level: ~' + correctedLevel.toFixed(2) + ' ng/mL</div>';
+          if (interactionNote) html += '<div class="info-box red" style="font-size:11px;margin-top:8px">' + interactionNote + '</div>';
+          html += '</div>';
+          interpEl.innerHTML = html;
+        }
+
+        // Simple dose recommendation
+        const doseRecEl = document.getElementById('digDoseRec');
+        if (doseRecEl) {
+          const midTarget = (target[0] + target[1]) / 2;
+          const ratio = midTarget / correctedLevel;
+          const newDose = Math.round(dailyDose * ratio * adjFactor / 31.25) * 31.25; // round to nearest 31.25
+          const capped = Math.min(Math.max(newDose, 62.5), 500);
+
+          let html = '<div class="result-box green" style="padding:12px">' +
+            '<div style="font-size:16px;font-weight:700">แนะนำ: ' + capped + ' mcg/day</div>' +
+            '<div style="font-size:11px;color:var(--text2);margin-top:4px">' +
+            'Current: ' + dailyDose + ' mcg × ratio ' + ratio.toFixed(2);
+          if (adjFactor < 1) html += ' × interaction factor ' + adjFactor;
+          html += ' = ' + capped + ' mcg</div></div>';
+
+          // Dose options
+          html += '<table class="pk-table" style="margin-top:10px"><tr><th>Dose (mcg)</th><th>Formulation</th><th>Predicted SDC</th></tr>';
+          for (const d of [62.5, 125, 187.5, 250, 375, 500]) {
+            const predSDC = correctedLevel * (d / dailyDose) / adjFactor;
+            const inRange = predSDC >= target[0] && predSDC <= target[1];
+            const c = inRange ? 'green' : (predSDC < target[0] ? 'amber' : 'red');
+            html += '<tr><td>' + d + ' mcg</td><td>' + formulation + '</td><td style="color:var(--' + c + ')">' + predSDC.toFixed(2) + ' ng/mL ' +
+              (inRange ? '✅' : '') + '</td></tr>';
+          }
+          html += '</table>';
+          doseRecEl.innerHTML = html;
+        }
+
+        // PK Table (population-based)
+        const model = DIG_MODELS[0];
+        const isHF = indication === 'hf';
+        const popCL = model.clFn(pt.crcl, pt.wt, isHF);
+        const ke = popCL / (model.vdFn(pt.wt) / 1000); // rough ke
+        const pkTableEl = document.getElementById('digPkTable');
+        if (pkTableEl) pkTableEl.innerHTML =
+          '<tr><td>Model</td><td>' + model.name + '</td></tr>' +
+          '<tr><td>Est. CL</td><td>' + popCL.toFixed(3) + ' L/hr</td></tr>' +
+          '<tr><td>Est. t½</td><td>' + (Math.LN2 / (ke || 0.01)).toFixed(0) + ' hr</td></tr>' +
+          '<tr><td>Bioavailability</td><td>' + (F * 100).toFixed(0) + '% (' + formulation + ')</td></tr>' +
+          '<tr><td>CrCl</td><td>' + (pt.crcl || 0).toFixed(1) + ' mL/min</td></tr>';
+
+        const resEl = document.getElementById('digResults');
+        if (resEl) resEl.style.display = 'block';
+        resEl?.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  })();
+
+  // ============================================================
+  // WARFARIN — INR-based + Pharmacogenomics (IWPC)
+  // ============================================================
+  const WarfarinTDM = (function() {
+
+    function inrDoseAdjustment(inr, currentWeeklyDose, targetLow, targetHigh) {
+      const midTarget = (targetLow + targetHigh) / 2;
+      let action, newDose, urgency;
+
+      if (inr < 1.5) {
+        action = 'เพิ่ม dose 10-20% + พิจารณาให้ loading dose';
+        newDose = currentWeeklyDose * 1.15;
+        urgency = 'amber';
+      } else if (inr < targetLow) {
+        action = 'เพิ่ม dose 5-15%';
+        newDose = currentWeeklyDose * 1.10;
+        urgency = 'amber';
+      } else if (inr >= targetLow && inr <= targetHigh) {
+        action = 'คงขนาดเดิม — INR อยู่ใน target';
+        newDose = currentWeeklyDose;
+        urgency = 'green';
+      } else if (inr <= targetHigh + 0.5) {
+        action = 'ลด dose 5-10% หรือคงเดิม + ติดตาม';
+        newDose = currentWeeklyDose * 0.95;
+        urgency = 'amber';
+      } else if (inr <= 5) {
+        action = 'Hold 1-2 วัน แล้ว ลด dose 10-20%';
+        newDose = currentWeeklyDose * 0.85;
+        urgency = 'red';
+      } else if (inr <= 9) {
+        action = 'Hold warfarin + ให้ Vitamin K 1-2.5 mg PO + ตรวจ INR ซ้ำใน 24-48h';
+        newDose = currentWeeklyDose * 0.75;
+        urgency = 'red';
+      } else {
+        action = '🚨 Hold warfarin + Vitamin K 5-10 mg IV + พิจารณา FFP/PCC ถ้ามี bleeding';
+        newDose = currentWeeklyDose * 0.5;
+        urgency = 'red';
+      }
+
+      return { action, newDose: Math.round(newDose * 2) / 2, urgency };
+    }
+
+    function iwpcAlgorithm(age, ht, wt, cyp2c9, vkorc1, race, amiodarone, enzymeInducer) {
+      // IWPC regression equation (NEJM 2009;360:753-764)
+      let val = 5.6044;
+      val -= 0.2614 * (age / 10);
+      val -= 0.0087 * ht;
+      val += 0.0128 * wt;
+
+      // VKORC1
+      if (vkorc1 === 'AG') val -= 0.8677;
+      else if (vkorc1 === 'AA') val -= 1.6974;
+
+      // CYP2C9
+      const cyp = {
+        '*1/*2': -0.5211, '*1/*3': -0.9357,
+        '*2/*2': -1.0616, '*2/*3': -1.9206, '*3/*3': -2.3312
+      };
+      if (cyp[cyp2c9]) val += cyp[cyp2c9];
+
+      // Race
+      if (race === 'asian') val += 0.2029;
+      else if (race === 'black') val -= 0.1291;
+
+      // Drugs
+      if (amiodarone) val -= 0.2188;
+      if (enzymeInducer) val += 0.1092;
+
+      const weeklyDose = val * val; // sqrt was applied, so square to get dose
+      return Math.max(weeklyDose, 3); // minimum 3 mg/wk
+    }
+
+    return {
+      runINR() {
+        const inr = +(document.getElementById('warINR')?.value) || 0;
+        const weeklyDose = +(document.getElementById('warWeeklyDose')?.value) || 35;
+        const indication = document.getElementById('warIndication')?.value || 'standard';
+        const targetLow = indication === 'valve' ? 2.5 : 2.0;
+        const targetHigh = indication === 'valve' ? 3.5 : 3.0;
+
+        if (inr <= 0) { alert('กรุณาใส่ค่า INR'); return; }
+
+        const adj = inrDoseAdjustment(inr, weeklyDose, targetLow, targetHigh);
+        const dailyCurrent = (weeklyDose / 7).toFixed(1);
+        const dailyNew = (adj.newDose / 7).toFixed(1);
+
+        const el = document.getElementById('warINRInterpretation');
+        if (el) {
+          let html = '<div class="result-box ' + adj.urgency + '" style="padding:12px">' +
+            '<div class="result-title">INR Interpretation</div>' +
+            '<div class="result-value" style="color:var(--' + adj.urgency + ')">' + inr.toFixed(1) + '</div>' +
+            '<div class="result-sub">Target: ' + targetLow + ' – ' + targetHigh + ' (' + indication + ')</div></div>';
+
+          html += '<div class="info-box ' + adj.urgency + '" style="font-size:12px;margin-top:10px">' +
+            '<strong>แนะนำ:</strong> ' + adj.action + '</div>';
+
+          html += '<table class="pk-table" style="margin-top:10px">' +
+            '<tr><td>Current Dose</td><td>' + weeklyDose + ' mg/wk (' + dailyCurrent + ' mg/day)</td></tr>' +
+            '<tr><td>Suggested Dose</td><td style="font-weight:700;color:var(--' + adj.urgency + ')">' + adj.newDose + ' mg/wk (' + dailyNew + ' mg/day)</td></tr>' +
+            '<tr><td>Follow-up INR</td><td>' + (inr > 5 ? '24-48 ชั่วโมง' : '1-2 สัปดาห์') + '</td></tr></table>';
+
+          // INR adjustment reference table
+          html += '<div style="margin-top:16px;font-size:11px;color:var(--text2)"><strong>INR Dose Adjustment Guide (ACCP):</strong></div>' +
+            '<table class="pk-table" style="font-size:11px">' +
+            '<tr><th>INR</th><th>Action</th></tr>' +
+            '<tr><td><1.5</td><td>เพิ่ม 10-20%</td></tr>' +
+            '<tr><td>1.5-' + targetLow + '</td><td>เพิ่ม 5-15%</td></tr>' +
+            '<tr style="background:rgba(16,185,129,.05)"><td>' + targetLow + '-' + targetHigh + '</td><td>✅ คงขนาดเดิม</td></tr>' +
+            '<tr><td>' + targetHigh + '-5.0</td><td>Hold 1-2 วัน แล้วลด 10-20%</td></tr>' +
+            '<tr><td>5.0-9.0</td><td>Hold + Vit K 1-2.5 mg PO</td></tr>' +
+            '<tr><td>>9.0</td><td>Hold + Vit K 5-10 mg IV ± FFP/PCC</td></tr></table>';
+
+          el.innerHTML = html;
+        }
+
+        const resEl = document.getElementById('warINRResults');
+        if (resEl) resEl.style.display = 'block';
+      },
+
+      runPGx() {
+        const pt = updateCrCl();
+        const cyp2c9 = document.getElementById('warCYP2C9')?.value || '*1/*1';
+        const vkorc1 = document.getElementById('warVKORC1')?.value || 'GG';
+        const race = document.getElementById('warRace')?.value || 'asian';
+        const amio = document.getElementById('warAmiodarone')?.value === '1';
+        const enzyme = document.getElementById('warEnzyme')?.value === '1';
+
+        const weeklyDose = iwpcAlgorithm(pt.age, pt.ht, pt.wt, cyp2c9, vkorc1, race, amio, enzyme);
+        const dailyDose = weeklyDose / 7;
+
+        // Risk classification
+        let riskCls = 'green', riskMsg = 'Standard dose';
+        if (weeklyDose < 21) { riskCls = 'amber'; riskMsg = 'Sensitive — ลด dose'; }
+        if (weeklyDose < 14) { riskCls = 'red'; riskMsg = 'Highly sensitive — ต้องระวังมาก'; }
+        if (weeklyDose > 49) { riskCls = 'amber'; riskMsg = 'Resistant — อาจต้อง dose สูง'; }
+
+        // Genotype interpretation
+        const cypInterp = { '*1/*1': 'Normal metabolizer (NM)', '*1/*2': 'Intermediate (IM)', '*1/*3': 'Intermediate (IM)',
+          '*2/*2': 'Poor metabolizer (PM)', '*2/*3': 'Poor metabolizer (PM)', '*3/*3': 'Poor metabolizer (PM)' };
+        const vkorcInterp = { 'GG': 'Normal sensitivity', 'AG': 'Increased sensitivity (↓ dose)', 'AA': 'High sensitivity (↓↓ dose)' };
+
+        const el = document.getElementById('warPGxResult');
+        if (el) {
+          let html = '<div class="result-box ' + riskCls + '" style="padding:12px">' +
+            '<div class="result-title">IWPC Predicted Dose</div>' +
+            '<div class="result-value" style="color:var(--' + riskCls + ')">' + weeklyDose.toFixed(1) + ' mg/wk</div>' +
+            '<div class="result-sub">(' + dailyDose.toFixed(1) + ' mg/day) — ' + riskMsg + '</div></div>';
+
+          html += '<table class="pk-table" style="margin-top:12px">' +
+            '<tr><td>CYP2C9</td><td>' + cyp2c9 + ' — ' + (cypInterp[cyp2c9] || 'Unknown') + '</td></tr>' +
+            '<tr><td>VKORC1</td><td>' + vkorc1 + ' — ' + (vkorcInterp[vkorc1] || 'Unknown') + '</td></tr>' +
+            '<tr><td>Race</td><td>' + race + '</td></tr>' +
+            '<tr><td>Age</td><td>' + pt.age + ' yrs</td></tr>' +
+            '<tr><td>Height</td><td>' + pt.ht + ' cm</td></tr>' +
+            '<tr><td>Weight</td><td>' + pt.wt + ' kg</td></tr>';
+          if (amio) html += '<tr><td>Amiodarone</td><td style="color:var(--red)">Yes (↓ dose ~25%)</td></tr>';
+          if (enzyme) html += '<tr><td>Enzyme Inducer</td><td style="color:var(--amber)">Yes (↑ dose)</td></tr>';
+          html += '</table>';
+
+          html += '<div class="info-box purple" style="font-size:11px;margin-top:12px">' +
+            '<strong>หมายเหตุ:</strong> IWPC algorithm ใช้สำหรับ <strong>initial dosing</strong> เท่านั้น<br>' +
+            'ต้องติดตาม INR ทุก 2-3 วันในสัปดาห์แรก แล้วปรับ dose ตาม INR response<br>' +
+            '<em>Ref: IWPC, N Engl J Med 2009;360:753-764</em></div>';
+
+          el.innerHTML = html;
+        }
+
+        const resEl = document.getElementById('warPGxResults');
+        if (resEl) resEl.style.display = 'block';
+      }
+    };
+  })();
+
+  // ============================================================
   // PUBLIC API
   // ============================================================
 
@@ -4216,6 +5015,16 @@ const TDMHub = (function() {
     // Valproate TDM module
     ValproateTDM_run: () => ValproateTDM.run(),
 
+    // Tacrolimus TDM module
+    TacrolimusTDM_run: () => TacrolimusTDM.run(),
+
+    // Digoxin TDM module
+    DigoxinTDM_run: () => DigoxinTDM.run(),
+
+    // Warfarin TDM module
+    WarfarinTDM_runINR: () => WarfarinTDM.runINR(),
+    WarfarinTDM_runPGx: () => WarfarinTDM.runPGx(),
+
     // Utilities
     updateCrCl: updateCrCl,
     getPatient: getPatient
@@ -4247,7 +5056,11 @@ IVDrugRef.delegate(document, 'click', {
   },
   phenytoinRun: function() { TDMHub.PhenytoinTDM_run(); },
   agRun: function() { TDMHub.AminoglycosideTDM_run(); },
-  vpaRun: function() { TDMHub.ValproateTDM_run(); }
+  vpaRun: function() { TDMHub.ValproateTDM_run(); },
+  tacrolimusRun: function() { TDMHub.TacrolimusTDM_run(); },
+  digoxinRun: function() { TDMHub.DigoxinTDM_run(); },
+  warfarinINRRun: function() { TDMHub.WarfarinTDM_runINR(); },
+  warfarinPGxRun: function() { TDMHub.WarfarinTDM_runPGx(); }
 });
 IVDrugRef.delegate(document, 'change', {
   vancoSetDose: function(e, t) {

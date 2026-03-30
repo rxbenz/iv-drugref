@@ -12,7 +12,1171 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
   <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
   <style>
-@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap);*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'IBM Plex Sans Thai','Plus Jakarta Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-family:var(--sans);background:var(--bg);color:var(--text)}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:0 0}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#94a3b8}.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid #e2e8f0;padding-bottom:env(safe-area-inset-bottom,0)}.bottom-nav-inner{max-width:600px;margin:0 auto;display:flex;justify-content:space-around;padding:6px 0 4px}.bottom-nav a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:10px;font-weight:500;gap:2px;transition:color .2s;padding:4px 8px}.bottom-nav a .nav-icon{font-size:18px;line-height:1}.bottom-nav a .nav-label{font-size:10px}.bottom-nav a:hover{color:#0ea5e9}.bottom-nav a.nav-active{color:#0ea5e9;font-weight:600}.theme-dark .bottom-nav{background:rgba(11,17,32,.92);border-top-color:#1e3050}.theme-dark .bottom-nav a{color:#64748b}.theme-dark .bottom-nav a.nav-active,.theme-dark .bottom-nav a:hover{color:#38bdf8}.nav-back{display:inline-flex;align-items:center;gap:4px;color:#0ea5e9;text-decoration:none;font-size:14px;font-weight:500}.nav-back svg{width:16px;height:16px}.field label{font-size:11px;color:#64748b;display:block;margin-bottom:4px;font-weight:500}.field input,.field select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;font-weight:500;font-family:inherit;background:#fff;color:#1e293b}.field input:focus,.field select:focus{outline:0;border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,.12)}.section{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:16px;overflow:hidden}.section-header{padding:12px 16px;font-size:13px;font-weight:600;color:#0ea5e9;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;gap:8px}.field-grid{display:grid;gap:12px;padding:16px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.container{max-width:640px;margin:0 auto;padding:16px 16px 90px}.badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.3px}.badge-had{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)}.badge-ed{background:rgba(5,150,105,.08);color:#059669;border:1px solid rgba(5,150,105,.2)}.badge-ned{background:rgba(217,119,6,.08);color:#d97706;border:1px solid rgba(217,119,6,.2)}.disclaimer{text-align:center;font-size:11px;color:#dc2626;padding:12px 16px;font-weight:500;background:#fef2f2;border-radius:8px;margin-top:16px}.info-box.blue{background:#e6f1fb;color:#0c447c}.info-box.amber{background:#fef3c7;color:#92400e}.info-box.red{background:#fef2f2;color:#991b1b}.btn{padding:6px 12px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border,rgba(255,255,255,.08));background:var(--bg-card,rgba(255,255,255,.06));color:var(--text-secondary,#94a3b8);transition:.15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.btn:hover{background:var(--bg-card-hover,rgba(255,255,255,.1));color:var(--text-primary,#f1f5f9);border-color:var(--border-focus,rgba(255,255,255,.15))}.btn.primary{background:linear-gradient(135deg,var(--accent-cyan,#22d3ee),var(--accent-blue,#38bdf8));color:#0f172a;border-color:transparent}.btn.primary:hover{box-shadow:0 2px 12px rgba(56,189,248,.25);transform:translateY(-1px)}.btn.sm{padding:4px 8px;font-size:10px}.theme-light .btn{background:rgba(0,0,0,.04);color:var(--text-secondary,#64748b);border-color:var(--border,#e2e8f0)}.theme-light .btn:hover{background:rgba(0,0,0,.08);color:var(--text-primary,#1e293b)}@media (max-width:480px){.container{padding:16px 14px 90px}}:root{--bg:#0b1120;--bg2:#131c31;--bg3:#1e293b;--bg4:#334155;--card:#151e30;--card-border:#1e3050;--card-hover:#1a2740;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--blue:#38bdf8;--blue-dim:rgba(56,189,248,0.10);--blue-glow:rgba(56,189,248,0.20);--green:#4ade80;--green-dim:rgba(74,222,128,0.10);--amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);--red:#f87171;--red-dim:rgba(248,113,113,0.10);--purple:#a78bfa;--purple-dim:rgba(167,139,250,0.10);--cyan:#22d3ee;--cyan-dim:rgba(34,211,238,0.10);--teal:#2dd4bf;--teal-dim:rgba(45,212,191,0.10);--pink:#f472b6;--pink-dim:rgba(244,114,182,0.10);--mono:'JetBrains Mono',monospace;--sans:'DM Sans','IBM Plex Sans Thai',sans-serif;--radius:12px;--radius-sm:8px;--radius-xs:6px;--bg-primary:#0b1120;--bg-secondary:#131c31;--bg-card:#151e30;--bg-card-hover:#1a2740;--bg-input:#131c31;--border:#1e3050;--border-focus:#38bdf8;--border-glow:rgba(56,189,248,0.25);--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--accent-blue:#38bdf8;--accent-cyan:#22d3ee;--accent-emerald:#34d399;--accent-green:#4ade80;--accent-amber:#fbbf24;--accent-red:#f87171;--accent-pink:#f472b6;--accent-purple:#a78bfa;--accent-teal:#2dd4bf;--font-mono:'JetBrains Mono',monospace;--font-sans:'DM Sans','IBM Plex Sans Thai',sans-serif;--shadow-sm:0 1px 2px rgba(0,0,0,0.2);--shadow-md:0 4px 12px rgba(0,0,0,0.3);--shadow-lg:0 8px 24px rgba(0,0,0,0.4);--shadow-glow:0 0 0 3px rgba(56,189,248,0.12)}body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}.header{background:rgba(19,28,49,.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--card-border);padding:0 16px;position:sticky;top:0;z-index:200}.header-inner{max-width:1440px;margin:0 auto;display:flex;align-items:center;gap:10px;height:52px;flex-wrap:wrap}.header a.back{color:var(--blue);text-decoration:none;display:flex;align-items:center;gap:3px;font-size:13px;font-weight:500}.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}.card-head{padding:10px 16px;font-size:12px;font-weight:600;letter-spacing:.5px;color:var(--text2);border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:8px}.card-body{padding:14px 16px}.dark-field input,.dark-field select{background:var(--bg2);border:1px solid var(--card-border);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:var(--mono);width:100%;outline:0;transition:border-color .2s}.dark-field input:focus,.dark-field select:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-dim)}.dark-field label{font-size:11px;color:var(--text3);display:block;margin-bottom:4px;font-weight:500}.progress{background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}.progress-bar{height:100%;border-radius:4px;transition:width .5s}.info-box{border-radius:8px;padding:8px 12px;font-size:11px;line-height:1.6;margin-top:6px}.info-box.green{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,.2)}.info-box.amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,.2)}.info-box.red{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,.2)}.info-box.blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(56,189,248,.2)}.mode-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:10px;padding:3px}.mode-tab{flex:1;font-family:inherit;font-size:12px;font-weight:500;padding:8px 6px;border-radius:8px;border:none;background:0 0;color:var(--text2);cursor:pointer;transition:.2s;text-align:center;line-height:1.3}.mode-tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}.mode-tab:hover:not(.active){color:var(--text)}.pair-section{display:none}.pair-section.active{display:block}.pair-selectors{display:flex;gap:12px;align-items:center;margin-bottom:16px}.pair-selectors .drug-select-wrap{flex:1;position:relative}.pair-selectors .vs-badge{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg2);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:600}.drug-select{width:100%;padding:12px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;color:var(--text);outline:0;appearance:none;-webkit-appearance:none;cursor:pointer;transition:border .2s}.drug-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(14,165,233,.1)}.compat-result{border-radius:14px;padding:18px;margin-bottom:14px;animation:.3s fadeUp}@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.compat-result.compatible{background:var(--green-bg);border:1px solid var(--green-border)}.compat-result.incompatible{background:var(--red-bg);border:1px solid var(--red-border)}.compat-result.variable{background:var(--amber-bg);border:1px solid var(--amber-border)}.compat-result.nodata{background:var(--gray-bg);border:1px solid var(--gray-border)}.compat-result.select-drugs{background:var(--card);border:1px solid var(--border);text-align:center;color:var(--text3);font-size:13px;padding:32px}.result-status{font-size:16px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}.result-detail{font-size:12px;line-height:1.7;color:var(--text2)}.compat-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}@media (max-width:600px){.compat-details{grid-template-columns:1fr}}.detail-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px}.detail-card .label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}.detail-card .label.green{color:var(--green)}.detail-card .label.red{color:var(--red)}.detail-card .value{font-size:12px;line-height:1.6;white-space:pre-line}.quick-chips{margin-bottom:14px}.quick-chips-title{font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:500}.chips-wrap{display:flex;flex-wrap:wrap;gap:5px}.chip{font-family:inherit;font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;transition:.2s;white-space:nowrap}.chip:hover{border-color:var(--blue);color:var(--blue)}.chip.had{border-color:var(--red-border);color:var(--red)}.matrix-section{display:none}.matrix-section.active{display:block}.matrix-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.matrix-filter .fbtn{font-family:inherit;font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:0 0;color:var(--text2);cursor:pointer;transition:.2s}.matrix-filter .fbtn:hover{border-color:var(--blue);color:var(--blue)}.matrix-filter .fbtn.active{background:var(--blue);border-color:var(--blue);color:#fff}.matrix-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}.matrix-table{border-collapse:separate;border-spacing:2px;min-width:100%}.matrix-table td,.matrix-table th{padding:0;text-align:center}.matrix-table .corner{width:100px;min-width:100px}.matrix-table .col-header{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);font-size:10px;font-weight:500;color:var(--text2);padding:6px 3px;height:90px;white-space:nowrap;max-width:28px}.matrix-table .row-header{font-size:10px;font-weight:500;color:var(--text2);text-align:right;padding-right:6px;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}.matrix-cell{width:24px;height:24px;min-width:24px;border-radius:4px;cursor:pointer;transition:.15s;position:relative}.matrix-cell:hover{transform:scale(1.4);z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.15)}.matrix-cell.c{background:#86efac}.matrix-cell.i{background:#fca5a5}.matrix-cell.v{background:#fcd34d}.matrix-cell.n{background:#e2e8f0}.matrix-cell.self{background:#f1f5f9}.matrix-legend{display:flex;gap:14px;font-size:11px;color:var(--text2);margin-top:10px;flex-wrap:wrap}.legend-item{display:flex;align-items:center;gap:4px}.legend-dot{width:12px;height:12px;border-radius:3px}.matrix-tooltip{display:none;position:fixed;z-index:1000;background:#1e293b;color:#f8fafc;padding:8px 12px;border-radius:8px;font-size:11px;line-height:1.5;max-width:260px;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.2)}.matrix-tooltip.show{display:block}.combined-section{display:none}.combined-section.active{display:block}.multi-drug-area{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px}.multi-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}.multi-search{width:100%;padding:10px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;color:var(--text);outline:0;margin-bottom:8px;transition:border .2s}.multi-search:focus{border-color:var(--blue)}.selected-drugs{display:flex;flex-wrap:wrap;gap:6px;min-height:32px;margin-bottom:10px}.sel-chip{font-family:inherit;font-size:11px;padding:4px 8px 4px 10px;border-radius:6px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);color:var(--blue);display:flex;align-items:center;gap:4px;cursor:default;font-weight:500}.sel-chip .remove{cursor:pointer;font-size:14px;line-height:1;opacity:.6;transition:opacity .15s}.sel-chip .remove:hover{opacity:1}.sel-chip.had-chip{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.2);color:var(--red)}.drug-suggestions{background:var(--card);border:1px solid var(--border);border-radius:8px;max-height:200px;overflow-y:auto;display:none}.drug-suggestions.show{display:block}.drug-sug-item{padding:8px 12px;font-size:12px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--bg)}.drug-sug-item:hover{background:rgba(14,165,233,.04)}.drug-sug-item:last-child{border-bottom:none}.drug-sug-item .sug-generic{font-weight:600}.drug-sug-item .sug-trade{color:var(--text3);font-size:11px}.multi-results{margin-top:12px}.multi-pair{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;font-size:12px;transition:background .15s;cursor:pointer}.multi-pair:hover{background:rgba(0,0,0,.02)}.multi-pair .pair-icon{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}.multi-pair .pair-icon.c{background:#dcfce7;color:#166534}.multi-pair .pair-icon.i{background:#fef2f2;color:#991b1b}.multi-pair .pair-icon.v{background:#fefce8;color:#854d0e}.multi-pair .pair-icon.n{background:#f1f5f9;color:#64748b}.multi-pair .pair-names{flex:1;font-weight:500}.multi-pair .pair-type{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}.multi-pair .pair-type.c{background:#dcfce7;color:#166534}.multi-pair .pair-type.i{background:#fef2f2;color:#991b1b}.multi-pair .pair-type.v{background:#fefce8;color:#854d0e}.multi-pair .pair-type.n{background:#f1f5f9;color:#64748b}@media (max-width:480px){.col-header{height:70px!important;font-size:9px!important}.matrix-cell{width:20px;height:20px;min-width:20px}}
+/* ============================================================
+   IV DrugRef PWA v5.0 — Shared Styles
+   ============================================================ */
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* ---- CSS Reset ---- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+/* ---- Typography ---- */
+body {
+  font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ---- Bottom Navigation (shared across ALL pages) ---- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid #e2e8f0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.bottom-nav-inner {
+  max-width: 600px; margin: 0 auto;
+  display: flex; justify-content: space-around;
+  padding: 6px 0 4px;
+}
+.bottom-nav a {
+  display: flex; flex-direction: column; align-items: center;
+  text-decoration: none; color: #94a3b8; font-size: 10px;
+  font-weight: 500; gap: 2px; transition: color 0.2s;
+  padding: 4px 8px;
+}
+.bottom-nav a .nav-icon { font-size: 18px; line-height: 1; }
+.bottom-nav a .nav-label { font-size: 10px; }
+.bottom-nav a:hover { color: #0ea5e9; }
+.bottom-nav a.nav-active { color: #0ea5e9; font-weight: 600; }
+
+/* ---- Dark theme bottom nav override ---- */
+.theme-dark .bottom-nav {
+  background: rgba(11,17,32,0.92);
+  border-top-color: #1e3050;
+}
+.theme-dark .bottom-nav a { color: #64748b; }
+.theme-dark .bottom-nav a:hover { color: #38bdf8; }
+.theme-dark .bottom-nav a.nav-active { color: #38bdf8; }
+
+/* ---- Common nav back button ---- */
+.nav-back {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: #0ea5e9; text-decoration: none; font-size: 14px; font-weight: 500;
+}
+.nav-back svg { width: 16px; height: 16px; }
+
+/* ---- Common form field styles ---- */
+.field label {
+  font-size: 11px; color: #64748b; display: block;
+  margin-bottom: 4px; font-weight: 500;
+}
+.field input, .field select {
+  width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 15px; font-weight: 500; font-family: inherit; background: #fff; color: #1e293b;
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
+}
+
+/* ---- Common section/card styles ---- */
+.section {
+  background: #fff; border-radius: 12px;
+  border: 1px solid #e2e8f0; margin-bottom: 16px; overflow: hidden;
+}
+.section-header {
+  padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0ea5e9;
+  border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px;
+}
+
+/* ---- Layout grids ---- */
+.field-grid { display: grid; gap: 12px; padding: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.container { max-width: 640px; margin: 0 auto; padding: 16px 16px 90px; }
+
+/* ---- Badges ---- */
+.badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px; letter-spacing: 0.3px;
+}
+.badge-had { background: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+.badge-ed { background: rgba(5,150,105,0.08); color: #059669; border: 1px solid rgba(5,150,105,0.2); }
+.badge-ned { background: rgba(217,119,6,0.08); color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+
+/* ---- Disclaimer ---- */
+.disclaimer {
+  text-align: center; font-size: 11px; color: #dc2626; padding: 12px 16px;
+  font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
+}
+
+/* ---- Info boxes ---- */
+.info-box {
+  border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-top: 12px;
+}
+.info-box.blue { background: #e6f1fb; color: #0c447c; }
+.info-box.amber { background: #fef3c7; color: #92400e; }
+.info-box.red { background: #fef2f2; color: #991b1b; }
+
+/* ---- Buttons (shared across all pages) ---- */
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  background: var(--bg-card, rgba(255, 255, 255, 0.06));
+  color: var(--text-secondary, #94a3b8);
+  transition: all .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--bg-card-hover, rgba(255, 255, 255, 0.1));
+  color: var(--text-primary, #f1f5f9);
+  border-color: var(--border-focus, rgba(255,255,255,0.15));
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent-cyan, #22d3ee), var(--accent-blue, #38bdf8));
+  color: #0f172a;
+  border-color: transparent;
+}
+
+.btn.primary:hover {
+  box-shadow: 0 2px 12px rgba(56, 189, 248, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn.sm {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+/* Light theme button overrides */
+.theme-light .btn {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary, #64748b);
+  border-color: var(--border, #e2e8f0);
+}
+
+.theme-light .btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary, #1e293b);
+}
+
+/* ---- Input Validation States ---- */
+.field input, .field select {
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.field input.input-error {
+  border-color: #ef4444 !important;
+  background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.10), 0 1px 3px rgba(239,68,68,0.08);
+  animation: validation-shake 0.4s ease-out;
+}
+.field input.input-warn {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.10), 0 1px 3px rgba(245,158,11,0.06);
+}
+.field input.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.20), 0 1px 4px rgba(239,68,68,0.12);
+}
+.field input.input-warn:focus {
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.18), 0 1px 4px rgba(245,158,11,0.10);
+}
+
+/* Error label turns red */
+.field:has(input.input-error) label { color: #dc2626; font-weight: 600; }
+.field:has(input.input-warn) label { color: #b45309; font-weight: 600; }
+
+@keyframes validation-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-4px); }
+  30% { transform: translateX(3px); }
+  45% { transform: translateX(-2px); }
+  60% { transform: translateX(1px); }
+}
+
+/* Dark theme input overrides */
+.theme-dark .field input.input-error {
+  border-color: #f87171 !important;
+  background: linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.06) 100%);
+  box-shadow: 0 0 0 3px rgba(248,113,113,0.12), 0 1px 3px rgba(248,113,113,0.08);
+}
+.theme-dark .field input.input-warn {
+  border-color: #fbbf24 !important;
+  background: linear-gradient(135deg, rgba(245,158,11,0.10) 0%, rgba(245,158,11,0.04) 100%);
+  box-shadow: 0 0 0 3px rgba(251,191,36,0.10), 0 1px 3px rgba(251,191,36,0.06);
+}
+.theme-dark .field:has(input.input-error) label { color: #fca5a5; }
+.theme-dark .field:has(input.input-warn) label { color: #fde68a; }
+
+/* ---- Validation Message Container ---- */
+.validation-container {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.validation-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+  animation: validation-slide-in 0.25s ease-out;
+}
+
+.validation-msg .v-icon {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.validation-error {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+  color: #991b1b;
+  border: 1px solid rgba(239,68,68,0.18);
+  box-shadow: 0 1px 3px rgba(239,68,68,0.06);
+}
+.validation-error .v-icon {
+  background: #fee2e2;
+  color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(239,68,68,0.08);
+}
+
+.validation-warn {
+  background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+  color: #92400e;
+  border: 1px solid rgba(245,158,11,0.18);
+  box-shadow: 0 1px 3px rgba(245,158,11,0.05);
+}
+.validation-warn .v-icon {
+  background: #fef3c7;
+  color: #d97706;
+  box-shadow: 0 0 0 2px rgba(245,158,11,0.08);
+}
+
+@keyframes validation-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dark theme message overrides */
+.theme-dark .validation-error {
+  background: linear-gradient(135deg, rgba(239,68,68,0.14) 0%, rgba(239,68,68,0.08) 100%);
+  color: #fca5a5;
+  border-color: rgba(248,113,113,0.20);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.theme-dark .validation-error .v-icon {
+  background: rgba(239,68,68,0.25);
+  color: #fca5a5;
+}
+.theme-dark .validation-warn {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%);
+  color: #fde68a;
+  border-color: rgba(251,191,36,0.18);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.theme-dark .validation-warn .v-icon {
+  background: rgba(245,158,11,0.20);
+  color: #fde68a;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+  .container { padding: 16px 14px 90px; }
+}
+
+/* ============================================================
+   IV DrugRef PWA v5.0 — Dark Theme
+   Used by: tdm.html, vanco-tdm.html, dashboard.html
+   ============================================================ */
+
+:root {
+  /* Legacy variable names (used by tdm.css, etc.) */
+  --bg: #0b1120;
+  --bg2: #131c31;
+  --bg3: #1e293b;
+  --bg4: #334155;
+  --card: #151e30;
+  --card-border: #1e3050;
+  --card-hover: #1a2740;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --text4: #475569;
+  --blue: #38bdf8;
+  --blue-dim: rgba(56,189,248,0.10);
+  --blue-glow: rgba(56,189,248,0.20);
+  --green: #4ade80;
+  --green-dim: rgba(74,222,128,0.10);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.10);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.10);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.10);
+  --cyan: #22d3ee;
+  --cyan-dim: rgba(34,211,238,0.10);
+  --teal: #2dd4bf;
+  --teal-dim: rgba(45,212,191,0.10);
+  --pink: #f472b6;
+  --pink-dim: rgba(244,114,182,0.10);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+
+  /* Standardized variable names (used by dashboard.css, index.css) */
+  --bg-primary: #0b1120;
+  --bg-secondary: #131c31;
+  --bg-card: #151e30;
+  --bg-card-hover: #1a2740;
+  --bg-input: #131c31;
+  --border: #1e3050;
+  --border-focus: #38bdf8;
+  --border-glow: rgba(56,189,248,0.25);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #38bdf8;
+  --accent-cyan: #22d3ee;
+  --accent-emerald: #34d399;
+  --accent-green: #4ade80;
+  --accent-amber: #fbbf24;
+  --accent-red: #f87171;
+  --accent-pink: #f472b6;
+  --accent-purple: #a78bfa;
+  --accent-teal: #2dd4bf;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 0 3px rgba(56,189,248,0.12);
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Subtle grid pattern */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Dark Header ---- */
+.header {
+  background: rgba(19,28,49,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--card-border);
+  padding: 0 16px;
+  position: sticky; top: 0; z-index: 200;
+}
+.header-inner {
+  max-width: 1440px; margin: 0 auto;
+  display: flex; align-items: center; gap: 10px; height: 52px;
+  flex-wrap: wrap;
+}
+.header a.back {
+  color: var(--blue); text-decoration: none;
+  display: flex; align-items: center; gap: 3px;
+  font-size: 13px; font-weight: 500;
+}
+
+/* ---- Dark Card ---- */
+.card {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+}
+.card-head {
+  padding: 10px 16px; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.5px; color: var(--text2);
+  border-bottom: 1px solid var(--card-border);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-body { padding: 14px 16px; }
+
+/* ---- Dark form fields ---- */
+.dark-field input, .dark-field select {
+  background: var(--bg2); border: 1px solid var(--card-border);
+  color: var(--text); border-radius: var(--radius-sm);
+  padding: 10px 12px; font-size: 14px; font-family: var(--mono);
+  width: 100%; outline: none; transition: border-color 0.2s;
+}
+.dark-field input:focus, .dark-field select:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-dim);
+}
+.dark-field label {
+  font-size: 11px; color: var(--text3); display: block;
+  margin-bottom: 4px; font-weight: 500;
+}
+
+/* ---- Progress bar ---- */
+.progress { background: var(--bg3); border-radius: 4px; height: 6px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+/* ---- Dark info boxes ---- */
+.info-box { border-radius: 8px; padding: 8px 12px; font-size: 11px; line-height: 1.6; margin-top: 6px; }
+.info-box.green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+.info-box.amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
+.info-box.red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.info-box.blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(56,189,248,0.2); }
+
+/* ============================================================
+   Compatibility Checker Page-Specific Styles
+   ============================================================
+   Includes: Mode tabs, pair checker, matrix view,
+   drug selects, compatibility result cards, quick chips
+ ============================================================ */
+
+/* Compat result color variables (dark theme) */
+.theme-dark {
+  --green-bg: rgba(74, 222, 128, 0.08);
+  --green-border: rgba(74, 222, 128, 0.25);
+  --red-bg: rgba(248, 113, 113, 0.08);
+  --red-border: rgba(248, 113, 113, 0.25);
+  --amber-bg: rgba(251, 191, 36, 0.08);
+  --amber-border: rgba(251, 191, 36, 0.25);
+  --gray-bg: rgba(148, 163, 184, 0.06);
+  --gray-border: rgba(148, 163, 184, 0.15);
+}
+
+/* Override header for compat page — needs more height for mode tabs */
+.header-inner {
+  height: auto !important;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 10px 0;
+  gap: 8px;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.header-back {
+  color: var(--blue);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.header-title-area {
+  min-width: 0;
+}
+
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+/* Content area — account for sticky header + bottom nav */
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 16px 100px;
+}
+
+/* Dark disclaimer override */
+.theme-dark .disclaimer {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--red-border);
+}
+
+/* Mode Tabs */
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+
+.mode-tab {
+  flex: 1;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.mode-tab.active {
+  background: var(--blue);
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.25);
+}
+
+.mode-tab:hover:not(.active) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Pair Checker Section */
+.pair-section {
+  display: none;
+}
+
+.pair-section.active {
+  display: block;
+}
+
+.pair-selectors {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pair-selectors .drug-select-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.pair-selectors .vs-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  background: var(--bg2);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.drug-select {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border .2s;
+}
+
+.drug-select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.compat-result {
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 14px;
+  animation: fadeUp .3s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.compat-result.compatible {
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+}
+
+.compat-result.incompatible {
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+}
+
+.compat-result.variable {
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+}
+
+.compat-result.nodata {
+  background: var(--gray-bg);
+  border: 1px solid var(--gray-border);
+}
+
+.compat-result.select-drugs {
+  background: var(--card);
+  border: 1px solid var(--border);
+  text-align: center;
+  color: var(--text3);
+  font-size: 13px;
+  padding: 32px;
+}
+
+.result-status {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-detail {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text2);
+}
+
+.compat-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (max-width: 600px) {
+  .compat-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.detail-card .label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+
+.detail-card .label.green {
+  color: var(--green);
+}
+
+.detail-card .label.red {
+  color: var(--red);
+}
+
+.detail-card .value {
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* Quick drug chips */
+.quick-chips {
+  margin-bottom: 14px;
+}
+
+.quick-chips-title {
+  font-size: 11px;
+  color: var(--text3);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.chip {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.chip.had {
+  border-color: var(--red-border);
+  color: var(--red);
+}
+
+/* Matrix View Section */
+.matrix-section {
+  display: none;
+}
+
+.matrix-section.active {
+  display: block;
+}
+
+.matrix-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.matrix-filter .fbtn {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.matrix-filter .fbtn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.matrix-filter .fbtn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.matrix-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.matrix-table {
+  border-collapse: separate;
+  border-spacing: 2px;
+  min-width: 100%;
+}
+
+.matrix-table th,
+.matrix-table td {
+  padding: 0;
+  text-align: center;
+}
+
+.matrix-table .corner {
+  width: 100px;
+  min-width: 100px;
+}
+
+.matrix-table .col-header {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text2);
+  padding: 6px 3px;
+  height: 90px;
+  white-space: nowrap;
+  max-width: 28px;
+}
+
+.matrix-table .row-header {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text2);
+  text-align: right;
+  padding-right: 6px;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.matrix-cell {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+}
+
+.matrix-cell:hover {
+  transform: scale(1.4);
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.matrix-cell.c {
+  background: #86efac;
+}
+
+.matrix-cell.i {
+  background: #fca5a5;
+}
+
+.matrix-cell.v {
+  background: #fcd34d;
+}
+
+.matrix-cell.n {
+  background: #e2e8f0;
+}
+
+.matrix-cell.self {
+  background: #f1f5f9;
+}
+
+.matrix-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Tooltip */
+.matrix-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  max-width: 260px;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.matrix-tooltip.show {
+  display: block;
+}
+
+/* Combined/Multi-Drug View Section */
+.combined-section {
+  display: none;
+}
+
+.combined-section.active {
+  display: block;
+}
+
+.multi-drug-area {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.multi-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.multi-search {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 8px;
+  transition: border .2s;
+}
+
+.multi-search:focus {
+  border-color: var(--blue);
+}
+
+.selected-drugs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  margin-bottom: 10px;
+}
+
+.sel-chip {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 8px 4px 10px;
+  border-radius: 6px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+  font-weight: 500;
+}
+
+.sel-chip .remove {
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  opacity: .6;
+  transition: opacity .15s;
+}
+
+.sel-chip .remove:hover {
+  opacity: 1;
+}
+
+.sel-chip.had-chip {
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.2);
+  color: var(--red);
+}
+
+.drug-suggestions {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.drug-suggestions.show {
+  display: block;
+}
+
+.drug-sug-item {
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .1s;
+  border-bottom: 1px solid var(--bg);
+}
+
+.drug-sug-item:hover {
+  background: rgba(14, 165, 233, 0.04);
+}
+
+.drug-sug-item:last-child {
+  border-bottom: none;
+}
+
+.drug-sug-item .sug-generic {
+  font-weight: 600;
+}
+
+.drug-sug-item .sug-trade {
+  color: var(--text3);
+  font-size: 11px;
+}
+
+.multi-results {
+  margin-top: 12px;
+}
+
+.multi-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  transition: background .15s;
+  cursor: pointer;
+}
+
+.multi-pair:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.multi-pair .pair-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.multi-pair .pair-icon.c {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.multi-pair .pair-icon.i {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.multi-pair .pair-icon.v {
+  background: #fefce8;
+  color: #854d0e;
+}
+
+.multi-pair .pair-icon.n {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.multi-pair .pair-names {
+  flex: 1;
+  font-weight: 500;
+}
+
+.multi-pair .pair-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.multi-pair .pair-type.c {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.multi-pair .pair-type.i {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.multi-pair .pair-type.v {
+  background: #fefce8;
+  color: #854d0e;
+}
+
+.multi-pair .pair-type.n {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .col-header {
+    height: 70px !important;
+    font-size: 9px !important;
+  }
+
+  .matrix-cell {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+}
+
 </style>
 </head>
 <body class="theme-dark">
@@ -20,18 +1184,17 @@
 <header class="header">
 <div class="header-inner">
 <div class="header-top">
-<div class="logo-area">
-<a href="index.html" style="color:var(--blue);text-decoration:none;font-size:14px;font-weight:500;">← กลับ</a>
-<div>
+<div class="header-left">
+<a href="index.html" class="header-back">← กลับ</a>
+<div class="header-title-area">
 <div class="logo-text">🔗 IV Compatibility Checker</div>
-<div class="logo-sub">IV Drug Quick Reference v4.4 — 167 drugs</div>
+<div class="logo-sub">IV Drug Quick Reference v5.0 — 167 drugs</div>
 </div>
 </div>
-<a href="calculator.html" style="font-family:inherit;font-size:10px;color:#fbbf24;background:linear-gradient(135deg,#0f172a,#334155);border:1.5px solid #475569;padding:4px 10px;border-radius:16px;text-decoration:none;font-weight:600;white-space:nowrap;">🧮 Calc</a>
 </div>
 <div class="mode-tabs" id="modeTabs">
-<button class="mode-tab active" data-mode="pair" onclick="switchMode('pair')">💊 Pair Checker</button>
-<button class="mode-tab" data-mode="matrix" onclick="switchMode('matrix')">📊 Matrix View</button>
+<button class="mode-tab active" data-mode="pair" onclick="switchMode('pair')">💊 Pair Check</button>
+<button class="mode-tab" data-mode="matrix" onclick="switchMode('matrix')">📊 Matrix</button>
 <button class="mode-tab" data-mode="combined" onclick="switchMode('combined')">🔬 Multi-Drug</button>
 </div>
 </div>
@@ -93,7 +1256,7 @@
 <a href="calculator.html" style="font-family:inherit;font-size:11px;color:#fbbf24;background:linear-gradient(135deg,#0f172a,#334155);border:1.5px solid #475569;padding:6px 16px;border-radius:20px;text-decoration:none;font-weight:600;">🧮 Dose Calculator →</a>
 <a href="tdm.html" style="font-family:inherit;font-size:11px;color:#38bdf8;background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid #38bdf8;padding:6px 16px;border-radius:20px;text-decoration:none;font-weight:600;">🎯 TDM Hub →</a>
 </div>
-<div style="text-align:center;padding:0 0 20px;font-size:10px;color:var(--text3);">IV DrugRef v4.6.0 | ภก. ฐาปนัท นาคครุฑ | สถาบันประสาทวิทยา</div>
+<div style="text-align:center;padding:0 0 20px;font-size:10px;color:var(--text3);">IV DrugRef v5.0.0 | ภก. ฐาปนัท นาคครุฑ | สถาบันประสาทวิทยา</div>
 </main>
 
 <div class="matrix-tooltip" id="matrixTooltip"></div>
@@ -607,6 +1770,166 @@
 var IVDrugRef = (function() {
 
   // ============================================================
+  // PATIENT INPUT VALIDATION
+  // ============================================================
+
+  /**
+   * Clinical validation rules for patient parameters.
+   * Two tiers: "error" = impossible/dangerous value (blocks calculation),
+   *            "warn"  = unusual but possible (shows warning, allows calculation).
+   */
+  var VALIDATION_RULES = {
+    age: {
+      label: 'อายุ',
+      unit: 'ปี',
+      error: { min: 0.1, max: 120, msg: 'อายุต้องอยู่ระหว่าง 0–120 ปี' },
+      warn: [
+        { test: function(v) { return v > 100; }, msg: 'อายุ >100 ปี — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 1; }, msg: 'อายุ <1 ปี — กรุณาตรวจสอบสูตรคำนวณ' }
+      ]
+    },
+    wt: {
+      label: 'น้ำหนัก',
+      unit: 'kg',
+      error: { min: 0.3, max: 500, msg: 'น้ำหนักต้องอยู่ระหว่าง 0.3–500 kg' },
+      warn: [
+        { test: function(v) { return v > 300; }, msg: 'น้ำหนัก >300 kg — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 3; }, msg: 'น้ำหนัก <3 kg — ตรวจสอบหน่วย (kg)' }
+      ]
+    },
+    scr: {
+      label: 'SCr',
+      unit: 'mg/dL',
+      error: { min: 0.05, max: 50, msg: 'SCr ต้องอยู่ระหว่าง 0.05–50 mg/dL' },
+      warn: [
+        { test: function(v) { return v > 15; }, msg: 'SCr >15 — ค่าสูงมาก กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 0.2; }, msg: 'SCr <0.2 — ค่าต่ำผิดปกติ อาจทำให้ CrCl สูงเกินจริง' }
+      ]
+    },
+    ht: {
+      label: 'ส่วนสูง',
+      unit: 'cm',
+      error: { min: 20, max: 260, msg: 'ส่วนสูงต้องอยู่ระหว่าง 20–260 cm' },
+      warn: [
+        { test: function(v) { return v > 220; }, msg: 'ส่วนสูง >220 cm — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 40; }, msg: 'ส่วนสูง <40 cm — กรุณาตรวจสอบ' }
+      ]
+    }
+  };
+
+  /**
+   * Validate a single patient parameter.
+   * @param {string} field - Field key (age, wt, scr, ht)
+   * @param {number} value - The value to validate
+   * @returns {Object} { valid: bool, level: 'ok'|'warn'|'error', messages: string[] }
+   */
+  function validateField(field, value) {
+    var rule = VALIDATION_RULES[field];
+    if (!rule) return { valid: true, level: 'ok', messages: [] };
+
+    var messages = [];
+
+    // Check for NaN / empty
+    if (value === null || value === undefined || isNaN(value)) {
+      return { valid: false, level: 'error', messages: [rule.label + ' — กรุณาระบุค่า'] };
+    }
+
+    // Hard error range
+    var er = rule.error;
+    if (value < er.min || value > er.max) {
+      return { valid: false, level: 'error', messages: [er.msg] };
+    }
+
+    // Warnings
+    var level = 'ok';
+    for (var i = 0; i < rule.warn.length; i++) {
+      if (rule.warn[i].test(value)) {
+        level = 'warn';
+        messages.push(rule.warn[i].msg);
+      }
+    }
+
+    return { valid: true, level: level, messages: messages };
+  }
+
+  /**
+   * Validate all patient fields and apply visual feedback to form inputs.
+   * @param {Object} values - { age, wt, scr, ht } numeric values
+   * @param {Object} fieldIds - Optional custom DOM ID mapping
+   * @returns {Object} { allValid: bool, results: { field: validationResult }, errors: string[], warnings: string[] }
+   */
+  function validatePatientInput(values, fieldIds) {
+    var ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', scr: 'ptScr'
+    }, fieldIds || {});
+
+    var results = {};
+    var errors = [];
+    var warnings = [];
+    var allValid = true;
+
+    var fields = ['age', 'wt', 'scr', 'ht'];
+    for (var i = 0; i < fields.length; i++) {
+      var f = fields[i];
+      var val = values[f];
+      var result = validateField(f, val);
+      results[f] = result;
+
+      if (!result.valid) {
+        allValid = false;
+        errors = errors.concat(result.messages);
+      } else if (result.level === 'warn') {
+        warnings = warnings.concat(result.messages);
+      }
+
+      // Apply visual feedback to DOM element
+      var el = document.getElementById(ids[f]);
+      if (el) {
+        el.classList.remove('input-error', 'input-warn');
+        if (result.level === 'error') {
+          el.classList.add('input-error');
+        } else if (result.level === 'warn') {
+          el.classList.add('input-warn');
+        }
+      }
+    }
+
+    return { allValid: allValid, results: results, errors: errors, warnings: warnings };
+  }
+
+  /**
+   * Render validation messages into a target container element.
+   * @param {string} containerId - DOM ID of the container
+   * @param {Object} validation - Result from validatePatientInput()
+   */
+  function renderValidationMessages(containerId, validation) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (validation.errors.length === 0 && validation.warnings.length === 0) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < validation.errors.length; i++) {
+      html += '<div class="validation-msg validation-error">'
+        + '<span class="v-icon">!</span>'
+        + '<span>' + validation.errors[i] + '</span></div>';
+    }
+    for (var j = 0; j < validation.warnings.length; j++) {
+      html += '<div class="validation-msg validation-warn">'
+        + '<span class="v-icon">?</span>'
+        + '<span>' + validation.warnings[j] + '</span></div>';
+    }
+
+    container.innerHTML = html;
+    container.style.display = 'flex';
+  }
+
+
+  // ============================================================
   // CLINICAL CALCULATORS
   // ============================================================
 
@@ -785,7 +2108,9 @@ var IVDrugRef = (function() {
 
     const getVal = (id, def) => {
       const el = document.getElementById(id);
-      return el ? (parseFloat(el.value) || def) : def;
+      if (!el) return def;
+      const v = parseFloat(el.value);
+      return isNaN(v) ? def : v;
     };
     const getStr = (id, def) => {
       const el = document.getElementById(id);
@@ -799,6 +2124,12 @@ var IVDrugRef = (function() {
     const scr = getVal(ids.scr, 1.0);
     const alb = getVal(ids.alb, 4.0);
     const dialysis = getStr(ids.dialysis, 'none');
+
+    // Run validation and apply visual feedback
+    const validation = validatePatientInput(
+      { age: age, wt: wt, scr: scr, ht: ht },
+      { age: ids.age, wt: ids.wt, scr: ids.scr, ht: ids.ht }
+    );
 
     const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
     const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
@@ -819,7 +2150,8 @@ var IVDrugRef = (function() {
     return {
       age, wt, ht, sex, scr, alb, dialysis,
       ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
-      crcl
+      crcl,
+      validation
     };
   }
 
@@ -1020,6 +2352,12 @@ var IVDrugRef = (function() {
     // Version info
     VERSION,
     APP_NAME,
+
+    // Validation
+    VALIDATION_RULES,
+    validateField,
+    validatePatientInput,
+    renderValidationMessages,
 
     // Clinical calculators
     calcIBW,
@@ -1304,7 +2642,23 @@ function checkPair() {
   const drugA = DRUGS.find(d => d.i === aId);
   const drugB = DRUGS.find(d => d.i === bId);
   const result = getCompatibility(drugA, drugB);
-  
+
+  // Send analytics
+  if (typeof IVDrugRef !== 'undefined' && IVDrugRef.sendAnalytics) {
+    IVDrugRef.sendAnalytics({
+      type: 'compat_usage',
+      mode: 'pair',
+      drug_a: drugA.g,
+      drug_b: drugB.g,
+      result_status: result.status,
+      result_source: result.source,
+      drugs_count: 2,
+      pairs_total: 1,
+      pairs_compatible: result.status === 'compatible' ? 1 : 0,
+      pairs_incompatible: result.status === 'incompatible' ? 1 : 0
+    });
+  }
+
   const icons = { compatible: '✅', incompatible: '❌', variable: '⚠️', nodata: '❓' };
   const labels = { compatible: 'Y-site Compatible', incompatible: 'INCOMPATIBLE', variable: 'Variable / Caution', nodata: 'No Direct Data' };
   const srcLabels = { curated: '📚 Trissel\'s / Curated DB', drugfield: '💊 Drug-specific field', text: '📝 Text analysis', none: '—' };
@@ -1492,7 +2846,23 @@ function checkMultiCompat() {
   
   const incompCount = pairs.filter(p => p.result.status === 'incompatible').length;
   const compatCount = pairs.filter(p => p.result.status === 'compatible').length;
-  
+
+  // Send analytics
+  if (typeof IVDrugRef !== 'undefined' && IVDrugRef.sendAnalytics) {
+    IVDrugRef.sendAnalytics({
+      type: 'compat_usage',
+      mode: 'multi',
+      drug_a: '',
+      drug_b: '',
+      result_status: incompCount > 0 ? 'has_incompatible' : 'compatible',
+      result_source: 'multi',
+      drugs_count: selectedMultiDrugs.length,
+      pairs_total: pairs.length,
+      pairs_compatible: compatCount,
+      pairs_incompatible: incompCount
+    });
+  }
+
   let summary = `<div style="font-size:12px;color:var(--text2);margin-bottom:10px;padding:8px 10px;background:var(--bg);border-radius:8px;">
     📊 ${pairs.length} pairs checked — 
     <span style="color:var(--green);font-weight:600">${compatCount} compatible</span>, 
@@ -1515,8 +2885,25 @@ function switchMode(mode) {
   document.getElementById('pairSection').classList.toggle('active', mode === 'pair');
   document.getElementById('matrixSection').classList.toggle('active', mode === 'matrix');
   document.getElementById('combinedSection').classList.toggle('active', mode === 'combined');
-  
-  if (mode === 'matrix') renderMatrix();
+
+  if (mode === 'matrix') {
+    renderMatrix();
+    // Send analytics for matrix view
+    if (typeof IVDrugRef !== 'undefined' && IVDrugRef.sendAnalytics) {
+      IVDrugRef.sendAnalytics({
+        type: 'compat_usage',
+        mode: 'matrix_view',
+        drug_a: '',
+        drug_b: '',
+        result_status: 'view',
+        result_source: 'matrix',
+        drugs_count: 0,
+        pairs_total: 0,
+        pairs_compatible: 0,
+        pairs_incompatible: 0
+      });
+    }
+  }
 }
 
 // Close suggestions on click outside
@@ -1528,18 +2915,16 @@ document.addEventListener('click', e => {
 
   // Expose functions to window for onclick handlers
   window.switchMode = switchMode;
-  window.addDrug = addDrug;
-  window.removeDrug = removeDrug;
-  window.searchDrug = searchDrug;
-  window.clearMulti = clearMulti;
-  window.checkPairCompat = checkPairCompat;
+  window.checkPair = checkPair;
   window.checkMultiCompat = checkMultiCompat;
   window.renderMatrix = renderMatrix;
   window.populateSelects = populateSelects;
   window.buildMatrixFilter = buildMatrixFilter;
-  window.switchMode = switchMode;
-  window.checkPair = checkPair;
   window.filterSuggestions = filterSuggestions;
+  window.addMultiDrug = addMultiDrug;
+  window.removeMultiDrug = removeMultiDrug;
+  window.showTooltip = showTooltip;
+  window.hideTooltip = hideTooltip;
 
   // Initialize on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', function() {

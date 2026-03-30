@@ -26,13 +26,17 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Bundled Stylesheets -->
-  <style>
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="shared.css">
+  <link rel="stylesheet" href="theme-light.css">
+  <link rel="stylesheet" href="admin.css">
+<style>
 /* ============================================================
    IV DrugRef PWA v5.0 — Shared Styles
    ============================================================ */
 
 /* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 /* ---- CSS Reset ---- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -197,10 +201,143 @@ body {
   color: var(--text-primary, #1e293b);
 }
 
+/* ---- Input Validation States ---- */
+.field input, .field select {
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.field input.input-error {
+  border-color: #ef4444 !important;
+  background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.10), 0 1px 3px rgba(239,68,68,0.08);
+  animation: validation-shake 0.4s ease-out;
+}
+.field input.input-warn {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.10), 0 1px 3px rgba(245,158,11,0.06);
+}
+.field input.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.20), 0 1px 4px rgba(239,68,68,0.12);
+}
+.field input.input-warn:focus {
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.18), 0 1px 4px rgba(245,158,11,0.10);
+}
+
+/* Error label turns red */
+.field:has(input.input-error) label { color: #dc2626; font-weight: 600; }
+.field:has(input.input-warn) label { color: #b45309; font-weight: 600; }
+
+@keyframes validation-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-4px); }
+  30% { transform: translateX(3px); }
+  45% { transform: translateX(-2px); }
+  60% { transform: translateX(1px); }
+}
+
+/* Dark theme input overrides */
+.theme-dark .field input.input-error {
+  border-color: #f87171 !important;
+  background: linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.06) 100%);
+  box-shadow: 0 0 0 3px rgba(248,113,113,0.12), 0 1px 3px rgba(248,113,113,0.08);
+}
+.theme-dark .field input.input-warn {
+  border-color: #fbbf24 !important;
+  background: linear-gradient(135deg, rgba(245,158,11,0.10) 0%, rgba(245,158,11,0.04) 100%);
+  box-shadow: 0 0 0 3px rgba(251,191,36,0.10), 0 1px 3px rgba(251,191,36,0.06);
+}
+.theme-dark .field:has(input.input-error) label { color: #fca5a5; }
+.theme-dark .field:has(input.input-warn) label { color: #fde68a; }
+
+/* ---- Validation Message Container ---- */
+.validation-container {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.validation-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+  animation: validation-slide-in 0.25s ease-out;
+}
+
+.validation-msg .v-icon {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.validation-error {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+  color: #991b1b;
+  border: 1px solid rgba(239,68,68,0.18);
+  box-shadow: 0 1px 3px rgba(239,68,68,0.06);
+}
+.validation-error .v-icon {
+  background: #fee2e2;
+  color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(239,68,68,0.08);
+}
+
+.validation-warn {
+  background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+  color: #92400e;
+  border: 1px solid rgba(245,158,11,0.18);
+  box-shadow: 0 1px 3px rgba(245,158,11,0.05);
+}
+.validation-warn .v-icon {
+  background: #fef3c7;
+  color: #d97706;
+  box-shadow: 0 0 0 2px rgba(245,158,11,0.08);
+}
+
+@keyframes validation-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dark theme message overrides */
+.theme-dark .validation-error {
+  background: linear-gradient(135deg, rgba(239,68,68,0.14) 0%, rgba(239,68,68,0.08) 100%);
+  color: #fca5a5;
+  border-color: rgba(248,113,113,0.20);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.theme-dark .validation-error .v-icon {
+  background: rgba(239,68,68,0.25);
+  color: #fca5a5;
+}
+.theme-dark .validation-warn {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%);
+  color: #fde68a;
+  border-color: rgba(251,191,36,0.18);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.theme-dark .validation-warn .v-icon {
+  background: rgba(245,158,11,0.20);
+  color: #fde68a;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 480px) {
   .container { padding: 16px 14px 90px; }
 }
+
 /* ============================================================
    IV DrugRef PWA v5.0 — Light Theme
    Used by: index, calculator, renal-dosing, compatibility, admin
@@ -288,6 +425,7 @@ body::before {
   transition: all .2s;
 }
 .header-pill:hover { background: #334155; box-shadow: 0 0 12px rgba(56,189,248,0.2); }
+
 /* IV DrugRef Admin Dashboard — CSS Module */
 
 /* ─── CSS Variables ─── */
@@ -1279,8 +1417,10 @@ body::before {
     grid-template-columns: 1fr 1fr;
   }
 }
-  </style>
+
+</style>
 </head>
+
 <body>
 
 <!-- ═══════ AUTH SCREEN ═══════ -->
@@ -1657,9 +1797,1121 @@ body::before {
 <!-- ═══════ SCRIPTS ═══════ -->
 <script src="i18n.js"></script>
 <script src="translations-en.js"></script>
+<script src="error-tracker.js"></script>
+<script src="core.js"></script>
+<script src="admin.js"></script>
 
-<!-- ═══════ INLINED ADMIN.JS ═══════ -->
 <script>
+// ============================================================================
+// IV DrugRef PWA — Error Tracker v1.0
+// Hybrid error tracking: client-side capture + GAS remote reporting
+// ============================================================================
+// Features:
+// - Global error capture (window.onerror, unhandledrejection)
+// - Non-intrusive toast notification for users
+// - In-memory error log with localStorage persistence for debugging
+// - Offline queue → auto-flush to GAS when back online
+// - Deduplication (same error within 60s = skip)
+// - Rate limiting (max 10 reports per minute to GAS)
+// - Email alert for critical errors via GAS
+// ============================================================================
+
+(function () {
+  'use strict';
+
+  // ─── Configuration ───
+  const CONFIG = {
+    // GAS endpoint (same as analytics)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
+
+    // LocalStorage keys
+    LS_ERROR_LOG: 'iv_drugref_error_log',
+    LS_ERROR_QUEUE: 'iv_drugref_error_queue',
+
+    // Limits
+    MAX_LOG_ENTRIES: 50,        // Keep last 50 errors in localStorage
+    MAX_QUEUE_SIZE: 20,         // Max queued errors before flush
+    DEDUP_WINDOW_MS: 60000,     // 60s dedup window
+    RATE_LIMIT_PER_MIN: 10,     // Max 10 reports/minute to GAS
+    TOAST_DURATION_MS: 5000,    // Toast visible for 5s
+    FLUSH_INTERVAL_MS: 30000,   // Auto-flush queue every 30s
+
+    // Severity levels
+    SEVERITY: {
+      LOW: 'low',           // Minor UI glitch
+      MEDIUM: 'medium',     // Feature broken but app usable
+      HIGH: 'high',         // Core feature broken
+      CRITICAL: 'critical'  // App crash / data corruption
+    },
+
+    // App metadata
+    APP_VERSION: '5.0.0',
+    APP_NAME: 'IV DrugRef PWA'
+  };
+
+  // ─── State ───
+  let recentErrors = [];        // For dedup tracking
+  let rateLimitCount = 0;       // Reports sent this minute
+  let flushTimer = null;
+  let toastContainer = null;
+
+  // ─── Utility: Get current page name ───
+  function getPageName() {
+    const path = window.location.pathname;
+    const file = path.split('/').pop() || 'index.html';
+    return file.replace('.html', '');
+  }
+
+  // ─── Utility: Generate error fingerprint for dedup ───
+  // Use message + filename (not full source path or line — those change per build in minified code)
+  function errorFingerprint(message, source) {
+    const filename = String(source || 'unknown').split('/').pop().split('?')[0];
+    const msgNorm = String(message || '').substring(0, 120); // Normalize length for dedup
+    return `${msgNorm}|${filename}`;
+  }
+
+  // ─── Utility: Check dedup ───
+  function isDuplicate(fingerprint) {
+    const now = Date.now();
+    // Clean old entries
+    recentErrors = recentErrors.filter(e => now - e.time < CONFIG.DEDUP_WINDOW_MS);
+    // Check if exists
+    if (recentErrors.some(e => e.fp === fingerprint)) return true;
+    recentErrors.push({ fp: fingerprint, time: now });
+    return false;
+  }
+
+  // ─── Utility: Classify severity ───
+  // Uses exact regex patterns instead of loose includes() to prevent false positives
+  // e.g., "fetching user dose data" won't trigger HIGH just because "dose" appears
+  function classifySeverity(error) {
+    const msg = (error.message || '').toLowerCase();
+    const type = (error.type || '').toLowerCase();
+
+    // Critical: data corruption, JSON parse failure, script crash
+    if (/json\.parse|syntaxerror.*json|unexpected token/.test(msg)) return CONFIG.SEVERITY.CRITICAL;
+    if (/data\s*corruption|corrupt/i.test(msg)) return CONFIG.SEVERITY.CRITICAL;
+    if (/maximum call stack|out of memory|aw,?\s*snap/i.test(msg)) return CONFIG.SEVERITY.CRITICAL;
+
+    // High: null refs, CORS/security blocks, quota exceeded, core calculation errors
+    if (/cannot read propert|null is not|undefined is not a function/.test(msg)) return CONFIG.SEVERITY.HIGH;
+    if (/\bcors\b|blocked by cors|access-control-allow|securityerror/.test(msg)) return CONFIG.SEVERITY.HIGH;
+    if (/quotaexceeded|quota_exceeded/.test(msg)) return CONFIG.SEVERITY.HIGH;
+    if (/dose.*calc.*fail|calc.*error|nan.*result/i.test(msg)) return CONFIG.SEVERITY.HIGH;
+
+    // Medium: network failures, type/reference errors, storage issues
+    if (/\bfetch\b.*fail|networkerror|net::err_|failed to fetch/i.test(msg)) return CONFIG.SEVERITY.MEDIUM;
+    if (type === 'unhandled_rejection') return CONFIG.SEVERITY.MEDIUM;
+    if (/typeerror|referenceerror/.test(msg)) return CONFIG.SEVERITY.MEDIUM;
+    if (type === 'resource_error') return CONFIG.SEVERITY.MEDIUM;
+
+    // Default: everything else
+    return CONFIG.SEVERITY.LOW;
+  }
+
+  // ─── Utility: Collect context (PII-safe) ───
+  function collectContext() {
+    return {
+      page: getPageName(),
+      // Strip query params and hash to avoid leaking user-specific data
+      url: window.location.origin + window.location.pathname,
+      // Truncate UA to just browser name/version (no detailed device fingerprint)
+      userAgent: (function() {
+        var ua = navigator.userAgent || '';
+        var m = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/);
+        return m ? m[0] : ua.substring(0, 50);
+      })(),
+      online: navigator.onLine,
+      timestamp: new Date().toISOString(),
+      sessionId: sessionStorage.getItem('sessionId') || 'unknown',
+      screenSize: `${screen.width}x${screen.height}`,
+      standalone: window.matchMedia('(display-mode: standalone)').matches,
+      appVersion: CONFIG.APP_VERSION
+    };
+  }
+
+  // ─── Toast UI ───
+  function createToastContainer() {
+    if (toastContainer) return toastContainer;
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'iv-error-toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+      max-width: 90vw;
+    `;
+    document.body.appendChild(toastContainer);
+    return toastContainer;
+  }
+
+  const MAX_TOASTS = 3; // Prevent toast storm during error cascade
+
+  function showToast(message, severity) {
+    if (!document.body) return; // Not ready yet
+
+    const container = createToastContainer();
+
+    // Limit visible toasts — remove oldest if at max
+    while (container.children.length >= MAX_TOASTS) {
+      container.removeChild(container.firstChild);
+    }
+
+    const toast = document.createElement('div');
+
+    const colors = {
+      low: { bg: '#f0f4f8', border: '#94a3b8', text: '#475569', icon: 'ℹ️' },
+      medium: { bg: '#fef9c3', border: '#f59e0b', text: '#92400e', icon: '⚠️' },
+      high: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', icon: '🔴' },
+      critical: { bg: '#fecaca', border: '#dc2626', text: '#7f1d1d', icon: '🚨' }
+    };
+    const c = colors[severity] || colors.medium;
+
+    toast.style.cssText = `
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 13px;
+      color: ${c.text};
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      max-width: 100%;
+      text-align: center;
+      line-height: 1.4;
+    `;
+
+    // User-friendly message (not raw error)
+    const userMsg = severity === 'critical' || severity === 'high'
+      ? `${c.icon} เกิดข้อผิดพลาด กรุณา refresh หน้า`
+      : `${c.icon} เกิดข้อผิดพลาดเล็กน้อย`;
+
+    toast.textContent = userMsg;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, CONFIG.TOAST_DURATION_MS);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    });
+  }
+
+  // ─── LocalStorage Log ───
+  function saveToLog(entry) {
+    try {
+      let log = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      log.unshift(entry);
+      if (log.length > CONFIG.MAX_LOG_ENTRIES) {
+        log = log.slice(0, CONFIG.MAX_LOG_ENTRIES);
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_LOG, JSON.stringify(log));
+    } catch (e) {
+      // localStorage full or unavailable — silently fail
+    }
+  }
+
+  // ─── Queue for GAS reporting ───
+  function addToQueue(entry) {
+    try {
+      let queue = JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+      queue.push(entry);
+      if (queue.length > CONFIG.MAX_QUEUE_SIZE) {
+        queue = queue.slice(-CONFIG.MAX_QUEUE_SIZE); // Keep newest
+      }
+      localStorage.setItem(CONFIG.LS_ERROR_QUEUE, JSON.stringify(queue));
+    } catch (e) { /* silently fail */ }
+  }
+
+  function getQueue() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_QUEUE) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function clearQueue() {
+    try {
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+    } catch (e) { /* silently fail */ }
+  }
+
+  // ─── Send to GAS (returns true on success attempt, false on skip) ───
+  function sendToGAS(entries) {
+    if (!navigator.onLine || entries.length === 0) return false;
+    if (rateLimitCount >= CONFIG.RATE_LIMIT_PER_MIN) return false;
+
+    rateLimitCount += entries.length;
+
+    const payload = JSON.stringify({
+      type: 'error_report',
+      errors: entries,
+      batch_size: entries.length,
+      reported_at: new Date().toISOString()
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        return navigator.sendBeacon(CONFIG.GAS_URL, payload);
+      } else {
+        fetch(CONFIG.GAS_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors',
+          keepalive: true
+        }).catch(() => {}); // Will retry on next flush
+        return true;
+      }
+    } catch (e) { return false; }
+  }
+
+  // ─── Flush queue (only clear on successful send) ───
+  function flushQueue() {
+    const queue = getQueue();
+    if (queue.length === 0 || !navigator.onLine) return;
+
+    const sent = sendToGAS(queue);
+    if (sent) {
+      clearQueue(); // Only clear if send was attempted successfully
+    }
+    // If send failed (rate limit, offline), queue persists for next flush
+  }
+
+  // ─── Core: Process error ───
+  function processError(errorInfo) {
+    const fp = errorFingerprint(errorInfo.message, errorInfo.source);
+    if (isDuplicate(fp)) return;
+
+    const severity = classifySeverity(errorInfo);
+    const context = collectContext();
+
+    const entry = {
+      ...errorInfo,
+      severity,
+      context,
+      fingerprint: fp,
+      id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    };
+
+    // 1. Console log (always)
+    console.error(`[ErrorTracker] ${severity.toUpperCase()}:`, errorInfo.message, entry);
+
+    // 2. Save to localStorage log
+    saveToLog(entry);
+
+    // 3. Show toast (only for medium+ severity)
+    if (severity !== CONFIG.SEVERITY.LOW) {
+      showToast(errorInfo.message, severity);
+    }
+
+    // 4. Queue for GAS reporting
+    addToQueue(entry);
+
+    // 5. If critical or high, flush immediately
+    if (severity === CONFIG.SEVERITY.CRITICAL || severity === CONFIG.SEVERITY.HIGH) {
+      flushQueue();
+    }
+  }
+
+  // ─── Global Error Handlers ───
+
+  // Catch synchronous errors
+  window.onerror = function (message, source, line, col, error) {
+    processError({
+      type: 'runtime_error',
+      message: String(message),
+      source: source || 'unknown',
+      line: line || 0,
+      col: col || 0,
+      stack: error ? error.stack : 'N/A'
+    });
+    return false; // Don't suppress default console error
+  };
+
+  // Catch unhandled promise rejections
+  window.addEventListener('unhandledrejection', function (event) {
+    const reason = event.reason;
+    processError({
+      type: 'unhandled_rejection',
+      message: reason ? (reason.message || String(reason)) : 'Unknown rejection',
+      source: 'Promise',
+      line: 0,
+      col: 0,
+      stack: reason && reason.stack ? reason.stack : 'N/A'
+    });
+  });
+
+  // Catch resource loading errors (images, scripts, etc.)
+  window.addEventListener('error', function (event) {
+    if (event.target && event.target !== window) {
+      const tag = event.target.tagName || 'unknown';
+      const src = event.target.src || event.target.href || 'unknown';
+      processError({
+        type: 'resource_error',
+        message: `Failed to load ${tag}: ${src}`,
+        source: src,
+        line: 0,
+        col: 0,
+        stack: 'N/A'
+      });
+    }
+  }, true); // Capture phase to catch resource errors
+
+  // ─── Service Worker error messages ───
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'SW_ERROR') {
+        processError({
+          type: 'service_worker_error',
+          message: event.data.error.message,
+          source: event.data.error.filename || 'sw.js',
+          line: event.data.error.lineno || 0,
+          col: 0,
+          stack: 'Service Worker context'
+        });
+      }
+    });
+  }
+
+  // ─── Network error monitoring ───
+  window.addEventListener('online', function () {
+    // Flush queued errors when back online
+    setTimeout(flushQueue, 2000);
+  });
+
+  // ─── Periodic flush ───
+  flushTimer = setInterval(flushQueue, CONFIG.FLUSH_INTERVAL_MS);
+
+  // ─── Rate limit reset ───
+  setInterval(function () {
+    rateLimitCount = 0;
+  }, 60000);
+
+  // ─── Public API (for manual error reporting) ───
+  window.IVErrorTracker = {
+    /**
+     * Manually report an error
+     * @param {string} message - Error description
+     * @param {string} severity - 'low'|'medium'|'high'|'critical'
+     * @param {object} extra - Additional context
+     */
+    report: function (message, severity, extra) {
+      processError({
+        type: 'manual_report',
+        message: String(message),
+        source: getPageName(),
+        line: 0,
+        col: 0,
+        stack: new Error().stack || 'N/A',
+        extra: extra || {}
+      });
+    },
+
+    /**
+     * Get error log from localStorage
+     * @returns {Array} Error entries
+     */
+    getLog: function () {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG.LS_ERROR_LOG) || '[]');
+      } catch (e) {
+        return [];
+      }
+    },
+
+    /**
+     * Clear error log
+     */
+    clearLog: function () {
+      localStorage.removeItem(CONFIG.LS_ERROR_LOG);
+      localStorage.removeItem(CONFIG.LS_ERROR_QUEUE);
+      console.log('[ErrorTracker] Log cleared');
+    },
+
+    /**
+     * Force flush queued errors to GAS
+     */
+    flush: flushQueue,
+
+    /**
+     * Get current queue size
+     */
+    queueSize: function () {
+      return getQueue().length;
+    }
+  };
+
+  // ─── Initial flush on load ───
+  window.addEventListener('load', function () {
+    // Flush any queued errors from previous sessions
+    setTimeout(flushQueue, 3000);
+  });
+
+  console.log('[ErrorTracker] Initialized — v1.0 | Page:', getPageName());
+})();
+
+// ============================================================
+// IV DrugRef PWA v5.0 — Core Utilities
+// Shared across all pages
+// ============================================================
+
+/* global window */
+'use strict';
+
+var IVDrugRef = (function() {
+
+  // ============================================================
+  // PATIENT INPUT VALIDATION
+  // ============================================================
+
+  /**
+   * Clinical validation rules for patient parameters.
+   * Two tiers: "error" = impossible/dangerous value (blocks calculation),
+   *            "warn"  = unusual but possible (shows warning, allows calculation).
+   */
+  var VALIDATION_RULES = {
+    age: {
+      label: 'อายุ',
+      unit: 'ปี',
+      error: { min: 0.1, max: 120, msg: 'อายุต้องอยู่ระหว่าง 0–120 ปี' },
+      warn: [
+        { test: function(v) { return v > 100; }, msg: 'อายุ >100 ปี — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 1; }, msg: 'อายุ <1 ปี — กรุณาตรวจสอบสูตรคำนวณ' }
+      ]
+    },
+    wt: {
+      label: 'น้ำหนัก',
+      unit: 'kg',
+      error: { min: 0.3, max: 500, msg: 'น้ำหนักต้องอยู่ระหว่าง 0.3–500 kg' },
+      warn: [
+        { test: function(v) { return v > 300; }, msg: 'น้ำหนัก >300 kg — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 3; }, msg: 'น้ำหนัก <3 kg — ตรวจสอบหน่วย (kg)' }
+      ]
+    },
+    scr: {
+      label: 'SCr',
+      unit: 'mg/dL',
+      error: { min: 0.05, max: 50, msg: 'SCr ต้องอยู่ระหว่าง 0.05–50 mg/dL' },
+      warn: [
+        { test: function(v) { return v > 15; }, msg: 'SCr >15 — ค่าสูงมาก กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 0.2; }, msg: 'SCr <0.2 — ค่าต่ำผิดปกติ อาจทำให้ CrCl สูงเกินจริง' }
+      ]
+    },
+    ht: {
+      label: 'ส่วนสูง',
+      unit: 'cm',
+      error: { min: 20, max: 260, msg: 'ส่วนสูงต้องอยู่ระหว่าง 20–260 cm' },
+      warn: [
+        { test: function(v) { return v > 220; }, msg: 'ส่วนสูง >220 cm — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 40; }, msg: 'ส่วนสูง <40 cm — กรุณาตรวจสอบ' }
+      ]
+    }
+  };
+
+  /**
+   * Validate a single patient parameter.
+   * @param {string} field - Field key (age, wt, scr, ht)
+   * @param {number} value - The value to validate
+   * @returns {Object} { valid: bool, level: 'ok'|'warn'|'error', messages: string[] }
+   */
+  function validateField(field, value) {
+    var rule = VALIDATION_RULES[field];
+    if (!rule) return { valid: true, level: 'ok', messages: [] };
+
+    var messages = [];
+
+    // Check for NaN / empty
+    if (value === null || value === undefined || isNaN(value)) {
+      return { valid: false, level: 'error', messages: [rule.label + ' — กรุณาระบุค่า'] };
+    }
+
+    // Hard error range
+    var er = rule.error;
+    if (value < er.min || value > er.max) {
+      return { valid: false, level: 'error', messages: [er.msg] };
+    }
+
+    // Warnings
+    var level = 'ok';
+    for (var i = 0; i < rule.warn.length; i++) {
+      if (rule.warn[i].test(value)) {
+        level = 'warn';
+        messages.push(rule.warn[i].msg);
+      }
+    }
+
+    return { valid: true, level: level, messages: messages };
+  }
+
+  /**
+   * Validate all patient fields and apply visual feedback to form inputs.
+   * @param {Object} values - { age, wt, scr, ht } numeric values
+   * @param {Object} fieldIds - Optional custom DOM ID mapping
+   * @returns {Object} { allValid: bool, results: { field: validationResult }, errors: string[], warnings: string[] }
+   */
+  function validatePatientInput(values, fieldIds) {
+    var ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', scr: 'ptScr'
+    }, fieldIds || {});
+
+    var results = {};
+    var errors = [];
+    var warnings = [];
+    var allValid = true;
+
+    var fields = ['age', 'wt', 'scr', 'ht'];
+    for (var i = 0; i < fields.length; i++) {
+      var f = fields[i];
+      var val = values[f];
+      var result = validateField(f, val);
+      results[f] = result;
+
+      if (!result.valid) {
+        allValid = false;
+        errors = errors.concat(result.messages);
+      } else if (result.level === 'warn') {
+        warnings = warnings.concat(result.messages);
+      }
+
+      // Apply visual feedback to DOM element
+      var el = document.getElementById(ids[f]);
+      if (el) {
+        el.classList.remove('input-error', 'input-warn');
+        if (result.level === 'error') {
+          el.classList.add('input-error');
+        } else if (result.level === 'warn') {
+          el.classList.add('input-warn');
+        }
+      }
+    }
+
+    return { allValid: allValid, results: results, errors: errors, warnings: warnings };
+  }
+
+  /**
+   * Render validation messages into a target container element.
+   * @param {string} containerId - DOM ID of the container
+   * @param {Object} validation - Result from validatePatientInput()
+   */
+  function renderValidationMessages(containerId, validation) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (validation.errors.length === 0 && validation.warnings.length === 0) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < validation.errors.length; i++) {
+      html += '<div class="validation-msg validation-error">'
+        + '<span class="v-icon">!</span>'
+        + '<span>' + validation.errors[i] + '</span></div>';
+    }
+    for (var j = 0; j < validation.warnings.length; j++) {
+      html += '<div class="validation-msg validation-warn">'
+        + '<span class="v-icon">?</span>'
+        + '<span>' + validation.warnings[j] + '</span></div>';
+    }
+
+    container.innerHTML = html;
+    container.style.display = 'flex';
+  }
+
+
+  // ============================================================
+  // CLINICAL CALCULATORS
+  // ============================================================
+
+  /**
+   * Ideal Body Weight (Devine formula)
+   * @param {number} ht - Height in cm
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} IBW in kg
+   */
+  function calcIBW(ht, sex) {
+    if (!ht || ht <= 0) return 0;
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  /**
+   * Adjusted Body Weight (for obesity)
+   * @param {number} wt - Actual weight in kg
+   * @param {number} ibw - Ideal body weight in kg
+   * @returns {number} ABW in kg
+   */
+  function calcABW(wt, ibw) {
+    // Guard: if actual weight < IBW, ABW formula can produce inappropriate values
+    // In clinical practice, use actual weight when wt < IBW
+    if (wt <= 0 || ibw <= 0) return wt || 0;
+    if (wt < ibw) return wt; // No adjustment needed if underweight
+    return ibw + 0.4 * (wt - ibw);
+  }
+
+  /**
+   * Body Mass Index
+   * @param {number} wt - Weight in kg
+   * @param {number} ht - Height in cm
+   * @returns {number} BMI in kg/m²
+   */
+  function calcBMI(wt, ht) {
+    if (!ht || ht <= 0) return 0;
+    return wt / ((ht / 100) ** 2);
+  }
+
+  /**
+   * Body Surface Area (Mosteller formula)
+   * @param {number} ht - Height in cm
+   * @param {number} wt - Weight in kg
+   * @returns {number} BSA in m²
+   */
+  function calcBSA(ht, wt) {
+    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
+    return Math.sqrt((ht * wt) / 3600);
+  }
+
+  /**
+   * Cockcroft-Gault CrCl with automatic weight adjustment
+   * Uses ABW if patient is obese (>130% IBW)
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
+   * @returns {number} CrCl in mL/min, minimum 5
+   */
+  function calcCockcroftGault(age, wt, scr, sex, ht) {
+    if (scr <= 0) return 0;
+    let useWt = wt;
+    if (ht && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
+    }
+    let crcl = ((140 - age) * useWt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.max(Math.round(crcl * 10) / 10, 5);
+  }
+
+  /**
+   * Cockcroft-Gault with raw TBW (no obesity adjustment)
+   * Used for comparison and non-adjusted dosing
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} CrCl in mL/min
+   */
+  function calcCG_raw(age, wt, scr, sex) {
+    if (scr <= 0) return 0;
+    let crcl = ((140 - age) * wt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.round(crcl * 10) / 10;
+  }
+
+  /**
+   * Bedside Schwartz equation (pediatric eGFR)
+   * For ages 1-17 years
+   * @param {number} ht - Height in cm
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcSchwartz(ht, scr) {
+    if (scr <= 0 || !ht || ht <= 0) return 0;
+    return Math.round((0.413 * ht / scr) * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 equation (race-free)
+   * Returns indexed eGFR for standardized BSA (1.73m²)
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcCKDEPI2021(age, scr, sex) {
+    let eGFR;
+    if (sex === 'F') {
+      const kappa = 0.7;
+      const alpha = scr <= kappa ? -0.241 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age) * 1.012;
+    } else {
+      const kappa = 0.9;
+      const alpha = scr <= kappa ? -0.302 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age);
+    }
+    return Math.round(eGFR * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 de-indexed for drug dosing
+   * Converts indexed eGFR to non-indexed using patient BSA
+   * Per KDIGO 2024 recommendations for personalized dosing
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} bsa - Body surface area in m²
+   * @returns {number} Non-indexed eGFR in mL/min
+   */
+  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
+    const indexed = calcCKDEPI2021(age, scr, sex);
+    return Math.round(indexed * bsa / 1.73 * 10) / 10;
+  }
+
+  /**
+   * Get CKD stage classification from GFR value
+   * @param {number} gfr - Glomerular filtration rate in mL/min
+   * @returns {Object} Stage info with stage code, Thai label, and CSS class
+   */
+  function getCKDStage(gfr) {
+    // Labels in both Thai (default) and English for i18n support
+    var stages = [
+      { min: 90, stage: 'G1', label: 'ปกติ/สูง', labelEn: 'Normal/High', cls: 'stage-1' },
+      { min: 60, stage: 'G2', label: 'ลดลงเล็กน้อย', labelEn: 'Mildly decreased', cls: 'stage-2' },
+      { min: 45, stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', labelEn: 'Mildly-moderately decreased', cls: 'stage-3a' },
+      { min: 30, stage: 'G3b', label: 'ลดลงปานกลาง-มาก', labelEn: 'Moderately-severely decreased', cls: 'stage-3b' },
+      { min: 15, stage: 'G4', label: 'ลดลงมาก', labelEn: 'Severely decreased', cls: 'stage-4' },
+      { min: -Infinity, stage: 'G5', label: 'ไตวาย', labelEn: 'Kidney failure', cls: 'stage-5' }
+    ];
+    for (var i = 0; i < stages.length; i++) {
+      if (gfr >= stages[i].min) return stages[i];
+    }
+    return stages[stages.length - 1];
+  }
+
+  /**
+   * Build comprehensive patient object from form elements
+   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
+   * @param {Object} fieldIds - Optional custom field ID mapping
+   * @returns {Object} Complete patient data object
+   */
+  function getPatientFromForm(fieldIds) {
+    // Default field IDs matching standard form layout
+    const ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    }, fieldIds || {});
+
+    const getVal = (id, def) => {
+      const el = document.getElementById(id);
+      if (!el) return def;
+      const v = parseFloat(el.value);
+      return isNaN(v) ? def : v;
+    };
+    const getStr = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? el.value : def;
+    };
+
+    const age = getVal(ids.age, 55);
+    const wt = getVal(ids.wt, 70);
+    const ht = getVal(ids.ht, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = getVal(ids.scr, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
+
+    // Run validation and apply visual feedback
+    const validation = validatePatientInput(
+      { age: age, wt: wt, scr: scr, ht: ht },
+      { age: ids.age, wt: ids.wt, scr: ids.scr, ht: ids.ht }
+    );
+
+    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
+    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
+    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
+    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
+    const isObese = wt > ibw * 1.3;
+    const isUnderweight = wt < ibw;
+    const isPediatric = age < 18;
+
+    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
+    let crcl;
+    if (isPediatric && ht > 0) {
+      crcl = calcSchwartz(ht, scr);
+    } else {
+      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
+    }
+
+    return {
+      age, wt, ht, sex, scr, alb, dialysis,
+      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
+      crcl,
+      validation
+    };
+  }
+
+
+  // ============================================================
+  // ANALYTICS
+  // ============================================================
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  let _reqCount = 0;
+
+  /**
+   * Get anonymous session ID from localStorage
+   * @returns {string} Session ID or empty string
+   */
+  function getSessionId() {
+    return localStorage.getItem('anonSessionId') || '';
+  }
+
+  /**
+   * Get anonymous user ID from localStorage
+   * @returns {string} User ID or empty string
+   */
+  function getUserId() {
+    return localStorage.getItem('anonUserId') || '';
+  }
+
+  /**
+   * Check if user has consented to analytics
+   * @returns {boolean} True if analytics consent is given
+   */
+  function hasAnalyticsConsent() {
+    return localStorage.getItem('analyticsConsent') === 'true';
+  }
+
+  /**
+   * Send analytics event via sendBeacon or fetch
+   * Rate limited to 40 requests per page session
+   * @param {Object} data - Event data to send
+   */
+  function sendAnalytics(data) {
+    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (_reqCount >= 40) return;
+    _reqCount++;
+    try {
+      const payload = JSON.stringify({
+        ...data,
+        session_id: getSessionId(),
+        user_id: getUserId()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(ANALYTICS_URL, payload);
+      } else {
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
+   * Track page view with automatic entry/exit timing
+   * Sends page_view events on entry and exit with duration
+   * @param {string} pageName - Name/identifier of current page
+   * @returns {Object} Tracking object with sendExit function and metadata
+   */
+  function trackPageView(pageName) {
+    const enterTime = Date.now();
+    const fromPage = (function() {
+      const ref = document.referrer || '';
+      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+      if (ref.includes('calculator.html')) return 'calculator';
+      if (ref.includes('tdm.html')) return 'tdm';
+      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
+      if (ref.includes('compatibility.html')) return 'compatibility';
+      if (ref.includes('dashboard.html')) return 'dashboard';
+      return ref ? 'external' : 'direct';
+    })();
+
+    // Send entry event
+    sendAnalytics({
+      type: 'page_view', page: pageName, action: 'enter',
+      from_page: fromPage, referrer: document.referrer || 'direct'
+    });
+
+    // Track exit event (sent only once)
+    let exitSent = false;
+    function sendExit(extraData) {
+      if (exitSent) return;
+      exitSent = true;
+      sendAnalytics({
+        type: 'page_view', page: pageName, action: 'leave',
+        duration_sec: Math.round((Date.now() - enterTime) / 1000),
+        from_page: fromPage,
+        ...(extraData || {})
+      });
+    }
+
+    // Send exit on page unload or visibility change
+    // Use named handlers stored on function scope to allow cleanup and prevent accumulation
+    function onBeforeUnload() { sendExit(); }
+    function onVisChange() { if (document.visibilityState === 'hidden') sendExit(); }
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+    document.addEventListener('visibilitychange', onVisChange);
+
+    return {
+      sendExit,
+      fromPage,
+      enterTime,
+      // Allow caller to clean up listeners
+      destroy: function() {
+        sendExit();
+        window.removeEventListener('beforeunload', onBeforeUnload);
+        document.removeEventListener('visibilitychange', onVisChange);
+      }
+    };
+  }
+
+
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
+
+  /**
+   * Register service worker for offline support and caching
+   * Non-blocking registration with console logging
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    }
+  }
+
+
+  // ============================================================
+  // UTILITY HELPERS
+  // ============================================================
+
+  /**
+   * Generate random anonymous ID using crypto API
+   * @param {number} len - Length in hex characters (default 16)
+   * @returns {string} Random hex string
+   */
+  function generateId(len) {
+    len = len || 16;
+    // Prefer crypto API, fallback to Math.random for older browsers
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const arr = new Uint8Array(len / 2);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // Fallback: Math.random-based (less secure but functional)
+    var result = '';
+    for (var i = 0; i < len; i++) {
+      result += Math.floor(Math.random() * 16).toString(16);
+    }
+    return result;
+  }
+
+  /**
+   * Debounce function to limit function execution
+   * @param {Function} fn - Function to debounce
+   * @param {number} ms - Debounce delay in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  /**
+   * Format number with specified decimal precision
+   * @param {number} n - Number to format
+   * @param {number} decimals - Number of decimal places (default 1)
+   * @returns {string} Formatted number string
+   */
+  function fmt(n, decimals) {
+    decimals = decimals !== undefined ? decimals : 1;
+    // Guard against NaN, Infinity, and non-numeric input
+    if (typeof n !== 'number' || !isFinite(n)) return '–';
+    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
+  }
+
+  /**
+   * Version and app name constants
+   */
+  const VERSION = '5.0.0';
+  const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+  return {
+    // Version info
+    VERSION,
+    APP_NAME,
+
+    // Validation
+    VALIDATION_RULES,
+    validateField,
+    validatePatientInput,
+    renderValidationMessages,
+
+    // Clinical calculators
+    calcIBW,
+    calcABW,
+    calcBMI,
+    calcBSA,
+    calcCockcroftGault,
+    calcCG_raw,
+    calcSchwartz,
+    calcCKDEPI2021,
+    calcCKDEPI2021_nonindexed,
+    getCKDStage,
+    getPatientFromForm,
+
+    // Analytics
+    sendAnalytics,
+    trackPageView,
+    getSessionId,
+    getUserId,
+    hasAnalyticsConsent,
+
+    // Service Worker
+    registerSW,
+
+    // Utility helpers
+    generateId,
+    debounce,
+    fmt
+  };
+})();
+
+// ============================================================
+// AUTO-INITIALIZATION
+// ============================================================
+// Register service worker on page load
+document.addEventListener('DOMContentLoaded', () => {
+  IVDrugRef.registerSW();
+});
+
 // ============================================================
 // IV DrugRef PWA v5.0 — Admin Module
 // Extracted from V4.7.0, wrapped in IIFE for modular architecture
@@ -1707,8 +2959,7 @@ function saveConfig(cfg) {
 function initGoogleAuth() {
   const cfg = getConfig();
   if (!cfg.clientId) {
-    // First-time setup: grant admin role so settings tab is accessible
-    state.myRole = 'admin';
+    // First-time setup: show app directly with settings
     showApp({ name: 'Admin (Setup)', email: 'setup@local', picture: '' });
     switchTab('settings');
     toast('กรุณาตั้งค่า Google Client ID และ Script URL ก่อน', 'info');
@@ -1767,19 +3018,9 @@ function showApp(user) {
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-user-name').textContent = user.name;
   document.getElementById('topbar-user-avatar').src = user.picture || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>';
+  loadDrugs();
+  loadAuditLog();
   loadSettingsUI();
-  const cfg = getConfig();
-  if (cfg.scriptUrl) {
-    // Script URL exists → load data from backend (role will be set from response)
-    loadDrugs();
-    loadAuditLog();
-  } else {
-    // No Script URL → grant temporary admin so user can access Settings tab
-    state.myRole = 'admin';
-    applyRoleUI();
-    switchTab('settings');
-    toast('⚠️ กรุณาตั้งค่า Google Apps Script URL ก่อน', 'warning');
-  }
 }
 
 /* ═══════════════════════════════════════════
@@ -2933,7 +4174,6 @@ document.addEventListener('DOMContentLoaded', () => {
       clearInterval(check);
       const cfg = getConfig();
       if (!cfg.clientId) {
-        state.myRole = 'admin';
         showApp({ name: 'Admin (Setup)', email: 'setup@local', picture: '' });
         switchTab('settings');
       }
@@ -2978,7 +4218,7 @@ window.renderPendingList = renderPendingList;
 window.toast = toast;
 
 })();
-</script>
 
+</script>
 </body>
 </html>

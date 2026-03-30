@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TDM Hub — Therapeutic Drug Monitoring | IV DrugRef</title>
   <meta name="description" content="Therapeutic Drug Monitoring Hub — Vancomycin, Phenytoin, Aminoglycosides, Valproate">
@@ -1175,7 +1175,7 @@ canvas {
      ============================================================ -->
 <div class="header">
   <div class="header-inner">
-    <a href="index.html" class="back" onclick="if(history.length>1){event.preventDefault();history.back()}">
+    <a href="index.html" class="back" data-action="goBack">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>กลับ
     </a>
     <h1>🎯 TDM Hub</h1>
@@ -1190,10 +1190,10 @@ canvas {
 
 <!-- Drug Selection Tabs -->
 <div class="drug-tabs" id="drugTabs">
-  <div class="drug-tab active" onclick="switchDrug('vancomycin')"><span class="tab-icon">🧬</span>Vancomycin</div>
-  <div class="drug-tab" onclick="switchDrug('phenytoin')"><span class="tab-icon">⚡</span>Phenytoin</div>
-  <div class="drug-tab" onclick="switchDrug('aminoglycoside')"><span class="tab-icon">💉</span>Aminoglycosides</div>
-  <div class="drug-tab" onclick="switchDrug('valproate')"><span class="tab-icon">🧠</span>Valproate</div>
+  <div class="drug-tab active" data-action="switchDrug" data-drug="vancomycin"><span class="tab-icon">🧬</span>Vancomycin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="phenytoin"><span class="tab-icon">⚡</span>Phenytoin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="aminoglycoside"><span class="tab-icon">💉</span>Aminoglycosides</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="valproate"><span class="tab-icon">🧠</span>Valproate</div>
 </div>
 
 <!-- ============================================================
@@ -1225,12 +1225,12 @@ canvas {
 
   <div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body">
     <div id="vancoDoseList"></div>
-    <button class="btn-add" onclick="VancoTDM.addDose()">+ เพิ่ม dose</button>
+    <button class="btn-add" data-action="vancoAddDose">+ เพิ่ม dose</button>
   </div></div>
 
   <div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body">
     <div id="vancoLevelList"></div>
-    <button class="btn-add" onclick="VancoTDM.addLevel()">+ เพิ่ม level</button>
+    <button class="btn-add" data-action="vancoAddLevel">+ เพิ่ม level</button>
   </div></div>
 
   <div class="card"><div class="card-head">🧬 PK MODEL</div><div class="card-body">
@@ -1239,7 +1239,7 @@ canvas {
   </div></div>
 
   <div style="text-align:center;margin:16px 0">
-    <button class="btn btn-primary" onclick="VancoTDM.run()" style="width:100%;padding:14px;font-size:15px">🧬 Run Bayesian MAP + MCMC</button>
+    <button class="btn btn-primary" data-action="vancoRun" style="width:100%;padding:14px;font-size:15px">🧬 Run Bayesian MAP + MCMC</button>
     <div id="vancoMcmcProgress" style="display:none;margin-top:8px">
       <div class="progress"><div class="progress-bar" id="vancoMcmcBar" style="width:0%;background:var(--blue)"></div></div>
       <div style="font-size:11px;color:var(--text3)" id="vancoMcmcStatus"></div>
@@ -1296,7 +1296,7 @@ canvas {
   </div></div>
 
   <div style="text-align:center;margin:16px 0">
-    <button class="btn btn-primary" onclick="PhenytoinTDM.run()" style="width:100%;padding:14px;font-size:15px">⚡ Calculate Phenytoin PK</button>
+    <button class="btn btn-primary" data-action="phenytoinRun" style="width:100%;padding:14px;font-size:15px">⚡ Calculate Phenytoin PK</button>
   </div>
 
   <div id="phenyResults" style="display:none">
@@ -1327,11 +1327,11 @@ canvas {
 
   <div class="card"><div class="card-head">💉 DRUG SELECTION</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Drug</label><select id="agDrug" onchange="AminoglyTDM.updateUI()">
+      <div class="field"><label>Drug</label><select id="agDrug" data-action="agUpdateUI">
         <option value="amikacin">Amikacin</option>
         <option value="gentamicin">Gentamicin</option>
       </select></div>
-      <div class="field"><label>Dosing Strategy</label><select id="agStrategy" onchange="AminoglyTDM.updateUI()">
+      <div class="field"><label>Dosing Strategy</label><select id="agStrategy" data-action="agUpdateUI">
         <option value="extended">Extended-interval (ODA)</option>
         <option value="conventional">Conventional (MDD)</option>
       </select></div>
@@ -1358,7 +1358,7 @@ canvas {
   </div></div>
 
   <div style="text-align:center;margin:16px 0">
-    <button class="btn btn-primary" onclick="AminoglyTDM.run()" style="width:100%;padding:14px;font-size:15px">💉 Calculate Aminoglycoside PK</button>
+    <button class="btn btn-primary" data-action="agRun" style="width:100%;padding:14px;font-size:15px">💉 Calculate Aminoglycoside PK</button>
   </div>
 
   <div id="agResults" style="display:none">
@@ -1398,7 +1398,7 @@ canvas {
   </div></div>
 
   <div style="text-align:center;margin:16px 0">
-    <button class="btn btn-primary" onclick="ValproateTDM.run()" style="width:100%;padding:14px;font-size:15px">🧠 Calculate Valproate TDM</button>
+    <button class="btn btn-primary" data-action="vpaRun" style="width:100%;padding:14px;font-size:15px">🧠 Calculate Valproate TDM</button>
   </div>
 
   <div id="vpaResults" style="display:none">
@@ -2513,6 +2513,23 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
    * Safe DOM element builder — prevents innerHTML XSS.
    * @param {string} tag - HTML tag name
    * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
@@ -2587,7 +2604,8 @@ var IVDrugRef = (function() {
     generateId,
     debounce,
     fmt,
-    dom
+    dom,
+    delegate
   };
 })();
 
@@ -3143,12 +3161,12 @@ const TDMHub = (function() {
       const el = document.getElementById('vancoDoseList');
       if (!el) return;
       el.innerHTML = doses.map((d, i) => `
-        <div class="entry-row"><div class="entry-head"><span>Dose #${i + 1}</span>${doses.length > 1 ? `<button onclick="TDMHub.VancoTDM_removeDose(${i})">×</button>` : ''}</div>
-        <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${d.amount}" min="100" max="4000" step="250" onchange="TDMHub.VancoTDM_setDose(${i},'amount',+this.value)"></div>
-        <div class="field"><label>Interval (hr)</label><input type="number" value="${d.interval}" min="4" max="72" onchange="TDMHub.VancoTDM_setDose(${i},'interval',+this.value)"></div>
-        <div class="field"><label>Infusion (hr)</label><input type="number" value="${d.infusion}" min="0.5" max="4" step="0.5" onchange="TDMHub.VancoTDM_setDose(${i},'infusion',+this.value)"></div></div>
-        <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${d.dateTime}" onchange="TDMHub.VancoTDM_setDose(${i},'dateTime',this.value)"></div>
-        <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${d.nDoses}" min="1" max="50" onchange="TDMHub.VancoTDM_setDose(${i},'nDoses',+this.value)"></div></div></div>`).join('');
+        <div class="entry-row"><div class="entry-head"><span>Dose #${i + 1}</span>${doses.length > 1 ? `<button data-action="vancoRemoveDose" data-index="${i}">×</button>` : ''}</div>
+        <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${d.amount}" min="100" max="4000" step="250" data-action="vancoSetDose" data-index="${i}" data-field="amount"></div>
+        <div class="field"><label>Interval (hr)</label><input type="number" value="${d.interval}" min="4" max="72" data-action="vancoSetDose" data-index="${i}" data-field="interval"></div>
+        <div class="field"><label>Infusion (hr)</label><input type="number" value="${d.infusion}" min="0.5" max="4" step="0.5" data-action="vancoSetDose" data-index="${i}" data-field="infusion"></div></div>
+        <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${d.dateTime}" data-action="vancoSetDose" data-index="${i}" data-field="dateTime"></div>
+        <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${d.nDoses}" min="1" max="50" data-action="vancoSetDose" data-index="${i}" data-field="nDoses"></div></div></div>`).join('');
       renderSamplingAdvice();
     }
 
@@ -3156,9 +3174,9 @@ const TDMHub = (function() {
       const el = document.getElementById('vancoLevelList');
       if (!el) return;
       el.innerHTML = levels.map((l, i) => `
-        <div class="entry-row"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${i + 1} (mcg/mL)</label><input type="number" value="${l.value}" min="0.1" max="100" step="0.1" onchange="TDMHub.VancoTDM_setLevel(${i},'value',+this.value)"></div>
-        <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${l.dateTime || ''}" onchange="TDMHub.VancoTDM_setLevel(${i},'dateTime',this.value)"></div></div>
-        ${levels.length > 1 ? `<button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="TDMHub.VancoTDM_removeLevel(${i})">ลบ</button>` : ''}</div>`).join('');
+        <div class="entry-row"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${i + 1} (mcg/mL)</label><input type="number" value="${l.value}" min="0.1" max="100" step="0.1" data-action="vancoSetLevel" data-index="${i}" data-field="value"></div>
+        <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${l.dateTime || ''}" data-action="vancoSetLevel" data-index="${i}" data-field="dateTime"></div></div>
+        ${levels.length > 1 ? `<button class="btn btn-sm btn-danger" style="margin-top:6px" data-action="vancoRemoveLevel" data-index="${i}">ลบ</button>` : ''}</div>`).join('');
       renderSamplingAdvice();
     }
 
@@ -3170,7 +3188,7 @@ const TDMHub = (function() {
       const el = document.getElementById('vancoModelSelect');
       if (!el) return;
       el.innerHTML = all.map(m => `
-        <div class="model-card ${selectedModel === m.id ? 'active' : ''}" onclick="TDMHub.VancoTDM_setModel('${m.id}')">
+        <div class="model-card ${selectedModel === m.id ? 'active' : ''}" data-action="vancoSetModel" data-model="${m.id}">
           <div class="mc-name">${m.name} ${m.id === recModel ? '<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>' : ''}</div><div class="mc-sub">${m.pop}</div></div>`).join('');
       if (recModel) {
         let msg = recModel === 'adane' ? `⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Obesity model)` : `👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly model)`;
@@ -3221,7 +3239,7 @@ const TDMHub = (function() {
       if (!el) return;
       el.innerHTML = opts.map(o => {
         const c = o.ok ? 'green' : (o.auc < 400 ? 'amber' : 'red');
-        return `<div class="dose-option" onclick="document.getElementById('vancoOptDose').value=${o.dose};document.getElementById('vancoOptInterval').value=${o.q};TDMHub.VancoTDM_updateOpt()">
+        return `<div class="dose-option" data-action="vancoDoseOption" data-dose="${o.dose}" data-q="${o.q}">
           <div class="opt-dose">${o.dose} mg q${o.q}h</div>
           <div class="opt-auc">AUC₂₄ ${o.auc.toFixed(0)} | Pk ${o.pk.toFixed(1)} | Tr ${o.tr.toFixed(1)}</div>
           <span class="opt-badge" style="background:var(--${c}-dim);color:var(--${c})">${o.ok ? 'In target' : o.auc < 400 ? 'Below' : 'Above'}</span></div>`;
@@ -3275,7 +3293,7 @@ const TDMHub = (function() {
         if (el)
           el.innerHTML = '<div class="model-grid">' + allModelResults.map((r, i) => {
             const cls = r.auc24 >= 400 && r.auc24 <= 600 ? 'green' : (r.auc24 < 400 ? 'amber' : 'red');
-            return `<div class="model-card ${i === bestIdx ? 'active' : ''}" onclick="TDMHub.VancoTDM_setModel('${PK_MODELS[i].id}');TDMHub.VancoTDM_run()">
+            return `<div class="model-card ${i === bestIdx ? 'active' : ''}" data-action="vancoRunModel" data-model="${PK_MODELS[i].id}">
               <div class="mc-name">${r.model} ${i === bestIdx ? '⭐' : ''}</div><div class="mc-sub">${PK_MODELS[i].pop}</div>
               <div class="mc-auc" style="color:var(--${cls})">AUC₂₄ ${r.auc24.toFixed(0)}</div>
               <div style="font-size:10px;color:var(--text3);margin-top:3px">CL ${r.cl.toFixed(2)} | Vd ${r.vd.toFixed(1)} | t½ ${r.halflife.toFixed(1)}h</div>
@@ -4211,30 +4229,37 @@ if (document.readyState === 'loading') {
   TDMHub.init();
 }
 
-// ====== Expose to window for onclick handlers in tdm.html ======
-window.switchDrug = TDMHub.switchDrug;
-window.VancoTDM = {
-  init: () => TDMHub.VancoTDM_init(),
-  addDose: () => TDMHub.VancoTDM_addDose(),
-  removeDose: (i) => TDMHub.VancoTDM_removeDose(i),
-  setDose: (i, k, v) => TDMHub.VancoTDM_setDose(i, k, v),
-  addLevel: () => TDMHub.VancoTDM_addLevel(),
-  removeLevel: (i) => TDMHub.VancoTDM_removeLevel(i),
-  setLevel: (i, k, v) => TDMHub.VancoTDM_setLevel(i, k, v),
-  setModel: (id) => TDMHub.VancoTDM_setModel(id),
-  updateOpt: () => TDMHub.VancoTDM_updateOpt(),
-  run: () => TDMHub.VancoTDM_run()
-};
-window.PhenytoinTDM = {
-  run: () => TDMHub.PhenytoinTDM_run()
-};
-window.AminoglyTDM = {
-  updateUI: () => TDMHub.AminoglycosideTDM_updateUI(),
-  run: () => TDMHub.AminoglycosideTDM_run()
-};
-window.ValproateTDM = {
-  run: () => TDMHub.ValproateTDM_run()
-};
+// ====== Event Delegation (replaces inline onclick/onchange in tdm.html) ======
+IVDrugRef.delegate(document, 'click', {
+  goBack: function(e) { if (history.length > 1) { e.preventDefault(); history.back(); } },
+  switchDrug: function(e, t) { TDMHub.switchDrug(t.dataset.drug); },
+  vancoAddDose: function() { TDMHub.VancoTDM_addDose(); },
+  vancoAddLevel: function() { TDMHub.VancoTDM_addLevel(); },
+  vancoRemoveDose: function(e, t) { TDMHub.VancoTDM_removeDose(+t.dataset.index); },
+  vancoRemoveLevel: function(e, t) { TDMHub.VancoTDM_removeLevel(+t.dataset.index); },
+  vancoSetModel: function(e, t) { TDMHub.VancoTDM_setModel(t.dataset.model); },
+  vancoRunModel: function(e, t) { TDMHub.VancoTDM_setModel(t.dataset.model); TDMHub.VancoTDM_run(); },
+  vancoRun: function() { TDMHub.VancoTDM_run(); },
+  vancoDoseOption: function(e, t) {
+    var d = document.getElementById('vancoOptDose'); if (d) d.value = t.dataset.dose;
+    var q = document.getElementById('vancoOptInterval'); if (q) q.value = t.dataset.q;
+    TDMHub.VancoTDM_updateOpt();
+  },
+  phenytoinRun: function() { TDMHub.PhenytoinTDM_run(); },
+  agRun: function() { TDMHub.AminoglycosideTDM_run(); },
+  vpaRun: function() { TDMHub.ValproateTDM_run(); }
+});
+IVDrugRef.delegate(document, 'change', {
+  vancoSetDose: function(e, t) {
+    var v = t.dataset.field === 'dateTime' ? t.value : +t.value;
+    TDMHub.VancoTDM_setDose(+t.dataset.index, t.dataset.field, v);
+  },
+  vancoSetLevel: function(e, t) {
+    var v = t.dataset.field === 'dateTime' ? t.value : +t.value;
+    TDMHub.VancoTDM_setLevel(+t.dataset.index, t.dataset.field, v);
+  },
+  agUpdateUI: function() { TDMHub.AminoglycosideTDM_updateUI(); }
+});
 
 </script>
 <script src="translations-en.js"></script>

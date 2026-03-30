@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IV DrugRef — Analytics Dashboard v6</title>
   <meta name="description" content="IV Drug Reference Analytics Dashboard">
@@ -2426,6 +2426,23 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
    * Safe DOM element builder — prevents innerHTML XSS.
    * @param {string} tag - HTML tag name
    * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
@@ -2500,7 +2517,8 @@ var IVDrugRef = (function() {
     generateId,
     debounce,
     fmt,
-    dom
+    dom,
+    delegate
   };
 })();
 
@@ -2978,7 +2996,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function addChartClick(chartId, filterKey, labelMap) {
     const el = document.getElementById(chartId);
     if (!el) return;
-    el.onclick = function(evt) {
+    el.addEventListener('click', function(evt) {
       const c = charts[chartId];
       if (!c) return;
       const pts = c.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
@@ -2988,7 +3006,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = labelMap ? (labelMap[label] || label) : label;
         addFilter(filterKey, val);
       }
-    };
+    });
   }
 
   // ============================================================
@@ -3441,10 +3459,6 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.keys(charts).forEach(dc);
   });
 
-  // ─── Expose minimal API to window (for filter engine used by DOM-built handlers) ──
-  window.addFilter = addFilter;
-  window.removeFilter = removeFilter;
-
   // ─── Init: Wire up all event handlers programmatically ─────
   const today = new Date().toISOString().substring(0, 10);
   const ago = new Date(Date.now() - DAU_DAYS * 86400000).toISOString().substring(0, 10);
@@ -3452,9 +3466,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('dateTo').value = today;
 
   // Debounced inputs
-  document.getElementById('globalSearch').oninput = debouncedReRender;
-  document.getElementById('dateFrom').onchange = debouncedReRender;
-  document.getElementById('dateTo').onchange = debouncedReRender;
+  document.getElementById('globalSearch').addEventListener('input', debouncedReRender);
+  document.getElementById('dateFrom').addEventListener('change', debouncedReRender);
+  document.getElementById('dateTo').addEventListener('change', debouncedReRender);
 
   // Header buttons
   var btnSetup = document.getElementById('btnSetup');

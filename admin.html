@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com; img-src 'self' data: https:; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com; img-src 'self' data: https:; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IV DrugRef Admin — จัดการข้อมูลยา</title>
 
@@ -1445,17 +1445,17 @@ body::before {
       <img id="topbar-user-avatar" src="" alt="">
       <span id="topbar-user-name"></span>
     </div>
-    <button class="topbar-signout" onclick="signOut()">Sign Out</button>
+    <button class="topbar-signout" data-action="signOut">Sign Out</button>
   </div>
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab-btn active" data-tab="drugs" onclick="switchTab('drugs')">📋 รายการยา</button>
-    <button class="tab-btn" data-tab="pending" onclick="switchTab('pending')">⏳ รออนุมัติ<span class="tab-badge" id="pending-count" style="display:none">0</span></button>
-    <button class="tab-btn" data-tab="import" onclick="switchTab('import')">📥 Import ยา</button>
-    <button class="tab-btn" data-tab="audit" onclick="switchTab('audit')">📝 Audit Log</button>
-    <button class="tab-btn" data-tab="users" onclick="switchTab('users')">👥 จัดการผู้ใช้</button>
-    <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">⚙️ ตั้งค่า</button>
+    <button class="tab-btn active" data-tab="drugs" data-action="switchTab">📋 รายการยา</button>
+    <button class="tab-btn" data-tab="pending" data-action="switchTab">⏳ รออนุมัติ<span class="tab-badge" id="pending-count" style="display:none">0</span></button>
+    <button class="tab-btn" data-tab="import" data-action="switchTab">📥 Import ยา</button>
+    <button class="tab-btn" data-tab="audit" data-action="switchTab">📝 Audit Log</button>
+    <button class="tab-btn" data-tab="users" data-action="switchTab">👥 จัดการผู้ใช้</button>
+    <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
   </div>
 
   <div class="main">
@@ -1485,18 +1485,18 @@ body::before {
       </div>
 
       <div class="toolbar">
-        <input type="text" class="search-box" id="search-drugs" placeholder="ค้นหาชื่อยา..." oninput="filterDrugs()">
-        <select class="filter-select" id="filter-status" onchange="filterDrugs()">
+        <input type="text" class="search-box" id="search-drugs" placeholder="ค้นหาชื่อยา..." data-action="filterDrugs">
+        <select class="filter-select" id="filter-status" data-action="filterDrugs">
           <option value="">ทุกสถานะ</option>
           <option value="approved">✅ Approved</option>
           <option value="pending">⏳ Pending</option>
           <option value="draft">📝 Draft</option>
         </select>
-        <select class="filter-select" id="filter-category" onchange="filterDrugs()">
+        <select class="filter-select" id="filter-category" data-action="filterDrugs">
           <option value="">ทุกหมวดหมู่</option>
         </select>
-        <button class="btn btn-primary" onclick="openDrugModal()">＋ เพิ่มยาใหม่</button>
-        <button class="btn btn-success" onclick="exportData()">📥 ส่งออก CSV</button>
+        <button class="btn btn-primary" data-action="openDrugModal">＋ เพิ่มยาใหม่</button>
+        <button class="btn btn-success" data-action="exportData">📥 ส่งออก CSV</button>
       </div>
 
       <div class="table-wrap">
@@ -1530,15 +1530,15 @@ body::before {
       <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px">
         Upload ไฟล์ CSV — ยาที่ import จะถูกตั้งเป็น draft เสมอ
       </p>
-      <div class="import-zone" id="import-zone" onclick="document.getElementById('import-file-input').click()">
+      <div class="import-zone" id="import-zone" data-action="triggerFileInput">
         <div class="import-zone-icon">📁</div>
         <div class="import-zone-text">คลิกหรือลากไฟล์มาวาง</div>
         <div class="import-zone-sub">รองรับ .csv — สูงสุด 500 รายการ</div>
       </div>
-      <input type="file" id="import-file-input" accept=".csv" style="display:none" onchange="handleImportFile(event)">
+      <input type="file" id="import-file-input" accept=".csv" style="display:none" data-action="handleImportFile">
       <div id="import-preview" class="import-preview"></div>
       <div style="margin-top:16px;display:flex;gap:12px">
-        <button class="btn btn-success" id="btn-import-confirm" style="display:none" onclick="confirmImport()">✅ ยืนยัน Import</button>
+        <button class="btn btn-success" id="btn-import-confirm" style="display:none" data-action="confirmImport">✅ ยืนยัน Import</button>
       </div>
     </div>
 
@@ -1546,7 +1546,7 @@ body::before {
     <div class="panel" id="audit-panel">
       <h2 style="margin-bottom:16px">📝 Audit Log</h2>
       <div class="toolbar" style="margin-bottom:16px">
-        <select class="filter-select" id="audit-filter-action" onchange="renderAuditLog()">
+        <select class="filter-select" id="audit-filter-action" data-action="renderAuditLog">
           <option value="">ทุก Action</option>
           <option value="create">🆕 สร้างใหม่</option>
           <option value="edit">✏️ แก้ไข</option>
@@ -1555,8 +1555,8 @@ body::before {
           <option value="reject">↩️ ส่งกลับ</option>
           <option value="import">📥 Import</option>
         </select>
-        <input type="date" class="form-input" id="audit-date-from" onchange="renderAuditLog()" style="width:auto">
-        <input type="date" class="form-input" id="audit-date-to" onchange="renderAuditLog()" style="width:auto">
+        <input type="date" class="form-input" id="audit-date-from" data-action="renderAuditLog" style="width:auto">
+        <input type="date" class="form-input" id="audit-date-to" data-action="renderAuditLog" style="width:auto">
       </div>
       <div id="audit-log-container"></div>
       <div class="pagination" id="audit-pagination"></div>
@@ -1582,7 +1582,7 @@ body::before {
             <option value="admin">🔑 Admin</option>
           </select>
         </div>
-        <button class="btn btn-primary" onclick="addUser()">＋ เพิ่มผู้ใช้</button>
+        <button class="btn btn-primary" data-action="addUser">＋ เพิ่มผู้ใช้</button>
       </div>
       <!-- Users Table -->
       <div class="table-wrap">
@@ -1623,8 +1623,8 @@ body::before {
             placeholder="pharmacist1@hospital.go.th, pharmacist2@hospital.go.th"></textarea>
           <span style="font-size:11px;color:var(--text-muted)">เฉพาะ email ที่อนุญาตให้เข้า admin</span>
         </div>
-        <button class="btn btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
-        <button class="btn btn-outline" onclick="testConnection()" style="margin-left:8px">🔌 ทดสอบการเชื่อมต่อ</button>
+        <button class="btn btn-primary" data-action="saveSettings">💾 บันทึกการตั้งค่า</button>
+        <button class="btn btn-outline" data-action="testConnection" style="margin-left:8px">🔌 ทดสอบการเชื่อมต่อ</button>
         <pre id="test-result" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px;font-family:var(--mono);white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
       </div>
     </div>
@@ -1636,18 +1636,18 @@ body::before {
   <div class="modal">
     <div class="modal-header">
       <h2 id="modal-title">เพิ่มยาใหม่</h2>
-      <button class="modal-close" onclick="closeDrugModal()">✕</button>
+      <button class="modal-close" data-action="closeDrugModal">✕</button>
     </div>
     <div class="modal-body">
       <!-- Form/Preview Toggle Tabs -->
       <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
-        <button type="button" id="btn-tab-form" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--primary);color:white;border-radius:8px 8px 0 0" onclick="togglePreview(false)">📝 แบบฟอร์ม</button>
-        <button type="button" id="btn-tab-preview" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-muted);border-radius:8px 8px 0 0" onclick="togglePreview(true)">👁 Preview</button>
+        <button type="button" id="btn-tab-form" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--primary);color:white;border-radius:8px 8px 0 0" data-action="togglePreview" data-preview="false">📝 แบบฟอร์ม</button>
+        <button type="button" id="btn-tab-preview" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-muted);border-radius:8px 8px 0 0" data-action="togglePreview" data-preview="true">👁 Preview</button>
       </div>
 
       <!-- Form View -->
       <div id="form-view">
-      <form id="drug-form" onsubmit="event.preventDefault(); saveDrug('pending')">
+      <form id="drug-form">
         <div class="form-grid">
           <input type="hidden" id="drug-id">
 
@@ -1774,10 +1774,10 @@ body::before {
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeDrugModal()">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="saveDrug('draft')">📝 บันทึก Draft</button>
-      <button class="btn btn-warning" onclick="saveDrug('pending')">⏳ ส่งอนุมัติ</button>
-      <button class="btn btn-success" id="btn-save-approve" onclick="saveDrugAndApprove()" style="display:none">✅ บันทึกและอนุมัติ</button>
+      <button class="btn btn-outline" data-action="closeDrugModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveDrug" data-status="draft">📝 บันทึก Draft</button>
+      <button class="btn btn-warning" data-action="saveDrug" data-status="pending">⏳ ส่งอนุมัติ</button>
+      <button class="btn btn-success" id="btn-save-approve" data-action="saveDrugAndApprove" style="display:none">✅ บันทึกและอนุมัติ</button>
     </div>
   </div>
 </div>
@@ -2861,6 +2861,23 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
    * Safe DOM element builder — prevents innerHTML XSS.
    * @param {string} tag - HTML tag name
    * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
@@ -2935,7 +2952,8 @@ var IVDrugRef = (function() {
     generateId,
     debounce,
     fmt,
-    dom
+    dom,
+    delegate
   };
 })();
 
@@ -3373,10 +3391,10 @@ function renderDrugTable() {
       <td><span class="badge badge-${d.status || 'draft'}">${d.status || 'draft'}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn btn-sm btn-outline" onclick="editDrug(${d.id})" title="แก้ไข">✏️</button>
-          <button class="btn btn-sm btn-outline" onclick="previewDrugById(${d.id})" title="Preview">👁</button>
-          ${isAdmin() && d.status === 'pending' ? `<button class="btn btn-sm btn-success" onclick="approveDrug(${d.id})" title="อนุมัติ">✅</button>` : ''}
-          ${isAdmin() ? `<button class="btn btn-sm btn-outline" onclick="deleteDrug(${d.id})" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+          <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="${d.id}" title="แก้ไข">✏️</button>
+          <button class="btn btn-sm btn-outline" data-action="previewDrugById" data-id="${d.id}" title="Preview">👁</button>
+          ${isAdmin() && d.status === 'pending' ? `<button class="btn btn-sm btn-success" data-action="approveDrug" data-id="${d.id}" title="อนุมัติ">✅</button>` : ''}
+          ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDrug" data-id="${d.id}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
         </div>
       </td>
     </tr>
@@ -3386,15 +3404,15 @@ function renderDrugTable() {
   const pag = document.getElementById('pagination');
   if (pages <= 1) { pag.innerHTML = ''; return; }
   let html = `<span style="color:var(--text-muted);font-size:12px">${total} รายการ</span>`;
-  html += `<button class="page-btn" onclick="goPage(${state.currentPage - 1})" ${state.currentPage <= 1 ? 'disabled' : ''}>‹</button>`;
+  html += `<button class="page-btn" data-action="goPage" data-page="${state.currentPage - 1}" ${state.currentPage <= 1 ? 'disabled' : ''}>‹</button>`;
   for (let i = 1; i <= pages; i++) {
     if (pages > 7 && Math.abs(i - state.currentPage) > 2 && i !== 1 && i !== pages) {
       if (i === state.currentPage - 3 || i === state.currentPage + 3) html += '<span>…</span>';
       continue;
     }
-    html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+    html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" data-action="goPage" data-page="${i}">${i}</button>`;
   }
-  html += `<button class="page-btn" onclick="goPage(${state.currentPage + 1})" ${state.currentPage >= pages ? 'disabled' : ''}>›</button>`;
+  html += `<button class="page-btn" data-action="goPage" data-page="${state.currentPage + 1}" ${state.currentPage >= pages ? 'disabled' : ''}>›</button>`;
   pag.innerHTML = html;
 }
 
@@ -3699,9 +3717,9 @@ function renderPendingList() {
           ${d.had ? '<span class="badge badge-had" style="margin-left:8px">⚠ HAD</span>' : ''}
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-sm btn-outline" onclick="editDrug(${d.id})">✏️ แก้ไข</button>
-          ${isAdmin() ? `<button class="btn btn-sm btn-success" onclick="approveDrug(${d.id})">✅ อนุมัติ</button>` : ''}
-          ${isAdmin() ? `<button class="btn btn-sm btn-danger" onclick="rejectDrug(${d.id}, prompt('เหตุผลที่ส่งกลับ:'))">↩️ ส่งกลับ</button>` : '<span class="badge badge-pending">รอ Admin อนุมัติ</span>'}
+          <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="${d.id}">✏️ แก้ไข</button>
+          ${isAdmin() ? `<button class="btn btn-sm btn-success" data-action="approveDrug" data-id="${d.id}">✅ อนุมัติ</button>` : ''}
+          ${isAdmin() ? `<button class="btn btn-sm btn-danger" data-action="rejectDrug" data-id="${d.id}">↩️ ส่งกลับ</button>` : '<span class="badge badge-pending">รอ Admin อนุมัติ</span>'}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;font-size:12px;color:var(--text-muted)">
@@ -4004,7 +4022,7 @@ function renderAuditLog() {
   if (pages <= 1) { pag.innerHTML = ''; return; }
   let html = '';
   for (let i = 1; i <= pages; i++) {
-    html += `<button class="page-btn ${i === state.auditPage ? 'active' : ''}" onclick="auditGoPage(${i})">${i}</button>`;
+    html += `<button class="page-btn ${i === state.auditPage ? 'active' : ''}" data-action="auditGoPage" data-page="${i}">${i}</button>`;
   }
   pag.innerHTML = html;
 }
@@ -4056,10 +4074,10 @@ function renderUsersTable() {
         <td>
           <div class="actions-cell">
             ${!isMe ? `
-              <button class="btn btn-sm btn-outline" onclick="changeRole('${escHtml(u.email)}', '${u.role === 'admin' ? 'editor' : 'admin'}')" title="เปลี่ยน role">
+              <button class="btn btn-sm btn-outline" data-action="changeRole" data-email="${escHtml(u.email)}" data-role="${u.role === 'admin' ? 'editor' : 'admin'}" title="เปลี่ยน role">
                 ${u.role === 'admin' ? '📝 → Editor' : '🔑 → Admin'}
               </button>
-              <button class="btn btn-sm btn-outline" onclick="removeUser('${escHtml(u.email)}')" title="ลบผู้ใช้" style="color:var(--danger)">🗑</button>
+              <button class="btn btn-sm btn-outline" data-action="removeUser" data-email="${escHtml(u.email)}" title="ลบผู้ใช้" style="color:var(--danger)">🗑</button>
             ` : '<span style="font-size:11px;color:var(--text-muted)">—</span>'}
           </div>
         </td>
@@ -4193,6 +4211,47 @@ function toast(msg, type = 'info') {
    ═══════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   setupImportZone();
+
+  // Prevent default form submit and delegate to saveDrug
+  var drugForm = document.getElementById('drug-form');
+  if (drugForm) {
+    drugForm.addEventListener('submit', function(e) { e.preventDefault(); saveDrug('pending'); });
+  }
+
+  // ═══ Event delegation — replaces all inline onclick/onchange/oninput ═══
+  IVDrugRef.delegate(document, 'click', {
+    signOut: function() { signOut(); },
+    switchTab: function(e, t) { switchTab(t.dataset.tab); },
+    openDrugModal: function() { openDrugModal(); },
+    exportData: function() { exportData(); },
+    triggerFileInput: function() { document.getElementById('import-file-input').click(); },
+    confirmImport: function() { confirmImport(); },
+    addUser: function() { addUser(); },
+    saveSettings: function() { saveSettings(); },
+    testConnection: function() { testConnection(); },
+    closeDrugModal: function() { closeDrugModal(); },
+    togglePreview: function(e, t) { togglePreview(t.dataset.preview === 'true'); },
+    saveDrug: function(e, t) { saveDrug(t.dataset.status); },
+    saveDrugAndApprove: function() { saveDrugAndApprove(); },
+    editDrug: function(e, t) { editDrug(+t.dataset.id); },
+    previewDrugById: function(e, t) { previewDrugById(+t.dataset.id); },
+    approveDrug: function(e, t) { approveDrug(+t.dataset.id); },
+    deleteDrug: function(e, t) { deleteDrug(+t.dataset.id); },
+    rejectDrug: function(e, t) { var reason = prompt('เหตุผลที่ส่งกลับ:'); if (reason !== null) rejectDrug(+t.dataset.id, reason); },
+    goPage: function(e, t) { goPage(+t.dataset.page); },
+    auditGoPage: function(e, t) { auditGoPage(+t.dataset.page); },
+    changeRole: function(e, t) { changeRole(t.dataset.email, t.dataset.role); },
+    removeUser: function(e, t) { removeUser(t.dataset.email); }
+  });
+  IVDrugRef.delegate(document, 'input', {
+    filterDrugs: function() { filterDrugs(); }
+  });
+  IVDrugRef.delegate(document, 'change', {
+    filterDrugs: function() { filterDrugs(); },
+    handleImportFile: function(e) { handleImportFile(e); },
+    renderAuditLog: function() { renderAuditLog(); }
+  });
+
   // Init Google Auth after GIS library loads
   if (typeof google !== 'undefined' && google.accounts) {
     initGoogleAuth();
@@ -4217,39 +4276,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════════════
-// EXPOSE TO WINDOW (for onclick handlers)
+// EXPOSE TO WINDOW — only items needed externally
+// (Google Auth callbacks & shared utilities)
+// All inline-handler exports removed; delegation handles them.
 // ═══════════════════════════════════════════
 window.initGoogleAuth = initGoogleAuth;
 window.handleCredentialResponse = handleCredentialResponse;
 window.signIn = signIn;
-window.signOut = signOut;
-window.switchTab = switchTab;
-window.openDrugModal = openDrugModal;
-window.closeDrugModal = closeDrugModal;
-window.saveDrug = saveDrug;
-window.editDrug = editDrug;
-window.deleteDrug = deleteDrug;
-window.approveDrug = approveDrug;
-window.rejectDrug = rejectDrug;
-window.saveDrugAndApprove = saveDrugAndApprove;
-window.handleImportFile = handleImportFile;
-window.confirmImport = confirmImport;
-window.downloadTemplate = downloadTemplate;
-window.exportData = exportData;
-window.saveSettings = saveSettings;
-window.filterDrugs = filterDrugs;
-window.loadSettingsUI = loadSettingsUI;
-window.renderAuditLog = renderAuditLog;
-window.testConnection = testConnection;
-window.addUser = addUser;
-window.changeRole = changeRole;
-window.removeUser = removeUser;
-window.sortTable = sortTable;
-window.goPage = goPage;
-window.auditGoPage = auditGoPage;
-window.togglePreview = togglePreview;
-window.previewDrugById = previewDrugById;
-window.renderPendingList = renderPendingList;
 window.toast = toast;
 
 })();

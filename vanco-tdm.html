@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vancomycin Bayesian TDM v2 — IV DrugRef</title>
   <meta name="description" content="Vancomycin Bayesian TDM with Bayesian MAP + MCMC estimation">
@@ -822,12 +822,12 @@ canvas {
 <div class="row row-4" style="margin-bottom:10px"><div class="field"><label>Weight (kg)</label><input type="number" id="ptWt" value="70" min="20" max="300" step="0.1"></div><div class="field"><label>Age (yr)</label><input type="number" id="ptAge" value="55" min="18" max="120"></div><div class="field"><label>Sex</label><select id="ptSex"><option value="M">Male</option><option value="F">Female</option></select></div><div class="field"><label>SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div></div>
 <div class="row row-2"><div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div><div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly style="color:var(--blue);background:var(--bg3);border:none"></div></div></div></div>
 
-<div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body"><div id="doseList"></div><button class="btn-add" onclick="addDose()">+ เพิ่ม dose</button></div></div>
-<div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body"><div id="levelList"></div><button class="btn-add" onclick="addLevel()">+ เพิ่ม level</button></div></div>
+<div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body"><div id="doseList"></div><button class="btn-add" data-action="addDose">+ เพิ่ม dose</button></div></div>
+<div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body"><div id="levelList"></div><button class="btn-add" data-action="addLevel">+ เพิ่ม level</button></div></div>
 
 <div class="card"><div class="card-head">🧬 PK MODEL</div><div class="card-body"><div class="model-grid" id="modelSelect"></div><div class="info-box purple" style="font-size:11px;margin-top:8px">"Auto" = ระบบเลือก model ที่ objective function value ต่ำที่สุด (best fit)</div></div></div>
 
-<div style="text-align:center;margin:16px 0"><button class="btn btn-primary" onclick="runBayesian()" style="width:100%;padding:14px;font-size:15px">🧬 Run Bayesian MAP + MCMC</button>
+<div style="text-align:center;margin:16px 0"><button class="btn btn-primary" data-action="runBayesian" style="width:100%;padding:14px;font-size:15px">🧬 Run Bayesian MAP + MCMC</button>
 <div id="mcmcProgress" style="display:none;margin-top:8px"><div class="progress"><div class="progress-bar" id="mcmcBar" style="width:0%;background:var(--blue)"></div></div><div style="font-size:11px;color:var(--text3)" id="mcmcStatus"></div></div></div>
 
 <div id="resultsSection" style="display:none">
@@ -1926,6 +1926,23 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
    * Safe DOM element builder — prevents innerHTML XSS.
    * @param {string} tag - HTML tag name
    * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
@@ -2000,7 +2017,8 @@ var IVDrugRef = (function() {
     generateId,
     debounce,
     fmt,
-    dom
+    dom,
+    delegate
   };
 })();
 
@@ -2183,21 +2201,21 @@ function getRecommendedSamplingTimes(){
 function renderDoses(){
   if(!doses[0].dateTime) doses[0].dateTime=getDefaultDateTime(0);
   document.getElementById('doseList').innerHTML=doses.map((d,i)=>`
-    <div class="dose-entry"><div class="dose-entry-head"><span>Dose #${i+1}</span>${doses.length>1?`<button onclick="doses.splice(${i},1);renderDoses()">×</button>`:''}</div>
-    <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${d.amount}" min="100" max="4000" step="250" onchange="doses[${i}].amount=+this.value"></div>
-    <div class="field"><label>Interval (hr)</label><input type="number" value="${d.interval}" min="4" max="72" onchange="doses[${i}].interval=+this.value"></div>
-    <div class="field"><label>Infusion (hr)</label><input type="number" value="${d.infusion}" min="0.5" max="4" step="0.5" onchange="doses[${i}].infusion=+this.value"></div></div>
-    <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${d.dateTime}" onchange="doses[${i}].dateTime=this.value;updateReferenceTime();renderSamplingAdvice()"></div>
-    <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${d.nDoses}" min="1" max="50" onchange="doses[${i}].nDoses=+this.value;renderSamplingAdvice()"></div></div></div>`).join('');
+    <div class="dose-entry"><div class="dose-entry-head"><span>Dose #${i+1}</span>${doses.length>1?`<button data-action="removeDose" data-index="${i}">×</button>`:''}</div>
+    <div class="row row-3" style="gap:8px"><div class="field"><label>Amount (mg)</label><input type="number" value="${d.amount}" min="100" max="4000" step="250" data-action="setDose" data-index="${i}" data-field="amount"></div>
+    <div class="field"><label>Interval (hr)</label><input type="number" value="${d.interval}" min="4" max="72" data-action="setDose" data-index="${i}" data-field="interval"></div>
+    <div class="field"><label>Infusion (hr)</label><input type="number" value="${d.infusion}" min="0.5" max="4" step="0.5" data-action="setDose" data-index="${i}" data-field="infusion"></div></div>
+    <div class="row row-2" style="gap:8px;margin-top:8px"><div class="field"><label>🕐 เริ่มให้ยา (วัน+เวลา)</label><input type="datetime-local" value="${d.dateTime}" data-action="setDoseDateTime" data-index="${i}"></div>
+    <div class="field"><label># doses ที่ให้แล้ว</label><input type="number" value="${d.nDoses}" min="1" max="50" data-action="setDoseCount" data-index="${i}"></div></div></div>`).join('');
   renderSamplingAdvice();
 }
 function addDose(){const l=doses[doses.length-1];const nextDt=l.dateTime?new Date(new Date(l.dateTime).getTime()+l.interval*l.nDoses*3600000).toISOString().slice(0,16):'';doses.push({amount:l.amount,interval:l.interval,infusion:l.infusion,nDoses:1,dateTime:nextDt});renderDoses();}
 
 function renderLevels(){
   document.getElementById('levelList').innerHTML=levels.map((l,i)=>`
-    <div class="level-entry"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${i+1} (mcg/mL)</label><input type="number" value="${l.value}" min="0.1" max="100" step="0.1" onchange="levels[${i}].value=+this.value"></div>
-    <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${l.dateTime}" onchange="levels[${i}].dateTime=this.value;renderSamplingAdvice()"></div></div>
-    ${levels.length>1?`<button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);margin-top:6px" onclick="levels.splice(${i},1);renderLevels()">ลบ</button>`:''}</div>`).join('');
+    <div class="level-entry"><div class="row row-2" style="gap:8px"><div class="field"><label>Level #${i+1} (mcg/mL)</label><input type="number" value="${l.value}" min="0.1" max="100" step="0.1" data-action="setLevel" data-index="${i}" data-field="value"></div>
+    <div class="field"><label>🕐 เวลาเจาะ</label><input type="datetime-local" value="${l.dateTime}" data-action="setLevelDateTime" data-index="${i}"></div></div>
+    ${levels.length>1?`<button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);margin-top:6px" data-action="removeLevel" data-index="${i}">ลบ</button>`:''}</div>`).join('');
   renderSamplingAdvice();
 }
 function addLevel(){const nextDt=doses[0]?.dateTime?new Date(new Date(doses[0].dateTime).getTime()+35.5*3600000).toISOString().slice(0,16):'';levels.push({value:10,dateTime:nextDt});renderLevels();}
@@ -2267,7 +2285,7 @@ function renderModelSelect(){
   const all=[{id:'auto',name:'Auto-select',pop:'Best fit (lowest OFV)'},...PK_MODELS];
   document.getElementById('modelSelect').innerHTML=all.map(m=>{
     const isRec = m.id===recModel;
-    return `<div class="model-card ${selectedModel===m.id?'active':''}" onclick="selectedModel='${m.id}';renderModelSelect()">
+    return `<div class="model-card ${selectedModel===m.id?'active':''}" data-action="selectModel" data-model="${m.id}">
       <div class="mc-name">${m.name} ${isRec?'<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>':''}</div>
       <div class="mc-sub">${m.pop}${m.ref?' — '+m.ref:''}</div></div>`;
   }).join('');
@@ -2561,7 +2579,7 @@ function runBayesian(){
   // Model comparison
   document.getElementById('modelCompare').innerHTML='<div class="model-grid">'+allModelResults.map((r,i)=>{
     const cls=r.auc24>=400&&r.auc24<=600?'green':(r.auc24<400?'amber':'red');
-    return`<div class="model-card ${i===bestIdx?'active':''}" onclick="selectedModel='${PK_MODELS[i].id}';runBayesian()">
+    return`<div class="model-card ${i===bestIdx?'active':''}" data-action="runWithModel" data-model="${PK_MODELS[i].id}">
       <div class="mc-name">${r.model} ${i===bestIdx?'⭐':''}</div>
       <div class="mc-sub">${PK_MODELS[i].pop}</div>
       <div class="mc-auc" style="color:var(--${cls})">AUC₂₄ ${r.auc24.toFixed(0)}</div>
@@ -2681,7 +2699,7 @@ function genDoseOpts(){
   opts=opts.slice(0,6);
   document.getElementById('doseCompare').innerHTML=opts.map(o=>{
     const c=o.ok?'green':(o.auc<400?'amber':'red');
-    return`<div class="dose-option" onclick="document.getElementById('optDose').value=${o.dose};document.getElementById('optInterval').value=${o.q};updateOptimizer();genDoseOpts()">
+    return`<div class="dose-option" data-action="doseOption" data-dose="${o.dose}" data-q="${o.q}">
       <div class="opt-dose">${o.dose} mg q${o.q}h</div>
       <div class="opt-auc">AUC₂₄ ${o.auc.toFixed(0)} | Pk ${o.pk.toFixed(1)} | Tr ${o.tr.toFixed(1)}</div>
       <span class="opt-badge" style="background:var(--${c}-dim);color:var(--${c})">${o.ok?'In target':o.auc<400?'Below':'Above'}</span></div>`;
@@ -2800,10 +2818,28 @@ function trackTDMResult(model, aucMAP, aucLo, aucHi, acceptRate, pt, pkResult, d
   renderLevels();
   renderModelSelect();
 
-  // ====== Expose to window for onclick handlers ======
-  window.addDose = addDose;
-  window.addLevel = addLevel;
-  window.runBayesian = runBayesian;
+  // ====== Event Delegation (replaces inline onclick/onchange) ======
+  IVDrugRef.delegate(document, 'click', {
+    addDose: function() { addDose(); },
+    addLevel: function() { addLevel(); },
+    runBayesian: function() { runBayesian(); },
+    removeDose: function(e, t) { doses.splice(+t.dataset.index, 1); renderDoses(); },
+    removeLevel: function(e, t) { levels.splice(+t.dataset.index, 1); renderLevels(); },
+    selectModel: function(e, t) { selectedModel = t.dataset.model; renderModelSelect(); },
+    runWithModel: function(e, t) { selectedModel = t.dataset.model; runBayesian(); },
+    doseOption: function(e, t) {
+      var d = document.getElementById('optDose'); if (d) d.value = t.dataset.dose;
+      var q = document.getElementById('optInterval'); if (q) q.value = t.dataset.q;
+      updateOptimizer(); genDoseOpts();
+    }
+  });
+  IVDrugRef.delegate(document, 'change', {
+    setDose: function(e, t) { doses[+t.dataset.index][t.dataset.field] = +t.value; },
+    setDoseDateTime: function(e, t) { doses[+t.dataset.index].dateTime = t.value; updateReferenceTime(); renderSamplingAdvice(); },
+    setDoseCount: function(e, t) { doses[+t.dataset.index].nDoses = +t.value; renderSamplingAdvice(); },
+    setLevel: function(e, t) { levels[+t.dataset.index][t.dataset.field] = +t.value; },
+    setLevelDateTime: function(e, t) { levels[+t.dataset.index].dateTime = t.value; renderSamplingAdvice(); }
+  });
 
 })();
 

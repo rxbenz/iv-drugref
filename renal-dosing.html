@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Renal Dosing — IV DrugRef</title>
   <meta name="description" content="Renal Dosing Guide — Drug adjustments by CrCl and CKD stage">
@@ -1031,15 +1031,15 @@ body::before {
     <div class="field-row-3">
       <div class="field">
         <label>อายุ (ปี)</label>
-        <input type="number" id="ptAge" value="65" min="1" max="120" oninput="recalc()">
+        <input type="number" id="ptAge" value="65" min="1" max="120" data-action="recalc">
       </div>
       <div class="field">
         <label>น้ำหนัก (kg)</label>
-        <input type="number" id="ptWt" value="70" min="3" max="400" step="0.1" oninput="recalc()">
+        <input type="number" id="ptWt" value="70" min="3" max="400" step="0.1" data-action="recalc">
       </div>
       <div class="field">
         <label>เพศ</label>
-        <select id="ptSex" onchange="recalc()">
+        <select id="ptSex" data-action="recalc">
           <option value="M">ชาย</option>
           <option value="F">หญิง</option>
         </select>
@@ -1048,11 +1048,11 @@ body::before {
     <div class="field-row">
       <div class="field">
         <label>SCr (mg/dL)</label>
-        <input type="number" id="ptScr" value="1.0" min="0.1" max="30" step="0.01" oninput="recalc()">
+        <input type="number" id="ptScr" value="1.0" min="0.1" max="30" step="0.01" data-action="recalc">
       </div>
       <div class="field">
         <label>ส่วนสูง (cm)</label>
-        <input type="number" id="ptHt" value="165" min="40" max="250" oninput="recalc()">
+        <input type="number" id="ptHt" value="165" min="40" max="250" data-action="recalc">
       </div>
     </div>
 
@@ -1068,21 +1068,21 @@ body::before {
     <div id="formulaSection">
       <label style="font-size:11px;color:var(--text-secondary);font-weight:500;margin-bottom:6px;display:block;">สูตรคำนวณ (เลือกที่จะใช้กับ dosing)</label>
       <div class="formula-toggle">
-        <button class="formula-btn active" onclick="setFormula('cg')">Cockcroft-Gault</button>
-        <button class="formula-btn" onclick="setFormula('ckd')">CKD-EPI 2021</button>
+        <button class="formula-btn active" data-action="setFormula" data-value="cg">Cockcroft-Gault</button>
+        <button class="formula-btn" data-action="setFormula" data-value="ckd">CKD-EPI 2021</button>
       </div>
     </div>
 
     <!-- Dual CrCl/eGFR Display -->
     <div id="adultResultsSection">
       <div class="renal-results">
-        <div class="renal-result-box cg active" onclick="setFormula('cg')" id="boxCG">
+        <div class="renal-result-box cg active" data-action="setFormula" data-value="cg" id="boxCG">
           <div class="renal-result-label">CrCl (Cockcroft-Gault)</div>
           <div class="renal-result-value" id="valCG">—</div>
           <div class="renal-result-unit">mL/min</div>
           <div id="stageCG"></div>
         </div>
-        <div class="renal-result-box ckd" onclick="setFormula('ckd')" id="boxCKD">
+        <div class="renal-result-box ckd" data-action="setFormula" data-value="ckd" id="boxCKD">
           <div class="renal-result-label">eGFR (CKD-EPI 2021)</div>
           <div class="renal-result-value" id="valCKD">—</div>
           <div class="renal-result-unit">mL/min/1.73m²</div>
@@ -1100,19 +1100,19 @@ body::before {
   <div class="section-header">💊 เลือกยาเพื่อดู Renal Dosing</div>
   <div class="search-box">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-    <input type="text" id="drugSearch" placeholder="ค้นหาชื่อยา..." oninput="filterDrugs()">
+    <input type="text" id="drugSearch" placeholder="ค้นหาชื่อยา..." data-action="filterDrugs">
   </div>
   <div class="filter-tabs" id="filterTabs">
-    <div class="filter-tab active" onclick="filterByClass('all')">ทั้งหมด</div>
-    <div class="filter-tab" onclick="filterByClass('abx')">💉 Antibiotics</div>
-    <div class="filter-tab" onclick="filterByClass('af')">🍄 Antifungals</div>
-    <div class="filter-tab" onclick="filterByClass('av')">🦠 Antivirals</div>
-    <div class="filter-tab" onclick="filterByClass('ac')">🩸 Anticoagulants</div>
-    <div class="filter-tab" onclick="filterByClass('chemo')">⚗️ Chemo</div>
-    <div class="filter-tab" onclick="filterByClass('cv')">❤️ Cardiovascular</div>
-    <div class="filter-tab" onclick="filterByClass('analgesic')">💊 Analgesics</div>
-    <div class="filter-tab" onclick="filterByClass('neuro')">🧠 Neuro</div>
-    <div class="filter-tab" onclick="filterByClass('misc')">📦 Others</div>
+    <div class="filter-tab active" data-action="filterByClass" data-value="all">ทั้งหมด</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="abx">💉 Antibiotics</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="af">🍄 Antifungals</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="av">🦠 Antivirals</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="ac">🩸 Anticoagulants</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="chemo">⚗️ Chemo</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="cv">❤️ Cardiovascular</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="analgesic">💊 Analgesics</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="neuro">🧠 Neuro</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="misc">📦 Others</div>
   </div>
   <div class="drug-list" id="drugList"></div>
 </div>
@@ -1121,7 +1121,7 @@ body::before {
 <div class="section recom-section" id="recomSection">
   <div class="recom-header-bar">
     <span class="recom-drug-name" id="recomDrugName"></span>
-    <span class="recom-close" onclick="closeDrugRecom()">&times;</span>
+    <span class="recom-close" data-action="closeDrugRecom">&times;</span>
   </div>
   <div id="recomBody"></div>
 </div>
@@ -2219,6 +2219,23 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
    * Safe DOM element builder — prevents innerHTML XSS.
    * @param {string} tag - HTML tag name
    * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
@@ -2293,7 +2310,8 @@ var IVDrugRef = (function() {
     generateId,
     debounce,
     fmt,
-    dom
+    dom,
+    delegate
   };
 })();
 
@@ -2386,7 +2404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isPediatric) return; // locked to Schwartz in pediatric mode
     activeFormula = f;
     document.querySelectorAll('.formula-btn').forEach(b => b.classList.remove('active'));
-    var activeBtn = document.querySelector(`.formula-btn[onclick="setFormula('${f}')"]`);
+    var activeBtn = document.querySelector(`.formula-btn[data-value="${f}"]`);
     if (activeBtn) activeBtn.classList.add('active');
     var boxCG = document.getElementById('boxCG'); if (boxCG) boxCG.classList.toggle('active', f === 'cg');
     var boxCKD = document.getElementById('boxCKD'); if (boxCKD) boxCKD.classList.toggle('active', f === 'ckd');
@@ -2878,7 +2896,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     list.innerHTML = drugs.map(d => `
-      <div class="drug-item ${selectedDrug === d.id ? 'active' : ''}" onclick="selectDrug('${d.id}')">
+      <div class="drug-item ${selectedDrug === d.id ? 'active' : ''}" data-action="selectDrug" data-id="${d.id}">
         <div class="drug-item-header">
           <div>
             <div class="drug-item-name">${d.name}</div>
@@ -3008,16 +3026,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ptSex').addEventListener('change', recalc);
     document.getElementById('ptScr').addEventListener('input', recalc);
 
-    // Set up drug search listener
-    document.getElementById('drugSearch').addEventListener('input', filterDrugs);
-
-    // Make global functions available for onclick handlers
-    window.setFormula = setFormula;
-    window.filterByClass = filterByClass;
-    window.selectDrug = selectDrug;
-    window.closeDrugRecom = closeDrugRecom;
-    window.recalc = recalc;
-    window.filterDrugs = filterDrugs;
+    // Event delegation — replaces inline onclick/oninput/onchange
+    IVDrugRef.delegate(document, 'click', {
+      setFormula: function(e, t) { setFormula(t.dataset.value); },
+      filterByClass: function(e, t) { filterByClass(t.dataset.value); },
+      selectDrug: function(e, t) { selectDrug(t.dataset.id); },
+      closeDrugRecom: function() { closeDrugRecom(); }
+    });
+    IVDrugRef.delegate(document, 'input', {
+      recalc: function() { recalc(); },
+      filterDrugs: function() { filterDrugs(); }
+    });
+    IVDrugRef.delegate(document, 'change', {
+      recalc: function() { recalc(); }
+    });
   }
 
   // Wait for DOM to be ready

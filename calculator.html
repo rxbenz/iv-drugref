@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dose Calculator — IV DrugRef</title>
   <meta name="description" content="IV Drug Dose Calculator with renal adjustments">
@@ -586,15 +586,15 @@ body::before {
     <div class="field-row-3">
       <div class="field">
         <label>น้ำหนัก (kg)</label>
-        <input type="number" id="ptWt" value="70" min="3" max="400" step="0.1" oninput="updateCrCl(); calculate();">
+        <input type="number" id="ptWt" value="70" min="3" max="400" step="0.1" data-action="patientInput">
       </div>
       <div class="field">
         <label>อายุ (ปี)</label>
-        <input type="number" id="ptAge" value="65" min="1" max="120" oninput="updateCrCl(); calculate();">
+        <input type="number" id="ptAge" value="65" min="1" max="120" data-action="patientInput">
       </div>
       <div class="field">
         <label>เพศ</label>
-        <select id="ptSex" onchange="updateCrCl(); calculate();">
+        <select id="ptSex" data-action="patientInput">
           <option value="M">ชาย</option>
           <option value="F">หญิง</option>
         </select>
@@ -603,11 +603,11 @@ body::before {
     <div class="field-row">
       <div class="field">
         <label>SCr (mg/dL)</label>
-        <input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1" oninput="updateCrCl(); calculate();">
+        <input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1" data-action="patientInput">
       </div>
       <div class="field">
         <label>ส่วนสูง (cm)</label>
-        <input type="number" id="ptHt" value="165" min="40" max="250" oninput="updateCrCl(); calculate();">
+        <input type="number" id="ptHt" value="165" min="40" max="250" data-action="patientInput">
       </div>
     </div>
     <div id="validationMessages" class="validation-container" style="display:none;"></div>
@@ -1722,6 +1722,23 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
    * Safe DOM element builder — prevents innerHTML XSS.
    * @param {string} tag - HTML tag name
    * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
@@ -1796,7 +1813,8 @@ var IVDrugRef = (function() {
     generateId,
     debounce,
     fmt,
-    dom
+    dom,
+    delegate
   };
 })();
 
@@ -1814,7 +1832,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ====== Drug Definitions ======
   const CALC_DRUGS = [
     {
-      id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🧬 Bayesian TDM →</a>',
+      id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🧬 Bayesian TDM →</a>',
       badges: ['badge-renal'],
       calc: function(pt) {
         const dose_low = Math.round(pt.wt * 15 / 250) * 250;
@@ -1865,7 +1883,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     {
-      id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-renal'],
       calc: function(pt) {
         const dose = Math.round(pt.wt * 15);
@@ -1890,7 +1908,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     {
-      id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-renal'],
       calc: function(pt) {
         const dose_conv = (pt.wt * 1.7).toFixed(0);
@@ -1941,7 +1959,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     {
-      id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-loading'],
       calc: function(pt) {
         const dose = Math.round(pt.wt * 20);
@@ -1962,7 +1980,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     {
-      id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;" onclick="event.stopPropagation()">🎯 TDM →</a>',
+      id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-loading'],
       calc: function(pt) {
         const dose30 = Math.round(pt.wt * 30);
@@ -2208,7 +2226,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderDrugGrid() {
     const grid = document.getElementById('drugGrid');
     grid.innerHTML = CALC_DRUGS.map(d => `
-      <div class="drug-card ${selectedDrug === d.id ? 'active' : ''}" onclick="selectDrug('${d.id}')">
+      <div class="drug-card ${selectedDrug === d.id ? 'active' : ''}" data-action="selectDrug" data-id="${d.id}">
         <div class="drug-name">${d.name}</div>
         <div class="drug-sub">${d.sub}</div>
         ${d.badges.map(b => `<span class="badge ${b}">${b.replace('badge-','')}</span>`).join(' ')}
@@ -2350,11 +2368,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ====== Expose to window ======
-  window.selectDrug = selectDrug;
-  window.calculate = calculate;
-  window.renderDrugGrid = renderDrugGrid;
-  window.updateCrCl = updateCrCl;
+  // ====== Event Delegation ======
+  IVDrugRef.delegate(document, 'click', {
+    selectDrug: function(e, t) { if (e.target.closest('a[href]')) return; selectDrug(t.dataset.id); }
+  });
+  IVDrugRef.delegate(document, 'input', {
+    patientInput: function() { updateCrCl(); calculate(); }
+  });
+  IVDrugRef.delegate(document, 'change', {
+    patientInput: function() { updateCrCl(); calculate(); }
+  });
 
   // ====== Init ======
   document.addEventListener('DOMContentLoaded', function() {

@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IV Drug Quick Reference — สถาบันประสาทวิทยา | Neurological Institute of Thailand</title>
 
@@ -1519,7 +1519,7 @@ body::before {
         placeholder="ค้นหายา... เช่น phenytoin, amiodarone, rt-PA"
         autocomplete="off" autocorrect="off" spellcheck="false">
       <span class="kbd-hint" id="kbdHint">⌘K</span>
-      <button class="search-clear" id="clearBtn" onclick="clearSearch()">✕</button>
+      <button class="search-clear" id="clearBtn" data-action="clearSearch">✕</button>
     </div>
   </div>
 
@@ -1547,7 +1547,7 @@ body::before {
 
   <!-- Filter Chip -->
   <div class="filter-chip-wrap" id="filterChipWrap">
-    <button class="filter-chip" id="filterChip" onclick="openFilterSheet()">
+    <button class="filter-chip" id="filterChip" data-action="openFilterSheet">
       <span class="chip-icon">🏷️</span>
       <span id="filterChipText">ทั้งหมด</span>
       <span class="chip-chevron">▼</span>
@@ -1558,7 +1558,7 @@ body::before {
   <div class="filter-zone" id="filterZone">
     <div class="filter-header">
       <div class="filter-label">🏷️ หมวดยา <span class="filter-active-tag" id="filterActiveTag">ทั้งหมด</span></div>
-      <button class="filter-toggle" id="filterToggle" onclick="toggleFilters()">
+      <button class="filter-toggle" id="filterToggle" data-action="toggleFilters">
         <span>กรอง</span><span class="chevron">▼</span>
       </button>
     </div>
@@ -1584,14 +1584,14 @@ body::before {
 </header>
 
 <!-- Filter Sheet Backdrop (modal) -->
-<div class="filter-sheet-backdrop" id="filterSheetBackdrop" onclick="closeFilterSheet()"></div>
+<div class="filter-sheet-backdrop" id="filterSheetBackdrop" data-action="closeFilterSheet"></div>
 
 <!-- Filter Sheet (bottom modal) -->
 <div class="filter-sheet" id="filterSheet">
   <div class="filter-sheet-handle"></div>
   <div class="filter-sheet-header">
     <div class="filter-sheet-title">🏷️ หมวดยา</div>
-    <button class="filter-sheet-close" onclick="closeFilterSheet()">✕</button>
+    <button class="filter-sheet-close" data-action="closeFilterSheet">✕</button>
   </div>
   <div class="filter-sheet-grid" id="filterSheetGrid">
     <button class="filter-sheet-btn active" data-filter="all">ทั้งหมด</button>
@@ -1649,10 +1649,10 @@ body::before {
       </div>
     </div>
     <div style="text-align:center;padding-bottom:16px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
-      <button onclick="showAbout()" style="font-family:inherit;font-size:11px;color:var(--text-muted);background:0 0;border:1px solid var(--border);padding:6px 16px;border-radius:20px;cursor:pointer">
+      <button data-action="showAbout" style="font-family:inherit;font-size:11px;color:var(--text-muted);background:0 0;border:1px solid var(--border);padding:6px 16px;border-radius:20px;cursor:pointer">
         ℹ️ เกี่ยวกับแอปนี้
       </button>
-      <button onclick="showContact()" style="font-family:inherit;font-size:11px;color:#0ea5e9;background:0 0;border:1px solid #bfdbfe;padding:6px 16px;border-radius:20px;cursor:pointer">
+      <button data-action="showContact" style="font-family:inherit;font-size:11px;color:#0ea5e9;background:0 0;border:1px solid #bfdbfe;padding:6px 16px;border-radius:20px;cursor:pointer">
         💬 แจ้งปัญหา / ข้อเสนอแนะ
       </button>
     </div>
@@ -2163,12 +2163,700 @@ body::before {
 })();
 
 // ============================================================
+// IV DrugRef PWA v5.0 — Core Utilities
+// Shared across all pages
+// ============================================================
+
+/* global window */
+'use strict';
+
+var IVDrugRef = (function() {
+
+  // ============================================================
+  // PATIENT INPUT VALIDATION
+  // ============================================================
+
+  /**
+   * Clinical validation rules for patient parameters.
+   * Two tiers: "error" = impossible/dangerous value (blocks calculation),
+   *            "warn"  = unusual but possible (shows warning, allows calculation).
+   */
+  var VALIDATION_RULES = {
+    age: {
+      label: 'อายุ',
+      unit: 'ปี',
+      error: { min: 0.1, max: 120, msg: 'อายุต้องอยู่ระหว่าง 0–120 ปี' },
+      warn: [
+        { test: function(v) { return v > 100; }, msg: 'อายุ >100 ปี — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 1; }, msg: 'อายุ <1 ปี — กรุณาตรวจสอบสูตรคำนวณ' }
+      ]
+    },
+    wt: {
+      label: 'น้ำหนัก',
+      unit: 'kg',
+      error: { min: 0.3, max: 500, msg: 'น้ำหนักต้องอยู่ระหว่าง 0.3–500 kg' },
+      warn: [
+        { test: function(v) { return v > 300; }, msg: 'น้ำหนัก >300 kg — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 3; }, msg: 'น้ำหนัก <3 kg — ตรวจสอบหน่วย (kg)' }
+      ]
+    },
+    scr: {
+      label: 'SCr',
+      unit: 'mg/dL',
+      error: { min: 0.05, max: 50, msg: 'SCr ต้องอยู่ระหว่าง 0.05–50 mg/dL' },
+      warn: [
+        { test: function(v) { return v > 15; }, msg: 'SCr >15 — ค่าสูงมาก กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 0.2; }, msg: 'SCr <0.2 — ค่าต่ำผิดปกติ อาจทำให้ CrCl สูงเกินจริง' }
+      ]
+    },
+    ht: {
+      label: 'ส่วนสูง',
+      unit: 'cm',
+      error: { min: 20, max: 260, msg: 'ส่วนสูงต้องอยู่ระหว่าง 20–260 cm' },
+      warn: [
+        { test: function(v) { return v > 220; }, msg: 'ส่วนสูง >220 cm — กรุณาตรวจสอบ' },
+        { test: function(v) { return v < 40; }, msg: 'ส่วนสูง <40 cm — กรุณาตรวจสอบ' }
+      ]
+    }
+  };
+
+  /**
+   * Validate a single patient parameter.
+   * @param {string} field - Field key (age, wt, scr, ht)
+   * @param {number} value - The value to validate
+   * @returns {Object} { valid: bool, level: 'ok'|'warn'|'error', messages: string[] }
+   */
+  function validateField(field, value) {
+    var rule = VALIDATION_RULES[field];
+    if (!rule) return { valid: true, level: 'ok', messages: [] };
+
+    var messages = [];
+
+    // Check for NaN / empty
+    if (value === null || value === undefined || isNaN(value)) {
+      return { valid: false, level: 'error', messages: [rule.label + ' — กรุณาระบุค่า'] };
+    }
+
+    // Hard error range
+    var er = rule.error;
+    if (value < er.min || value > er.max) {
+      return { valid: false, level: 'error', messages: [er.msg] };
+    }
+
+    // Warnings
+    var level = 'ok';
+    for (var i = 0; i < rule.warn.length; i++) {
+      if (rule.warn[i].test(value)) {
+        level = 'warn';
+        messages.push(rule.warn[i].msg);
+      }
+    }
+
+    return { valid: true, level: level, messages: messages };
+  }
+
+  /**
+   * Validate all patient fields and apply visual feedback to form inputs.
+   * @param {Object} values - { age, wt, scr, ht } numeric values
+   * @param {Object} fieldIds - Optional custom DOM ID mapping
+   * @returns {Object} { allValid: bool, results: { field: validationResult }, errors: string[], warnings: string[] }
+   */
+  function validatePatientInput(values, fieldIds) {
+    var ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', scr: 'ptScr'
+    }, fieldIds || {});
+
+    var results = {};
+    var errors = [];
+    var warnings = [];
+    var allValid = true;
+
+    var fields = ['age', 'wt', 'scr', 'ht'];
+    for (var i = 0; i < fields.length; i++) {
+      var f = fields[i];
+      var val = values[f];
+      var result = validateField(f, val);
+      results[f] = result;
+
+      if (!result.valid) {
+        allValid = false;
+        errors = errors.concat(result.messages);
+      } else if (result.level === 'warn') {
+        warnings = warnings.concat(result.messages);
+      }
+
+      // Apply visual feedback to DOM element
+      var el = document.getElementById(ids[f]);
+      if (el) {
+        el.classList.remove('input-error', 'input-warn');
+        if (result.level === 'error') {
+          el.classList.add('input-error');
+        } else if (result.level === 'warn') {
+          el.classList.add('input-warn');
+        }
+      }
+    }
+
+    return { allValid: allValid, results: results, errors: errors, warnings: warnings };
+  }
+
+  /**
+   * Render validation messages into a target container element.
+   * @param {string} containerId - DOM ID of the container
+   * @param {Object} validation - Result from validatePatientInput()
+   */
+  function renderValidationMessages(containerId, validation) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Clear safely
+    while (container.firstChild) container.removeChild(container.firstChild);
+
+    if (validation.errors.length === 0 && validation.warnings.length === 0) {
+      container.style.display = 'none';
+      return;
+    }
+
+    function buildMsg(text, level) {
+      return dom('div', { className: 'validation-msg validation-' + level }, [
+        dom('span', { className: 'v-icon', textContent: level === 'error' ? '!' : '?' }),
+        dom('span', { textContent: text })
+      ]);
+    }
+
+    for (var i = 0; i < validation.errors.length; i++) {
+      container.appendChild(buildMsg(validation.errors[i], 'error'));
+    }
+    for (var j = 0; j < validation.warnings.length; j++) {
+      container.appendChild(buildMsg(validation.warnings[j], 'warn'));
+    }
+
+    container.style.display = 'flex';
+  }
+
+
+  // ============================================================
+  // CLINICAL CALCULATORS
+  // ============================================================
+
+  /**
+   * Ideal Body Weight (Devine formula)
+   * @param {number} ht - Height in cm
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} IBW in kg
+   */
+  function calcIBW(ht, sex) {
+    if (!ht || ht <= 0) return 0;
+    const htIn = ht / 2.54;
+    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+  }
+
+  /**
+   * Adjusted Body Weight (for obesity)
+   * @param {number} wt - Actual weight in kg
+   * @param {number} ibw - Ideal body weight in kg
+   * @returns {number} ABW in kg
+   */
+  function calcABW(wt, ibw) {
+    // Guard: if actual weight < IBW, ABW formula can produce inappropriate values
+    // In clinical practice, use actual weight when wt < IBW
+    if (wt <= 0 || ibw <= 0) return wt || 0;
+    if (wt < ibw) return wt; // No adjustment needed if underweight
+    return ibw + 0.4 * (wt - ibw);
+  }
+
+  /**
+   * Body Mass Index
+   * @param {number} wt - Weight in kg
+   * @param {number} ht - Height in cm
+   * @returns {number} BMI in kg/m²
+   */
+  function calcBMI(wt, ht) {
+    if (!ht || ht <= 0) return 0;
+    return wt / ((ht / 100) ** 2);
+  }
+
+  /**
+   * Body Surface Area (Mosteller formula)
+   * @param {number} ht - Height in cm
+   * @param {number} wt - Weight in kg
+   * @returns {number} BSA in m²
+   */
+  function calcBSA(ht, wt) {
+    if (!ht || !wt || ht <= 0 || wt <= 0) return 0;
+    return Math.sqrt((ht * wt) / 3600);
+  }
+
+  /**
+   * Cockcroft-Gault CrCl with automatic weight adjustment
+   * Uses ABW if patient is obese (>130% IBW)
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} ht - Height in cm (optional, used for obesity adjustment)
+   * @returns {number} CrCl in mL/min, minimum 5
+   */
+  function calcCockcroftGault(age, wt, scr, sex, ht) {
+    if (scr <= 0) return 0;
+    let useWt = wt;
+    if (ht && ht > 0) {
+      const ibw = calcIBW(ht, sex);
+      if (wt > ibw * 1.3) useWt = calcABW(wt, ibw); // ABW for obese
+    }
+    let crcl = ((140 - age) * useWt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.max(Math.round(crcl * 10) / 10, 5);
+  }
+
+  /**
+   * Cockcroft-Gault with raw TBW (no obesity adjustment)
+   * Used for comparison and non-adjusted dosing
+   * @param {number} age - Age in years
+   * @param {number} wt - Actual weight in kg
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} CrCl in mL/min
+   */
+  function calcCG_raw(age, wt, scr, sex) {
+    if (scr <= 0) return 0;
+    let crcl = ((140 - age) * wt) / (72 * scr);
+    if (sex === 'F') crcl *= 0.85;
+    return Math.round(crcl * 10) / 10;
+  }
+
+  /**
+   * Bedside Schwartz equation (pediatric eGFR)
+   * For ages 1-17 years
+   * @param {number} ht - Height in cm
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcSchwartz(ht, scr) {
+    if (scr <= 0 || !ht || ht <= 0) return 0;
+    return Math.round((0.413 * ht / scr) * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 equation (race-free)
+   * Returns indexed eGFR for standardized BSA (1.73m²)
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @returns {number} eGFR in mL/min/1.73m²
+   */
+  function calcCKDEPI2021(age, scr, sex) {
+    let eGFR;
+    if (sex === 'F') {
+      const kappa = 0.7;
+      const alpha = scr <= kappa ? -0.241 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age) * 1.012;
+    } else {
+      const kappa = 0.9;
+      const alpha = scr <= kappa ? -0.302 : -1.2;
+      eGFR = 142 * Math.pow(Math.min(scr / kappa, 1), alpha)
+        * Math.pow(Math.max(scr / kappa, 1), -1.2)
+        * Math.pow(0.9938, age);
+    }
+    return Math.round(eGFR * 10) / 10;
+  }
+
+  /**
+   * CKD-EPI 2021 de-indexed for drug dosing
+   * Converts indexed eGFR to non-indexed using patient BSA
+   * Per KDIGO 2024 recommendations for personalized dosing
+   * @param {number} age - Age in years
+   * @param {number} scr - Serum creatinine in mg/dL
+   * @param {string} sex - 'M' or 'F'
+   * @param {number} bsa - Body surface area in m²
+   * @returns {number} Non-indexed eGFR in mL/min
+   */
+  function calcCKDEPI2021_nonindexed(age, scr, sex, bsa) {
+    const indexed = calcCKDEPI2021(age, scr, sex);
+    return Math.round(indexed * bsa / 1.73 * 10) / 10;
+  }
+
+  /**
+   * Get CKD stage classification from GFR value
+   * @param {number} gfr - Glomerular filtration rate in mL/min
+   * @returns {Object} Stage info with stage code, Thai label, and CSS class
+   */
+  function getCKDStage(gfr) {
+    // Labels in both Thai (default) and English for i18n support
+    var stages = [
+      { min: 90, stage: 'G1', label: 'ปกติ/สูง', labelEn: 'Normal/High', cls: 'stage-1' },
+      { min: 60, stage: 'G2', label: 'ลดลงเล็กน้อย', labelEn: 'Mildly decreased', cls: 'stage-2' },
+      { min: 45, stage: 'G3a', label: 'ลดลงเล็กน้อย-ปานกลาง', labelEn: 'Mildly-moderately decreased', cls: 'stage-3a' },
+      { min: 30, stage: 'G3b', label: 'ลดลงปานกลาง-มาก', labelEn: 'Moderately-severely decreased', cls: 'stage-3b' },
+      { min: 15, stage: 'G4', label: 'ลดลงมาก', labelEn: 'Severely decreased', cls: 'stage-4' },
+      { min: -Infinity, stage: 'G5', label: 'ไตวาย', labelEn: 'Kidney failure', cls: 'stage-5' }
+    ];
+    for (var i = 0; i < stages.length; i++) {
+      if (gfr >= stages[i].min) return stages[i];
+    }
+    return stages[stages.length - 1];
+  }
+
+  /**
+   * Build comprehensive patient object from form elements
+   * Automatically calculates all derived metrics (IBW, ABW, BMI, BSA, etc.)
+   * @param {Object} fieldIds - Optional custom field ID mapping
+   * @returns {Object} Complete patient data object
+   */
+  function getPatientFromForm(fieldIds) {
+    // Default field IDs matching standard form layout
+    const ids = Object.assign({
+      age: 'ptAge', wt: 'ptWt', ht: 'ptHt', sex: 'ptSex', scr: 'ptScr',
+      alb: 'ptAlb', dialysis: 'ptDialysis'
+    }, fieldIds || {});
+
+    const getVal = (id, def) => {
+      const el = document.getElementById(id);
+      if (!el) return def;
+      const v = parseFloat(el.value);
+      return isNaN(v) ? def : v;
+    };
+    const getStr = (id, def) => {
+      const el = document.getElementById(id);
+      return el ? el.value : def;
+    };
+
+    const age = getVal(ids.age, 55);
+    const wt = getVal(ids.wt, 70);
+    const ht = getVal(ids.ht, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = getVal(ids.scr, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
+
+    // Run validation and apply visual feedback
+    const validation = validatePatientInput(
+      { age: age, wt: wt, scr: scr, ht: ht },
+      { age: ids.age, wt: ids.wt, scr: ids.scr, ht: ids.ht }
+    );
+
+    const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
+    const abw = Math.round(calcABW(wt, ibw) * 10) / 10;
+    const bmi = Math.round(calcBMI(wt, ht) * 10) / 10;
+    const bsa = Math.round(calcBSA(ht, wt) * 100) / 100;
+    const isObese = wt > ibw * 1.3;
+    const isUnderweight = wt < ibw;
+    const isPediatric = age < 18;
+
+    // Calculate renal function (CrCl for adults, Schwartz for pediatric)
+    let crcl;
+    if (isPediatric && ht > 0) {
+      crcl = calcSchwartz(ht, scr);
+    } else {
+      crcl = calcCockcroftGault(age, wt, scr, sex, ht);
+    }
+
+    return {
+      age, wt, ht, sex, scr, alb, dialysis,
+      ibw, abw, bmi, bsa, isObese, isUnderweight, isPediatric,
+      crcl,
+      validation
+    };
+  }
+
+
+  // ============================================================
+  // ANALYTICS
+  // ============================================================
+  const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  let _reqCount = 0;
+
+  /**
+   * Get anonymous session ID from localStorage
+   * @returns {string} Session ID or empty string
+   */
+  function getSessionId() {
+    return localStorage.getItem('anonSessionId') || '';
+  }
+
+  /**
+   * Get anonymous user ID from localStorage
+   * @returns {string} User ID or empty string
+   */
+  function getUserId() {
+    return localStorage.getItem('anonUserId') || '';
+  }
+
+  /**
+   * Check if user has consented to analytics
+   * @returns {boolean} True if analytics consent is given
+   */
+  function hasAnalyticsConsent() {
+    return localStorage.getItem('analyticsConsent') === 'true';
+  }
+
+  /**
+   * Send analytics event via sendBeacon or fetch
+   * Rate limited to 40 requests per page session
+   * @param {Object} data - Event data to send
+   */
+  function sendAnalytics(data) {
+    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (_reqCount >= 40) return;
+    _reqCount++;
+    try {
+      const payload = JSON.stringify({
+        ...data,
+        session_id: getSessionId(),
+        user_id: getUserId()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(ANALYTICS_URL, payload);
+      } else {
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
+   * Track page view with automatic entry/exit timing
+   * Sends page_view events on entry and exit with duration
+   * @param {string} pageName - Name/identifier of current page
+   * @returns {Object} Tracking object with sendExit function and metadata
+   */
+  function trackPageView(pageName) {
+    const enterTime = Date.now();
+    const fromPage = (function() {
+      const ref = document.referrer || '';
+      if (ref.includes('index.html') || ref.endsWith('iv-drugref/')) return 'drugref';
+      if (ref.includes('calculator.html')) return 'calculator';
+      if (ref.includes('tdm.html')) return 'tdm';
+      if (ref.includes('vanco-tdm.html')) return 'vanco-tdm';
+      if (ref.includes('renal-dosing.html')) return 'renal-dosing';
+      if (ref.includes('compatibility.html')) return 'compatibility';
+      if (ref.includes('dashboard.html')) return 'dashboard';
+      return ref ? 'external' : 'direct';
+    })();
+
+    // Send entry event
+    sendAnalytics({
+      type: 'page_view', page: pageName, action: 'enter',
+      from_page: fromPage, referrer: document.referrer || 'direct'
+    });
+
+    // Track exit event (sent only once)
+    let exitSent = false;
+    function sendExit(extraData) {
+      if (exitSent) return;
+      exitSent = true;
+      sendAnalytics({
+        type: 'page_view', page: pageName, action: 'leave',
+        duration_sec: Math.round((Date.now() - enterTime) / 1000),
+        from_page: fromPage,
+        ...(extraData || {})
+      });
+    }
+
+    // Send exit on page unload or visibility change
+    // Use named handlers stored on function scope to allow cleanup and prevent accumulation
+    function onBeforeUnload() { sendExit(); }
+    function onVisChange() { if (document.visibilityState === 'hidden') sendExit(); }
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+    document.addEventListener('visibilitychange', onVisChange);
+
+    return {
+      sendExit,
+      fromPage,
+      enterTime,
+      // Allow caller to clean up listeners
+      destroy: function() {
+        sendExit();
+        window.removeEventListener('beforeunload', onBeforeUnload);
+        document.removeEventListener('visibilitychange', onVisChange);
+      }
+    };
+  }
+
+
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
+
+  /**
+   * Register service worker for offline support and caching
+   * Non-blocking registration with console logging
+   */
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    }
+  }
+
+
+  // ============================================================
+  // UTILITY HELPERS
+  // ============================================================
+
+  /**
+   * Generate random anonymous ID using crypto API
+   * @param {number} len - Length in hex characters (default 16)
+   * @returns {string} Random hex string
+   */
+  function generateId(len) {
+    len = len || 16;
+    // Prefer crypto API, fallback to Math.random for older browsers
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const arr = new Uint8Array(len / 2);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // Fallback: Math.random-based (less secure but functional)
+    var result = '';
+    for (var i = 0; i < len; i++) {
+      result += Math.floor(Math.random() * 16).toString(16);
+    }
+    return result;
+  }
+
+  /**
+   * Debounce function to limit function execution
+   * @param {Function} fn - Function to debounce
+   * @param {number} ms - Debounce delay in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  /**
+   * Format number with specified decimal precision
+   * @param {number} n - Number to format
+   * @param {number} decimals - Number of decimal places (default 1)
+   * @returns {string} Formatted number string
+   */
+  function fmt(n, decimals) {
+    decimals = decimals !== undefined ? decimals : 1;
+    // Guard against NaN, Infinity, and non-numeric input
+    if (typeof n !== 'number' || !isFinite(n)) return '–';
+    return (Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals)).toFixed(decimals);
+  }
+
+  /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
+   * Safe DOM element builder — prevents innerHTML XSS.
+   * @param {string} tag - HTML tag name
+   * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
+   * @param {Array} children - Child elements or strings (strings become text nodes)
+   * @returns {HTMLElement}
+   */
+  function dom(tag, attrs, children) {
+    var el = document.createElement(tag);
+    if (attrs) {
+      for (var key in attrs) {
+        if (key === 'className') el.className = attrs[key];
+        else if (key === 'textContent') el.textContent = attrs[key];
+        else if (key === 'style' && typeof attrs[key] === 'string') el.style.cssText = attrs[key];
+        else if (key === 'htmlFor') el.htmlFor = attrs[key];
+        else el.setAttribute(key, attrs[key]);
+      }
+    }
+    if (children) {
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (typeof child === 'string') el.appendChild(document.createTextNode(child));
+        else if (child) el.appendChild(child);
+      }
+    }
+    return el;
+  }
+
+  /**
+   * Version and app name constants
+   */
+  const VERSION = '5.0.0';
+  const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // PUBLIC API
+  // ============================================================
+  return {
+    // Version info
+    VERSION,
+    APP_NAME,
+
+    // Validation
+    VALIDATION_RULES,
+    validateField,
+    validatePatientInput,
+    renderValidationMessages,
+
+    // Clinical calculators
+    calcIBW,
+    calcABW,
+    calcBMI,
+    calcBSA,
+    calcCockcroftGault,
+    calcCG_raw,
+    calcSchwartz,
+    calcCKDEPI2021,
+    calcCKDEPI2021_nonindexed,
+    getCKDStage,
+    getPatientFromForm,
+
+    // Analytics
+    sendAnalytics,
+    trackPageView,
+    getSessionId,
+    getUserId,
+    hasAnalyticsConsent,
+
+    // Service Worker
+    registerSW,
+
+    // Utility helpers
+    generateId,
+    debounce,
+    fmt,
+    dom,
+    delegate
+  };
+})();
+
+// ============================================================
+// AUTO-INITIALIZATION
+// ============================================================
+// Register service worker on page load
+document.addEventListener('DOMContentLoaded', () => {
+  IVDrugRef.registerSW();
+});
+
+// ============================================================
 // IV DrugRef PWA v5.0 — Index Page Script
 // Extracted from V4.7.1 (clean, non-obfuscated)
 // Drug reference homepage with search, filtering, and analytics
 // ============================================================
 
-const ANALYTICS_URL="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",DOSE_CALC={"Norepinephrine (Levophed)":{unit:"mcg/kg/min",min:.01,max:2,default:.1,step:.01,wt:!0,concs:[{l:"4 mg/250 mL",v:16},{l:"8 mg/250 mL",v:32}],note:"Central line preferred. Extravasation → phentolamine 5-10 mg SC"},Dobutamine:{unit:"mcg/kg/min",min:2.5,max:20,default:5,step:.5,wt:!0,concs:[{l:"250 mg/250 mL",v:1e3},{l:"500 mg/250 mL",v:2e3}],note:"Titrate q10 min. ห้ามผสมกับ NaHCO₃"},Dopamine:{unit:"mcg/kg/min",min:1,max:20,default:5,step:.5,wt:!0,concs:[{l:"200 mg/250 mL",v:800},{l:"400 mg/250 mL",v:1600}],note:"Low 1-5: renal | Med 5-10: cardiac | High >10: vasopressor"},"Adrenaline (Epinephrine)":{unit:"mcg/min",min:1,max:20,default:2,step:.5,wt:!1,concs:[{l:"1 mg/250 mL",v:4},{l:"4 mg/250 mL",v:16}],note:"Infusion 1-10 mcg/min titrate. Cardiac arrest: 1 mg IV push q3-5min"},Nicardipine:{unit:"mg/hr",min:1,max:15,default:5,step:.5,wt:!1,concs:[{l:"25 mg/250 mL (0.1 mg/mL)",v:100},{l:"50 mg/250 mL",v:200}],note:"เปลี่ยน IV site q12h (peripheral). Target ถึง → ลด 3 mg/hr"},Dexmedetomidine:{unit:"mcg/kg/hr",min:.2,max:1.5,default:.5,step:.1,wt:!0,concs:[{l:"200 mcg/50 mL (4 mcg/mL)",v:4}],note:"ห้ามให้ >24 ชม. Loading: 1 mcg/kg/10 min (optional)"}};let searchTimeout,DRUGS=[],filteredDrugs=[],searchQuery="",currentFilter="all",expandedCards=new Set;function loadDrugsFromCache(){try{const e=localStorage.getItem("drugData_v4");if(e){const t=JSON.parse(e);if(Array.isArray(t)&&t.length>0){const e=t[0];if(e&&e.generic&&e.strength&&e.dilution&&e.admin)return t}}localStorage.removeItem("drugData_v4"),localStorage.removeItem("drugData_v4_ts")}catch(e){localStorage.removeItem("drugData_v4"),localStorage.removeItem("drugData_v4_ts")}return null}async function fetchDrugsFromLocalFile(){try{const e=await fetch("./drugs-data.json",{cache:"no-cache"});if(!e.ok)return null;const t=await e.json();if(Array.isArray(t)&&t.length>0)return t}catch(e){console.warn("[DrugSync] Local file fetch error:",e)}return null}async function fetchDrugsFromServer(){if(!navigator.onLine)return null;try{const e=await fetch(ANALYTICS_URL+"?action=drugs",{method:"GET",cache:"no-cache"});if(!e.ok)return null;const t=await e.json();if(t.drugs&&Array.isArray(t.drugs)&&t.drugs.length>0&&t.drugs.every(e=>e.generic&&e.reconst&&e.dilution&&e.admin&&e.monitoring))return t.drugs}catch(e){console.warn("[DrugSync] Server fetch error:",e)}return null}function saveDrugsToCache(e){try{localStorage.setItem("drugData_v4",JSON.stringify(e)),localStorage.setItem("drugData_v4_ts",Date.now().toString())}catch(e){}}function showSyncStatus(e,t="success"){let n=document.getElementById("syncStatus");n||(n=document.createElement("div"),n.id="syncStatus",n.style.cssText="position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9999;\n                        padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;\n                        opacity:0;transition:opacity 0.3s;pointer-events:none;font-family:inherit;\n                        white-space:nowrap;",document.body.appendChild(n)),n.style.background={syncing:"#f59e0b",success:"#059669",offline:"#64748b",error:"#dc2626"}[t]||"#ffffff",n.style.color="#fff",n.textContent=e,n.style.opacity="1","syncing"!==t&&setTimeout(()=>{n.style.opacity="0"},3e3)}async function initDrugs(){try{"v5"!==localStorage.getItem("drugCacheVer")&&(localStorage.removeItem("drugData_v4"),localStorage.removeItem("drugData_v4_ts"),localStorage.setItem("drugCacheVer","v5"))}catch(e){}let e=loadDrugsFromCache();if(DRUGS=e||[],!DRUGS.length){const e=await fetchDrugsFromLocalFile();e&&(DRUGS=e,saveDrugsToCache(DRUGS))}updateList();const t=localStorage.getItem("drugData_v4_ts")||"0",n=parseInt(t),i=Date.now()-n>18e5;if(navigator.onLine&&i){showSyncStatus("🔄 กำลัง sync...","syncing");const t=await fetchDrugsFromServer();t?(DRUGS=t,saveDrugsToCache(DRUGS),updateList(),showSyncStatus(`📦 อัพเดต ${t.length} รายการ`,"success")):showSyncStatus(e?"📦 ใช้ข้อมูลจาก cache":"⚠️ ไม่มีอินเทอร์เน็ต","offline")}}async function manualSync(){if(!navigator.onLine)return void showSyncStatus("⚠️ ไม่มีอินเทอร์เน็ต","offline");showSyncStatus("🔄 กำลัง sync...","syncing");try{const e=await fetchDrugsFromServer();e?(DRUGS=e,saveDrugsToCache(DRUGS),updateList(),showSyncStatus(`✓ อัพเดต ${e.length} รายการ`,"success")):showSyncStatus("✗ ไม่สามารถ sync ได้","error")}catch(e){console.error("[Sync] Error:",e);showSyncStatus("✗ Sync error","error")}}function onSearch(e){clearTimeout(searchTimeout),searchQuery=e.toLowerCase().trim(),searchQuery?document.getElementById("clearBtn").classList.add("show"):document.getElementById("clearBtn").classList.remove("show"),searchTimeout=setTimeout(()=>{updateList(),searchQuery&&sendAnalytics("SEARCH",{query:searchQuery,results:filteredDrugs.length})},150)}function clearSearch(){document.getElementById("searchInput").value="",searchQuery="",document.getElementById("clearBtn").classList.remove("show"),updateList(),document.getElementById("searchInput").focus()}function setFilter(e){currentFilter=e,updateFilterUI(),updateList(),closeFilterSheet(),sendAnalytics("FILTER",{filter:e})}function updateFilterUI(){document.querySelectorAll(".filter-btn").forEach(e=>{const t=e.dataset.filter;e.classList.toggle("active",t===currentFilter)}),document.querySelectorAll(".filter-sheet-btn").forEach(e=>{const t=e.dataset.filter;e.classList.toggle("active",t===currentFilter)});const e=document.getElementById("filterChipText"),t=document.getElementById("filterChip"),n=document.getElementById("filterActiveTag");if("all"===currentFilter)e.textContent="ทั้งหมด",t.classList.remove("has-filter"),n&&(n.textContent="ทั้งหมด",n.classList.remove("show"));else{const i="had"===currentFilter?"⚠ High Alert":currentFilter;e.textContent=i,t.classList.add("has-filter"),n&&(n.textContent=i,n.classList.add("show"))}}function filterDrugs(){let e=DRUGS;if(searchQuery){const t=searchQuery;e=e.filter(e=>{const n=(e.generic||"").toLowerCase(),i=(e.trade||"").toLowerCase(),s=(e.strength||"").toLowerCase(),a=(e.categories||[]).map(e=>e.toLowerCase()).join(" "),r=(e.precautions||"").toLowerCase();return n.includes(t)||i.includes(t)||s.includes(t)||a.includes(t)||r.includes(t)})}return"all"!==currentFilter&&(e="had"===currentFilter?e.filter(e=>e.had):e.filter(e=>(e.categories||[]).includes(currentFilter))),e}function sendAnalytics(e,t={}){if(navigator.onLine)try{const n={action:"log",event:e,data:t,timestamp:(new Date).toISOString(),userAgent:navigator.userAgent,sessionId:sessionStorage.getItem("sessionId")||""};fetch(ANALYTICS_URL,{method:"POST",body:JSON.stringify(n),mode:"no-cors"}).catch(()=>{})}catch(e){}}function trackSession(){const e="sid_"+Date.now()+"_"+Math.random().toString(36).substr(2,6);sessionStorage.setItem("sessionId",e),sessionStorage.setItem("sessionStart",Date.now().toString()),sendAnalytics("SESSION_START",{sessionId:e})}function renderDrugCard(e){const t=["drug-card"];e.had&&t.push("had");const n="E"===e.ed?'<span class="badge badge-ed">ED</span>':'<span class="badge badge-ned">NED</span>',i=e.had?'<span class="badge badge-had">⚠ HAD</span>':"",s=(e.trade||"").match(/\d+\s*(?:mg|mcg|mL)/i),a=s?s[0]:e.strength||"";return`\n    <div class="${t.join(" ")}" data-drug-id="${e.id}">\n      <div class="card-header" onclick="toggleCard(${e.id})">\n        <div class="card-number">${e.id}</div>\n        <div class="card-title-area">\n          <div class="card-generic">${e.generic}${DOSE_CALC[e.generic]?' <span style="font-size:11px;opacity:0.7;" title="มี Dose Calculator">📊</span>':''}</div>\n          <div class="card-trade">\n            ${e.trade||"-"}\n            ${a?`<span style="opacity:0.6; font-size:11px;">${a}</span>`:""}\n          </div>\n        </div>\n        <div class="card-badges">\n          ${i}\n          ${n}\n        </div>\n        <div class="card-chevron">▼</div>\n      </div>\n      \n      <div class="card-body">\n        ${renderCardBody(e)}\n      </div>\n    </div>\n  `}function renderCardBody(e){let t="";if(e.reconst&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">🧪</span> Reconstitution\n        </div>\n        <div class="info-grid">\n          <div class="info-item">\n            <div class="info-label">Solvent</div>\n            <div class="info-value">${e.reconst.solvent||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Volume</div>\n            <div class="info-value">${e.reconst.volume||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Concentration</div>\n            <div class="info-value mono">${e.reconst.conc||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.dilution&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">💧</span> Dilution\n        </div>\n        <div class="info-grid">\n          <div class="info-item">\n            <div class="info-label">Diluent</div>\n            <div class="info-value">${e.dilution.diluent||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Final Volume</div>\n            <div class="info-value">${e.dilution.volume||"-"}</div>\n          </div>\n          <div class="info-item full-width">\n            <div class="info-label">Final Concentration</div>\n            <div class="info-value mono">${e.dilution.finalConc||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.admin&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">💉</span> Administration\n        </div>\n        <div class="info-grid">\n          <div class="info-item full-width">\n            <div class="info-label">Route</div>\n            <div class="info-value">${e.admin.route||"-"}</div>\n          </div>\n          <div class="info-item full-width">\n            <div class="info-label">Rate</div>\n            <div class="info-value">${e.admin.rate||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.stability&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">⏱️</span> Stability\n        </div>\n        <div class="info-grid">\n          <div class="info-item">\n            <div class="info-label">Reconstituted</div>\n            <div class="info-value">${e.stability.reconst||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Diluted</div>\n            <div class="info-value">${e.stability.diluted||"-"}</div>\n          </div>\n          <div class="info-item full-width">\n            <div class="info-label">Storage</div>\n            <div class="info-value">${e.stability.storage||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.compat){const n=e.compat.ysite&&"limited data"!==e.compat.ysite.toLowerCase()&&"not recommended"!==e.compat.ysite.toLowerCase();t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">🔗</span> Y-site Compatibility\n        </div>\n        <div class="${n?"compat-ok":"compat-bad"}">\n          <div class="info-label">${n?"✓ Compatible":"✗ Incompatible"}</div>\n          <div class="info-value" style="margin-top:4px;">${e.compat.ysite||"-"}</div>\n        </div>\n        ${e.compat.incompat?`\n          <div class="warning-box" style="margin-top:8px;">\n            <div class="info-label" style="color:#dc2626;">ห้ามผสม (Incompatible)</div>\n            <div class="info-value" style="color:#7f1d1d; margin-top:4px;">${e.compat.incompat}</div>\n          </div>\n        `:""}\n      </div>\n    `}return e.precautions&&(t+=`\n      <div class="warning-box">\n        <div class="info-label">⚠️ Precautions</div>\n        <div class="info-value" style="margin-top:6px; color:#7f1d1d;">${e.precautions}</div>\n      </div>\n    `),e.monitoring&&e.monitoring.length>0&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">👁️</span> Monitoring\n        </div>\n        <div class="monitoring-tags">\n          ${e.monitoring.map(e=>`<span class="m-tag">${e}</span>`).join("")}\n        </div>\n      </div>\n    `),DOSE_CALC[e.generic]&&(t+=renderDoseCalculator(e.generic)),e.ref&&(t+=`\n      <div class="ref-line">\n        📚 <strong>Ref:</strong> ${e.ref}\n      </div>\n    `),t}function renderDoseCalculator(e){const t=DOSE_CALC[e];if(!t)return"";const n=t.concs.map((t,n)=>`\n    <div class="calc-field">\n      <label>${t.l}</label>\n      <input type="radio" name="conc_${e.replace(/[^a-z0-9]/gi,"")}" value="${t.v}" \n             ${0===n?"checked":""} onchange="updateDoseCalc('${e}')">\n    </div>\n  `).join(""),i=t.wt?`\n    <div class="calc-field">\n      <label>Weight (kg)</label>\n      <input type="number" min="1" max="200" value="70" step="1" \n             id="wt_${e.replace(/[^a-z0-9]/gi,"")}" onchange="updateDoseCalc('${e}')" oninput="updateDoseCalc('${e}')">\n    </div>\n  `:"",s=`dose_${e.replace(/[^a-z0-9]/gi,"")}`;return`\n    <div class="calc-section">\n      <div style="font-weight:600; font-size:12px; color:#185FA5; margin-bottom:8px;">\n        📊 Dose Calculator: ${e}\n      </div>\n      <div class="calc-grid">\n        ${n}\n        ${i}\n        <div class="calc-field">\n          <label>Dose (${t.unit})</label>\n          <input type="number" min="${t.min}" max="${t.max}" value="${t.default}" step="${t.step}"\n                 id="${s}" onchange="updateDoseCalc('${e}')" oninput="updateDoseCalc('${e}')">\n        </div>\n      </div>\n      <div id="calcResult_${e.replace(/[^a-z0-9]/gi,"")}" style="display:none; margin-top:10px;">\n        <div class="calc-result">\n          <div class="calc-result-value" id="calcValue_${e.replace(/[^a-z0-9]/gi,"")}">-</div>\n          <div style="font-size:10px; color:#166534; margin-top:2px;">mL/hr</div>\n        </div>\n      </div>\n      <div class="calc-note">\n        ${t.note}\n      </div>\n      <div class="calc-disclaimer">\n        ⚠️ This is a guide only. Always verify calculations independently.\n      </div>\n    </div>\n  `}function updateDoseCalc(e){const t=DOSE_CALC[e];if(!t)return;const n=e.replace(/[^a-z0-9]/gi,""),i=document.querySelectorAll(`input[name="conc_${n}"]:checked`);if(0===i.length)return;const s=parseFloat(i[0].value),a=document.getElementById(`dose_${n}`);if(!a)return;const r=parseFloat(a.value)||t.default;let o,l=1;if(t.wt){const e=document.getElementById(`wt_${n}`);l=e?parseFloat(e.value)||70:70}o=t.wt?r*l*60/s:60*r/s;const c=document.getElementById(`calcResult_${n}`),d=document.getElementById(`calcValue_${n}`);c&&d&&(d.textContent=o.toFixed(1),c.style.display="block")}function toggleCard(e){const t=document.querySelector(`[data-drug-id="${e}"]`);if(!t)return;const n=t.classList.contains("expanded");if(t.classList.toggle("expanded"),n)expandedCards.delete(e);else{expandedCards.add(e);const t=DRUGS.find(t=>t.id===e);t&&sendAnalytics("VIEW_DRUG",{drugId:e,drugName:t.generic})}}function renderDrugList(e){const t=document.getElementById("drugList"),n=document.getElementById("resultsInfo");if(0===e.length)t.innerHTML='\n      <div class="empty-state">\n        <div class="empty-icon">📭</div>\n        <div class="empty-text">ไม่พบยา</div>\n        <div class="empty-hint">ลองค้นหาด้วยคำอื่นหรือเปลี่ยนตัวกรองประเภท</div>\n      </div>\n    ',n.textContent="0 results";else{t.innerHTML=e.map(e=>renderDrugCard(e)).join("");const i=e.filter(e=>e.had).length;n.innerHTML=`แสดง ${e.length} รายการ`+(i>0?` (${i} ⚠ HAD)`:"")+(e.length<DRUGS.length?` จากทั้งหมด ${DRUGS.length} รายการ`:"")}}function openFilterSheet(){const e=document.getElementById("filterSheetBackdrop"),t=document.getElementById("filterSheet");e.classList.add("open"),t.classList.add("open")}function closeFilterSheet(){const e=document.getElementById("filterSheetBackdrop"),t=document.getElementById("filterSheet");e.classList.remove("open"),t.classList.remove("open")}function initFilters(){document.querySelectorAll(".filter-btn").forEach(e=>{e.addEventListener("click",()=>setFilter(e.dataset.filter))}),document.querySelectorAll(".filter-sheet-btn").forEach(e=>{e.addEventListener("click",()=>setFilter(e.dataset.filter))})}function toggleFilters(){const e=document.getElementById("filters"),t=document.getElementById("filterToggle");e&&t&&(e.classList.toggle("open"),t.classList.toggle("open"))}function showAbout(){alert("IV Drug Quick Reference v4.7.0\n\nจัดทำโดย ภก. ฐาปนัท นาคครุฑ (Benz)\nกลุ่มงานเภสัชกรรม\nสถาบันประสาทวิทยา\n\nแหล่งอ้างอิง:\nLexicomp, Trissel's Handbook,\nAHFS, ISMP, AHA/ACLS, Package Inserts")}function showContact(){alert("📧 แจ้งปัญหา / ข้อเสนอแนะ\n\nติดต่อ: ภก. ฐาปนัท นาคครุฑ (Benz)\nEmail: thapanat.nk@gmail.com\nLINE: rxbenz\n\nพบข้อมูลยาผิดพลาด อยากให้เพิ่มยา หรือมี feedback ใดๆ แจ้งได้เลยครับ")}function updateList(){filteredDrugs=filterDrugs(),renderDrugList(filteredDrugs)}let activeUrgentAlerts=[],urgentAlertsDismissed=JSON.parse(localStorage.getItem("urgentDismissed")||"[]");const URGENT_POLL_INTERVAL=3e5;let urgentPollClientTimer=null;async function requestNotificationPermission(){if(!("Notification"in window))return console.warn("[Urgent] Notification API not supported"),"denied";if("granted"===Notification.permission)return"granted";if("denied"===Notification.permission)return"denied";try{return await Notification.requestPermission()}catch(e){return console.warn("[Urgent] Permission request failed:",e),"denied"}}async function initUrgentAlertSystem(){const e=await requestNotificationPermission();console.log("[Urgent] Notification permission:",e),"serviceWorker"in navigator&&navigator.serviceWorker.controller&&(navigator.serviceWorker.addEventListener("message",e=>{e.data&&("URGENT_ALERTS_UPDATE"===e.data.type&&handleUrgentAlertsUpdate(e.data.alerts,e.data.hasNew),"URGENT_ALERT_CLICK"===e.data.type&&showUrgentAlertDetail(e.data.alertId))}),navigator.serviceWorker.controller.postMessage({type:"START_URGENT_POLL"})),startClientUrgentPolling(),await checkUrgentAlertsFromClient()}function startClientUrgentPolling(){urgentPollClientTimer&&clearInterval(urgentPollClientTimer),urgentPollClientTimer=setInterval(()=>{navigator.onLine&&checkUrgentAlertsFromClient()},3e5)}async function checkUrgentAlertsFromClient(){if(navigator.onLine)try{const e=parseInt(localStorage.getItem("urgentLastCheck")||"0"),t=await fetch(`${ANALYTICS_URL}?action=checkUrgentAlerts&since=${e}`,{cache:"no-cache"});if(!t.ok)return;const n=await t.json();if(n.serverTime&&localStorage.setItem("urgentLastCheck",String(n.serverTime)),n.alerts&&n.alerts.length>0&&(handleUrgentAlertsUpdate(n.alerts,n.hasNew),n.hasNew&&"granted"===Notification.permission)){const e=n.alerts.filter(e=>e.isNew);for(const t of e)if(document.hidden)try{new Notification(`⚠️ ${t.title}`,{body:t.message||t.drugName,icon:"./icons/icon-192x192.png",tag:"urgent-"+t.id,requireInteraction:"critical"===t.severity})}catch(e){}}}catch(e){console.warn("[Urgent] Client check failed:",e.message)}}function handleUrgentAlertsUpdate(e,t){activeUrgentAlerts=e.filter(e=>!urgentAlertsDismissed.includes(e.id)),renderUrgentBanner(),t&&navigator.onLine&&manualSync()}function renderUrgentBanner(){let e=document.getElementById("urgentAlertBanner");if(0===activeUrgentAlerts.length)return void(e&&(e.style.display="none"));e||(e=document.createElement("div"),e.id="urgentAlertBanner",e.style.cssText="position:fixed;top:0;left:0;right:0;z-index:10000;\n      font-family:'IBM Plex Sans Thai',sans-serif;transition:transform 0.3s ease;",document.body.appendChild(e));const t={critical:{bg:"#dc2626",border:"#b91c1c",text:"#fff",pulse:!0},high:{bg:"#d97706",border:"#b45309",text:"#fff",pulse:!1},medium:{bg:"#2563eb",border:"#1d4ed8",text:"#fff",pulse:!1}},n=[...activeUrgentAlerts].sort((e,t)=>{const n={critical:0,high:1,medium:2};return(n[e.severity]??3)-(n[t.severity]??3)}),i=n[0],s=t[i.severity]||t.high,a=n.length-1;if(e.style.display="block",e.innerHTML=`\n    <div style="background:${s.bg};border-bottom:2px solid ${s.border};color:${s.text};\n                padding:10px 16px;${s.pulse?"animation:urgentPulse 2s infinite;":""}">\n      <div style="display:flex;align-items:center;justify-content:space-between;max-width:900px;margin:0 auto;">\n        <div style="flex:1;min-width:0;">\n          <div style="font-size:12px;font-weight:700;letter-spacing:0.5px;opacity:0.9;margin-bottom:2px;">\n            ${{critical:"🚨",high:"⚠️",medium:"ℹ️"}[i.severity]} ${({recall:"Drug Recall",safety_alert:"Safety Alert",shortage:"Drug Shortage",formulation_change:"Formulation Change"}[i.type]||"ALERT").toUpperCase()}\n            ${i.drugName?" — "+i.drugName:""}\n          </div>\n          <div style="font-size:13px;font-weight:500;line-height:1.4;">\n            ${i.title}\n          </div>\n          ${i.actionRequired?`<div style="font-size:11px;margin-top:3px;opacity:0.9;">📋 ${i.actionRequired}</div>`:""}\n          ${a>0?`<div style="font-size:11px;margin-top:4px;opacity:0.8;">+ ${a} รายการเพิ่มเติม</div>`:""}\n        </div>\n        <div style="display:flex;gap:8px;flex-shrink:0;margin-left:12px;">\n          <button onclick="showAllUrgentAlerts()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);\n            color:${s.text};padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;\n            font-family:inherit;">ดูทั้งหมด</button>\n          <button onclick="dismissUrgentAlert(${i.id})" style="background:none;border:none;color:${s.text};\n            font-size:18px;cursor:pointer;opacity:0.7;padding:4px;">✕</button>\n        </div>\n      </div>\n    </div>\n  `,s.pulse&&!document.getElementById("urgentPulseStyle")){const e=document.createElement("style");e.id="urgentPulseStyle",e.textContent="@keyframes urgentPulse{0%,100%{opacity:1}50%{opacity:0.85}}",document.head.appendChild(e)}}function dismissUrgentAlert(e){urgentAlertsDismissed.push(e),localStorage.setItem("urgentDismissed",JSON.stringify(urgentAlertsDismissed)),activeUrgentAlerts=activeUrgentAlerts.filter(t=>t.id!==e),renderUrgentBanner()}function showAllUrgentAlerts(){const e=[...activeUrgentAlerts].sort((e,t)=>{const n={critical:0,high:1,medium:2};return(n[e.severity]??3)-(n[t.severity]??3)}),t={critical:"🚨",high:"⚠️",medium:"ℹ️"},n={recall:"Drug Recall",safety_alert:"Safety Alert",shortage:"Drug Shortage",formulation_change:"Formulation Change"},i={critical:"#fef2f2",high:"#fffbeb",medium:"#eff6ff"},s={critical:"#fecaca",high:"#fed7aa",medium:"#bfdbfe"},a={critical:"#991b1b",high:"#92400e",medium:"#1e40af"};let r=e.map(e=>`\n    <div style="background:${i[e.severity]||"#f8fafc"};border:1px solid ${s[e.severity]||"#e2e8f0"};\n                border-radius:12px;padding:14px;margin-bottom:10px;">\n      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">\n        <span style="font-size:16px;">${t[e.severity]}</span>\n        <span style="font-size:12px;font-weight:700;color:${a[e.severity]};letter-spacing:0.3px;">\n          ${(n[e.type]||"ALERT").toUpperCase()}\n        </span>\n        ${e.drugName?`<span style="font-size:12px;color:#64748b;">— ${e.drugName}</span>`:""}\n      </div>\n      <div style="font-size:14px;font-weight:600;color:#1e293b;line-height:1.4;">${e.title}</div>\n      ${e.message?`<div style="font-size:13px;color:#475569;margin-top:4px;line-height:1.5;">${e.message}</div>`:""}\n      ${e.actionRequired?`<div style="font-size:12px;color:${a[e.severity]};margin-top:6px;font-weight:500;">📋 Action: ${e.actionRequired}</div>`:""}\n      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">\n        <span style="font-size:10px;color:#94a3b8;">${e.createdAt?new Date(e.createdAt).toLocaleString("th-TH"):""}</span>\n        <button onclick="dismissUrgentAlert(${e.id});document.getElementById('urgentModal').remove();"\n                style="font-size:11px;color:#64748b;background:rgba(0,0,0,0.05);border:none;padding:4px 10px;\n                       border-radius:6px;cursor:pointer;font-family:inherit;">รับทราบแล้ว</button>\n      </div>\n    </div>\n  `).join(""),o=document.getElementById("urgentModal");o&&o.remove(),o=document.createElement("div"),o.id="urgentModal",o.style.cssText="position:fixed;inset:0;z-index:10001;display:flex;align-items:flex-end;justify-content:center;",o.innerHTML=`\n    <div onclick="document.getElementById('urgentModal').remove()"\n         style="position:absolute;inset:0;background:rgba(0,0,0,0.5);"></div>\n    <div style="position:relative;background:#fff;border-radius:20px 20px 0 0;max-height:80vh;width:100%;max-width:500px;\n                overflow-y:auto;padding:20px;box-shadow:0 -4px 30px rgba(0,0,0,0.2);">\n      <div style="width:36px;height:4px;background:#cbd5e1;border-radius:2px;margin:0 auto 16px;"></div>\n      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">\n        <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🔔 Urgent Drug Alerts (${e.length})</h3>\n        <button onclick="document.getElementById('urgentModal').remove()"\n                style="width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;color:#64748b;\n                       font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>\n      </div>\n      ${r||'<div style="text-align:center;color:#94a3b8;padding:20px;">ไม่มี urgent alerts</div>'}\n    </div>\n  `,document.body.appendChild(o)}function showUrgentAlertDetail(e){activeUrgentAlerts.find(t=>t.id===e)&&showAllUrgentAlerts()}async function init(){"serviceWorker"in navigator&&navigator.serviceWorker.register("./sw.js").catch(e=>{console.warn("[SW] Registration failed:",e)}),trackSession(),await initDrugs(),document.getElementById("drugCount").textContent=DRUGS.length+" drugs",document.getElementById("footerDrugCount").textContent=DRUGS.length,document.getElementById("versionInfo").textContent=`เวอร์ชัน 4.7.1 — มีนาคม 2569 (2026) | ข้อมูลยา ${DRUGS.length} รายการ`,initFilters(),updateFilterUI(),document.getElementById("searchInput").addEventListener("input",e=>{onSearch(e.target.value)}),document.getElementById("filterSheetBackdrop").addEventListener("click",closeFilterSheet),window.addEventListener("online",()=>{showSyncStatus("🌐 Back online","success"),manualSync(),checkUrgentAlertsFromClient()}),window.addEventListener("offline",()=>{showSyncStatus("📡 No internet","offline")}),window.addEventListener("beforeinstallprompt",e=>{e.preventDefault(),window.deferredPrompt=e}),initUrgentAlertSystem()}"loading"===document.readyState?document.addEventListener("DOMContentLoaded",init):init();
+const ANALYTICS_URL="https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec",DOSE_CALC={"Norepinephrine (Levophed)":{unit:"mcg/kg/min",min:.01,max:2,default:.1,step:.01,wt:!0,concs:[{l:"4 mg/250 mL",v:16},{l:"8 mg/250 mL",v:32}],note:"Central line preferred. Extravasation → phentolamine 5-10 mg SC"},Dobutamine:{unit:"mcg/kg/min",min:2.5,max:20,default:5,step:.5,wt:!0,concs:[{l:"250 mg/250 mL",v:1e3},{l:"500 mg/250 mL",v:2e3}],note:"Titrate q10 min. ห้ามผสมกับ NaHCO₃"},Dopamine:{unit:"mcg/kg/min",min:1,max:20,default:5,step:.5,wt:!0,concs:[{l:"200 mg/250 mL",v:800},{l:"400 mg/250 mL",v:1600}],note:"Low 1-5: renal | Med 5-10: cardiac | High >10: vasopressor"},"Adrenaline (Epinephrine)":{unit:"mcg/min",min:1,max:20,default:2,step:.5,wt:!1,concs:[{l:"1 mg/250 mL",v:4},{l:"4 mg/250 mL",v:16}],note:"Infusion 1-10 mcg/min titrate. Cardiac arrest: 1 mg IV push q3-5min"},Nicardipine:{unit:"mg/hr",min:1,max:15,default:5,step:.5,wt:!1,concs:[{l:"25 mg/250 mL (0.1 mg/mL)",v:100},{l:"50 mg/250 mL",v:200}],note:"เปลี่ยน IV site q12h (peripheral). Target ถึง → ลด 3 mg/hr"},Dexmedetomidine:{unit:"mcg/kg/hr",min:.2,max:1.5,default:.5,step:.1,wt:!0,concs:[{l:"200 mcg/50 mL (4 mcg/mL)",v:4}],note:"ห้ามให้ >24 ชม. Loading: 1 mcg/kg/10 min (optional)"}};let searchTimeout,DRUGS=[],filteredDrugs=[],searchQuery="",currentFilter="all",expandedCards=new Set;function loadDrugsFromCache(){try{const e=localStorage.getItem("drugData_v4");if(e){const t=JSON.parse(e);if(Array.isArray(t)&&t.length>0){const e=t[0];if(e&&e.generic&&e.strength&&e.dilution&&e.admin)return t}}localStorage.removeItem("drugData_v4"),localStorage.removeItem("drugData_v4_ts")}catch(e){localStorage.removeItem("drugData_v4"),localStorage.removeItem("drugData_v4_ts")}return null}async function fetchDrugsFromLocalFile(){try{const e=await fetch("./drugs-data.json",{cache:"no-cache"});if(!e.ok)return null;const t=await e.json();if(Array.isArray(t)&&t.length>0)return t}catch(e){console.warn("[DrugSync] Local file fetch error:",e)}return null}async function fetchDrugsFromServer(){if(!navigator.onLine)return null;try{const e=await fetch(ANALYTICS_URL+"?action=drugs",{method:"GET",cache:"no-cache"});if(!e.ok)return null;const t=await e.json();if(t.drugs&&Array.isArray(t.drugs)&&t.drugs.length>0&&t.drugs.every(e=>e.generic&&e.reconst&&e.dilution&&e.admin&&e.monitoring))return t.drugs}catch(e){console.warn("[DrugSync] Server fetch error:",e)}return null}function saveDrugsToCache(e){try{localStorage.setItem("drugData_v4",JSON.stringify(e)),localStorage.setItem("drugData_v4_ts",Date.now().toString())}catch(e){}}function showSyncStatus(e,t="success"){let n=document.getElementById("syncStatus");n||(n=document.createElement("div"),n.id="syncStatus",n.style.cssText="position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9999;\n                        padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;\n                        opacity:0;transition:opacity 0.3s;pointer-events:none;font-family:inherit;\n                        white-space:nowrap;",document.body.appendChild(n)),n.style.background={syncing:"#f59e0b",success:"#059669",offline:"#64748b",error:"#dc2626"}[t]||"#ffffff",n.style.color="#fff",n.textContent=e,n.style.opacity="1","syncing"!==t&&setTimeout(()=>{n.style.opacity="0"},3e3)}async function initDrugs(){try{"v5"!==localStorage.getItem("drugCacheVer")&&(localStorage.removeItem("drugData_v4"),localStorage.removeItem("drugData_v4_ts"),localStorage.setItem("drugCacheVer","v5"))}catch(e){}let e=loadDrugsFromCache();if(DRUGS=e||[],!DRUGS.length){const e=await fetchDrugsFromLocalFile();e&&(DRUGS=e,saveDrugsToCache(DRUGS))}updateList();const t=localStorage.getItem("drugData_v4_ts")||"0",n=parseInt(t),i=Date.now()-n>18e5;if(navigator.onLine&&i){showSyncStatus("🔄 กำลัง sync...","syncing");const t=await fetchDrugsFromServer();t?(DRUGS=t,saveDrugsToCache(DRUGS),updateList(),showSyncStatus(`📦 อัพเดต ${t.length} รายการ`,"success")):showSyncStatus(e?"📦 ใช้ข้อมูลจาก cache":"⚠️ ไม่มีอินเทอร์เน็ต","offline")}}async function manualSync(){if(!navigator.onLine)return void showSyncStatus("⚠️ ไม่มีอินเทอร์เน็ต","offline");showSyncStatus("🔄 กำลัง sync...","syncing");try{const e=await fetchDrugsFromServer();e?(DRUGS=e,saveDrugsToCache(DRUGS),updateList(),showSyncStatus(`✓ อัพเดต ${e.length} รายการ`,"success")):showSyncStatus("✗ ไม่สามารถ sync ได้","error")}catch(e){console.error("[Sync] Error:",e);showSyncStatus("✗ Sync error","error")}}function onSearch(e){clearTimeout(searchTimeout),searchQuery=e.toLowerCase().trim(),searchQuery?document.getElementById("clearBtn").classList.add("show"):document.getElementById("clearBtn").classList.remove("show"),searchTimeout=setTimeout(()=>{updateList(),searchQuery&&sendAnalytics("SEARCH",{query:searchQuery,results:filteredDrugs.length})},150)}function clearSearch(){document.getElementById("searchInput").value="",searchQuery="",document.getElementById("clearBtn").classList.remove("show"),updateList(),document.getElementById("searchInput").focus()}function setFilter(e){currentFilter=e,updateFilterUI(),updateList(),closeFilterSheet(),sendAnalytics("FILTER",{filter:e})}function updateFilterUI(){document.querySelectorAll(".filter-btn").forEach(e=>{const t=e.dataset.filter;e.classList.toggle("active",t===currentFilter)}),document.querySelectorAll(".filter-sheet-btn").forEach(e=>{const t=e.dataset.filter;e.classList.toggle("active",t===currentFilter)});const e=document.getElementById("filterChipText"),t=document.getElementById("filterChip"),n=document.getElementById("filterActiveTag");if("all"===currentFilter)e.textContent="ทั้งหมด",t.classList.remove("has-filter"),n&&(n.textContent="ทั้งหมด",n.classList.remove("show"));else{const i="had"===currentFilter?"⚠ High Alert":currentFilter;e.textContent=i,t.classList.add("has-filter"),n&&(n.textContent=i,n.classList.add("show"))}}function filterDrugs(){let e=DRUGS;if(searchQuery){const t=searchQuery;e=e.filter(e=>{const n=(e.generic||"").toLowerCase(),i=(e.trade||"").toLowerCase(),s=(e.strength||"").toLowerCase(),a=(e.categories||[]).map(e=>e.toLowerCase()).join(" "),r=(e.precautions||"").toLowerCase();return n.includes(t)||i.includes(t)||s.includes(t)||a.includes(t)||r.includes(t)})}return"all"!==currentFilter&&(e="had"===currentFilter?e.filter(e=>e.had):e.filter(e=>(e.categories||[]).includes(currentFilter))),e}function sendAnalytics(e,t={}){if(navigator.onLine)try{const n={action:"log",event:e,data:t,timestamp:(new Date).toISOString(),userAgent:navigator.userAgent,sessionId:sessionStorage.getItem("sessionId")||""};fetch(ANALYTICS_URL,{method:"POST",body:JSON.stringify(n),mode:"no-cors"}).catch(()=>{})}catch(e){}}function trackSession(){const e="sid_"+Date.now()+"_"+Math.random().toString(36).substr(2,6);sessionStorage.setItem("sessionId",e),sessionStorage.setItem("sessionStart",Date.now().toString()),sendAnalytics("SESSION_START",{sessionId:e})}function renderDrugCard(e){const t=["drug-card"];e.had&&t.push("had");const n="E"===e.ed?'<span class="badge badge-ed">ED</span>':'<span class="badge badge-ned">NED</span>',i=e.had?'<span class="badge badge-had">⚠ HAD</span>':"",s=(e.trade||"").match(/\d+\s*(?:mg|mcg|mL)/i),a=s?s[0]:e.strength||"";return`\n    <div class="${t.join(" ")}" data-drug-id="${e.id}">\n      <div class="card-header" data-action="toggleCard" data-id="${e.id}">\n        <div class="card-number">${e.id}</div>\n        <div class="card-title-area">\n          <div class="card-generic">${e.generic}${DOSE_CALC[e.generic]?' <span style="font-size:11px;opacity:0.7;" title="มี Dose Calculator">📊</span>':''}</div>\n          <div class="card-trade">\n            ${e.trade||"-"}\n            ${a?`<span style="opacity:0.6; font-size:11px;">${a}</span>`:""}\n          </div>\n        </div>\n        <div class="card-badges">\n          ${i}\n          ${n}\n        </div>\n        <div class="card-chevron">▼</div>\n      </div>\n      \n      <div class="card-body">\n        ${renderCardBody(e)}\n      </div>\n    </div>\n  `}function renderCardBody(e){let t="";if(e.reconst&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">🧪</span> Reconstitution\n        </div>\n        <div class="info-grid">\n          <div class="info-item">\n            <div class="info-label">Solvent</div>\n            <div class="info-value">${e.reconst.solvent||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Volume</div>\n            <div class="info-value">${e.reconst.volume||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Concentration</div>\n            <div class="info-value mono">${e.reconst.conc||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.dilution&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">💧</span> Dilution\n        </div>\n        <div class="info-grid">\n          <div class="info-item">\n            <div class="info-label">Diluent</div>\n            <div class="info-value">${e.dilution.diluent||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Final Volume</div>\n            <div class="info-value">${e.dilution.volume||"-"}</div>\n          </div>\n          <div class="info-item full-width">\n            <div class="info-label">Final Concentration</div>\n            <div class="info-value mono">${e.dilution.finalConc||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.admin&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">💉</span> Administration\n        </div>\n        <div class="info-grid">\n          <div class="info-item full-width">\n            <div class="info-label">Route</div>\n            <div class="info-value">${e.admin.route||"-"}</div>\n          </div>\n          <div class="info-item full-width">\n            <div class="info-label">Rate</div>\n            <div class="info-value">${e.admin.rate||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.stability&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">⏱️</span> Stability\n        </div>\n        <div class="info-grid">\n          <div class="info-item">\n            <div class="info-label">Reconstituted</div>\n            <div class="info-value">${e.stability.reconst||"-"}</div>\n          </div>\n          <div class="info-item">\n            <div class="info-label">Diluted</div>\n            <div class="info-value">${e.stability.diluted||"-"}</div>\n          </div>\n          <div class="info-item full-width">\n            <div class="info-label">Storage</div>\n            <div class="info-value">${e.stability.storage||"-"}</div>\n          </div>\n        </div>\n      </div>\n    `),e.compat){const n=e.compat.ysite&&"limited data"!==e.compat.ysite.toLowerCase()&&"not recommended"!==e.compat.ysite.toLowerCase();t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">🔗</span> Y-site Compatibility\n        </div>\n        <div class="${n?"compat-ok":"compat-bad"}">\n          <div class="info-label">${n?"✓ Compatible":"✗ Incompatible"}</div>\n          <div class="info-value" style="margin-top:4px;">${e.compat.ysite||"-"}</div>\n        </div>\n        ${e.compat.incompat?`\n          <div class="warning-box" style="margin-top:8px;">\n            <div class="info-label" style="color:#dc2626;">ห้ามผสม (Incompatible)</div>\n            <div class="info-value" style="color:#7f1d1d; margin-top:4px;">${e.compat.incompat}</div>\n          </div>\n        `:""}\n      </div>\n    `}return e.precautions&&(t+=`\n      <div class="warning-box">\n        <div class="info-label">⚠️ Precautions</div>\n        <div class="info-value" style="margin-top:6px; color:#7f1d1d;">${e.precautions}</div>\n      </div>\n    `),e.monitoring&&e.monitoring.length>0&&(t+=`\n      <div class="info-section">\n        <div class="section-title">\n          <span class="icon">👁️</span> Monitoring\n        </div>\n        <div class="monitoring-tags">\n          ${e.monitoring.map(e=>`<span class="m-tag">${e}</span>`).join("")}\n        </div>\n      </div>\n    `),DOSE_CALC[e.generic]&&(t+=renderDoseCalculator(e.generic)),e.ref&&(t+=`\n      <div class="ref-line">\n        📚 <strong>Ref:</strong> ${e.ref}\n      </div>\n    `),t}function renderDoseCalculator(e){const t=DOSE_CALC[e];if(!t)return"";const n=t.concs.map((t,n)=>`\n    <div class="calc-field">\n      <label>${t.l}</label>\n      <input type="radio" name="conc_${e.replace(/[^a-z0-9]/gi,"")}" value="${t.v}" \n             ${0===n?"checked":""} data-action="updateDoseCalc" data-drug="${e}">\n    </div>\n  `).join(""),i=t.wt?`\n    <div class="calc-field">\n      <label>Weight (kg)</label>\n      <input type="number" min="1" max="200" value="70" step="1" \n             id="wt_${e.replace(/[^a-z0-9]/gi,"")}" data-action="updateDoseCalc" data-drug="${e}" data-action="updateDoseCalc" data-drug="${e}">\n    </div>\n  `:"",s=`dose_${e.replace(/[^a-z0-9]/gi,"")}`;return`\n    <div class="calc-section">\n      <div style="font-weight:600; font-size:12px; color:#185FA5; margin-bottom:8px;">\n        📊 Dose Calculator: ${e}\n      </div>\n      <div class="calc-grid">\n        ${n}\n        ${i}\n        <div class="calc-field">\n          <label>Dose (${t.unit})</label>\n          <input type="number" min="${t.min}" max="${t.max}" value="${t.default}" step="${t.step}"\n                 id="${s}" data-action="updateDoseCalc" data-drug="${e}" data-action="updateDoseCalc" data-drug="${e}">\n        </div>\n      </div>\n      <div id="calcResult_${e.replace(/[^a-z0-9]/gi,"")}" style="display:none; margin-top:10px;">\n        <div class="calc-result">\n          <div class="calc-result-value" id="calcValue_${e.replace(/[^a-z0-9]/gi,"")}">-</div>\n          <div style="font-size:10px; color:#166534; margin-top:2px;">mL/hr</div>\n        </div>\n      </div>\n      <div class="calc-note">\n        ${t.note}\n      </div>\n      <div class="calc-disclaimer">\n        ⚠️ This is a guide only. Always verify calculations independently.\n      </div>\n    </div>\n  `}function updateDoseCalc(e){const t=DOSE_CALC[e];if(!t)return;const n=e.replace(/[^a-z0-9]/gi,""),i=document.querySelectorAll(`input[name="conc_${n}"]:checked`);if(0===i.length)return;const s=parseFloat(i[0].value),a=document.getElementById(`dose_${n}`);if(!a)return;const r=parseFloat(a.value)||t.default;let o,l=1;if(t.wt){const e=document.getElementById(`wt_${n}`);l=e?parseFloat(e.value)||70:70}o=t.wt?r*l*60/s:60*r/s;const c=document.getElementById(`calcResult_${n}`),d=document.getElementById(`calcValue_${n}`);c&&d&&(d.textContent=o.toFixed(1),c.style.display="block")}function toggleCard(e){const t=document.querySelector(`[data-drug-id="${e}"]`);if(!t)return;const n=t.classList.contains("expanded");if(t.classList.toggle("expanded"),n)expandedCards.delete(e);else{expandedCards.add(e);const t=DRUGS.find(t=>t.id===e);t&&sendAnalytics("VIEW_DRUG",{drugId:e,drugName:t.generic})}}function renderDrugList(e){const t=document.getElementById("drugList"),n=document.getElementById("resultsInfo");if(0===e.length)t.innerHTML='\n      <div class="empty-state">\n        <div class="empty-icon">📭</div>\n        <div class="empty-text">ไม่พบยา</div>\n        <div class="empty-hint">ลองค้นหาด้วยคำอื่นหรือเปลี่ยนตัวกรองประเภท</div>\n      </div>\n    ',n.textContent="0 results";else{t.innerHTML=e.map(e=>renderDrugCard(e)).join("");const i=e.filter(e=>e.had).length;n.innerHTML=`แสดง ${e.length} รายการ`+(i>0?` (${i} ⚠ HAD)`:"")+(e.length<DRUGS.length?` จากทั้งหมด ${DRUGS.length} รายการ`:"")}}function openFilterSheet(){const e=document.getElementById("filterSheetBackdrop"),t=document.getElementById("filterSheet");e.classList.add("open"),t.classList.add("open")}function closeFilterSheet(){const e=document.getElementById("filterSheetBackdrop"),t=document.getElementById("filterSheet");e.classList.remove("open"),t.classList.remove("open")}function initFilters(){document.querySelectorAll(".filter-btn").forEach(e=>{e.addEventListener("click",()=>setFilter(e.dataset.filter))}),document.querySelectorAll(".filter-sheet-btn").forEach(e=>{e.addEventListener("click",()=>setFilter(e.dataset.filter))})}function toggleFilters(){const e=document.getElementById("filters"),t=document.getElementById("filterToggle");e&&t&&(e.classList.toggle("open"),t.classList.toggle("open"))}function showAbout(){alert("IV Drug Quick Reference v4.7.0\n\nจัดทำโดย ภก. ฐาปนัท นาคครุฑ (Benz)\nกลุ่มงานเภสัชกรรม\nสถาบันประสาทวิทยา\n\nแหล่งอ้างอิง:\nLexicomp, Trissel's Handbook,\nAHFS, ISMP, AHA/ACLS, Package Inserts")}function showContact(){alert("📧 แจ้งปัญหา / ข้อเสนอแนะ\n\nติดต่อ: ภก. ฐาปนัท นาคครุฑ (Benz)\nEmail: thapanat.nk@gmail.com\nLINE: rxbenz\n\nพบข้อมูลยาผิดพลาด อยากให้เพิ่มยา หรือมี feedback ใดๆ แจ้งได้เลยครับ")}function updateList(){filteredDrugs=filterDrugs(),renderDrugList(filteredDrugs)}let activeUrgentAlerts=[],urgentAlertsDismissed=JSON.parse(localStorage.getItem("urgentDismissed")||"[]");const URGENT_POLL_INTERVAL=3e5;let urgentPollClientTimer=null;async function requestNotificationPermission(){if(!("Notification"in window))return console.warn("[Urgent] Notification API not supported"),"denied";if("granted"===Notification.permission)return"granted";if("denied"===Notification.permission)return"denied";try{return await Notification.requestPermission()}catch(e){return console.warn("[Urgent] Permission request failed:",e),"denied"}}async function initUrgentAlertSystem(){const e=await requestNotificationPermission();console.log("[Urgent] Notification permission:",e),"serviceWorker"in navigator&&navigator.serviceWorker.controller&&(navigator.serviceWorker.addEventListener("message",e=>{e.data&&("URGENT_ALERTS_UPDATE"===e.data.type&&handleUrgentAlertsUpdate(e.data.alerts,e.data.hasNew),"URGENT_ALERT_CLICK"===e.data.type&&showUrgentAlertDetail(e.data.alertId))}),navigator.serviceWorker.controller.postMessage({type:"START_URGENT_POLL"})),startClientUrgentPolling(),await checkUrgentAlertsFromClient()}function startClientUrgentPolling(){urgentPollClientTimer&&clearInterval(urgentPollClientTimer),urgentPollClientTimer=setInterval(()=>{navigator.onLine&&checkUrgentAlertsFromClient()},3e5)}async function checkUrgentAlertsFromClient(){if(navigator.onLine)try{const e=parseInt(localStorage.getItem("urgentLastCheck")||"0"),t=await fetch(`${ANALYTICS_URL}?action=checkUrgentAlerts&since=${e}`,{cache:"no-cache"});if(!t.ok)return;const n=await t.json();if(n.serverTime&&localStorage.setItem("urgentLastCheck",String(n.serverTime)),n.alerts&&n.alerts.length>0&&(handleUrgentAlertsUpdate(n.alerts,n.hasNew),n.hasNew&&"granted"===Notification.permission)){const e=n.alerts.filter(e=>e.isNew);for(const t of e)if(document.hidden)try{new Notification(`⚠️ ${t.title}`,{body:t.message||t.drugName,icon:"./icons/icon-192x192.png",tag:"urgent-"+t.id,requireInteraction:"critical"===t.severity})}catch(e){}}}catch(e){console.warn("[Urgent] Client check failed:",e.message)}}function handleUrgentAlertsUpdate(e,t){activeUrgentAlerts=e.filter(e=>!urgentAlertsDismissed.includes(e.id)),renderUrgentBanner(),t&&navigator.onLine&&manualSync()}function renderUrgentBanner(){let e=document.getElementById("urgentAlertBanner");if(0===activeUrgentAlerts.length)return void(e&&(e.style.display="none"));e||(e=document.createElement("div"),e.id="urgentAlertBanner",e.style.cssText="position:fixed;top:0;left:0;right:0;z-index:10000;\n      font-family:'IBM Plex Sans Thai',sans-serif;transition:transform 0.3s ease;",document.body.appendChild(e));const t={critical:{bg:"#dc2626",border:"#b91c1c",text:"#fff",pulse:!0},high:{bg:"#d97706",border:"#b45309",text:"#fff",pulse:!1},medium:{bg:"#2563eb",border:"#1d4ed8",text:"#fff",pulse:!1}},n=[...activeUrgentAlerts].sort((e,t)=>{const n={critical:0,high:1,medium:2};return(n[e.severity]??3)-(n[t.severity]??3)}),i=n[0],s=t[i.severity]||t.high,a=n.length-1;if(e.style.display="block",e.innerHTML=`\n    <div style="background:${s.bg};border-bottom:2px solid ${s.border};color:${s.text};\n                padding:10px 16px;${s.pulse?"animation:urgentPulse 2s infinite;":""}">\n      <div style="display:flex;align-items:center;justify-content:space-between;max-width:900px;margin:0 auto;">\n        <div style="flex:1;min-width:0;">\n          <div style="font-size:12px;font-weight:700;letter-spacing:0.5px;opacity:0.9;margin-bottom:2px;">\n            ${{critical:"🚨",high:"⚠️",medium:"ℹ️"}[i.severity]} ${({recall:"Drug Recall",safety_alert:"Safety Alert",shortage:"Drug Shortage",formulation_change:"Formulation Change"}[i.type]||"ALERT").toUpperCase()}\n            ${i.drugName?" — "+i.drugName:""}\n          </div>\n          <div style="font-size:13px;font-weight:500;line-height:1.4;">\n            ${i.title}\n          </div>\n          ${i.actionRequired?`<div style="font-size:11px;margin-top:3px;opacity:0.9;">📋 ${i.actionRequired}</div>`:""}\n          ${a>0?`<div style="font-size:11px;margin-top:4px;opacity:0.8;">+ ${a} รายการเพิ่มเติม</div>`:""}\n        </div>\n        <div style="display:flex;gap:8px;flex-shrink:0;margin-left:12px;">\n          <button data-action="showAllUrgentAlerts" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);\n            color:${s.text};padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;\n            font-family:inherit;">ดูทั้งหมด</button>\n          <button data-action="dismissUrgentAlert" data-id="${i.id}" style="background:none;border:none;color:${s.text};\n            font-size:18px;cursor:pointer;opacity:0.7;padding:4px;">✕</button>\n        </div>\n      </div>\n    </div>\n  `,s.pulse&&!document.getElementById("urgentPulseStyle")){const e=document.createElement("style");e.id="urgentPulseStyle",e.textContent="@keyframes urgentPulse{0%,100%{opacity:1}50%{opacity:0.85}}",document.head.appendChild(e)}}function dismissUrgentAlert(e){urgentAlertsDismissed.push(e),localStorage.setItem("urgentDismissed",JSON.stringify(urgentAlertsDismissed)),activeUrgentAlerts=activeUrgentAlerts.filter(t=>t.id!==e),renderUrgentBanner()}function showAllUrgentAlerts(){const e=[...activeUrgentAlerts].sort((e,t)=>{const n={critical:0,high:1,medium:2};return(n[e.severity]??3)-(n[t.severity]??3)}),t={critical:"🚨",high:"⚠️",medium:"ℹ️"},n={recall:"Drug Recall",safety_alert:"Safety Alert",shortage:"Drug Shortage",formulation_change:"Formulation Change"},i={critical:"#fef2f2",high:"#fffbeb",medium:"#eff6ff"},s={critical:"#fecaca",high:"#fed7aa",medium:"#bfdbfe"},a={critical:"#991b1b",high:"#92400e",medium:"#1e40af"};let r=e.map(e=>`\n    <div style="background:${i[e.severity]||"#f8fafc"};border:1px solid ${s[e.severity]||"#e2e8f0"};\n                border-radius:12px;padding:14px;margin-bottom:10px;">\n      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">\n        <span style="font-size:16px;">${t[e.severity]}</span>\n        <span style="font-size:12px;font-weight:700;color:${a[e.severity]};letter-spacing:0.3px;">\n          ${(n[e.type]||"ALERT").toUpperCase()}\n        </span>\n        ${e.drugName?`<span style="font-size:12px;color:#64748b;">— ${e.drugName}</span>`:""}\n      </div>\n      <div style="font-size:14px;font-weight:600;color:#1e293b;line-height:1.4;">${e.title}</div>\n      ${e.message?`<div style="font-size:13px;color:#475569;margin-top:4px;line-height:1.5;">${e.message}</div>`:""}\n      ${e.actionRequired?`<div style="font-size:12px;color:${a[e.severity]};margin-top:6px;font-weight:500;">📋 Action: ${e.actionRequired}</div>`:""}\n      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">\n        <span style="font-size:10px;color:#94a3b8;">${e.createdAt?new Date(e.createdAt).toLocaleString("th-TH"):""}</span>\n        <button data-action="dismissUrgentAlertAndClose" data-id="${e.id}"\n                style="font-size:11px;color:#64748b;background:rgba(0,0,0,0.05);border:none;padding:4px 10px;\n                       border-radius:6px;cursor:pointer;font-family:inherit;">รับทราบแล้ว</button>\n      </div>\n    </div>\n  `).join(""),o=document.getElementById("urgentModal");o&&o.remove(),o=document.createElement("div"),o.id="urgentModal",o.style.cssText="position:fixed;inset:0;z-index:10001;display:flex;align-items:flex-end;justify-content:center;",o.innerHTML=`\n    <div data-action="closeUrgentModal"\n         style="position:absolute;inset:0;background:rgba(0,0,0,0.5);"></div>\n    <div style="position:relative;background:#fff;border-radius:20px 20px 0 0;max-height:80vh;width:100%;max-width:500px;\n                overflow-y:auto;padding:20px;box-shadow:0 -4px 30px rgba(0,0,0,0.2);">\n      <div style="width:36px;height:4px;background:#cbd5e1;border-radius:2px;margin:0 auto 16px;"></div>\n      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">\n        <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🔔 Urgent Drug Alerts (${e.length})</h3>\n        <button data-action="closeUrgentModal"\n                style="width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;color:#64748b;\n                       font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>\n      </div>\n      ${r||'<div style="text-align:center;color:#94a3b8;padding:20px;">ไม่มี urgent alerts</div>'}\n    </div>\n  `,document.body.appendChild(o)}function showUrgentAlertDetail(e){activeUrgentAlerts.find(t=>t.id===e)&&showAllUrgentAlerts()}async function init(){"serviceWorker"in navigator&&navigator.serviceWorker.register("./sw.js").catch(e=>{console.warn("[SW] Registration failed:",e)}),trackSession(),await initDrugs(),document.getElementById("drugCount").textContent=DRUGS.length+" drugs",document.getElementById("footerDrugCount").textContent=DRUGS.length,document.getElementById("versionInfo").textContent=`เวอร์ชัน 4.7.1 — มีนาคม 2569 (2026) | ข้อมูลยา ${DRUGS.length} รายการ`,initFilters(),updateFilterUI(),IVDrugRef.delegate(document,"click",{clearSearch:function(){clearSearch()},openFilterSheet:function(){openFilterSheet()},toggleFilters:function(){toggleFilters()},closeFilterSheet:function(){closeFilterSheet()},showAbout:function(){showAbout()},showContact:function(){showContact()},toggleCard:function(e,t){var id=parseInt(t.getAttribute("data-id")||t.closest("[data-id]").getAttribute("data-id"));if(id)toggleCard(id)},dismissUrgentAlert:function(e,t){var id=parseInt(t.getAttribute("data-id"));if(id)dismissUrgentAlert(id)},showAllUrgentAlerts:function(){showAllUrgentAlerts()},dismissUrgentAlertAndClose:function(e,t){var id=parseInt(t.getAttribute("data-id"));if(id){dismissUrgentAlert(id);var m=document.getElementById("urgentModal");if(m)m.remove()}},closeUrgentModal:function(){var m=document.getElementById("urgentModal");if(m)m.remove()}}),IVDrugRef.delegate(document,"input",{updateDoseCalc:function(e,t){var drug=t.getAttribute("data-drug");if(drug)updateDoseCalc(drug)}}),IVDrugRef.delegate(document,"change",{updateDoseCalc:function(e,t){var drug=t.getAttribute("data-drug");if(drug)updateDoseCalc(drug)}}),document.getElementById("searchInput").addEventListener("input",e=>{onSearch(e.target.value)}),window.addEventListener("online",()=>{showSyncStatus("🌐 Back online","success"),manualSync(),checkUrgentAlertsFromClient()}),window.addEventListener("offline",()=>{showSyncStatus("📡 No internet","offline")}),window.addEventListener("beforeinstallprompt",e=>{e.preventDefault(),window.deferredPrompt=e}),initUrgentAlertSystem()}"loading"===document.readyState?document.addEventListener("DOMContentLoaded",init):init();
 </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IV Compatibility Checker — IV DrugRef</title>
   <meta name="description" content="IV Drug Compatibility Checker — Pair checker, matrix view, multi-drug compatibility">
@@ -1194,9 +1194,9 @@ body::before {
 </div>
 </div>
 <div class="mode-tabs" id="modeTabs">
-<button class="mode-tab active" data-mode="pair" onclick="switchMode('pair')">💊 Pair Check</button>
-<button class="mode-tab" data-mode="matrix" onclick="switchMode('matrix')">📊 Matrix</button>
-<button class="mode-tab" data-mode="combined" onclick="switchMode('combined')">🔬 Multi-Drug</button>
+<button class="mode-tab active" data-mode="pair" data-action="switchMode">💊 Pair Check</button>
+<button class="mode-tab" data-mode="matrix" data-action="switchMode">📊 Matrix</button>
+<button class="mode-tab" data-mode="combined" data-action="switchMode">🔬 Multi-Drug</button>
 </div>
 </div>
 </header>
@@ -1206,13 +1206,13 @@ body::before {
 <div class="pair-section active" id="pairSection">
 <div class="pair-selectors">
 <div class="drug-select-wrap">
-<select class="drug-select" id="drugA" onchange="checkPair()">
+<select class="drug-select" id="drugA" data-action="checkPair">
 <option value="">— เลือกยา A —</option>
 </select>
 </div>
 <div class="vs-badge">VS</div>
 <div class="drug-select-wrap">
-<select class="drug-select" id="drugB" onchange="checkPair()">
+<select class="drug-select" id="drugB" data-action="checkPair">
 <option value="">— เลือกยา B —</option>
 </select>
 </div>
@@ -1242,7 +1242,7 @@ body::before {
 <div class="combined-section" id="combinedSection">
 <div class="multi-drug-area">
 <div class="multi-title">🔬 Multi-Drug Compatibility Check</div>
-<input type="text" class="multi-search" id="multiSearch" placeholder="พิมพ์ชื่อยาเพื่อเพิ่ม..." autocomplete="off" oninput="filterSuggestions()" onfocus="filterSuggestions()">
+<input type="text" class="multi-search" id="multiSearch" placeholder="พิมพ์ชื่อยาเพื่อเพิ่ม..." autocomplete="off" data-action="filterSuggestions">
 <div class="drug-suggestions" id="drugSuggestions"></div>
 <div class="selected-drugs" id="selectedDrugs"></div>
 <div class="multi-results" id="multiResults"></div>
@@ -2344,6 +2344,23 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Event delegation helper — attaches a single listener on a container
+   * and dispatches to handlers based on data-action attributes.
+   * @param {HTMLElement|null} container - Element to listen on (null = document)
+   * @param {string} eventType - DOM event type ('click', 'input', 'change', etc.)
+   * @param {Object} actionMap - { actionName: function(event, targetElement) }
+   */
+  function delegate(container, eventType, actionMap) {
+    var useCapture = (eventType === 'focus' || eventType === 'blur');
+    (container || document).addEventListener(eventType, function(e) {
+      var target = e.target.closest ? e.target.closest('[data-action]') : e.target;
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+      if (action && actionMap[action]) actionMap[action](e, target);
+    }, useCapture);
+  }
+
+  /**
    * Safe DOM element builder — prevents innerHTML XSS.
    * @param {string} tag - HTML tag name
    * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
@@ -2418,7 +2435,8 @@ var IVDrugRef = (function() {
     generateId,
     debounce,
     fmt,
-    dom
+    dom,
+    delegate
   };
 })();
 
@@ -2781,7 +2799,7 @@ function renderMatrix() {
       } else {
         const result = getCompatibility(rowDrug, colDrug);
         const cls = result.status === 'compatible' ? 'c' : result.status === 'incompatible' ? 'i' : result.status === 'variable' ? 'v' : 'n';
-        html += `<td><div class="matrix-cell ${cls}" data-a="${rowDrug.g}" data-b="${colDrug.g}" data-s="${result.status}" onmouseenter="showTooltip(event,this)" onmouseleave="hideTooltip()"></div></td>`;
+        html += `<td><div class="matrix-cell ${cls}" data-a="${rowDrug.g}" data-b="${colDrug.g}" data-s="${result.status}"></div></td>`;
       }
     });
     html += '</tr>';
@@ -2822,8 +2840,8 @@ function filterSuggestions() {
   if (matches.length === 0) { container.classList.remove('show'); return; }
   
   container.innerHTML = matches.map(d => 
-    `<div class="drug-sug-item" onclick="addMultiDrug(${d.i})">
-      <span class="sug-generic">${d.g}</span>${d.h ? ' ⚠' : ''} 
+    `<div class="drug-sug-item" data-action="addMultiDrug" data-index="${d.i}">
+      <span class="sug-generic">${d.g}</span>${d.h ? ' ⚠' : ''}
       <span class="sug-trade">${d.t}</span>
     </div>`
   ).join('');
@@ -2849,7 +2867,7 @@ function renderMultiDrugs() {
   const container = document.getElementById('selectedDrugs');
   container.innerHTML = selectedMultiDrugs.map(id => {
     const d = DRUGS.find(dr => dr.i === id);
-    return `<span class="sel-chip ${d.h ? 'had-chip' : ''}">${d.g.split(' ')[0]}${d.h ? ' ⚠' : ''} <span class="remove" onclick="removeMultiDrug(${id})">×</span></span>`;
+    return `<span class="sel-chip ${d.h ? 'had-chip' : ''}">${d.g.split(' ')[0]}${d.h ? ' ⚠' : ''} <span class="remove" data-action="removeMultiDrug" data-id="${id}">×</span></span>`;
   }).join('');
 }
 
@@ -2947,25 +2965,41 @@ document.addEventListener('click', e => {
   }
 });
 
-  // Expose functions to window for onclick handlers
-  window.switchMode = switchMode;
-  window.checkPair = checkPair;
-  window.checkMultiCompat = checkMultiCompat;
-  window.renderMatrix = renderMatrix;
-  window.populateSelects = populateSelects;
-  window.buildMatrixFilter = buildMatrixFilter;
-  window.filterSuggestions = filterSuggestions;
-  window.addMultiDrug = addMultiDrug;
-  window.removeMultiDrug = removeMultiDrug;
-  window.showTooltip = showTooltip;
-  window.hideTooltip = hideTooltip;
-
   // Initialize on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', function() {
     populateSelects();
     buildMatrixFilter();
     checkMultiCompat();
-    
+
+    // Event delegation — replaces all inline handlers
+    IVDrugRef.delegate(document, 'click', {
+      switchMode: function(e, t) { switchMode(t.dataset.mode); },
+      addMultiDrug: function(e, t) { addMultiDrug(+t.dataset.index); },
+      removeMultiDrug: function(e, t) { removeMultiDrug(+t.dataset.id); }
+    });
+    IVDrugRef.delegate(document, 'change', {
+      checkPair: function() { checkPair(); }
+    });
+    IVDrugRef.delegate(document, 'input', {
+      filterSuggestions: function() { filterSuggestions(); }
+    });
+    IVDrugRef.delegate(document, 'focusin', {
+      filterSuggestions: function() { filterSuggestions(); }
+    });
+
+    // Matrix tooltip delegation
+    var matrixEl = document.getElementById('matrixScroll');
+    if (matrixEl) {
+      matrixEl.addEventListener('mouseover', function(e) {
+        var cell = e.target.closest('.matrix-cell');
+        if (cell && cell.dataset.a) showTooltip(e, cell);
+      });
+      matrixEl.addEventListener('mouseout', function(e) {
+        var cell = e.target.closest('.matrix-cell');
+        if (cell) hideTooltip();
+      });
+    }
+
     // Send analytics
     if (typeof IVDrugRef !== 'undefined' && IVDrugRef.trackPageView) {
       IVDrugRef.trackPageView('compatibility');

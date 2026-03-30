@@ -1285,25 +1285,28 @@ var IVDrugRef = (function() {
     var container = document.getElementById(containerId);
     if (!container) return;
 
+    // Clear safely
+    while (container.firstChild) container.removeChild(container.firstChild);
+
     if (validation.errors.length === 0 && validation.warnings.length === 0) {
       container.style.display = 'none';
-      container.innerHTML = '';
       return;
     }
 
-    var html = '';
-    for (var i = 0; i < validation.errors.length; i++) {
-      html += '<div class="validation-msg validation-error">'
-        + '<span class="v-icon">!</span>'
-        + '<span>' + validation.errors[i] + '</span></div>';
-    }
-    for (var j = 0; j < validation.warnings.length; j++) {
-      html += '<div class="validation-msg validation-warn">'
-        + '<span class="v-icon">?</span>'
-        + '<span>' + validation.warnings[j] + '</span></div>';
+    function buildMsg(text, level) {
+      return dom('div', { className: 'validation-msg validation-' + level }, [
+        dom('span', { className: 'v-icon', textContent: level === 'error' ? '!' : '?' }),
+        dom('span', { textContent: text })
+      ]);
     }
 
-    container.innerHTML = html;
+    for (var i = 0; i < validation.errors.length; i++) {
+      container.appendChild(buildMsg(validation.errors[i], 'error'));
+    }
+    for (var j = 0; j < validation.warnings.length; j++) {
+      container.appendChild(buildMsg(validation.warnings[j], 'warn'));
+    }
+
     container.style.display = 'flex';
   }
 
@@ -1719,6 +1722,34 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Safe DOM element builder — prevents innerHTML XSS.
+   * @param {string} tag - HTML tag name
+   * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
+   * @param {Array} children - Child elements or strings (strings become text nodes)
+   * @returns {HTMLElement}
+   */
+  function dom(tag, attrs, children) {
+    var el = document.createElement(tag);
+    if (attrs) {
+      for (var key in attrs) {
+        if (key === 'className') el.className = attrs[key];
+        else if (key === 'textContent') el.textContent = attrs[key];
+        else if (key === 'style' && typeof attrs[key] === 'string') el.style.cssText = attrs[key];
+        else if (key === 'htmlFor') el.htmlFor = attrs[key];
+        else el.setAttribute(key, attrs[key]);
+      }
+    }
+    if (children) {
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (typeof child === 'string') el.appendChild(document.createTextNode(child));
+        else if (child) el.appendChild(child);
+      }
+    }
+    return el;
+  }
+
+  /**
    * Version and app name constants
    */
   const VERSION = '5.0.0';
@@ -1764,7 +1795,8 @@ var IVDrugRef = (function() {
     // Utility helpers
     generateId,
     debounce,
-    fmt
+    fmt,
+    dom
   };
 })();
 
@@ -2106,34 +2138,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (isObese || isElderly) {
         bodyBox.style.display = 'block';
-        let html = '<div class="info-box blue" style="font-size:11px;line-height:1.6;">';
-        html += `<strong>📐 Body Comp:</strong> BMI ${bmi.toFixed(1)} | IBW ${ibw.toFixed(1)} kg | ABW ${abw.toFixed(1)} kg<br>`;
+        var D = IVDrugRef.dom;
+        var lines = [
+          D('strong', { textContent: '📐 Body Comp:' }),
+          ' BMI ' + bmi.toFixed(1) + ' | IBW ' + ibw.toFixed(1) + ' kg | ABW ' + abw.toFixed(1) + ' kg'
+        ];
         if (isObese) {
-          html += `<strong>⚠ Obesity (TBW>${Math.round(ibw*1.3)}kg):</strong> CG ปรับใช้ ABW ${abw.toFixed(1)} kg (TBW ${wt} → CrCl overestimate ~${Math.round(crcl_raw - crcl)} mL/min)`;
+          lines.push(D('br'));
+          lines.push(D('strong', { textContent: '⚠ Obesity (TBW>' + Math.round(ibw*1.3) + 'kg):' }));
+          lines.push(' CG ปรับใช้ ABW ' + abw.toFixed(1) + ' kg (TBW ' + wt + ' → CrCl overestimate ~' + Math.round(crcl_raw - crcl) + ' mL/min)');
         }
         if (isElderly) {
-          html += `${isObese ? '<br>' : ''}<strong>👴 Elderly + SCr ${scr}:</strong> Low SCr อาจ overestimate CrCl จาก low muscle mass — พิจารณาใช้ clinical judgment`;
+          if (isObese) lines.push(D('br'));
+          lines.push(D('strong', { textContent: '👴 Elderly + SCr ' + scr + ':' }));
+          lines.push(' Low SCr อาจ overestimate CrCl จาก low muscle mass — พิจารณาใช้ clinical judgment');
         }
-        html += '</div>';
-        bodyBox.innerHTML = html;
+        var box = D('div', { className: 'info-box blue', style: 'font-size:11px;line-height:1.6;' }, lines);
+        while (bodyBox.firstChild) bodyBox.removeChild(bodyBox.firstChild);
+        bodyBox.appendChild(box);
       } else {
         bodyBox.style.display = 'none';
       }
     } else if (isPed) {
       bodyBox.style.display = 'block';
-      bodyBox.innerHTML = ht > 0
-        ? '<div class="info-box blue" style="font-size:11px;"><strong>👶 Pediatric:</strong> ใช้ Bedside Schwartz (0.413 × Ht / SCr) — CG ไม่เหมาะสำหรับเด็ก<br>⚠ Dosing guidelines ด้านล่างเป็นของผู้ใหญ่ — กรุณาตรวจสอบ pediatric dosing แยก</div>'
-        : '<div class="info-box amber" style="font-size:11px;"><strong>👶 Pediatric:</strong> กรุณาใส่ส่วนสูงเพื่อคำนวณ eGFR (Schwartz) — CG ไม่เหมาะสำหรับเด็ก</div>';
+      var D = IVDrugRef.dom;
+      var pedBox;
+      if (ht > 0) {
+        pedBox = D('div', { className: 'info-box blue', style: 'font-size:11px;' }, [
+          D('strong', { textContent: '👶 Pediatric:' }),
+          ' ใช้ Bedside Schwartz (0.413 × Ht / SCr) — CG ไม่เหมาะสำหรับเด็ก',
+          D('br'),
+          '⚠ Dosing guidelines ด้านล่างเป็นของผู้ใหญ่ — กรุณาตรวจสอบ pediatric dosing แยก'
+        ]);
+      } else {
+        pedBox = D('div', { className: 'info-box amber', style: 'font-size:11px;' }, [
+          D('strong', { textContent: '👶 Pediatric:' }),
+          ' กรุณาใส่ส่วนสูงเพื่อคำนวณ eGFR (Schwartz) — CG ไม่เหมาะสำหรับเด็ก'
+        ]);
+      }
+      while (bodyBox.firstChild) bodyBox.removeChild(bodyBox.firstChild);
+      bodyBox.appendChild(pedBox);
     } else {
       bodyBox.style.display = 'none';
     }
 
     if (crcl < 30) {
       warn.style.display = 'block';
-      warn.innerHTML = '<div class="info-box red"><strong>⚠ CrCl <30 mL/min</strong> — ปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing</div>';
+      while (warn.firstChild) warn.removeChild(warn.firstChild);
+      warn.appendChild(IVDrugRef.dom('div', { className: 'info-box red' }, [
+        IVDrugRef.dom('strong', { textContent: '⚠ CrCl <30 mL/min' }),
+        ' — ปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing'
+      ]));
     } else if (crcl < 50) {
       warn.style.display = 'block';
-      warn.innerHTML = '<div class="info-box amber"><strong>CrCl 30-50 mL/min</strong> — ยาบางตัวต้องปรับขนาด/interval</div>';
+      while (warn.firstChild) warn.removeChild(warn.firstChild);
+      warn.appendChild(IVDrugRef.dom('div', { className: 'info-box amber' }, [
+        IVDrugRef.dom('strong', { textContent: 'CrCl 30-50 mL/min' }),
+        ' — ยาบางตัวต้องปรับขนาด/interval'
+      ]));
     } else {
       warn.style.display = 'none';
     }

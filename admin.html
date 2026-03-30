@@ -2422,25 +2422,28 @@ var IVDrugRef = (function() {
     var container = document.getElementById(containerId);
     if (!container) return;
 
+    // Clear safely
+    while (container.firstChild) container.removeChild(container.firstChild);
+
     if (validation.errors.length === 0 && validation.warnings.length === 0) {
       container.style.display = 'none';
-      container.innerHTML = '';
       return;
     }
 
-    var html = '';
-    for (var i = 0; i < validation.errors.length; i++) {
-      html += '<div class="validation-msg validation-error">'
-        + '<span class="v-icon">!</span>'
-        + '<span>' + validation.errors[i] + '</span></div>';
-    }
-    for (var j = 0; j < validation.warnings.length; j++) {
-      html += '<div class="validation-msg validation-warn">'
-        + '<span class="v-icon">?</span>'
-        + '<span>' + validation.warnings[j] + '</span></div>';
+    function buildMsg(text, level) {
+      return dom('div', { className: 'validation-msg validation-' + level }, [
+        dom('span', { className: 'v-icon', textContent: level === 'error' ? '!' : '?' }),
+        dom('span', { textContent: text })
+      ]);
     }
 
-    container.innerHTML = html;
+    for (var i = 0; i < validation.errors.length; i++) {
+      container.appendChild(buildMsg(validation.errors[i], 'error'));
+    }
+    for (var j = 0; j < validation.warnings.length; j++) {
+      container.appendChild(buildMsg(validation.warnings[j], 'warn'));
+    }
+
     container.style.display = 'flex';
   }
 
@@ -2856,6 +2859,34 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Safe DOM element builder — prevents innerHTML XSS.
+   * @param {string} tag - HTML tag name
+   * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
+   * @param {Array} children - Child elements or strings (strings become text nodes)
+   * @returns {HTMLElement}
+   */
+  function dom(tag, attrs, children) {
+    var el = document.createElement(tag);
+    if (attrs) {
+      for (var key in attrs) {
+        if (key === 'className') el.className = attrs[key];
+        else if (key === 'textContent') el.textContent = attrs[key];
+        else if (key === 'style' && typeof attrs[key] === 'string') el.style.cssText = attrs[key];
+        else if (key === 'htmlFor') el.htmlFor = attrs[key];
+        else el.setAttribute(key, attrs[key]);
+      }
+    }
+    if (children) {
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (typeof child === 'string') el.appendChild(document.createTextNode(child));
+        else if (child) el.appendChild(child);
+      }
+    }
+    return el;
+  }
+
+  /**
    * Version and app name constants
    */
   const VERSION = '5.0.0';
@@ -2901,7 +2932,8 @@ var IVDrugRef = (function() {
     // Utility helpers
     generateId,
     debounce,
-    fmt
+    fmt,
+    dom
   };
 })();
 

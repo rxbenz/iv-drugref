@@ -1782,25 +1782,28 @@ var IVDrugRef = (function() {
     var container = document.getElementById(containerId);
     if (!container) return;
 
+    // Clear safely
+    while (container.firstChild) container.removeChild(container.firstChild);
+
     if (validation.errors.length === 0 && validation.warnings.length === 0) {
       container.style.display = 'none';
-      container.innerHTML = '';
       return;
     }
 
-    var html = '';
-    for (var i = 0; i < validation.errors.length; i++) {
-      html += '<div class="validation-msg validation-error">'
-        + '<span class="v-icon">!</span>'
-        + '<span>' + validation.errors[i] + '</span></div>';
-    }
-    for (var j = 0; j < validation.warnings.length; j++) {
-      html += '<div class="validation-msg validation-warn">'
-        + '<span class="v-icon">?</span>'
-        + '<span>' + validation.warnings[j] + '</span></div>';
+    function buildMsg(text, level) {
+      return dom('div', { className: 'validation-msg validation-' + level }, [
+        dom('span', { className: 'v-icon', textContent: level === 'error' ? '!' : '?' }),
+        dom('span', { textContent: text })
+      ]);
     }
 
-    container.innerHTML = html;
+    for (var i = 0; i < validation.errors.length; i++) {
+      container.appendChild(buildMsg(validation.errors[i], 'error'));
+    }
+    for (var j = 0; j < validation.warnings.length; j++) {
+      container.appendChild(buildMsg(validation.warnings[j], 'warn'));
+    }
+
     container.style.display = 'flex';
   }
 
@@ -2216,6 +2219,34 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Safe DOM element builder — prevents innerHTML XSS.
+   * @param {string} tag - HTML tag name
+   * @param {Object|null} attrs - Attributes/properties (className, style, textContent, etc.)
+   * @param {Array} children - Child elements or strings (strings become text nodes)
+   * @returns {HTMLElement}
+   */
+  function dom(tag, attrs, children) {
+    var el = document.createElement(tag);
+    if (attrs) {
+      for (var key in attrs) {
+        if (key === 'className') el.className = attrs[key];
+        else if (key === 'textContent') el.textContent = attrs[key];
+        else if (key === 'style' && typeof attrs[key] === 'string') el.style.cssText = attrs[key];
+        else if (key === 'htmlFor') el.htmlFor = attrs[key];
+        else el.setAttribute(key, attrs[key]);
+      }
+    }
+    if (children) {
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (typeof child === 'string') el.appendChild(document.createTextNode(child));
+        else if (child) el.appendChild(child);
+      }
+    }
+    return el;
+  }
+
+  /**
    * Version and app name constants
    */
   const VERSION = '5.0.0';
@@ -2261,7 +2292,8 @@ var IVDrugRef = (function() {
     // Utility helpers
     generateId,
     debounce,
-    fmt
+    fmt,
+    dom
   };
 })();
 
@@ -2434,22 +2466,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const ckdNonindexed = IVDrugRef.calcCKDEPI2021_nonindexed(pt.age, pt.scr, pt.sex, pt.bsa);
 
     // Update CG display — show adjusted label if obese
-    const cgLabel = pt.isObese ? `CrCl (CG — <span style="color:#ea580c;font-weight:700;">ABW</span>)` : 'CrCl (Cockcroft-Gault)';
-    document.querySelector('#boxCG .renal-result-label').innerHTML = cgLabel;
+    const cgLabelEl = document.querySelector('#boxCG .renal-result-label');
+    while (cgLabelEl.firstChild) cgLabelEl.removeChild(cgLabelEl.firstChild);
+    if (pt.isObese) {
+      cgLabelEl.appendChild(document.createTextNode('CrCl (CG — '));
+      cgLabelEl.appendChild(IVDrugRef.dom('span', { style: 'color:#ea580c;font-weight:700;', textContent: 'ABW' }));
+      cgLabelEl.appendChild(document.createTextNode(')'));
+    } else {
+      cgLabelEl.textContent = 'CrCl (Cockcroft-Gault)';
+    }
     document.getElementById('valCG').textContent = cg.toFixed(1);
 
     // CKD-EPI show non-indexed for dosing
-    const ckdLabel = pt.bsa > 2.0 || pt.bsa < 1.5
-      ? `eGFR (CKD-EPI — <span style="color:#15803d;font-weight:700;">non-indexed</span>)`
-      : 'eGFR (CKD-EPI 2021)';
-    document.querySelector('#boxCKD .renal-result-label').innerHTML = ckdLabel;
+    const ckdLabelEl = document.querySelector('#boxCKD .renal-result-label');
+    while (ckdLabelEl.firstChild) ckdLabelEl.removeChild(ckdLabelEl.firstChild);
+    if (pt.bsa > 2.0 || pt.bsa < 1.5) {
+      ckdLabelEl.appendChild(document.createTextNode('eGFR (CKD-EPI — '));
+      ckdLabelEl.appendChild(IVDrugRef.dom('span', { style: 'color:#15803d;font-weight:700;', textContent: 'non-indexed' }));
+      ckdLabelEl.appendChild(document.createTextNode(')'));
+    } else {
+      ckdLabelEl.textContent = 'eGFR (CKD-EPI 2021)';
+    }
     document.getElementById('valCKD').textContent = (activeFormula === 'ckd' ? ckdNonindexed : ckdIndexed).toFixed(1);
     document.querySelector('#boxCKD .renal-result-unit').textContent = activeFormula === 'ckd' ? 'mL/min (non-indexed for dosing)' : 'mL/min/1.73m²';
 
     const stageCG = IVDrugRef.getCKDStage(cg);
     const stageCKD = IVDrugRef.getCKDStage(ckdIndexed);
-    document.getElementById('stageCG').innerHTML = `<span class="renal-result-stage ${stageCG.cls}">${stageCG.stage} ${stageCG.label}</span>`;
-    document.getElementById('stageCKD').innerHTML = `<span class="renal-result-stage ${stageCKD.cls}">${stageCKD.stage} ${stageCKD.label}</span>`;
+    function renderStage(containerId, stage) {
+      var el = document.getElementById(containerId);
+      while (el.firstChild) el.removeChild(el.firstChild);
+      el.appendChild(IVDrugRef.dom('span', { className: 'renal-result-stage ' + stage.cls, textContent: stage.stage + ' ' + stage.label }));
+    }
+    renderStage('stageCG', stageCG);
+    renderStage('stageCKD', stageCKD);
 
     // ── BODY COMPOSITION ANALYSIS ──
     const isElderly = pt.age >= 65 && pt.scr < 0.7;
@@ -2483,17 +2532,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 <em>Ref: KDIGO 2024; Flamant M, et al. Am J Kidney Dis 2012</em>`;
       }
 
-      bodyBox.innerHTML = `
-        <div class="body-comp-box ${boxClass}">
-          <div class="body-comp-title">${title}</div>
-          <div class="body-comp-grid">
-            <div class="body-comp-item"><div class="label">BMI</div><div class="value">${pt.bmi.toFixed(1)}</div></div>
-            <div class="body-comp-item"><div class="label">IBW</div><div class="value">${pt.ibw.toFixed(1)} kg</div></div>
-            <div class="body-comp-item"><div class="label">ABW</div><div class="value">${pt.abw.toFixed(1)} kg</div></div>
-          </div>
-          ${weightTag}
-          <div class="body-comp-note">${note}</div>
-        </div>`;
+      var D = IVDrugRef.dom;
+      function compItem(label, value) {
+        return D('div', { className: 'body-comp-item' }, [
+          D('div', { className: 'label', textContent: label }),
+          D('div', { className: 'value', textContent: value })
+        ]);
+      }
+      var gridEl = D('div', { className: 'body-comp-grid' }, [
+        compItem('BMI', pt.bmi.toFixed(1)),
+        compItem('IBW', pt.ibw.toFixed(1) + ' kg'),
+        compItem('ABW', pt.abw.toFixed(1) + ' kg')
+      ]);
+
+      // Weight tag element
+      var weightEl = null;
+      if (pt.isObese) {
+        weightEl = D('span', { className: 'weight-used-tag abw', textContent: 'CG ใช้ ABW = ' + pt.abw.toFixed(1) + ' kg' });
+      } else if (pt.isUnderweight) {
+        weightEl = D('span', { className: 'weight-used-tag tbw', textContent: 'CG ใช้ TBW = ' + pt.wt + ' kg' });
+      }
+
+      // Note element — safe text construction
+      var noteEl = D('div', { className: 'body-comp-note' });
+      if (pt.isObese) {
+        noteEl.appendChild(D('strong', { textContent: 'TBW ' + pt.wt + ' kg → CG(TBW) = ' + cgRaw.toFixed(1) + ' mL/min' }));
+        noteEl.appendChild(document.createTextNode(' (overestimates by ~' + (cgRaw - cg).toFixed(0) + ' mL/min)'));
+        noteEl.appendChild(D('br'));
+        noteEl.appendChild(document.createTextNode('ระบบปรับใช้ '));
+        noteEl.appendChild(D('strong', { textContent: 'ABW = IBW + 0.4×(TBW−IBW) = ' + pt.abw.toFixed(1) + ' kg' }));
+        noteEl.appendChild(document.createTextNode(' อัตโนมัติ'));
+        noteEl.appendChild(D('br'));
+        noteEl.appendChild(D('em', { textContent: 'Ref: Winter MA, et al. Pharmacotherapy 2012; Brown DL, et al. Ann Pharmacother 2013' }));
+      } else if (pt.isUnderweight) {
+        noteEl.appendChild(document.createTextNode('น้ำหนักจริงต่ำกว่า IBW → ใช้ actual body weight ใน CG (ไม่ปรับ)'));
+        noteEl.appendChild(D('br'));
+        noteEl.appendChild(D('em', { textContent: 'พิจารณาว่า low muscle mass อาจทำให้ CrCl overestimate ได้' }));
+      } else if (isElderly) {
+        noteEl.appendChild(document.createTextNode('อายุ ≥65 ปี + SCr ' + pt.scr + ' mg/dL (<0.7) → CrCl อาจ '));
+        noteEl.appendChild(D('strong', { textContent: 'overestimate' }));
+        noteEl.appendChild(document.createTextNode(' จาก low muscle mass'));
+        noteEl.appendChild(D('br'));
+        noteEl.appendChild(document.createTextNode('บาง clinician round SCr ขึ้นเป็น 1.0 — '));
+        noteEl.appendChild(D('strong', { textContent: 'แต่ practice นี้ controversial และไม่ evidence-based' }));
+        noteEl.appendChild(D('br'));
+        noteEl.appendChild(D('strong', { textContent: 'แนะนำ:' }));
+        noteEl.appendChild(document.createTextNode(' ใช้ CKD-EPI 2021 แทน CG ในกลุ่มนี้ หรือใช้ clinical judgment'));
+        noteEl.appendChild(D('br'));
+        noteEl.appendChild(D('em', { textContent: 'Ref: KDIGO 2024; Flamant M, et al. Am J Kidney Dis 2012' }));
+      }
+
+      var compBox = D('div', { className: 'body-comp-box ' + boxClass }, [
+        D('div', { className: 'body-comp-title', textContent: title }),
+        gridEl
+      ]);
+      if (weightEl) compBox.appendChild(weightEl);
+      compBox.appendChild(noteEl);
+
+      while (bodyBox.firstChild) bodyBox.removeChild(bodyBox.firstChild);
+      bodyBox.appendChild(compBox);
     } else {
       bodyBox.style.display = 'none';
     }
@@ -2501,19 +2598,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── GFR WARNINGS ──
     const gfr = getActiveGFR();
     const warn = document.getElementById('renalWarning');
-    let warnHtml = '';
+    while (warn.firstChild) warn.removeChild(warn.firstChild);
+    var D = IVDrugRef.dom;
+
+    function addWarnBox(cls, strongText, text, emText) {
+      var children = [D('strong', { textContent: strongText }), ' — ' + text];
+      if (emText) { children.push(D('br')); children.push(D('em', { textContent: emText })); }
+      warn.appendChild(D('div', { className: 'info-box ' + cls }, children));
+    }
+
     if (gfr < 15) {
-      warnHtml += '<div class="info-box red"><strong>⚠ GFR &lt;15</strong> — ไตวายระยะสุดท้าย (G5) ยาส่วนใหญ่ต้องปรับขนาดอย่างมาก หรือ contraindicated</div>';
+      addWarnBox('red', '⚠ GFR <15', 'ไตวายระยะสุดท้าย (G5) ยาส่วนใหญ่ต้องปรับขนาดอย่างมาก หรือ contraindicated');
     } else if (gfr < 30) {
-      warnHtml += '<div class="info-box amber"><strong>⚠ GFR 15–29</strong> — ต้องปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing ทุกตัว</div>';
+      addWarnBox('amber', '⚠ GFR 15–29', 'ต้องปรับขนาดยาส่วนใหญ่ ตรวจสอบ renal dosing ทุกตัว');
     } else if (gfr < 50) {
-      warnHtml += '<div class="info-box amber"><strong>GFR 30–49</strong> — ยาหลายตัวต้องปรับ dose/interval</div>';
+      addWarnBox('amber', 'GFR 30–49', 'ยาหลายตัวต้องปรับ dose/interval');
     }
     // ARC warning
     if (gfr > 130 && pt.age < 50) {
-      warnHtml += '<div class="info-box teal"><strong>🔺 Augmented Renal Clearance (ARC)?</strong> — GFR >130 ในผู้ป่วยอายุน้อย → อาจต้องเพิ่มขนาดยา (เช่น beta-lactams, vancomycin) เพื่อให้ได้ target<br><em>Ref: Udy AA, et al. Clin Pharmacokinet 2010</em></div>';
+      addWarnBox('teal', '🔺 Augmented Renal Clearance (ARC)?', 'GFR >130 ในผู้ป่วยอายุน้อย → อาจต้องเพิ่มขนาดยา (เช่น beta-lactams, vancomycin) เพื่อให้ได้ target', 'Ref: Udy AA, et al. Clin Pharmacokinet 2010');
     }
-    warn.innerHTML = warnHtml;
 
     // Re-render drug recommendation if open
     if (selectedDrug) showDrugRecom(selectedDrug);

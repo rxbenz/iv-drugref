@@ -2076,14 +2076,9 @@ const PK_MODELS = [
 
 let selectedModel='auto', currentPK=null, mcmcSamples=[], allModelResults=[];
 
-// --- Helpers ---
-function cockcroft(age,wt,scr,sex,ht){
-  if(scr<=0) return 0;
-  let useWt=wt;
-  if(ht&&ht>0){const htIn=ht/2.54;const ibw=sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(wt>ibw*1.3)useWt=ibw+0.4*(wt-ibw);}
-  let c=((140-age)*useWt)/(72*scr);if(sex==='F')c*=0.85;return Math.max(Math.round(c*10)/10,5);
-}
-function getPatient(){return{wt:+(document.getElementById('ptWt').value)||70,age:+(document.getElementById('ptAge').value)||55,sex:document.getElementById('ptSex').value,scr:+(document.getElementById('ptScr').value)||1,ht:+(document.getElementById('ptHt').value)||170};}
+// --- Helpers (consolidated into core.js) ---
+function cockcroft(age,wt,scr,sex,ht){ return IVDrugRef.calcCockcroftGault(age,wt,scr,sex,ht); }
+function getPatient(){ var p=IVDrugRef.getPatientFromForm(); return{wt:p.wt,age:p.age,sex:p.sex,scr:p.scr,ht:p.ht}; }
 function updateCrCl(){
   const p=getPatient();
   const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);

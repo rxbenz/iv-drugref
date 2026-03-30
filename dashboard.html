@@ -2598,21 +2598,12 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#39;');
   }
 
-  // ─── UTILITY: Safe number formatting ───────────────────────
+  // ─── UTILITIES: Consolidated from core.js ───────────────────
   function fmtNum(n, decimals) {
-    if (!Number.isFinite(n)) return 'N/A';
-    decimals = decimals !== undefined ? decimals : 1;
-    return n.toFixed(decimals);
+    var result = IVDrugRef.fmt(n, decimals);
+    return result === '–' ? 'N/A' : result;
   }
-
-  // ─── UTILITY: Debounce ─────────────────────────────────────
-  function debounce(fn, ms) {
-    let t;
-    return function(...args) {
-      clearTimeout(t);
-      t = setTimeout(() => fn.apply(this, args), ms);
-    };
-  }
+  var debounce = IVDrugRef.debounce;
 
   // ─── Tab navigation ────────────────────────────────────────
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {

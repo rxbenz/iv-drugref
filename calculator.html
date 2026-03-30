@@ -2070,76 +2070,29 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   // ====== CrCl Calculator ======
-  /** Read numeric input — returns NaN-safe value, only falls back to def for truly empty/non-numeric */
-  function readNum(id, def) {
-    var v = parseFloat(document.getElementById(id).value);
-    return isNaN(v) ? def : v;
-  }
-
-  function calcIBW(ht, sex) {
-    const htIn = ht / 2.54;
-    return sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
-  }
-
-  function getCrCl() {
-    const age = readNum('ptAge', 65);
-    const wt = readNum('ptWt', 70);
-    const scr = readNum('ptScr', 1.0);
-    const sex = document.getElementById('ptSex').value;
-    const ht = readNum('ptHt', 0);
-    if (scr <= 0) return 0;
-
-    if (age < 18 && ht > 0) {
-      return IVDrugRef.calcSchwartz(ht, scr);
-    }
-
-    let useWt = wt;
-    if (ht > 0) {
-      const ibw = calcIBW(ht, sex);
-      if (wt > ibw * 1.3) useWt = ibw + 0.4 * (wt - ibw);
-      else if (wt < ibw) useWt = wt;
-    }
-    return IVDrugRef.calcCockcroftGault(age, useWt, scr, sex);
-  }
-
-  function getPatient() {
-    const age = readNum('ptAge', 65);
-    const wt = readNum('ptWt', 70);
-    const ht = readNum('ptHt', 0);
-    const sex = document.getElementById('ptSex').value;
-    const scr = readNum('ptScr', 1.0);
-    return { wt, age, sex, scr, ht, crcl: getCrCl() };
-  }
+  // Patient data, CrCl, IBW/ABW consolidated into IVDrugRef.getPatientFromForm()
 
   function updateCrCl() {
-    const age = readNum('ptAge', 65);
-    const wt = readNum('ptWt', 70);
-    const ht = readNum('ptHt', 0);
-    const sex = document.getElementById('ptSex').value;
-    const scr = readNum('ptScr', 1.0);
-
-    // Validate patient input
-    const validation = IVDrugRef.validatePatientInput(
-      { age: age, wt: wt, scr: scr, ht: ht }
-    );
-    IVDrugRef.renderValidationMessages('validationMessages', validation);
+    // Use core.js patient object — consolidates validation, CrCl, IBW/ABW/BMI
+    const pt = IVDrugRef.getPatientFromForm();
+    IVDrugRef.renderValidationMessages('validationMessages', pt.validation);
 
     // Block calculation on hard errors
-    if (!validation.allValid) {
+    if (!pt.validation.allValid) {
       var cv = document.getElementById('crclValue'); if (cv) cv.textContent = '—';
       var bi = document.getElementById('bodyCompInfo'); if (bi) bi.style.display = 'none';
       var cw = document.getElementById('crclWarning'); if (cw) cw.style.display = 'none';
       return;
     }
 
-    const crcl = getCrCl();
-    const isPed = age < 18;
+    const crcl = pt.crcl;
+    const isPed = pt.isPediatric;
     const bodyBox = document.getElementById('bodyCompInfo');
     const warn = document.getElementById('crclWarning');
     const crclLabel = document.getElementById('crclLabel');
     const crclValue = document.getElementById('crclValue');
 
-    if (isPed && ht > 0) {
+    if (isPed && pt.ht > 0) {
       if (crclLabel) crclLabel.textContent = 'eGFR (Bedside Schwartz):';
       if (crclValue) crclValue.textContent = crcl.toFixed(1) + ' mL/min/1.73m²';
     } else {
@@ -2147,13 +2100,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (crclValue) crclValue.textContent = crcl.toFixed(1) + ' mL/min';
     }
 
-    if (!isPed && ht > 0) {
-      const ibw = calcIBW(ht, sex);
-      const bmi = wt / ((ht / 100) ** 2);
-      const abw = ibw + 0.4 * (wt - ibw);
-      const isObese = wt > ibw * 1.3;
-      const isElderly = age >= 65 && scr < 0.7;
-      const crcl_raw = ((140 - age) * wt) / (72 * scr) * (sex === 'F' ? 0.85 : 1);
+    if (!isPed && pt.ht > 0) {
+      const ibw = pt.ibw;
+      const bmi = pt.bmi;
+      const abw = pt.abw;
+      const isObese = pt.isObese;
+      const isElderly = pt.age >= 65 && pt.scr < 0.7;
+      const crcl_raw = IVDrugRef.calcCG_raw(pt.age, pt.wt, pt.scr, pt.sex);
 
       if (isObese || isElderly) {
         bodyBox.style.display = 'block';
@@ -2165,11 +2118,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isObese) {
           lines.push(D('br'));
           lines.push(D('strong', { textContent: '⚠ Obesity (TBW>' + Math.round(ibw*1.3) + 'kg):' }));
-          lines.push(' CG ปรับใช้ ABW ' + abw.toFixed(1) + ' kg (TBW ' + wt + ' → CrCl overestimate ~' + Math.round(crcl_raw - crcl) + ' mL/min)');
+          lines.push(' CG ปรับใช้ ABW ' + abw.toFixed(1) + ' kg (TBW ' + pt.wt + ' → CrCl overestimate ~' + Math.round(crcl_raw - crcl) + ' mL/min)');
         }
         if (isElderly) {
           if (isObese) lines.push(D('br'));
-          lines.push(D('strong', { textContent: '👴 Elderly + SCr ' + scr + ':' }));
+          lines.push(D('strong', { textContent: '👴 Elderly + SCr ' + pt.scr + ':' }));
           lines.push(' Low SCr อาจ overestimate CrCl จาก low muscle mass — พิจารณาใช้ clinical judgment');
         }
         var box = D('div', { className: 'info-box blue', style: 'font-size:11px;line-height:1.6;' }, lines);
@@ -2182,7 +2135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       bodyBox.style.display = 'block';
       var D = IVDrugRef.dom;
       var pedBox;
-      if (ht > 0) {
+      if (pt.ht > 0) {
         pedBox = D('div', { className: 'info-box blue', style: 'font-size:11px;' }, [
           D('strong', { textContent: '👶 Pediatric:' }),
           ' ใช้ Bedside Schwartz (0.413 × Ht / SCr) — CG ไม่เหมาะสำหรับเด็ก',
@@ -2247,20 +2200,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('outputHeader');
     if (!selectedDrug) { sec.style.display = 'none'; return; }
 
-    // Block drug dosing calculation when patient input has hard errors
-    const validation = IVDrugRef.validatePatientInput({
-      age: readNum('ptAge', 65), wt: readNum('ptWt', 70),
-      scr: readNum('ptScr', 1.0), ht: readNum('ptHt', 0)
-    });
-    if (!validation.allValid) {
-      sec.style.display = 'none';
-      return;
-    }
-
     const drug = CALC_DRUGS.find(d => d.id === selectedDrug);
     if (!drug) return;
 
-    const pt = getPatient();
+    // getPatientFromForm runs validation internally
+    const pt = IVDrugRef.getPatientFromForm();
+    if (!pt.validation.allValid) { sec.style.display = 'none'; return; }
     const result = drug.calc(pt);
 
     header.innerHTML = `📊 ${drug.name}`;

@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com; img-src 'self' data: https:; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com https://api.github.com; img-src 'self' data: https:; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IV DrugRef Admin — จัดการข้อมูลยา</title>
 
@@ -1626,6 +1626,29 @@ body::before {
         <button class="btn btn-primary" data-action="saveSettings">💾 บันทึกการตั้งค่า</button>
         <button class="btn btn-outline" data-action="testConnection" style="margin-left:8px">🔌 ทดสอบการเชื่อมต่อ</button>
         <pre id="test-result" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px;font-family:var(--mono);white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
+
+        <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
+        <h3 style="margin-bottom:12px">📦 Sync drugs-data.json</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+          อัพเดทไฟล์ drugs-data.json (local fallback) ให้ตรงกับข้อมูลใน Google Sheets<br>
+          ถ้าไม่ sync — user ที่ offline หรือเข้าครั้งแรกจะเห็นข้อมูลเก่า
+        </p>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">GitHub Personal Access Token</label>
+          <input type="password" class="form-input" id="settings-gh-token"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          <span style="font-size:11px;color:var(--text-muted)">ต้องมี scope: <code>contents:write</code> หรือ <code>repo</code> — <a href="https://github.com/settings/tokens/new?scopes=repo&description=IV+DrugRef+Admin+Sync" target="_blank" rel="noopener" style="color:var(--primary)">สร้าง token</a></span>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">GitHub Repo (owner/repo)</label>
+          <input type="text" class="form-input" id="settings-gh-repo"
+            placeholder="rxbenz/iv-drugref" value="rxbenz/iv-drugref">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline" data-action="exportDrugsJSON">📥 Export JSON</button>
+          <button class="btn btn-primary" data-action="syncToGitHub">🔄 Sync to GitHub</button>
+        </div>
+        <div id="sync-result" style="display:none;margin-top:12px;padding:10px;border-radius:var(--radius);font-size:12px"></div>
       </div>
     </div>
   </div>
@@ -2998,12 +3021,16 @@ function getConfig() {
     scriptUrl: localStorage.getItem(LS_PREFIX + 'scriptUrl') || '',
     clientId: localStorage.getItem(LS_PREFIX + 'clientId') || '',
     allowedEmails: (localStorage.getItem(LS_PREFIX + 'allowedEmails') || '').split(',').map(e => e.trim()).filter(Boolean),
+    ghToken: localStorage.getItem(LS_PREFIX + 'ghToken') || '',
+    ghRepo: localStorage.getItem(LS_PREFIX + 'ghRepo') || 'rxbenz/iv-drugref',
   };
 }
 function saveConfig(cfg) {
   localStorage.setItem(LS_PREFIX + 'scriptUrl', cfg.scriptUrl);
   localStorage.setItem(LS_PREFIX + 'clientId', cfg.clientId);
   localStorage.setItem(LS_PREFIX + 'allowedEmails', cfg.allowedEmails.join(','));
+  if (cfg.ghToken !== undefined) localStorage.setItem(LS_PREFIX + 'ghToken', cfg.ghToken);
+  if (cfg.ghRepo !== undefined) localStorage.setItem(LS_PREFIX + 'ghRepo', cfg.ghRepo);
 }
 
 /* ═══════════════════════════════════════════
@@ -4146,6 +4173,10 @@ function loadSettingsUI() {
   document.getElementById('settings-script-url').value = cfg.scriptUrl;
   document.getElementById('settings-client-id').value = cfg.clientId;
   document.getElementById('settings-allowed-emails').value = cfg.allowedEmails.join(', ');
+  var ghTokenEl = document.getElementById('settings-gh-token');
+  var ghRepoEl = document.getElementById('settings-gh-repo');
+  if (ghTokenEl) ghTokenEl.value = cfg.ghToken;
+  if (ghRepoEl) ghRepoEl.value = cfg.ghRepo;
 }
 
 function saveSettings() {
@@ -4153,9 +4184,110 @@ function saveSettings() {
     scriptUrl: document.getElementById('settings-script-url').value.trim(),
     clientId: document.getElementById('settings-client-id').value.trim(),
     allowedEmails: document.getElementById('settings-allowed-emails').value.split(',').map(e => e.trim()).filter(Boolean),
+    ghToken: (document.getElementById('settings-gh-token')?.value || '').trim(),
+    ghRepo: (document.getElementById('settings-gh-repo')?.value || 'rxbenz/iv-drugref').trim(),
   };
   saveConfig(cfg);
   toast('💾 บันทึกการตั้งค่าแล้ว — reload เพื่อใช้งาน Google Sign-in', 'success');
+}
+
+/* ═══════════════════════════════════════════
+   DRUGS-DATA.JSON SYNC
+   ═══════════════════════════════════════════ */
+
+/** Build drugs-data.json content from current approved drugs */
+function buildDrugsDataJSON() {
+  const approved = state.drugs.filter(d => d.status === 'approved');
+  approved.sort((a, b) => (a.generic || '').localeCompare(b.generic || ''));
+  const cleaned = approved.map((d, i) => {
+    const out = { id: i + 1 };
+    const fields = ['generic','trade','strength','ed','categories','reconst','dilution','admin',
+      'stability','compat','precautions','monitoring','had','ref'];
+    for (const f of fields) { if (d[f] !== undefined && d[f] !== null && d[f] !== '') out[f] = d[f]; }
+    return out;
+  });
+  return JSON.stringify(cleaned, null, 2);
+}
+
+/** Export drugs-data.json as downloadable file */
+function exportDrugsJSON() {
+  if (state.drugs.length === 0) { toast('ไม่มีข้อมูลยา — โหลดข้อมูลก่อน', 'info'); return; }
+  const json = buildDrugsDataJSON();
+  const count = JSON.parse(json).length;
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'drugs-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📥 Export drugs-data.json สำเร็จ (' + count + ' รายการ)', 'success');
+}
+
+/** Sync drugs-data.json to GitHub via Contents API */
+async function syncToGitHub() {
+  const cfg = getConfig();
+  if (!cfg.ghToken) { toast('❌ กรุณาใส่ GitHub Token ในตั้งค่าก่อน', 'error'); return; }
+  if (!cfg.ghRepo) { toast('❌ กรุณาใส่ GitHub Repo', 'error'); return; }
+  if (state.drugs.length === 0) { toast('ไม่มีข้อมูลยา — โหลดข้อมูลก่อน', 'info'); return; }
+
+  const resultEl = document.getElementById('sync-result');
+  if (resultEl) {
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'rgba(14,165,233,.08)';
+    resultEl.style.color = 'var(--primary)';
+    resultEl.textContent = '🔄 กำลัง sync...';
+  }
+
+  try {
+    const apiBase = 'https://api.github.com/repos/' + cfg.ghRepo + '/contents/drugs-data.json';
+    const headers = { 'Authorization': 'Bearer ' + cfg.ghToken, 'Accept': 'application/vnd.github.v3+json' };
+
+    // 1. Get current file SHA
+    const getRes = await fetch(apiBase, { headers: headers });
+    if (!getRes.ok && getRes.status !== 404) throw new Error('GitHub GET failed: ' + getRes.status);
+    const current = getRes.ok ? await getRes.json() : null;
+    const sha = current ? current.sha : undefined;
+
+    // 2. Build new content
+    const json = buildDrugsDataJSON();
+    const count = JSON.parse(json).length;
+    const content = btoa(unescape(encodeURIComponent(json)));
+
+    // 3. PUT to GitHub
+    const body = {
+      message: 'Sync drugs-data.json from admin (' + count + ' drugs)',
+      content: content,
+      branch: 'main'
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiBase, {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+      body: JSON.stringify(body)
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(function() { return {}; });
+      throw new Error('GitHub PUT failed: ' + putRes.status + ' — ' + (err.message || ''));
+    }
+
+    const result = await putRes.json();
+    if (resultEl) {
+      resultEl.style.background = 'rgba(16,185,129,.08)';
+      resultEl.style.color = 'var(--green, #10b981)';
+      resultEl.textContent = '✅ Sync สำเร็จ! ' + count + ' drugs → ' + cfg.ghRepo + '/main\nCommit: ' + (result.commit ? result.commit.sha.substring(0, 7) : 'ok') + '\nGitHub Pages จะ rebuild ภายใน 1-2 นาที';
+    }
+    toast('✅ Sync to GitHub สำเร็จ (' + count + ' drugs)', 'success');
+  } catch (e) {
+    if (resultEl) {
+      resultEl.style.background = 'rgba(239,68,68,.08)';
+      resultEl.style.color = 'var(--danger, #ef4444)';
+      resultEl.textContent = '❌ Sync failed: ' + e.message;
+    }
+    toast('❌ Sync failed: ' + e.message, 'error');
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -4229,6 +4361,8 @@ document.addEventListener('DOMContentLoaded', () => {
     addUser: function() { addUser(); },
     saveSettings: function() { saveSettings(); },
     testConnection: function() { testConnection(); },
+    exportDrugsJSON: function() { exportDrugsJSON(); },
+    syncToGitHub: function() { syncToGitHub(); },
     closeDrugModal: function() { closeDrugModal(); },
     togglePreview: function(e, t) { togglePreview(t.dataset.preview === 'true'); },
     saveDrug: function(e, t) { saveDrug(t.dataset.status); },

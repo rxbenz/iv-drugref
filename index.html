@@ -38,6 +38,36 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
+/* ---- Accessibility: Skip to content ---- */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 4px;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: #0ea5e9;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 0 0 8px 0;
+  text-decoration: none;
+}
+.skip-to-content:focus {
+  left: 0;
+}
+
+/* ---- Accessibility: Focus visible ---- */
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 2px;
+}
+
 /* ---- Typography ---- */
 body {
   font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
@@ -1499,6 +1529,7 @@ body::before {
 </head>
 
 <body>
+<a href="#drugList" class="skip-to-content">Skip to drug list</a>
 
 <!-- Header with search and filter -->
 <header class="header">
@@ -1514,12 +1545,12 @@ body::before {
       <div class="drug-count" id="drugCount">48 drugs</div>
     </div>
     <div class="search-wrap">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon" aria-hidden="true">🔍</span>
       <input type="text" class="search-input" id="searchInput"
         placeholder="ค้นหายา... เช่น phenytoin, amiodarone, rt-PA"
         autocomplete="off" autocorrect="off" spellcheck="false">
       <span class="kbd-hint" id="kbdHint">⌘K</span>
-      <button class="search-clear" id="clearBtn" data-action="clearSearch">✕</button>
+      <button class="search-clear" id="clearBtn" data-action="clearSearch" aria-label="Clear search">✕</button>
     </div>
   </div>
 
@@ -1550,7 +1581,7 @@ body::before {
     <button class="filter-chip" id="filterChip" data-action="openFilterSheet">
       <span class="chip-icon">🏷️</span>
       <span id="filterChipText">ทั้งหมด</span>
-      <span class="chip-chevron">▼</span>
+      <span class="chip-chevron" aria-hidden="true">▼</span>
     </button>
   </div>
 

@@ -24,6 +24,36 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
+/* ---- Accessibility: Skip to content ---- */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 4px;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: #0ea5e9;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 0 0 8px 0;
+  text-decoration: none;
+}
+.skip-to-content:focus {
+  left: 0;
+}
+
+/* ---- Accessibility: Focus visible ---- */
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 2px;
+}
+
 /* ---- Typography ---- */
 body {
   font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
@@ -1169,6 +1199,7 @@ canvas {
 </style>
 </head>
 <body class="theme-dark">
+<a href="#content" class="skip-to-content">Skip to content</a>
 
 <!-- ============================================================
      HEADER
@@ -1189,14 +1220,14 @@ canvas {
 <div class="container">
 
 <!-- Drug Selection Tabs -->
-<div class="drug-tabs" id="drugTabs">
-  <div class="drug-tab active" data-action="switchDrug" data-drug="vancomycin"><span class="tab-icon">🧬</span>Vancomycin</div>
-  <div class="drug-tab" data-action="switchDrug" data-drug="phenytoin"><span class="tab-icon">⚡</span>Phenytoin</div>
-  <div class="drug-tab" data-action="switchDrug" data-drug="aminoglycoside"><span class="tab-icon">💉</span>Aminoglycosides</div>
-  <div class="drug-tab" data-action="switchDrug" data-drug="valproate"><span class="tab-icon">🧠</span>Valproate</div>
-  <div class="drug-tab" data-action="switchDrug" data-drug="tacrolimus"><span class="tab-icon">🔬</span>Tacrolimus</div>
-  <div class="drug-tab" data-action="switchDrug" data-drug="digoxin"><span class="tab-icon">💜</span>Digoxin</div>
-  <div class="drug-tab" data-action="switchDrug" data-drug="warfarin"><span class="tab-icon">🩸</span>Warfarin</div>
+<div class="drug-tabs" id="drugTabs" role="tablist" aria-label="TDM Drug Selection">
+  <div class="drug-tab active" data-action="switchDrug" data-drug="vancomycin" role="tab" tabindex="0" aria-selected="true" aria-controls="sec_vancomycin"><span class="tab-icon" aria-hidden="true">🧬</span>Vancomycin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="phenytoin" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_phenytoin"><span class="tab-icon" aria-hidden="true">⚡</span>Phenytoin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="aminoglycoside" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_aminoglycoside"><span class="tab-icon" aria-hidden="true">💉</span>Aminoglycosides</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="valproate" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_valproate"><span class="tab-icon" aria-hidden="true">🧠</span>Valproate</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="tacrolimus" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_tacrolimus"><span class="tab-icon" aria-hidden="true">🔬</span>Tacrolimus</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="digoxin" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_digoxin"><span class="tab-icon" aria-hidden="true">💜</span>Digoxin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="warfarin" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_warfarin"><span class="tab-icon" aria-hidden="true">🩸</span>Warfarin</div>
 </div>
 
 <!-- ============================================================
@@ -1278,7 +1309,7 @@ canvas {
 <!-- ============================================================
      PHENYTOIN SECTION
      ============================================================ -->
-<div class="drug-section" id="sec_phenytoin">
+<div class="drug-section" id="sec_phenytoin" role="tabpanel" aria-labelledby="tab_phenytoin">
 
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
@@ -1326,7 +1357,7 @@ canvas {
 <!-- ============================================================
      AMINOGLYCOSIDE SECTION
      ============================================================ -->
-<div class="drug-section" id="sec_aminoglycoside">
+<div class="drug-section" id="sec_aminoglycoside" role="tabpanel" aria-labelledby="tab_aminoglycoside">
 
   <div class="card"><div class="card-head">💉 DRUG SELECTION</div><div class="card-body">
     <div class="row row-3">
@@ -1380,7 +1411,7 @@ canvas {
 <!-- ============================================================
      VALPROATE SECTION
      ============================================================ -->
-<div class="drug-section" id="sec_valproate">
+<div class="drug-section" id="sec_valproate" role="tabpanel" aria-labelledby="tab_valproate">
 
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
@@ -1418,7 +1449,7 @@ canvas {
 <!-- ============================================================
      TACROLIMUS
      ============================================================ -->
-<div class="drug-section" id="sec_tacrolimus">
+<div class="drug-section" id="sec_tacrolimus" role="tabpanel" aria-labelledby="tab_tacrolimus">
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
       <div class="field"><label>Trough Level (ng/mL)</label>
@@ -1497,7 +1528,7 @@ canvas {
 <!-- ============================================================
      DIGOXIN
      ============================================================ -->
-<div class="drug-section" id="sec_digoxin">
+<div class="drug-section" id="sec_digoxin" role="tabpanel" aria-labelledby="tab_digoxin">
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
       <div class="field"><label>Serum Digoxin (ng/mL)</label>
@@ -1570,7 +1601,7 @@ canvas {
 <!-- ============================================================
      WARFARIN
      ============================================================ -->
-<div class="drug-section" id="sec_warfarin">
+<div class="drug-section" id="sec_warfarin" role="tabpanel" aria-labelledby="tab_warfarin">
   <div class="card"><div class="card-head">🩸 INR-BASED DOSE ADJUSTMENT</div><div class="card-body">
     <div class="row row-3">
       <div class="field"><label>Current INR</label>
@@ -2945,11 +2976,19 @@ const TDMHub = (function() {
 
   function switchDrug(drug) {
     activeDrug = drug;
-    document.querySelectorAll('.drug-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.drug-tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+      t.setAttribute('tabindex', '-1');
+    });
     document.querySelectorAll('.drug-section').forEach(s => s.classList.remove('active'));
     const tabs = document.querySelectorAll('.drug-tab');
     const idx = ['vancomycin', 'phenytoin', 'aminoglycoside', 'valproate', 'tacrolimus', 'digoxin', 'warfarin'].indexOf(drug);
-    if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+    if (idx >= 0 && tabs[idx]) {
+      tabs[idx].classList.add('active');
+      tabs[idx].setAttribute('aria-selected', 'true');
+      tabs[idx].setAttribute('tabindex', '0');
+    }
     var secEl = document.getElementById('sec_' + drug); if (secEl) secEl.classList.add('active');
   }
 

@@ -7142,50 +7142,6 @@
   },
   {
     "id": 164,
-    "generic": "Plasma Exchange (TPE)",
-    "trade": "Albumin 5% + NSS / FFP (replacement)",
-    "strength": "Replacement: Albumin 5% หรือ FFP",
-    "ed": "N",
-    "categories": [
-      "neurology",
-      "icu"
-    ],
-    "reconst": {
-      "solvent": "Albumin 5%: Ready to use\nFFP: thaw per blood bank",
-      "volume": "-",
-      "conc": "-"
-    },
-    "dilution": {
-      "diluent": "ผ่าน apheresis machine",
-      "volume": "-",
-      "finalConc": "-"
-    },
-    "admin": {
-      "route": "Via apheresis device\n(Centrifugal/Membrane)",
-      "rate": "1–1.5 plasma volumes/session\n5 sessions over 10–14 days"
-    },
-    "stability": {
-      "reconst": "-",
-      "diluted": "Albumin: stable\nFFP: 24 hr หลัง thaw",
-      "storage": "Albumin: RT\nFFP: -20°C → thaw"
-    },
-    "compat": {
-      "ysite": "N/A (separate circuit)",
-      "incompat": "-"
-    },
-    "precautions": "• GBS (ASFA Category I), MG crisis (I), CIDP (I), NMOSD (II)\n• Replacement: Albumin 5% (preferred) หรือ FFP\n• ⚠ Hypotension, Hypocalcemia (citrate)\n• Coagulopathy (albumin dilutes clotting factors)\n• Drug removal → reschedule meds POST-TPE\n• ⚠ ห้ามให้ IVIG ทันทีหลัง TPE",
-    "monitoring": [
-      "BP (continuous)",
-      "Ca²⁺ ionized (q session)",
-      "CBC+Coag",
-      "Access site",
-      "Fibrinogen"
-    ],
-    "had": false,
-    "ref": "ASFA 2023; Cortese I. Neurology 2011"
-  },
-  {
-    "id": 165,
     "generic": "Adalimumab",
     "trade": "Humira Inj. 40 mg (prefilled)",
     "strength": "40 mg/0.4 mL",
@@ -7230,7 +7186,7 @@
     "ref": "Lexicomp; ACR RA; AGA IBD guidelines"
   },
   {
-    "id": 166,
+    "id": 165,
     "generic": "Omalizumab",
     "trade": "Xolair Inj. 150 mg",
     "strength": "150 mg/vial",
@@ -7274,7 +7230,7 @@
     "ref": "Lexicomp; GINA 2024"
   },
   {
-    "id": 167,
+    "id": 166,
     "generic": "Pembrolizumab",
     "trade": "Keytruda Inj. 100 mg/4 mL",
     "strength": "25 mg/mL",

@@ -96,7 +96,7 @@ window.IV_I18N_EN = (function() {
     { th: 'ค้นหายา...', en: 'Search drugs...' },
 
     // ── Version info ──
-    { th: 'เวอร์ชัน 4.6.0 — มีนาคม 2569 (2026)', en: 'Version 4.6.0 — March 2026' },
+    { th: 'เวอร์ชัน 5.0.0 — มีนาคม 2569 (2026)', en: 'Version 5.0.0 — March 2026' },
     { th: 'มีนาคม 2569', en: 'March 2026' },
 
     // ── TDM page ──

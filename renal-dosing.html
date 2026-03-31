@@ -2927,6 +2927,392 @@ document.addEventListener('DOMContentLoaded', () => {
           ref: 'Lexicomp 2024 | Nicolau DP, et al. AAC 1995'
         };
       }
+    },
+
+    // ════════════════════════════════════════════════════
+    // ANTIFUNGALS
+    // ════════════════════════════════════════════════════
+    {
+      id: 'fluconazole', name: 'Fluconazole', class: 'af', badges: ['af','renal'],
+      sub: 'Azole',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr > 50) rec = 'Normal dose (200-400 mg/day)';
+        else rec = 'ลด dose 50%';
+        return {
+          recommended: rec,
+          table: [
+            { range: '>50', dose: '200-400 mg', freq: 'q24h', note: 'Normal dose', hl: gfr > 50 },
+            { range: '≤50 (no HD)', dose: '100-200 mg', freq: 'q24h', note: 'ลด 50%', hlAmber: gfr <= 50 && gfr > 10 },
+            { range: '<10 / HD', dose: '100-200 mg', freq: 'q24h post-HD', note: 'ให้หลัง HD', hlRed: gfr <= 10 },
+          ],
+          info: '<strong>HD:</strong> Fluconazole dialyzable — ให้ dose หลัง HD<br><strong>CRRT:</strong> ให้ normal dose (200-400 mg/day)<br><strong>Monitor:</strong> LFTs, QTc',
+          infoType: 'blue',
+          ref: 'Lexicomp 2024 | IDSA Candidiasis Guidelines 2016'
+        };
+      }
+    },
+    {
+      id: 'amphotericin-b', name: 'Amphotericin B (Liposomal)', class: 'af', badges: ['af','nephrotox'],
+      sub: 'Polyene',
+      getDosing: function(gfr) {
+        return {
+          recommended: '3-5 mg/kg/day (ไม่ต้องปรับ dose ตาม GFR)',
+          table: [
+            { range: 'All GFR', dose: '3-5 mg/kg/day', freq: 'q24h', note: 'ไม่ต้องปรับ dose', hl: true },
+            { range: 'HD', dose: '3-5 mg/kg/day', freq: 'q24h', note: 'ไม่ถูก dialyze', hl: false },
+          ],
+          info: '<strong>⚠ Nephrotoxic:</strong> Monitor SCr, K+, Mg++ ทุกวัน<br>Liposomal form มี nephrotoxicity น้อยกว่า conventional<br>Pre-hydrate with NSS 500 mL ก่อนให้ยา<br><strong>CRRT:</strong> ไม่ต้องปรับ dose',
+          infoType: 'amber',
+          ref: 'Lexicomp 2024 | IDSA Aspergillosis Guidelines 2016'
+        };
+      }
+    },
+    {
+      id: 'voriconazole', name: 'Voriconazole', class: 'af', badges: ['af','avoid'],
+      sub: 'Azole',
+      getDosing: function(gfr) {
+        return {
+          recommended: gfr > 50 ? 'IV: 6 mg/kg q12h x2 → 4 mg/kg q12h' : '⚠ หลีกเลี่ยง IV (SBECD accumulation) → ใช้ PO แทน',
+          table: [
+            { range: '>50', dose: 'IV: 6→4 mg/kg; PO: 200-300 mg', freq: 'q12h', note: 'Normal', hl: gfr > 50 },
+            { range: '≤50', dose: '⚠ PO only: 200-300 mg', freq: 'q12h', note: 'หลีกเลี่ยง IV (SBECD)', hlAmber: gfr <= 50 && gfr > 10 },
+            { range: '<10 / HD', dose: 'PO: 200 mg', freq: 'q12h', note: 'PO only', hlRed: gfr <= 10 },
+          ],
+          info: '<strong>⚠ IV formulation:</strong> มี SBECD (sulfobutylether-β-cyclodextrin) ที่สะสมใน renal impairment<br>ถ้า CrCl ≤50 → เปลี่ยนเป็น PO หรือใช้ liposomal ampho B แทน<br><strong>TDM:</strong> Trough 1-5.5 mcg/mL<br><strong>Monitor:</strong> LFTs, visual disturbances',
+          infoType: 'amber',
+          ref: 'Lexicomp 2024 | IDSA Aspergillosis Guidelines 2016'
+        };
+      }
+    },
+
+    // ════════════════════════════════════════════════════
+    // ANTIVIRALS
+    // ════════════════════════════════════════════════════
+    {
+      id: 'acyclovir', name: 'Acyclovir', class: 'av', badges: ['av','renal','nephrotox'],
+      sub: 'Nucleoside Analog',
+      getDosing: function(gfr, pt) {
+        const dose10 = Math.round(pt.wt * 10);
+        let rec;
+        if (gfr > 50) rec = `${dose10} mg (10 mg/kg) q8h`;
+        else if (gfr > 25) rec = `${dose10} mg q12h`;
+        else if (gfr > 10) rec = `${dose10} mg q24h`;
+        else rec = `${Math.round(dose10 / 2)} mg q24h`;
+        return {
+          recommended: rec,
+          table: [
+            { range: '>50', dose: '10 mg/kg', freq: 'q8h', note: 'HSV encephalitis dose', hl: gfr > 50 },
+            { range: '25–50', dose: '10 mg/kg', freq: 'q12h', note: '', hlAmber: gfr > 25 && gfr <= 50 },
+            { range: '10–25', dose: '10 mg/kg', freq: 'q24h', note: '', hlAmber: gfr > 10 && gfr <= 25 },
+            { range: '<10 / HD', dose: '5 mg/kg', freq: 'q24h + post-HD', note: 'Give dose post-HD', hlRed: gfr <= 10 },
+          ],
+          info: '<strong>⚠ Nephrotoxic:</strong> Crystalluria risk — hydrate with NSS 1 L ก่อนให้ยา<br>Infuse over ≥1 hour<br><strong>HD:</strong> Give supplemental dose post-HD<br><strong>Monitor:</strong> SCr, urine output, neurological status',
+          infoType: 'amber',
+          ref: 'Lexicomp 2024 | Red Book 2024'
+        };
+      }
+    },
+    {
+      id: 'ganciclovir', name: 'Ganciclovir', class: 'av', badges: ['av','renal','hd'],
+      sub: 'Nucleoside Analog',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr >= 70) rec = '5 mg/kg q12h (induction) → 5 mg/kg q24h (maintenance)';
+        else if (gfr >= 50) rec = '2.5 mg/kg q12h → 2.5 mg/kg q24h';
+        else if (gfr >= 25) rec = '2.5 mg/kg q24h → 1.25 mg/kg q24h';
+        else if (gfr >= 10) rec = '1.25 mg/kg q24h → 0.625 mg/kg q24h';
+        else rec = '1.25 mg/kg 3x/wk post-HD';
+        return {
+          recommended: rec,
+          table: [
+            { range: '≥70', dose: '5 mg/kg', freq: 'q12h / q24h', note: 'Induction / Maintenance', hl: gfr >= 70 },
+            { range: '50–69', dose: '2.5 mg/kg', freq: 'q12h / q24h', note: '', hlAmber: gfr >= 50 && gfr < 70 },
+            { range: '25–49', dose: '2.5 / 1.25 mg/kg', freq: 'q24h', note: '', hlAmber: gfr >= 25 && gfr < 50 },
+            { range: '10–24', dose: '1.25 / 0.625 mg/kg', freq: 'q24h', note: '', hlAmber: gfr >= 10 && gfr < 25 },
+            { range: '<10 / HD', dose: '1.25 mg/kg', freq: '3x/wk post-HD', note: '', hlRed: gfr < 10 },
+          ],
+          info: '<strong>Monitor:</strong> CBC 2-3x/wk (neutropenia risk), SCr<br><strong>HD:</strong> Give post-HD on dialysis days<br><strong>CRRT:</strong> 2.5 mg/kg q12h (induction) → q24h (maintenance)',
+          infoType: 'blue',
+          ref: 'Lexicomp 2024 | Transplant Infectious Disease Guidelines'
+        };
+      }
+    },
+
+    // ════════════════════════════════════════════════════
+    // ANTICOAGULANTS
+    // ════════════════════════════════════════════════════
+    {
+      id: 'enoxaparin', name: 'Enoxaparin', class: 'ac', badges: ['ac','renal'],
+      sub: 'LMWH',
+      getDosing: function(gfr, pt) {
+        const treatDose = Math.round(pt.wt * 1);
+        const prophDose = gfr > 30 ? 40 : 30;
+        let rec;
+        if (gfr > 30) rec = `Treatment: ${treatDose} mg q12h | Prophylaxis: 40 mg q24h`;
+        else rec = `Treatment: ${treatDose} mg q24h | Prophylaxis: 30 mg q24h`;
+        return {
+          recommended: rec,
+          table: [
+            { range: '>30', dose: `${treatDose} mg (1 mg/kg)`, freq: 'q12h', note: 'Treatment dose', hl: gfr > 30 },
+            { range: '>30', dose: '40 mg', freq: 'q24h', note: 'Prophylaxis', hl: gfr > 30 },
+            { range: '≤30', dose: `${treatDose} mg (1 mg/kg)`, freq: 'q24h ⚠', note: 'ลด frequency', hlRed: gfr <= 30 },
+            { range: '≤30', dose: '30 mg', freq: 'q24h', note: 'Prophylaxis (ลด dose)', hlRed: gfr <= 30 },
+          ],
+          info: '<strong>⚠ CrCl ≤30:</strong> LMWH สะสมได้ → พิจารณา UFH แทน<br><strong>Monitor:</strong> Anti-Xa level (target 0.5-1.0 IU/mL for treatment)<br><strong>Obesity:</strong> ใช้ actual body weight, cap ที่ 150 mg/dose<br><strong>HD:</strong> หลีกเลี่ยง LMWH → ใช้ UFH',
+          infoType: 'amber',
+          ref: 'Lexicomp 2024 | CHEST Guidelines 2021'
+        };
+      }
+    },
+    {
+      id: 'dabigatran', name: 'Dabigatran', class: 'ac', badges: ['ac','renal','avoid'],
+      sub: 'DOAC (Direct Thrombin Inhibitor)',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr > 50) rec = '150 mg BID (AF) | 150 mg BID (VTE treatment)';
+        else if (gfr > 30) rec = '110 mg BID (ลด dose)';
+        else rec = '⚠ ห้ามใช้ (CrCl <30)';
+        return {
+          recommended: rec,
+          table: [
+            { range: '>50', dose: '150 mg', freq: 'BID', note: 'Normal dose', hl: gfr > 50 },
+            { range: '30–50', dose: '110 mg', freq: 'BID', note: 'ลด dose (age ≥80, P-gp inhib)', hlAmber: gfr > 30 && gfr <= 50 },
+            { range: '<30', dose: '⚠ Contraindicated', freq: '—', note: 'ห้ามใช้', hlRed: gfr <= 30 },
+          ],
+          info: '<strong>⚠ Renal elimination 80%:</strong> ห้ามใช้ถ้า CrCl <30<br><strong>Drug interaction:</strong> P-gp inhibitors (verapamil, dronedarone) → ลด dose<br><strong>Reversal:</strong> Idarucizumab (Praxbind)<br><strong>HD:</strong> Dialyzable — สามารถ remove ได้ 60% ใน 2-3 ชม.',
+          infoType: 'red',
+          ref: 'Lexicomp 2024 | ESC AF Guidelines 2024'
+        };
+      }
+    },
+
+    // ════════════════════════════════════════════════════
+    // CARDIOVASCULAR
+    // ════════════════════════════════════════════════════
+    {
+      id: 'digoxin', name: 'Digoxin', class: 'cv', badges: ['cv','renal','nephrotox'],
+      sub: 'Cardiac Glycoside',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr > 50) rec = '0.125-0.25 mg/day';
+        else if (gfr > 10) rec = '0.0625-0.125 mg/day';
+        else rec = '0.0625 mg q48h หรือ by level';
+        return {
+          recommended: rec,
+          table: [
+            { range: '>50', dose: '0.125-0.25 mg', freq: 'q24h', note: '', hl: gfr > 50 },
+            { range: '10–50', dose: '0.0625-0.125 mg', freq: 'q24h', note: 'ลด dose 50%', hlAmber: gfr > 10 && gfr <= 50 },
+            { range: '<10 / HD', dose: '0.0625 mg', freq: 'q48h', note: 'By level', hlRed: gfr <= 10 },
+          ],
+          info: '<strong>TDM:</strong> Target 0.5-0.9 ng/mL (HF) | 0.8-2.0 (AF)<br><strong>⚠ Toxicity risk:</strong> เพิ่มขึ้นเมื่อ K+ ต่ำ, renal impairment<br><strong>HD:</strong> Not significantly removed<br><strong>Drug interaction:</strong> Amiodarone, verapamil → ลด dose 50%',
+          infoType: 'amber',
+          ref: 'Lexicomp 2024 | ACC/AHA HF Guidelines 2022'
+        };
+      }
+    },
+    {
+      id: 'enalapril', name: 'Enalapril', class: 'cv', badges: ['cv','renal'],
+      sub: 'ACE Inhibitor',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr > 30) rec = '2.5-20 mg/day (titrate)';
+        else rec = '2.5 mg/day (start low, titrate cautiously)';
+        return {
+          recommended: rec,
+          table: [
+            { range: '>30', dose: '2.5-20 mg', freq: 'q12-24h', note: 'Titrate to response', hl: gfr > 30 },
+            { range: '10–30', dose: '2.5-5 mg', freq: 'q24h', note: 'Start low', hlAmber: gfr > 10 && gfr <= 30 },
+            { range: '<10 / HD', dose: '2.5 mg', freq: 'q24h', note: 'Dialyzable', hlRed: gfr <= 10 },
+          ],
+          info: '<strong>⚠ Monitor:</strong> K+, SCr (ยอมรับ SCr เพิ่ม ≤30% จาก baseline)<br>ถ้า SCr เพิ่ม >30% หรือ K+ >5.5 → ลด dose หรือหยุด<br><strong>HD:</strong> Give supplemental dose post-HD (20-25% dialyzable)',
+          infoType: 'blue',
+          ref: 'Lexicomp 2024 | KDIGO CKD Guidelines 2024'
+        };
+      }
+    },
+
+    // ════════════════════════════════════════════════════
+    // ANALGESICS
+    // ════════════════════════════════════════════════════
+    {
+      id: 'morphine', name: 'Morphine', class: 'analgesic', badges: ['analgesic','renal','avoid'],
+      sub: 'Opioid',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr > 50) rec = 'Normal dose (titrate to pain)';
+        else if (gfr > 15) rec = 'ลด dose 50-75% + เพิ่ม interval';
+        else rec = '⚠ หลีกเลี่ยง → เปลี่ยนเป็น fentanyl/hydromorphone';
+        return {
+          recommended: rec,
+          table: [
+            { range: '>50', dose: 'Normal dose', freq: 'q4h PRN', note: 'Titrate to pain', hl: gfr > 50 },
+            { range: '15–50', dose: 'ลด 50-75%', freq: 'q6-8h', note: 'M6G สะสม', hlAmber: gfr > 15 && gfr <= 50 },
+            { range: '<15 / HD', dose: '⚠ หลีกเลี่ยง', freq: '—', note: 'ใช้ fentanyl แทน', hlRed: gfr <= 15 },
+          ],
+          info: '<strong>⚠ Active metabolite M6G:</strong> สะสมใน renal impairment → respiratory depression, sedation<br><strong>Alternative:</strong> Fentanyl (no active metabolites, ไม่ต้องปรับ dose)<br><strong>HD:</strong> M6G ถูก dialyze ได้บางส่วน แต่ยังเสี่ยง',
+          infoType: 'red',
+          ref: 'Lexicomp 2024 | Dean M. J Pain Symptom Manage 2004'
+        };
+      }
+    },
+    {
+      id: 'gabapentin', name: 'Gabapentin', class: 'analgesic', badges: ['analgesic','renal'],
+      sub: 'Gabapentinoid',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr >= 60) rec = '300-1200 mg TID';
+        else if (gfr >= 30) rec = '200-700 mg BID';
+        else if (gfr >= 15) rec = '100-300 mg daily';
+        else rec = '100-300 mg post-HD';
+        return {
+          recommended: rec,
+          table: [
+            { range: '≥60', dose: '300-1200 mg', freq: 'TID', note: 'Normal dose', hl: gfr >= 60 },
+            { range: '30–59', dose: '200-700 mg', freq: 'BID', note: '', hlAmber: gfr >= 30 && gfr < 60 },
+            { range: '15–29', dose: '100-300 mg', freq: 'q24h', note: '', hlAmber: gfr >= 15 && gfr < 30 },
+            { range: '<15 / HD', dose: '100-300 mg', freq: 'post-HD', note: 'Supplemental dose after HD', hlRed: gfr < 15 },
+          ],
+          info: '<strong>100% renal elimination:</strong> ต้องปรับ dose ตาม GFR เสมอ<br><strong>HD:</strong> Dialyzable — ให้ supplemental dose 125-350 mg post-HD<br><strong>Monitor:</strong> Sedation, dizziness, peripheral edema',
+          infoType: 'blue',
+          ref: 'Lexicomp 2024 | Bockbrader HN, et al. Clin Pharmacokinet 2010'
+        };
+      }
+    },
+
+    // ════════════════════════════════════════════════════
+    // NEUROLOGY
+    // ════════════════════════════════════════════════════
+    {
+      id: 'levetiracetam', name: 'Levetiracetam', class: 'neuro', badges: ['neuro','renal','hd'],
+      sub: 'Antiepileptic',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr > 80) rec = '500-1500 mg BID';
+        else if (gfr > 50) rec = '500-1000 mg BID';
+        else if (gfr > 30) rec = '250-750 mg BID';
+        else rec = '250-500 mg BID + supplement post-HD';
+        return {
+          recommended: rec,
+          table: [
+            { range: '>80', dose: '500-1500 mg', freq: 'q12h', note: 'Normal dose', hl: gfr > 80 },
+            { range: '50–80', dose: '500-1000 mg', freq: 'q12h', note: '', hl: gfr > 50 && gfr <= 80 },
+            { range: '30–50', dose: '250-750 mg', freq: 'q12h', note: '', hlAmber: gfr > 30 && gfr <= 50 },
+            { range: '<30 / HD', dose: '250-500 mg', freq: 'q12h', note: 'Supplement 250-500 mg post-HD', hlRed: gfr <= 30 },
+          ],
+          info: '<strong>66% renal elimination:</strong> ต้องปรับ dose ตาม GFR<br><strong>HD:</strong> Dialyzable ~50% — ให้ supplemental dose 250-500 mg post-HD<br><strong>CRRT:</strong> 250-750 mg q12h<br><strong>IV ↔ PO:</strong> 1:1 conversion',
+          infoType: 'blue',
+          ref: 'Lexicomp 2024 | Epilepsia 2006'
+        };
+      }
+    },
+    {
+      id: 'phenobarbital', name: 'Phenobarbital', class: 'neuro', badges: ['neuro','hd'],
+      sub: 'Barbiturate',
+      getDosing: function(gfr) {
+        return {
+          recommended: gfr > 10 ? '60-180 mg/day (ไม่ต้องปรับ dose แต่ระวัง sedation)' : 'Normal dose + supplement post-HD',
+          table: [
+            { range: '>10', dose: '60-180 mg', freq: 'q24h', note: 'ไม่ต้องปรับ (hepatic metabolism)', hl: gfr > 10 },
+            { range: '<10 / HD', dose: '60-180 mg', freq: 'q24h', note: 'Supplement post-HD', hlAmber: gfr <= 10 },
+          ],
+          info: '<strong>Primarily hepatic metabolism</strong> — ไม่ต้องปรับ dose ตาม GFR<br>แต่ active metabolite อาจสะสมใน severe renal impairment → ระวัง sedation<br><strong>HD:</strong> 20-50% dialyzable — give supplement post-HD<br><strong>TDM:</strong> Target 15-40 mcg/mL',
+          infoType: 'blue',
+          ref: 'Lexicomp 2024 | Winter\'s Basic Clinical Pharmacokinetics'
+        };
+      }
+    },
+
+    // ════════════════════════════════════════════════════
+    // CHEMOTHERAPY
+    // ════════════════════════════════════════════════════
+    {
+      id: 'methotrexate', name: 'Methotrexate (High-dose)', class: 'chemo', badges: ['chemo','renal','nephrotox'],
+      sub: 'Antimetabolite',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr >= 60) rec = 'ให้ตาม protocol + aggressive hydration + leucovorin rescue';
+        else rec = '⚠ GFR <60 → ลด dose หรือ delay until renal recovery';
+        return {
+          recommended: rec,
+          table: [
+            { range: '≥60', dose: 'Per protocol', freq: 'Per protocol', note: 'ต้อง hydrate + alkalinize urine', hl: gfr >= 60 },
+            { range: '<60', dose: '⚠ Hold/Reduce', freq: '—', note: 'Delay until GFR ≥60', hlRed: gfr < 60 },
+          ],
+          info: '<strong>⚠ Nephrotoxic:</strong> MTX precipitates ใน renal tubules<br><strong>Mandatory:</strong> Aggressive hydration (3 L/m²/day) + Urine alkalinization (pH >7)<br><strong>Leucovorin rescue:</strong> ต้องให้ตาม MTX level protocol<br><strong>HD:</strong> High-flux HD หรือ CWHD อาจช่วยลด level ได้<br><strong>Monitor:</strong> MTX level, SCr q6-12h, CBC, LFTs',
+          infoType: 'red',
+          ref: 'Lexicomp 2024 | NCCN Guidelines | Howard SC, et al. NEJM 2016'
+        };
+      }
+    },
+    {
+      id: 'cisplatin', name: 'Cisplatin', class: 'chemo', badges: ['chemo','nephrotox'],
+      sub: 'Platinum',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr >= 60) rec = 'ให้ตาม protocol + aggressive hydration';
+        else if (gfr >= 45) rec = 'ลด dose 25% + hydration';
+        else rec = '⚠ ห้ามใช้ → เปลี่ยนเป็น carboplatin';
+        return {
+          recommended: rec,
+          table: [
+            { range: '≥60', dose: 'Per protocol', freq: 'Per cycle', note: 'Pre/post hydration mandatory', hl: gfr >= 60 },
+            { range: '45–59', dose: 'ลด 25%', freq: 'Per cycle', note: 'พิจารณา carboplatin', hlAmber: gfr >= 45 && gfr < 60 },
+            { range: '<45', dose: '⚠ Contraindicated', freq: '—', note: 'ใช้ carboplatin แทน', hlRed: gfr < 45 },
+          ],
+          info: '<strong>⚠ Highly nephrotoxic:</strong> Causes dose-dependent tubular injury<br><strong>Mandatory hydration:</strong> NSS 1-2 L pre/post + mannitol<br><strong>Alternative:</strong> Carboplatin (AUC-based, less nephrotoxic)<br><strong>Monitor:</strong> SCr, Mg++, K+, audiometry',
+          infoType: 'red',
+          ref: 'Lexicomp 2024 | NCCN Guidelines'
+        };
+      }
+    },
+
+    // ════════════════════════════════════════════════════
+    // MISCELLANEOUS
+    // ════════════════════════════════════════════════════
+    {
+      id: 'allopurinol', name: 'Allopurinol', class: 'misc', badges: ['misc','renal'],
+      sub: 'Xanthine Oxidase Inhibitor',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr > 60) rec = '100-300 mg/day';
+        else if (gfr > 30) rec = '100-200 mg/day';
+        else if (gfr > 15) rec = '100 mg/day';
+        else rec = '100 mg q48h';
+        return {
+          recommended: rec,
+          table: [
+            { range: '>60', dose: '100-300 mg', freq: 'q24h', note: 'Titrate to uric acid <6', hl: gfr > 60 },
+            { range: '30–60', dose: '100-200 mg', freq: 'q24h', note: '', hlAmber: gfr > 30 && gfr <= 60 },
+            { range: '15–30', dose: '100 mg', freq: 'q24h', note: '', hlAmber: gfr > 15 && gfr <= 30 },
+            { range: '<15 / HD', dose: '100 mg', freq: 'q48h', note: 'Post-HD on dialysis days', hlRed: gfr <= 15 },
+          ],
+          info: '<strong>Active metabolite Oxipurinol:</strong> สะสมใน renal impairment → เสี่ยง hypersensitivity syndrome<br><strong>HLA-B*5801:</strong> Screen ก่อนเริ่มยา (โดยเฉพาะ Thai/Asian) — ลด risk SJS/TEN<br><strong>HD:</strong> Dialyzable — give post-HD<br><strong>Alternative:</strong> Febuxostat (ไม่ต้องปรับ dose)',
+          infoType: 'amber',
+          ref: 'Lexicomp 2024 | ACR Gout Guidelines 2020'
+        };
+      }
+    },
+    {
+      id: 'metformin', name: 'Metformin', class: 'misc', badges: ['misc','renal','avoid'],
+      sub: 'Biguanide',
+      getDosing: function(gfr) {
+        let rec;
+        if (gfr >= 45) rec = '500-1000 mg BID (max 2000 mg/day)';
+        else if (gfr >= 30) rec = '500 mg BID (max 1000 mg/day) ⚠';
+        else rec = '⚠ Contraindicated (lactic acidosis risk)';
+        return {
+          recommended: rec,
+          table: [
+            { range: '≥45', dose: '500-1000 mg', freq: 'BID', note: 'Normal dose', hl: gfr >= 45 },
+            { range: '30–44', dose: '500 mg', freq: 'BID (max 1000)', note: '⚠ ลด dose + monitor', hlAmber: gfr >= 30 && gfr < 45 },
+            { range: '<30', dose: '⚠ Contraindicated', freq: '—', note: 'Lactic acidosis risk', hlRed: gfr < 30 },
+          ],
+          info: '<strong>⚠ Lactic acidosis:</strong> Risk เพิ่มเมื่อ GFR <30<br><strong>GFR 30-44:</strong> ลด dose + ห้ามเริ่มยาใหม่ (ให้ต่อได้ถ้าใช้อยู่แล้ว)<br><strong>Hold:</strong> ก่อน contrast media, surgery, หรือ acute illness<br><strong>HD:</strong> Dialyzable — มี case reports ใช้ HD รักษา metformin-associated lactic acidosis',
+          infoType: 'red',
+          ref: 'Lexicomp 2024 | KDIGO Diabetes & CKD 2022 | FDA Label 2024'
+        };
+      }
     }
   ];
 

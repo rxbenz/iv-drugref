@@ -109,8 +109,8 @@ body {
 }
 .nav-back svg { width: 16px; height: 16px; }
 
-/* ---- Page header layout ---- */
-.header {
+/* ---- Page header layout (calc/renal/vanco - NOT index) ---- */
+div.header {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -118,12 +118,12 @@ body {
   max-width: 900px;
   margin: 0 auto;
 }
-.header h1 {
+div.header h1 {
   flex: 1;
   font-size: 22px;
   margin: 0;
 }
-.header .cross-link {
+div.header .cross-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -135,20 +135,20 @@ body {
   white-space: nowrap;
   transition: all .15s;
 }
-.header .cross-link.tdm-link {
+div.header .cross-link.tdm-link {
   background: rgba(14, 165, 233, 0.08);
   border: 1px solid rgba(14, 165, 233, 0.2);
   color: #0ea5e9;
 }
-.header .cross-link.tdm-link:hover {
+div.header .cross-link.tdm-link:hover {
   background: rgba(14, 165, 233, 0.15);
 }
-.header .cross-link.calc-link {
+div.header .cross-link.calc-link {
   background: rgba(139, 92, 246, 0.08);
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: #8b5cf6;
 }
-.header .cross-link.calc-link:hover {
+div.header .cross-link.calc-link:hover {
   background: rgba(139, 92, 246, 0.15);
 }
 

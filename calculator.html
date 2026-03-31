@@ -109,6 +109,49 @@ body {
 }
 .nav-back svg { width: 16px; height: 16px; }
 
+/* ---- Page header layout ---- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.header h1 {
+  flex: 1;
+  font-size: 22px;
+  margin: 0;
+}
+.header .cross-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.header .cross-link.tdm-link {
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  color: #0ea5e9;
+}
+.header .cross-link.tdm-link:hover {
+  background: rgba(14, 165, 233, 0.15);
+}
+.header .cross-link.calc-link {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+}
+.header .cross-link.calc-link:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
 /* ---- Common form field styles ---- */
 .field label {
   font-size: 11px; color: #64748b; display: block;
@@ -605,7 +648,7 @@ body::before {
 <div class="header">
   <a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
   <h1>🧮 Dose Calculator</h1>
-  <a href="tdm.html" class="tdm-link">🎯 TDM Hub</a>
+  <a href="tdm.html" class="cross-link tdm-link">🎯 TDM Hub</a>
 </div>
 
 <div class="container">

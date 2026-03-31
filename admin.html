@@ -3119,8 +3119,16 @@ function signIn() {
 function signOut() {
   google.accounts.id.disableAutoSelect();
   state.user = null;
+  state.myRole = 'editor';
   document.getElementById('app').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
+  // Re-render sign-in button and re-prompt so user can sign back in
+  try {
+    google.accounts.id.renderButton(document.getElementById('google-signin-button'), {
+      theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill',
+    });
+    google.accounts.id.prompt();
+  } catch (e) { /* GIS not available */ }
 }
 
 function showApp(user) {
@@ -3128,6 +3136,11 @@ function showApp(user) {
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-user-name').textContent = user.name;
   document.getElementById('topbar-user-avatar').src = user.picture || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%230ea5e9"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">👤</text></svg>';
+  // Setup mode (no script URL) → grant admin so settings tab is accessible
+  if (user.email === 'setup@local') {
+    state.myRole = 'admin';
+    applyRoleUI();
+  }
   loadDrugs();
   loadAuditLog();
   loadSettingsUI();
@@ -3315,6 +3328,11 @@ async function loadDrugs() {
     // Capture role from backend response
     if (result.myRole) {
       state.myRole = result.myRole;
+      localStorage.setItem(LS_PREFIX + 'myRole', result.myRole);
+    }
+    // Cache drugs for offline fallback
+    if (state.drugs.length > 0) {
+      localStorage.setItem(LS_PREFIX + 'drugsCache', JSON.stringify(state.drugs));
     }
     populateCategories();
     renderStats();
@@ -3327,13 +3345,20 @@ async function loadDrugs() {
       toast('❌ คุณไม่มีสิทธิ์เข้าถึงระบบนี้ — ติดต่อ Admin', 'error');
       return;
     }
+    // Restore cached role so UI isn't blocked
+    const cachedRole = localStorage.getItem(LS_PREFIX + 'myRole');
+    if (cachedRole) state.myRole = cachedRole;
     // Fallback: load from localStorage cache
     const cached = localStorage.getItem(LS_PREFIX + 'drugsCache');
     if (cached) {
-      state.drugs = JSON.parse(cached);
+      try { state.drugs = JSON.parse(cached); } catch (pe) { state.drugs = []; }
+      populateCategories();
       renderStats();
       renderDrugTable();
+      applyRoleUI();
       toast('โหลดจาก cache — ไม่สามารถเชื่อมต่อ server', 'info');
+    } else {
+      toast('ไม่มีข้อมูลยา — กรุณาเชื่อมต่อ internet', 'error');
     }
   }
   hideLoading();

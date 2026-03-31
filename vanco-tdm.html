@@ -152,6 +152,19 @@ div.header .cross-link.calc-link:hover {
   background: rgba(139, 92, 246, 0.15);
 }
 
+/* ---- Standardized app footer ---- */
+.app-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-muted, #94a3b8);
+  opacity: 0.8;
+}
+.theme-dark .app-footer {
+  color: var(--text3, #64748b);
+}
+
 /* ---- Common form field styles ---- */
 .field label {
   font-size: 11px; color: #64748b; display: block;
@@ -915,7 +928,7 @@ canvas {
 <div id="optResult"></div><div class="dose-compare" id="doseCompare"></div></div></div>
 </div>
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้น ไม่ทดแทน clinical judgment<br>Bayesian MAP + MCMC | Models: Buelga 2005, Roberts 2011, Goti 2018<br>Ref: ASHP/IDSA Vancomycin Guidelines 2020 | สำหรับบุคลากรทางการแพทย์เท่านั้น</div>
-<div style="text-align:center;padding:16px;font-size:11px;color:var(--text3)">IV DrugRef v5.0.0</div>
+<div class="app-footer">IV DrugRef v5.0.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 </div>
 
 <nav class="bottom-nav">

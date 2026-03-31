@@ -152,6 +152,19 @@ div.header .cross-link.calc-link:hover {
   background: rgba(139, 92, 246, 0.15);
 }
 
+/* ---- Standardized app footer ---- */
+.app-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-muted, #94a3b8);
+  opacity: 0.8;
+}
+.theme-dark .app-footer {
+  color: var(--text3, #64748b);
+}
+
 /* ---- Common form field styles ---- */
 .field label {
   font-size: 11px; color: #64748b; display: block;
@@ -1326,12 +1339,7 @@ body::before {
 <div class="disclaimer">
 <strong>⚠️ Disclaimer:</strong> ข้อมูล Compatibility เป็นเครื่องมือสนับสนุนทางคลินิกเบื้องต้น ผลอาจแตกต่างตาม concentration, diluent, temperature และ contact time ต้องตรวจสอบกับ Trissel's Handbook, Lexicomp หรือแหล่งอ้างอิงปฐมภูมิก่อนใช้จริงทุกครั้ง ไม่ทดแทนดุลยพินิจทางวิชาชีพ
 </div>
-<div style="text-align:center;padding:16px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
-<a href="index.html" style="font-family:inherit;font-size:11px;color:var(--blue);background:none;border:1px solid var(--border);padding:6px 16px;border-radius:20px;text-decoration:none;font-weight:500;">💊 Drug Reference →</a>
-<a href="calculator.html" style="font-family:inherit;font-size:11px;color:#fbbf24;background:linear-gradient(135deg,#0f172a,#334155);border:1.5px solid #475569;padding:6px 16px;border-radius:20px;text-decoration:none;font-weight:600;">🧮 Dose Calculator →</a>
-<a href="tdm.html" style="font-family:inherit;font-size:11px;color:#38bdf8;background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid #38bdf8;padding:6px 16px;border-radius:20px;text-decoration:none;font-weight:600;">🎯 TDM Hub →</a>
-</div>
-<div style="text-align:center;padding:0 0 20px;font-size:10px;color:var(--text3);">IV DrugRef v5.0.0 | ภก. ฐาปนัท นาคครุฑ | สถาบันประสาทวิทยา</div>
+<div class="app-footer">IV DrugRef v5.0.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 </main>
 
 <div class="matrix-tooltip" id="matrixTooltip"></div>

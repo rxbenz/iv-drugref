@@ -1427,6 +1427,7 @@ tr.highlight td {
   <button class="tab" data-tab="renal">🧬 Renal</button>
   <button class="tab" data-tab="compat">🔗 Compat</button>
   <button class="tab" data-tab="dosecalc">🧮 Drug Calc</button>
+  <button class="tab" data-tab="ratings">⭐ Ratings</button>
   <button class="tab" data-tab="survey">📋 Survey</button>
   <button class="tab" data-tab="journey">🗺 Journey</button>
 </div>
@@ -1510,6 +1511,19 @@ tr.highlight td {
   </div>
   <div class="g2">
     <div class="card full"><div class="card-hd"><span class="em">📈</span> Dose Calcs by Day</div><div class="card-act"><button class="btn sm" data-xprt="dcDayChart">📷</button></div><canvas id="dcDayChart" height="120"></canvas></div>
+  </div>
+</div>
+
+<!-- RATINGS & NPS -->
+<div class="tab-panel" id="panel-ratings">
+  <div class="bento" id="ratingStats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">⭐</span> Drug Rating Distribution</div><div class="card-act"><button class="btn sm" data-xprt="ratingDistChart">📷</button></div><canvas id="ratingDistChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> NPS Score Distribution</div><div class="card-act"><button class="btn sm" data-xprt="npsDistChart">📷</button></div><canvas id="npsDistChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Rated Drugs</div><div class="card-bd" id="topRatedDrugs"></div></div>
+    <div class="card"><div class="card-hd"><span class="em">💬</span> NPS Comments</div><div class="card-bd" id="npsComments" style="max-height:300px;overflow-y:auto"></div></div>
   </div>
 </div>
 
@@ -3027,6 +3041,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageViews = applyFilters(RAW.pageViews || []);
     const renalDosing = applyFilters(RAW.renalDosing || []);
     const compatUsage = applyFilters(RAW.compatUsage || []);
+    const drugRatings = applyFilters(RAW.drugRatings || []);
+    const npsResponses = applyFilters(RAW.npsResponses || []);
 
     // Always render overview + active tab
     renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage);
@@ -3037,6 +3053,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tab === 'renal' || tab === 'overview') renderRenal(renalDosing);
     if (tab === 'compat' || tab === 'overview') renderCompat(compatUsage);
     if (tab === 'dosecalc' || tab === 'overview') renderDoseCalc(doseCalcs);
+    if (tab === 'ratings' || tab === 'overview') renderRatingsNPS(drugRatings, npsResponses);
     if (tab === 'survey' || tab === 'overview') renderSurvey(surveys);
     if (tab === 'journey' || tab === 'overview') renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage);
 
@@ -3375,6 +3392,104 @@ document.addEventListener('DOMContentLoaded', () => {
     const byDay = dailyCount(doseCalcs);
     const days = Object.keys(byDay).sort().slice(-DAU_DAYS);
     mc('dcDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Dose Calcs', data:days.map(d => byDay[d]), borderColor:C.pink, backgroundColor:'rgba(244,114,182,0.08)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
+  }
+
+  // ============================================================
+  // RENDER: RATINGS & NPS
+  // ============================================================
+  function renderRatingsNPS(drugRatings, npsResponses) {
+    // ── Stats ──
+    const totalRatings = drugRatings.length;
+    const avgRating = totalRatings > 0 ? fmtNum(drugRatings.reduce((s, r) => s + (parseFloat(r.rating) || 0), 0) / totalRatings) : '—';
+    const totalNPS = npsResponses.length;
+    const promoters = npsResponses.filter(r => parseInt(r.score) >= 9).length;
+    const detractors = npsResponses.filter(r => parseInt(r.score) <= 6).length;
+    const npsScore = totalNPS > 0 ? Math.round((promoters / totalNPS - detractors / totalNPS) * 100) : '—';
+
+    var el = document.getElementById('ratingStats');
+    if (el) el.innerHTML = [
+      statBox('⭐', avgRating, 'Avg Drug Rating', 'amber'),
+      statBox('📊', totalRatings.toLocaleString(), 'Total Ratings', 'blue'),
+      statBox('📈', typeof npsScore === 'number' ? (npsScore >= 0 ? '+' : '') + npsScore : npsScore, 'NPS Score', npsScore >= 50 ? 'green' : npsScore >= 0 ? 'amber' : 'red'),
+      statBox('👥', totalNPS.toLocaleString(), 'NPS Responses', 'purple'),
+      statBox('😊', promoters.toLocaleString(), 'Promoters (9-10)', 'green'),
+      statBox('😐', (totalNPS - promoters - detractors).toLocaleString(), 'Passives (7-8)', 'amber'),
+    ].join('');
+
+    // ── Rating Distribution Chart (1-5 stars) ──
+    var ratingBuckets = [0, 0, 0, 0, 0];
+    drugRatings.forEach(function(r) {
+      var v = parseInt(r.rating);
+      if (v >= 1 && v <= 5) ratingBuckets[v - 1]++;
+    });
+    mc('ratingDistChart', {
+      type: 'bar',
+      data: {
+        labels: ['★', '★★', '★★★', '★★★★', '★★★★★'],
+        datasets: [{ data: ratingBuckets, backgroundColor: [C.red, '#fb923c', C.amber, C.green, C.cyan], borderRadius: 4 }]
+      },
+      options: { ...CD, plugins: { legend: { display: false } } }
+    });
+
+    // ── NPS Distribution Chart (0-10) ──
+    var npsBuckets = new Array(11).fill(0);
+    npsResponses.forEach(function(r) {
+      var v = parseInt(r.score);
+      if (v >= 0 && v <= 10) npsBuckets[v]++;
+    });
+    var npsColors = npsBuckets.map(function(_, i) { return i <= 6 ? C.red : i <= 8 ? C.amber : C.green; });
+    mc('npsDistChart', {
+      type: 'bar',
+      data: {
+        labels: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        datasets: [{ data: npsBuckets, backgroundColor: npsColors, borderRadius: 4 }]
+      },
+      options: { ...CD, plugins: { legend: { display: false } } }
+    });
+
+    // ── Top Rated Drugs ──
+    var drugMap = {};
+    drugRatings.forEach(function(r) {
+      var name = r.drug_name || r.drugName || 'Unknown';
+      if (!drugMap[name]) drugMap[name] = { sum: 0, count: 0 };
+      drugMap[name].sum += parseFloat(r.rating) || 0;
+      drugMap[name].count++;
+    });
+    var sorted = Object.entries(drugMap).map(function(e) {
+      return { name: e[0], avg: e[1].sum / e[1].count, count: e[1].count };
+    }).sort(function(a, b) { return b.avg - a.avg || b.count - a.count; }).slice(0, 10);
+
+    var topEl = document.getElementById('topRatedDrugs');
+    if (topEl) {
+      if (sorted.length === 0) {
+        topEl.innerHTML = '<div class="empty-msg"><div class="icon">⭐</div>ยังไม่มีข้อมูล rating</div>';
+      } else {
+        topEl.innerHTML = '<table class="tw"><tr><th>Drug</th><th>Avg</th><th>Count</th></tr>' +
+          sorted.map(function(d) {
+            var stars = '★'.repeat(Math.round(d.avg)) + '☆'.repeat(5 - Math.round(d.avg));
+            return '<tr><td>' + d.name + '</td><td><span style="color:#f59e0b">' + stars + '</span> ' + d.avg.toFixed(1) + '</td><td>' + d.count + '</td></tr>';
+          }).join('') + '</table>';
+      }
+    }
+
+    // ── NPS Comments ──
+    var commentsEl = document.getElementById('npsComments');
+    if (commentsEl) {
+      var withComment = npsResponses.filter(function(r) { return r.comment && r.comment.trim(); });
+      if (withComment.length === 0) {
+        commentsEl.innerHTML = '<div class="empty-msg"><div class="icon">💬</div>ยังไม่มี comment</div>';
+      } else {
+        commentsEl.innerHTML = withComment.slice(0, 20).map(function(r) {
+          var score = parseInt(r.score);
+          var cat = score >= 9 ? 'Promoter' : score >= 7 ? 'Passive' : 'Detractor';
+          var color = score >= 9 ? C.green : score >= 7 ? C.amber : C.red;
+          return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">' +
+            '<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:' + color + ';color:#fff;text-align:center;line-height:24px;font-weight:700;font-size:11px;margin-right:8px">' + score + '</span>' +
+            '<span style="color:var(--text2)">' + (r.comment || '') + '</span>' +
+            '<span style="float:right;font-size:10px;color:var(--text3)">' + cat + '</span></div>';
+        }).join('');
+      }
+    }
   }
 
   // ============================================================

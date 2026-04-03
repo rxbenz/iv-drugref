@@ -3190,7 +3190,7 @@ function handleStarClick(drugId,drugName,starVal){
     setTimeout(function(){thanks.textContent='\u2605 '+starVal+'/5';},2000);
   }
   // Analytics
-  sendAnalytics('DRUG_RATING',{drugId:drugId,drugName:drugName,rating:starVal});
+  try{navigator.sendBeacon(ANALYTICS_URL,JSON.stringify({type:'DRUG_RATING',drugId:drugId,drugName:drugName,rating:starVal,session_id:sessionStorage.getItem('sessionId')||'',user_id:localStorage.getItem('anonUserId')||''}))}catch(e){};
 }
 
 // Star hover effect
@@ -3276,7 +3276,7 @@ function submitNPS(){
   if(npsSelectedScore===null)return;
   var comment=(document.getElementById('npsComment')||{}).value||'';
   localStorage.setItem('npsLastResponse',String(Date.now()));
-  sendAnalytics('NPS_SUBMIT',{score:npsSelectedScore,comment:comment,sessionCount:parseInt(localStorage.getItem('npsSessionCount')||'0')});
+  try{navigator.sendBeacon(ANALYTICS_URL,JSON.stringify({type:'NPS_SUBMIT',score:npsSelectedScore,comment:comment,sessionCount:parseInt(localStorage.getItem('npsSessionCount')||'0'),session_id:sessionStorage.getItem('sessionId')||'',user_id:localStorage.getItem('anonUserId')||''}))}catch(e){};
   dismissNPS();
 }
 

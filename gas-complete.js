@@ -27,9 +27,16 @@
 // ──────────────────────────────────────────────
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
+// DrugData อยู่ใน analytics spreadsheet (คนละ sheet กับ admin)
+var DRUG_SPREADSHEET_ID = '1WWXRocEfhLSZRvuWPbDZ7uKlW61wGB3HIGF_4vjkIeE';
+
 function getSS() {
   if (SPREADSHEET_ID) return SpreadsheetApp.openById(SPREADSHEET_ID);
   return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+function getDrugSS() {
+  return SpreadsheetApp.openById(DRUG_SPREADSHEET_ID);
 }
 
 // Sheet name constants
@@ -69,8 +76,8 @@ function errorResponse(msg) {
 // ──────────────────────────────────────────────
 // SHEET HELPERS
 // ──────────────────────────────────────────────
-function getOrCreateSheet(name, headers) {
-  var ss = getSS();
+function getOrCreateSheet(name, headers, ss) {
+  ss = ss || getSS();
   var sheet = ss.getSheetByName(name);
   if (!sheet) {
     sheet = ss.insertSheet(name);
@@ -83,8 +90,8 @@ function getOrCreateSheet(name, headers) {
   return sheet;
 }
 
-function getSheetData(sheetName) {
-  var ss = getSS();
+function getSheetData(sheetName, ss) {
+  ss = ss || getSS();
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) return [];
   var data = sheet.getDataRange().getValues();
@@ -451,7 +458,7 @@ function handleExport(sheetName) {
 // ════════════════════════════════════════════════
 
 function handleGetDrugs() {
-  var drugs = getSheetData(SHEETS.DRUGS);
+  var drugs = getSheetData(SHEETS.DRUGS, getDrugSS());
   // Filter to approved only IF status column exists
   // DrugData sheet อาจไม่มี column status (ยาทั้งหมดถือว่า approved)
   var hasStatus = drugs.length > 0 && drugs[0].hasOwnProperty('status');
@@ -508,7 +515,7 @@ function handleAdminGetDrugs(user) {
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'คุณไม่มีสิทธิเข้าถึงส่วนนี้' });
 
   return jsonResponse({
-    drugs: getSheetData(SHEETS.DRUGS),
+    drugs: getSheetData(SHEETS.DRUGS, getDrugSS()),
     auditLog: getSheetData(SHEETS.AUDIT),
     myRole: perm.role,
     adminUsers: perm.role === 'admin' ? getSheetData(SHEETS.USERS) : []
@@ -522,7 +529,8 @@ function handleCreateDrug(user, data) {
   var sheet = getOrCreateSheet(SHEETS.DRUGS,
     ['id', 'generic', 'trade', 'strength', 'ed', 'had', 'categories', 'status',
      'reconst', 'dilution', 'admin', 'stability', 'compat', 'precautions', 'monitoring', 'ref',
-     'createdBy', 'createdAt', 'updatedAt']
+     'createdBy', 'createdAt', 'updatedAt'],
+    getDrugSS()
   );
 
   var id = Date.now();
@@ -546,7 +554,7 @@ function handleUpdateDrug(user, data) {
   var perm = checkPermission(user, 'editor');
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ' });
 
-  var sheet = getSS().getSheetByName(SHEETS.DRUGS);
+  var sheet = getDrugSS().getSheetByName(SHEETS.DRUGS);
   if (!sheet) return errorResponse('Drugs sheet not found');
 
   var all = sheet.getDataRange().getValues();
@@ -578,7 +586,7 @@ function handleDeleteDrug(user, data) {
   var perm = checkPermission(user, 'admin');
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ต้องเป็น admin' });
 
-  var sheet = getSS().getSheetByName(SHEETS.DRUGS);
+  var sheet = getDrugSS().getSheetByName(SHEETS.DRUGS);
   if (!sheet) return errorResponse('Drugs sheet not found');
 
   var all = sheet.getDataRange().getValues();

@@ -474,11 +474,12 @@ function getRole(email) {
   if (!email) return null;
   var users = getSheetData(SHEETS.USERS);
 
-  // Search by email column (case-insensitive)
+  // Search by email column (case-insensitive, handles Email/email header)
   var user = users.find(function(u) {
-    return (u.email || '').toLowerCase() === email.toLowerCase();
+    var uEmail = u.email || u.Email || '';
+    return uEmail.toLowerCase() === email.toLowerCase();
   });
-  if (user) return user.role || 'editor';
+  if (user) return user.role || user.Role || 'editor';
 
   // Fallback: if AdminUsers is empty AND email is in fallback list, grant admin
   if (users.length === 0 && FALLBACK_ADMINS.indexOf(email.toLowerCase()) >= 0) {

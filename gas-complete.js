@@ -458,13 +458,10 @@ function handleExport(sheetName) {
 // ════════════════════════════════════════════════
 
 function handleGetDrugs() {
-  var drugs = getSheetData(SHEETS.DRUGS, getDrugSS());
-  // Filter to approved only IF status column exists
-  // DrugData sheet อาจไม่มี column status (ยาทั้งหมดถือว่า approved)
-  var hasStatus = drugs.length > 0 && drugs[0].hasOwnProperty('status');
-  var result = hasStatus
-    ? drugs.filter(function(d) { return d.status === 'approved'; })
-    : drugs; // No status column = return all
+  var rawDrugs = getSheetData(SHEETS.DRUGS, getDrugSS());
+  var drugs = rawDrugs.map(function(d) { return normalizeDrugRow(d); });
+  // Filter to approved only
+  var result = drugs.filter(function(d) { return d.status === 'approved'; });
   return jsonResponse({ drugs: result });
 }
 
@@ -514,12 +511,70 @@ function handleAdminGetDrugs(user) {
   var perm = checkPermission(user, 'editor');
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'คุณไม่มีสิทธิเข้าถึงส่วนนี้' });
 
+  var rawDrugs = getSheetData(SHEETS.DRUGS, getDrugSS());
+  var drugs = rawDrugs.map(function(d) { return normalizeDrugRow(d); });
+
   return jsonResponse({
-    drugs: getSheetData(SHEETS.DRUGS, getDrugSS()),
+    drugs: drugs,
     auditLog: getSheetData(SHEETS.AUDIT),
     myRole: perm.role,
     adminUsers: perm.role === 'admin' ? getSheetData(SHEETS.USERS) : []
   });
+}
+
+/**
+ * Map analytics sheet headers (human-readable) → admin format (lowercase keys)
+ * Supports both formats so it works regardless of which sheet is used
+ */
+function normalizeDrugRow(d) {
+  // If already normalized (has lowercase 'generic'), return as-is
+  if (d.generic) return d;
+
+  var hadVal = d['HAD'] || d['had'] || false;
+  if (hadVal === 'TRUE' || hadVal === true) hadVal = true;
+  else hadVal = false;
+
+  var cats = d['Categories'] || d['categories'] || '';
+  if (typeof cats === 'string') {
+    cats = cats.split(',').map(function(c) { return c.trim().toLowerCase(); }).filter(Boolean);
+  }
+
+  return {
+    id: d['ID'] || d['id'] || '',
+    generic: d['Generic Name'] || d['generic'] || '',
+    trade: d['Trade Name'] || d['trade'] || '',
+    strength: d['Strength'] || d['strength'] || '',
+    ed: d['ED/NED'] || d['ed'] || 'N',
+    had: hadVal,
+    categories: cats,
+    status: d['status'] || 'approved',
+    reconst: {
+      solvent: d['Reconst: Solvent'] || '',
+      volume: d['Reconst: Volume'] || '',
+      conc: d['Reconst: Conc'] || ''
+    },
+    dilution: {
+      diluent: d['Dilution: Diluent'] || '',
+      volume: d['Dilution: Volume'] || '',
+      finalConc: d['Dilution: Final Conc'] || ''
+    },
+    admin: {
+      route: d['Admin: Route'] || '',
+      rate: d['Admin: Rate'] || ''
+    },
+    stability: {
+      reconst: d['Stability: Reconst'] || '',
+      diluted: d['Stability: Diluted'] || '',
+      storage: d['Stability: Storage'] || ''
+    },
+    compat: {
+      ysite: d['Compat: Y-site'] || '',
+      incompat: d['Compat: Incompatible'] || ''
+    },
+    precautions: d['Precautions'] || d['precautions'] || '',
+    monitoring: d['Monitoring'] || d['monitoring'] || '',
+    ref: d['Reference'] || d['ref'] || ''
+  };
 }
 
 function handleCreateDrug(user, data) {

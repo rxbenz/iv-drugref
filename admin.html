@@ -1594,6 +1594,7 @@ body::before {
     <button class="tab-btn" data-tab="audit" data-action="switchTab">📝 Audit Log</button>
     <button class="tab-btn" data-tab="users" data-action="switchTab">👥 จัดการผู้ใช้</button>
     <button class="tab-btn" data-tab="quality" data-action="switchTab">📊 Data Quality</button>
+    <button class="tab-btn" data-tab="compat" data-action="switchTab">🔗 Compatibility</button>
     <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
   </div>
 
@@ -1804,6 +1805,72 @@ body::before {
       <div id="quality-had-flags" style="margin-top:16px"></div>
       <div id="quality-duplicates" style="margin-top:16px"></div>
     </div>
+
+<!-- ═══════ PANEL: COMPATIBILITY ═══════ -->
+    <div class="panel" id="compat-panel">
+      <h2 style="margin-bottom:4px">🔗 Compatibility Database</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        จัดการข้อมูลคู่ยา Y-site compatibility — ปัจจุบัน <span id="compat-total-count">0</span> คู่
+      </p>
+      <div class="stats-row" id="compat-stats"></div>
+      <div class="toolbar" style="margin-top:16px">
+        <input type="text" class="search-box" id="search-compat" placeholder="ค้นหาชื่อยา..." data-action="filterCompat">
+        <select class="filter-select" id="filter-compat-result" data-action="filterCompat">
+          <option value="">ทุกผลลัพธ์</option>
+          <option value="c">✅ Compatible</option>
+          <option value="i">❌ Incompatible</option>
+          <option value="v">⚠️ Variable</option>
+        </select>
+        <button class="btn btn-primary" data-action="openCompatModal">＋ เพิ่มคู่ยา</button>
+        <button class="btn btn-outline" data-action="importCuratedPairs" id="btn-import-curated">📦 Import CURATED</button>
+        <button class="btn btn-success" data-action="exportCompatCSV">📥 Export CSV</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead><tr><th>#</th><th>Drug A</th><th>Drug B</th><th>ผลลัพธ์</th><th>Reference</th><th>จัดการ</th></tr></thead>
+          <tbody id="compat-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="compat-pagination"></div>
+    </div>
+
+<!-- ═══════ COMPAT MODAL ═══════ -->
+<div class="modal-overlay" id="compat-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h2 id="compat-modal-title">เพิ่มคู่ยา Compatibility</h2>
+      <button class="modal-close" data-action="closeCompatModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="compat-form">
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Drug A *</label>
+          <input type="text" class="form-input" id="cf-drugA" required placeholder="เช่น Norepinephrine">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Drug B *</label>
+          <input type="text" class="form-input" id="cf-drugB" required placeholder="เช่น Dobutamine">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">ผลลัพธ์ *</label>
+          <select class="form-select" id="cf-result" required>
+            <option value="c">✅ Compatible (c)</option>
+            <option value="i">❌ Incompatible (i)</option>
+            <option value="v">⚠️ Variable (v)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Reference</label>
+          <input type="text" class="form-input" id="cf-ref" placeholder="เช่น Trissel's 2024, Lexicomp">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeCompatModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveCompatPair">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════ DRUG MODAL ═══════ -->
 <div class="modal-overlay" id="drug-modal">
@@ -3165,6 +3232,9 @@ let state = {
   sortDir: 'asc',
   editingId: null,
   importData: null,
+  compatPairs: [],
+  compatPage: 1,
+  editingCompatId: null,
 };
 
 function getConfig() {
@@ -3285,7 +3355,7 @@ async function apiCall(action, data = {}) {
     throw new Error('No script URL');
   }
 
-  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers'].includes(action);
+  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers', 'getCompatPairs'].includes(action);
   const url = new URL(cfg.scriptUrl);
   url.searchParams.set('action', action);
   url.searchParams.set('user', state.user?.email || 'unknown');
@@ -4467,6 +4537,335 @@ async function syncToGitHub() {
 }
 
 /* ═══════════════════════════════════════════
+   COMPATIBILITY PAIRS CRUD
+   ═══════════════════════════════════════════ */
+const COMPAT_PER_PAGE = 25;
+const RESULT_LABELS = { c: '✅ Compatible', i: '❌ Incompatible', v: '⚠️ Variable' };
+const RESULT_BADGE = { c: 'badge-approved', i: 'badge-had', v: 'badge-pending' };
+
+async function loadCompatPairs() {
+  showLoading('กำลังโหลดข้อมูล compatibility...');
+  try {
+    const result = await apiCall('getCompatPairs');
+    state.compatPairs = result.pairs || [];
+    renderCompatStats();
+    renderCompatTable();
+  } catch (e) {
+    console.error('loadCompatPairs error:', e);
+    toast('โหลดข้อมูล compatibility ล้มเหลว', 'error');
+  }
+  hideLoading();
+}
+
+function getFilteredCompatPairs() {
+  let pairs = state.compatPairs;
+  const q = (document.getElementById('search-compat')?.value || '').toLowerCase().trim();
+  const result = document.getElementById('filter-compat-result')?.value || '';
+
+  if (q) {
+    pairs = pairs.filter(p =>
+      (p.drugA || '').toLowerCase().includes(q) ||
+      (p.drugB || '').toLowerCase().includes(q)
+    );
+  }
+  if (result) {
+    pairs = pairs.filter(p => p.result === result);
+  }
+  return pairs;
+}
+
+function renderCompatStats() {
+  const total = state.compatPairs.length;
+  const compatible = state.compatPairs.filter(p => p.result === 'c').length;
+  const incompatible = state.compatPairs.filter(p => p.result === 'i').length;
+  const variable = state.compatPairs.filter(p => p.result === 'v').length;
+
+  const el = document.getElementById('compat-stats');
+  if (el) el.innerHTML = `
+    <div class="stat-card"><div class="stat-label">คู่ยาทั้งหมด</div><div class="stat-value primary">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Compatible</div><div class="stat-value success">${compatible}</div></div>
+    <div class="stat-card"><div class="stat-label">Incompatible</div><div class="stat-value danger">${incompatible}</div></div>
+    <div class="stat-card"><div class="stat-label">Variable</div><div class="stat-value warning">${variable}</div></div>
+  `;
+
+  const countEl = document.getElementById('compat-total-count');
+  if (countEl) countEl.textContent = total;
+}
+
+function renderCompatTable() {
+  const filtered = getFilteredCompatPairs();
+  const total = filtered.length;
+  const pages = Math.ceil(total / COMPAT_PER_PAGE) || 1;
+  if (state.compatPage > pages) state.compatPage = pages;
+  const start = (state.compatPage - 1) * COMPAT_PER_PAGE;
+  const slice = filtered.slice(start, start + COMPAT_PER_PAGE);
+
+  const tbody = document.getElementById('compat-table-body');
+  if (!tbody) return;
+
+  if (slice.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:32px">ไม่มีข้อมูล</td></tr>';
+  } else {
+    tbody.innerHTML = slice.map((p, idx) => `
+      <tr>
+        <td style="color:var(--text-muted);font-size:12px">${start + idx + 1}</td>
+        <td><strong>${escHtml(p.drugA || '')}</strong></td>
+        <td><strong>${escHtml(p.drugB || '')}</strong></td>
+        <td><span class="badge ${RESULT_BADGE[p.result] || ''}">${RESULT_LABELS[p.result] || p.result}</span></td>
+        <td style="font-size:12px;color:var(--text-muted)">${escHtml(p.ref || '—')}</td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-sm btn-outline" data-action="editCompatPair" data-id="${p.id}" title="แก้ไข">✏️</button>
+            ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteCompatPair" data-id="${p.id}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Pagination
+  const pag = document.getElementById('compat-pagination');
+  if (pages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<span style="color:var(--text-muted);font-size:12px">${total} คู่ยา</span>`;
+  html += `<button class="page-btn" data-action="compatGoPage" data-page="${state.compatPage - 1}" ${state.compatPage <= 1 ? 'disabled' : ''}>‹</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && Math.abs(i - state.compatPage) > 2 && i !== 1 && i !== pages) {
+      if (i === state.compatPage - 3 || i === state.compatPage + 3) html += '<span>…</span>';
+      continue;
+    }
+    html += `<button class="page-btn ${i === state.compatPage ? 'active' : ''}" data-action="compatGoPage" data-page="${i}">${i}</button>`;
+  }
+  html += `<button class="page-btn" data-action="compatGoPage" data-page="${state.compatPage + 1}" ${state.compatPage >= pages ? 'disabled' : ''}>›</button>`;
+  pag.innerHTML = html;
+}
+
+function compatGoPage(p) {
+  const pages = Math.ceil(getFilteredCompatPairs().length / COMPAT_PER_PAGE);
+  if (p < 1 || p > pages) return;
+  state.compatPage = p;
+  renderCompatTable();
+}
+
+function filterCompat() {
+  state.compatPage = 1;
+  renderCompatTable();
+}
+
+function openCompatModal(pair = null) {
+  state.editingCompatId = pair ? pair.id : null;
+  document.getElementById('compat-modal-title').textContent = pair ? 'แก้ไขคู่ยา' : 'เพิ่มคู่ยา Compatibility';
+  document.getElementById('cf-drugA').value = pair ? pair.drugA : '';
+  document.getElementById('cf-drugB').value = pair ? pair.drugB : '';
+  document.getElementById('cf-result').value = pair ? pair.result : 'c';
+  document.getElementById('cf-ref').value = pair ? (pair.ref || '') : '';
+  document.getElementById('compat-modal').classList.add('open');
+}
+
+function closeCompatModal() {
+  document.getElementById('compat-modal').classList.remove('open');
+  state.editingCompatId = null;
+}
+
+async function saveCompatPair() {
+  const drugA = document.getElementById('cf-drugA').value.trim();
+  const drugB = document.getElementById('cf-drugB').value.trim();
+  const result = document.getElementById('cf-result').value;
+  const ref = document.getElementById('cf-ref').value.trim();
+
+  if (!drugA || !drugB) {
+    toast('กรุณากรอกชื่อยาทั้ง 2 ช่อง', 'error');
+    return;
+  }
+
+  showLoading('กำลังบันทึก...');
+  try {
+    if (state.editingCompatId) {
+      await apiCall('updateCompatPair', { id: state.editingCompatId, drugA, drugB, result, ref });
+      toast('✅ อัพเดทคู่ยาแล้ว', 'success');
+    } else {
+      await apiCall('createCompatPair', { drugA, drugB, result, ref });
+      toast('✅ เพิ่มคู่ยาแล้ว', 'success');
+    }
+    closeCompatModal();
+    await loadCompatPairs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+function editCompatPair(id) {
+  const pair = state.compatPairs.find(p => String(p.id) === String(id));
+  if (pair) openCompatModal(pair);
+}
+
+async function deleteCompatPair(id) {
+  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
+  const pair = state.compatPairs.find(p => String(p.id) === String(id));
+  if (!pair) return;
+  if (!confirm(`ลบคู่ยา "${pair.drugA} + ${pair.drugB}" ?`)) return;
+
+  showLoading('กำลังลบ...');
+  try {
+    await apiCall('deleteCompatPair', { id });
+    toast('🗑 ลบคู่ยาแล้ว', 'success');
+    await loadCompatPairs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+function exportCompatCSV() {
+  if (state.compatPairs.length === 0) { toast('ไม่มีข้อมูล', 'info'); return; }
+  const rows = [['Drug A', 'Drug B', 'Result', 'Reference']];
+  state.compatPairs.forEach(p => {
+    rows.push([p.drugA, p.drugB, p.result, p.ref || '']);
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `compat-pairs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  toast('📥 Export CSV สำเร็จ', 'success');
+}
+
+// Hardcoded CURATED pairs from compatibility.js — for one-time migration
+const CURATED_PAIRS = [
+['Norepinephrine','Dobutamine','c'],['Norepinephrine','Dopamine','c'],['Norepinephrine','Adrenaline','c'],
+['Norepinephrine','Midazolam','c'],['Norepinephrine','Fentanyl','c'],['Norepinephrine','Morphine','c'],
+['Norepinephrine','Heparin','c'],['Norepinephrine','Human Insulin','c'],['Norepinephrine','Potassium','c'],
+['Norepinephrine','Furosemide','i'],['Norepinephrine','Pantoprazole','i'],['Norepinephrine','Sodium bicarbonate','i'],
+['Norepinephrine','Phenytoin','i'],['Norepinephrine','Diazepam','i'],['Norepinephrine','Nicardipine','c'],
+['Norepinephrine','Dexmedetomidine','c'],['Norepinephrine','Propofol','c'],['Norepinephrine','Amiodarone','c'],
+['Norepinephrine','Vancomycin','c'],['Norepinephrine','Meropenem','c'],['Norepinephrine','Labetalol','c'],
+['Dopamine','Dobutamine','c'],['Dopamine','Adrenaline','c'],['Dopamine','Midazolam','c'],
+['Dopamine','Fentanyl','c'],['Dopamine','Heparin','c'],['Dopamine','Morphine','c'],
+['Dopamine','Sodium bicarbonate','i'],['Dopamine','Furosemide','v'],['Dopamine','Human Insulin','v'],
+['Dopamine','Phenytoin','i'],['Dopamine','Acyclovir','i'],['Dopamine','Nicardipine','c'],
+['Dobutamine','Adrenaline','c'],['Dobutamine','Midazolam','c'],['Dobutamine','Fentanyl','c'],
+['Dobutamine','Heparin','c'],['Dobutamine','Human Insulin','v'],['Dobutamine','Furosemide','i'],
+['Dobutamine','Sodium bicarbonate','i'],['Dobutamine','Phenytoin','i'],['Dobutamine','Diazepam','i'],
+['Dobutamine','Acyclovir','i'],['Dobutamine','Nicardipine','c'],['Dobutamine','Potassium','c'],
+['Amiodarone','Midazolam','c'],['Amiodarone','Fentanyl','c'],['Amiodarone','Morphine','c'],
+['Amiodarone','Dobutamine','c'],['Amiodarone','Dopamine','c'],['Amiodarone','Furosemide','i'],
+['Amiodarone','Heparin','i'],['Amiodarone','Sodium bicarbonate','i'],['Amiodarone','Phenytoin','i'],
+['Amiodarone','Potassium','c'],['Amiodarone','Human Insulin','c'],['Amiodarone','Dexmedetomidine','c'],
+['Midazolam','Fentanyl','c'],['Midazolam','Morphine','c'],['Midazolam','Heparin','c'],
+['Midazolam','Human Insulin','c'],['Midazolam','Potassium','c'],['Midazolam','Furosemide','v'],
+['Midazolam','Sodium bicarbonate','i'],['Midazolam','Dexamethasone','c'],['Midazolam','Ondansetron','c'],
+['Midazolam','Omeprazole','v'],['Midazolam','Propofol','c'],['Midazolam','Vancomycin','c'],
+['Midazolam','Meropenem','c'],['Midazolam','Nicardipine','c'],['Midazolam','Labetalol','c'],
+['Propofol','Fentanyl','c'],['Propofol','Morphine','c'],['Propofol','Potassium','c'],
+['Propofol','Heparin','c'],['Propofol','Phenytoin','i'],['Propofol','Vancomycin','i'],
+['Propofol','Meropenem','c'],['Propofol','Ketamine','c'],['Propofol','Dexmedetomidine','c'],
+['Heparin','Human Insulin','c'],['Heparin','Potassium','c'],['Heparin','Morphine','c'],
+['Heparin','Fentanyl','c'],['Heparin','Furosemide','c'],['Heparin','Dexamethasone','c'],
+['Heparin','Pantoprazole','c'],['Heparin','Vancomycin','i'],['Heparin','Gentamicin','v'],
+['Heparin','Ciprofloxacin','i'],['Heparin','Diazepam','i'],['Heparin','Phenytoin','i'],
+['Heparin','Nicardipine','c'],['Heparin','Labetalol','c'],['Heparin','Meropenem','c'],
+['Human Insulin','Potassium','c'],['Human Insulin','Sodium bicarbonate','i'],['Human Insulin','Phenytoin','i'],
+['Furosemide','Morphine','c'],['Furosemide','Potassium','c'],['Furosemide','Dexamethasone','c'],
+['Furosemide','Vancomycin','i'],['Furosemide','Ciprofloxacin','i'],['Furosemide','Ondansetron','i'],
+['Furosemide','Nicardipine','i'],['Furosemide','Labetalol','i'],['Furosemide','Amiodarone','i'],
+['Phenytoin','Fentanyl','i'],['Phenytoin','Morphine','i'],['Phenytoin','Vancomycin','i'],
+['Phenytoin','Meropenem','i'],['Phenytoin','Potassium','i'],['Phenytoin','Dexamethasone','i'],
+['Phenytoin','Dexmedetomidine','i'],['Phenytoin','Propofol','i'],['Phenytoin','Midazolam','i'],
+['Vancomycin','Meropenem','c'],['Vancomycin','Midazolam','c'],['Vancomycin','Morphine','c'],
+['Vancomycin','Fentanyl','c'],['Vancomycin','Potassium','c'],['Vancomycin','Ceftriaxone','i'],
+['Vancomycin','Ceftazidime','i'],['Vancomycin','Piperacillin','i'],['Vancomycin','Dexamethasone','v'],
+['Dexmedetomidine','Fentanyl','c'],['Dexmedetomidine','Midazolam','c'],['Dexmedetomidine','Morphine','c'],
+['Dexmedetomidine','Amphotericin','i'],['Dexmedetomidine','Diazepam','i'],
+['Nicardipine','Fentanyl','c'],['Nicardipine','Sodium bicarbonate','i'],['Nicardipine','Phenytoin','i'],
+['Labetalol','Fentanyl','c'],['Labetalol','Morphine','c'],['Labetalol','Heparin','c'],
+['Labetalol','Sodium bicarbonate','i'],['Labetalol','Potassium','c'],
+['Meropenem','Fentanyl','c'],['Meropenem','Morphine','c'],['Meropenem','Dexamethasone','c'],
+['Meropenem','Ondansetron','c'],['Meropenem','Potassium','c'],['Meropenem','Acyclovir','i'],['Meropenem','Diazepam','i'],
+['Magnesium','Heparin','c'],['Magnesium','Human Insulin','c'],['Magnesium','Potassium','c'],
+['Magnesium','Midazolam','c'],['Magnesium','Amphotericin','i'],['Magnesium','Sodium bicarbonate','i'],
+['Magnesium','Calcium','i'],
+['Ondansetron','Morphine','c'],['Ondansetron','Fentanyl','c'],['Ondansetron','Dexamethasone','c'],
+['Ondansetron','Potassium','c'],['Ondansetron','Sodium bicarbonate','i'],
+['Ketamine','Midazolam','c'],['Ketamine','Fentanyl','c'],['Ketamine','Morphine','c'],
+['Ketamine','Diazepam','i'],['Ketamine','Sodium bicarbonate','i'],['Ketamine','Phenobarbital','i'],
+['Calcium','Sodium bicarbonate','i'],['Calcium','Potassium','c'],
+['Levetiracetam','Diazepam','c'],['Levetiracetam','Valproic','c'],
+['Valproic','Meropenem','i'],
+['Methylprednisolone','Heparin','c'],['Methylprednisolone','Ondansetron','c'],
+['Hydrocortisone','Heparin','c'],['Hydrocortisone','Midazolam','i'],
+['Cisatracurium','Midazolam','c'],['Cisatracurium','Fentanyl','c'],['Cisatracurium','Morphine','c'],
+['Cisatracurium','Propofol','c'],['Cisatracurium','Sodium bicarbonate','i'],
+['Cisplatin','Ondansetron','c'],['Cisplatin','Dexamethasone','c'],['Cisplatin','Mannitol','c'],
+['Cisplatin','Potassium','c'],['Cisplatin','Sodium bicarbonate','i'],
+['Carboplatin','Ondansetron','c'],['Carboplatin','Dexamethasone','c'],['Carboplatin','Sodium bicarbonate','i'],
+['Paclitaxel','Carboplatin','c'],['Paclitaxel','Cisplatin','c'],['Paclitaxel','Doxorubicin','i'],
+['Doxorubicin','Ondansetron','c'],['Doxorubicin','Dexamethasone','c'],['Doxorubicin','Cyclophosphamide','c'],
+['Doxorubicin','Heparin','i'],['Doxorubicin','5-Fluorouracil','i'],
+['5-Fluorouracil','Ondansetron','c'],['5-Fluorouracil','Leucovorin','c'],['5-Fluorouracil','Methotrexate','i'],
+['Gemcitabine','Ondansetron','c'],['Gemcitabine','Dexamethasone','c'],['Gemcitabine','Amphotericin','i'],['Gemcitabine','Furosemide','i'],
+['Etoposide','Carboplatin','c'],['Etoposide','Cisplatin','c'],['Etoposide','Ondansetron','c'],['Etoposide','Cefepime','i'],
+['Oxaliplatin','Leucovorin','c'],['Oxaliplatin','Sodium bicarbonate','i'],
+['Cefepime','Midazolam','c'],['Cefepime','Fentanyl','c'],['Cefepime','Heparin','c'],
+['Cefepime','Morphine','c'],['Cefepime','Vancomycin','i'],['Cefepime','Metronidazole','c'],
+['Cefepime','Amphotericin','i'],
+['Calcium chloride','Dobutamine','c'],['Calcium chloride','Dopamine','c'],['Calcium chloride','Norepinephrine','c'],
+['Calcium chloride','Sodium bicarbonate','i'],['Calcium chloride','Ceftriaxone','i'],
+['Diltiazem','Heparin','c'],['Diltiazem','Human Insulin','c'],['Diltiazem','Potassium','c'],
+['Diltiazem','Amphotericin','i'],['Diltiazem','Furosemide','i'],['Diltiazem','Phenytoin','i'],['Diltiazem','Diazepam','i'],
+['Milrinone','Heparin','c'],['Milrinone','Potassium','c'],['Milrinone','Morphine','c'],['Milrinone','Human Insulin','c'],
+['Milrinone','Furosemide','i'],['Milrinone','Sodium bicarbonate','i'],
+['Daptomycin','Dexamethasone','c'],['Daptomycin','Heparin','c'],
+['Daptomycin','RL','i'],['Daptomycin','Sodium bicarbonate','i'],
+['Caspofungin','Dexamethasone','c'],['Caspofungin','Meropenem','c'],
+['Caspofungin','D5W','i'],['Caspofungin','Sodium bicarbonate','i'],
+['Norepinephrine','Calcium chloride','c'],['Norepinephrine','Milrinone','c'],['Norepinephrine','Diltiazem','c'],
+['Norepinephrine','Cefepime','c'],
+['Dopamine','Calcium chloride','c'],['Dopamine','Milrinone','c'],['Dopamine','Diltiazem','c'],
+['Heparin','Cefepime','c'],['Heparin','Diltiazem','c'],['Heparin','Milrinone','c'],
+['Midazolam','Cefepime','c'],['Midazolam','Diltiazem','c'],
+];
+
+async function importCuratedPairs() {
+  if (state.compatPairs.length > 0) {
+    if (!confirm(`มีข้อมูลอยู่แล้ว ${state.compatPairs.length} คู่\nระบบจะข้ามคู่ยาที่ซ้ำ — ต้องการ import CURATED ${CURATED_PAIRS.length} คู่?`)) return;
+  } else {
+    if (!confirm(`Import ข้อมูล CURATED ${CURATED_PAIRS.length} คู่ยา เข้าสู่ Google Sheets?`)) return;
+  }
+
+  const pairs = CURATED_PAIRS.map(([drugA, drugB, result]) => ({
+    drugA, drugB, result, ref: "Trissel's / Lexicomp"
+  }));
+
+  showLoading(`กำลัง import ${pairs.length} คู่ยา...`);
+  try {
+    // Use POST directly for bulk — payload is large
+    const cfg = getConfig();
+    const postUrl = cfg.scriptUrl + '?action=bulkCreateCompatPairs&user=' + encodeURIComponent(state.user?.email || 'unknown');
+    const body = JSON.stringify({ action: 'bulkCreateCompatPairs', user: state.user?.email || 'unknown', pairs });
+
+    if (body.length < 6000) {
+      // Small enough for GET
+      const result = await apiCall('bulkCreateCompatPairs', { pairs });
+      toast(`✅ Import สำเร็จ: เพิ่ม ${result.created} คู่, ข้าม ${result.skipped} คู่ซ้ำ`, 'success');
+    } else {
+      // Large payload → POST no-cors
+      await fetch(postUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: body,
+      });
+      await new Promise(r => setTimeout(r, 2000));
+      toast('✅ ส่งข้อมูล import แล้ว — กำลังโหลดใหม่...', 'success');
+    }
+    await loadCompatPairs();
+  } catch (e) {
+    toast('❌ Import ล้มเหลว: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+/* ═══════════════════════════════════════════
    TAB NAVIGATION
    ═══════════════════════════════════════════ */
 function switchTab(tab) {
@@ -4481,6 +4880,7 @@ function switchTab(tab) {
   if (tab === 'audit') renderAuditLog();
   if (tab === 'users') loadUsers();
   if (tab === 'quality') renderQualityDashboard();
+  if (tab === 'compat') loadCompatPairs();
 }
 
 /* ═══════════════════════════════════════════
@@ -4552,15 +4952,25 @@ document.addEventListener('DOMContentLoaded', () => {
     goPage: function(e, t) { goPage(+t.dataset.page); },
     auditGoPage: function(e, t) { auditGoPage(+t.dataset.page); },
     changeRole: function(e, t) { changeRole(t.dataset.email, t.dataset.role); },
-    removeUser: function(e, t) { removeUser(t.dataset.email); }
+    removeUser: function(e, t) { removeUser(t.dataset.email); },
+    openCompatModal: function() { openCompatModal(); },
+    closeCompatModal: function() { closeCompatModal(); },
+    saveCompatPair: function() { saveCompatPair(); },
+    editCompatPair: function(e, t) { editCompatPair(t.dataset.id); },
+    deleteCompatPair: function(e, t) { deleteCompatPair(t.dataset.id); },
+    compatGoPage: function(e, t) { compatGoPage(+t.dataset.page); },
+    exportCompatCSV: function() { exportCompatCSV(); },
+    importCuratedPairs: function() { importCuratedPairs(); }
   });
   IVDrugRef.delegate(document, 'input', {
-    filterDrugs: function() { filterDrugs(); }
+    filterDrugs: function() { filterDrugs(); },
+    filterCompat: function() { filterCompat(); }
   });
   IVDrugRef.delegate(document, 'change', {
     filterDrugs: function() { filterDrugs(); },
     handleImportFile: function(e) { handleImportFile(e); },
-    renderAuditLog: function() { renderAuditLog(); }
+    renderAuditLog: function() { renderAuditLog(); },
+    filterCompat: function() { filterCompat(); }
   });
 
   // Init Google Auth after GIS library loads

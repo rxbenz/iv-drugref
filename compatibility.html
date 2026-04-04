@@ -2246,6 +2246,7 @@ var IVDrugRef = (function() {
   // ANALYTICS
   // ============================================================
   const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  const ADMIN_GAS_URL = 'https://script.google.com/macros/s/AKfycbwJhLwY34rKpVVBE4aFRMOee6-lldazO64uOk0EXEA0Yvwgz6SA3kjeWt7-R6BSsNZT/exec';
   let _reqCount = 0;
 
   /**
@@ -2509,6 +2510,7 @@ var IVDrugRef = (function() {
     getSessionId,
     getUserId,
     hasAnalyticsConsent,
+    getAdminGasUrl: function() { return ADMIN_GAS_URL; },
 
     // Service Worker
     registerSW,
@@ -2655,6 +2657,52 @@ CURATED.forEach(([a, b, s]) => {
   const key = [ka, kb].sort().join('|');
   CURATED_MAP[key] = s;
 });
+
+// ===== DYNAMIC COMPAT DATA — fetch from Google Sheets =====
+const COMPAT_LS_KEY = 'ivdrug_compatPairsCache';
+const COMPAT_LS_TS = 'ivdrug_compatPairsCacheTs';
+const COMPAT_CACHE_TTL = 30 * 60 * 1000; // 30 min
+
+function rebuildCuratedMap(pairs) {
+  Object.keys(CURATED_MAP).forEach(k => delete CURATED_MAP[k]);
+  pairs.forEach(([a, b, s]) => {
+    const ka = a.toLowerCase().split(' ')[0];
+    const kb = b.toLowerCase().split(' ')[0];
+    const key = [ka, kb].sort().join('|');
+    CURATED_MAP[key] = s;
+  });
+}
+
+function loadCompatPairsFromSheet() {
+  try {
+    const cached = localStorage.getItem(COMPAT_LS_KEY);
+    const cachedTs = parseInt(localStorage.getItem(COMPAT_LS_TS) || '0');
+    if (cached && (Date.now() - cachedTs) < COMPAT_CACHE_TTL) {
+      const pairs = JSON.parse(cached);
+      if (pairs.length > 0) {
+        rebuildCuratedMap(pairs);
+        console.log('[Compat] Loaded ' + pairs.length + ' pairs from cache');
+      }
+    }
+  } catch (e) { /* ignore cache errors */ }
+
+  var gasUrl = (typeof IVDrugRef !== 'undefined' && IVDrugRef.getAdminGasUrl)
+    ? IVDrugRef.getAdminGasUrl() : '';
+  if (!gasUrl) return;
+
+  fetch(gasUrl + '?action=compatpairs')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var pairs = data.pairs;
+      if (Array.isArray(pairs) && pairs.length > 0) {
+        rebuildCuratedMap(pairs);
+        localStorage.setItem(COMPAT_LS_KEY, JSON.stringify(pairs));
+        localStorage.setItem(COMPAT_LS_TS, String(Date.now()));
+        console.log('[Compat] Synced ' + pairs.length + ' pairs from sheet');
+      }
+    })
+    .catch(function() { /* silent — CURATED fallback is already loaded */ });
+}
 
 // Enhanced drug matching
 function normKey(generic) {
@@ -3049,6 +3097,7 @@ document.addEventListener('click', e => {
 
   // Initialize on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', function() {
+    loadCompatPairsFromSheet();
     populateSelects();
     buildMatrixFilter();
     checkMultiCompat();

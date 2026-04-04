@@ -1505,6 +1505,58 @@ body::before {
   }
 }
 
+/* ============================================================
+   DATA QUALITY DASHBOARD
+   ============================================================ */
+.q-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.q-critical { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.q-high { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+.q-medium { background: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
+.q-low { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+.q-bar {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 80px;
+}
+.q-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.q-had-card {
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.q-dup-card {
+  padding: 8px 14px;
+  margin-bottom: 4px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  font-size: 12px;
+}
+
 </style>
 </head>
 
@@ -1541,6 +1593,7 @@ body::before {
     <button class="tab-btn" data-tab="import" data-action="switchTab">📥 Import ยา</button>
     <button class="tab-btn" data-tab="audit" data-action="switchTab">📝 Audit Log</button>
     <button class="tab-btn" data-tab="users" data-action="switchTab">👥 จัดการผู้ใช้</button>
+    <button class="tab-btn" data-tab="quality" data-action="switchTab">📊 Data Quality</button>
     <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
   </div>
 
@@ -1739,6 +1792,18 @@ body::before {
     </div>
   </div>
 </div>
+
+<!-- ═══════ DATA QUALITY PANEL ═══════ -->
+    <div class="panel" id="quality-panel">
+      <h2 style="margin-bottom:4px">📊 Data Validation & Quality Dashboard</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        มาตรฐาน สภ.รพ. มาตรฐานที่ ๔: การควบคุมยา — ตรวจสอบความครบถ้วนของข้อมูลยาฉีด
+      </p>
+      <div class="stats-row" id="quality-stats"></div>
+      <div id="quality-issues" style="margin-top:16px"></div>
+      <div id="quality-had-flags" style="margin-top:16px"></div>
+      <div id="quality-duplicates" style="margin-top:16px"></div>
+    </div>
 
 <!-- ═══════ DRUG MODAL ═══════ -->
 <div class="modal-overlay" id="drug-modal">
@@ -4415,6 +4480,7 @@ function switchTab(tab) {
   if (tab === 'pending') renderPendingList();
   if (tab === 'audit') renderAuditLog();
   if (tab === 'users') loadUsers();
+  if (tab === 'quality') renderQualityDashboard();
 }
 
 /* ═══════════════════════════════════════════
@@ -4529,6 +4595,206 @@ window.initGoogleAuth = initGoogleAuth;
 window.handleCredentialResponse = handleCredentialResponse;
 window.signIn = signIn;
 window.toast = toast;
+
+/* ═══════════════════════════════════════════
+   DATA QUALITY DASHBOARD
+   มาตรฐาน สภ.รพ. มาตรฐานที่ ๔: การควบคุมยา
+   ═══════════════════════════════════════════ */
+
+function renderQualityDashboard() {
+  var drugs = state.drugs || [];
+  if (!drugs.length) { toast('⚠ ยังไม่มีข้อมูลยา', 'warning'); return; }
+
+  // ── Field definitions with severity ──
+  var FIELDS = [
+    { key: 'generic', label: 'ชื่อสามัญ', severity: 'critical', pts: 15 },
+    { key: 'strength', label: 'ความแรง', severity: 'critical', pts: 15 },
+    { key: 'admin.route', label: 'วิธีบริหาร (Route)', severity: 'critical', pts: 15 },
+    { key: 'admin.rate', label: 'อัตราการให้ (Rate)', severity: 'critical', pts: 15 },
+    { key: 'trade', label: 'ชื่อการค้า', severity: 'high', pts: 5 },
+    { key: 'reconst.solvent', label: 'ตัวทำละลาย (Reconst)', severity: 'high', pts: 3 },
+    { key: 'dilution.diluent', label: 'สารละลายเจือจาง (Dilution)', severity: 'high', pts: 3 },
+    { key: 'dilution.finalConc', label: 'ความเข้มข้นสุดท้าย', severity: 'high', pts: 4 },
+    { key: 'stability.reconst', label: 'ความคงตัว (Reconst)', severity: 'medium', pts: 3 },
+    { key: 'stability.diluted', label: 'ความคงตัว (Diluted)', severity: 'medium', pts: 3 },
+    { key: 'stability.storage', label: 'การจัดเก็บ (Storage)', severity: 'medium', pts: 4 },
+    { key: 'precautions', label: 'ข้อควรระวัง', severity: 'high', pts: 5 },
+    { key: 'monitoring', label: 'การติดตาม (Monitoring)', severity: 'medium', pts: 3 },
+    { key: 'ref', label: 'แหล่งอ้างอิง (Reference)', severity: 'low', pts: 2 },
+    { key: 'compat.ysite', label: 'Y-site Compatibility', severity: 'low', pts: 5 }
+  ];
+  var MAX_PTS = FIELDS.reduce(function(s, f) { return s + f.pts; }, 0);
+
+  // ── Helper: get nested field value ──
+  function getField(drug, key) {
+    var parts = key.split('.');
+    var val = drug;
+    for (var i = 0; i < parts.length; i++) {
+      if (!val) return '';
+      val = val[parts[i]];
+    }
+    if (Array.isArray(val)) return val.length > 0 ? val.join(', ') : '';
+    if (typeof val === 'object' && val !== null) return JSON.stringify(val);
+    return val ? String(val).trim() : '';
+  }
+
+  function isEmpty(v) { return !v || v === '-' || v === 'N/A' || v === 'null' || v === '[]' || v === '{}'; }
+
+  // ── Score each drug ──
+  var allIssues = [];
+  var scores = [];
+
+  drugs.forEach(function(drug) {
+    var pts = 0;
+    var missing = [];
+    FIELDS.forEach(function(f) {
+      var val = getField(drug, f.key);
+      if (!isEmpty(val)) {
+        pts += f.pts;
+      } else {
+        missing.push(f);
+      }
+    });
+    var pct = Math.round(pts / MAX_PTS * 100);
+    scores.push({ drug: drug, score: pct, missing: missing });
+
+    missing.forEach(function(f) {
+      var sev = f.severity;
+      // HAD drug missing precautions = upgrade to critical
+      if (drug.had && f.key === 'precautions') sev = 'critical';
+      allIssues.push({
+        drugId: drug.id,
+        drugName: drug.generic || '(no name)',
+        had: drug.had,
+        field: f.label,
+        severity: sev,
+        key: f.key
+      });
+    });
+  });
+
+  // ── HAD flags ──
+  var hadIssues = drugs.filter(function(d) {
+    return d.had && (isEmpty(getField(d, 'precautions')) || isEmpty(getField(d, 'monitoring')));
+  });
+
+  // ── Duplicate detection ──
+  var dupGeneric = [];
+  var dupTrade = [];
+  var seenGeneric = {};
+  var seenTrade = {};
+  drugs.forEach(function(d) {
+    var g = (d.generic || '').toLowerCase().trim();
+    var t = (d.trade || '').toLowerCase().trim();
+    if (g && seenGeneric[g]) dupGeneric.push({ name: d.generic, id1: seenGeneric[g], id2: d.id });
+    else if (g) seenGeneric[g] = d.id;
+    if (t && t !== '-' && seenTrade[t]) dupTrade.push({ name: d.trade, id1: seenTrade[t], id2: d.id });
+    else if (t && t !== '-') seenTrade[t] = d.id;
+  });
+
+  // ── Stats ──
+  var avgScore = Math.round(scores.reduce(function(s, d) { return s + d.score; }, 0) / scores.length);
+  var complete = scores.filter(function(d) { return d.score === 100; }).length;
+  var critical = allIssues.filter(function(i) { return i.severity === 'critical'; }).length;
+  var totalDups = dupGeneric.length + dupTrade.length;
+
+  var statsEl = document.getElementById('quality-stats');
+  if (statsEl) statsEl.innerHTML =
+    '<div class="stat-card"><div class="stat-label">Quality Score</div><div class="stat-value ' + (avgScore >= 90 ? 'success' : avgScore >= 70 ? 'warning' : 'danger') + '">' + avgScore + '%</div></div>' +
+    '<div class="stat-card"><div class="stat-label">ข้อมูลครบ 100%</div><div class="stat-value success">' + complete + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">ข้อมูลไม่ครบ</div><div class="stat-value warning">' + (drugs.length - complete) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">🔴 Critical Issues</div><div class="stat-value danger">' + critical + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">⚠ HAD Issues</div><div class="stat-value danger">' + hadIssues.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">ซ้ำซ้อน (Duplicates)</div><div class="stat-value ' + (totalDups > 0 ? 'warning' : 'success') + '">' + totalDups + '</div></div>';
+
+  // ── Issues table (sorted by severity) ──
+  var sevOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+  var sevLabel = { critical: '🔴 CRITICAL', high: '🟠 HIGH', medium: '🟡 MEDIUM', low: '🔵 LOW' };
+  var sevColor = { critical: '#fef2f2', high: '#fff7ed', medium: '#fefce8', low: '#eff6ff' };
+  allIssues.sort(function(a, b) { return sevOrder[a.severity] - sevOrder[b.severity]; });
+
+  var issuesEl = document.getElementById('quality-issues');
+  if (issuesEl) {
+    var html = '<h3 style="margin-bottom:8px">📋 Validation Issues (' + allIssues.length + ' รายการ)</h3>';
+    if (allIssues.length === 0) {
+      html += '<div style="padding:20px;text-align:center;color:var(--success);font-weight:600">✅ ข้อมูลยาครบถ้วนทุกรายการ</div>';
+    } else {
+      html += '<div class="table-wrap"><table class="drug-table"><thead><tr>' +
+        '<th>ระดับ</th><th>#</th><th>ชื่อยา</th><th>Field ที่ขาด</th><th>HAD</th></tr></thead><tbody>';
+      allIssues.slice(0, 100).forEach(function(iss) {
+        html += '<tr style="background:' + sevColor[iss.severity] + '">' +
+          '<td><span class="q-badge q-' + iss.severity + '">' + sevLabel[iss.severity] + '</span></td>' +
+          '<td>' + iss.drugId + '</td>' +
+          '<td><strong>' + escHtml(iss.drugName) + '</strong></td>' +
+          '<td>' + escHtml(iss.field) + '</td>' +
+          '<td>' + (iss.had ? '<span class="badge badge-had">⚠ HAD</span>' : '—') + '</td></tr>';
+      });
+      if (allIssues.length > 100) html += '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">... แสดง 100 จาก ' + allIssues.length + ' รายการ</td></tr>';
+      html += '</tbody></table></div>';
+    }
+
+    // ── Bottom drugs by score ──
+    var bottomDrugs = scores.filter(function(d) { return d.score < 100; }).sort(function(a, b) { return a.score - b.score; }).slice(0, 15);
+    if (bottomDrugs.length > 0) {
+      html += '<h3 style="margin:20px 0 8px">📉 ยาที่ข้อมูลน้อยที่สุด (Bottom 15)</h3>';
+      html += '<div class="table-wrap"><table class="drug-table"><thead><tr><th>#</th><th>ชื่อยา</th><th>Score</th><th>Progress</th><th>Fields ที่ขาด</th></tr></thead><tbody>';
+      bottomDrugs.forEach(function(d) {
+        var color = d.score >= 80 ? 'var(--success)' : d.score >= 60 ? 'var(--warning)' : 'var(--danger)';
+        html += '<tr><td>' + d.drug.id + '</td><td><strong>' + escHtml(d.drug.generic || '') + '</strong></td>' +
+          '<td style="font-weight:700;color:' + color + '">' + d.score + '%</td>' +
+          '<td><div class="q-bar"><div class="q-bar-fill" style="width:' + d.score + '%;background:' + color + '"></div></div></td>' +
+          '<td style="font-size:11px">' + d.missing.map(function(m) { return m.label; }).join(', ') + '</td></tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+    issuesEl.innerHTML = html;
+  }
+
+  // ── HAD flags ──
+  var hadEl = document.getElementById('quality-had-flags');
+  if (hadEl) {
+    if (hadIssues.length === 0) {
+      hadEl.innerHTML = '';
+    } else {
+      var hHtml = '<h3 style="margin-bottom:8px">🚨 HAD Drugs ที่ขาดข้อมูลสำคัญ (' + hadIssues.length + ' รายการ)</h3>' +
+        '<p style="font-size:11px;color:var(--danger);margin-bottom:8px">ยา High-Alert ต้องมี Precautions + Monitoring ครบ ตามมาตรฐาน สภ.รพ.</p>';
+      hadIssues.forEach(function(d) {
+        var missingFields = [];
+        if (isEmpty(getField(d, 'precautions'))) missingFields.push('Precautions');
+        if (isEmpty(getField(d, 'monitoring'))) missingFields.push('Monitoring');
+        hHtml += '<div class="q-had-card">' +
+          '<strong>#' + d.id + ' ' + escHtml(d.generic || '') + '</strong> ' +
+          '<span class="badge badge-had">⚠ HAD</span> — ' +
+          '<span style="color:var(--danger)">ขาด: ' + missingFields.join(', ') + '</span>' +
+          ' <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="' + d.id + '" style="margin-left:8px">✏️ แก้ไข</button></div>';
+      });
+      hadEl.innerHTML = hHtml;
+    }
+  }
+
+  // ── Duplicates ──
+  var dupEl = document.getElementById('quality-duplicates');
+  if (dupEl) {
+    if (totalDups === 0) {
+      dupEl.innerHTML = '';
+    } else {
+      var dHtml = '<h3 style="margin-bottom:8px">🔍 ตรวจพบข้อมูลซ้ำ (' + totalDups + ' คู่)</h3>';
+      if (dupGeneric.length > 0) {
+        dHtml += '<h4 style="font-size:12px;margin:8px 0 4px">Generic Name ซ้ำ:</h4>';
+        dupGeneric.forEach(function(d) {
+          dHtml += '<div class="q-dup-card">⚠ "<strong>' + escHtml(d.name) + '</strong>" — พบใน #' + d.id1 + ' และ #' + d.id2 + '</div>';
+        });
+      }
+      if (dupTrade.length > 0) {
+        dHtml += '<h4 style="font-size:12px;margin:8px 0 4px">Trade Name ซ้ำ:</h4>';
+        dupTrade.forEach(function(d) {
+          dHtml += '<div class="q-dup-card">⚠ "<strong>' + escHtml(d.name) + '</strong>" — พบใน #' + d.id1 + ' และ #' + d.id2 + '</div>';
+        });
+      }
+      dupEl.innerHTML = dHtml;
+    }
+  }
+}
 
 })();
 

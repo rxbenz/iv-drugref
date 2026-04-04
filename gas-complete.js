@@ -52,6 +52,7 @@ var SHEETS = {
   TDM_USAGE: 'TDMUsage',
   RENAL_DOSING: 'RenalDosing',
   COMPAT_USAGE: 'CompatUsage',
+  RENAL_DRUGS_DATA: 'RenalDrugsData',
   SURVEYS: 'Surveys',
   ERRORS: 'ErrorLog',
   URGENT_ALERTS: 'UrgentAlerts',
@@ -236,6 +237,20 @@ function doGet(e) {
       case 'bulkcreatecompatpairs':
         return handleBulkCreateCompatPairs(user, data);
 
+      // ── Renal Dosing Data ──
+      case 'renaldrugs':
+        return handleGetRenalDrugsPublic();
+      case 'getrenaldrugs':
+        return handleGetRenalDrugs(user);
+      case 'createrenaldrug':
+        return handleCreateRenalDrug(user, data);
+      case 'updaterenaldrug':
+        return handleUpdateRenalDrug(user, data);
+      case 'deleterenaldrug':
+        return handleDeleteRenalDrug(user, data);
+      case 'bulkcreaterenaldrugs':
+        return handleBulkCreateRenalDrugs(user, data);
+
       // ── Urgent Alerts ──
       case 'checkurgentalerts':
         return handleCheckUrgentAlerts(e.parameter.since);
@@ -259,6 +274,9 @@ function doPost(e) {
     // ── Admin bulk operations via POST ──
     if (data.action === 'bulkCreateCompatPairs') {
       return handleBulkCreateCompatPairs(data.user || '', data);
+    }
+    if (data.action === 'bulkCreateRenalDrugs') {
+      return handleBulkCreateRenalDrugs(data.user || '', data);
     }
 
     var eventType = data.type || data.event || data.action || '';
@@ -861,6 +879,133 @@ function handleBulkCreateCompatPairs(user, data) {
   });
 
   addAuditLog(user, 'bulkImportCompat', '', '', 'Imported ' + created + ' pairs, skipped ' + skipped + ' duplicates');
+  return jsonResponse({ success: true, created: created, skipped: skipped });
+}
+
+
+// ════════════════════════════════════════════════
+// RENAL DOSING DATA CRUD
+// ════════════════════════════════════════════════
+
+var RENAL_DRUG_HEADERS = ['id', 'name', 'class', 'sub', 'badges', 'recommended', 'dosingTable', 'info', 'infoType', 'ref', 'createdBy', 'createdAt', 'updatedAt'];
+
+function handleGetRenalDrugsPublic() {
+  var drugs = getSheetData(SHEETS.RENAL_DRUGS_DATA);
+  var slim = drugs.map(function(d) {
+    return { id: d.id, name: d.name, class: d['class'], sub: d.sub, badges: d.badges, recommended: d.recommended, dosingTable: d.dosingTable, info: d.info, infoType: d.infoType, ref: d.ref };
+  });
+  return jsonResponse({ drugs: slim });
+}
+
+function handleGetRenalDrugs(user) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  return jsonResponse({ drugs: getSheetData(SHEETS.RENAL_DRUGS_DATA), myRole: perm.role });
+}
+
+function handleCreateRenalDrug(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+
+  var sheet = getOrCreateSheet(SHEETS.RENAL_DRUGS_DATA, RENAL_DRUG_HEADERS);
+  var now = new Date().toISOString();
+  var id = data.id || ('renal_' + Date.now());
+  sheet.appendRow([
+    id, data.name || '', data['class'] || '', data.sub || '',
+    typeof data.badges === 'object' ? JSON.stringify(data.badges) : (data.badges || '[]'),
+    data.recommended || '',
+    typeof data.dosingTable === 'object' ? JSON.stringify(data.dosingTable) : (data.dosingTable || '[]'),
+    data.info || '', data.infoType || 'blue', data.ref || '',
+    user, now, now
+  ]);
+  addAuditLog(user, 'createRenalDrug', id, data.name, 'Created');
+  return jsonResponse({ success: true, id: id });
+}
+
+function handleUpdateRenalDrug(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+
+  var sheet = getSS().getSheetByName(SHEETS.RENAL_DRUGS_DATA);
+  if (!sheet) return errorResponse('RenalDrugsData sheet not found');
+
+  var all = sheet.getDataRange().getValues();
+  var headers = all[0];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) return errorResponse('ID column not found');
+
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      for (var key in data) {
+        if (key === 'id') continue;
+        var col = headers.indexOf(key);
+        if (col >= 0) {
+          var val = typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key];
+          sheet.getRange(i + 1, col + 1).setValue(val);
+        }
+      }
+      var updCol = headers.indexOf('updatedAt');
+      if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
+      addAuditLog(user, 'updateRenalDrug', data.id, data.name || all[i][headers.indexOf('name')], 'Updated');
+      return jsonResponse({ success: true, id: data.id });
+    }
+  }
+  return errorResponse('Renal drug not found: ' + data.id);
+}
+
+function handleDeleteRenalDrug(user, data) {
+  var perm = checkPermission(user, 'admin');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ต้องเป็น admin' });
+
+  var sheet = getSS().getSheetByName(SHEETS.RENAL_DRUGS_DATA);
+  if (!sheet) return errorResponse('RenalDrugsData sheet not found');
+
+  var all = sheet.getDataRange().getValues();
+  var idCol = all[0].indexOf('id');
+  var nameCol = all[0].indexOf('name');
+
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      var name = all[i][nameCol] || '';
+      sheet.deleteRow(i + 1);
+      addAuditLog(user, 'deleteRenalDrug', data.id, name, 'Deleted');
+      return jsonResponse({ success: true, message: 'Deleted: ' + name });
+    }
+  }
+  return errorResponse('Renal drug not found: ' + data.id);
+}
+
+function handleBulkCreateRenalDrugs(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+
+  var drugs = data.drugs || [];
+  if (drugs.length === 0) return errorResponse('No drugs provided');
+
+  var sheet = getOrCreateSheet(SHEETS.RENAL_DRUGS_DATA, RENAL_DRUG_HEADERS);
+  var existing = getSheetData(SHEETS.RENAL_DRUGS_DATA);
+  var existingIds = {};
+  existing.forEach(function(d) { existingIds[String(d.id).toLowerCase()] = true; });
+
+  var now = new Date().toISOString();
+  var created = 0, skipped = 0;
+
+  drugs.forEach(function(d) {
+    var drugId = String(d.id || '').toLowerCase();
+    if (existingIds[drugId]) { skipped++; return; }
+    sheet.appendRow([
+      d.id || '', d.name || '', d['class'] || '', d.sub || '',
+      typeof d.badges === 'object' ? JSON.stringify(d.badges) : (d.badges || '[]'),
+      d.recommended || '',
+      typeof d.dosingTable === 'object' ? JSON.stringify(d.dosingTable) : (d.dosingTable || '[]'),
+      d.info || '', d.infoType || 'blue', d.ref || '',
+      user, now, now
+    ]);
+    existingIds[drugId] = true;
+    created++;
+  });
+
+  addAuditLog(user, 'bulkImportRenalDrugs', '', '', 'Imported ' + created + ', skipped ' + skipped);
   return jsonResponse({ success: true, created: created, skipped: skipped });
 }
 

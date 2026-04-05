@@ -2,7 +2,7 @@
 # IV DrugRef v5.0 — Auto Deploy to GitHub Pages
 # ============================================================
 # Trigger: push to main branch
-# Process: install deps → build prod → deploy to GitHub Pages
+# Process: backup tag → install deps → build prod → deploy
 # ============================================================
 
 name: Deploy to GitHub Pages
@@ -12,9 +12,9 @@ on:
     branches: [main]
   workflow_dispatch:  # Allow manual trigger from GitHub UI
 
-# Sets permissions for GITHUB_TOKEN to deploy to Pages
+# Sets permissions for GITHUB_TOKEN
 permissions:
-  contents: read
+  contents: write   # needed for creating backup tags
   pages: write
   id-token: write
 
@@ -29,6 +29,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for tags
+
+      - name: Create backup tag
+        run: |
+          TAG="deploy/$(date -u +'%Y%m%d-%H%M%S')"
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "✅ Backup tag created: $TAG"
+          echo "BACKUP_TAG=$TAG" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

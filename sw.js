@@ -1,7 +1,8 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.0.0
+// IV Drug Reference PWA — Service Worker v5.3.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
+// Changed: Prompt-based update (no skipWaiting on install)
 // ============================================================================
 
 const CACHE_NAME = 'iv-drugref-v5.0.1';
@@ -42,7 +43,7 @@ const ASSETS_TO_CACHE = [
   './icons/icon-512x512.png'
 ];
 
-// ─── Install: Cache core assets ───
+// ─── Install: Cache core assets (wait for user prompt before activating) ───
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME)
@@ -50,7 +51,7 @@ self.addEventListener('install', (e) => {
         console.log('[SW] Caching core assets');
         return cache.addAll(ASSETS_TO_CACHE);
       })
-      .then(() => self.skipWaiting())
+    // No skipWaiting() — new SW waits until user accepts the update prompt
   );
 });
 
@@ -246,6 +247,9 @@ self.addEventListener('message', (event) => {
   if (!event.data) return;
 
   switch (event.data.type) {
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
     case 'START_URGENT_POLL':
       startUrgentPolling();
       break;

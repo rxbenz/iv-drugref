@@ -770,15 +770,70 @@ var IVDrugRef = (function() {
   // ============================================================
 
   /**
-   * Register service worker for offline support and caching
-   * Non-blocking registration with console logging
+   * Register service worker with user-prompted update flow.
+   * When a new SW is found waiting, shows a toast asking the user to reload.
    */
   function registerSW() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('[SW] Registered:', reg.scope))
-        .catch(err => console.warn('[SW] Registration failed:', err));
-    }
+    if (!('serviceWorker' in navigator)) return;
+
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      console.log('[SW] Registered:', reg.scope);
+
+      // If a new SW is already waiting (e.g. user revisits after deploy)
+      if (reg.waiting) { showUpdateToast(reg.waiting); return; }
+
+      // Listen for a new SW that finishes installing
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        if (!newSW) return;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            // New version ready — prompt user
+            showUpdateToast(newSW);
+          }
+        });
+      });
+    }).catch(err => console.warn('[SW] Registration failed:', err));
+
+    // When the new SW takes over, reload the page
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  }
+
+  /**
+   * Show a non-intrusive toast prompting the user to reload for updates.
+   * @param {ServiceWorker} waitingSW - the waiting service worker instance
+   */
+  function showUpdateToast(waitingSW) {
+    // Prevent duplicate toasts
+    if (document.getElementById('sw-update-toast')) return;
+
+    var toast = document.createElement('div');
+    toast.id = 'sw-update-toast';
+    toast.className = 'sw-update-toast';
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML =
+      '<span class="sw-update-msg">มีเวอร์ชันใหม่พร้อมใช้งาน</span>' +
+      '<button class="sw-update-btn" id="sw-update-accept">โหลดใหม่</button>' +
+      '<button class="sw-update-dismiss" id="sw-update-dismiss" aria-label="ปิด">&times;</button>';
+    document.body.appendChild(toast);
+
+    // Force reflow then add visible class for animation
+    toast.offsetHeight;
+    toast.classList.add('visible');
+
+    document.getElementById('sw-update-accept').addEventListener('click', function() {
+      waitingSW.postMessage({ type: 'SKIP_WAITING' });
+      toast.remove();
+    });
+    document.getElementById('sw-update-dismiss').addEventListener('click', function() {
+      toast.classList.remove('visible');
+      setTimeout(function() { toast.remove(); }, 300);
+    });
   }
 
 

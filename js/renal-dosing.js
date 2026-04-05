@@ -1076,6 +1076,9 @@
     // Track page view
     IVDrugRef.trackPageView('renal-dosing');
 
+    // Patient context: fill from session, set up auto-save
+    IVDrugRef.patientCtx.init();
+
     // Initial render
     recalc();
     renderDrugList();

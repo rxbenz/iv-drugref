@@ -1520,6 +1520,7 @@ const TDMHub = (function() {
   function init() {
     // Wrap in DOMContentLoaded to ensure DOM is ready
     function onReady() {
+      IVDrugRef.patientCtx.init();
       updateCrCl();
       VancoTDM.init();
       AminoglycosideTDM.updateUI();

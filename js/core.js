@@ -399,6 +399,258 @@ var IVDrugRef = (function() {
 
 
   // ============================================================
+  // PATIENT CONTEXT PERSISTENCE
+  // ============================================================
+  var PATIENT_CTX_KEY = 'ivdrug_patientCtx';
+  var PATIENT_FIELDS = ['wt', 'age', 'sex', 'scr', 'ht', 'alb', 'dialysis'];
+  var PATIENT_FIELD_IDS = { wt: 'ptWt', age: 'ptAge', sex: 'ptSex', scr: 'ptScr', ht: 'ptHt', alb: 'ptAlb', dialysis: 'ptDialysis' };
+  var MAX_PATIENTS = 3;
+
+  function _ctxRead() {
+    try { return JSON.parse(sessionStorage.getItem(PATIENT_CTX_KEY)) || null; }
+    catch(e) { return null; }
+  }
+  function _ctxWrite(data) {
+    try { sessionStorage.setItem(PATIENT_CTX_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+  function _ctxEnsure() {
+    var d = _ctxRead();
+    if (!d || !Array.isArray(d.patients)) d = { patients: [], activeIdx: 0 };
+    return d;
+  }
+
+  /** Collect raw patient values from current form inputs */
+  function _collectFormValues() {
+    var vals = {};
+    for (var i = 0; i < PATIENT_FIELDS.length; i++) {
+      var f = PATIENT_FIELDS[i];
+      var el = document.getElementById(PATIENT_FIELD_IDS[f]);
+      if (!el) continue;
+      if (f === 'sex' || f === 'dialysis') vals[f] = el.value;
+      else { var v = parseFloat(el.value); if (!isNaN(v)) vals[f] = v; }
+    }
+    return vals;
+  }
+
+  /** Build short label: "♂ 70kg 55y SCr 1.0" */
+  function _buildLabel(p) {
+    var parts = [];
+    if (p.sex) parts.push(p.sex === 'M' ? '\u2642' : '\u2640');
+    if (p.wt) parts.push(p.wt + 'kg');
+    if (p.age) parts.push(p.age + 'y');
+    if (p.scr) parts.push('SCr ' + p.scr);
+    if (p.ht) parts.push(p.ht + 'cm');
+    return parts.join(' ') || 'Patient';
+  }
+
+  var patientCtx = {
+    /** Save current form values to active patient slot (or create new) */
+    save: function() {
+      var vals = _collectFormValues();
+      if (!vals.wt && !vals.age && !vals.scr) return; // nothing meaningful
+      var d = _ctxEnsure();
+      vals.savedAt = Date.now();
+      vals.label = _buildLabel(vals);
+      if (d.patients.length === 0) {
+        vals.id = generateId(8);
+        d.patients.push(vals);
+        d.activeIdx = 0;
+      } else {
+        var idx = d.activeIdx;
+        vals.id = d.patients[idx].id || generateId(8);
+        d.patients[idx] = vals;
+      }
+      _ctxWrite(d);
+      patientCtx.renderBar();
+    },
+
+    /** Get active patient data or null */
+    load: function() {
+      var d = _ctxRead();
+      if (!d || !d.patients.length) return null;
+      return d.patients[d.activeIdx] || d.patients[0] || null;
+    },
+
+    /** Get all patients */
+    getAll: function() {
+      var d = _ctxRead();
+      return d ? d.patients : [];
+    },
+
+    /** Get active index */
+    getActiveIdx: function() {
+      var d = _ctxRead();
+      return d ? d.activeIdx : 0;
+    },
+
+    /** Add new patient slot (max 3) */
+    addNew: function() {
+      var d = _ctxEnsure();
+      if (d.patients.length >= MAX_PATIENTS) return;
+      d.patients.push({ id: generateId(8), label: 'Patient ' + (d.patients.length + 1), savedAt: Date.now() });
+      d.activeIdx = d.patients.length - 1;
+      _ctxWrite(d);
+      patientCtx.fillForm();
+      patientCtx.renderBar();
+    },
+
+    /** Switch active patient */
+    setActive: function(idx) {
+      var d = _ctxEnsure();
+      if (idx < 0 || idx >= d.patients.length) return;
+      // Save current form to old slot first
+      var vals = _collectFormValues();
+      if (vals.wt || vals.age || vals.scr) {
+        vals.savedAt = Date.now();
+        vals.label = _buildLabel(vals);
+        vals.id = d.patients[d.activeIdx] ? d.patients[d.activeIdx].id : generateId(8);
+        d.patients[d.activeIdx] = vals;
+      }
+      d.activeIdx = idx;
+      _ctxWrite(d);
+      patientCtx.fillForm();
+      patientCtx.renderBar();
+    },
+
+    /** Remove one patient */
+    remove: function(idx) {
+      var d = _ctxEnsure();
+      if (idx < 0 || idx >= d.patients.length) return;
+      d.patients.splice(idx, 1);
+      if (d.activeIdx >= d.patients.length) d.activeIdx = Math.max(0, d.patients.length - 1);
+      _ctxWrite(d);
+      if (d.patients.length) patientCtx.fillForm();
+      patientCtx.renderBar();
+    },
+
+    /** Clear all patients */
+    clear: function() {
+      sessionStorage.removeItem(PATIENT_CTX_KEY);
+      patientCtx.renderBar();
+    },
+
+    /** Fill form inputs from active patient context */
+    fillForm: function() {
+      var p = patientCtx.load();
+      if (!p) return false;
+      var filled = false;
+      for (var i = 0; i < PATIENT_FIELDS.length; i++) {
+        var f = PATIENT_FIELDS[i];
+        if (p[f] === undefined || p[f] === null) continue;
+        var el = document.getElementById(PATIENT_FIELD_IDS[f]);
+        if (!el) continue;
+        el.value = p[f];
+        filled = true;
+      }
+      // Dispatch events to trigger existing recalculation handlers
+      if (filled) {
+        ['ptWt', 'ptAge', 'ptScr', 'ptHt', 'ptAlb'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        ['ptSex', 'ptDialysis'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
+      return filled;
+    },
+
+    /** Render patient context bar into #patientCtxBar */
+    renderBar: function() {
+      var bar = document.getElementById('patientCtxBar');
+      if (!bar) return;
+      var d = _ctxRead();
+      var patients = d ? d.patients : [];
+      var activeIdx = d ? d.activeIdx : 0;
+
+      // Clear
+      while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+      if (!patients.length) {
+        bar.className = 'patient-ctx-bar empty';
+        return;
+      }
+
+      bar.className = 'patient-ctx-bar';
+
+      // Patient chips
+      var chips = dom('div', { className: 'ctx-chips' }, []);
+      for (var i = 0; i < patients.length; i++) {
+        var p = patients[i];
+        var chip = dom('button', {
+          className: 'ctx-chip' + (i === activeIdx ? ' active' : ''),
+          'data-action': 'ctxSwitch',
+          'data-idx': String(i),
+          textContent: p.label || ('Patient ' + (i + 1))
+        });
+        chips.appendChild(chip);
+      }
+      bar.appendChild(chips);
+
+      // Actions
+      var actions = dom('div', { className: 'ctx-actions' }, []);
+      if (patients.length < MAX_PATIENTS) {
+        actions.appendChild(dom('button', {
+          className: 'ctx-btn ctx-add',
+          'data-action': 'ctxAdd',
+          textContent: '+',
+          title: 'เพิ่มผู้ป่วย'
+        }));
+      }
+      actions.appendChild(dom('button', {
+        className: 'ctx-btn ctx-clear',
+        'data-action': 'ctxClear',
+        textContent: 'ล้าง',
+        title: 'ล้างข้อมูลผู้ป่วยทั้งหมด'
+      }));
+      bar.appendChild(actions);
+    },
+
+    /** Set up auto-save listener + fill + render bar. Call once on page init. */
+    init: function() {
+      // Fill from existing context (suppress auto-save during fill)
+      var _filling = false;
+      var filled = false;
+
+      // Debounced auto-save
+      var autoSave = debounce(function() {
+        if (!_filling) patientCtx.save();
+      }, 500);
+
+      // Attach auto-save to all patient inputs
+      PATIENT_FIELDS.forEach(function(f) {
+        var el = document.getElementById(PATIENT_FIELD_IDS[f]);
+        if (!el) return;
+        var evt = (f === 'sex' || f === 'dialysis') ? 'change' : 'input';
+        el.addEventListener(evt, autoSave);
+      });
+
+      // Fill form from context (before auto-save kicks in)
+      _filling = true;
+      filled = patientCtx.fillForm();
+      _filling = false;
+
+      // If we filled, do an initial save to refresh savedAt
+      if (filled) patientCtx.save();
+
+      // Render bar
+      patientCtx.renderBar();
+
+      // Event delegation for bar buttons
+      var bar = document.getElementById('patientCtxBar');
+      if (bar) {
+        delegate(bar, 'click', {
+          ctxSwitch: function(e, t) { patientCtx.setActive(parseInt(t.dataset.idx, 10)); },
+          ctxAdd: function() { patientCtx.addNew(); },
+          ctxClear: function() { patientCtx.clear(); }
+        });
+      }
+    }
+  };
+
+
+  // ============================================================
   // ANALYTICS
   // ============================================================
   const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
@@ -630,7 +882,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.0.0';
+  const VERSION = '5.1.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -659,6 +911,9 @@ var IVDrugRef = (function() {
     calcCKDEPI2021_nonindexed,
     getCKDStage,
     getPatientFromForm,
+
+    // Patient Context Persistence
+    patientCtx,
 
     // Analytics
     sendAnalytics,

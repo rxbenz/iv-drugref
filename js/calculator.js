@@ -499,6 +499,7 @@
   // ====== Init ======
   document.addEventListener('DOMContentLoaded', function() {
     IVDrugRef.trackPageView('calculator');
+    IVDrugRef.patientCtx.init();
     updateCrCl();
     renderDrugGrid();
   });

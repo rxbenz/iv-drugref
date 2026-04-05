@@ -776,6 +776,7 @@ function trackTDMResult(model, aucMAP, aucLo, aucHi, acceptRate, pt, pkResult, d
   window.addEventListener('resize',()=>{if(currentPK)updateOptimizer();});
 
   // Init
+  IVDrugRef.patientCtx.init();
   updateCrCl();
   renderDoses();
   renderLevels();

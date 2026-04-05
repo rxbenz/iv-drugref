@@ -4876,7 +4876,7 @@ const CURATED_PAIRS = [
 ['Labetalol','Fentanyl','c'],['Labetalol','Morphine','c'],['Labetalol','Heparin','c'],
 ['Labetalol','Sodium bicarbonate','i'],['Labetalol','Potassium','c'],
 ['Meropenem','Fentanyl','c'],['Meropenem','Morphine','c'],['Meropenem','Dexamethasone','c'],
-['Meropenem','Ondansetron','c'],['Meropenem','Potassium','c'],['Meropenem','Acyclovir','i'],['Meropenem','Diazepam','i'],
+['Meropenem','Ondansetron','v'],['Meropenem','Potassium','c'],['Meropenem','Acyclovir','i'],['Meropenem','Diazepam','i'],
 ['Magnesium','Heparin','c'],['Magnesium','Human Insulin','c'],['Magnesium','Potassium','c'],
 ['Magnesium','Midazolam','c'],['Magnesium','Amphotericin','i'],['Magnesium','Sodium bicarbonate','i'],
 ['Magnesium','Calcium','i'],
@@ -4885,8 +4885,8 @@ const CURATED_PAIRS = [
 ['Ketamine','Midazolam','c'],['Ketamine','Fentanyl','c'],['Ketamine','Morphine','c'],
 ['Ketamine','Diazepam','i'],['Ketamine','Sodium bicarbonate','i'],['Ketamine','Phenobarbital','i'],
 ['Calcium','Sodium bicarbonate','i'],['Calcium','Potassium','c'],
-['Levetiracetam','Diazepam','c'],['Levetiracetam','Valproic','c'],
-['Valproic','Meropenem','i'],
+['Levetiracetam','Diazepam','v'],['Levetiracetam','Valproic','c'],
+// Valproic+Meropenem: PK interaction, NOT Y-site — removed from compat matrix
 ['Methylprednisolone','Heparin','c'],['Methylprednisolone','Ondansetron','c'],
 ['Hydrocortisone','Heparin','c'],['Hydrocortisone','Midazolam','i'],
 ['Cisatracurium','Midazolam','c'],['Cisatracurium','Fentanyl','c'],['Cisatracurium','Morphine','c'],
@@ -4919,6 +4919,9 @@ const CURATED_PAIRS = [
 ['Dopamine','Calcium chloride','c'],['Dopamine','Milrinone','c'],['Dopamine','Diltiazem','c'],
 ['Heparin','Cefepime','c'],['Heparin','Diltiazem','c'],['Heparin','Milrinone','c'],
 ['Midazolam','Cefepime','c'],['Midazolam','Diltiazem','c'],
+// Audit additions: critical missing pairs
+['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium','i'],
+['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['Mannitol','KCl','i'],
 ];
 
 async function importCuratedPairs() {

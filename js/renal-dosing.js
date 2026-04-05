@@ -320,6 +320,9 @@
 
     // Re-render drug recommendation if open
     if (selectedDrug) showDrugRecom(selectedDrug);
+
+    // CDS: Re-render drug list to update contraindication highlighting
+    renderDrugList(document.getElementById('drugSearch').value.toLowerCase().trim());
   }
 
   // ============================

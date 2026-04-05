@@ -5757,16 +5757,20 @@ async function importCuratedRenal() {
    ANALYTICS SUMMARY
    ═══════════════════════════════════════════ */
 async function loadAnalyticsSummary() {
-  var cfg = getConfig();
-  if (!cfg.scriptUrl) {
-    showAnalyticsStatus('กรุณาตั้งค่า Script URL ก่อนใช้งาน Analytics', true);
+  // Analytics data อยู่ใน analytics spreadsheet (ไม่ใช่ admin spreadsheet)
+  // ใช้ IVDrugRef.getAnalyticsUrl() จาก core.js หรือ localStorage analyticsUrl
+  var analyticsUrl = (typeof IVDrugRef !== 'undefined' && IVDrugRef.getAnalyticsUrl)
+    ? IVDrugRef.getAnalyticsUrl()
+    : localStorage.getItem('analyticsUrl') || '';
+  if (!analyticsUrl) {
+    showAnalyticsStatus('ไม่พบ Analytics URL — ตรวจสอบ core.js', true);
     return;
   }
   showLoading('กำลังโหลดข้อมูล analytics...');
   try {
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, 15000);
-    var res = await fetch(cfg.scriptUrl + '?action=raw', { signal: controller.signal });
+    var res = await fetch(analyticsUrl + '?action=raw', { signal: controller.signal });
     clearTimeout(timeout);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     var data = await res.json();

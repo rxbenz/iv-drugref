@@ -854,32 +854,42 @@ function handleBulkCreateCompatPairs(user, data) {
 
   var sheet = getOrCreateSheet(SHEETS.COMPAT_PAIRS, COMPAT_HEADERS);
 
-  // Read existing pairs for duplicate detection
+  // Read existing pairs for upsert detection
   var existing = getSheetData(SHEETS.COMPAT_PAIRS);
   var existingKeys = {};
-  existing.forEach(function(p) {
+  existing.forEach(function(p, idx) {
     var key = [p.drugA, p.drugB].map(function(s) { return (s || '').toLowerCase().trim(); }).sort().join('|');
-    existingKeys[key] = true;
+    existingKeys[key] = { row: idx + 2, result: p.result }; // +2 for header + 0-index
   });
 
   var now = new Date().toISOString();
   var created = 0;
+  var updated = 0;
   var skipped = 0;
 
   pairs.forEach(function(p) {
     var key = [p.drugA, p.drugB].map(function(s) { return (s || '').toLowerCase().trim(); }).sort().join('|');
+    var newResult = p.result || 'c';
     if (existingKeys[key]) {
-      skipped++;
+      // Upsert: update if status changed
+      if (existingKeys[key].result !== newResult) {
+        var rowNum = existingKeys[key].row;
+        sheet.getRange(rowNum, 4).setValue(newResult); // col 4 = result
+        sheet.getRange(rowNum, 8).setValue(now);        // col 8 = updatedAt
+        updated++;
+      } else {
+        skipped++;
+      }
       return;
     }
     var id = Date.now() + created; // Ensure unique IDs
-    sheet.appendRow([id, p.drugA || '', p.drugB || '', p.result || 'c', p.ref || '', user, now, now]);
-    existingKeys[key] = true;
+    sheet.appendRow([id, p.drugA || '', p.drugB || '', newResult, p.ref || '', user, now, now]);
+    existingKeys[key] = { row: sheet.getLastRow(), result: newResult };
     created++;
   });
 
-  addAuditLog(user, 'bulkImportCompat', '', '', 'Imported ' + created + ' pairs, skipped ' + skipped + ' duplicates');
-  return jsonResponse({ success: true, created: created, skipped: skipped });
+  addAuditLog(user, 'bulkImportCompat', '', '', 'Imported ' + created + ' new, updated ' + updated + ', skipped ' + skipped + ' unchanged');
+  return jsonResponse({ success: true, created: created, updated: updated, skipped: skipped });
 }
 
 

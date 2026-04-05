@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IV Drug Quick Reference — สถาบันประสาทวิทยา | Neurological Institute of Thailand</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="description" content="คู่มือผสมยาฉีดฉบับพกพา สำหรับกลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="IV DrugRef">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="msapplication-TileColor" content="#0ea5e9">
+  <meta name="msapplication-TileImage" content="icons/icon-144x144.png">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Icons for various platforms -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-light.css">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+<a href="#drugList" class="skip-to-content">Skip to drug list</a>
+
+<!-- Header with search and filter -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo-area">
+        <div class="logo-icon">💉</div>
+        <div>
+          <div class="logo-text">IV Drug Quick Reference</div>
+          <div class="logo-sub">NEUROLOGICAL INSTITUTE OF THAILAND</div>
+        </div>
+      </div>
+      <div class="drug-count" id="drugCount">48 drugs</div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="text" class="search-input" id="searchInput"
+        placeholder="ค้นหายา... เช่น phenytoin, amiodarone, rt-PA"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+      <span class="kbd-hint" id="kbdHint">⌘K</span>
+      <button class="search-clear" id="clearBtn" data-action="clearSearch" aria-label="Clear search">✕</button>
+    </div>
+  </div>
+
+  <!-- Tools Zone -->
+  <div class="tools-zone" id="toolsZone">
+    <div class="tools-grid">
+      <a href="calculator.html" class="tool-card tool-calc">
+        <span class="tool-icon">🧮</span>
+        <span class="tool-label">Dose Calc</span>
+      </a>
+      <a href="tdm.html" class="tool-card tool-tdm">
+        <span class="tool-icon">🎯</span>
+        <span class="tool-label">TDM Hub</span>
+      </a>
+      <a href="renal-dosing.html" class="tool-card tool-renal">
+        <span class="tool-icon">🧬</span>
+        <span class="tool-label">Renal Dose</span>
+      </a>
+      <a href="compatibility.html" class="tool-card tool-compat">
+        <span class="tool-icon">🔗</span>
+        <span class="tool-label">Compat</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter Chip -->
+  <div class="filter-chip-wrap" id="filterChipWrap">
+    <button class="filter-chip" id="filterChip" data-action="openFilterSheet">
+      <span class="chip-icon">🏷️</span>
+      <span id="filterChipText">ทั้งหมด</span>
+      <span class="chip-chevron" aria-hidden="true">▼</span>
+    </button>
+  </div>
+
+  <!-- Filter Zone (hidden by default, shown via JS) -->
+  <div class="filter-zone" id="filterZone">
+    <div class="filter-header">
+      <div class="filter-label">🏷️ หมวดยา <span class="filter-active-tag" id="filterActiveTag">ทั้งหมด</span></div>
+      <button class="filter-toggle" id="filterToggle" data-action="toggleFilters">
+        <span>กรอง</span><span class="chevron">▼</span>
+      </button>
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
+      <button class="filter-btn" data-filter="had">⚠ High Alert</button>
+      <button class="filter-btn" data-filter="antiepileptic">Antiepileptic</button>
+      <button class="filter-btn" data-filter="stroke">Stroke</button>
+      <button class="filter-btn" data-filter="antimicrobial">Antimicrobial</button>
+      <button class="filter-btn" data-filter="icu">ICU/Critical</button>
+      <button class="filter-btn" data-filter="immunotherapy">Immunotherapy</button>
+      <button class="filter-btn" data-filter="cardiovascular">Cardiovascular</button>
+      <button class="filter-btn" data-filter="analgesic">Analgesic/Sedation</button>
+      <button class="filter-btn" data-filter="oncology">Oncology</button>
+      <button class="filter-btn" data-filter="antidote">Antidote</button>
+      <button class="filter-btn" data-filter="emergency">Emergency</button>
+      <button class="filter-btn" data-filter="obstetrics">Obstetrics</button>
+      <button class="filter-btn" data-filter="neurology">Neurology</button>
+      <button class="filter-btn" data-filter="biologics">Biologics</button>
+      <button class="filter-btn" data-filter="cardiology">Cardiology</button>
+    </div>
+  </div>
+</header>
+
+<!-- Filter Sheet Backdrop (modal) -->
+<div class="filter-sheet-backdrop" id="filterSheetBackdrop" data-action="closeFilterSheet"></div>
+
+<!-- Filter Sheet (bottom modal) -->
+<div class="filter-sheet" id="filterSheet">
+  <div class="filter-sheet-handle"></div>
+  <div class="filter-sheet-header">
+    <div class="filter-sheet-title">🏷️ หมวดยา</div>
+    <button class="filter-sheet-close" data-action="closeFilterSheet">✕</button>
+  </div>
+  <div class="filter-sheet-grid" id="filterSheetGrid">
+    <button class="filter-sheet-btn active" data-filter="all">ทั้งหมด</button>
+    <button class="filter-sheet-btn" data-filter="had">⚠ High Alert</button>
+    <button class="filter-sheet-btn" data-filter="antiepileptic">Antiepileptic</button>
+    <button class="filter-sheet-btn" data-filter="stroke">Stroke</button>
+    <button class="filter-sheet-btn" data-filter="antimicrobial">Antimicrobial</button>
+    <button class="filter-sheet-btn" data-filter="icu">ICU/Critical</button>
+    <button class="filter-sheet-btn" data-filter="immunotherapy">Immunotherapy</button>
+    <button class="filter-sheet-btn" data-filter="cardiovascular">Cardiovascular</button>
+    <button class="filter-sheet-btn" data-filter="analgesic">Analgesic/Sedation</button>
+    <button class="filter-sheet-btn" data-filter="oncology">Oncology</button>
+    <button class="filter-sheet-btn" data-filter="antidote">Antidote</button>
+    <button class="filter-sheet-btn" data-filter="emergency">Emergency</button>
+    <button class="filter-sheet-btn" data-filter="obstetrics">Obstetrics</button>
+    <button class="filter-sheet-btn" data-filter="neurology">Neurology</button>
+    <button class="filter-sheet-btn" data-filter="biologics">Biologics</button>
+    <button class="filter-sheet-btn" data-filter="cardiology">Cardiology</button>
+  </div>
+</div>
+
+<!-- Main Content Area -->
+<main class="content" id="content">
+  <div class="results-info" id="resultsInfo"></div>
+  <div id="drugList"></div>
+
+  <!-- Footer -->
+  <footer style="margin-top:32px;border-top:1px solid var(--border)">
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin:16px 0;text-align:left">
+      <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:6px;display:flex;align-items:center;gap:5px">⚠️ ข้อจำกัดความรับผิดชอบ (Disclaimer)</div>
+      <div style="font-size:11px;color:#7f1d1d;line-height:1.6">
+        ข้อมูลในแอปพลิเคชันนี้จัดทำขึ้นเพื่อเป็น<strong>เครื่องมือสนับสนุนการตัดสินใจทางคลินิก</strong>เท่านั้น ไม่ได้มีวัตถุประสงค์เพื่อทดแทนดุลยพินิจทางวิชาชีพของเภสัชกรหรือบุคลากรทางการแพทย์ ผู้ใช้ควรตรวจสอบข้อมูลกับแหล่งอ้างอิงปฐมภูมิ (เช่น Package Insert, Lexicomp, Trissel's) และพิจารณาข้อมูลเฉพาะของผู้ป่วยแต่ละรายก่อนนำไปใช้ในทางคลินิกเสมอ ผู้จัดทำไม่รับผิดชอบต่อความเสียหายใดๆ ที่อาจเกิดจากการใช้ข้อมูลนี้โดยไม่ได้ตรวจสอบกับแหล่งข้อมูลที่เป็นปัจจุบัน
+      </div>
+    </div>
+    <div style="padding:16px 0;text-align:center">
+      <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px">💉 IV Drug Quick Reference PWA</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text-secondary)">จัดทำโดย ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม</div>
+      <div style="font-size:11px;color:var(--text-muted)">สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px">
+        แหล่งอ้างอิง: Lexicomp, Trissel's Handbook on Injectable Drugs (21st Ed.),<br>
+        AHFS Drug Information, ISMP, AHA/ACLS, Package Inserts, Clinical Practice Guidelines
+      </div>
+      <div id="versionInfo" style="font-size:11px;color:var(--text-muted);margin-top:2px">เวอร์ชัน 5.0.0 — มีนาคม 2569 (2026) | ข้อมูลยา <span id="footerDrugCount">167</span> รายการ</div>
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px 16px;margin:0 0 16px;text-align:center">
+      <div style="font-size:11px;font-weight:700;color:#1e40af;margin-bottom:6px">📜 สัญญาอนุญาต (License)</div>
+      <div style="font-size:11px;color:#1e3a5f;line-height:1.6">
+        ผลงานนี้เผยแพร่ภายใต้สัญญาอนุญาต <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</strong><br>
+        ✅ ใช้งาน แชร์ ดัดแปลงได้ — ต้องให้เครดิตผู้สร้าง | ❌ ห้ามใช้เชิงพาณิชย์ | 🔄 ถ้าดัดแปลง ต้องแชร์ภายใต้สัญญาเดียวกัน
+      </div>
+      <div style="margin-top:8px">
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.th" target="_blank" rel="noopener" style="font-size:10px;color:#3b82f6;text-decoration:none;background:#fff;border:1px solid #bfdbfe;padding:4px 12px;border-radius:6px;display:inline-block">
+          🔗 ดูรายละเอียดสัญญาอนุญาต CC BY-NC-SA 4.0
+        </a>
+      </div>
+    </div>
+    <div style="text-align:center;padding-bottom:16px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+      <button data-action="showAbout" style="font-family:inherit;font-size:11px;color:var(--text-muted);background:0 0;border:1px solid var(--border);padding:6px 16px;border-radius:20px;cursor:pointer">
+        ℹ️ เกี่ยวกับแอปนี้
+      </button>
+      <button data-action="showContact" style="font-family:inherit;font-size:11px;color:#0ea5e9;background:0 0;border:1px solid #bfdbfe;padding:6px 16px;border-radius:20px;cursor:pointer">
+        💬 แจ้งปัญหา / ข้อเสนอแนะ
+      </button>
+    </div>
+  </footer>
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" class="nav-home nav-active">
+      <span class="nav-icon">💉</span>
+      <span class="nav-label">Drug Ref</span>
+    </a>
+    <a href="calculator.html" class="nav-calc">
+      <span class="nav-icon">🧮</span>
+      <span class="nav-label">Dose Calc</span>
+    </a>
+    <a href="tdm.html" class="nav-tdm">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">TDM Hub</span>
+    </a>
+    <a href="renal-dosing.html" class="nav-renal">
+      <span class="nav-icon">🧬</span>
+      <span class="nav-label">Renal Dose</span>
+    </a>
+    <a href="compatibility.html" class="nav-compat">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Compat</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Scripts -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/index.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

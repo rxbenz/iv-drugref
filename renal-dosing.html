@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renal Dosing — IV DrugRef</title>
+  <meta name="description" content="Renal Dosing Guide — Drug adjustments by CrCl and CKD stage">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-light.css">
+  <link rel="stylesheet" href="css/renal-dosing.css">
+</head>
+<body>
+<a href="#renal-results" class="skip-to-content">Skip to results</a>
+
+<div class="header">
+  <a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
+  <h1>🧬 Renal Dosing</h1>
+  <a href="calculator.html" class="cross-link calc-link">🧮 Dose Calc</a>
+</div>
+
+<div class="container">
+
+<!-- Patient Info -->
+<div class="section">
+  <div class="section-header">👤 ข้อมูลผู้ป่วย</div>
+  <div class="field-grid">
+    <div class="field-row-3">
+      <div class="field">
+        <label for="ptAge">อายุ (ปี)</label>
+        <input type="number" id="ptAge" value="65" min="1" max="120" data-action="recalc">
+      </div>
+      <div class="field">
+        <label for="ptWt">น้ำหนัก (kg)</label>
+        <input type="number" id="ptWt" value="70" min="3" max="400" step="0.1" data-action="recalc">
+      </div>
+      <div class="field">
+        <label for="ptSex">เพศ</label>
+        <select id="ptSex" data-action="recalc">
+          <option value="M">ชาย</option>
+          <option value="F">หญิง</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="ptScr">SCr (mg/dL)</label>
+        <input type="number" id="ptScr" value="1.0" min="0.1" max="30" step="0.01" data-action="recalc">
+      </div>
+      <div class="field">
+        <label for="ptHt">ส่วนสูง (cm)</label>
+        <input type="number" id="ptHt" value="165" min="40" max="250" data-action="recalc">
+      </div>
+    </div>
+
+    <div id="validationMessages" class="validation-container" style="display:none;"></div>
+
+    <!-- Body Composition Analysis -->
+    <div id="bodyCompBox" style="display:none;"></div>
+
+    <!-- Pediatric Schwartz Box -->
+    <div id="pediatricBox" style="display:none;"></div>
+
+    <!-- Formula Selection (hidden for pediatric) -->
+    <div id="formulaSection">
+      <label style="font-size:11px;color:var(--text-secondary);font-weight:500;margin-bottom:6px;display:block;">สูตรคำนวณ (เลือกที่จะใช้กับ dosing)</label>
+      <div class="formula-toggle">
+        <button class="formula-btn active" data-action="setFormula" data-value="cg">Cockcroft-Gault</button>
+        <button class="formula-btn" data-action="setFormula" data-value="ckd">CKD-EPI 2021</button>
+      </div>
+    </div>
+
+    <!-- Dual CrCl/eGFR Display -->
+    <div id="adultResultsSection">
+      <div class="renal-results">
+        <div class="renal-result-box cg active" data-action="setFormula" data-value="cg" id="boxCG">
+          <div class="renal-result-label">CrCl (Cockcroft-Gault)</div>
+          <div class="renal-result-value" id="valCG">—</div>
+          <div class="renal-result-unit">mL/min</div>
+          <div id="stageCG"></div>
+        </div>
+        <div class="renal-result-box ckd" data-action="setFormula" data-value="ckd" id="boxCKD">
+          <div class="renal-result-label">eGFR (CKD-EPI 2021)</div>
+          <div class="renal-result-value" id="valCKD">—</div>
+          <div class="renal-result-unit">mL/min/1.73m²</div>
+          <div id="stageCKD"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="renalWarning"></div>
+  </div>
+</div>
+
+<!-- Drug Selection -->
+<div class="section">
+  <div class="section-header">💊 เลือกยาเพื่อดู Renal Dosing</div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="drugSearch" placeholder="ค้นหาชื่อยา..." data-action="filterDrugs">
+  </div>
+  <div class="filter-tabs" id="filterTabs">
+    <div class="filter-tab active" data-action="filterByClass" data-value="all">ทั้งหมด</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="abx">💉 Antibiotics</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="af">🍄 Antifungals</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="av">🦠 Antivirals</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="ac">🩸 Anticoagulants</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="chemo">⚗️ Chemo</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="cv">❤️ Cardiovascular</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="analgesic">💊 Analgesics</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="neuro">🧠 Neuro</div>
+    <div class="filter-tab" data-action="filterByClass" data-value="misc">📦 Others</div>
+  </div>
+  <div class="drug-list" id="drugList"></div>
+</div>
+
+<!-- Recommendation Output -->
+<div class="section recom-section" id="recomSection">
+  <div class="recom-header-bar">
+    <span class="recom-drug-name" id="recomDrugName"></span>
+    <span class="recom-close" data-action="closeDrugRecom">&times;</span>
+  </div>
+  <div id="recomBody"></div>
+</div>
+
+<div class="disclaimer">
+  ⚠ เครื่องมือช่วยปรับขนาดยาเบื้องต้นเท่านั้น — ต้องใช้ clinical judgment ประกอบเสมอ<br>
+  อ้างอิงจาก Lexicomp, Sanford Guide, KDIGO, Package Inserts
+</div>
+<div class="app-footer">IV DrugRef v5.0.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" class="nav-home">
+      <span class="nav-icon">💊</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="calculator.html" class="nav-calc">
+      <span class="nav-icon">🧮</span>
+      <span class="nav-label">Calc</span>
+    </a>
+    <a href="tdm.html" class="nav-tdm">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">TDM</span>
+    </a>
+    <a href="renal-dosing.html" class="nav-renal nav-active">
+      <span class="nav-icon">🧬</span>
+      <span class="nav-label">Renal</span>
+    </a>
+    <a href="compatibility.html" class="nav-compat">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Compat</span>
+    </a>
+  </div>
+</nav>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/renal-dosing.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

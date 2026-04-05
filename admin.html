@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com https://api.github.com; img-src 'self' data: https:; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IV DrugRef Admin — จัดการข้อมูลยา</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="description" content="ระบบจัดการข้อมูลยาฉีดสำหรับสถาบันประสาทวิทยา">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="IV DrugRef Admin">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="msapplication-TileColor" content="#0ea5e9">
+  <meta name="msapplication-TileImage" content="icons/icon-144x144.png">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="shared.css">
+  <link rel="stylesheet" href="theme-light.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+<!-- ═══════ AUTH SCREEN ═══════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <span class="auth-logo">💊</span>
+    <h1>IV DrugRef Admin</h1>
+    <p>ระบบจัดการข้อมูลยาฉีด — เฉพาะเภสัชกรที่ได้รับอนุญาต</p>
+    <div id="google-signin-button" style="margin-bottom:16px"></div>
+    <p class="auth-error" id="auth-error"></p>
+  </div>
+</div>
+
+<!-- ═══════ APP ═══════ -->
+<div id="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-brand">💊 IV DrugRef <span>Admin</span></div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-user">
+      <img id="topbar-user-avatar" src="" alt="">
+      <span id="topbar-user-name"></span>
+    </div>
+    <button class="topbar-signout" data-action="signOut">Sign Out</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="drugs" data-action="switchTab">📋 รายการยา</button>
+    <button class="tab-btn" data-tab="pending" data-action="switchTab">⏳ รออนุมัติ<span class="tab-badge" id="pending-count" style="display:none">0</span></button>
+    <button class="tab-btn" data-tab="import" data-action="switchTab">📥 Import ยา</button>
+    <button class="tab-btn" data-tab="audit" data-action="switchTab">📝 Audit Log</button>
+    <button class="tab-btn" data-tab="users" data-action="switchTab">👥 จัดการผู้ใช้</button>
+    <button class="tab-btn" data-tab="quality" data-action="switchTab">📊 Data Quality</button>
+    <button class="tab-btn" data-tab="compat" data-action="switchTab">🔗 Compatibility</button>
+    <button class="tab-btn" data-tab="renal" data-action="switchTab">💊 Renal Dosing</button>
+    <button class="tab-btn" data-tab="analytics" data-action="switchTab">📈 Analytics</button>
+    <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
+  </div>
+
+  <div class="main">
+    <!-- ═══════ PANEL: DRUG LIST ═══════ -->
+    <div class="panel active" id="drugs-panel">
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">รวมทั้งหมด</div>
+          <div class="stat-value primary" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">อนุมัติแล้ว</div>
+          <div class="stat-value success" id="stat-approved">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">รออนุมัติ</div>
+          <div class="stat-value warning" id="stat-pending">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Draft</div>
+          <div class="stat-value primary" id="stat-draft">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">HAD</div>
+          <div class="stat-value danger" id="stat-had">0</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input type="text" class="search-box" id="search-drugs" placeholder="ค้นหาชื่อยา..." data-action="filterDrugs">
+        <select class="filter-select" id="filter-status" data-action="filterDrugs">
+          <option value="">ทุกสถานะ</option>
+          <option value="approved">✅ Approved</option>
+          <option value="pending">⏳ Pending</option>
+          <option value="draft">📝 Draft</option>
+        </select>
+        <select class="filter-select" id="filter-category" data-action="filterDrugs">
+          <option value="">ทุกหมวดหมู่</option>
+        </select>
+        <button class="btn btn-primary" data-action="openDrugModal">＋ เพิ่มยาใหม่</button>
+        <button class="btn btn-success" data-action="exportData">📥 ส่งออก CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="drug-table">
+          <thead>
+            <tr>
+              <th>ชื่อยา</th>
+              <th>สถานะ</th>
+              <th>Strength</th>
+              <th>Route</th>
+              <th>Flags</th>
+              <th>หมวดหมู่</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="drug-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- ═══════ PANEL: PENDING APPROVAL ═══════ -->
+    <div class="panel" id="pending-panel">
+      <h2 style="margin-bottom:16px">⏳ ยาที่รออนุมัติ</h2>
+      <div id="pending-list"></div>
+    </div>
+
+    <!-- ═══════ PANEL: IMPORT ═══════ -->
+    <div class="panel" id="import-panel">
+      <h2 style="margin-bottom:8px">📥 Bulk Import ยา</h2>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px">
+        Upload ไฟล์ CSV — ยาที่ import จะถูกตั้งเป็น draft เสมอ
+      </p>
+      <div class="import-zone" id="import-zone" data-action="triggerFileInput">
+        <div class="import-zone-icon">📁</div>
+        <div class="import-zone-text">คลิกหรือลากไฟล์มาวาง</div>
+        <div class="import-zone-sub">รองรับ .csv — สูงสุด 500 รายการ</div>
+      </div>
+      <input type="file" id="import-file-input" accept=".csv" style="display:none" data-action="handleImportFile">
+      <div id="import-preview" class="import-preview"></div>
+      <div style="margin-top:16px;display:flex;gap:12px">
+        <button class="btn btn-success" id="btn-import-confirm" style="display:none" data-action="confirmImport">✅ ยืนยัน Import</button>
+      </div>
+    </div>
+
+    <!-- ═══════ PANEL: AUDIT LOG ═══════ -->
+    <div class="panel" id="audit-panel">
+      <h2 style="margin-bottom:16px">📝 Audit Log</h2>
+      <div class="toolbar" style="margin-bottom:16px">
+        <select class="filter-select" id="audit-filter-action" data-action="renderAuditLog">
+          <option value="">ทุก Action</option>
+          <option value="create">🆕 สร้างใหม่</option>
+          <option value="edit">✏️ แก้ไข</option>
+          <option value="delete">🗑 ลบ</option>
+          <option value="approve">✅ อนุมัติ</option>
+          <option value="reject">↩️ ส่งกลับ</option>
+          <option value="import">📥 Import</option>
+        </select>
+        <input type="date" class="form-input" id="audit-date-from" data-action="renderAuditLog" style="width:auto">
+        <input type="date" class="form-input" id="audit-date-to" data-action="renderAuditLog" style="width:auto">
+      </div>
+      <div id="audit-log-container"></div>
+      <div class="pagination" id="audit-pagination"></div>
+    </div>
+
+    <!-- ═══════ PANEL: USERS ═══════ -->
+    <div class="panel" id="users-panel">
+      <h2 style="margin-bottom:16px">👥 จัดการผู้ใช้</h2>
+      <!-- Add User Form -->
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap">
+        <div class="form-group" style="margin:0;flex:1;min-width:200px">
+          <label class="form-label" style="font-size:12px">Email *</label>
+          <input type="email" class="form-input" id="new-user-email" placeholder="user@hospital.go.th">
+        </div>
+        <div class="form-group" style="margin:0;flex:1;min-width:150px">
+          <label class="form-label" style="font-size:12px">ชื่อ</label>
+          <input type="text" class="form-input" id="new-user-name" placeholder="ชื่อ-สกุล">
+        </div>
+        <div class="form-group" style="margin:0;min-width:120px">
+          <label class="form-label" style="font-size:12px">Role</label>
+          <select class="form-select" id="new-user-role">
+            <option value="editor">📝 Editor</option>
+            <option value="admin">🔑 Admin</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" data-action="addUser">＋ เพิ่มผู้ใช้</button>
+      </div>
+      <!-- Users Table -->
+      <div class="table-wrap">
+        <table class="drug-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>ชื่อ</th>
+              <th>Role</th>
+              <th>เพิ่มโดย</th>
+              <th>วันที่เพิ่ม</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════ PANEL: SETTINGS ═══════ -->
+    <div class="panel" id="settings-panel">
+      <h2 style="margin-bottom:16px">⚙️ ตั้งค่า</h2>
+      <div style="max-width:600px">
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">Google Apps Script URL</label>
+          <input type="url" class="form-input" id="settings-script-url"
+            placeholder="https://script.google.com/macros/s/xxx/exec">
+          <span style="font-size:11px;color:var(--text-muted)">URL ของ Google Apps Script ที่ deploy แล้ว</span>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">Google Client ID (สำหรับ Sign-in)</label>
+          <input type="text" class="form-input" id="settings-client-id"
+            placeholder="xxxx.apps.googleusercontent.com">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">Allowed Emails (คั่นด้วย ,)</label>
+          <textarea class="form-textarea" id="settings-allowed-emails"
+            placeholder="pharmacist1@hospital.go.th, pharmacist2@hospital.go.th"></textarea>
+          <span style="font-size:11px;color:var(--text-muted)">เฉพาะ email ที่อนุญาตให้เข้า admin</span>
+        </div>
+        <button class="btn btn-primary" data-action="saveSettings">💾 บันทึกการตั้งค่า</button>
+        <button class="btn btn-outline" data-action="testConnection" style="margin-left:8px">🔌 ทดสอบการเชื่อมต่อ</button>
+        <pre id="test-result" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px;font-family:var(--mono);white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
+
+        <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
+        <h3 style="margin-bottom:12px">📦 Sync drugs-data.json</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+          อัพเดทไฟล์ drugs-data.json (local fallback) ให้ตรงกับข้อมูลใน Google Sheets<br>
+          ถ้าไม่ sync — user ที่ offline หรือเข้าครั้งแรกจะเห็นข้อมูลเก่า
+        </p>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">GitHub Personal Access Token</label>
+          <input type="password" class="form-input" id="settings-gh-token"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          <span style="font-size:11px;color:var(--text-muted)">ต้องมี scope: <code>contents:write</code> หรือ <code>repo</code> — <a href="https://github.com/settings/tokens/new?scopes=repo&description=IV+DrugRef+Admin+Sync" target="_blank" rel="noopener" style="color:var(--primary)">สร้าง token</a></span>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">GitHub Repo (owner/repo)</label>
+          <input type="text" class="form-input" id="settings-gh-repo"
+            placeholder="rxbenz/iv-drugref" value="rxbenz/iv-drugref">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline" data-action="exportDrugsJSON">📥 Export JSON</button>
+          <button class="btn btn-primary" data-action="syncToGitHub">🔄 Sync to GitHub</button>
+        </div>
+        <div id="sync-result" style="display:none;margin-top:12px;padding:10px;border-radius:var(--radius);font-size:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DATA QUALITY PANEL ═══════ -->
+    <div class="panel" id="quality-panel">
+      <h2 style="margin-bottom:4px">📊 Data Validation & Quality Dashboard</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        มาตรฐาน สภ.รพ. มาตรฐานที่ ๔: การควบคุมยา — ตรวจสอบความครบถ้วนของข้อมูลยาฉีด
+      </p>
+      <div class="stats-row" id="quality-stats"></div>
+      <div id="quality-issues" style="margin-top:16px"></div>
+      <div id="quality-had-flags" style="margin-top:16px"></div>
+      <div id="quality-duplicates" style="margin-top:16px"></div>
+    </div>
+
+<!-- ═══════ PANEL: COMPATIBILITY ═══════ -->
+    <div class="panel" id="compat-panel">
+      <h2 style="margin-bottom:4px">🔗 Compatibility Database</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        จัดการข้อมูลคู่ยา Y-site compatibility — ปัจจุบัน <span id="compat-total-count">0</span> คู่
+      </p>
+
+      <div class="stats-row" id="compat-stats"></div>
+
+      <div class="toolbar" style="margin-top:16px">
+        <input type="text" class="search-box" id="search-compat" placeholder="ค้นหาชื่อยา..." data-action="filterCompat">
+        <select class="filter-select" id="filter-compat-result" data-action="filterCompat">
+          <option value="">ทุกผลลัพธ์</option>
+          <option value="c">✅ Compatible</option>
+          <option value="i">❌ Incompatible</option>
+          <option value="v">⚠️ Variable</option>
+        </select>
+        <button class="btn btn-primary" data-action="openCompatModal">＋ เพิ่มคู่ยา</button>
+        <button class="btn btn-outline" data-action="importCuratedPairs" id="btn-import-curated" title="นำเข้าข้อมูลคู่ยาจาก CURATED database ที่ hardcode ไว้">📦 Import CURATED</button>
+        <button class="btn btn-success" data-action="exportCompatCSV">📥 Export CSV</button>
+      </div>
+
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Drug A</th>
+              <th>Drug B</th>
+              <th>ผลลัพธ์</th>
+              <th>Reference</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="compat-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="compat-pagination"></div>
+    </div>
+
+<!-- ═══════ COMPAT MODAL ═══════ -->
+<div class="modal-overlay" id="compat-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h2 id="compat-modal-title">เพิ่มคู่ยา Compatibility</h2>
+      <button class="modal-close" data-action="closeCompatModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="compat-form">
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Drug A *</label>
+          <input type="text" class="form-input" id="cf-drugA" required placeholder="เช่น Norepinephrine">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Drug B *</label>
+          <input type="text" class="form-input" id="cf-drugB" required placeholder="เช่น Dobutamine">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">ผลลัพธ์ *</label>
+          <select class="form-select" id="cf-result" required>
+            <option value="c">✅ Compatible (c)</option>
+            <option value="i">❌ Incompatible (i)</option>
+            <option value="v">⚠️ Variable (v)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Reference</label>
+          <input type="text" class="form-input" id="cf-ref" placeholder="เช่น Trissel's 2024, Lexicomp">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeCompatModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveCompatPair">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PANEL: RENAL DOSING ═══════ -->
+    <div class="panel" id="renal-panel">
+      <h2 style="margin-bottom:4px">💊 Renal Dosing Database</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        จัดการข้อมูล renal dose adjustment — <span id="renal-total-count">0</span> รายการ
+      </p>
+      <div class="stats-row" id="renal-stats"></div>
+      <div class="toolbar" style="margin-top:16px">
+        <input type="text" class="search-box" id="search-renal" placeholder="ค้นหาชื่อยา..." data-action="filterRenal">
+        <select class="filter-select" id="filter-renal-class" data-action="filterRenal">
+          <option value="">ทุก Class</option>
+          <option value="abx">💊 Antibiotics</option>
+          <option value="af">🍄 Antifungals</option>
+          <option value="av">🦠 Antivirals</option>
+          <option value="ac">🩸 Anticoagulants</option>
+          <option value="cv">❤️ Cardiovascular</option>
+          <option value="analgesic">💉 Analgesics</option>
+          <option value="neuro">🧠 Neurology</option>
+          <option value="chemo">⚗️ Chemo</option>
+          <option value="misc">📋 Misc</option>
+        </select>
+        <button class="btn btn-primary" data-action="openRenalModal">＋ เพิ่มยา</button>
+        <button class="btn btn-outline" data-action="importCuratedRenal" id="btn-import-renal">📦 Import CURATED</button>
+        <button class="btn btn-success" data-action="exportRenalCSV">📥 Export CSV</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead><tr><th>#</th><th>Drug Name</th><th>Class</th><th>Subclass</th><th>GFR Ranges</th><th>Info Type</th><th>จัดการ</th></tr></thead>
+          <tbody id="renal-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="renal-pagination"></div>
+    </div>
+
+<!-- ═══════ PANEL: ANALYTICS SUMMARY ═══════ -->
+    <div class="panel" id="analytics-panel">
+      <h2 style="margin-bottom:4px">📈 Analytics Summary</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        สรุปข้อมูลการใช้งาน — ช่วยจัดลำดับความสำคัญว่ายาไหนควรเพิ่ม/แก้ไขก่อน
+      </p>
+
+      <div id="analytics-status" style="display:none;padding:12px;border-radius:var(--radius);margin-bottom:16px;font-size:13px"></div>
+
+      <div class="stats-row" id="analytics-stats">
+        <div class="stat-card">
+          <div class="stat-label">DAU (30d avg)</div>
+          <div class="stat-value primary" id="ana-dau">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Searches (7d)</div>
+          <div class="stat-value primary" id="ana-searches">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Errors (7d)</div>
+          <div class="stat-value danger" id="ana-errors">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Error Rate</div>
+          <div class="stat-value warning" id="ana-error-rate">—</div>
+        </div>
+      </div>
+
+      <!-- Missing Drugs -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔍 ยาที่ถูกค้นหาแต่ไม่มีในฐานข้อมูล</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          คำค้นที่ user พิมพ์แล้วไม่พบยา — ควรพิจารณาเพิ่มเข้าระบบ
+        </p>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>คำค้นหา</th><th>จำนวนครั้ง</th><th>ความถี่</th></tr></thead>
+            <tbody id="ana-missing-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top Searched Drugs -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔥 Top Searched Drugs (7 วัน)</h3>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>ชื่อยา</th><th>จำนวนครั้ง</th><th>ความถี่</th></tr></thead>
+            <tbody id="ana-top-drugs-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- All Search Queries -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔎 คำค้นหาทั้งหมด (7 วัน)</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          คำค้นสุดท้ายที่ user พิมพ์ในแต่ละ session — ดูว่า user กำลังหายาอะไร
+        </p>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>คำค้นหา</th><th>จำนวน sessions</th><th>พบยาใน DB?</th></tr></thead>
+            <tbody id="ana-all-queries-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Errors -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">⚠️ Errors ล่าสุด</h3>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>เวลา</th><th>Severity</th><th>Message</th><th>Page</th></tr></thead>
+            <tbody id="ana-errors-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+<!-- ═══════ RENAL MODAL ═══════ -->
+<div class="modal-overlay" id="renal-modal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <h2 id="renal-modal-title">เพิ่มยา Renal Dosing</h2>
+      <button class="modal-close" data-action="closeRenalModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Form/Preview Toggle -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button type="button" id="btn-renal-form" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--primary);color:white;border-radius:8px 8px 0 0" data-action="toggleRenalPreview" data-preview="false">📝 แบบฟอร์ม</button>
+        <button type="button" id="btn-renal-preview" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-muted);border-radius:8px 8px 0 0" data-action="toggleRenalPreview" data-preview="true">👁 Preview</button>
+      </div>
+
+      <!-- Form View -->
+      <div id="renal-form-view">
+        <form id="renal-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Drug ID *</label>
+              <input type="text" class="form-input" id="rf-id" required placeholder="เช่น vancomycin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Drug Name *</label>
+              <input type="text" class="form-input" id="rf-name" required placeholder="เช่น Vancomycin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Class *</label>
+              <select class="form-select" id="rf-class" required>
+                <option value="abx">💊 Antibiotics</option>
+                <option value="af">🍄 Antifungals</option>
+                <option value="av">🦠 Antivirals</option>
+                <option value="ac">🩸 Anticoagulants</option>
+                <option value="cv">❤️ Cardiovascular</option>
+                <option value="analgesic">💉 Analgesics</option>
+                <option value="neuro">🧠 Neurology</option>
+                <option value="chemo">⚗️ Chemo</option>
+                <option value="misc">📋 Misc</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subclass</label>
+              <input type="text" class="form-input" id="rf-sub" placeholder="เช่น Glycopeptide">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:12px 0">
+            <label class="form-label">Badges</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="renal"> Renal Adjust</label>
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="hd"> HD Adjust</label>
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="nephrotox"> Nephrotoxic</label>
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="avoid"> Avoid/Caution</label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Recommended Dose</label>
+            <input type="text" class="form-input" id="rf-recommended" placeholder="เช่น 15-20 mg/kg/dose q8-12h">
+          </div>
+
+          <!-- Dynamic Dosing Table -->
+          <div class="form-section" style="margin:16px 0 8px">Dosing Table (GFR Ranges)</div>
+          <div style="display:grid;grid-template-columns:120px 1fr 100px 1fr 36px;gap:4px;margin-bottom:4px;font-size:11px;font-weight:600;color:var(--text-muted)">
+            <span>GFR Range</span><span>Dose</span><span>Frequency</span><span>Note</span><span></span>
+          </div>
+          <div id="rf-dosing-rows"></div>
+          <button type="button" class="btn btn-outline btn-sm" data-action="addRenalDosingRow" style="margin-top:8px">＋ เพิ่ม GFR Range</button>
+
+          <div class="form-group" style="margin-top:16px">
+            <label class="form-label">Clinical Info (HTML)</label>
+            <textarea class="form-textarea" id="rf-info" rows="4" placeholder="<strong>TDM:</strong> AUC/MIC 400-600..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Info Type</label>
+            <select class="form-select" id="rf-infoType">
+              <option value="blue">🔵 Blue (Info)</option>
+              <option value="amber">🟡 Amber (Warning)</option>
+              <option value="red">🔴 Red (Danger)</option>
+              <option value="teal">🟢 Teal (Tip)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reference</label>
+            <input type="text" class="form-input" id="rf-ref" placeholder="เช่น Rybak MJ, et al. 2020 | Lexicomp">
+          </div>
+        </form>
+      </div>
+
+      <!-- Preview View -->
+      <div id="renal-preview-view" style="display:none">
+        <div id="renal-preview-card"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeRenalModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveRenalDrug">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DRUG MODAL ═══════ -->
+<div class="modal-overlay" id="drug-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">เพิ่มยาใหม่</h2>
+      <button class="modal-close" data-action="closeDrugModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Form/Preview Toggle Tabs -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button type="button" id="btn-tab-form" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--primary);color:white;border-radius:8px 8px 0 0" data-action="togglePreview" data-preview="false">📝 แบบฟอร์ม</button>
+        <button type="button" id="btn-tab-preview" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-muted);border-radius:8px 8px 0 0" data-action="togglePreview" data-preview="true">👁 Preview</button>
+      </div>
+
+      <!-- Form View -->
+      <div id="form-view">
+      <form id="drug-form">
+        <div class="form-grid">
+          <input type="hidden" id="drug-id">
+
+          <!-- Basic Info -->
+          <div class="form-section">ข้อมูลพื้นฐาน</div>
+          <div class="form-group">
+            <label class="form-label">Generic Name *</label>
+            <input type="text" class="form-input" id="f-generic" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trade Name</label>
+            <input type="text" class="form-input" id="f-trade">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Strength</label>
+            <input type="text" class="form-input" id="f-strength" placeholder="เช่น 10 mg/mL">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ED/NED</label>
+            <select class="form-select" id="f-ed">
+              <option value="E">E — Essential Drug</option>
+              <option value="N">N — Non-Essential</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categories (คั่นด้วย ,)</label>
+            <input type="text" class="form-input" id="f-categories" placeholder="เช่น antibiotic, cardiovascular">
+          </div>
+          <div class="form-group">
+            <label class="form-label form-check">
+              <input type="checkbox" id="f-had"> High-Alert Drug (HAD)
+            </label>
+          </div>
+
+          <!-- Reconstitution -->
+          <div class="form-section">Reconstitution</div>
+          <div class="form-group">
+            <label class="form-label">Solvent</label>
+            <input type="text" class="form-input" id="f-reconst-solvent" placeholder="เช่น Sterile Water for Injection">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Volume</label>
+            <input type="text" class="form-input" id="f-reconst-volume" placeholder="เช่น 10 mL">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Final Concentration</label>
+            <input type="text" class="form-input" id="f-reconst-conc" placeholder="เช่น 50 mg/mL">
+          </div>
+
+          <!-- Dilution -->
+          <div class="form-section">Dilution</div>
+          <div class="form-group">
+            <label class="form-label">Diluent</label>
+            <input type="text" class="form-input" id="f-dil-diluent" placeholder="เช่น NSS, D5W">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Volume</label>
+            <input type="text" class="form-input" id="f-dil-volume" placeholder="เช่น 100 mL">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Final Concentration</label>
+            <input type="text" class="form-input" id="f-dil-conc" placeholder="เช่น 1-2 mg/mL">
+          </div>
+
+          <!-- Administration -->
+          <div class="form-section">Administration</div>
+          <div class="form-group">
+            <label class="form-label">Route</label>
+            <input type="text" class="form-input" id="f-admin-route" placeholder="เช่น IV push, IV infusion">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rate</label>
+            <input type="text" class="form-input" id="f-admin-rate" placeholder="เช่น over 30 min">
+          </div>
+
+          <!-- Stability -->
+          <div class="form-section">Stability</div>
+          <div class="form-group">
+            <label class="form-label">After Reconstitution</label>
+            <input type="text" class="form-input" id="f-stab-reconst" placeholder="เช่น 24 ชม. ที่ RT">
+          </div>
+          <div class="form-group">
+            <label class="form-label">After Dilution</label>
+            <input type="text" class="form-input" id="f-stab-diluted" placeholder="เช่น 48 ชม. ที่ 2-8°C">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Storage Conditions</label>
+            <input type="text" class="form-input" id="f-stab-storage" placeholder="เช่น เก็บที่ 2-8°C ป้องกันแสง">
+          </div>
+
+          <!-- Compatibility -->
+          <div class="form-section">Compatibility</div>
+          <div class="form-group full">
+            <label class="form-label">Y-site Compatible</label>
+            <textarea class="form-textarea" id="f-compat-ysite" placeholder="รายชื่อยาที่ compatible ผ่าน Y-site"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Incompatible</label>
+            <textarea class="form-textarea" id="f-compat-incompat" placeholder="รายชื่อยาที่ incompatible"></textarea>
+          </div>
+
+          <!-- Clinical -->
+          <div class="form-section">ข้อมูลทางคลินิก</div>
+          <div class="form-group full">
+            <label class="form-label">Precautions</label>
+            <textarea class="form-textarea" id="f-precautions" rows="3" placeholder="ข้อควรระวัง / nursing considerations"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Monitoring (คั่นด้วย ,)</label>
+            <input type="text" class="form-input" id="f-monitoring" placeholder="เช่น SCr, BUN, BP, HR">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Reference</label>
+            <input type="text" class="form-input" id="f-ref" placeholder="เช่น Lexicomp 2025, Micromedex">
+          </div>
+        </div>
+
+      </form>
+      </div><!-- /form-view -->
+
+      <!-- Preview View -->
+      <div id="preview-view" style="display:none">
+        <div class="preview-card" id="preview-card"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeDrugModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveDrug" data-status="draft">📝 บันทึก Draft</button>
+      <button class="btn btn-warning" data-action="saveDrug" data-status="pending">⏳ ส่งอนุมัติ</button>
+      <button class="btn btn-success" id="btn-save-approve" data-action="saveDrugAndApprove" style="display:none">✅ บันทึกและอนุมัติ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ LOADING OVERLAY ═══════ -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner" style="width:40px;height:40px"></div>
+  <span id="loading-text">กำลังโหลด...</span>
+</div>
+
+<!-- ═══════ TOAST CONTAINER ═══════ -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═══════ EXTERNAL LIBS ═══════ -->
+<!-- PapaParse v5.4.1 — pinned version, SRI hash must be updated if version changes -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs" crossorigin="anonymous"></script>
+<!-- Google Identity Services — SRI not applicable (Google does not guarantee content stability) -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<!-- ═══════ SCRIPTS ═══════ -->
+<script src="i18n.js"></script>
+<script src="translations-en.js"></script>
+<script src="error-tracker.js"></script>
+<script src="core.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

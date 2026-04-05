@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IV DrugRef — Analytics Dashboard v6</title>
+  <meta name="description" content="IV Drug Reference Analytics Dashboard">
+  <meta name="theme-color" content="#060a14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js v4.4.8 — pinned version, SRI hash must be updated if version changes -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" integrity="sha384-T/4KgSWuZEPozpPz7rnnp/5lDSnpY1VPJCojf1S81uTHS1E38qgLfMgVsAeRCWc4" crossorigin="anonymous"></script>
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-dark.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="theme-dark">
+
+<div class="header"><div class="header-inner">
+  <h1>📊 IV DrugRef Analytics <span class="ver">v6 CROSS-FILTER</span></h1>
+  <div class="header-actions">
+    <button class="btn" id="btnSetup">⚙ URL</button>
+    <button class="btn" id="btnExportSessions" data-export="Sessions">📥 Sessions</button>
+    <button class="btn" id="btnExportSearches" data-export="Searches">📥 Searches</button>
+    <button class="btn" id="btnExportRenal" data-export="RenalDosing">📥 Renal</button>
+    <button class="btn" id="btnExportTDM" data-export="TDMUsage">📥 TDM</button>
+    <button class="btn" id="btnExportCompat" data-export="CompatUsage">📥 Compat</button>
+    <button class="btn primary" id="btnRefresh">🔄 Refresh</button>
+  </div>
+</div></div>
+
+<div class="setup-banner" id="setupBanner">
+  <h3>⚙ ตั้งค่า Google Apps Script URL</h3>
+  <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+  <button id="btnSaveUrl">💾 บันทึก</button>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <label>📅 จาก</label><input type="date" id="dateFrom">
+  <label>ถึง</label><input type="date" id="dateTo">
+  <div class="sep"></div>
+  <input type="text" class="search-box" id="globalSearch" placeholder="🔍 ค้นหายา / user...">
+  <div class="sep"></div>
+  <div id="filterBadges"></div>
+  <button class="btn sm" id="clearFiltersBtn">✕ ล้างทั้งหมด</button>
+  <div class="sep"></div>
+  <button class="btn sm" id="arBtn">⏱ Auto: OFF</button>
+  <span id="arDot" style="display:none"><span class="live-dot"></span><span style="font-size:10px;color:var(--text-muted)">Live</span></span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="overview">📈 Overview</button>
+  <button class="tab" data-tab="drugs">💊 Drug Usage</button>
+  <button class="tab" data-tab="tdm">🎯 TDM</button>
+  <button class="tab" data-tab="renal">🧬 Renal</button>
+  <button class="tab" data-tab="compat">🔗 Compat</button>
+  <button class="tab" data-tab="dosecalc">🧮 Drug Calc</button>
+  <button class="tab" data-tab="ratings">⭐ Ratings</button>
+  <button class="tab" data-tab="survey">📋 Survey</button>
+  <button class="tab" data-tab="journey">🗺 Journey</button>
+</div>
+
+<div class="content">
+
+<!-- OVERVIEW -->
+<div class="tab-panel active" id="panel-overview">
+  <div class="bento" id="overviewStats"></div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Daily Active Users</div><div class="card-act"><button class="btn sm" data-xprt="dauChart">📷</button></div><canvas id="dauChart" height="65"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">📱</span> Platform</div><div class="card-act"><button class="btn sm" data-xprt="platformChart">📷</button></div><canvas id="platformChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">⏱</span> Search Time</div><div class="card-act"><button class="btn sm" data-xprt="timeChart">📷</button></div><canvas id="timeChart" height="190"></canvas></div>
+  </div>
+</div>
+
+<!-- DRUGS -->
+<div class="tab-panel" id="panel-drugs">
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">🔍</span> Top ยาค้นหาบ่อย</div><div class="tw" id="topDrugsTable"></div></div>
+    <div class="card"><div class="card-hd"><span class="em">👁</span> Top ยาดูบ่อย</div><div class="tw" id="topExpandsTable"></div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">🏷</span> Filter ใช้บ่อย</div><div class="card-act"><button class="btn sm" data-xprt="filterChart">📷</button></div><canvas id="filterChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📂</span> Expand Source</div><div class="card-act"><button class="btn sm" data-xprt="srcChart">📷</button></div><canvas id="srcChart" height="190"></canvas></div>
+  </div>
+</div>
+
+<!-- TDM -->
+<div class="tab-panel" id="panel-tdm">
+  <div class="bento" id="tdmStats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">📊</span> TDM by Drug</div><div class="card-act"><button class="btn sm" data-xprt="tdmDrugChart">📷</button></div><canvas id="tdmDrugChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🎯</span> Interpretation</div><div class="card-act"><button class="btn sm" data-xprt="tdmInterpChart">📷</button></div><canvas id="tdmInterpChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> TDM by Day</div><div class="card-act"><button class="btn sm" data-xprt="tdmDayChart">📷</button></div><canvas id="tdmDayChart" height="120"></canvas></div>
+  </div>
+</div>
+
+<!-- RENAL -->
+<div class="tab-panel" id="panel-renal">
+  <div class="bento" id="renalStats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drugs</div><div class="tw" id="renalDrugsTable"></div></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> Drug Class</div><div class="card-act"><button class="btn sm" data-xprt="renalClassChart">📷</button></div><canvas id="renalClassChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">🔬</span> Formula (CG vs CKD-EPI)</div><div class="card-act"><button class="btn sm" data-xprt="renalFormulaChart">📷</button></div><canvas id="renalFormulaChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🏥</span> CKD Stage</div><div class="card-act"><button class="btn sm" data-xprt="renalStageChart">📷</button></div><canvas id="renalStageChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Renal Usage by Day</div><div class="card-act"><button class="btn sm" data-xprt="renalDayChart">📷</button></div><canvas id="renalDayChart" height="120"></canvas></div>
+  </div>
+</div>
+
+<!-- Compat -->
+<div class="tab-panel" id="panel-compat">
+  <div id="compatStats" class="bento"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">📊</span> Compat by Mode</div><div class="card-act"><button class="btn sm" data-xprt="compatModeChart">📷</button></div><canvas id="compatModeChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drug Pairs</div><div class="card-act"><button class="btn sm" data-xprt="compatDrugChart">📷</button></div><canvas id="compatDrugChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Compat Usage by Day</div><div class="card-act"><button class="btn sm" data-xprt="compatDayChart">📷</button></div><canvas id="compatDayChart" height="120"></canvas></div>
+  </div>
+</div>
+
+<!-- DOSE CALC -->
+<div class="tab-panel" id="panel-dosecalc">
+  <div class="bento" id="doseCalcStats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Drugs Calculated</div><div class="card-act"><button class="btn sm" data-xprt="dcDrugChart">📷</button></div><canvas id="dcDrugChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📏</span> Dose Unit Distribution</div><div class="card-act"><button class="btn sm" data-xprt="dcUnitChart">📷</button></div><canvas id="dcUnitChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">👥</span> Top Users</div><div class="card-act"><button class="btn sm" data-xprt="dcUserChart">📷</button></div><canvas id="dcUserChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">⚖</span> Weight Distribution</div><div class="card-act"><button class="btn sm" data-xprt="dcWeightChart">📷</button></div><canvas id="dcWeightChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">📈</span> Dose Calcs by Day</div><div class="card-act"><button class="btn sm" data-xprt="dcDayChart">📷</button></div><canvas id="dcDayChart" height="120"></canvas></div>
+  </div>
+</div>
+
+<!-- RATINGS & NPS -->
+<div class="tab-panel" id="panel-ratings">
+  <div class="bento" id="ratingStats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">⭐</span> Drug Rating Distribution</div><div class="card-act"><button class="btn sm" data-xprt="ratingDistChart">📷</button></div><canvas id="ratingDistChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> NPS Score Distribution</div><div class="card-act"><button class="btn sm" data-xprt="npsDistChart">📷</button></div><canvas id="npsDistChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">💊</span> Top Rated Drugs</div><div class="card-bd" id="topRatedDrugs"></div></div>
+    <div class="card"><div class="card-hd"><span class="em">💬</span> NPS Comments</div><div class="card-bd" id="npsComments" style="max-height:300px;overflow-y:auto"></div></div>
+  </div>
+</div>
+
+<!-- SURVEY -->
+<div class="tab-panel" id="panel-survey">
+  <div class="bento" id="surveyStats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">⭐</span> Satisfaction</div><div class="card-act"><button class="btn sm" data-xprt="satChart">📷</button></div><canvas id="satChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">👥</span> Role</div><div class="card-act"><button class="btn sm" data-xprt="roleChart">📷</button></div><canvas id="roleChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">🏥</span> Department</div><div class="card-act"><button class="btn sm" data-xprt="deptChart">📷</button></div><canvas id="deptChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">📊</span> SUS Score Distribution</div><div class="card-act"><button class="btn sm" data-xprt="susChart">📷</button></div><canvas id="susChart" height="190"></canvas><div class="empty-msg" id="susEmptyMsg" style="display:none"><div class="icon">📊</div>ต้องการข้อมูล SUS ≥5 responses</div></div>
+  </div>
+</div>
+
+<!-- JOURNEY -->
+<div class="tab-panel" id="panel-journey">
+  <div class="bento" id="journeyStats"></div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">📄</span> Page Visits</div><div class="card-act"><button class="btn sm" data-xprt="pvChart">📷</button></div><canvas id="pvChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🔀</span> Nav Flow (top 15)</div><div class="card-act"><button class="btn sm" data-xprt="flowChart">📷</button></div><canvas id="flowChart" height="190"></canvas></div>
+  </div>
+  <div class="card full" style="margin-top:8px">
+    <div class="card-hd"><span class="em">🗺</span> User Timeline</div>
+    <div class="user-list" id="userList"></div>
+    <div class="journey-search">
+      <input type="text" id="journeyUid" placeholder="พิมพ์ user_id...">
+      <button id="btnShowTimeline">🔍</button>
+    </div>
+    <div id="userTimeline"></div>
+  </div>
+</div>
+
+<div id="statusMsg" class="loading">กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ Google Sheets</div>
+<div class="footer-info" id="footerInfo"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

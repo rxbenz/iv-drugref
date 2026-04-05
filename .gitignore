@@ -1,0 +1,29 @@
+# Build output (GitHub Actions will build this)
+dist/
+
+# Node dependencies (GitHub Actions will install)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Claude session files
+.claude/
+
+# Legacy / deprecated files
+admin-bundled.html
+generate-swot-report.js
+generate-swot-thai.js
+migrate.sh
+migrate.bat
+deploy.sh
+check_build.js
+
+# Temp files
+*.tmp
+*.bak

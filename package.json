@@ -1,0 +1,30 @@
+{
+  "name": "iv-drugref-pwa",
+  "version": "5.0.0",
+  "description": "IV Drug Quick Reference PWA - Modular Architecture",
+  "main": "build.js",
+  "scripts": {
+    "test": "node --test test/clinical-formulas.test.js",
+    "build": "node build.js",
+    "build:dev": "node build.js --dev",
+    "build:prod": "node build.js --prod"
+  },
+  "keywords": [
+    "IV",
+    "drugs",
+    "reference",
+    "PWA",
+    "healthcare",
+    "modular"
+  ],
+  "author": "",
+  "license": "CC-BY-NC-SA-4.0",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "clean-css": "^5.3.3",
+    "docx": "^9.6.1",
+    "terser": "^5.46.1"
+  }
+}

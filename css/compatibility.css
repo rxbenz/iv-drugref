@@ -1,0 +1,710 @@
+/* ============================================================
+   Compatibility Checker Page-Specific Styles
+   ============================================================
+   Includes: Mode tabs, pair checker, matrix view,
+   drug selects, compatibility result cards, quick chips
+ ============================================================ */
+
+/* Compat result color variables (dark theme) */
+.theme-dark {
+  --green-bg: rgba(74, 222, 128, 0.08);
+  --green-border: rgba(74, 222, 128, 0.25);
+  --red-bg: rgba(248, 113, 113, 0.08);
+  --red-border: rgba(248, 113, 113, 0.25);
+  --amber-bg: rgba(251, 191, 36, 0.08);
+  --amber-border: rgba(251, 191, 36, 0.25);
+  --gray-bg: rgba(148, 163, 184, 0.06);
+  --gray-border: rgba(148, 163, 184, 0.15);
+}
+
+/* Override header for compat page — needs more height for mode tabs */
+.header-inner {
+  height: auto !important;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 10px 0;
+  gap: 8px;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.header-back {
+  color: var(--blue);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.header-title-area {
+  min-width: 0;
+}
+
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+/* Content area — account for sticky header + bottom nav */
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 16px 100px;
+}
+
+/* Dark disclaimer override */
+.theme-dark .disclaimer {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--red-border);
+}
+
+/* Mode Tabs */
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+
+.mode-tab {
+  flex: 1;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.mode-tab.active {
+  background: var(--blue);
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.25);
+}
+
+.mode-tab:hover:not(.active) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Pair Checker Section */
+.pair-section {
+  display: none;
+}
+
+.pair-section.active {
+  display: block;
+}
+
+.pair-selectors {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pair-selectors .drug-select-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.pair-selectors .vs-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  background: var(--bg2);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.drug-select {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border .2s;
+}
+
+.drug-select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.compat-result {
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 14px;
+  animation: fadeUp .3s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.compat-result.compatible {
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+}
+
+.compat-result.incompatible {
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+}
+
+.compat-result.variable {
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+}
+
+.compat-result.nodata {
+  background: var(--gray-bg);
+  border: 1px solid var(--gray-border);
+}
+
+.compat-result.select-drugs {
+  background: var(--card);
+  border: 1px solid var(--border);
+  text-align: center;
+  color: var(--text3);
+  font-size: 13px;
+  padding: 32px;
+}
+
+.result-status {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-detail {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text2);
+}
+
+.compat-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (max-width: 600px) {
+  .compat-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.detail-card .label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+
+.detail-card .label.green {
+  color: var(--green);
+}
+
+.detail-card .label.red {
+  color: var(--red);
+}
+
+.detail-card .value {
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* Quick drug chips */
+.quick-chips {
+  margin-bottom: 14px;
+}
+
+.quick-chips-title {
+  font-size: 11px;
+  color: var(--text3);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.chip {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.chip.had {
+  border-color: var(--red-border);
+  color: var(--red);
+}
+
+/* Matrix View Section */
+.matrix-section {
+  display: none;
+}
+
+.matrix-section.active {
+  display: block;
+}
+
+.matrix-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.matrix-filter .fbtn {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.matrix-filter .fbtn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.matrix-filter .fbtn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.matrix-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.matrix-table {
+  border-collapse: separate;
+  border-spacing: 2px;
+  min-width: 100%;
+}
+
+.matrix-table th,
+.matrix-table td {
+  padding: 0;
+  text-align: center;
+}
+
+.matrix-table .corner {
+  width: 100px;
+  min-width: 100px;
+}
+
+.matrix-table .col-header {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text2);
+  padding: 6px 3px;
+  height: 90px;
+  white-space: nowrap;
+  max-width: 28px;
+}
+
+.matrix-table .row-header {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text2);
+  text-align: right;
+  padding-right: 6px;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.matrix-cell {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+}
+
+.matrix-cell:hover {
+  transform: scale(1.4);
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.matrix-cell.c {
+  background: #86efac;
+}
+
+.matrix-cell.i {
+  background: #fca5a5;
+}
+
+.matrix-cell.v {
+  background: #fcd34d;
+}
+
+.matrix-cell.n {
+  background: #e2e8f0;
+}
+
+.matrix-cell.self {
+  background: #f1f5f9;
+}
+
+.matrix-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Tooltip */
+.matrix-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  max-width: 260px;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.matrix-tooltip.show {
+  display: block;
+}
+
+/* Combined/Multi-Drug View Section */
+.combined-section {
+  display: none;
+}
+
+.combined-section.active {
+  display: block;
+}
+
+.multi-drug-area {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.multi-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.multi-search {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 8px;
+  transition: border .2s;
+}
+
+.multi-search:focus {
+  border-color: var(--blue);
+}
+
+.selected-drugs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  margin-bottom: 10px;
+}
+
+.sel-chip {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 8px 4px 10px;
+  border-radius: 6px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+  font-weight: 500;
+}
+
+.sel-chip .remove {
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  opacity: .6;
+  transition: opacity .15s;
+}
+
+.sel-chip .remove:hover {
+  opacity: 1;
+}
+
+.sel-chip.had-chip {
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.2);
+  color: var(--red);
+}
+
+.drug-suggestions {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.drug-suggestions.show {
+  display: block;
+}
+
+.drug-sug-item {
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .1s;
+  border-bottom: 1px solid var(--bg);
+}
+
+.drug-sug-item:hover {
+  background: rgba(14, 165, 233, 0.04);
+}
+
+.drug-sug-item:last-child {
+  border-bottom: none;
+}
+
+.drug-sug-item .sug-generic {
+  font-weight: 600;
+}
+
+.drug-sug-item .sug-trade {
+  color: var(--text3);
+  font-size: 11px;
+}
+
+.multi-results {
+  margin-top: 12px;
+}
+
+.multi-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  transition: background .15s;
+  cursor: pointer;
+}
+
+.multi-pair:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.multi-pair .pair-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.multi-pair .pair-icon.c {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.multi-pair .pair-icon.i {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.multi-pair .pair-icon.v {
+  background: #fefce8;
+  color: #854d0e;
+}
+
+.multi-pair .pair-icon.n {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.multi-pair .pair-names {
+  flex: 1;
+  font-weight: 500;
+}
+
+.multi-pair .pair-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.multi-pair .pair-type.c {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.multi-pair .pair-type.i {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.multi-pair .pair-type.v {
+  background: #fefce8;
+  color: #854d0e;
+}
+
+.multi-pair .pair-type.n {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .col-header {
+    height: 70px !important;
+    font-size: 9px !important;
+  }
+
+  .matrix-cell {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+}

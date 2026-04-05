@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IV Compatibility Checker — IV DrugRef</title>
+  <meta name="description" content="IV Drug Compatibility Checker — Pair checker, matrix view, multi-drug compatibility">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-dark.css">
+  <link rel="stylesheet" href="css/compatibility.css">
+</head>
+<body class="theme-dark">
+<a href="#content" class="skip-to-content">Skip to content</a>
+
+<header class="header">
+<div class="header-inner">
+<div class="header-top">
+<div class="header-left">
+<a href="index.html" class="header-back">← กลับ</a>
+<div class="header-title-area">
+<div class="logo-text">🔗 IV Compatibility Checker</div>
+<div class="logo-sub">IV Drug Quick Reference v5.0 — 167 drugs</div>
+</div>
+</div>
+</div>
+<div class="mode-tabs" id="modeTabs" role="tablist" aria-label="Compatibility check mode">
+<button class="mode-tab active" data-mode="pair" data-action="switchMode" role="tab" aria-selected="true">💊 Pair Check</button>
+<button class="mode-tab" data-mode="matrix" data-action="switchMode" role="tab" aria-selected="false">📊 Matrix</button>
+<button class="mode-tab" data-mode="combined" data-action="switchMode" role="tab" aria-selected="false">🔬 Multi-Drug</button>
+</div>
+</div>
+</header>
+
+<main class="content">
+<!-- ===== MODE 1: PAIR CHECKER ===== -->
+<div class="pair-section active" id="pairSection">
+<div class="pair-selectors">
+<div class="drug-select-wrap">
+<select class="drug-select" id="drugA" data-action="checkPair">
+<option value="">— เลือกยา A —</option>
+</select>
+</div>
+<div class="vs-badge">VS</div>
+<div class="drug-select-wrap">
+<select class="drug-select" id="drugB" data-action="checkPair">
+<option value="">— เลือกยา B —</option>
+</select>
+</div>
+</div>
+<div id="pairResult">
+<div class="compat-result select-drugs">เลือกยา 2 ตัวเพื่อตรวจสอบ Compatibility</div>
+</div>
+<div class="quick-chips">
+<div class="quick-chips-title">🔥 ICU/Critical drugs (quick select)</div>
+<div class="chips-wrap" id="quickChips"></div>
+</div>
+</div>
+
+<!-- ===== MODE 2: MATRIX VIEW ===== -->
+<div class="matrix-section" id="matrixSection">
+<div class="matrix-filter" id="matrixFilter"></div>
+<div class="matrix-scroll" id="matrixScroll"></div>
+<div class="matrix-legend">
+<div class="legend-item"><div class="legend-dot" style="background:#86efac"></div> Compatible</div>
+<div class="legend-item"><div class="legend-dot" style="background:#fca5a5"></div> Incompatible</div>
+<div class="legend-item"><div class="legend-dot" style="background:#fcd34d"></div> Variable/Caution</div>
+<div class="legend-item"><div class="legend-dot" style="background:#e2e8f0"></div> No data</div>
+</div>
+</div>
+
+<!-- ===== MODE 3: COMBINED/MULTI-DRUG ===== -->
+<div class="combined-section" id="combinedSection">
+<div class="multi-drug-area">
+<div class="multi-title">🔬 Multi-Drug Compatibility Check</div>
+<input type="text" class="multi-search" id="multiSearch" placeholder="พิมพ์ชื่อยาเพื่อเพิ่ม..." autocomplete="off" data-action="filterSuggestions">
+<div class="drug-suggestions" id="drugSuggestions"></div>
+<div class="selected-drugs" id="selectedDrugs"></div>
+<div class="multi-results" id="multiResults"></div>
+</div>
+</div>
+
+<div class="disclaimer">
+<strong>⚠️ Disclaimer:</strong> ข้อมูล Compatibility เป็นเครื่องมือสนับสนุนทางคลินิกเบื้องต้น ผลอาจแตกต่างตาม concentration, diluent, temperature และ contact time ต้องตรวจสอบกับ Trissel's Handbook, Lexicomp หรือแหล่งอ้างอิงปฐมภูมิก่อนใช้จริงทุกครั้ง ไม่ทดแทนดุลยพินิจทางวิชาชีพ
+</div>
+<div class="app-footer">IV DrugRef v5.0.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+</main>
+
+<div class="matrix-tooltip" id="matrixTooltip"></div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" class="nav-home">
+      <span class="nav-icon">💊</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="calculator.html" class="nav-calc">
+      <span class="nav-icon">🧮</span>
+      <span class="nav-label">Calc</span>
+    </a>
+    <a href="tdm.html" class="nav-tdm">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">TDM</span>
+    </a>
+    <a href="renal-dosing.html" class="nav-renal">
+      <span class="nav-icon">🧬</span>
+      <span class="nav-label">Renal</span>
+    </a>
+    <a href="compatibility.html" class="nav-compat nav-active">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Compat</span>
+    </a>
+  </div>
+</nav>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/compatibility.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

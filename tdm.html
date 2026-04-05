@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TDM Hub — Therapeutic Drug Monitoring | IV DrugRef</title>
+  <meta name="description" content="Therapeutic Drug Monitoring Hub — Vancomycin, Phenytoin, Aminoglycosides, Valproate">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-dark.css">
+  <link rel="stylesheet" href="css/tdm.css">
+</head>
+<body class="theme-dark">
+<a href="#content" class="skip-to-content">Skip to content</a>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<div class="header">
+  <div class="header-inner">
+    <a href="index.html" class="back" data-action="goBack">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>กลับ
+    </a>
+    <h1>🎯 TDM Hub</h1>
+    <span class="ver">v1.0</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN CONTAINER
+     ============================================================ -->
+<div class="container">
+
+<!-- Drug Selection Tabs -->
+<div class="drug-tabs" id="drugTabs" role="tablist" aria-label="TDM Drug Selection">
+  <div class="drug-tab active" data-action="switchDrug" data-drug="vancomycin" role="tab" tabindex="0" aria-selected="true" aria-controls="sec_vancomycin"><span class="tab-icon" aria-hidden="true">🧬</span>Vancomycin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="phenytoin" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_phenytoin"><span class="tab-icon" aria-hidden="true">⚡</span>Phenytoin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="aminoglycoside" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_aminoglycoside"><span class="tab-icon" aria-hidden="true">💉</span>Aminoglycosides</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="valproate" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_valproate"><span class="tab-icon" aria-hidden="true">🧠</span>Valproate</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="tacrolimus" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_tacrolimus"><span class="tab-icon" aria-hidden="true">🔬</span>Tacrolimus</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="digoxin" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_digoxin"><span class="tab-icon" aria-hidden="true">💜</span>Digoxin</div>
+  <div class="drug-tab" data-action="switchDrug" data-drug="warfarin" role="tab" tabindex="-1" aria-selected="false" aria-controls="sec_warfarin"><span class="tab-icon" aria-hidden="true">🩸</span>Warfarin</div>
+</div>
+
+<!-- ============================================================
+     SHARED PATIENT INFO
+     ============================================================ -->
+<div class="card" id="patientCard">
+  <div class="card-head">👤 PATIENT INFORMATION</div>
+  <div class="card-body">
+    <div class="row row-4" style="margin-bottom:10px">
+      <div class="field"><label>Weight (kg)</label><input type="number" id="ptWt" value="70" min="20" max="300" step="0.1"></div>
+      <div class="field"><label>Age (yr)</label><input type="number" id="ptAge" value="55" min="1" max="120"></div>
+      <div class="field"><label>Sex</label><select id="ptSex"><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="field"><label>SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div>
+    </div>
+    <div id="validationMessages" class="validation-container" style="display:none;"></div>
+    <div class="row row-4">
+      <div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div>
+      <div class="field"><label>Albumin (g/dL)</label><input type="number" id="ptAlb" value="4.0" min="0.5" max="6" step="0.1"></div>
+      <div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly></div>
+      <div class="field"><label>Dialysis</label><select id="ptDialysis"><option value="none">None</option><option value="HD">HD</option><option value="CRRT">CRRT</option></select></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VANCOMYCIN SECTION
+     ============================================================ -->
+<div class="drug-section active" id="sec_vancomycin" role="tabpanel" aria-labelledby="tab_vancomycin">
+
+  <div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body">
+    <div id="vancoDoseList"></div>
+    <button class="btn-add" data-action="vancoAddDose">+ เพิ่ม dose</button>
+  </div></div>
+
+  <div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body">
+    <div id="vancoLevelList"></div>
+    <button class="btn-add" data-action="vancoAddLevel">+ เพิ่ม level</button>
+  </div></div>
+
+  <div class="card"><div class="card-head">🧬 PK MODEL</div><div class="card-body">
+    <div class="model-grid" id="vancoModelSelect"></div>
+    <div class="info-box purple" style="font-size:11px;margin-top:8px">"Auto" = ระบบเลือก model ที่ objective function value ต่ำที่สุด (best fit)</div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="vancoRun" style="width:100%;padding:14px;font-size:15px">🧬 Run Bayesian MAP + MCMC</button>
+    <div id="vancoMcmcProgress" style="display:none;margin-top:8px">
+      <div class="progress"><div class="progress-bar" id="vancoMcmcBar" style="width:0%;background:var(--blue)"></div></div>
+      <div style="font-size:11px;color:var(--text3)" id="vancoMcmcStatus"></div>
+    </div>
+  </div>
+
+  <div id="vancoResults" style="display:none">
+    <div class="card"><div class="card-head">📊 AUC₂₄ RESULT</div><div class="card-body">
+      <div id="vancoAucResult"></div>
+      <div class="stat-grid" id="vancoPkStats"></div>
+      <div id="vancoCiInfo"></div>
+      <table class="pk-table" id="vancoPkTable"></table>
+    </div></div>
+
+    <div class="card"><div class="card-head">🔬 MODEL COMPARISON</div><div class="card-body"><div id="vancoModelCompare"></div></div></div>
+
+    <div class="card"><div class="card-head">📈 CONCENTRATION-TIME (90% CI)</div><div class="card-body">
+      <div class="graph-container"><canvas id="vancoGraph" height="320"></canvas></div>
+      <div class="info-box blue" style="font-size:11px"><b>━</b> MAP estimate &nbsp;<span style="opacity:.4">█</span> 90% CI &nbsp;<span style="color:var(--amber)">●</span> Measured &nbsp;<span style="color:var(--green)">┈</span> Proposed</div>
+    </div></div>
+
+    <div class="card"><div class="card-head">🎯 DOSE OPTIMIZATION</div><div class="card-body">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px">ปรับ dose/interval → real-time update:</p>
+      <div class="slider-row"><label>Dose (mg)</label><input type="range" id="vancoOptDose" min="250" max="3000" step="250" value="1000"><span class="slider-val" id="vancoOptDoseVal">1000 mg</span></div>
+      <div class="slider-row"><label>Interval (hr)</label><input type="range" id="vancoOptInterval" min="6" max="48" step="2" value="12"><span class="slider-val" id="vancoOptIntervalVal">q12h</span></div>
+      <div class="slider-row"><label>Infusion (hr)</label><input type="range" id="vancoOptInfusion" min="0.5" max="4" step="0.5" value="1"><span class="slider-val" id="vancoOptInfusionVal">1 hr</span></div>
+      <div id="vancoOptResult"></div>
+      <div class="dose-compare" id="vancoDoseCompare"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHENYTOIN SECTION
+     ============================================================ -->
+<div class="drug-section" id="sec_phenytoin" role="tabpanel" aria-labelledby="tab_phenytoin">
+
+  <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Total Phenytoin (mcg/mL)</label><input type="number" id="phenyLevel" value="12" min="0.1" max="60" step="0.1"></div>
+      <div class="field"><label>Free Phenytoin (mcg/mL)</label><input type="number" id="phenyFree" value="" placeholder="ถ้ามี" min="0" max="10" step="0.1"></div>
+      <div class="field"><label>Current Dose (mg/day)</label><input type="number" id="phenyDose" value="300" min="50" max="800" step="25"></div>
+    </div>
+    <div class="info-box blue" style="font-size:11px;margin-top:10px">
+      <strong>📍 Sampling Guide:</strong><br>
+      • เจาะ <strong>trough level</strong> (ก่อน dose ถัดไป) หลัง steady state (5-7 วันหลังเริ่มหรือปรับ dose)<br>
+      • ⚠ Phenytoin มี non-linear kinetics → ถ้า albumin <3.5 g/dL ต้องส่ง <strong>free level</strong><br>
+      • Free phenytoin target: 1-2 mcg/mL
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-head">🔬 CORRECTED LEVEL (Winter-Tozer)</div><div class="card-body">
+    <div id="phenyCorrection"></div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="phenytoinRun" style="width:100%;padding:14px;font-size:15px">⚡ Calculate Phenytoin PK</button>
+  </div>
+
+  <div id="phenyResults" style="display:none">
+    <div class="card"><div class="card-head">📊 LEVEL INTERPRETATION</div><div class="card-body"><div id="phenyInterpretation"></div></div></div>
+
+    <div class="card"><div class="card-head">📐 MICHAELIS-MENTEN KINETICS</div><div class="card-body">
+      <div id="phenyMM"></div>
+      <table class="pk-table" id="phenyPkTable"></table>
+    </div></div>
+
+    <div class="card"><div class="card-head">🎯 DOSE PREDICTION</div><div class="card-body">
+      <div class="slider-row"><label>Target Css (mcg/mL)</label><input type="range" id="phenyTargetCss" min="5" max="25" step="0.5" value="15"><span class="slider-val" id="phenyTargetVal">15 mcg/mL</span></div>
+      <div id="phenyDosePredict"></div>
+      <div id="phenyDoseTable"></div>
+    </div></div>
+
+    <div class="card"><div class="card-head">📈 DOSE-LEVEL CURVE</div><div class="card-body">
+      <div class="graph-container"><canvas id="phenyGraph" height="280"></canvas></div>
+      <div class="info-box blue" style="font-size:11px">เส้นโค้ง Michaelis-Menten: แสดง non-linear relationship ระหว่าง dose ↔ Css (Orbit method)</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     AMINOGLYCOSIDE SECTION
+     ============================================================ -->
+<div class="drug-section" id="sec_aminoglycoside" role="tabpanel" aria-labelledby="tab_aminoglycoside">
+
+  <div class="card"><div class="card-head">💉 DRUG SELECTION</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Drug</label><select id="agDrug" data-action="agUpdateUI">
+        <option value="amikacin">Amikacin</option>
+        <option value="gentamicin">Gentamicin</option>
+      </select></div>
+      <div class="field"><label>Dosing Strategy</label><select id="agStrategy" data-action="agUpdateUI">
+        <option value="extended">Extended-interval (ODA)</option>
+        <option value="conventional">Conventional (MDD)</option>
+      </select></div>
+      <div class="field"><label>Current Dose (mg)</label><input type="number" id="agDose" value="1050" min="50" max="3000" step="50"></div>
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Peak (mcg/mL)</label><input type="number" id="agPeak" value="" placeholder="30 min post-infusion" min="0" max="100" step="0.1"></div>
+      <div class="field"><label>Trough (mcg/mL)</label><input type="number" id="agTrough" value="" placeholder="30 min pre-dose" min="0" max="50" step="0.1"></div>
+      <div class="field"><label>Random Level (mcg/mL)</label><input type="number" id="agRandom" value="" placeholder="Hartford nomogram" min="0" max="100" step="0.1"></div>
+    </div>
+    <div class="row row-2" style="margin-top:10px">
+      <div class="field"><label>Time of Random Level (hr post-dose)</label><input type="number" id="agRandomTime" value="8" min="1" max="24" step="0.5"></div>
+      <div class="field"><label>Infusion Duration (hr)</label><input type="number" id="agInfusion" value="0.5" min="0.25" max="2" step="0.25"></div>
+    </div>
+    <div class="info-box blue" style="font-size:11px;margin-top:10px">
+      <strong>📍 Sampling Guide:</strong><br>
+      • <strong>Hartford nomogram:</strong> เจาะ random level ที่ 6-14 hr post-dose (extended-interval)<br>
+      • <strong>Peak:</strong> 30 นาทีหลัง infusion เสร็จ | <strong>Trough:</strong> 30 นาทีก่อน dose ถัดไป<br>
+      • ⚠ ควรเจาะหลัง dose ที่ 1 เท่านั้น (AG ไม่ต้องรอ steady state สำหรับ Hartford nomogram)
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="agRun" style="width:100%;padding:14px;font-size:15px">💉 Calculate Aminoglycoside PK</button>
+  </div>
+
+  <div id="agResults" style="display:none">
+    <div class="card"><div class="card-head">📊 HARTFORD NOMOGRAM</div><div class="card-body"><div id="agNomogram"></div></div></div>
+    <div class="card"><div class="card-head">🔬 PK PARAMETERS</div><div class="card-body">
+      <div id="agPkResult"></div>
+      <table class="pk-table" id="agPkTable"></table>
+    </div></div>
+    <div class="card"><div class="card-head">🎯 DOSE RECOMMENDATION</div><div class="card-body"><div id="agDoseRec"></div></div></div>
+    <div class="card"><div class="card-head">📈 CONCENTRATION-TIME CURVE</div><div class="card-body">
+      <div class="graph-container"><canvas id="agGraph" height="280"></canvas></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VALPROATE SECTION
+     ============================================================ -->
+<div class="drug-section" id="sec_valproate" role="tabpanel" aria-labelledby="tab_valproate">
+
+  <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Total VPA (mcg/mL)</label><input type="number" id="vpaLevel" value="70" min="1" max="250" step="1"></div>
+      <div class="field"><label>Free VPA (mcg/mL)</label><input type="number" id="vpaFree" value="" placeholder="ถ้ามี" min="0" max="50" step="0.1"></div>
+      <div class="field"><label>Current Dose (mg/day)</label><input type="number" id="vpaDose" value="1000" min="100" max="4000" step="100"></div>
+    </div>
+    <div class="row row-2" style="margin-top:10px">
+      <div class="field"><label>Formulation</label><select id="vpaForm"><option value="DR">Delayed-release (Depakote)</option><option value="ER">Extended-release (Depakote ER)</option><option value="syrup">Syrup/Solution</option><option value="IV">IV</option></select></div>
+      <div class="field"><label>Indication</label><select id="vpaIndication"><option value="epilepsy">Epilepsy</option><option value="SE">Status Epilepticus</option><option value="bipolar">Bipolar</option><option value="migraine">Migraine prophylaxis</option></select></div>
+    </div>
+    <div class="info-box blue" style="font-size:11px;margin-top:10px">
+      <strong>📍 Sampling Guide:</strong><br>
+      • เจาะ <strong>trough level</strong> ก่อน dose ถัดไป (steady state: 2-3 วันหลังเริ่ม/ปรับ dose)<br>
+      • ถ้า albumin <3.5 g/dL หรือ uremia → ส่ง <strong>free VPA level</strong> (free fraction ↑)<br>
+      • ⚠ ห้ามใช้ร่วม <strong>Carbapenem</strong> → ลด VPA level 60-100%
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="vpaRun" style="width:100%;padding:14px;font-size:15px">🧠 Calculate Valproate TDM</button>
+  </div>
+
+  <div id="vpaResults" style="display:none">
+    <div class="card"><div class="card-head">📊 FREE LEVEL CORRECTION</div><div class="card-body"><div id="vpaFreeCorrection"></div></div></div>
+    <div class="card"><div class="card-head">📐 LEVEL INTERPRETATION</div><div class="card-body"><div id="vpaInterpretation"></div></div></div>
+    <div class="card"><div class="card-head">🎯 DOSE ADJUSTMENT</div><div class="card-body">
+      <div class="slider-row"><label>Target (mcg/mL)</label><input type="range" id="vpaTarget" min="30" max="120" step="5" value="75"><span class="slider-val" id="vpaTargetVal">75 mcg/mL</span></div>
+      <div id="vpaDoseRec"></div>
+    </div></div>
+    <div class="card"><div class="card-head">⚠ DRUG INTERACTIONS</div><div class="card-body"><div id="vpaInteractions"></div></div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TACROLIMUS
+     ============================================================ -->
+<div class="drug-section" id="sec_tacrolimus" role="tabpanel" aria-labelledby="tab_tacrolimus">
+  <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Trough Level (ng/mL)</label>
+        <input type="number" id="tacroLevel" value="" placeholder="C0 trough" min="0.1" max="60" step="0.1">
+      </div>
+      <div class="field"><label>Dose (mg BID)</label>
+        <input type="number" id="tacroDose" value="2" min="0.25" max="20" step="0.25">
+      </div>
+      <div class="field"><label>Transplant Type</label>
+        <select id="tacroTxType">
+          <option value="kidney">Kidney</option>
+          <option value="liver">Liver</option>
+          <option value="heart">Heart</option>
+          <option value="lung">Lung</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row row-3" style="margin-top:10px">
+      <div class="field"><label>Post-Tx Day</label>
+        <input type="number" id="tacroPostTxDay" value="30" min="1" max="3650" step="1">
+      </div>
+      <div class="field"><label>Hematocrit (%)</label>
+        <input type="number" id="tacroHct" value="33" min="15" max="60" step="1">
+      </div>
+      <div class="field"><label>CYP3A5 Genotype</label>
+        <select id="tacroCYP3A5">
+          <option value="unknown">Unknown</option>
+          <option value="expressor">*1/*1 or *1/*3 (Expressor)</option>
+          <option value="nonexpressor">*3/*3 (Non-expressor)</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-box blue" style="font-size:11px;margin-top:10px">
+      <strong>📍 Sampling Guide:</strong><br>
+      • C0 trough: เจาะก่อนให้ยา dose เช้า (12h post-dose)<br>
+      • ควรเจาะหลัง steady-state (≥3 วันหลังเริ่มยาหรือปรับ dose)<br>
+      • ใช้ whole blood EDTA tube (ห้ามใช้ serum)
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="tacrolimusRun" style="width:100%;padding:14px;font-size:15px">
+      🔬 Calculate Tacrolimus PK
+    </button>
+  </div>
+
+  <div id="tacroResults" style="display:none">
+    <div class="card"><div class="card-head">📊 LEVEL INTERPRETATION</div>
+      <div class="card-body"><div id="tacroInterpretation"></div></div>
+    </div>
+    <div class="card"><div class="card-head">🔬 PK PARAMETERS (Bayesian MAP)</div>
+      <div class="card-body"><div id="tacroPkResult"></div>
+        <table class="pk-table" id="tacroPkTable"></table>
+      </div>
+    </div>
+    <div class="card"><div class="card-head">🎯 DOSE OPTIMIZATION</div>
+      <div class="card-body">
+        <div class="slider-row"><label>Target Trough (ng/mL)</label>
+          <input type="range" id="tacroTargetTrough" min="3" max="20" step="0.5" value="8">
+          <span class="slider-val" id="tacroTargetVal">8 ng/mL</span>
+        </div>
+        <div id="tacroDosePredict"></div>
+        <div id="tacroDoseTable"></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-head">📈 CONCENTRATION-TIME CURVE</div>
+      <div class="card-body">
+        <div class="graph-container"><canvas id="tacroGraph" height="280"></canvas></div>
+        <div id="tacroCiInfo"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DIGOXIN
+     ============================================================ -->
+<div class="drug-section" id="sec_digoxin" role="tabpanel" aria-labelledby="tab_digoxin">
+  <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Serum Digoxin (ng/mL)</label>
+        <input type="number" id="digLevel" value="" placeholder="SDC" min="0.1" max="10" step="0.1">
+      </div>
+      <div class="field"><label>Time Since Last Dose (hr)</label>
+        <input type="number" id="digTimeSinceLastDose" value="12" min="0" max="48" step="0.5">
+      </div>
+      <div class="field"><label>Daily Dose (mcg)</label>
+        <input type="number" id="digDose" value="125" min="31.25" max="500" step="31.25">
+      </div>
+    </div>
+    <div class="row row-3" style="margin-top:10px">
+      <div class="field"><label>Formulation</label>
+        <select id="digFormulation">
+          <option value="tablet">Tablet (F=0.7)</option>
+          <option value="elixir">Elixir (F=0.8)</option>
+          <option value="capsule">Capsule (F=0.9)</option>
+          <option value="iv">IV (F=1.0)</option>
+        </select>
+      </div>
+      <div class="field"><label>Indication</label>
+        <select id="digIndication">
+          <option value="hf">Heart Failure (0.5-0.9)</option>
+          <option value="af">AF Rate Control (0.8-2.0)</option>
+        </select>
+      </div>
+      <div class="field"><label>Concurrent Drugs</label>
+        <select id="digInteraction">
+          <option value="none">None</option>
+          <option value="amiodarone">Amiodarone (↓50% dose)</option>
+          <option value="verapamil">Verapamil (↓25% dose)</option>
+          <option value="quinidine">Quinidine (↓50% dose)</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-box amber" style="font-size:11px;margin-top:10px">
+      <strong>⚠ Distribution Phase:</strong> Digoxin มี distribution phase 6-8 ชั่วโมง<br>
+      ถ้าเจาะเลือด <6h post-dose → ค่าจะสูงผิดปกติ ไม่สะท้อน steady-state<br>
+      <strong>แนะนำ:</strong> เจาะ trough (≥6h post-dose, ideally pre-dose)
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:16px 0">
+    <button class="btn btn-primary" data-action="digoxinRun" style="width:100%;padding:14px;font-size:15px">
+      💜 Calculate Digoxin PK
+    </button>
+  </div>
+
+  <div id="digResults" style="display:none">
+    <div class="card"><div class="card-head">📊 LEVEL INTERPRETATION</div>
+      <div class="card-body"><div id="digInterpretation"></div></div>
+    </div>
+    <div class="card"><div class="card-head">🔬 PK PARAMETERS</div>
+      <div class="card-body"><div id="digPkResult"></div>
+        <table class="pk-table" id="digPkTable"></table>
+      </div>
+    </div>
+    <div class="card"><div class="card-head">🎯 DOSE RECOMMENDATION</div>
+      <div class="card-body"><div id="digDoseRec"></div></div>
+    </div>
+    <div class="card"><div class="card-head">📈 CONCENTRATION-TIME CURVE</div>
+      <div class="card-body">
+        <div class="graph-container"><canvas id="digGraph" height="280"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     WARFARIN
+     ============================================================ -->
+<div class="drug-section" id="sec_warfarin" role="tabpanel" aria-labelledby="tab_warfarin">
+  <div class="card"><div class="card-head">🩸 INR-BASED DOSE ADJUSTMENT</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Current INR</label>
+        <input type="number" id="warINR" value="" placeholder="INR" min="0.5" max="15" step="0.1">
+      </div>
+      <div class="field"><label>Current Weekly Dose (mg)</label>
+        <input type="number" id="warWeeklyDose" value="35" min="1" max="150" step="0.5">
+      </div>
+      <div class="field"><label>Indication</label>
+        <select id="warIndication">
+          <option value="standard">AF/DVT/PE (INR 2.0-3.0)</option>
+          <option value="valve">Mechanical Valve (INR 2.5-3.5)</option>
+        </select>
+      </div>
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:8px 0">
+    <button class="btn btn-primary" data-action="warfarinINRRun" style="width:100%;padding:14px;font-size:15px">
+      🩸 INR Dose Adjustment
+    </button>
+  </div>
+
+  <div id="warINRResults" style="display:none">
+    <div class="card"><div class="card-head">📊 INR INTERPRETATION & DOSE ADJUSTMENT</div>
+      <div class="card-body"><div id="warINRInterpretation"></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><div class="card-head">🧬 PHARMACOGENOMICS-GUIDED DOSING (IWPC)</div><div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>CYP2C9 Genotype</label>
+        <select id="warCYP2C9">
+          <option value="*1/*1">*1/*1 (Normal)</option>
+          <option value="*1/*2">*1/*2 (IM)</option>
+          <option value="*1/*3">*1/*3 (IM)</option>
+          <option value="*2/*2">*2/*2 (PM)</option>
+          <option value="*2/*3">*2/*3 (PM)</option>
+          <option value="*3/*3">*3/*3 (PM)</option>
+        </select>
+      </div>
+      <div class="field"><label>VKORC1 -1639 G>A</label>
+        <select id="warVKORC1">
+          <option value="GG">G/G (Normal dose)</option>
+          <option value="AG">A/G (Lower dose)</option>
+          <option value="AA">A/A (Lowest dose)</option>
+        </select>
+      </div>
+      <div class="field"><label>Race</label>
+        <select id="warRace">
+          <option value="asian">Asian</option>
+          <option value="black">Black</option>
+          <option value="white">White/Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row row-3" style="margin-top:10px">
+      <div class="field"><label>Concurrent Amiodarone</label>
+        <select id="warAmiodarone"><option value="0">No</option><option value="1">Yes</option></select>
+      </div>
+      <div class="field"><label>Enzyme Inducer (Rifampin, CBZ)</label>
+        <select id="warEnzyme"><option value="0">No</option><option value="1">Yes</option></select>
+      </div>
+    </div>
+    <div class="info-box purple" style="font-size:11px;margin-top:10px">
+      <strong>📍 IWPC Algorithm:</strong> International Warfarin Pharmacogenetics Consortium<br>
+      ใช้ข้อมูล genotype + demographics ทำนาย initial weekly dose<br>
+      <em>Ref: IWPC, N Engl J Med 2009;360:753-764</em>
+    </div>
+  </div></div>
+
+  <div style="text-align:center;margin:8px 0">
+    <button class="btn btn-outline" data-action="warfarinPGxRun" style="width:100%;padding:14px;font-size:15px">
+      🧬 PGx-Guided Initial Dose
+    </button>
+  </div>
+
+  <div id="warPGxResults" style="display:none">
+    <div class="card"><div class="card-head">🧬 PHARMACOGENOMICS DOSING PREDICTION</div>
+      <div class="card-body"><div id="warPGxResult"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DISCLAIMER
+     ============================================================ -->
+<div class="disclaimer">
+  ⚠ เครื่องมือช่วยคำนวณเบื้องต้น ไม่ทดแทน clinical judgment ของเภสัชกร/แพทย์<br>
+  Vancomycin: Bayesian MAP + MCMC | Models: Buelga 2005, Roberts 2011, Goti 2018 | Ref: ASHP/IDSA 2020<br>
+  Phenytoin: Winter-Tozer correction | Michaelis-Menten kinetics | Ref: Winter's Basic Clinical Pharmacokinetics<br>
+  Aminoglycosides: Hartford nomogram + 1-compartment PK | Ref: Nicolau et al. 1995<br>
+  Valproate: Free level correction | Ref: Applied Clinical Pharmacokinetics, Bauer 2008<br>
+  Tacrolimus: Bayesian MAP + MCMC | Models: Staatz 2004, Antignac 2007, Han 2013 | Ref: KDIGO Transplant Guidelines<br>
+  Digoxin: 2-compartment PK | Models: Jelliffe 1991, Konishi 2002 | Ref: ACC/AHA/HRS 2023<br>
+  Warfarin: INR-based + IWPC pharmacogenomics | Ref: IWPC NEJM 2009; ACCP Guidelines<br>
+  สำหรับบุคลากรทางการแพทย์เท่านั้น
+</div>
+
+<div class="app-footer">IV DrugRef v5.0.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+
+</div><!-- end container -->
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" class="nav-home">
+      <span class="nav-icon">💊</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="calculator.html" class="nav-calc">
+      <span class="nav-icon">🧮</span>
+      <span class="nav-label">Calc</span>
+    </a>
+    <a href="tdm.html" class="nav-tdm nav-active">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">TDM</span>
+    </a>
+    <a href="renal-dosing.html" class="nav-renal">
+      <span class="nav-icon">🧬</span>
+      <span class="nav-label">Renal</span>
+    </a>
+    <a href="compatibility.html" class="nav-compat">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Compat</span>
+    </a>
+  </div>
+</nav>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/tdm.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

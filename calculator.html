@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dose Calculator — IV DrugRef</title>
+  <meta name="description" content="IV Drug Dose Calculator with renal adjustments">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-light.css">
+  <link rel="stylesheet" href="css/calculator.css">
+</head>
+<body>
+<a href="#outputSection" class="skip-to-content">Skip to results</a>
+
+<div class="header">
+  <a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
+  <h1>🧮 Dose Calculator</h1>
+  <a href="tdm.html" class="cross-link tdm-link">🎯 TDM Hub</a>
+</div>
+
+<div class="container">
+
+<!-- Patient Info -->
+<div class="section">
+  <div class="section-header">👤 ข้อมูลผู้ป่วย</div>
+  <div class="field-grid">
+    <div class="field-row-3">
+      <div class="field">
+        <label for="ptWt">น้ำหนัก (kg)</label>
+        <input type="number" id="ptWt" value="70" min="3" max="400" step="0.1" data-action="patientInput" aria-describedby="validationMessages">
+      </div>
+      <div class="field">
+        <label for="ptAge">อายุ (ปี)</label>
+        <input type="number" id="ptAge" value="65" min="1" max="120" data-action="patientInput" aria-describedby="validationMessages">
+      </div>
+      <div class="field">
+        <label for="ptSex">เพศ</label>
+        <select id="ptSex" data-action="patientInput">
+          <option value="M">ชาย</option>
+          <option value="F">หญิง</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="ptScr">SCr (mg/dL)</label>
+        <input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1" data-action="patientInput" aria-describedby="validationMessages">
+      </div>
+      <div class="field">
+        <label for="ptHt">ส่วนสูง (cm)</label>
+        <input type="number" id="ptHt" value="165" min="40" max="250" data-action="patientInput" aria-describedby="validationMessages">
+      </div>
+    </div>
+    <div id="validationMessages" class="validation-container" style="display:none;"></div>
+    <div id="bodyCompInfo" style="display:none;"></div>
+    <div class="crcl-display">
+      <span id="crclLabel">CrCl (Cockcroft-Gault):</span>
+      <span class="crcl-value" id="crclValue">—</span>
+    </div>
+    <div id="crclWarning" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- Drug Selection -->
+<div class="section">
+  <div class="section-header">💊 เลือกยา</div>
+  <div class="drug-grid" id="drugGrid"></div>
+</div>
+
+<!-- Calculator Output -->
+<div class="section" id="outputSection" style="display:none;">
+  <div class="section-header" id="outputHeader">📊 ผลคำนวณ</div>
+  <div id="outputBody"></div>
+</div>
+
+<div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้นเท่านั้น ต้องใช้ clinical judgment ประกอบการตัดสินใจทุกครั้ง<br>ข้อมูลจาก Lexicomp, Trissel's, AHA/ACLS, IDSA, AES Guidelines</div>
+<div class="app-footer">IV DrugRef v5.0.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" class="nav-home">
+      <span class="nav-icon">💊</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="calculator.html" class="nav-calc nav-active">
+      <span class="nav-icon">🧮</span>
+      <span class="nav-label">Calc</span>
+    </a>
+    <a href="tdm.html" class="nav-tdm">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">TDM</span>
+    </a>
+    <a href="renal-dosing.html" class="nav-renal">
+      <span class="nav-icon">🧬</span>
+      <span class="nav-label">Renal</span>
+    </a>
+    <a href="compatibility.html" class="nav-compat">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Compat</span>
+    </a>
+  </div>
+</nav>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/calculator.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

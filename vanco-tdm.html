@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vancomycin Bayesian TDM v2 — IV DrugRef</title>
+  <meta name="description" content="Vancomycin Bayesian TDM with Bayesian MAP + MCMC estimation">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-dark.css">
+  <link rel="stylesheet" href="css/vanco-tdm.css">
+</head>
+<body class="theme-dark">
+<a href="#content" class="skip-to-content">Skip to content</a>
+
+<div class="header"><a href="calculator.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>กลับ</a><h1>Vancomycin Bayesian TDM</h1><span class="ver">v2.0</span></div>
+<div class="container">
+<div class="card"><div class="card-head">👤 PATIENT</div><div class="card-body">
+<div class="row row-4" style="margin-bottom:10px"><div class="field"><label>Weight (kg)</label><input type="number" id="ptWt" value="70" min="20" max="300" step="0.1"></div><div class="field"><label>Age (yr)</label><input type="number" id="ptAge" value="55" min="18" max="120"></div><div class="field"><label>Sex</label><select id="ptSex"><option value="M">Male</option><option value="F">Female</option></select></div><div class="field"><label>SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div></div>
+<div class="row row-2"><div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div><div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly style="color:var(--blue);background:var(--bg3);border:none"></div></div></div></div>
+
+<div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body"><div id="doseList"></div><button class="btn-add" data-action="addDose">+ เพิ่ม dose</button></div></div>
+<div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body"><div id="levelList"></div><button class="btn-add" data-action="addLevel">+ เพิ่ม level</button></div></div>
+
+<div class="card"><div class="card-head">🧬 PK MODEL</div><div class="card-body"><div class="model-grid" id="modelSelect"></div><div class="info-box purple" style="font-size:11px;margin-top:8px">"Auto" = ระบบเลือก model ที่ objective function value ต่ำที่สุด (best fit)</div></div></div>
+
+<div style="text-align:center;margin:16px 0"><button class="btn btn-primary" data-action="runBayesian" style="width:100%;padding:14px;font-size:15px">🧬 Run Bayesian MAP + MCMC</button>
+<div id="mcmcProgress" style="display:none;margin-top:8px"><div class="progress"><div class="progress-bar" id="mcmcBar" style="width:0%;background:var(--blue)"></div></div><div style="font-size:11px;color:var(--text3)" id="mcmcStatus"></div></div></div>
+
+<div id="resultsSection" style="display:none">
+<div class="card"><div class="card-head">📊 RESULTS</div><div class="card-body"><div id="aucResult"></div><div class="stat-grid" id="pkStats"></div><div id="ciInfo"></div><table class="pk-table" id="pkTable"></table></div></div>
+<div class="card"><div class="card-head">🔬 MODEL COMPARISON</div><div class="card-body"><div id="modelCompare"></div></div></div>
+<div class="card"><div class="card-head">📈 CONCENTRATION-TIME (90% CI)</div><div class="card-body"><div class="graph-container"><canvas id="pkGraph" height="320"></canvas></div><div class="info-box blue" style="font-size:11px"><b>━</b> MAP estimate &nbsp;<span style="opacity:.4">█</span> 90% CI &nbsp;<span style="color:var(--amber)">●</span> Measured &nbsp;<span style="color:var(--green)">┈</span> Proposed</div></div></div>
+<div class="card"><div class="card-head">🎯 DOSE OPTIMIZATION</div><div class="card-body"><p style="font-size:12px;color:var(--text2);margin-bottom:10px">ปรับ dose/interval → กราฟเปลี่ยน real-time:</p>
+<div class="slider-row"><label>Dose (mg)</label><input type="range" id="optDose" min="250" max="3000" step="250" value="1000"><span class="slider-val" id="optDoseVal">1000 mg</span></div>
+<div class="slider-row"><label>Interval (hr)</label><input type="range" id="optInterval" min="6" max="48" step="2" value="12"><span class="slider-val" id="optIntervalVal">q12h</span></div>
+<div class="slider-row"><label>Infusion (hr)</label><input type="range" id="optInfusion" min="0.5" max="4" step="0.5" value="1"><span class="slider-val" id="optInfusionVal">1 hr</span></div>
+<div id="optResult"></div><div class="dose-compare" id="doseCompare"></div></div></div>
+</div>
+<div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้น ไม่ทดแทน clinical judgment<br>Bayesian MAP + MCMC | Models: Buelga 2005, Roberts 2011, Goti 2018<br>Ref: ASHP/IDSA Vancomycin Guidelines 2020 | สำหรับบุคลากรทางการแพทย์เท่านั้น</div>
+<div class="app-footer">IV DrugRef v5.0.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" class="nav-home">
+      <span class="nav-icon">💊</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="calculator.html" class="nav-calc">
+      <span class="nav-icon">🧮</span>
+      <span class="nav-label">Calc</span>
+    </a>
+    <a href="tdm.html" class="nav-tdm">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">TDM</span>
+    </a>
+    <a href="renal-dosing.html" class="nav-renal">
+      <span class="nav-icon">🧬</span>
+      <span class="nav-label">Renal</span>
+    </a>
+    <a href="compatibility.html" class="nav-compat">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Compat</span>
+    </a>
+  </div>
+</nav>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/vanco-tdm.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

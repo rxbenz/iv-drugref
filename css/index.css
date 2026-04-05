@@ -1277,3 +1277,134 @@
   font-family: inherit;
   white-space: nowrap;
 }
+
+/* ============================================================
+   QUICK ACCESS ZONE — Favorites, Most Used, Recent
+   ============================================================ */
+.quick-access-zone {
+  padding: 0 16px 8px;
+}
+
+.qa-section {
+  margin-bottom: 14px;
+}
+
+.qa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.qa-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qa-action {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.qa-action:hover {
+  color: var(--accent-red, #ef4444);
+  background: #fef2f2;
+}
+
+.qa-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.qa-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.drug-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.drug-chip:hover {
+  border-color: var(--accent-blue);
+  background: #f0f9ff;
+}
+.drug-chip:active {
+  transform: scale(0.96);
+}
+.drug-chip .chip-star {
+  color: #f59e0b;
+  font-size: 11px;
+}
+.drug-chip .chip-rank {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 14px;
+}
+.drug-chip.chip-had {
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+
+/* Favorite button on drug card header */
+.fav-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+.fav-btn:hover {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+.fav-btn.active {
+  color: #f59e0b;
+}
+.fav-btn:active {
+  transform: scale(1.25);
+}
+
+/* Dark theme adjustments */
+.theme-dark .drug-chip:hover {
+  background: rgba(14, 165, 233, 0.1);
+}
+.theme-dark .qa-action:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+.theme-dark .drug-chip.chip-had {
+  background: rgba(251, 191, 36, 0.1);
+}

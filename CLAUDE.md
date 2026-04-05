@@ -109,6 +109,20 @@ Google Sheets stores everything as text. When drug data comes back from GAS, fie
 
 **Rule**: Any new code that reads drug fields must NOT assume correct JS types. Always go through `normalizeDrugFields()` or check types before using array/object methods.
 
+### index.js line 7 is minified — extend via monkey-patching
+The main drug logic on line 7 of `js/index.js` is minified/obfuscated. To add features, append new code **after line 143** and monkey-patch existing global functions (e.g., `renderDrugCard`, `toggleCard`, `updateList`). Register new actions via a second `IVDrugRef.delegate()` call — multiple delegate calls on the same container work fine.
+
+### Quick Access Zone — Favorites, Most Used, Recent (v5.1.0)
+localStorage keys for the quick access feature:
+- `drugFavorites` — `number[]` of bookmarked drug IDs
+- `drugViewHistory` — `{id,ts}[]` of last 20 viewed drugs
+- `drugViewCounts` — `{[id]: count}` view count per drug
+
+The `#quickAccessZone` div sits between `#resultsInfo` and `#drugList` in `index.html`. It renders 3 sections (favorites, most used, recent) only when search is empty and filter is "all".
+
+### `monitoring` field — GAS-cached data is strings, not arrays
+When drug data is loaded from GAS (not from `drugs-data.json`), `monitoring` arrives as a comma-separated string. `renderCardBody()` calls `e.monitoring.map()` which throws `TypeError` on strings. The local JSON file has correct arrays. This is a **known pre-existing issue** when stale GAS-sourced data is in `localStorage.drugData_v4`. Clearing the cache (`localStorage.removeItem('drugData_v4')`) forces reload from the JSON file and resolves it. A proper fix should normalize `monitoring` to an array in `initDrugs()` or apply `normalizeDrugFields()` from admin.js to index.js.
+
 ### Testing admin.html locally
 - Admin page requires Google Sign-in — most features won't work in local preview
 - Use `npm run build:prod` then serve from `dist/` (NOT `build:dev` — admin.html needs inlined CSS/JS)

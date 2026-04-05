@@ -366,19 +366,42 @@
     calculate();
   }
 
+  let lastCalcResult = null;
+
+  function buildCalcShareText(drug, pt, result) {
+    var dt = IVDrugRef.ShareExport ? IVDrugRef.ShareExport.thaiDateTime() : '';
+    var sex = pt.sex === 'M' ? '\u0e0a\u0e32\u0e22' : '\u0e2b\u0e0d\u0e34\u0e07'; // ชาย/หญิง
+    var text = '=== ' + drug.name + ' Dose ===\n';
+    text += '\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48: ' + dt + '\n\n'; // วันที่
+    text += '\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22: ' + sex + ' ' + pt.age + ' \u0e1b\u0e35 ' + pt.wt + ' kg SCr ' + pt.scr + '\n'; // ผู้ป่วย ... ปี
+    if (pt.crcl) text += 'CrCl: ' + pt.crcl.toFixed(1) + ' mL/min\n';
+    text += '\n\u0e41\u0e19\u0e30\u0e19\u0e33: ' + result.title + '\n'; // แนะนำ
+    result.details.forEach(function(d) {
+      // Strip HTML tags from values
+      var v = d.v.replace(/<[^>]*>/g, '');
+      text += '- ' + d.l + ': ' + v + '\n';
+    });
+    var ver = IVDrugRef.VERSION || '5.1.0';
+    text += '\n---\nIV DrugRef v' + ver + '\nhttps://rxbenz.github.io/iv-drugref/\n';
+    text += '\u26a0 \u0e43\u0e0a\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e33\u0e19\u0e27\u0e13 \u0e44\u0e21\u0e48\u0e17\u0e14\u0e41\u0e17\u0e19 clinical judgment';
+    // ⚠ ใช้เป็นเครื่องมือช่วยคำนวณ ไม่ทดแทน clinical judgment
+    return text;
+  }
+
   function calculate() {
     const sec = document.getElementById('outputSection');
     const body = document.getElementById('outputBody');
     const header = document.getElementById('outputHeader');
-    if (!selectedDrug) { sec.style.display = 'none'; return; }
+    if (!selectedDrug) { sec.style.display = 'none'; lastCalcResult = null; return; }
 
     const drug = CALC_DRUGS.find(d => d.id === selectedDrug);
     if (!drug) return;
 
     // getPatientFromForm runs validation internally
     const pt = IVDrugRef.getPatientFromForm();
-    if (!pt.validation.allValid) { sec.style.display = 'none'; return; }
+    if (!pt.validation.allValid) { sec.style.display = 'none'; lastCalcResult = null; return; }
     const result = drug.calc(pt);
+    lastCalcResult = { drug: drug, pt: pt, result: result };
 
     header.innerHTML = `📊 ${drug.name}`;
     body.innerHTML = `
@@ -391,6 +414,9 @@
           ${result.details.map(d => `<div class="detail-row"><span class="detail-label">${d.l}</span><span class="detail-value">${d.v}</span></div>`).join('')}
         </div>
         <div class="info-box ${result.infoType}" style="margin-top:14px;">${result.info}</div>
+        <div class="share-row">
+          <button class="btn" data-action="copyCalcResult">\ud83d\udccb \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01</button>
+        </div>
       </div>
     `;
     sec.style.display = 'block';
@@ -487,7 +513,12 @@
 
   // ====== Event Delegation ======
   IVDrugRef.delegate(document, 'click', {
-    selectDrug: function(e, t) { if (e.target.closest('a[href]')) return; selectDrug(t.dataset.id); }
+    selectDrug: function(e, t) { if (e.target.closest('a[href]')) return; selectDrug(t.dataset.id); },
+    copyCalcResult: function() {
+      if (!lastCalcResult || !IVDrugRef.ShareExport) return;
+      var text = buildCalcShareText(lastCalcResult.drug, lastCalcResult.pt, lastCalcResult.result);
+      IVDrugRef.ShareExport.copyText(text, { page: 'calculator', drug: lastCalcResult.drug.name });
+    }
   });
   IVDrugRef.delegate(document, 'input', {
     patientInput: function() { updateCrCl(); calculate(); }

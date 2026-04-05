@@ -473,3 +473,39 @@ div.header .cross-link.calc-link:hover {
   .patient-ctx-bar { padding: 5px 10px; }
   .ctx-chip { font-size: 10px; padding: 3px 7px; }
 }
+
+/* ---- Share / Export buttons ---- */
+.share-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.share-row .btn {
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--card, #fff);
+  color: var(--text, #0f172a);
+  cursor: pointer;
+  transition: all .15s;
+}
+.share-row .btn:active {
+  transform: scale(0.96);
+}
+
+/* ---- Print-to-PDF ---- */
+#ivdr-print-area { display: none; }
+
+@media print {
+  body > *:not(#ivdr-print-area) { display: none !important; }
+  #ivdr-print-area {
+    display: block !important;
+    position: static !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  @page { margin: 12mm; }
+}

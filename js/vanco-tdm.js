@@ -565,6 +565,8 @@ function runBayesian(){
     const aucMAP=currentPK.auc24;
     const aucLo=aucArr.length>0?aucArr[Math.floor(aucArr.length*0.05)]:NaN;
     const aucHi=aucArr.length>0?aucArr[Math.floor(aucArr.length*0.95)]:NaN;
+    // Store on currentPK for share/export access
+    currentPK.aucLo=aucLo; currentPK.aucHi=aucHi;
 
     // CL CI
     const clArr=samples.map(s=>s.cl).filter(v=>isFinite(v)).sort((a,b)=>a-b);
@@ -584,6 +586,10 @@ function runBayesian(){
         <div class="result-value" style="color:var(--${aucCls})">${aucMAP.toFixed(0)}</div>
         <div class="result-sub" style="color:var(--${aucCls})">${aucMsg}</div>
         <div style="font-size:11px;color:var(--text2);margin-top:6px">90% CI: <span class="ci-badge" style="background:var(--${aucCls}-dim);color:var(--${aucCls})">${aucLo.toFixed(0)} — ${aucHi.toFixed(0)}</span></div>
+      </div>
+      <div class="share-row">
+        <button class="btn" data-action="shareVancoLine">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c LINE</button>
+        <button class="btn" data-action="exportVancoPdf">\ud83d\udcc4 Export PDF</button>
       </div>`;
 
     document.getElementById('pkStats').innerHTML=`
@@ -667,6 +673,180 @@ function genDoseOpts(){
       <div class="opt-auc">AUC₂₄ ${o.auc.toFixed(0)} | Pk ${o.pk.toFixed(1)} | Tr ${o.tr.toFixed(1)}</div>
       <span class="opt-badge" style="background:var(--${c}-dim);color:var(--${c})">${o.ok?'In target':o.auc<400?'Below':'Above'}</span></div>`;
   }).join('');
+}
+
+// ============================================================
+// SHARE / EXPORT HELPERS
+// ============================================================
+function fmtDT(dtStr) {
+  if (!dtStr) return '-';
+  var d = new Date(dtStr);
+  var dd = String(d.getDate()).padStart(2,'0');
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var yy = d.getFullYear()+543;
+  var hh = String(d.getHours()).padStart(2,'0');
+  var mn = String(d.getMinutes()).padStart(2,'0');
+  return dd+'/'+mm+'/'+yy+' '+hh+':'+mn;
+}
+
+function getOptData() {
+  var el = document.getElementById('optDose');
+  if (!el || !currentPK) return null;
+  var od = +el.value, oi = +document.getElementById('optInterval').value, oif = +document.getElementById('optInfusion').value;
+  var auc24 = calcAUC_ss(currentPK.cl, currentPK.vd, od, oi, oif) * (24/oi);
+  var ss = ssPeakTrough(currentPK.cl, currentPK.vd, od, oi, oif);
+  return { dose: od, interval: oi, infusion: oif, auc24: auc24, peak: ss.peak, trough: ss.trough };
+}
+
+function buildVancoShareText() {
+  if (!currentPK) return '';
+  var SE = IVDrugRef.ShareExport;
+  var dt = SE ? SE.thaiDateTime() : '';
+  var pt = getPatient();
+  var crcl = cockcroft(pt.age, pt.wt, pt.scr, pt.sex, pt.ht);
+  var sex = pt.sex === 'M' ? '\u0e0a\u0e32\u0e22' : '\u0e2b\u0e0d\u0e34\u0e07';
+
+  var interp = '\u0e2d\u0e22\u0e39\u0e48\u0e43\u0e19 target range';
+  if (currentPK.auc24 < 400) interp = '\u0e15\u0e48\u0e33\u0e01\u0e27\u0e48\u0e32 target (subtherapeutic)';
+  else if (currentPK.auc24 > 600) interp = '\u0e2a\u0e39\u0e07\u0e01\u0e27\u0e48\u0e32 target (\u0e40\u0e2a\u0e35\u0e48\u0e22\u0e07 nephrotoxicity)';
+
+  var text = '=== Vancomycin TDM ===\n';
+  text += '\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48: ' + dt + '\n\n';
+  text += '\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22: ' + sex + ' ' + pt.age + ' \u0e1b\u0e35 ' + pt.wt + ' kg SCr ' + pt.scr + '\n';
+  text += 'CrCl: ' + crcl.toFixed(1) + ' mL/min\n\n';
+
+  // Dose history
+  text += '--- \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e40\u0e14\u0e34\u0e21 ---\n';
+  for (var i = 0; i < doses.length; i++) {
+    var d = doses[i];
+    text += '#' + (i+1) + ': ' + d.amount + ' mg q' + d.interval + 'h';
+    text += ' (infuse ' + d.infusion + 'h, ' + d.nDoses + ' doses)';
+    if (d.dateTime) text += ' \u0e40\u0e23\u0e34\u0e48\u0e21 ' + fmtDT(d.dateTime);
+    text += '\n';
+  }
+
+  // Measured levels
+  text += '\n--- \u0e1c\u0e25 Level ---\n';
+  for (var j = 0; j < levels.length; j++) {
+    var lv = levels[j];
+    text += '#' + (j+1) + ': ' + lv.value + ' mcg/mL';
+    if (lv.dateTime) text += ' \u0e40\u0e08\u0e32\u0e30 ' + fmtDT(lv.dateTime);
+    text += '\n';
+  }
+
+  // AUC result
+  text += '\n--- \u0e1c\u0e25\u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c ---\n';
+  text += 'AUC\u2082\u2084: ' + currentPK.auc24.toFixed(0) + ' (target 400-600)\n';
+  text += '90% CI: ' + currentPK.aucLo.toFixed(0) + '\u2013' + currentPK.aucHi.toFixed(0) + '\n';
+  text += '\u0e1c\u0e25\u0e01\u0e32\u0e23\u0e41\u0e1b\u0e25\u0e1c\u0e25: ' + interp + '\n';
+  text += 'SS Peak: ' + currentPK.ssPeak.toFixed(1) + ' | SS Trough: ' + currentPK.ssTrough.toFixed(1) + '\n';
+  text += 'PK: CL ' + currentPK.cl.toFixed(3) + ' L/hr | Vd ' + currentPK.vd.toFixed(1) + ' L | t\u00bd ' + currentPK.halflife.toFixed(1) + 'h\n';
+  text += 'Model: ' + currentPK.model + '\n';
+
+  // Dose optimizer recommendation
+  var opt = getOptData();
+  if (opt) {
+    text += '\n--- \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e43\u0e2b\u0e21\u0e48\u0e17\u0e35\u0e48\u0e41\u0e19\u0e30\u0e19\u0e33 ---\n';
+    text += opt.dose + ' mg q' + opt.interval + 'h (infuse ' + opt.infusion + 'h)\n';
+    text += '\u0e04\u0e32\u0e14\u0e01\u0e32\u0e23\u0e13\u0e4c AUC\u2082\u2084: ' + opt.auc24.toFixed(0);
+    var optMsg = ' \u2714 In target';
+    if (opt.auc24 < 400) optMsg = ' \u26a0 Below target';
+    else if (opt.auc24 > 600) optMsg = ' \u26a0 Above target';
+    text += optMsg + '\n';
+    text += 'Predicted Peak: ' + opt.peak.toFixed(1) + ' | Trough: ' + opt.trough.toFixed(1) + '\n';
+  }
+
+  text += '\n---\nIV DrugRef v' + (IVDrugRef.VERSION || '5.1.0') + '\nhttps://rxbenz.github.io/iv-drugref/\n';
+  text += '\u26a0 \u0e43\u0e0a\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e33\u0e19\u0e27\u0e13 \u0e44\u0e21\u0e48\u0e17\u0e14\u0e41\u0e17\u0e19 clinical judgment';
+  return text;
+}
+
+function buildVancoPrintData() {
+  if (!currentPK) return null;
+  var pt = getPatient();
+  var crcl = cockcroft(pt.age, pt.wt, pt.scr, pt.sex, pt.ht);
+  var sex = pt.sex === 'M' ? '\u0e0a\u0e32\u0e22' : '\u0e2b\u0e0d\u0e34\u0e07';
+  var cellSt = 'padding:4px 8px;border-bottom:1px solid #e2e8f0;font-size:12px';
+
+  var interp = 'In target (400-600)';
+  var interpColor = '#16a34a';
+  if (currentPK.auc24 < 400) { interp = 'Below target (<400)'; interpColor = '#d97706'; }
+  else if (currentPK.auc24 > 600) { interp = 'Above target (>600)'; interpColor = '#dc2626'; }
+
+  var patientHtml = '<div style="font-size:13px;line-height:1.8">' +
+    '<b>\u0e40\u0e1e\u0e28:</b> ' + sex + ' &nbsp; <b>\u0e2d\u0e32\u0e22\u0e38:</b> ' + pt.age + ' \u0e1b\u0e35 &nbsp; ' +
+    '<b>\u0e19\u0e49\u0e33\u0e2b\u0e19\u0e31\u0e01:</b> ' + pt.wt + ' kg &nbsp; <b>SCr:</b> ' + pt.scr + ' mg/dL<br>' +
+    '<b>CrCl:</b> ' + crcl.toFixed(1) + ' mL/min' +
+    (pt.ht ? ' &nbsp; <b>\u0e2a\u0e48\u0e27\u0e19\u0e2a\u0e39\u0e07:</b> ' + pt.ht + ' cm' : '') +
+    '</div>';
+
+  // Dose history table
+  var doseHtml = '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;margin-bottom:4px">\ud83d\udc8a \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e40\u0e14\u0e34\u0e21</div>' +
+    '<table style="width:100%;font-size:11px;border-collapse:collapse">' +
+    '<tr style="background:#f1f5f9"><th style="'+cellSt+';text-align:left">#</th><th style="'+cellSt+';text-align:left">Dose</th><th style="'+cellSt+';text-align:left">Regimen</th><th style="'+cellSt+';text-align:left">\u0e40\u0e27\u0e25\u0e32\u0e40\u0e23\u0e34\u0e48\u0e21</th></tr>';
+  for (var i = 0; i < doses.length; i++) {
+    var d = doses[i];
+    doseHtml += '<tr><td style="'+cellSt+'">' + (i+1) + '</td>' +
+      '<td style="'+cellSt+'">' + d.amount + ' mg x' + d.nDoses + ' doses</td>' +
+      '<td style="'+cellSt+'">q' + d.interval + 'h (infuse ' + d.infusion + 'h)</td>' +
+      '<td style="'+cellSt+'">' + fmtDT(d.dateTime) + '</td></tr>';
+  }
+  doseHtml += '</table></div>';
+
+  // Measured levels table
+  var lvlHtml = '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;margin-bottom:4px">\ud83e\ude78 \u0e1c\u0e25 Level \u0e17\u0e35\u0e48\u0e40\u0e08\u0e32\u0e30\u0e44\u0e14\u0e49</div>' +
+    '<table style="width:100%;font-size:11px;border-collapse:collapse">' +
+    '<tr style="background:#f1f5f9"><th style="'+cellSt+';text-align:left">#</th><th style="'+cellSt+';text-align:left">Level</th><th style="'+cellSt+';text-align:left">\u0e40\u0e27\u0e25\u0e32\u0e40\u0e08\u0e32\u0e30</th></tr>';
+  for (var j = 0; j < levels.length; j++) {
+    var lv = levels[j];
+    lvlHtml += '<tr><td style="'+cellSt+'">' + (j+1) + '</td>' +
+      '<td style="'+cellSt+'">' + lv.value + ' mcg/mL</td>' +
+      '<td style="'+cellSt+'">' + fmtDT(lv.dateTime) + '</td></tr>';
+  }
+  lvlHtml += '</table></div>';
+
+  // AUC result box + PK table
+  var aucHtml = '<div style="text-align:center;padding:14px;border:2px solid ' + interpColor + ';border-radius:10px;margin-bottom:14px">' +
+    '<div style="font-size:12px;color:#64748b">AUC\u2082\u2084/MIC (' + currentPK.model + ')</div>' +
+    '<div style="font-size:32px;font-weight:700;color:' + interpColor + '">' + currentPK.auc24.toFixed(0) + '</div>' +
+    '<div style="font-size:12px;color:' + interpColor + '">' + interp + '</div>' +
+    '<div style="font-size:11px;color:#64748b;margin-top:4px">90% CI: ' + currentPK.aucLo.toFixed(0) + ' \u2013 ' + currentPK.aucHi.toFixed(0) + '</div>' +
+    '</div>' +
+    '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px">' +
+    '<tr><td style="'+cellSt+'"><b>SS Peak</b></td><td style="'+cellSt+'">' + currentPK.ssPeak.toFixed(1) + ' mcg/mL</td>' +
+    '<td style="'+cellSt+'"><b>SS Trough</b></td><td style="'+cellSt+'">' + currentPK.ssTrough.toFixed(1) + ' mcg/mL</td></tr>' +
+    '<tr><td style="'+cellSt+'"><b>CL</b></td><td style="'+cellSt+'">' + currentPK.cl.toFixed(3) + ' L/hr</td>' +
+    '<td style="'+cellSt+'"><b>Vd</b></td><td style="'+cellSt+'">' + currentPK.vd.toFixed(1) + ' L</td></tr>' +
+    '<tr><td style="'+cellSt+'"><b>Ke</b></td><td style="'+cellSt+'">' + currentPK.ke.toFixed(4) + ' hr\u207b\u00b9</td>' +
+    '<td style="'+cellSt+'"><b>t\u00bd</b></td><td style="'+cellSt+'">' + currentPK.halflife.toFixed(1) + ' hr</td></tr>' +
+    '</table>';
+
+  // Dose optimizer recommendation
+  var optHtml = '';
+  var opt = getOptData();
+  if (opt) {
+    var optColor = '#16a34a', optMsg = 'In target';
+    if (opt.auc24 < 400) { optColor = '#d97706'; optMsg = 'Below target'; }
+    else if (opt.auc24 > 600) { optColor = '#dc2626'; optMsg = 'Above target'; }
+    optHtml = '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:14px">' +
+      '<div style="font-size:12px;font-weight:600;margin-bottom:6px">\ud83c\udfaf \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e43\u0e2b\u0e21\u0e48\u0e17\u0e35\u0e48\u0e41\u0e19\u0e30\u0e19\u0e33</div>' +
+      '<div style="font-size:16px;font-weight:700;color:#0f172a">' + opt.dose + ' mg q' + opt.interval + 'h</div>' +
+      '<div style="font-size:12px;color:#64748b;margin-top:4px">Infusion: ' + opt.infusion + ' hr</div>' +
+      '<div style="font-size:13px;margin-top:6px;color:' + optColor + ';font-weight:600">' +
+        '\u0e04\u0e32\u0e14\u0e01\u0e32\u0e23\u0e13\u0e4c AUC\u2082\u2084: ' + opt.auc24.toFixed(0) + ' \u2014 ' + optMsg + '</div>' +
+      '<div style="font-size:12px;color:#64748b;margin-top:2px">Predicted Peak: ' + opt.peak.toFixed(1) + ' mcg/mL | Trough: ' + opt.trough.toFixed(1) + ' mcg/mL</div>' +
+      '</div>';
+  }
+
+  var resultsHtml = doseHtml + lvlHtml + aucHtml + optHtml;
+
+  return {
+    title: 'Vancomycin Bayesian TDM Report',
+    patientHtml: patientHtml,
+    resultsHtml: resultsHtml,
+    chartCanvas: document.getElementById('pkGraph'),
+    analytics: { page: 'vanco-tdm', drug: 'Vancomycin', auc: currentPK.auc24.toFixed(0) }
+  };
 }
 
 // ============================================================
@@ -795,6 +975,14 @@ function trackTDMResult(model, aucMAP, aucLo, aucHi, acceptRate, pt, pkResult, d
       var d = document.getElementById('optDose'); if (d) d.value = t.dataset.dose;
       var q = document.getElementById('optInterval'); if (q) q.value = t.dataset.q;
       updateOptimizer(); genDoseOpts();
+    },
+    shareVancoLine: function() {
+      if (!currentPK || !IVDrugRef.ShareExport) return;
+      IVDrugRef.ShareExport.shareToLine(buildVancoShareText(), { page: 'vanco-tdm', drug: 'Vancomycin', auc: currentPK.auc24.toFixed(0) });
+    },
+    exportVancoPdf: function() {
+      if (!currentPK || !IVDrugRef.ShareExport) return;
+      IVDrugRef.ShareExport.printReport(buildVancoPrintData());
     }
   });
   IVDrugRef.delegate(document, 'change', {

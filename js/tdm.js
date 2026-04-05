@@ -654,6 +654,17 @@ const TDMHub = (function() {
       setLevel(i, k, v) { levels[i][k] = v; },
       setModel(id) { selectedModel = id; renderModelSelect(); },
       updateOpt() { updateOptimizer(); genDoseOpts(); },
+      getDoses() { return doses; },
+      getLevels() { return levels; },
+      getPK() { return currentPK; },
+      getOptData() {
+        var el = document.getElementById('vancoOptDose');
+        if (!el || !currentPK) return null;
+        var od = +el.value, oi = +document.getElementById('vancoOptInterval').value, oif = +document.getElementById('vancoOptInfusion').value;
+        var auc24 = calcAUC_ss(currentPK.cl, currentPK.vd, od, oi, oif) * (24/oi);
+        var ss = ssPeakTrough(currentPK.cl, currentPK.vd, od, oi, oif);
+        return { dose: od, interval: oi, infusion: oif, auc24: auc24, peak: ss.peak, trough: ss.trough };
+      },
       run() {
         const pt = updateCrCl();
         updateRef();
@@ -718,7 +729,11 @@ const TDMHub = (function() {
               <div class="result-box ${aucCls}"><div class="result-title">AUC₂₄/MIC (${currentPK.model})</div>
               <div class="result-value" style="color:var(--${aucCls})">${aucMAP.toFixed(0)}</div>
               <div class="result-sub" style="color:var(--${aucCls})">${aucMsg}</div>
-              <div style="font-size:11px;color:var(--text2);margin-top:6px">90% CI: <span class="ci-badge" style="background:var(--${aucCls}-dim);color:var(--${aucCls})">${aucLo.toFixed(0)} — ${aucHi.toFixed(0)}</span></div></div>`;
+              <div style="font-size:11px;color:var(--text2);margin-top:6px">90% CI: <span class="ci-badge" style="background:var(--${aucCls}-dim);color:var(--${aucCls})">${aucLo.toFixed(0)} — ${aucHi.toFixed(0)}</span></div></div>
+              <div class="share-row"><button class="btn" data-action="shareTDM" data-drug="vancomycin">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="vancomycin">\ud83d\udcc4 PDF</button></div>`;
+
+          // Store AUC CI on currentPK for share access
+          currentPK.aucLo = aucLo; currentPK.aucHi = aucHi;
 
           const pkEl = document.getElementById('vancoPkStats');
           if (pkEl)
@@ -959,7 +974,8 @@ const TDMHub = (function() {
             <div class="info-box amber" style="font-size:11px;margin-top:8px">
               <b>Toxicity signs by level:</b><br>
               >20: Nystagmus | >30: Ataxia, slurred speech | >40: Lethargy, confusion | >50: Coma, seizures
-            </div>`;
+            </div>
+            <div class="share-row"><button class="btn" data-action="shareTDM" data-drug="phenytoin">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="phenytoin">\ud83d\udcc4 PDF</button></div>`;
 
         const mm = estimateMM(currentDose, useCss, pt.wt);
 
@@ -1300,6 +1316,9 @@ const TDMHub = (function() {
               <b>Monitor:</b> SCr daily, audiometry weekly, vestibular function
             </div>`;
 
+        const agShareEl = document.getElementById('agDoseRec');
+        if (agShareEl) agShareEl.innerHTML += '<div class="share-row"><button class="btn" data-action="shareTDM" data-drug="aminoglycoside">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="aminoglycoside">\ud83d\udcc4 PDF</button></div>';
+
         drawAGGraph(drug, dose, interval, infDuration, ke, vd);
         const agResEl = document.getElementById('agResults');
         if (agResEl) agResEl.style.display = 'block';
@@ -1457,6 +1476,9 @@ const TDMHub = (function() {
               • VPA level: 3-5 days after dose change, trough preferred<br>
               • Free VPA level: if albumin low, VPA >75, uremia, pregnancy, elderly
             </div>`;
+
+        const vpaInterEl = document.getElementById('vpaInteractions');
+        if (vpaInterEl) vpaInterEl.innerHTML += '<div class="share-row"><button class="btn" data-action="shareTDM" data-drug="valproate">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="valproate">\ud83d\udcc4 PDF</button></div>';
 
         const vpaResEl = document.getElementById('vpaResults');
         if (vpaResEl) vpaResEl.style.display = 'block';
@@ -1826,6 +1848,12 @@ const TDMHub = (function() {
           }
         });
 
+        const tacroShareRow = document.createElement('div');
+        tacroShareRow.className = 'share-row';
+        tacroShareRow.innerHTML = '<button class="btn" data-action="shareTDM" data-drug="tacrolimus">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="tacrolimus">\ud83d\udcc4 PDF</button>';
+        const tacroResEl = document.getElementById('tacroResults');
+        if (tacroResEl) { var existing = tacroResEl.querySelector('.share-row'); if (existing) existing.remove(); tacroResEl.appendChild(tacroShareRow); }
+
         const resEl = document.getElementById('tacroResults');
         if (resEl) resEl.style.display = 'block';
         resEl?.scrollIntoView({ behavior: 'smooth' });
@@ -1945,6 +1973,12 @@ const TDMHub = (function() {
           '<tr><td>Est. t½</td><td>' + (Math.LN2 / (ke || 0.01)).toFixed(0) + ' hr</td></tr>' +
           '<tr><td>Bioavailability</td><td>' + (F * 100).toFixed(0) + '% (' + formulation + ')</td></tr>' +
           '<tr><td>CrCl</td><td>' + (pt.crcl || 0).toFixed(1) + ' mL/min</td></tr>';
+
+        const digShareRow = document.createElement('div');
+        digShareRow.className = 'share-row';
+        digShareRow.innerHTML = '<button class="btn" data-action="shareTDM" data-drug="digoxin">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="digoxin">\ud83d\udcc4 PDF</button>';
+        const digResEl2 = document.getElementById('digResults');
+        if (digResEl2) { var existing = digResEl2.querySelector('.share-row'); if (existing) existing.remove(); digResEl2.appendChild(digShareRow); }
 
         const resEl = document.getElementById('digResults');
         if (resEl) resEl.style.display = 'block';
@@ -2068,6 +2102,12 @@ const TDMHub = (function() {
           el.innerHTML = html;
         }
 
+        const warINRShareRow = document.createElement('div');
+        warINRShareRow.className = 'share-row';
+        warINRShareRow.innerHTML = '<button class="btn" data-action="shareTDM" data-drug="warfarin-inr">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="warfarin-inr">\ud83d\udcc4 PDF</button>';
+        const warINRResEl = document.getElementById('warINRResults');
+        if (warINRResEl) { var existing = warINRResEl.querySelector('.share-row'); if (existing) existing.remove(); warINRResEl.appendChild(warINRShareRow); }
+
         const resEl = document.getElementById('warINRResults');
         if (resEl) resEl.style.display = 'block';
       },
@@ -2120,6 +2160,12 @@ const TDMHub = (function() {
           el.innerHTML = html;
         }
 
+        const warPGxShareRow = document.createElement('div');
+        warPGxShareRow.className = 'share-row';
+        warPGxShareRow.innerHTML = '<button class="btn" data-action="shareTDM" data-drug="warfarin-pgx">\ud83d\udccb \u0e41\u0e0a\u0e23\u0e4c</button><button class="btn" data-action="exportTDM" data-drug="warfarin-pgx">\ud83d\udcc4 PDF</button>';
+        const warPGxResEl = document.getElementById('warPGxResults');
+        if (warPGxResEl) { var existing = warPGxResEl.querySelector('.share-row'); if (existing) existing.remove(); warPGxResEl.appendChild(warPGxShareRow); }
+
         const resEl = document.getElementById('warPGxResults');
         if (resEl) resEl.style.display = 'block';
       }
@@ -2148,6 +2194,10 @@ const TDMHub = (function() {
     VancoTDM_setLevel: (i, k, v) => VancoTDM.setLevel(i, k, v),
     VancoTDM_setModel: (id) => VancoTDM.setModel(id),
     VancoTDM_updateOpt: () => VancoTDM.updateOpt(),
+    VancoTDM_getDoses: () => VancoTDM.getDoses(),
+    VancoTDM_getLevels: () => VancoTDM.getLevels(),
+    VancoTDM_getPK: () => VancoTDM.getPK(),
+    VancoTDM_getOptData: () => VancoTDM.getOptData(),
 
     // Phenytoin TDM module
     PhenytoinTDM_run: () => PhenytoinTDM.run(),
@@ -2204,7 +2254,9 @@ IVDrugRef.delegate(document, 'click', {
   tacrolimusRun: function() { TDMHub.TacrolimusTDM_run(); },
   digoxinRun: function() { TDMHub.DigoxinTDM_run(); },
   warfarinINRRun: function() { TDMHub.WarfarinTDM_runINR(); },
-  warfarinPGxRun: function() { TDMHub.WarfarinTDM_runPGx(); }
+  warfarinPGxRun: function() { TDMHub.WarfarinTDM_runPGx(); },
+  shareTDM: function(e, t) { tdmShareLine(t.dataset.drug); },
+  exportTDM: function(e, t) { tdmExportPdf(t.dataset.drug); }
 });
 IVDrugRef.delegate(document, 'change', {
   vancoSetDose: function(e, t) {
@@ -2217,3 +2269,303 @@ IVDrugRef.delegate(document, 'change', {
   },
   agUpdateUI: function() { TDMHub.AminoglycosideTDM_updateUI(); }
 });
+
+// ============================================================
+// SHARE / EXPORT HELPERS (DOM-based extraction for all drug tabs)
+// ============================================================
+var TDM_RESULT_SECTIONS = {
+  'vancomycin': 'vancoResults',
+  'phenytoin': 'phenyResults',
+  'aminoglycoside': 'agResults',
+  'valproate': 'vpaResults',
+  'tacrolimus': 'tacroResults',
+  'digoxin': 'digResults',
+  'warfarin-inr': 'warINRResults',
+  'warfarin-pgx': 'warPGxResults'
+};
+var TDM_DRUG_NAMES = {
+  'vancomycin': 'Vancomycin',
+  'phenytoin': 'Phenytoin',
+  'aminoglycoside': 'Aminoglycoside',
+  'valproate': 'Valproate',
+  'tacrolimus': 'Tacrolimus',
+  'digoxin': 'Digoxin',
+  'warfarin-inr': 'Warfarin (INR)',
+  'warfarin-pgx': 'Warfarin (PGx)'
+};
+var TDM_GRAPH_IDS = {
+  'vancomycin': 'vancoGraph',
+  'aminoglycoside': 'agGraph'
+};
+
+function extractTDMResultText(drug) {
+  var sectionId = TDM_RESULT_SECTIONS[drug];
+  if (!sectionId) return '';
+  var section = document.getElementById(sectionId);
+  if (!section || section.style.display === 'none') return '';
+
+  // Extract text from result boxes, stat grids, pk tables, info boxes
+  var lines = [];
+  // Result boxes
+  section.querySelectorAll('.result-box').forEach(function(box) {
+    var title = box.querySelector('.result-title');
+    var value = box.querySelector('.result-value');
+    var sub = box.querySelector('.result-sub');
+    if (value) lines.push((title ? title.textContent.trim() + ': ' : '') + value.textContent.trim());
+    if (sub) lines.push(sub.textContent.trim());
+  });
+  // Stat grids
+  section.querySelectorAll('.stat').forEach(function(s) {
+    var label = s.querySelector('.stat-label');
+    var val = s.querySelector('.stat-val');
+    if (label && val) lines.push(label.textContent.trim() + ': ' + val.textContent.trim());
+  });
+  // PK tables
+  section.querySelectorAll('.pk-table tr, table tr').forEach(function(tr) {
+    var cells = tr.querySelectorAll('td');
+    if (cells.length >= 2) lines.push(cells[0].textContent.trim() + ': ' + cells[1].textContent.trim());
+  });
+  return lines.join('\n');
+}
+
+function fmtDTHub(dtStr) {
+  if (!dtStr) return '-';
+  var d = new Date(dtStr);
+  var dd = String(d.getDate()).padStart(2,'0');
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var yy = d.getFullYear()+543;
+  var hh = String(d.getHours()).padStart(2,'0');
+  var mn = String(d.getMinutes()).padStart(2,'0');
+  return dd+'/'+mm+'/'+yy+' '+hh+':'+mn;
+}
+
+function buildVancoTDMShareText() {
+  var SE = IVDrugRef.ShareExport;
+  var dt = SE ? SE.thaiDateTime() : '';
+  var pt = TDMHub.getPatient();
+  var sex = pt.sex === 'M' ? '\u0e0a\u0e32\u0e22' : '\u0e2b\u0e0d\u0e34\u0e07';
+  var pk = TDMHub.VancoTDM_getPK();
+  if (!pk) return '';
+  var doses = TDMHub.VancoTDM_getDoses();
+  var levels = TDMHub.VancoTDM_getLevels();
+
+  var interp = '\u0e2d\u0e22\u0e39\u0e48\u0e43\u0e19 target range';
+  if (pk.auc24 < 400) interp = '\u0e15\u0e48\u0e33\u0e01\u0e27\u0e48\u0e32 target (subtherapeutic)';
+  else if (pk.auc24 > 600) interp = '\u0e2a\u0e39\u0e07\u0e01\u0e27\u0e48\u0e32 target (\u0e40\u0e2a\u0e35\u0e48\u0e22\u0e07 nephrotoxicity)';
+
+  var text = '=== Vancomycin TDM ===\n';
+  text += '\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48: ' + dt + '\n\n';
+  text += '\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22: ' + sex + ' ' + pt.age + ' \u0e1b\u0e35 ' + pt.wt + ' kg SCr ' + pt.scr + '\n';
+  if (pt.crcl) text += 'CrCl: ' + (typeof pt.crcl === 'number' ? pt.crcl.toFixed(1) : pt.crcl) + ' mL/min\n';
+
+  text += '\n--- \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e40\u0e14\u0e34\u0e21 ---\n';
+  for (var i = 0; i < doses.length; i++) {
+    var d = doses[i];
+    text += '#' + (i+1) + ': ' + d.amount + ' mg q' + d.interval + 'h';
+    text += ' (infuse ' + d.infusion + 'h, ' + d.nDoses + ' doses)';
+    if (d.dateTime) text += ' \u0e40\u0e23\u0e34\u0e48\u0e21 ' + fmtDTHub(d.dateTime);
+    text += '\n';
+  }
+
+  text += '\n--- \u0e1c\u0e25 Level ---\n';
+  for (var j = 0; j < levels.length; j++) {
+    var lv = levels[j];
+    text += '#' + (j+1) + ': ' + lv.value + ' mcg/mL';
+    if (lv.dateTime) text += ' \u0e40\u0e08\u0e32\u0e30 ' + fmtDTHub(lv.dateTime);
+    text += '\n';
+  }
+
+  text += '\n--- \u0e1c\u0e25\u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c ---\n';
+  text += 'AUC\u2082\u2084: ' + pk.auc24.toFixed(0) + ' (target 400-600)\n';
+  if (pk.aucLo) text += '90% CI: ' + pk.aucLo.toFixed(0) + '\u2013' + pk.aucHi.toFixed(0) + '\n';
+  text += '\u0e1c\u0e25\u0e01\u0e32\u0e23\u0e41\u0e1b\u0e25\u0e1c\u0e25: ' + interp + '\n';
+  text += 'SS Peak: ' + pk.ssPeak.toFixed(1) + ' | SS Trough: ' + pk.ssTrough.toFixed(1) + '\n';
+  text += 'PK: CL ' + pk.cl.toFixed(3) + ' L/hr | Vd ' + pk.vd.toFixed(1) + ' L | t\u00bd ' + pk.halflife.toFixed(1) + 'h\n';
+  text += 'Model: ' + pk.model + '\n';
+
+  var opt = TDMHub.VancoTDM_getOptData();
+  if (opt) {
+    text += '\n--- \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e43\u0e2b\u0e21\u0e48\u0e17\u0e35\u0e48\u0e41\u0e19\u0e30\u0e19\u0e33 ---\n';
+    text += opt.dose + ' mg q' + opt.interval + 'h (infuse ' + opt.infusion + 'h)\n';
+    text += '\u0e04\u0e32\u0e14\u0e01\u0e32\u0e23\u0e13\u0e4c AUC\u2082\u2084: ' + opt.auc24.toFixed(0);
+    var optMsg = ' \u2714 In target';
+    if (opt.auc24 < 400) optMsg = ' \u26a0 Below target';
+    else if (opt.auc24 > 600) optMsg = ' \u26a0 Above target';
+    text += optMsg + '\n';
+    text += 'Predicted Peak: ' + opt.peak.toFixed(1) + ' | Trough: ' + opt.trough.toFixed(1) + '\n';
+  }
+
+  var ver = IVDrugRef.VERSION || '5.1.0';
+  text += '\n---\nIV DrugRef v' + ver + '\nhttps://rxbenz.github.io/iv-drugref/\n';
+  text += '\u26a0 \u0e43\u0e0a\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e33\u0e19\u0e27\u0e13 \u0e44\u0e21\u0e48\u0e17\u0e14\u0e41\u0e17\u0e19 clinical judgment';
+  return text;
+}
+
+function buildTDMShareText(drug) {
+  // Vancomycin gets enriched version with dose/level/optimizer data
+  if (drug === 'vancomycin') return buildVancoTDMShareText();
+
+  var SE = IVDrugRef.ShareExport;
+  var dt = SE ? SE.thaiDateTime() : '';
+  var pt = TDMHub.getPatient();
+  var sex = pt.sex === 'M' ? '\u0e0a\u0e32\u0e22' : '\u0e2b\u0e0d\u0e34\u0e07';
+  var drugName = TDM_DRUG_NAMES[drug] || drug;
+
+  var text = '=== ' + drugName + ' TDM ===\n';
+  text += '\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48: ' + dt + '\n\n';
+  text += '\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22: ' + sex + ' ' + pt.age + ' \u0e1b\u0e35 ' + pt.wt + ' kg SCr ' + pt.scr + '\n';
+  if (pt.crcl) text += 'CrCl: ' + (typeof pt.crcl === 'number' ? pt.crcl.toFixed(1) : pt.crcl) + ' mL/min\n';
+  text += '\n';
+  text += extractTDMResultText(drug) + '\n';
+  var ver = IVDrugRef.VERSION || '5.1.0';
+  text += '\n---\nIV DrugRef v' + ver + '\nhttps://rxbenz.github.io/iv-drugref/\n';
+  text += '\u26a0 \u0e43\u0e0a\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e33\u0e19\u0e27\u0e13 \u0e44\u0e21\u0e48\u0e17\u0e14\u0e41\u0e17\u0e19 clinical judgment';
+  return text;
+}
+
+function tdmShareLine(drug) {
+  if (!IVDrugRef.ShareExport) return;
+  var text = buildTDMShareText(drug);
+  IVDrugRef.ShareExport.shareToLine(text, { page: 'tdm', drug: TDM_DRUG_NAMES[drug] || drug });
+}
+
+function buildVancoTDMPrintData() {
+  var pt = TDMHub.getPatient();
+  var sex = pt.sex === 'M' ? '\u0e0a\u0e32\u0e22' : '\u0e2b\u0e0d\u0e34\u0e07';
+  var pk = TDMHub.VancoTDM_getPK();
+  if (!pk) return null;
+  var doses = TDMHub.VancoTDM_getDoses();
+  var levels = TDMHub.VancoTDM_getLevels();
+  var cellSt = 'padding:4px 8px;border-bottom:1px solid #e2e8f0;font-size:12px';
+
+  var interp = 'In target (400-600)';
+  var interpColor = '#16a34a';
+  if (pk.auc24 < 400) { interp = 'Below target (<400)'; interpColor = '#d97706'; }
+  else if (pk.auc24 > 600) { interp = 'Above target (>600)'; interpColor = '#dc2626'; }
+
+  var patientHtml = '<div style="font-size:13px;line-height:1.8">' +
+    '<b>\u0e40\u0e1e\u0e28:</b> ' + sex + ' &nbsp; <b>\u0e2d\u0e32\u0e22\u0e38:</b> ' + pt.age + ' \u0e1b\u0e35 &nbsp; ' +
+    '<b>\u0e19\u0e49\u0e33\u0e2b\u0e19\u0e31\u0e01:</b> ' + pt.wt + ' kg &nbsp; <b>SCr:</b> ' + pt.scr + ' mg/dL' +
+    (pt.crcl ? ' &nbsp; <b>CrCl:</b> ' + (typeof pt.crcl === 'number' ? pt.crcl.toFixed(1) : pt.crcl) + ' mL/min' : '') +
+    '</div>';
+
+  // Dose history
+  var doseHtml = '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;margin-bottom:4px">\ud83d\udc8a \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e40\u0e14\u0e34\u0e21</div>' +
+    '<table style="width:100%;font-size:11px;border-collapse:collapse">' +
+    '<tr style="background:#f1f5f9"><th style="'+cellSt+';text-align:left">#</th><th style="'+cellSt+';text-align:left">Dose</th><th style="'+cellSt+';text-align:left">Regimen</th><th style="'+cellSt+';text-align:left">\u0e40\u0e27\u0e25\u0e32\u0e40\u0e23\u0e34\u0e48\u0e21</th></tr>';
+  for (var i = 0; i < doses.length; i++) {
+    var d = doses[i];
+    doseHtml += '<tr><td style="'+cellSt+'">' + (i+1) + '</td>' +
+      '<td style="'+cellSt+'">' + d.amount + ' mg x' + d.nDoses + ' doses</td>' +
+      '<td style="'+cellSt+'">q' + d.interval + 'h (infuse ' + d.infusion + 'h)</td>' +
+      '<td style="'+cellSt+'">' + fmtDTHub(d.dateTime) + '</td></tr>';
+  }
+  doseHtml += '</table></div>';
+
+  // Measured levels
+  var lvlHtml = '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;margin-bottom:4px">\ud83e\ude78 \u0e1c\u0e25 Level \u0e17\u0e35\u0e48\u0e40\u0e08\u0e32\u0e30\u0e44\u0e14\u0e49</div>' +
+    '<table style="width:100%;font-size:11px;border-collapse:collapse">' +
+    '<tr style="background:#f1f5f9"><th style="'+cellSt+';text-align:left">#</th><th style="'+cellSt+';text-align:left">Level</th><th style="'+cellSt+';text-align:left">\u0e40\u0e27\u0e25\u0e32\u0e40\u0e08\u0e32\u0e30</th></tr>';
+  for (var j = 0; j < levels.length; j++) {
+    var lv = levels[j];
+    lvlHtml += '<tr><td style="'+cellSt+'">' + (j+1) + '</td>' +
+      '<td style="'+cellSt+'">' + lv.value + ' mcg/mL</td>' +
+      '<td style="'+cellSt+'">' + fmtDTHub(lv.dateTime) + '</td></tr>';
+  }
+  lvlHtml += '</table></div>';
+
+  // AUC result + PK table
+  var aucHtml = '<div style="text-align:center;padding:14px;border:2px solid ' + interpColor + ';border-radius:10px;margin-bottom:14px">' +
+    '<div style="font-size:12px;color:#64748b">AUC\u2082\u2084/MIC (' + pk.model + ')</div>' +
+    '<div style="font-size:32px;font-weight:700;color:' + interpColor + '">' + pk.auc24.toFixed(0) + '</div>' +
+    '<div style="font-size:12px;color:' + interpColor + '">' + interp + '</div>' +
+    (pk.aucLo ? '<div style="font-size:11px;color:#64748b;margin-top:4px">90% CI: ' + pk.aucLo.toFixed(0) + ' \u2013 ' + pk.aucHi.toFixed(0) + '</div>' : '') +
+    '</div>' +
+    '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px">' +
+    '<tr><td style="'+cellSt+'"><b>SS Peak</b></td><td style="'+cellSt+'">' + pk.ssPeak.toFixed(1) + ' mcg/mL</td>' +
+    '<td style="'+cellSt+'"><b>SS Trough</b></td><td style="'+cellSt+'">' + pk.ssTrough.toFixed(1) + ' mcg/mL</td></tr>' +
+    '<tr><td style="'+cellSt+'"><b>CL</b></td><td style="'+cellSt+'">' + pk.cl.toFixed(3) + ' L/hr</td>' +
+    '<td style="'+cellSt+'"><b>Vd</b></td><td style="'+cellSt+'">' + pk.vd.toFixed(1) + ' L</td></tr>' +
+    '<tr><td style="'+cellSt+'"><b>Ke</b></td><td style="'+cellSt+'">' + pk.ke.toFixed(4) + ' hr\u207b\u00b9</td>' +
+    '<td style="'+cellSt+'"><b>t\u00bd</b></td><td style="'+cellSt+'">' + pk.halflife.toFixed(1) + ' hr</td></tr>' +
+    '</table>';
+
+  // Dose optimizer
+  var optHtml = '';
+  var opt = TDMHub.VancoTDM_getOptData();
+  if (opt) {
+    var optColor = '#16a34a', optMsg = 'In target';
+    if (opt.auc24 < 400) { optColor = '#d97706'; optMsg = 'Below target'; }
+    else if (opt.auc24 > 600) { optColor = '#dc2626'; optMsg = 'Above target'; }
+    optHtml = '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:14px">' +
+      '<div style="font-size:12px;font-weight:600;margin-bottom:6px">\ud83c\udfaf \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e43\u0e2b\u0e21\u0e48\u0e17\u0e35\u0e48\u0e41\u0e19\u0e30\u0e19\u0e33</div>' +
+      '<div style="font-size:16px;font-weight:700;color:#0f172a">' + opt.dose + ' mg q' + opt.interval + 'h</div>' +
+      '<div style="font-size:12px;color:#64748b;margin-top:4px">Infusion: ' + opt.infusion + ' hr</div>' +
+      '<div style="font-size:13px;margin-top:6px;color:' + optColor + ';font-weight:600">' +
+        '\u0e04\u0e32\u0e14\u0e01\u0e32\u0e23\u0e13\u0e4c AUC\u2082\u2084: ' + opt.auc24.toFixed(0) + ' \u2014 ' + optMsg + '</div>' +
+      '<div style="font-size:12px;color:#64748b;margin-top:2px">Predicted Peak: ' + opt.peak.toFixed(1) + ' mcg/mL | Trough: ' + opt.trough.toFixed(1) + ' mcg/mL</div>' +
+      '</div>';
+  }
+
+  return {
+    title: 'Vancomycin Bayesian TDM Report',
+    patientHtml: patientHtml,
+    resultsHtml: doseHtml + lvlHtml + aucHtml + optHtml,
+    chartCanvas: document.getElementById('vancoGraph'),
+    analytics: { page: 'tdm', drug: 'Vancomycin', auc: pk.auc24.toFixed(0) }
+  };
+}
+
+function tdmExportPdf(drug) {
+  if (!IVDrugRef.ShareExport) return;
+
+  // Vancomycin gets enriched version
+  if (drug === 'vancomycin') {
+    var vancoData = buildVancoTDMPrintData();
+    if (vancoData) { IVDrugRef.ShareExport.printReport(vancoData); return; }
+  }
+
+  var pt = TDMHub.getPatient();
+  var sex = pt.sex === 'M' ? '\u0e0a\u0e32\u0e22' : '\u0e2b\u0e0d\u0e34\u0e07';
+  var drugName = TDM_DRUG_NAMES[drug] || drug;
+  var sectionId = TDM_RESULT_SECTIONS[drug];
+  var section = sectionId ? document.getElementById(sectionId) : null;
+
+  var patientHtml = '<div style="font-size:13px;line-height:1.8">' +
+    '<b>\u0e40\u0e1e\u0e28:</b> ' + sex + ' &nbsp; <b>\u0e2d\u0e32\u0e22\u0e38:</b> ' + pt.age + ' \u0e1b\u0e35 &nbsp; ' +
+    '<b>\u0e19\u0e49\u0e33\u0e2b\u0e19\u0e31\u0e01:</b> ' + pt.wt + ' kg &nbsp; <b>SCr:</b> ' + pt.scr + ' mg/dL' +
+    (pt.crcl ? ' &nbsp; <b>CrCl:</b> ' + (typeof pt.crcl === 'number' ? pt.crcl.toFixed(1) : pt.crcl) + ' mL/min' : '') +
+    '</div>';
+
+  // Clone the result section HTML for print (strip buttons and share rows)
+  var resultsHtml = '';
+  if (section) {
+    var clone = section.cloneNode(true);
+    clone.querySelectorAll('.share-row, button, .btn').forEach(function(el) { el.remove(); });
+    clone.style.display = 'block';
+    clone.style.color = '#000';
+    clone.querySelectorAll('[style*="color:var("]').forEach(function(el) {
+      var s = el.getAttribute('style') || '';
+      s = s.replace(/color:var\(--green\)/g, 'color:#16a34a')
+           .replace(/color:var\(--amber\)/g, 'color:#d97706')
+           .replace(/color:var\(--red\)/g, 'color:#dc2626')
+           .replace(/color:var\(--blue\)/g, 'color:#2563eb')
+           .replace(/color:var\(--purple\)/g, 'color:#7c3aed')
+           .replace(/color:var\(--text2\)/g, 'color:#64748b')
+           .replace(/color:var\(--text3\)/g, 'color:#94a3b8');
+      el.setAttribute('style', s);
+    });
+    resultsHtml = clone.innerHTML;
+  }
+
+  var graphId = TDM_GRAPH_IDS[drug];
+  var chartCanvas = graphId ? document.getElementById(graphId) : null;
+
+  IVDrugRef.ShareExport.printReport({
+    title: drugName + ' TDM Report',
+    patientHtml: patientHtml,
+    resultsHtml: resultsHtml,
+    chartCanvas: chartCanvas,
+    analytics: { page: 'tdm', drug: drugName }
+  });
+}

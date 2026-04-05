@@ -2613,7 +2613,7 @@ const CURATED=[
 ['Ketamine','Midazolam','c'],['Ketamine','Fentanyl','c'],['Ketamine','Morphine','c'],
 ['Ketamine','Diazepam','i'],['Ketamine','Sodium bicarbonate','i'],['Ketamine','Phenobarbital','i'],
 ['Calcium','Sodium bicarbonate','i'],['Calcium','Potassium','c'],
-['Levetiracetam','Diazepam','v'],['Levetiracetam','Valproic','c'],
+['Levetiracetam','Diazepam','v'],['Levetiracetam','Sodium Valproate','c'],
 // Valproic+Meropenem: PK interaction (↓VPA 60-90%), NOT physical Y-site incompatibility — removed from compat matrix
 ['Methylprednisolone','Heparin','c'],['Methylprednisolone','Ondansetron','c'],
 ['Hydrocortisone','Heparin','c'],['Hydrocortisone','Midazolam','i'],
@@ -2649,16 +2649,14 @@ const CURATED=[
 ['Heparin','Cefepime','c'],['Heparin','Diltiazem','c'],['Heparin','Milrinone','c'],
 ['Midazolam','Cefepime','c'],['Midazolam','Diltiazem','c'],
 // Audit additions: critical missing pairs
-['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium','i'],
-['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['Mannitol','KCl','i'],
+['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium chloride','i'],
+['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['20% Mannitol','Potassium chloride','i'],
 ];
 
 // Build fast lookup: key = sorted pair of first-word-lowercase → status
 const CURATED_MAP = {};
 CURATED.forEach(([a, b, s]) => {
-  const ka = a.toLowerCase().split(' ')[0];
-  const kb = b.toLowerCase().split(' ')[0];
-  const key = [ka, kb].sort().join('|');
+  const key = [normKey(a), normKey(b)].sort().join('|');
   CURATED_MAP[key] = s;
 });
 
@@ -2671,9 +2669,7 @@ function rebuildCuratedMap(pairs) {
   // pairs = [[drugA, drugB, result], ...]
   Object.keys(CURATED_MAP).forEach(k => delete CURATED_MAP[k]);
   pairs.forEach(([a, b, s]) => {
-    const ka = a.toLowerCase().split(' ')[0];
-    const kb = b.toLowerCase().split(' ')[0];
-    const key = [ka, kb].sort().join('|');
+    const key = [normKey(a), normKey(b)].sort().join('|');
     CURATED_MAP[key] = s;
   });
 }
@@ -2713,7 +2709,13 @@ function loadCompatPairsFromSheet() {
 
 // Enhanced drug matching
 function normKey(generic) {
-  return generic.toLowerCase().split(' ')[0].replace(/[^a-z]/g, '');
+  // Find first word that contains letters (skip "20%", "5%", etc.)
+  const words = generic.toLowerCase().split(/[\s,()\/]+/);
+  for (const w of words) {
+    const cleaned = w.replace(/[^a-z]/g, '');
+    if (cleaned.length > 0) return cleaned;
+  }
+  return generic.toLowerCase().replace(/[^a-z]/g, '');
 }
 
 function parseNames(text) {

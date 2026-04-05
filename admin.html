@@ -5086,7 +5086,7 @@ const CURATED_PAIRS = [
 ['Ketamine','Midazolam','c'],['Ketamine','Fentanyl','c'],['Ketamine','Morphine','c'],
 ['Ketamine','Diazepam','i'],['Ketamine','Sodium bicarbonate','i'],['Ketamine','Phenobarbital','i'],
 ['Calcium','Sodium bicarbonate','i'],['Calcium','Potassium','c'],
-['Levetiracetam','Diazepam','v'],['Levetiracetam','Valproic','c'],
+['Levetiracetam','Diazepam','v'],['Levetiracetam','Sodium Valproate','c'],
 // Valproic+Meropenem: PK interaction, NOT Y-site — removed from compat matrix
 ['Methylprednisolone','Heparin','c'],['Methylprednisolone','Ondansetron','c'],
 ['Hydrocortisone','Heparin','c'],['Hydrocortisone','Midazolam','i'],
@@ -5121,8 +5121,8 @@ const CURATED_PAIRS = [
 ['Heparin','Cefepime','c'],['Heparin','Diltiazem','c'],['Heparin','Milrinone','c'],
 ['Midazolam','Cefepime','c'],['Midazolam','Diltiazem','c'],
 // Audit additions: critical missing pairs
-['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium','i'],
-['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['Mannitol','KCl','i'],
+['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium chloride','i'],
+['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['20% Mannitol','Potassium chloride','i'],
 ];
 
 async function importCuratedPairs() {

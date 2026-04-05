@@ -28,9 +28,9 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="shared.css">
-  <link rel="stylesheet" href="theme-light.css">
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme-light.css">
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 
 <body>
@@ -724,6 +724,22 @@
   </div>
 </div>
 
+<!-- ═══════ DIFF REVIEW MODAL ═══════ -->
+<div class="modal-overlay" id="diff-modal">
+  <div class="modal" style="max-width:960px">
+    <div class="modal-header">
+      <h2 id="diff-modal-title">🔍 ตรวจสอบการเปลี่ยนแปลง</h2>
+      <button class="modal-close" data-action="closeDiffModal">✕</button>
+    </div>
+    <div class="modal-body" id="diff-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeDiffModal">ปิด</button>
+      <button class="btn btn-success" id="diff-approve-btn" data-action="approveDrugFromDiff">✅ อนุมัติ</button>
+      <button class="btn btn-danger" id="diff-reject-btn" data-action="rejectDrugFromDiff">↩️ ส่งกลับ</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════ LOADING OVERLAY ═══════ -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner" style="width:40px;height:40px"></div>
@@ -742,9 +758,9 @@
 <!-- ═══════ SCRIPTS ═══════ -->
 <script src="i18n.js"></script>
 <script src="translations-en.js"></script>
-<script src="error-tracker.js"></script>
-<script src="core.js"></script>
-<script src="admin.js"></script>
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/admin.js"></script>
 
 </body>
 </html>

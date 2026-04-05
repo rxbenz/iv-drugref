@@ -1099,3 +1099,110 @@
   background: #e0f2fe;
   color: #0c4a6e;
 }
+
+/* ─── Diff Review Table ─── */
+.diff-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.diff-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.diff-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.diff-dot.changed { background: #f59e0b; }
+.diff-dot.added { background: #10b981; }
+.diff-dot.removed { background: #ef4444; }
+.diff-dot.same { background: #94a3b8; }
+
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.diff-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border-bottom: 2px solid var(--border);
+}
+.diff-table th:first-child { width: 160px; }
+.diff-row td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  word-break: break-word;
+}
+.diff-row .diff-label {
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-alt);
+  white-space: nowrap;
+}
+.diff-row.diff-same { opacity: 0.55; }
+.diff-row.diff-changed .diff-old {
+  background: #fef2f2;
+  color: #991b1b;
+  text-decoration: line-through;
+  text-decoration-color: #fca5a5;
+}
+.diff-row.diff-changed .diff-new {
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 600;
+}
+.diff-row.diff-added .diff-old {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.diff-row.diff-added .diff-new {
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 600;
+}
+.diff-row.diff-removed .diff-old {
+  background: #fef2f2;
+  color: #991b1b;
+}
+.diff-row.diff-removed .diff-new {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.diff-section-header td {
+  padding: 10px 12px 6px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.diff-new-drug-notice {
+  text-align: center;
+  padding: 24px;
+  background: #f0fdf4;
+  border-radius: var(--radius);
+  color: #166534;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .diff-table th:first-child { width: 100px; }
+  .diff-table { font-size: 12px; }
+  .diff-row td { padding: 6px 8px; }
+}

@@ -76,6 +76,10 @@ function errorResponse(msg) {
   return jsonResponse({ success: false, error: msg });
 }
 
+function tryParseJSON(str) {
+  try { return JSON.parse(str); } catch (e) { return str; }
+}
+
 // ──────────────────────────────────────────────
 // SHEET HELPERS
 // ──────────────────────────────────────────────
@@ -552,7 +556,13 @@ function handleAdminGetDrugs(user) {
  */
 function normalizeDrugRow(d) {
   // If already normalized (has lowercase 'generic'), return as-is
-  if (d.generic) return d;
+  if (d.generic) {
+    // Parse previousData if it's a JSON string
+    if (d.previousData && typeof d.previousData === 'string') {
+      d.previousData = tryParseJSON(d.previousData);
+    }
+    return d;
+  }
 
   var hadVal = d['HAD'] || d['had'] || false;
   if (hadVal === 'TRUE' || hadVal === true) hadVal = true;
@@ -597,7 +607,8 @@ function normalizeDrugRow(d) {
     },
     precautions: d['Precautions'] || d['precautions'] || '',
     monitoring: d['Monitoring'] || d['monitoring'] || '',
-    ref: d['Reference'] || d['ref'] || ''
+    ref: d['Reference'] || d['ref'] || '',
+    previousData: d['previousData'] ? tryParseJSON(d['previousData']) : null
   };
 }
 
@@ -608,7 +619,7 @@ function handleCreateDrug(user, data) {
   var sheet = getOrCreateSheet(SHEETS.DRUGS,
     ['id', 'generic', 'trade', 'strength', 'ed', 'had', 'categories', 'status',
      'reconst', 'dilution', 'admin', 'stability', 'compat', 'precautions', 'monitoring', 'ref',
-     'createdBy', 'createdAt', 'updatedAt'],
+     'createdBy', 'createdAt', 'updatedAt', 'previousData'],
     getDrugSS()
   );
 
@@ -643,6 +654,21 @@ function handleUpdateDrug(user, data) {
 
   for (var i = 1; i < all.length; i++) {
     if (String(all[i][idCol]) === String(data.id)) {
+      // ═══ Snapshot previous data when changing to pending (for diff review) ═══
+      var prevStatusCol = headers.indexOf('status');
+      var prevDataCol = headers.indexOf('previousData');
+      if (data.status === 'pending' && prevDataCol >= 0 && prevStatusCol >= 0 && all[i][prevStatusCol] === 'approved') {
+        var snapshot = {};
+        for (var h = 0; h < headers.length; h++) {
+          if (headers[h] && headers[h] !== 'previousData') {
+            var cellVal = all[i][h];
+            snapshot[headers[h]] = (typeof cellVal === 'string' && (cellVal.charAt(0) === '{' || cellVal.charAt(0) === '['))
+              ? tryParseJSON(cellVal) : cellVal;
+          }
+        }
+        sheet.getRange(i + 1, prevDataCol + 1).setValue(JSON.stringify(snapshot));
+      }
+
       for (var key in data) {
         if (key === 'id') continue;
         var col = headers.indexOf(key);
@@ -687,7 +713,7 @@ function handleApproveDrug(user, data) {
   var perm = checkPermission(user, 'admin');
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ต้องเป็น admin' });
 
-  var updateData = { id: data.id, status: 'approved' };
+  var updateData = { id: data.id, status: 'approved', previousData: '' };
   var result = handleUpdateDrug(user, updateData);
   addAuditLog(user, 'approveDrug', data.id, '', 'Approved by ' + user);
   return result;

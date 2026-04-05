@@ -310,11 +310,33 @@ async function apiCallChunked(action, drugs) {
 /* ═══════════════════════════════════════════
    DRUG LIST OPERATIONS
    ═══════════════════════════════════════════ */
+
+/** Ensure categories/monitoring are arrays and nested objects are parsed */
+function normalizeDrugFields(d) {
+  if (typeof d.categories === 'string') {
+    d.categories = d.categories.startsWith('[')
+      ? (function() { try { return JSON.parse(d.categories); } catch(e) { return d.categories.split(',').map(s => s.trim()).filter(Boolean); } })()
+      : d.categories.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  if (typeof d.monitoring === 'string') {
+    d.monitoring = d.monitoring.startsWith('[')
+      ? (function() { try { return JSON.parse(d.monitoring); } catch(e) { return d.monitoring.split(',').map(s => s.trim()).filter(Boolean); } })()
+      : d.monitoring.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  // Parse nested JSON objects if stored as strings (from GAS Sheet)
+  ['reconst', 'dilution', 'admin', 'stability', 'compat'].forEach(key => {
+    if (typeof d[key] === 'string' && d[key].startsWith('{')) {
+      try { d[key] = JSON.parse(d[key]); } catch(e) {}
+    }
+  });
+  return d;
+}
+
 async function loadDrugs() {
   showLoading('กำลังโหลดข้อมูลยา...');
   try {
     const result = await apiCall('getDrugs');
-    state.drugs = result.drugs || [];
+    state.drugs = (result.drugs || []).map(normalizeDrugFields);
     // Capture role from backend response
     if (result.myRole) {
       state.myRole = result.myRole;
@@ -341,7 +363,7 @@ async function loadDrugs() {
     // Fallback: load from localStorage cache
     const cached = localStorage.getItem(LS_PREFIX + 'drugsCache');
     if (cached) {
-      try { state.drugs = JSON.parse(cached); } catch (pe) { state.drugs = []; }
+      try { state.drugs = JSON.parse(cached).map(normalizeDrugFields); } catch (pe) { state.drugs = []; }
       populateCategories();
       renderStats();
       renderDrugTable();
@@ -552,7 +574,7 @@ function openDrugModal(drug = null) {
     'f-trade': drug?.trade || '',
     'f-strength': drug?.strength || '',
     'f-ed': drug?.ed || 'E',
-    'f-categories': (drug?.categories || []).join(', '),
+    'f-categories': Array.isArray(drug?.categories) ? drug.categories.join(', ') : (drug?.categories || ''),
     'f-reconst-solvent': drug?.reconst?.solvent || '',
     'f-reconst-volume': drug?.reconst?.volume || '',
     'f-reconst-conc': drug?.reconst?.conc || '',
@@ -567,7 +589,7 @@ function openDrugModal(drug = null) {
     'f-compat-ysite': drug?.compat?.ysite || '',
     'f-compat-incompat': drug?.compat?.incompat || '',
     'f-precautions': drug?.precautions || '',
-    'f-monitoring': (drug?.monitoring || []).join(', '),
+    'f-monitoring': Array.isArray(drug?.monitoring) ? drug.monitoring.join(', ') : (drug?.monitoring || ''),
     'f-ref': drug?.ref || '',
   };
   Object.entries(fields).forEach(([id, val]) => {
@@ -649,6 +671,15 @@ async function saveDrug(status) {
   }
   data.status = status;
   showLoading('กำลังบันทึก...');
+
+  // ═══ Snapshot previous approved data for diff review ═══
+  if (status === 'pending' && state.editingId) {
+    const existing = state.drugs.find(d => d.id === state.editingId);
+    if (existing && existing.status === 'approved') {
+      const { previousData: _, ...snapshot } = existing;
+      data.previousData = JSON.stringify(snapshot);
+    }
+  }
 
   const statusLabel = status === 'pending' ? '⏳ รออนุมัติ' : '📝 Draft';
   try {
@@ -789,6 +820,7 @@ function renderPendingList() {
           ${d.had ? '<span class="badge badge-had" style="margin-left:8px">⚠ HAD</span>' : ''}
         </div>
         <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-outline" data-action="openDiffModal" data-id="${d.id}">🔍 ตรวจสอบ</button>
           <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="${d.id}">✏️ แก้ไข</button>
           ${isAdmin() ? `<button class="btn btn-sm btn-success" data-action="approveDrug" data-id="${d.id}">✅ อนุมัติ</button>` : ''}
           ${isAdmin() ? `<button class="btn btn-sm btn-danger" data-action="rejectDrug" data-id="${d.id}">↩️ ส่งกลับ</button>` : '<span class="badge badge-pending">รอ Admin อนุมัติ</span>'}
@@ -802,6 +834,174 @@ function renderPendingList() {
       </div>
     </div>
   `).join('');
+}
+
+/* ═══════════════════════════════════════════
+   DIFF REVIEW MODAL
+   ═══════════════════════════════════════════ */
+
+/** Field definitions for diff display — [label, path, type] */
+const DIFF_FIELDS = [
+  // section: ข้อมูลทั่วไป
+  { section: 'ข้อมูลทั่วไป' },
+  { label: 'ชื่อสามัญ (Generic)', path: 'generic' },
+  { label: 'ชื่อการค้า (Trade)', path: 'trade' },
+  { label: 'ความแรง', path: 'strength' },
+  { label: 'บัญชียาหลัก', path: 'ed' },
+  { label: 'High-Alert Drug', path: 'had', type: 'boolean' },
+  { label: 'หมวดหมู่', path: 'categories', type: 'array' },
+  // section: การผสมยา
+  { section: 'การผสมยา (Reconstitution)' },
+  { label: 'ตัวทำละลาย', path: 'reconst.solvent' },
+  { label: 'ปริมาตรผสม', path: 'reconst.volume' },
+  { label: 'ความเข้มข้น', path: 'reconst.conc' },
+  // section: การเจือจาง
+  { section: 'การเจือจาง (Dilution)' },
+  { label: 'สารละลาย', path: 'dilution.diluent' },
+  { label: 'ปริมาตร', path: 'dilution.volume' },
+  { label: 'ความเข้มข้นสุดท้าย', path: 'dilution.finalConc' },
+  // section: การบริหารยา
+  { section: 'การบริหารยา (Administration)' },
+  { label: 'วิธีให้ยา', path: 'admin.route' },
+  { label: 'อัตราเร็ว', path: 'admin.rate' },
+  // section: ความคงตัว
+  { section: 'ความคงตัว (Stability)' },
+  { label: 'หลังผสม', path: 'stability.reconst' },
+  { label: 'หลังเจือจาง', path: 'stability.diluted' },
+  { label: 'การเก็บรักษา', path: 'stability.storage' },
+  // section: ความเข้ากัน
+  { section: 'ความเข้ากัน (Compatibility)' },
+  { label: 'Y-site compatible', path: 'compat.ysite' },
+  { label: 'Incompatible', path: 'compat.incompat' },
+  // section: อื่นๆ
+  { section: 'อื่นๆ' },
+  { label: 'ข้อควรระวัง', path: 'precautions' },
+  { label: 'Monitoring', path: 'monitoring', type: 'array' },
+  { label: 'อ้างอิง', path: 'ref' },
+];
+
+function getNestedVal(obj, path) {
+  if (!obj) return '';
+  return path.split('.').reduce((o, k) => (o && o[k] != null) ? o[k] : '', obj);
+}
+
+function formatDiffVal(val, type) {
+  if (type === 'boolean') return val ? '✅ ใช่' : '❌ ไม่';
+  if (type === 'array') {
+    const arr = Array.isArray(val) ? val : (typeof val === 'string' && val ? val.split(',').map(s => s.trim()) : []);
+    return arr.length ? arr.join(', ') : '';
+  }
+  if (val === '' || val == null) return '';
+  return String(val);
+}
+
+function openDiffModal(drugId) {
+  const drug = state.drugs.find(d => d.id === drugId);
+  if (!drug) { toast('ไม่พบข้อมูลยา', 'error'); return; }
+
+  state.diffDrugId = drugId;
+  const prev = drug.previousData || null;
+  const isNew = !prev;
+
+  // Title
+  document.getElementById('diff-modal-title').textContent =
+    isNew ? `🆕 ยาใหม่: ${escHtml(drug.generic)}` : `🔍 เปรียบเทียบ: ${escHtml(drug.generic)}`;
+
+  // Show/hide approve/reject buttons based on role
+  const isAdm = isAdmin();
+  document.getElementById('diff-approve-btn').style.display = isAdm ? 'inline-flex' : 'none';
+  document.getElementById('diff-reject-btn').style.display = isAdm ? 'inline-flex' : 'none';
+
+  // Render diff content
+  const el = document.getElementById('diff-content');
+  el.innerHTML = renderDiffHTML(prev, drug, isNew);
+
+  document.getElementById('diff-modal').classList.add('open');
+}
+
+function renderDiffHTML(oldData, newData, isNew) {
+  if (isNew) {
+    return `<div class="diff-new-drug-notice">🆕 ยาใหม่ — ยังไม่มีข้อมูลเดิมให้เปรียบเทียบ</div>` + renderNewDrugTable(newData);
+  }
+
+  // Count changes
+  let changed = 0, added = 0, removed = 0, same = 0;
+  const rows = [];
+
+  for (const field of DIFF_FIELDS) {
+    if (field.section) {
+      rows.push(`<tr class="diff-section-header"><td colspan="3">${escHtml(field.section)}</td></tr>`);
+      continue;
+    }
+    const oldVal = formatDiffVal(getNestedVal(oldData, field.path), field.type);
+    const newVal = formatDiffVal(getNestedVal(newData, field.path), field.type);
+    let cls = 'diff-same';
+    if (oldVal === newVal) {
+      same++;
+    } else if (!oldVal && newVal) {
+      cls = 'diff-added'; added++;
+    } else if (oldVal && !newVal) {
+      cls = 'diff-removed'; removed++;
+    } else {
+      cls = 'diff-changed'; changed++;
+    }
+    rows.push(`<tr class="diff-row ${cls}">
+      <td class="diff-label">${escHtml(field.label)}</td>
+      <td class="diff-old">${escHtml(oldVal) || '<span style="opacity:0.4">—</span>'}</td>
+      <td class="diff-new">${escHtml(newVal) || '<span style="opacity:0.4">—</span>'}</td>
+    </tr>`);
+  }
+
+  const summary = `<div class="diff-summary">
+    ${changed ? `<span class="diff-summary-item"><span class="diff-dot changed"></span> แก้ไข ${changed}</span>` : ''}
+    ${added ? `<span class="diff-summary-item"><span class="diff-dot added"></span> เพิ่ม ${added}</span>` : ''}
+    ${removed ? `<span class="diff-summary-item"><span class="diff-dot removed"></span> ลบ ${removed}</span>` : ''}
+    <span class="diff-summary-item"><span class="diff-dot same"></span> ไม่เปลี่ยน ${same}</span>
+  </div>`;
+
+  return summary + `<table class="diff-table">
+    <thead><tr><th>ฟิลด์</th><th>ข้อมูลเดิม</th><th>ข้อมูลใหม่</th></tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table>`;
+}
+
+function renderNewDrugTable(drug) {
+  const rows = [];
+  for (const field of DIFF_FIELDS) {
+    if (field.section) {
+      rows.push(`<tr class="diff-section-header"><td colspan="2">${escHtml(field.section)}</td></tr>`);
+      continue;
+    }
+    const val = formatDiffVal(getNestedVal(drug, field.path), field.type);
+    if (!val) continue; // skip empty fields for new drugs
+    rows.push(`<tr class="diff-row diff-added">
+      <td class="diff-label">${escHtml(field.label)}</td>
+      <td class="diff-new">${escHtml(val)}</td>
+    </tr>`);
+  }
+  return `<table class="diff-table">
+    <thead><tr><th>ฟิลด์</th><th>ค่า</th></tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table>`;
+}
+
+function closeDiffModal() {
+  document.getElementById('diff-modal').classList.remove('open');
+  state.diffDrugId = null;
+}
+
+async function approveDrugFromDiff() {
+  if (!state.diffDrugId) return;
+  closeDiffModal();
+  await approveDrug(state.diffDrugId);
+}
+
+function rejectDrugFromDiff() {
+  if (!state.diffDrugId) return;
+  const reason = prompt('เหตุผลที่ส่งกลับ:');
+  if (reason === null) return;
+  closeDiffModal();
+  rejectDrug(state.diffDrugId, reason);
 }
 
 /* ═══════════════════════════════════════════
@@ -2626,6 +2826,10 @@ document.addEventListener('DOMContentLoaded', () => {
     approveDrug: function(e, t) { approveDrug(+t.dataset.id); },
     deleteDrug: function(e, t) { deleteDrug(+t.dataset.id); },
     rejectDrug: function(e, t) { var reason = prompt('เหตุผลที่ส่งกลับ:'); if (reason !== null) rejectDrug(+t.dataset.id, reason); },
+    openDiffModal: function(e, t) { openDiffModal(+t.dataset.id); },
+    closeDiffModal: function() { closeDiffModal(); },
+    approveDrugFromDiff: function() { approveDrugFromDiff(); },
+    rejectDrugFromDiff: function() { rejectDrugFromDiff(); },
     goPage: function(e, t) { goPage(+t.dataset.page); },
     auditGoPage: function(e, t) { auditGoPage(+t.dataset.page); },
     changeRole: function(e, t) { changeRole(t.dataset.email, t.dataset.role); },

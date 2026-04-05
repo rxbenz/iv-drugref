@@ -500,12 +500,26 @@ div.header .cross-link.calc-link:hover {
 #ivdr-print-area { display: none; }
 
 @media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  body::before, body::after {
+    display: none !important;
+    content: none !important;
+  }
   body > *:not(#ivdr-print-area) { display: none !important; }
   #ivdr-print-area {
     display: block !important;
     position: static !important;
     background: #fff !important;
     color: #000 !important;
+    z-index: 9999;
+  }
+  #ivdr-print-area * {
+    color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   @page { margin: 12mm; }
 }

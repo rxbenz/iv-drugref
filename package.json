@@ -1,6 +1,6 @@
 {
   "name": "iv-drugref-pwa",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "IV Drug Quick Reference PWA - Modular Architecture",
   "main": "build.js",
   "scripts": {

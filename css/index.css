@@ -527,18 +527,18 @@
 
 .tool-tdm {
   background: linear-gradient(135deg, #0f172a, #1e293b);
-  border-color: rgba(56, 189, 248, 0.3);
-  color: #38bdf8;
-  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.1);
+  border-color: rgba(125, 211, 252, 0.3);
+  color: #7dd3fc;
+  box-shadow: 0 2px 8px rgba(125, 211, 252, 0.1);
 }
 
 .tool-tdm::before {
-  background: #38bdf8;
+  background: #7dd3fc;
 }
 
 .tool-tdm:hover {
-  border-color: rgba(56, 189, 248, 0.5);
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.18);
+  border-color: rgba(125, 211, 252, 0.5);
+  box-shadow: 0 4px 16px rgba(125, 211, 252, 0.18);
 }
 
 .tool-renal {

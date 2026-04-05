@@ -38,7 +38,7 @@
   border-color: var(--blue);
   background: var(--blue-dim);
   color: var(--blue);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 20px rgba(125, 211, 252, 0.08);
 }
 
 .drug-tab .tab-icon {
@@ -57,7 +57,7 @@
 }
 
 .card:hover {
-  border-color: rgba(56, 189, 248, 0.15);
+  border-color: rgba(125, 211, 252, 0.15);
 }
 
 .card-head {
@@ -170,14 +170,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #38bdf8, #22d3ee);
+  background: linear-gradient(135deg, #7dd3fc, #22d3ee);
   color: #0f172a;
-  box-shadow: 0 2px 12px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 2px 12px rgba(125, 211, 252, 0.25);
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, #7dd3fc, #67e8f9);
-  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);
+  box-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
   transform: translateY(-1px);
 }
 
@@ -301,7 +301,7 @@
 
 .result-box.blue {
   background: var(--blue-dim);
-  border: 1.5px solid rgba(56, 189, 248, 0.25);
+  border: 1.5px solid rgba(125, 211, 252, 0.25);
 }
 
 .result-box.purple {

@@ -2270,7 +2270,7 @@ var IVDrugRef = (function() {
    * @returns {boolean} True if analytics consent is given
    */
   function hasAnalyticsConsent() {
-    return true // Always allow;
+    return true; // Always allow — matches v4.7 behavior
   }
 
   /**
@@ -2510,6 +2510,7 @@ var IVDrugRef = (function() {
     getSessionId,
     getUserId,
     hasAnalyticsConsent,
+    getAnalyticsUrl: function() { return ANALYTICS_URL; },
     getAdminGasUrl: function() { return ADMIN_GAS_URL; },
 
     // Service Worker
@@ -2667,6 +2668,7 @@ const COMPAT_LS_TS = 'ivdrug_compatPairsCacheTs';
 const COMPAT_CACHE_TTL = 30 * 60 * 1000; // 30 min
 
 function rebuildCuratedMap(pairs) {
+  // pairs = [[drugA, drugB, result], ...]
   Object.keys(CURATED_MAP).forEach(k => delete CURATED_MAP[k]);
   pairs.forEach(([a, b, s]) => {
     const ka = a.toLowerCase().split(' ')[0];
@@ -2677,6 +2679,7 @@ function rebuildCuratedMap(pairs) {
 }
 
 function loadCompatPairsFromSheet() {
+  // Check cache first
   try {
     const cached = localStorage.getItem(COMPAT_LS_KEY);
     const cachedTs = parseInt(localStorage.getItem(COMPAT_LS_TS) || '0');
@@ -2689,6 +2692,7 @@ function loadCompatPairsFromSheet() {
     }
   } catch (e) { /* ignore cache errors */ }
 
+  // Fetch fresh data from admin GAS (where CompatPairs sheet lives)
   var gasUrl = (typeof IVDrugRef !== 'undefined' && IVDrugRef.getAdminGasUrl)
     ? IVDrugRef.getAdminGasUrl() : '';
   if (!gasUrl) return;
@@ -3100,7 +3104,9 @@ document.addEventListener('click', e => {
 
   // Initialize on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', function() {
+    // Fetch sheet-managed compat pairs (async, non-blocking — CURATED is fallback)
     loadCompatPairsFromSheet();
+
     populateSelects();
     buildMatrixFilter();
     checkMultiCompat();

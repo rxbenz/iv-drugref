@@ -1557,6 +1557,64 @@ body::before {
   font-size: 12px;
 }
 
+/* ═══════ ANALYTICS SUMMARY ═══════ */
+.analytics-table {
+  font-size: 13px;
+}
+.analytics-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.analytics-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.analytics-bar {
+  height: 100%;
+  background: var(--warning, #f59e0b);
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+.analytics-bar-blue {
+  background: var(--primary, #0ea5e9);
+}
+.priority-high td {
+  background: #fef2f2;
+}
+.priority-high td:first-child {
+  border-left: 3px solid var(--danger, #ef4444);
+}
+.priority-medium td {
+  background: #fffbeb;
+}
+.priority-medium td:first-child {
+  border-left: 3px solid var(--warning, #f59e0b);
+}
+.severity-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.severity-high, .severity-critical {
+  background: #fecaca;
+  color: #991b1b;
+}
+.severity-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+.severity-low, .severity-info {
+  background: #e0f2fe;
+  color: #0c4a6e;
+}
+
 </style>
 </head>
 
@@ -1596,6 +1654,7 @@ body::before {
     <button class="tab-btn" data-tab="quality" data-action="switchTab">📊 Data Quality</button>
     <button class="tab-btn" data-tab="compat" data-action="switchTab">🔗 Compatibility</button>
     <button class="tab-btn" data-tab="renal" data-action="switchTab">💊 Renal Dosing</button>
+    <button class="tab-btn" data-tab="analytics" data-action="switchTab">📈 Analytics</button>
     <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
   </div>
 
@@ -1813,7 +1872,9 @@ body::before {
       <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
         จัดการข้อมูลคู่ยา Y-site compatibility — ปัจจุบัน <span id="compat-total-count">0</span> คู่
       </p>
+
       <div class="stats-row" id="compat-stats"></div>
+
       <div class="toolbar" style="margin-top:16px">
         <input type="text" class="search-box" id="search-compat" placeholder="ค้นหาชื่อยา..." data-action="filterCompat">
         <select class="filter-select" id="filter-compat-result" data-action="filterCompat">
@@ -1823,12 +1884,22 @@ body::before {
           <option value="v">⚠️ Variable</option>
         </select>
         <button class="btn btn-primary" data-action="openCompatModal">＋ เพิ่มคู่ยา</button>
-        <button class="btn btn-outline" data-action="importCuratedPairs" id="btn-import-curated">📦 Import CURATED</button>
+        <button class="btn btn-outline" data-action="importCuratedPairs" id="btn-import-curated" title="นำเข้าข้อมูลคู่ยาจาก CURATED database ที่ hardcode ไว้">📦 Import CURATED</button>
         <button class="btn btn-success" data-action="exportCompatCSV">📥 Export CSV</button>
       </div>
+
       <div class="table-wrap" style="margin-top:12px">
         <table class="drug-table">
-          <thead><tr><th>#</th><th>Drug A</th><th>Drug B</th><th>ผลลัพธ์</th><th>Reference</th><th>จัดการ</th></tr></thead>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Drug A</th>
+              <th>Drug B</th>
+              <th>ผลลัพธ์</th>
+              <th>Reference</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
           <tbody id="compat-table-body"></tbody>
         </table>
       </div>
@@ -1907,6 +1978,71 @@ body::before {
       <div class="pagination" id="renal-pagination"></div>
     </div>
 
+<!-- ═══════ PANEL: ANALYTICS SUMMARY ═══════ -->
+    <div class="panel" id="analytics-panel">
+      <h2 style="margin-bottom:4px">📈 Analytics Summary</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        สรุปข้อมูลการใช้งาน — ช่วยจัดลำดับความสำคัญว่ายาไหนควรเพิ่ม/แก้ไขก่อน
+      </p>
+
+      <div id="analytics-status" style="display:none;padding:12px;border-radius:var(--radius);margin-bottom:16px;font-size:13px"></div>
+
+      <div class="stats-row" id="analytics-stats">
+        <div class="stat-card">
+          <div class="stat-label">DAU (30d avg)</div>
+          <div class="stat-value primary" id="ana-dau">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Searches (7d)</div>
+          <div class="stat-value primary" id="ana-searches">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Errors (7d)</div>
+          <div class="stat-value danger" id="ana-errors">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Error Rate</div>
+          <div class="stat-value warning" id="ana-error-rate">—</div>
+        </div>
+      </div>
+
+      <!-- Missing Drugs -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔍 ยาที่ถูกค้นหาแต่ไม่มีในฐานข้อมูล</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          คำค้นที่ user พิมพ์แล้วไม่พบยา — ควรพิจารณาเพิ่มเข้าระบบ
+        </p>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>คำค้นหา</th><th>จำนวนครั้ง</th><th>ความถี่</th></tr></thead>
+            <tbody id="ana-missing-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top Searched Drugs -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔥 Top Searched Drugs (7 วัน)</h3>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>ชื่อยา</th><th>จำนวนครั้ง</th><th>ความถี่</th></tr></thead>
+            <tbody id="ana-top-drugs-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Errors -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">⚠️ Errors ล่าสุด</h3>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>เวลา</th><th>Severity</th><th>Message</th><th>Page</th></tr></thead>
+            <tbody id="ana-errors-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
 <!-- ═══════ RENAL MODAL ═══════ -->
 <div class="modal-overlay" id="renal-modal">
   <div class="modal" style="max-width:720px">
@@ -1915,25 +2051,46 @@ body::before {
       <button class="modal-close" data-action="closeRenalModal">✕</button>
     </div>
     <div class="modal-body">
+      <!-- Form/Preview Toggle -->
       <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
         <button type="button" id="btn-renal-form" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--primary);color:white;border-radius:8px 8px 0 0" data-action="toggleRenalPreview" data-preview="false">📝 แบบฟอร์ม</button>
         <button type="button" id="btn-renal-preview" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-muted);border-radius:8px 8px 0 0" data-action="toggleRenalPreview" data-preview="true">👁 Preview</button>
       </div>
+
+      <!-- Form View -->
       <div id="renal-form-view">
         <form id="renal-form">
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Drug ID *</label><input type="text" class="form-input" id="rf-id" required placeholder="เช่น vancomycin"></div>
-            <div class="form-group"><label class="form-label">Drug Name *</label><input type="text" class="form-input" id="rf-name" required placeholder="เช่น Vancomycin"></div>
-            <div class="form-group"><label class="form-label">Class *</label>
+            <div class="form-group">
+              <label class="form-label">Drug ID *</label>
+              <input type="text" class="form-input" id="rf-id" required placeholder="เช่น vancomycin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Drug Name *</label>
+              <input type="text" class="form-input" id="rf-name" required placeholder="เช่น Vancomycin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Class *</label>
               <select class="form-select" id="rf-class" required>
-                <option value="abx">💊 Antibiotics</option><option value="af">🍄 Antifungals</option><option value="av">🦠 Antivirals</option>
-                <option value="ac">🩸 Anticoagulants</option><option value="cv">❤️ Cardiovascular</option><option value="analgesic">💉 Analgesics</option>
-                <option value="neuro">🧠 Neurology</option><option value="chemo">⚗️ Chemo</option><option value="misc">📋 Misc</option>
+                <option value="abx">💊 Antibiotics</option>
+                <option value="af">🍄 Antifungals</option>
+                <option value="av">🦠 Antivirals</option>
+                <option value="ac">🩸 Anticoagulants</option>
+                <option value="cv">❤️ Cardiovascular</option>
+                <option value="analgesic">💉 Analgesics</option>
+                <option value="neuro">🧠 Neurology</option>
+                <option value="chemo">⚗️ Chemo</option>
+                <option value="misc">📋 Misc</option>
               </select>
             </div>
-            <div class="form-group"><label class="form-label">Subclass</label><input type="text" class="form-input" id="rf-sub" placeholder="เช่น Glycopeptide"></div>
+            <div class="form-group">
+              <label class="form-label">Subclass</label>
+              <input type="text" class="form-input" id="rf-sub" placeholder="เช่น Glycopeptide">
+            </div>
           </div>
-          <div class="form-group" style="margin:12px 0"><label class="form-label">Badges</label>
+
+          <div class="form-group" style="margin:12px 0">
+            <label class="form-label">Badges</label>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
               <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="renal"> Renal Adjust</label>
               <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="hd"> HD Adjust</label>
@@ -1941,21 +2098,44 @@ body::before {
               <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="avoid"> Avoid/Caution</label>
             </div>
           </div>
-          <div class="form-group" style="margin-bottom:12px"><label class="form-label">Recommended Dose</label><input type="text" class="form-input" id="rf-recommended" placeholder="เช่น 15-20 mg/kg/dose q8-12h"></div>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Recommended Dose</label>
+            <input type="text" class="form-input" id="rf-recommended" placeholder="เช่น 15-20 mg/kg/dose q8-12h">
+          </div>
+
+          <!-- Dynamic Dosing Table -->
           <div class="form-section" style="margin:16px 0 8px">Dosing Table (GFR Ranges)</div>
           <div style="display:grid;grid-template-columns:120px 1fr 100px 1fr 36px;gap:4px;margin-bottom:4px;font-size:11px;font-weight:600;color:var(--text-muted)">
             <span>GFR Range</span><span>Dose</span><span>Frequency</span><span>Note</span><span></span>
           </div>
           <div id="rf-dosing-rows"></div>
           <button type="button" class="btn btn-outline btn-sm" data-action="addRenalDosingRow" style="margin-top:8px">＋ เพิ่ม GFR Range</button>
-          <div class="form-group" style="margin-top:16px"><label class="form-label">Clinical Info (HTML)</label><textarea class="form-textarea" id="rf-info" rows="4" placeholder="<strong>TDM:</strong> AUC/MIC 400-600..."></textarea></div>
-          <div class="form-group" style="margin-bottom:12px"><label class="form-label">Info Type</label>
-            <select class="form-select" id="rf-infoType"><option value="blue">🔵 Blue (Info)</option><option value="amber">🟡 Amber (Warning)</option><option value="red">🔴 Red (Danger)</option><option value="teal">🟢 Teal (Tip)</option></select>
+
+          <div class="form-group" style="margin-top:16px">
+            <label class="form-label">Clinical Info (HTML)</label>
+            <textarea class="form-textarea" id="rf-info" rows="4" placeholder="<strong>TDM:</strong> AUC/MIC 400-600..."></textarea>
           </div>
-          <div class="form-group"><label class="form-label">Reference</label><input type="text" class="form-input" id="rf-ref" placeholder="เช่น Rybak MJ, et al. 2020 | Lexicomp"></div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Info Type</label>
+            <select class="form-select" id="rf-infoType">
+              <option value="blue">🔵 Blue (Info)</option>
+              <option value="amber">🟡 Amber (Warning)</option>
+              <option value="red">🔴 Red (Danger)</option>
+              <option value="teal">🟢 Teal (Tip)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reference</label>
+            <input type="text" class="form-input" id="rf-ref" placeholder="เช่น Rybak MJ, et al. 2020 | Lexicomp">
+          </div>
         </form>
       </div>
-      <div id="renal-preview-view" style="display:none"><div id="renal-preview-card"></div></div>
+
+      <!-- Preview View -->
+      <div id="renal-preview-view" style="display:none">
+        <div id="renal-preview-card"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" data-action="closeRenalModal">ยกเลิก</button>
@@ -3014,6 +3194,7 @@ var IVDrugRef = (function() {
   // ANALYTICS
   // ============================================================
   const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  const ADMIN_GAS_URL = 'https://script.google.com/macros/s/AKfycbwJhLwY34rKpVVBE4aFRMOee6-lldazO64uOk0EXEA0Yvwgz6SA3kjeWt7-R6BSsNZT/exec';
   let _reqCount = 0;
 
   /**
@@ -3037,7 +3218,7 @@ var IVDrugRef = (function() {
    * @returns {boolean} True if analytics consent is given
    */
   function hasAnalyticsConsent() {
-    return true // Always allow;
+    return true; // Always allow — matches v4.7 behavior
   }
 
   /**
@@ -3277,6 +3458,8 @@ var IVDrugRef = (function() {
     getSessionId,
     getUserId,
     hasAnalyticsConsent,
+    getAnalyticsUrl: function() { return ANALYTICS_URL; },
+    getAdminGasUrl: function() { return ADMIN_GAS_URL; },
 
     // Service Worker
     registerSW,
@@ -3324,12 +3507,16 @@ let state = {
   sortDir: 'asc',
   editingId: null,
   importData: null,
+  // Compatibility pairs
   compatPairs: [],
   compatPage: 1,
   editingCompatId: null,
+  // Renal dosing
   renalDrugs: [],
   renalPage: 1,
   editingRenalId: null,
+  // Analytics summary
+  analyticsData: null,
 };
 
 function getConfig() {
@@ -4963,6 +5150,7 @@ async function importCuratedPairs() {
   }
   hideLoading();
 }
+
 /* ═══════════════════════════════════════════
    RENAL DOSING DATA CRUD
    ═══════════════════════════════════════════ */
@@ -5218,7 +5406,7 @@ function exportRenalCSV() {
   toast('📥 Export CSV สำเร็จ', 'success');
 }
 
-// Hardcoded CURATED renal dosing data for one-time migration
+// Hardcoded CURATED renal dosing data — for one-time migration
 const CURATED_RENAL_DRUGS = [
   // ── ANTIBIOTICS ──
   {id:'vancomycin',name:'Vancomycin','class':'abx',sub:'Glycopeptide',badges:['abx','renal','hd'],
@@ -5533,34 +5721,250 @@ async function importCuratedRenal() {
   } else {
     if (!confirm('Import ข้อมูล CURATED ' + CURATED_RENAL_DRUGS.length + ' ยา เข้าสู่ Google Sheets?')) return;
   }
+
   const drugs = CURATED_RENAL_DRUGS.map(d => ({
     id: d.id, name: d.name, 'class': d['class'], sub: d.sub,
     badges: d.badges, recommended: d.recommended,
     dosingTable: d.dosingTable, info: d.info, infoType: d.infoType, ref: d.ref
   }));
+
   showLoading('กำลัง import ' + drugs.length + ' ยา...');
   try {
     const cfg = getConfig();
     const postUrl = cfg.scriptUrl + '?action=bulkCreateRenalDrugs&user=' + encodeURIComponent(state.user?.email || 'unknown');
     const body = JSON.stringify({ action: 'bulkCreateRenalDrugs', user: state.user?.email || 'unknown', drugs: drugs });
+
     if (body.length < 6000) {
       const result = await apiCall('bulkCreateRenalDrugs', { drugs });
-      toast('✅ Import: เพิ่ม ' + result.created + ', ข้าม ' + result.skipped + ' ซ้ำ', 'success');
+      toast('✅ Import สำเร็จ: เพิ่ม ' + result.created + ' ยา, ข้าม ' + result.skipped + ' ซ้ำ', 'success');
     } else {
-      await fetch(postUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body });
+      await fetch(postUrl, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: body,
+      });
       await new Promise(r => setTimeout(r, 2500));
       toast('✅ ส่งข้อมูล import แล้ว — กำลังโหลดใหม่...', 'success');
     }
     await loadRenalDrugs();
-  } catch (e) { toast('❌ Import ล้มเหลว: ' + e.message, 'error'); }
+  } catch (e) {
+    toast('❌ Import ล้มเหลว: ' + e.message, 'error');
+  }
   hideLoading();
 }
+
+/* ═══════════════════════════════════════════
+   ANALYTICS SUMMARY
+   ═══════════════════════════════════════════ */
+async function loadAnalyticsSummary() {
+  var cfg = getConfig();
+  if (!cfg.scriptUrl) {
+    showAnalyticsStatus('กรุณาตั้งค่า Script URL ก่อนใช้งาน Analytics', true);
+    return;
+  }
+  showLoading('กำลังโหลดข้อมูล analytics...');
+  try {
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 15000);
+    var res = await fetch(cfg.scriptUrl + '?action=raw', { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+    state.analyticsData = data;
+    renderAnalyticsSummary();
+    showAnalyticsStatus('');
+    toast('โหลด analytics สำเร็จ');
+  } catch (e) {
+    var msg = e.name === 'AbortError' ? 'Timeout — ลองอีกครั้ง' : e.message;
+    showAnalyticsStatus('❌ โหลด analytics ล้มเหลว: ' + msg, true);
+  }
+  hideLoading();
+}
+
+function showAnalyticsStatus(msg, isError) {
+  var el = document.getElementById('analytics-status');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = isError ? 'var(--danger-bg, #fef2f2)' : 'var(--surface)';
+  el.style.color = isError ? 'var(--danger, #ef4444)' : 'var(--text)';
+}
+
+function renderAnalyticsSummary() {
+  var d = state.analyticsData;
+  if (!d) return;
+
+  var now = new Date();
+  var day7ago = new Date(now - 7 * 86400000);
+  var day30ago = new Date(now - 30 * 86400000);
+
+  var sessions = d.sessions || [];
+  var searches = d.searches || [];
+  var errors = (d.errors || d.errorLog || []);
+
+  // ── DAU (30d average) ──
+  var sessionsLast30 = sessions.filter(function(s) {
+    return s.timestamp && new Date(s.timestamp) >= day30ago;
+  });
+  var dauMap = {};
+  sessionsLast30.forEach(function(s) {
+    var day = String(s.timestamp).substring(0, 10);
+    if (!dauMap[day]) dauMap[day] = new Set();
+    dauMap[day].add(s.user_id || s.session_id || 'anon');
+  });
+  var dauDays = Object.keys(dauMap);
+  var dauAvg = dauDays.length > 0
+    ? Math.round(dauDays.reduce(function(sum, day) { return sum + dauMap[day].size; }, 0) / dauDays.length)
+    : 0;
+
+  // ── Searches (7d) ──
+  var searchesLast7 = searches.filter(function(s) {
+    return s.timestamp && new Date(s.timestamp) >= day7ago;
+  });
+
+  // ── Errors (7d) ──
+  var errorsLast7 = errors.filter(function(e) {
+    return e.timestamp && new Date(e.timestamp) >= day7ago;
+  });
+  var sessionsLast7 = sessions.filter(function(s) {
+    return s.timestamp && new Date(s.timestamp) >= day7ago;
+  });
+  var errorRate = sessionsLast7.length > 0
+    ? (errorsLast7.length / sessionsLast7.length * 100).toFixed(1) + '%'
+    : '—';
+
+  // ── Render stats cards ──
+  document.getElementById('ana-dau').textContent = dauAvg;
+  document.getElementById('ana-searches').textContent = searchesLast7.length;
+  document.getElementById('ana-errors').textContent = errorsLast7.length;
+  document.getElementById('ana-error-rate').textContent = errorRate;
+
+  // ── Missing drugs: queries with no result click ──
+  renderMissingDrugs(searchesLast7);
+
+  // ── Top searched drugs ──
+  renderTopSearchedDrugs(searchesLast7);
+
+  // ── Recent errors ──
+  renderRecentErrors(errors);
+}
+
+function renderMissingDrugs(searches) {
+  // Searches where user typed a query but didn't click any drug result
+  var drugNames = state.drugs.map(function(d) {
+    return (d.name || d.genericName || '').toLowerCase();
+  });
+  var missingMap = {};
+  searches.forEach(function(s) {
+    var q = (s.query || '').trim().toLowerCase();
+    if (!q) return;
+    // Consider "missing" if no drug was clicked from this search
+    if (s.drug_clicked && String(s.drug_clicked).trim() !== '') return;
+    // Normalize and count
+    if (!missingMap[q]) missingMap[q] = 0;
+    missingMap[q]++;
+  });
+
+  // Filter out queries that actually match a drug in the DB
+  var missingList = Object.keys(missingMap)
+    .filter(function(q) {
+      return !drugNames.some(function(name) {
+        return name.indexOf(q) !== -1 || q.indexOf(name) !== -1;
+      });
+    })
+    .map(function(q) { return { query: q, count: missingMap[q] }; })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, 20);
+
+  var maxCount = missingList.length > 0 ? missingList[0].count : 1;
+  var tbody = document.getElementById('ana-missing-body');
+
+  if (missingList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">ไม่พบคำค้นที่ไม่มีในฐานข้อมูล</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = missingList.map(function(item, i) {
+    var pct = Math.round(item.count / maxCount * 100);
+    var urgency = item.count >= 5 ? 'priority-high' : item.count >= 2 ? 'priority-medium' : '';
+    return '<tr class="' + urgency + '">'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td><strong>' + escHtml(item.query) + '</strong></td>'
+      + '<td>' + item.count + '</td>'
+      + '<td><div class="analytics-bar-wrap"><div class="analytics-bar" style="width:' + pct + '%"></div></div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderTopSearchedDrugs(searches) {
+  var drugCount = {};
+  searches.forEach(function(s) {
+    var name = (s.drug_clicked || '').trim();
+    if (!name) return;
+    if (!drugCount[name]) drugCount[name] = 0;
+    drugCount[name]++;
+  });
+
+  var topDrugs = Object.keys(drugCount)
+    .map(function(name) { return { name: name, count: drugCount[name] }; })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, 20);
+
+  var maxCount = topDrugs.length > 0 ? topDrugs[0].count : 1;
+  var tbody = document.getElementById('ana-top-drugs-body');
+
+  if (topDrugs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">ไม่มีข้อมูลการค้นหา</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = topDrugs.map(function(item, i) {
+    var pct = Math.round(item.count / maxCount * 100);
+    var inDb = state.drugs.some(function(d) {
+      return (d.name || d.genericName || '').toLowerCase() === item.name.toLowerCase();
+    });
+    var badge = inDb ? '' : ' <span style="color:var(--warning);font-size:11px">(ไม่มีใน DB)</span>';
+    return '<tr>'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td>' + escHtml(item.name) + badge + '</td>'
+      + '<td>' + item.count + '</td>'
+      + '<td><div class="analytics-bar-wrap"><div class="analytics-bar analytics-bar-blue" style="width:' + pct + '%"></div></div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderRecentErrors(errors) {
+  var sorted = errors.slice().sort(function(a, b) {
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  }).slice(0, 20);
+
+  var tbody = document.getElementById('ana-errors-body');
+
+  if (sorted.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">ไม่มี errors</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(function(e) {
+    var sev = (e.severity || 'info').toLowerCase();
+    var sevClass = sev === 'high' || sev === 'critical' ? 'priority-high'
+      : sev === 'medium' ? 'priority-medium' : '';
+    return '<tr class="' + sevClass + '">'
+      + '<td style="white-space:nowrap;font-size:11px">' + escHtml(formatDate(e.timestamp)) + '</td>'
+      + '<td><span class="severity-badge severity-' + escHtml(sev) + '">' + escHtml(sev) + '</span></td>'
+      + '<td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">' + escHtml(e.message || '—') + '</td>'
+      + '<td style="font-size:11px">' + escHtml(e.page || e.url || '—') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
 /* ═══════════════════════════════════════════
    TAB NAVIGATION
    ═══════════════════════════════════════════ */
 function switchTab(tab) {
   // Editor ไม่สามารถเข้า tab ที่ถูกจำกัด
-  if (!isAdmin() && ['import', 'settings', 'users'].includes(tab)) {
+  if (!isAdmin() && ['import', 'settings', 'users', 'analytics'].includes(tab)) {
     toast('❌ คุณไม่มีสิทธิ์เข้าถึงส่วนนี้', 'error');
     return;
   }
@@ -5572,6 +5976,7 @@ function switchTab(tab) {
   if (tab === 'quality') renderQualityDashboard();
   if (tab === 'compat') loadCompatPairs();
   if (tab === 'renal') loadRenalDrugs();
+  if (tab === 'analytics') loadAnalyticsSummary();
 }
 
 /* ═══════════════════════════════════════════
@@ -5644,6 +6049,7 @@ document.addEventListener('DOMContentLoaded', () => {
     auditGoPage: function(e, t) { auditGoPage(+t.dataset.page); },
     changeRole: function(e, t) { changeRole(t.dataset.email, t.dataset.role); },
     removeUser: function(e, t) { removeUser(t.dataset.email); },
+    // Compatibility pairs
     openCompatModal: function() { openCompatModal(); },
     closeCompatModal: function() { closeCompatModal(); },
     saveCompatPair: function() { saveCompatPair(); },
@@ -5652,6 +6058,7 @@ document.addEventListener('DOMContentLoaded', () => {
     compatGoPage: function(e, t) { compatGoPage(+t.dataset.page); },
     exportCompatCSV: function() { exportCompatCSV(); },
     importCuratedPairs: function() { importCuratedPairs(); },
+    // Renal dosing
     openRenalModal: function() { openRenalModal(); },
     closeRenalModal: function() { closeRenalModal(); },
     saveRenalDrug: function() { saveRenalDrug(); },

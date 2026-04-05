@@ -431,7 +431,7 @@ function populateCategories() {
   const current = sel.value;
   sel.innerHTML = '<option value="">ทุกหมวดหมู่</option>';
   [...cats].sort().forEach(c => {
-    sel.innerHTML += `<option value="${c}">${c}</option>`;
+    sel.innerHTML += `<option value="${escHtml(c)}">${escHtml(c)}</option>`;
   });
   sel.value = current;
 }
@@ -473,22 +473,22 @@ function renderDrugTable() {
   const tbody = document.getElementById('drug-table-body');
   tbody.innerHTML = page.map(d => `
     <tr>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">${d.id || '—'}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">${escHtml(String(d.id || '—'))}</td>
       <td>
         <div class="drug-name">${escHtml(d.generic || '')}</div>
         ${d.had ? '<span class="badge badge-had" style="font-size:10px">⚠ HAD</span>' : ''}
       </td>
       <td class="drug-trade">${escHtml(d.trade || '—')}</td>
       <td>${(d.categories || []).map(c => `<span class="badge badge-cat">${escHtml(c)}</span>`).join('')}</td>
-      <td><span class="badge ${d.ed === 'E' ? 'badge-ed' : 'badge-ned'}">${d.ed || '—'}</span></td>
+      <td><span class="badge ${d.ed === 'E' ? 'badge-ed' : 'badge-ned'}">${escHtml(d.ed || '—')}</span></td>
       <td>${d.had ? '⚠️' : '—'}</td>
-      <td><span class="badge badge-${d.status || 'draft'}">${d.status || 'draft'}</span></td>
+      <td><span class="badge badge-${escHtml(d.status || 'draft')}">${escHtml(d.status || 'draft')}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="${d.id}" title="แก้ไข">✏️</button>
-          <button class="btn btn-sm btn-outline" data-action="previewDrugById" data-id="${d.id}" title="Preview">👁</button>
-          ${isAdmin() && d.status === 'pending' ? `<button class="btn btn-sm btn-success" data-action="approveDrug" data-id="${d.id}" title="อนุมัติ">✅</button>` : ''}
-          ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDrug" data-id="${d.id}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+          <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="${escHtml(String(d.id))}" title="แก้ไข">✏️</button>
+          <button class="btn btn-sm btn-outline" data-action="previewDrugById" data-id="${escHtml(String(d.id))}" title="Preview">👁</button>
+          ${isAdmin() && d.status === 'pending' ? `<button class="btn btn-sm btn-success" data-action="approveDrug" data-id="${escHtml(String(d.id))}" title="อนุมัติ">✅</button>` : ''}
+          ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDrug" data-id="${escHtml(String(d.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
         </div>
       </td>
     </tr>
@@ -820,17 +820,17 @@ function renderPendingList() {
           ${d.had ? '<span class="badge badge-had" style="margin-left:8px">⚠ HAD</span>' : ''}
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-sm btn-outline" data-action="openDiffModal" data-id="${d.id}">🔍 ตรวจสอบ</button>
-          <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="${d.id}">✏️ แก้ไข</button>
-          ${isAdmin() ? `<button class="btn btn-sm btn-success" data-action="approveDrug" data-id="${d.id}">✅ อนุมัติ</button>` : ''}
-          ${isAdmin() ? `<button class="btn btn-sm btn-danger" data-action="rejectDrug" data-id="${d.id}">↩️ ส่งกลับ</button>` : '<span class="badge badge-pending">รอ Admin อนุมัติ</span>'}
+          <button class="btn btn-sm btn-outline" data-action="openDiffModal" data-id="${escHtml(String(d.id))}">🔍 ตรวจสอบ</button>
+          <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="${escHtml(String(d.id))}">✏️ แก้ไข</button>
+          ${isAdmin() ? `<button class="btn btn-sm btn-success" data-action="approveDrug" data-id="${escHtml(String(d.id))}">✅ อนุมัติ</button>` : ''}
+          ${isAdmin() ? `<button class="btn btn-sm btn-danger" data-action="rejectDrug" data-id="${escHtml(String(d.id))}">↩️ ส่งกลับ</button>` : '<span class="badge badge-pending">รอ Admin อนุมัติ</span>'}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;font-size:12px;color:var(--text-muted)">
         <div><strong>Strength:</strong> ${escHtml(d.strength || '—')}</div>
         <div><strong>Route:</strong> ${escHtml(d.admin?.route || '—')}</div>
         <div><strong>Rate:</strong> ${escHtml(d.admin?.rate || '—')}</div>
-        <div><strong>Categories:</strong> ${(d.categories||[]).join(', ') || '—'}</div>
+        <div><strong>Categories:</strong> ${(d.categories||[]).map(c => escHtml(c)).join(', ') || '—'}</div>
       </div>
     </div>
   `).join('');
@@ -1283,7 +1283,7 @@ function renderAuditLog() {
       </div>
       <div class="audit-action">
         ${actionIcon(e.action)} ${actionLabel(e.action)}: <strong>${escHtml(e.drugName || '')}</strong>
-        ${e.drugId ? `<span style="font-family:var(--mono);font-size:11px;color:var(--text-light)">#${e.drugId}</span>` : ''}
+        ${e.drugId ? `<span style="font-family:var(--mono);font-size:11px;color:var(--text-light)">#${escHtml(String(e.drugId))}</span>` : ''}
       </div>
       ${e.details ? `<div class="audit-details">${escHtml(e.details)}</div>` : ''}
     </div>
@@ -1610,12 +1610,12 @@ function renderCompatTable() {
         <td style="color:var(--text-muted);font-size:12px">${start + idx + 1}</td>
         <td><strong>${escHtml(p.drugA || '')}</strong></td>
         <td><strong>${escHtml(p.drugB || '')}</strong></td>
-        <td><span class="badge ${RESULT_BADGE[p.result] || ''}">${RESULT_LABELS[p.result] || p.result}</span></td>
+        <td><span class="badge ${RESULT_BADGE[p.result] || ''}">${RESULT_LABELS[p.result] || escHtml(p.result || '')}</span></td>
         <td style="font-size:12px;color:var(--text-muted)">${escHtml(p.ref || '—')}</td>
         <td>
           <div style="display:flex;gap:4px">
-            <button class="btn btn-sm btn-outline" data-action="editCompatPair" data-id="${p.id}" title="แก้ไข">✏️</button>
-            ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteCompatPair" data-id="${p.id}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+            <button class="btn btn-sm btn-outline" data-action="editCompatPair" data-id="${escHtml(String(p.id))}" title="แก้ไข">✏️</button>
+            ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteCompatPair" data-id="${escHtml(String(p.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
           </div>
         </td>
       </tr>
@@ -1933,10 +1933,10 @@ function renderRenalTable() {
       <tr>
         <td style="color:var(--text-muted);font-size:12px">${start + idx + 1}</td>
         <td><strong>${escHtml(d.name || '')}</strong><br><span style="font-size:11px;color:var(--text-muted)">${escHtml(d.id || '')}</span></td>
-        <td><span class="badge">${CLASS_LABELS[d['class']] || d['class'] || ''}</span></td>
+        <td><span class="badge">${escHtml(CLASS_LABELS[d['class']] || d['class'] || '')}</span></td>
         <td style="font-size:12px">${escHtml(d.sub || '')}</td>
         <td style="font-size:12px">${(d.dosingTable || []).length} ranges</td>
-        <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${d.infoType === 'red' ? '#ef4444' : d.infoType === 'amber' ? '#f59e0b' : d.infoType === 'teal' ? '#14b8a6' : '#3b82f6'}"></span> ${INFO_TYPE_LABELS[d.infoType] || ''}</td>
+        <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${d.infoType === 'red' ? '#ef4444' : d.infoType === 'amber' ? '#f59e0b' : d.infoType === 'teal' ? '#14b8a6' : '#3b82f6'}"></span> ${escHtml(INFO_TYPE_LABELS[d.infoType] || '')}</td>
         <td>
           <div style="display:flex;gap:4px">
             <button class="btn btn-sm btn-outline" data-action="editRenalDrug" data-id="${escHtml(String(d.id))}" title="แก้ไข">✏️</button>
@@ -3029,8 +3029,8 @@ function renderQualityDashboard() {
         '<th>ระดับ</th><th>#</th><th>ชื่อยา</th><th>Field ที่ขาด</th><th>HAD</th></tr></thead><tbody>';
       allIssues.slice(0, 100).forEach(function(iss) {
         html += '<tr style="background:' + sevColor[iss.severity] + '">' +
-          '<td><span class="q-badge q-' + iss.severity + '">' + sevLabel[iss.severity] + '</span></td>' +
-          '<td>' + iss.drugId + '</td>' +
+          '<td><span class="q-badge q-' + escHtml(iss.severity) + '">' + (sevLabel[iss.severity] || escHtml(iss.severity)) + '</span></td>' +
+          '<td>' + escHtml(String(iss.drugId)) + '</td>' +
           '<td><strong>' + escHtml(iss.drugName) + '</strong></td>' +
           '<td>' + escHtml(iss.field) + '</td>' +
           '<td>' + (iss.had ? '<span class="badge badge-had">⚠ HAD</span>' : '—') + '</td></tr>';
@@ -3046,10 +3046,10 @@ function renderQualityDashboard() {
       html += '<div class="table-wrap"><table class="drug-table"><thead><tr><th>#</th><th>ชื่อยา</th><th>Score</th><th>Progress</th><th>Fields ที่ขาด</th></tr></thead><tbody>';
       bottomDrugs.forEach(function(d) {
         var color = d.score >= 80 ? 'var(--success)' : d.score >= 60 ? 'var(--warning)' : 'var(--danger)';
-        html += '<tr><td>' + d.drug.id + '</td><td><strong>' + escHtml(d.drug.generic || '') + '</strong></td>' +
+        html += '<tr><td>' + escHtml(String(d.drug.id)) + '</td><td><strong>' + escHtml(d.drug.generic || '') + '</strong></td>' +
           '<td style="font-weight:700;color:' + color + '">' + d.score + '%</td>' +
           '<td><div class="q-bar"><div class="q-bar-fill" style="width:' + d.score + '%;background:' + color + '"></div></div></td>' +
-          '<td style="font-size:11px">' + d.missing.map(function(m) { return m.label; }).join(', ') + '</td></tr>';
+          '<td style="font-size:11px">' + d.missing.map(function(m) { return escHtml(m.label); }).join(', ') + '</td></tr>';
       });
       html += '</tbody></table></div>';
     }
@@ -3069,10 +3069,10 @@ function renderQualityDashboard() {
         if (isEmpty(getField(d, 'precautions'))) missingFields.push('Precautions');
         if (isEmpty(getField(d, 'monitoring'))) missingFields.push('Monitoring');
         hHtml += '<div class="q-had-card">' +
-          '<strong>#' + d.id + ' ' + escHtml(d.generic || '') + '</strong> ' +
+          '<strong>#' + escHtml(String(d.id)) + ' ' + escHtml(d.generic || '') + '</strong> ' +
           '<span class="badge badge-had">⚠ HAD</span> — ' +
           '<span style="color:var(--danger)">ขาด: ' + missingFields.join(', ') + '</span>' +
-          ' <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="' + d.id + '" style="margin-left:8px">✏️ แก้ไข</button></div>';
+          ' <button class="btn btn-sm btn-outline" data-action="editDrug" data-id="' + escHtml(String(d.id)) + '" style="margin-left:8px">✏️ แก้ไข</button></div>';
       });
       hadEl.innerHTML = hHtml;
     }
@@ -3088,13 +3088,13 @@ function renderQualityDashboard() {
       if (dupGeneric.length > 0) {
         dHtml += '<h4 style="font-size:12px;margin:8px 0 4px">Generic Name ซ้ำ:</h4>';
         dupGeneric.forEach(function(d) {
-          dHtml += '<div class="q-dup-card">⚠ "<strong>' + escHtml(d.name) + '</strong>" — พบใน #' + d.id1 + ' และ #' + d.id2 + '</div>';
+          dHtml += '<div class="q-dup-card">⚠ "<strong>' + escHtml(d.name) + '</strong>" — พบใน #' + escHtml(String(d.id1)) + ' และ #' + escHtml(String(d.id2)) + '</div>';
         });
       }
       if (dupTrade.length > 0) {
         dHtml += '<h4 style="font-size:12px;margin:8px 0 4px">Trade Name ซ้ำ:</h4>';
         dupTrade.forEach(function(d) {
-          dHtml += '<div class="q-dup-card">⚠ "<strong>' + escHtml(d.name) + '</strong>" — พบใน #' + d.id1 + ' และ #' + d.id2 + '</div>';
+          dHtml += '<div class="q-dup-card">⚠ "<strong>' + escHtml(d.name) + '</strong>" — พบใน #' + escHtml(String(d.id1)) + ' และ #' + escHtml(String(d.id2)) + '</div>';
         });
       }
       dupEl.innerHTML = dHtml;

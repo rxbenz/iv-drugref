@@ -143,6 +143,89 @@ function dismissNPS(){
 }
 
 // ============================================================
+// FALLBACK — Show error + retry when drug data fails to load
+// ============================================================
+(function(){
+  // Check after init completes — if DRUGS is empty, show error UI
+  var _checkInterval=setInterval(function(){
+    // Wait until init has run (drugCount element gets updated after initDrugs)
+    var countEl=document.getElementById('drugCount');
+    if(!countEl)return;
+    // If DRUGS loaded fine, stop checking
+    if(typeof DRUGS!=='undefined'&&DRUGS.length>0){clearInterval(_checkInterval);return;}
+    // Only show if drugList is empty (no cards rendered)
+    var list=document.getElementById('drugList');
+    if(!list||list.children.length>0){clearInterval(_checkInterval);return;}
+    clearInterval(_checkInterval);
+    showDrugLoadError();
+  },2000);
+
+  // Timeout: if still empty after 15s, definitely show error
+  setTimeout(function(){
+    clearInterval(_checkInterval);
+    if(typeof DRUGS==='undefined'||!DRUGS.length){
+      var list=document.getElementById('drugList');
+      if(list&&list.children.length===0)showDrugLoadError();
+    }
+  },15000);
+})();
+
+function showDrugLoadError(){
+  var list=document.getElementById('drugList');
+  if(!list)return;
+  // Don't show twice
+  if(document.getElementById('drugLoadError'))return;
+  list.innerHTML='<div id="drugLoadError" style="text-align:center;padding:48px 24px;">'
+    +'<div style="font-size:48px;margin-bottom:16px;">&#9888;&#65039;</div>'
+    +'<div style="font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text-primary,#1e293b);">'
+    +'\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E42\u0E2B\u0E25\u0E14\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E22\u0E32\u0E44\u0E14\u0E49</div>'
+    +'<div style="font-size:14px;color:var(--text-secondary,#64748b);margin-bottom:24px;line-height:1.6;">'
+    +'\u0E2D\u0E32\u0E08\u0E40\u0E01\u0E34\u0E14\u0E08\u0E32\u0E01\u0E1B\u0E31\u0E0D\u0E2B\u0E32\u0E01\u0E32\u0E23\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E2B\u0E23\u0E37\u0E2D\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E1E\u0E23\u0E49\u0E2D\u0E21<br>'
+    +'\u0E25\u0E2D\u0E07\u0E01\u0E14\u0E1B\u0E38\u0E48\u0E21\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E42\u0E2B\u0E25\u0E14\u0E43\u0E2B\u0E21\u0E48</div>'
+    +'<button onclick="retryDrugLoad()" style="display:inline-flex;align-items:center;gap:8px;'
+    +'padding:12px 32px;background:var(--accent,#3b82f6);color:#fff;border:none;border-radius:12px;'
+    +'font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">'
+    +'\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48</button>'
+    +'</div>';
+}
+
+async function retryDrugLoad(){
+  var errEl=document.getElementById('drugLoadError');
+  if(errEl){
+    errEl.querySelector('button').disabled=true;
+    errEl.querySelector('button').textContent='\u0E01\u0E33\u0E25\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14...';
+  }
+  try{
+    var data=await fetchDrugsFromLocalFile();
+    if(!data&&navigator.onLine){
+      data=await fetchDrugsFromServer();
+    }
+    if(data&&data.length>0){
+      DRUGS=data;
+      saveDrugsToCache(DRUGS);
+      if(errEl)errEl.remove();
+      updateList();
+      document.getElementById('drugCount').textContent=DRUGS.length+' drugs';
+      document.getElementById('footerDrugCount').textContent=DRUGS.length;
+      renderQuickAccess();
+    }else{
+      if(errEl){
+        errEl.querySelector('button').disabled=false;
+        errEl.querySelector('button').textContent='\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48';
+      }
+      showSyncStatus('\u0E22\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49 \u0E25\u0E2D\u0E07\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07','error');
+    }
+  }catch(e){
+    console.error('[RetryLoad]',e);
+    if(errEl){
+      errEl.querySelector('button').disabled=false;
+      errEl.querySelector('button').textContent='\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48';
+    }
+    showSyncStatus('\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14 \u0E25\u0E2D\u0E07\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07','error');
+  }
+}
+
+// ============================================================
 // QUICK ACCESS — Favorites, Most Used, Recent
 // ============================================================
 

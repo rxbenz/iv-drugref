@@ -1557,6 +1557,64 @@ body::before {
   font-size: 12px;
 }
 
+/* ═══════ ANALYTICS SUMMARY ═══════ */
+.analytics-table {
+  font-size: 13px;
+}
+.analytics-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.analytics-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.analytics-bar {
+  height: 100%;
+  background: var(--warning, #f59e0b);
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+.analytics-bar-blue {
+  background: var(--primary, #0ea5e9);
+}
+.priority-high td {
+  background: #fef2f2;
+}
+.priority-high td:first-child {
+  border-left: 3px solid var(--danger, #ef4444);
+}
+.priority-medium td {
+  background: #fffbeb;
+}
+.priority-medium td:first-child {
+  border-left: 3px solid var(--warning, #f59e0b);
+}
+.severity-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.severity-high, .severity-critical {
+  background: #fecaca;
+  color: #991b1b;
+}
+.severity-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+.severity-low, .severity-info {
+  background: #e0f2fe;
+  color: #0c4a6e;
+}
+
 </style>
 </head>
 
@@ -1594,6 +1652,9 @@ body::before {
     <button class="tab-btn" data-tab="audit" data-action="switchTab">📝 Audit Log</button>
     <button class="tab-btn" data-tab="users" data-action="switchTab">👥 จัดการผู้ใช้</button>
     <button class="tab-btn" data-tab="quality" data-action="switchTab">📊 Data Quality</button>
+    <button class="tab-btn" data-tab="compat" data-action="switchTab">🔗 Compatibility</button>
+    <button class="tab-btn" data-tab="renal" data-action="switchTab">💊 Renal Dosing</button>
+    <button class="tab-btn" data-tab="analytics" data-action="switchTab">📈 Analytics</button>
     <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
   </div>
 
@@ -1804,6 +1865,284 @@ body::before {
       <div id="quality-had-flags" style="margin-top:16px"></div>
       <div id="quality-duplicates" style="margin-top:16px"></div>
     </div>
+
+<!-- ═══════ PANEL: COMPATIBILITY ═══════ -->
+    <div class="panel" id="compat-panel">
+      <h2 style="margin-bottom:4px">🔗 Compatibility Database</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        จัดการข้อมูลคู่ยา Y-site compatibility — ปัจจุบัน <span id="compat-total-count">0</span> คู่
+      </p>
+
+      <div class="stats-row" id="compat-stats"></div>
+
+      <div class="toolbar" style="margin-top:16px">
+        <input type="text" class="search-box" id="search-compat" placeholder="ค้นหาชื่อยา..." data-action="filterCompat">
+        <select class="filter-select" id="filter-compat-result" data-action="filterCompat">
+          <option value="">ทุกผลลัพธ์</option>
+          <option value="c">✅ Compatible</option>
+          <option value="i">❌ Incompatible</option>
+          <option value="v">⚠️ Variable</option>
+        </select>
+        <button class="btn btn-primary" data-action="openCompatModal">＋ เพิ่มคู่ยา</button>
+        <button class="btn btn-outline" data-action="importCuratedPairs" id="btn-import-curated" title="นำเข้าข้อมูลคู่ยาจาก CURATED database ที่ hardcode ไว้">📦 Import CURATED</button>
+        <button class="btn btn-success" data-action="exportCompatCSV">📥 Export CSV</button>
+      </div>
+
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Drug A</th>
+              <th>Drug B</th>
+              <th>ผลลัพธ์</th>
+              <th>Reference</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="compat-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="compat-pagination"></div>
+    </div>
+
+<!-- ═══════ COMPAT MODAL ═══════ -->
+<div class="modal-overlay" id="compat-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h2 id="compat-modal-title">เพิ่มคู่ยา Compatibility</h2>
+      <button class="modal-close" data-action="closeCompatModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="compat-form">
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Drug A *</label>
+          <input type="text" class="form-input" id="cf-drugA" required placeholder="เช่น Norepinephrine">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Drug B *</label>
+          <input type="text" class="form-input" id="cf-drugB" required placeholder="เช่น Dobutamine">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">ผลลัพธ์ *</label>
+          <select class="form-select" id="cf-result" required>
+            <option value="c">✅ Compatible (c)</option>
+            <option value="i">❌ Incompatible (i)</option>
+            <option value="v">⚠️ Variable (v)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Reference</label>
+          <input type="text" class="form-input" id="cf-ref" placeholder="เช่น Trissel's 2024, Lexicomp">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeCompatModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveCompatPair">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PANEL: RENAL DOSING ═══════ -->
+    <div class="panel" id="renal-panel">
+      <h2 style="margin-bottom:4px">💊 Renal Dosing Database</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        จัดการข้อมูล renal dose adjustment — <span id="renal-total-count">0</span> รายการ
+      </p>
+      <div class="stats-row" id="renal-stats"></div>
+      <div class="toolbar" style="margin-top:16px">
+        <input type="text" class="search-box" id="search-renal" placeholder="ค้นหาชื่อยา..." data-action="filterRenal">
+        <select class="filter-select" id="filter-renal-class" data-action="filterRenal">
+          <option value="">ทุก Class</option>
+          <option value="abx">💊 Antibiotics</option>
+          <option value="af">🍄 Antifungals</option>
+          <option value="av">🦠 Antivirals</option>
+          <option value="ac">🩸 Anticoagulants</option>
+          <option value="cv">❤️ Cardiovascular</option>
+          <option value="analgesic">💉 Analgesics</option>
+          <option value="neuro">🧠 Neurology</option>
+          <option value="chemo">⚗️ Chemo</option>
+          <option value="misc">📋 Misc</option>
+        </select>
+        <button class="btn btn-primary" data-action="openRenalModal">＋ เพิ่มยา</button>
+        <button class="btn btn-outline" data-action="importCuratedRenal" id="btn-import-renal">📦 Import CURATED</button>
+        <button class="btn btn-success" data-action="exportRenalCSV">📥 Export CSV</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead><tr><th>#</th><th>Drug Name</th><th>Class</th><th>Subclass</th><th>GFR Ranges</th><th>Info Type</th><th>จัดการ</th></tr></thead>
+          <tbody id="renal-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="renal-pagination"></div>
+    </div>
+
+<!-- ═══════ PANEL: ANALYTICS SUMMARY ═══════ -->
+    <div class="panel" id="analytics-panel">
+      <h2 style="margin-bottom:4px">📈 Analytics Summary</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        สรุปข้อมูลการใช้งาน — ช่วยจัดลำดับความสำคัญว่ายาไหนควรเพิ่ม/แก้ไขก่อน
+      </p>
+
+      <div id="analytics-status" style="display:none;padding:12px;border-radius:var(--radius);margin-bottom:16px;font-size:13px"></div>
+
+      <div class="stats-row" id="analytics-stats">
+        <div class="stat-card">
+          <div class="stat-label">DAU (30d avg)</div>
+          <div class="stat-value primary" id="ana-dau">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Searches (7d)</div>
+          <div class="stat-value primary" id="ana-searches">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Errors (7d)</div>
+          <div class="stat-value danger" id="ana-errors">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Error Rate</div>
+          <div class="stat-value warning" id="ana-error-rate">—</div>
+        </div>
+      </div>
+
+      <!-- Missing Drugs -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔍 ยาที่ถูกค้นหาแต่ไม่มีในฐานข้อมูล</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          คำค้นที่ user พิมพ์แล้วไม่พบยา — ควรพิจารณาเพิ่มเข้าระบบ
+        </p>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>คำค้นหา</th><th>จำนวนครั้ง</th><th>ความถี่</th></tr></thead>
+            <tbody id="ana-missing-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top Searched Drugs -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔥 Top Searched Drugs (7 วัน)</h3>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>ชื่อยา</th><th>จำนวนครั้ง</th><th>ความถี่</th></tr></thead>
+            <tbody id="ana-top-drugs-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Errors -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">⚠️ Errors ล่าสุด</h3>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>เวลา</th><th>Severity</th><th>Message</th><th>Page</th></tr></thead>
+            <tbody id="ana-errors-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+<!-- ═══════ RENAL MODAL ═══════ -->
+<div class="modal-overlay" id="renal-modal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <h2 id="renal-modal-title">เพิ่มยา Renal Dosing</h2>
+      <button class="modal-close" data-action="closeRenalModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Form/Preview Toggle -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button type="button" id="btn-renal-form" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--primary);color:white;border-radius:8px 8px 0 0" data-action="toggleRenalPreview" data-preview="false">📝 แบบฟอร์ม</button>
+        <button type="button" id="btn-renal-preview" style="padding:8px 20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-muted);border-radius:8px 8px 0 0" data-action="toggleRenalPreview" data-preview="true">👁 Preview</button>
+      </div>
+
+      <!-- Form View -->
+      <div id="renal-form-view">
+        <form id="renal-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Drug ID *</label>
+              <input type="text" class="form-input" id="rf-id" required placeholder="เช่น vancomycin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Drug Name *</label>
+              <input type="text" class="form-input" id="rf-name" required placeholder="เช่น Vancomycin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Class *</label>
+              <select class="form-select" id="rf-class" required>
+                <option value="abx">💊 Antibiotics</option>
+                <option value="af">🍄 Antifungals</option>
+                <option value="av">🦠 Antivirals</option>
+                <option value="ac">🩸 Anticoagulants</option>
+                <option value="cv">❤️ Cardiovascular</option>
+                <option value="analgesic">💉 Analgesics</option>
+                <option value="neuro">🧠 Neurology</option>
+                <option value="chemo">⚗️ Chemo</option>
+                <option value="misc">📋 Misc</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subclass</label>
+              <input type="text" class="form-input" id="rf-sub" placeholder="เช่น Glycopeptide">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:12px 0">
+            <label class="form-label">Badges</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="renal"> Renal Adjust</label>
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="hd"> HD Adjust</label>
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="nephrotox"> Nephrotoxic</label>
+              <label style="font-size:12px"><input type="checkbox" class="rf-badge" value="avoid"> Avoid/Caution</label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Recommended Dose</label>
+            <input type="text" class="form-input" id="rf-recommended" placeholder="เช่น 15-20 mg/kg/dose q8-12h">
+          </div>
+
+          <!-- Dynamic Dosing Table -->
+          <div class="form-section" style="margin:16px 0 8px">Dosing Table (GFR Ranges)</div>
+          <div style="display:grid;grid-template-columns:120px 1fr 100px 1fr 36px;gap:4px;margin-bottom:4px;font-size:11px;font-weight:600;color:var(--text-muted)">
+            <span>GFR Range</span><span>Dose</span><span>Frequency</span><span>Note</span><span></span>
+          </div>
+          <div id="rf-dosing-rows"></div>
+          <button type="button" class="btn btn-outline btn-sm" data-action="addRenalDosingRow" style="margin-top:8px">＋ เพิ่ม GFR Range</button>
+
+          <div class="form-group" style="margin-top:16px">
+            <label class="form-label">Clinical Info (HTML)</label>
+            <textarea class="form-textarea" id="rf-info" rows="4" placeholder="<strong>TDM:</strong> AUC/MIC 400-600..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Info Type</label>
+            <select class="form-select" id="rf-infoType">
+              <option value="blue">🔵 Blue (Info)</option>
+              <option value="amber">🟡 Amber (Warning)</option>
+              <option value="red">🔴 Red (Danger)</option>
+              <option value="teal">🟢 Teal (Tip)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reference</label>
+            <input type="text" class="form-input" id="rf-ref" placeholder="เช่น Rybak MJ, et al. 2020 | Lexicomp">
+          </div>
+        </form>
+      </div>
+
+      <!-- Preview View -->
+      <div id="renal-preview-view" style="display:none">
+        <div id="renal-preview-card"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeRenalModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveRenalDrug">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════ DRUG MODAL ═══════ -->
 <div class="modal-overlay" id="drug-modal">
@@ -2855,6 +3194,7 @@ var IVDrugRef = (function() {
   // ANALYTICS
   // ============================================================
   const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  const ADMIN_GAS_URL = 'https://script.google.com/macros/s/AKfycbwJhLwY34rKpVVBE4aFRMOee6-lldazO64uOk0EXEA0Yvwgz6SA3kjeWt7-R6BSsNZT/exec';
   let _reqCount = 0;
 
   /**
@@ -2878,7 +3218,7 @@ var IVDrugRef = (function() {
    * @returns {boolean} True if analytics consent is given
    */
   function hasAnalyticsConsent() {
-    return localStorage.getItem('analyticsConsent') === 'true';
+    return true; // Always allow — matches v4.7 behavior
   }
 
   /**
@@ -3118,6 +3458,8 @@ var IVDrugRef = (function() {
     getSessionId,
     getUserId,
     hasAnalyticsConsent,
+    getAnalyticsUrl: function() { return ANALYTICS_URL; },
+    getAdminGasUrl: function() { return ADMIN_GAS_URL; },
 
     // Service Worker
     registerSW,
@@ -3165,6 +3507,16 @@ let state = {
   sortDir: 'asc',
   editingId: null,
   importData: null,
+  // Compatibility pairs
+  compatPairs: [],
+  compatPage: 1,
+  editingCompatId: null,
+  // Renal dosing
+  renalDrugs: [],
+  renalPage: 1,
+  editingRenalId: null,
+  // Analytics summary
+  analyticsData: null,
 };
 
 function getConfig() {
@@ -3285,7 +3637,7 @@ async function apiCall(action, data = {}) {
     throw new Error('No script URL');
   }
 
-  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers'].includes(action);
+  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers', 'getCompatPairs', 'getRenalDrugs'].includes(action);
   const url = new URL(cfg.scriptUrl);
   url.searchParams.set('action', action);
   url.searchParams.set('user', state.user?.email || 'unknown');
@@ -4467,11 +4819,1152 @@ async function syncToGitHub() {
 }
 
 /* ═══════════════════════════════════════════
+   COMPATIBILITY PAIRS CRUD
+   ═══════════════════════════════════════════ */
+const COMPAT_PER_PAGE = 25;
+const RESULT_LABELS = { c: '✅ Compatible', i: '❌ Incompatible', v: '⚠️ Variable' };
+const RESULT_BADGE = { c: 'badge-approved', i: 'badge-had', v: 'badge-pending' };
+
+async function loadCompatPairs() {
+  showLoading('กำลังโหลดข้อมูล compatibility...');
+  try {
+    const result = await apiCall('getCompatPairs');
+    state.compatPairs = result.pairs || [];
+    renderCompatStats();
+    renderCompatTable();
+  } catch (e) {
+    console.error('loadCompatPairs error:', e);
+    toast('โหลดข้อมูล compatibility ล้มเหลว', 'error');
+  }
+  hideLoading();
+}
+
+function getFilteredCompatPairs() {
+  let pairs = state.compatPairs;
+  const q = (document.getElementById('search-compat')?.value || '').toLowerCase().trim();
+  const result = document.getElementById('filter-compat-result')?.value || '';
+
+  if (q) {
+    pairs = pairs.filter(p =>
+      (p.drugA || '').toLowerCase().includes(q) ||
+      (p.drugB || '').toLowerCase().includes(q)
+    );
+  }
+  if (result) {
+    pairs = pairs.filter(p => p.result === result);
+  }
+  return pairs;
+}
+
+function renderCompatStats() {
+  const total = state.compatPairs.length;
+  const compatible = state.compatPairs.filter(p => p.result === 'c').length;
+  const incompatible = state.compatPairs.filter(p => p.result === 'i').length;
+  const variable = state.compatPairs.filter(p => p.result === 'v').length;
+
+  const el = document.getElementById('compat-stats');
+  if (el) el.innerHTML = `
+    <div class="stat-card"><div class="stat-label">คู่ยาทั้งหมด</div><div class="stat-value primary">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Compatible</div><div class="stat-value success">${compatible}</div></div>
+    <div class="stat-card"><div class="stat-label">Incompatible</div><div class="stat-value danger">${incompatible}</div></div>
+    <div class="stat-card"><div class="stat-label">Variable</div><div class="stat-value warning">${variable}</div></div>
+  `;
+
+  const countEl = document.getElementById('compat-total-count');
+  if (countEl) countEl.textContent = total;
+}
+
+function renderCompatTable() {
+  const filtered = getFilteredCompatPairs();
+  const total = filtered.length;
+  const pages = Math.ceil(total / COMPAT_PER_PAGE) || 1;
+  if (state.compatPage > pages) state.compatPage = pages;
+  const start = (state.compatPage - 1) * COMPAT_PER_PAGE;
+  const slice = filtered.slice(start, start + COMPAT_PER_PAGE);
+
+  const tbody = document.getElementById('compat-table-body');
+  if (!tbody) return;
+
+  if (slice.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:32px">ไม่มีข้อมูล</td></tr>';
+  } else {
+    tbody.innerHTML = slice.map((p, idx) => `
+      <tr>
+        <td style="color:var(--text-muted);font-size:12px">${start + idx + 1}</td>
+        <td><strong>${escHtml(p.drugA || '')}</strong></td>
+        <td><strong>${escHtml(p.drugB || '')}</strong></td>
+        <td><span class="badge ${RESULT_BADGE[p.result] || ''}">${RESULT_LABELS[p.result] || p.result}</span></td>
+        <td style="font-size:12px;color:var(--text-muted)">${escHtml(p.ref || '—')}</td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-sm btn-outline" data-action="editCompatPair" data-id="${p.id}" title="แก้ไข">✏️</button>
+            ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteCompatPair" data-id="${p.id}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Pagination
+  const pag = document.getElementById('compat-pagination');
+  if (pages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<span style="color:var(--text-muted);font-size:12px">${total} คู่ยา</span>`;
+  html += `<button class="page-btn" data-action="compatGoPage" data-page="${state.compatPage - 1}" ${state.compatPage <= 1 ? 'disabled' : ''}>‹</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && Math.abs(i - state.compatPage) > 2 && i !== 1 && i !== pages) {
+      if (i === state.compatPage - 3 || i === state.compatPage + 3) html += '<span>…</span>';
+      continue;
+    }
+    html += `<button class="page-btn ${i === state.compatPage ? 'active' : ''}" data-action="compatGoPage" data-page="${i}">${i}</button>`;
+  }
+  html += `<button class="page-btn" data-action="compatGoPage" data-page="${state.compatPage + 1}" ${state.compatPage >= pages ? 'disabled' : ''}>›</button>`;
+  pag.innerHTML = html;
+}
+
+function compatGoPage(p) {
+  const pages = Math.ceil(getFilteredCompatPairs().length / COMPAT_PER_PAGE);
+  if (p < 1 || p > pages) return;
+  state.compatPage = p;
+  renderCompatTable();
+}
+
+function filterCompat() {
+  state.compatPage = 1;
+  renderCompatTable();
+}
+
+function openCompatModal(pair = null) {
+  state.editingCompatId = pair ? pair.id : null;
+  document.getElementById('compat-modal-title').textContent = pair ? 'แก้ไขคู่ยา' : 'เพิ่มคู่ยา Compatibility';
+  document.getElementById('cf-drugA').value = pair ? pair.drugA : '';
+  document.getElementById('cf-drugB').value = pair ? pair.drugB : '';
+  document.getElementById('cf-result').value = pair ? pair.result : 'c';
+  document.getElementById('cf-ref').value = pair ? (pair.ref || '') : '';
+  document.getElementById('compat-modal').classList.add('open');
+}
+
+function closeCompatModal() {
+  document.getElementById('compat-modal').classList.remove('open');
+  state.editingCompatId = null;
+}
+
+async function saveCompatPair() {
+  const drugA = document.getElementById('cf-drugA').value.trim();
+  const drugB = document.getElementById('cf-drugB').value.trim();
+  const result = document.getElementById('cf-result').value;
+  const ref = document.getElementById('cf-ref').value.trim();
+
+  if (!drugA || !drugB) {
+    toast('กรุณากรอกชื่อยาทั้ง 2 ช่อง', 'error');
+    return;
+  }
+
+  showLoading('กำลังบันทึก...');
+  try {
+    if (state.editingCompatId) {
+      await apiCall('updateCompatPair', { id: state.editingCompatId, drugA, drugB, result, ref });
+      toast('✅ อัพเดทคู่ยาแล้ว', 'success');
+    } else {
+      await apiCall('createCompatPair', { drugA, drugB, result, ref });
+      toast('✅ เพิ่มคู่ยาแล้ว', 'success');
+    }
+    closeCompatModal();
+    await loadCompatPairs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+function editCompatPair(id) {
+  const pair = state.compatPairs.find(p => String(p.id) === String(id));
+  if (pair) openCompatModal(pair);
+}
+
+async function deleteCompatPair(id) {
+  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
+  const pair = state.compatPairs.find(p => String(p.id) === String(id));
+  if (!pair) return;
+  if (!confirm(`ลบคู่ยา "${pair.drugA} + ${pair.drugB}" ?`)) return;
+
+  showLoading('กำลังลบ...');
+  try {
+    await apiCall('deleteCompatPair', { id });
+    toast('🗑 ลบคู่ยาแล้ว', 'success');
+    await loadCompatPairs();
+  } catch (e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+function exportCompatCSV() {
+  if (state.compatPairs.length === 0) { toast('ไม่มีข้อมูล', 'info'); return; }
+  const rows = [['Drug A', 'Drug B', 'Result', 'Reference']];
+  state.compatPairs.forEach(p => {
+    rows.push([p.drugA, p.drugB, p.result, p.ref || '']);
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `compat-pairs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  toast('📥 Export CSV สำเร็จ', 'success');
+}
+
+// Hardcoded CURATED pairs from compatibility.js — for one-time migration
+const CURATED_PAIRS = [
+['Norepinephrine','Dobutamine','c'],['Norepinephrine','Dopamine','c'],['Norepinephrine','Adrenaline','c'],
+['Norepinephrine','Midazolam','c'],['Norepinephrine','Fentanyl','c'],['Norepinephrine','Morphine','c'],
+['Norepinephrine','Heparin','c'],['Norepinephrine','Human Insulin','c'],['Norepinephrine','Potassium','c'],
+['Norepinephrine','Furosemide','i'],['Norepinephrine','Pantoprazole','i'],['Norepinephrine','Sodium bicarbonate','i'],
+['Norepinephrine','Phenytoin','i'],['Norepinephrine','Diazepam','i'],['Norepinephrine','Nicardipine','c'],
+['Norepinephrine','Dexmedetomidine','c'],['Norepinephrine','Propofol','c'],['Norepinephrine','Amiodarone','c'],
+['Norepinephrine','Vancomycin','c'],['Norepinephrine','Meropenem','c'],['Norepinephrine','Labetalol','c'],
+['Dopamine','Dobutamine','c'],['Dopamine','Adrenaline','c'],['Dopamine','Midazolam','c'],
+['Dopamine','Fentanyl','c'],['Dopamine','Heparin','c'],['Dopamine','Morphine','c'],
+['Dopamine','Sodium bicarbonate','i'],['Dopamine','Furosemide','v'],['Dopamine','Human Insulin','v'],
+['Dopamine','Phenytoin','i'],['Dopamine','Acyclovir','i'],['Dopamine','Nicardipine','c'],
+['Dobutamine','Adrenaline','c'],['Dobutamine','Midazolam','c'],['Dobutamine','Fentanyl','c'],
+['Dobutamine','Heparin','c'],['Dobutamine','Human Insulin','v'],['Dobutamine','Furosemide','i'],
+['Dobutamine','Sodium bicarbonate','i'],['Dobutamine','Phenytoin','i'],['Dobutamine','Diazepam','i'],
+['Dobutamine','Acyclovir','i'],['Dobutamine','Nicardipine','c'],['Dobutamine','Potassium','c'],
+['Amiodarone','Midazolam','c'],['Amiodarone','Fentanyl','c'],['Amiodarone','Morphine','c'],
+['Amiodarone','Dobutamine','c'],['Amiodarone','Dopamine','c'],['Amiodarone','Furosemide','i'],
+['Amiodarone','Heparin','i'],['Amiodarone','Sodium bicarbonate','i'],['Amiodarone','Phenytoin','i'],
+['Amiodarone','Potassium','c'],['Amiodarone','Human Insulin','c'],['Amiodarone','Dexmedetomidine','c'],
+['Midazolam','Fentanyl','c'],['Midazolam','Morphine','c'],['Midazolam','Heparin','c'],
+['Midazolam','Human Insulin','c'],['Midazolam','Potassium','c'],['Midazolam','Furosemide','v'],
+['Midazolam','Sodium bicarbonate','i'],['Midazolam','Dexamethasone','c'],['Midazolam','Ondansetron','c'],
+['Midazolam','Omeprazole','v'],['Midazolam','Propofol','c'],['Midazolam','Vancomycin','c'],
+['Midazolam','Meropenem','c'],['Midazolam','Nicardipine','c'],['Midazolam','Labetalol','c'],
+['Propofol','Fentanyl','c'],['Propofol','Morphine','c'],['Propofol','Potassium','c'],
+['Propofol','Heparin','c'],['Propofol','Phenytoin','i'],['Propofol','Vancomycin','i'],
+['Propofol','Meropenem','c'],['Propofol','Ketamine','c'],['Propofol','Dexmedetomidine','c'],
+['Heparin','Human Insulin','c'],['Heparin','Potassium','c'],['Heparin','Morphine','c'],
+['Heparin','Fentanyl','c'],['Heparin','Furosemide','c'],['Heparin','Dexamethasone','c'],
+['Heparin','Pantoprazole','c'],['Heparin','Vancomycin','i'],['Heparin','Gentamicin','v'],
+['Heparin','Ciprofloxacin','i'],['Heparin','Diazepam','i'],['Heparin','Phenytoin','i'],
+['Heparin','Nicardipine','c'],['Heparin','Labetalol','c'],['Heparin','Meropenem','c'],
+['Human Insulin','Potassium','c'],['Human Insulin','Sodium bicarbonate','i'],['Human Insulin','Phenytoin','i'],
+['Furosemide','Morphine','c'],['Furosemide','Potassium','c'],['Furosemide','Dexamethasone','c'],
+['Furosemide','Vancomycin','i'],['Furosemide','Ciprofloxacin','i'],['Furosemide','Ondansetron','i'],
+['Furosemide','Nicardipine','i'],['Furosemide','Labetalol','i'],['Furosemide','Amiodarone','i'],
+['Phenytoin','Fentanyl','i'],['Phenytoin','Morphine','i'],['Phenytoin','Vancomycin','i'],
+['Phenytoin','Meropenem','i'],['Phenytoin','Potassium','i'],['Phenytoin','Dexamethasone','i'],
+['Phenytoin','Dexmedetomidine','i'],['Phenytoin','Propofol','i'],['Phenytoin','Midazolam','i'],
+['Vancomycin','Meropenem','c'],['Vancomycin','Midazolam','c'],['Vancomycin','Morphine','c'],
+['Vancomycin','Fentanyl','c'],['Vancomycin','Potassium','c'],['Vancomycin','Ceftriaxone','i'],
+['Vancomycin','Ceftazidime','i'],['Vancomycin','Piperacillin','i'],['Vancomycin','Dexamethasone','v'],
+['Dexmedetomidine','Fentanyl','c'],['Dexmedetomidine','Midazolam','c'],['Dexmedetomidine','Morphine','c'],
+['Dexmedetomidine','Amphotericin','i'],['Dexmedetomidine','Diazepam','i'],
+['Nicardipine','Fentanyl','c'],['Nicardipine','Sodium bicarbonate','i'],['Nicardipine','Phenytoin','i'],
+['Labetalol','Fentanyl','c'],['Labetalol','Morphine','c'],['Labetalol','Heparin','c'],
+['Labetalol','Sodium bicarbonate','i'],['Labetalol','Potassium','c'],
+['Meropenem','Fentanyl','c'],['Meropenem','Morphine','c'],['Meropenem','Dexamethasone','c'],
+['Meropenem','Ondansetron','v'],['Meropenem','Potassium','c'],['Meropenem','Acyclovir','i'],['Meropenem','Diazepam','i'],
+['Magnesium','Heparin','c'],['Magnesium','Human Insulin','c'],['Magnesium','Potassium','c'],
+['Magnesium','Midazolam','c'],['Magnesium','Amphotericin','i'],['Magnesium','Sodium bicarbonate','i'],
+['Magnesium','Calcium','i'],
+['Ondansetron','Morphine','c'],['Ondansetron','Fentanyl','c'],['Ondansetron','Dexamethasone','c'],
+['Ondansetron','Potassium','c'],['Ondansetron','Sodium bicarbonate','i'],
+['Ketamine','Midazolam','c'],['Ketamine','Fentanyl','c'],['Ketamine','Morphine','c'],
+['Ketamine','Diazepam','i'],['Ketamine','Sodium bicarbonate','i'],['Ketamine','Phenobarbital','i'],
+['Calcium','Sodium bicarbonate','i'],['Calcium','Potassium','c'],
+['Levetiracetam','Diazepam','v'],['Levetiracetam','Valproic','c'],
+// Valproic+Meropenem: PK interaction, NOT Y-site — removed from compat matrix
+['Methylprednisolone','Heparin','c'],['Methylprednisolone','Ondansetron','c'],
+['Hydrocortisone','Heparin','c'],['Hydrocortisone','Midazolam','i'],
+['Cisatracurium','Midazolam','c'],['Cisatracurium','Fentanyl','c'],['Cisatracurium','Morphine','c'],
+['Cisatracurium','Propofol','c'],['Cisatracurium','Sodium bicarbonate','i'],
+['Cisplatin','Ondansetron','c'],['Cisplatin','Dexamethasone','c'],['Cisplatin','Mannitol','c'],
+['Cisplatin','Potassium','c'],['Cisplatin','Sodium bicarbonate','i'],
+['Carboplatin','Ondansetron','c'],['Carboplatin','Dexamethasone','c'],['Carboplatin','Sodium bicarbonate','i'],
+['Paclitaxel','Carboplatin','c'],['Paclitaxel','Cisplatin','c'],['Paclitaxel','Doxorubicin','i'],
+['Doxorubicin','Ondansetron','c'],['Doxorubicin','Dexamethasone','c'],['Doxorubicin','Cyclophosphamide','c'],
+['Doxorubicin','Heparin','i'],['Doxorubicin','5-Fluorouracil','i'],
+['5-Fluorouracil','Ondansetron','c'],['5-Fluorouracil','Leucovorin','c'],['5-Fluorouracil','Methotrexate','i'],
+['Gemcitabine','Ondansetron','c'],['Gemcitabine','Dexamethasone','c'],['Gemcitabine','Amphotericin','i'],['Gemcitabine','Furosemide','i'],
+['Etoposide','Carboplatin','c'],['Etoposide','Cisplatin','c'],['Etoposide','Ondansetron','c'],['Etoposide','Cefepime','i'],
+['Oxaliplatin','Leucovorin','c'],['Oxaliplatin','Sodium bicarbonate','i'],
+['Cefepime','Midazolam','c'],['Cefepime','Fentanyl','c'],['Cefepime','Heparin','c'],
+['Cefepime','Morphine','c'],['Cefepime','Vancomycin','i'],['Cefepime','Metronidazole','c'],
+['Cefepime','Amphotericin','i'],
+['Calcium chloride','Dobutamine','c'],['Calcium chloride','Dopamine','c'],['Calcium chloride','Norepinephrine','c'],
+['Calcium chloride','Sodium bicarbonate','i'],['Calcium chloride','Ceftriaxone','i'],
+['Diltiazem','Heparin','c'],['Diltiazem','Human Insulin','c'],['Diltiazem','Potassium','c'],
+['Diltiazem','Amphotericin','i'],['Diltiazem','Furosemide','i'],['Diltiazem','Phenytoin','i'],['Diltiazem','Diazepam','i'],
+['Milrinone','Heparin','c'],['Milrinone','Potassium','c'],['Milrinone','Morphine','c'],['Milrinone','Human Insulin','c'],
+['Milrinone','Furosemide','i'],['Milrinone','Sodium bicarbonate','i'],
+['Daptomycin','Dexamethasone','c'],['Daptomycin','Heparin','c'],
+['Daptomycin','RL','i'],['Daptomycin','Sodium bicarbonate','i'],
+['Caspofungin','Dexamethasone','c'],['Caspofungin','Meropenem','c'],
+['Caspofungin','D5W','i'],['Caspofungin','Sodium bicarbonate','i'],
+['Norepinephrine','Calcium chloride','c'],['Norepinephrine','Milrinone','c'],['Norepinephrine','Diltiazem','c'],
+['Norepinephrine','Cefepime','c'],
+['Dopamine','Calcium chloride','c'],['Dopamine','Milrinone','c'],['Dopamine','Diltiazem','c'],
+['Heparin','Cefepime','c'],['Heparin','Diltiazem','c'],['Heparin','Milrinone','c'],
+['Midazolam','Cefepime','c'],['Midazolam','Diltiazem','c'],
+// Audit additions: critical missing pairs
+['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium','i'],
+['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['Mannitol','KCl','i'],
+];
+
+async function importCuratedPairs() {
+  if (state.compatPairs.length > 0) {
+    if (!confirm(`มีข้อมูลอยู่แล้ว ${state.compatPairs.length} คู่\nระบบจะข้ามคู่ยาที่ซ้ำ — ต้องการ import CURATED ${CURATED_PAIRS.length} คู่?`)) return;
+  } else {
+    if (!confirm(`Import ข้อมูล CURATED ${CURATED_PAIRS.length} คู่ยา เข้าสู่ Google Sheets?`)) return;
+  }
+
+  const pairs = CURATED_PAIRS.map(([drugA, drugB, result]) => ({
+    drugA, drugB, result, ref: "Trissel's / Lexicomp"
+  }));
+
+  showLoading(`กำลัง import ${pairs.length} คู่ยา...`);
+  try {
+    // Use POST directly for bulk — payload is large
+    const cfg = getConfig();
+    const postUrl = cfg.scriptUrl + '?action=bulkCreateCompatPairs&user=' + encodeURIComponent(state.user?.email || 'unknown');
+    const body = JSON.stringify({ action: 'bulkCreateCompatPairs', user: state.user?.email || 'unknown', pairs });
+
+    if (body.length < 6000) {
+      // Small enough for GET
+      const result = await apiCall('bulkCreateCompatPairs', { pairs });
+      toast(`✅ Import สำเร็จ: เพิ่ม ${result.created} คู่, ข้าม ${result.skipped} คู่ซ้ำ`, 'success');
+    } else {
+      // Large payload → POST no-cors
+      await fetch(postUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: body,
+      });
+      await new Promise(r => setTimeout(r, 2000));
+      toast('✅ ส่งข้อมูล import แล้ว — กำลังโหลดใหม่...', 'success');
+    }
+    await loadCompatPairs();
+  } catch (e) {
+    toast('❌ Import ล้มเหลว: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+/* ═══════════════════════════════════════════
+   RENAL DOSING DATA CRUD
+   ═══════════════════════════════════════════ */
+const RENAL_PER_PAGE = 25;
+const CLASS_LABELS = {abx:'Antibiotics',af:'Antifungals',av:'Antivirals',ac:'Anticoagulants',cv:'Cardiovascular',analgesic:'Analgesics',neuro:'Neurology',chemo:'Chemo',misc:'Misc'};
+const INFO_TYPE_LABELS = {blue:'🔵 Info',amber:'🟡 Warning',red:'🔴 Danger',teal:'🟢 Tip'};
+const INFO_TYPE_COLORS = {blue:'#eff6ff',amber:'#fffbeb',red:'#fef2f2',teal:'#f0fdfa'};
+
+async function loadRenalDrugs() {
+  showLoading('กำลังโหลดข้อมูล renal dosing...');
+  try {
+    const result = await apiCall('getRenalDrugs');
+    state.renalDrugs = (result.drugs || []).map(d => ({
+      ...d,
+      badges: typeof d.badges === 'string' ? JSON.parse(d.badges || '[]') : (d.badges || []),
+      dosingTable: typeof d.dosingTable === 'string' ? JSON.parse(d.dosingTable || '[]') : (d.dosingTable || [])
+    }));
+    renderRenalStats();
+    renderRenalTable();
+  } catch (e) {
+    console.error('loadRenalDrugs error:', e);
+    toast('โหลดข้อมูล renal dosing ล้มเหลว', 'error');
+  }
+  hideLoading();
+}
+
+function getFilteredRenalDrugs() {
+  let drugs = state.renalDrugs;
+  const q = (document.getElementById('search-renal')?.value || '').toLowerCase().trim();
+  const cls = document.getElementById('filter-renal-class')?.value || '';
+  if (q) drugs = drugs.filter(d => (d.name || '').toLowerCase().includes(q) || (d.id || '').toLowerCase().includes(q));
+  if (cls) drugs = drugs.filter(d => d['class'] === cls);
+  return drugs;
+}
+
+function renderRenalStats() {
+  const total = state.renalDrugs.length;
+  const classes = {};
+  state.renalDrugs.forEach(d => { classes[d['class']] = (classes[d['class']] || 0) + 1; });
+  const topClasses = Object.entries(classes).sort((a,b) => b[1]-a[1]).slice(0, 3);
+  const el = document.getElementById('renal-stats');
+  if (el) el.innerHTML = `
+    <div class="stat-card"><div class="stat-label">ยาทั้งหมด</div><div class="stat-value primary">${total}</div></div>
+    ${topClasses.map(([c,n]) => `<div class="stat-card"><div class="stat-label">${CLASS_LABELS[c] || c}</div><div class="stat-value">${n}</div></div>`).join('')}
+  `;
+  const countEl = document.getElementById('renal-total-count');
+  if (countEl) countEl.textContent = total;
+}
+
+function renderRenalTable() {
+  const filtered = getFilteredRenalDrugs();
+  const total = filtered.length;
+  const pages = Math.ceil(total / RENAL_PER_PAGE) || 1;
+  if (state.renalPage > pages) state.renalPage = pages;
+  const start = (state.renalPage - 1) * RENAL_PER_PAGE;
+  const slice = filtered.slice(start, start + RENAL_PER_PAGE);
+  const tbody = document.getElementById('renal-table-body');
+  if (!tbody) return;
+  if (slice.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">ไม่มีข้อมูล</td></tr>';
+  } else {
+    tbody.innerHTML = slice.map((d, idx) => `
+      <tr>
+        <td style="color:var(--text-muted);font-size:12px">${start + idx + 1}</td>
+        <td><strong>${escHtml(d.name || '')}</strong><br><span style="font-size:11px;color:var(--text-muted)">${escHtml(d.id || '')}</span></td>
+        <td><span class="badge">${CLASS_LABELS[d['class']] || d['class'] || ''}</span></td>
+        <td style="font-size:12px">${escHtml(d.sub || '')}</td>
+        <td style="font-size:12px">${(d.dosingTable || []).length} ranges</td>
+        <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${d.infoType === 'red' ? '#ef4444' : d.infoType === 'amber' ? '#f59e0b' : d.infoType === 'teal' ? '#14b8a6' : '#3b82f6'}"></span> ${INFO_TYPE_LABELS[d.infoType] || ''}</td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-sm btn-outline" data-action="editRenalDrug" data-id="${escHtml(String(d.id))}" title="แก้ไข">✏️</button>
+            ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteRenalDrug" data-id="${escHtml(String(d.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  const pag = document.getElementById('renal-pagination');
+  if (pages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<span style="color:var(--text-muted);font-size:12px">${total} รายการ</span>`;
+  html += `<button class="page-btn" data-action="renalGoPage" data-page="${state.renalPage - 1}" ${state.renalPage <= 1 ? 'disabled' : ''}>‹</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && Math.abs(i - state.renalPage) > 2 && i !== 1 && i !== pages) {
+      if (i === state.renalPage - 3 || i === state.renalPage + 3) html += '<span>…</span>';
+      continue;
+    }
+    html += `<button class="page-btn ${i === state.renalPage ? 'active' : ''}" data-action="renalGoPage" data-page="${i}">${i}</button>`;
+  }
+  html += `<button class="page-btn" data-action="renalGoPage" data-page="${state.renalPage + 1}" ${state.renalPage >= pages ? 'disabled' : ''}>›</button>`;
+  pag.innerHTML = html;
+}
+
+function renalGoPage(p) {
+  const pages = Math.ceil(getFilteredRenalDrugs().length / RENAL_PER_PAGE);
+  if (p < 1 || p > pages) return;
+  state.renalPage = p;
+  renderRenalTable();
+}
+
+function filterRenal() { state.renalPage = 1; renderRenalTable(); }
+
+function openRenalModal(drug = null) {
+  state.editingRenalId = drug ? drug.id : null;
+  document.getElementById('renal-modal-title').textContent = drug ? 'แก้ไขยา Renal Dosing' : 'เพิ่มยา Renal Dosing';
+  document.getElementById('rf-id').value = drug ? drug.id : '';
+  document.getElementById('rf-id').readOnly = !!drug;
+  document.getElementById('rf-name').value = drug ? drug.name : '';
+  document.getElementById('rf-class').value = drug ? drug['class'] : 'abx';
+  document.getElementById('rf-sub').value = drug ? (drug.sub || '') : '';
+  document.getElementById('rf-recommended').value = drug ? (drug.recommended || '') : '';
+  document.getElementById('rf-info').value = drug ? (drug.info || '') : '';
+  document.getElementById('rf-infoType').value = drug ? (drug.infoType || 'blue') : 'blue';
+  document.getElementById('rf-ref').value = drug ? (drug.ref || '') : '';
+  document.querySelectorAll('.rf-badge').forEach(cb => { cb.checked = drug ? (drug.badges || []).includes(cb.value) : false; });
+  const container = document.getElementById('rf-dosing-rows');
+  container.innerHTML = '';
+  if (drug && drug.dosingTable && drug.dosingTable.length > 0) {
+    drug.dosingTable.forEach(r => addRenalDosingRow(r.range, r.dose, r.freq, r.note));
+  } else {
+    addRenalDosingRow('>80', '', '', 'Normal dosing');
+    addRenalDosingRow('50-80', '', '', '');
+    addRenalDosingRow('10-50', '', '', '');
+    addRenalDosingRow('<10 / HD', '', '', '');
+  }
+  document.getElementById('renal-form-view').style.display = 'block';
+  document.getElementById('renal-preview-view').style.display = 'none';
+  document.getElementById('btn-renal-form').style.background = 'var(--primary)';
+  document.getElementById('btn-renal-form').style.color = 'white';
+  document.getElementById('btn-renal-preview').style.background = 'transparent';
+  document.getElementById('btn-renal-preview').style.color = 'var(--text-muted)';
+  document.getElementById('renal-modal').classList.add('open');
+}
+
+function closeRenalModal() {
+  document.getElementById('renal-modal').classList.remove('open');
+  state.editingRenalId = null;
+}
+
+function addRenalDosingRow(range, dose, freq, note) {
+  const container = document.getElementById('rf-dosing-rows');
+  const row = document.createElement('div');
+  row.className = 'renal-dosing-row';
+  row.style.cssText = 'display:grid;grid-template-columns:120px 1fr 100px 1fr 36px;gap:4px;margin-bottom:4px';
+  row.innerHTML = `<input class="form-input rf-row-range" placeholder=">80" value="${escHtml(range || '')}" style="font-size:12px;padding:6px 8px"><input class="form-input rf-row-dose" placeholder="Dose" value="${escHtml(dose || '')}" style="font-size:12px;padding:6px 8px"><input class="form-input rf-row-freq" placeholder="Freq" value="${escHtml(freq || '')}" style="font-size:12px;padding:6px 8px"><input class="form-input rf-row-note" placeholder="Note" value="${escHtml(note || '')}" style="font-size:12px;padding:6px 8px"><button type="button" class="btn btn-sm" data-action="removeRenalDosingRow" style="color:var(--danger);padding:4px">✕</button>`;
+  container.appendChild(row);
+}
+
+function collectRenalFormData() {
+  const badges = [];
+  document.querySelectorAll('.rf-badge:checked').forEach(cb => badges.push(cb.value));
+  const cls = document.getElementById('rf-class').value;
+  if (!badges.includes(cls)) badges.unshift(cls);
+  const rows = [];
+  document.querySelectorAll('#rf-dosing-rows .renal-dosing-row').forEach(row => {
+    const range = row.querySelector('.rf-row-range')?.value?.trim() || '';
+    const dose = row.querySelector('.rf-row-dose')?.value?.trim() || '';
+    const freq = row.querySelector('.rf-row-freq')?.value?.trim() || '';
+    const note = row.querySelector('.rf-row-note')?.value?.trim() || '';
+    if (range || dose) rows.push({ range, dose, freq, note });
+  });
+  return {
+    id: document.getElementById('rf-id').value.trim(),
+    name: document.getElementById('rf-name').value.trim(),
+    'class': cls,
+    sub: document.getElementById('rf-sub').value.trim(),
+    badges, recommended: document.getElementById('rf-recommended').value.trim(),
+    dosingTable: rows,
+    info: document.getElementById('rf-info').value.trim(),
+    infoType: document.getElementById('rf-infoType').value,
+    ref: document.getElementById('rf-ref').value.trim()
+  };
+}
+
+async function saveRenalDrug() {
+  const data = collectRenalFormData();
+  if (!data.id || !data.name) { toast('กรุณากรอก Drug ID และ Drug Name', 'error'); return; }
+  showLoading('กำลังบันทึก...');
+  try {
+    if (state.editingRenalId) {
+      await apiCall('updateRenalDrug', data);
+      toast('✅ อัพเดทยาแล้ว', 'success');
+    } else {
+      await apiCall('createRenalDrug', data);
+      toast('✅ เพิ่มยาแล้ว', 'success');
+    }
+    closeRenalModal();
+    await loadRenalDrugs();
+  } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  hideLoading();
+}
+
+function editRenalDrug(id) {
+  const drug = state.renalDrugs.find(d => String(d.id) === String(id));
+  if (drug) openRenalModal(drug);
+}
+
+async function deleteRenalDrug(id) {
+  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
+  const drug = state.renalDrugs.find(d => String(d.id) === String(id));
+  if (!drug) return;
+  if (!confirm(`ลบยา "${drug.name}" ?`)) return;
+  showLoading('กำลังลบ...');
+  try {
+    await apiCall('deleteRenalDrug', { id });
+    toast('🗑 ลบยาแล้ว', 'success');
+    await loadRenalDrugs();
+  } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  hideLoading();
+}
+
+function toggleRenalPreview(show) {
+  document.getElementById('renal-form-view').style.display = show ? 'none' : 'block';
+  document.getElementById('renal-preview-view').style.display = show ? 'block' : 'none';
+  document.getElementById('btn-renal-form').style.background = show ? 'transparent' : 'var(--primary)';
+  document.getElementById('btn-renal-form').style.color = show ? 'var(--text-muted)' : 'white';
+  document.getElementById('btn-renal-preview').style.background = show ? 'var(--primary)' : 'transparent';
+  document.getElementById('btn-renal-preview').style.color = show ? 'white' : 'var(--text-muted)';
+  if (show) renderRenalPreview();
+}
+
+function renderRenalPreview() {
+  const data = collectRenalFormData();
+  const card = document.getElementById('renal-preview-card');
+  const badgeHtml = (data.badges || []).map(b => `<span style="display:inline-block;padding:2px 8px;border-radius:50px;font-size:11px;font-weight:600;background:#e0f2fe;color:#0ea5e9;margin-right:4px">${escHtml(b)}</span>`).join('');
+  const tableRows = (data.dosingTable || []).map(r => `<tr><td style="padding:8px 12px;font-weight:600;white-space:nowrap">${escHtml(r.range)}</td><td style="padding:8px 12px">${escHtml(r.dose)}</td><td style="padding:8px 12px">${escHtml(r.freq)}</td><td style="padding:8px 12px;font-size:12px;color:var(--text-muted)">${escHtml(r.note)}</td></tr>`).join('');
+  const bgColor = INFO_TYPE_COLORS[data.infoType] || '#eff6ff';
+  const borderColor = data.infoType === 'red' ? '#ef4444' : data.infoType === 'amber' ? '#f59e0b' : data.infoType === 'teal' ? '#14b8a6' : '#3b82f6';
+  card.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:600px">
+      <h3 style="margin-bottom:4px">${escHtml(data.name || 'Drug Name')}</h3>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${escHtml(data.sub || '')}</div>
+      <div style="margin-bottom:12px">${badgeHtml}</div>
+      ${data.recommended ? `<div style="background:#ecfdf5;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:16px"><div style="font-size:11px;font-weight:600;color:#059669;margin-bottom:4px">RECOMMENDED DOSE</div><div style="font-weight:600;color:#047857">${escHtml(data.recommended)}</div></div>` : ''}
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px"><thead><tr style="background:#f8fafc"><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">GFR</th><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">Dose</th><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">Freq</th><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">Note</th></tr></thead><tbody>${tableRows}</tbody></table>
+      ${data.info ? `<div style="background:${bgColor};border-left:4px solid ${borderColor};border-radius:0 8px 8px 0;padding:12px;margin-bottom:12px;font-size:13px">${data.info}</div>` : ''}
+      ${data.ref ? `<div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:var(--text-muted)"><strong>Ref:</strong> ${escHtml(data.ref)}</div>` : ''}
+    </div>`;
+}
+
+function exportRenalCSV() {
+  if (state.renalDrugs.length === 0) { toast('ไม่มีข้อมูล', 'info'); return; }
+  const rows = [['ID', 'Name', 'Class', 'Subclass', 'Badges', 'Recommended', 'Dosing Table', 'Info', 'Info Type', 'Reference']];
+  state.renalDrugs.forEach(d => {
+    rows.push([d.id, d.name, d['class'], d.sub, JSON.stringify(d.badges), d.recommended, JSON.stringify(d.dosingTable), d.info, d.infoType, d.ref]);
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `renal-dosing-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  toast('📥 Export CSV สำเร็จ', 'success');
+}
+
+// Hardcoded CURATED renal dosing data — for one-time migration
+const CURATED_RENAL_DRUGS = [
+  // ── ANTIBIOTICS ──
+  {id:'vancomycin',name:'Vancomycin','class':'abx',sub:'Glycopeptide',badges:['abx','renal','hd'],
+    recommended:'15-20 mg/kg/dose q8-12h',
+    dosingTable:[
+      {range:'>80',dose:'15-20 mg/kg',freq:'q8-12h',note:'Normal dosing'},
+      {range:'50–80',dose:'15-20 mg/kg',freq:'q12h',note:''},
+      {range:'30–50',dose:'15-20 mg/kg',freq:'q24h',note:''},
+      {range:'10–30',dose:'15-20 mg/kg',freq:'q24-48h',note:'Re-dose by trough'},
+      {range:'<10 / HD',dose:'15-20 mg/kg',freq:'q48-72h',note:'Re-dose when trough <15-20'}
+    ],
+    info:'<strong>TDM:</strong> AUC/MIC 400-600 (preferred) | Trough 15-20 mcg/mL<br>เจาะ trough ก่อน dose ที่ 4<br><strong>HD:</strong> Re-dose 15-25 mg/kg post-HD, เจาะ pre-HD level<br><strong>CRRT:</strong> 15-20 mg/kg loading → 7.5-10 mg/kg q12h (adjust by level)',
+    infoType:'blue',
+    ref:'Rybak MJ, et al. Am J Health Syst Pharm. 2020;77(11):835-864 | Lexicomp 2024'},
+
+  {id:'meropenem',name:'Meropenem','class':'abx',sub:'Carbapenem',badges:['abx','renal'],
+    recommended:'1-2 g q8h',
+    dosingTable:[
+      {range:'>50',dose:'1–2 g',freq:'q8h',note:'No adjustment needed'},
+      {range:'26–50',dose:'1 g',freq:'q12h',note:''},
+      {range:'10–25',dose:'500 mg–1 g',freq:'q12h',note:''},
+      {range:'<10 / HD',dose:'500 mg–1 g',freq:'q24h',note:'Give post-HD on HD days'}
+    ],
+    info:'<strong>Extended infusion:</strong> 3-4 hr infusion may improve PK/PD target attainment<br><strong>Seizure risk:</strong> ต่ำกว่า Imipenem แต่ยังต้องระวังใน CKD<br><strong>CRRT:</strong> 1 g q8h (CVVH/CVVHD/CVVHDF)',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Sanford Guide 2024'},
+
+  {id:'imipenem',name:'Imipenem/Cilastatin','class':'abx',sub:'Carbapenem',badges:['abx','renal'],
+    recommended:'500 mg q6h',
+    dosingTable:[
+      {range:'>70',dose:'500 mg',freq:'q6h',note:'Normal'},
+      {range:'41–70',dose:'500 mg',freq:'q8h',note:''},
+      {range:'21–40',dose:'250–500 mg',freq:'q8-12h',note:''},
+      {range:'6–20',dose:'250 mg',freq:'q12h',note:''},
+      {range:'<6 / HD',dose:'250 mg',freq:'q12h',note:'Supplement post-HD'}
+    ],
+    info:'<strong>⚠ Seizure risk สูงขึ้นใน renal impairment</strong> — ห้ามใช้ขนาด >500 mg/dose ถ้า CrCl <70<br><strong>CRRT:</strong> 500 mg q6-8h',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | Package Insert'},
+
+  {id:'ertapenem',name:'Ertapenem','class':'abx',sub:'Carbapenem',badges:['abx','renal','hd'],
+    recommended:'1 g q24h',
+    dosingTable:[
+      {range:'>30',dose:'1 g',freq:'q24h',note:'No adjustment'},
+      {range:'≤30 / HD',dose:'500 mg',freq:'q24h',note:'Give supplement 150 mg post-HD'}
+    ],
+    info:'<strong>HD:</strong> ถ้า dose ≤6 hr ก่อน HD → supplement 150 mg post-HD<br><strong>ไม่แนะนำ</strong>ใน CRRT (ข้อมูลจำกัด)',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Sanford Guide 2024'},
+
+  {id:'piptazo',name:'Piperacillin/Tazobactam','class':'abx',sub:'Beta-lactam/BLI',badges:['abx','renal'],
+    recommended:'4.5 g q6h',
+    dosingTable:[
+      {range:'>40',dose:'4.5 g',freq:'q6h',note:'Normal (EI: 4hr)'},
+      {range:'20–40',dose:'3.375 g q6h หรือ 4.5 g',freq:'q8h',note:''},
+      {range:'<20 / HD',dose:'2.25 g q6h หรือ 4.5 g',freq:'q12h',note:'Supplement 0.75 g post-HD'}
+    ],
+    info:'<strong>Extended infusion:</strong> 4 hr infusion recommended for PK/PD optimization<br><strong>⚠ หลีกเลี่ยงร่วม Vancomycin</strong> → ↑ risk AKI<br><strong>CRRT:</strong> 4.5 g q6-8h',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Rhodes NJ, et al. Pharmacotherapy 2015'},
+
+  {id:'ceftriaxone',name:'Ceftriaxone','class':'abx',sub:'3rd gen Cephalosporin',badges:['abx'],
+    recommended:'1–2 g q24h (ไม่ต้องปรับขนาดตามไต)',
+    dosingTable:[
+      {range:'All GFR',dose:'1–2 g',freq:'q24h',note:'ไม่ต้องปรับ (hepatic elimination ~40%)'},
+      {range:'HD',dose:'1–2 g',freq:'q24h',note:'Not dialyzable; no supplement needed'}
+    ],
+    info:'<strong>ข้อดี:</strong> No renal dose adjustment needed<br><strong>⚠ Max 2g/day</strong> ใน combined hepatic + renal impairment<br><strong>ห้ามผสม</strong>ใน Ca²⁺-containing solutions (Ringer\'s, Hartmann\'s)',
+    infoType:'teal',
+    ref:'Lexicomp 2024'},
+
+  {id:'ceftazidime',name:'Ceftazidime','class':'abx',sub:'3rd gen Cephalosporin (anti-Pseudomonas)',badges:['abx','renal','hd'],
+    recommended:'1–2 g q8h',
+    dosingTable:[
+      {range:'>50',dose:'1–2 g',freq:'q8h',note:'Normal'},
+      {range:'31–50',dose:'1 g',freq:'q12h',note:''},
+      {range:'16–30',dose:'1 g',freq:'q24h',note:''},
+      {range:'6–15',dose:'500 mg',freq:'q24h',note:''},
+      {range:'<6 / HD',dose:'1 g loading → 500 mg',freq:'q24-48h',note:'Give post-HD'}
+    ],
+    info:'<strong>CRRT:</strong> 1-2 g q8-12h<br><strong>Extended infusion:</strong> อาจพิจารณา 3-4 hr infusion',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Sanford Guide 2024'},
+
+  {id:'cefepime',name:'Cefepime','class':'abx',sub:'4th gen Cephalosporin',badges:['abx','renal'],
+    recommended:'1–2 g q8h',
+    dosingTable:[
+      {range:'>60',dose:'1–2 g',freq:'q8h',note:'Normal'},
+      {range:'30–60',dose:'1–2 g',freq:'q12h',note:''},
+      {range:'11–29',dose:'1 g',freq:'q24h',note:''},
+      {range:'≤10 / HD',dose:'500 mg–1 g',freq:'q24h',note:'Give post-HD'}
+    ],
+    info:'<strong>⚠ Neurotoxicity risk สูงขึ้นมาก</strong>เมื่อไม่ปรับ dose ใน CKD → confusion, seizures, myoclonus<br><strong>CRRT:</strong> 1-2 g q8-12h',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | Payne LE, et al. Crit Care. 2017;21(1):276'},
+
+  {id:'amikacin',name:'Amikacin','class':'abx',sub:'Aminoglycoside',badges:['abx','renal','hd'],
+    recommended:'15 mg/kg q24h (extended-interval)',
+    dosingTable:[
+      {range:'≥60',dose:'15 mg/kg',freq:'q24h',note:'Extended-interval'},
+      {range:'40–59',dose:'15 mg/kg',freq:'q36h',note:''},
+      {range:'20–39',dose:'15 mg/kg',freq:'q48h',note:''},
+      {range:'<20 / HD',dose:'15 mg/kg',freq:'By level',note:'Re-dose when trough <5'}
+    ],
+    info:'<strong>TDM:</strong> Peak 20-35 (extended) | Trough <5 mcg/mL<br><strong>Monitor:</strong> SCr, audiometry, vestibular function<br><strong>HD:</strong> Give post-HD, เจาะ level pre-next dose',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Nicolau DP, et al. AAC 1995'},
+
+  // ── ANTIFUNGALS ──
+  {id:'fluconazole',name:'Fluconazole','class':'af',sub:'Azole',badges:['af','renal'],
+    recommended:'200-400 mg/day',
+    dosingTable:[
+      {range:'>50',dose:'200-400 mg',freq:'q24h',note:'Normal dose'},
+      {range:'≤50 (no HD)',dose:'100-200 mg',freq:'q24h',note:'ลด 50%'},
+      {range:'<10 / HD',dose:'100-200 mg',freq:'q24h post-HD',note:'ให้หลัง HD'}
+    ],
+    info:'<strong>HD:</strong> Fluconazole dialyzable — ให้ dose หลัง HD<br><strong>CRRT:</strong> ให้ normal dose (200-400 mg/day)<br><strong>Monitor:</strong> LFTs, QTc',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | IDSA Candidiasis Guidelines 2016'},
+
+  {id:'amphotericin-b',name:'Amphotericin B (Liposomal)','class':'af',sub:'Polyene',badges:['af','nephrotox'],
+    recommended:'3-5 mg/kg/day (ไม่ต้องปรับ dose ตาม GFR)',
+    dosingTable:[
+      {range:'All GFR',dose:'3-5 mg/kg/day',freq:'q24h',note:'ไม่ต้องปรับ dose'},
+      {range:'HD',dose:'3-5 mg/kg/day',freq:'q24h',note:'ไม่ถูก dialyze'}
+    ],
+    info:'<strong>⚠ Nephrotoxic:</strong> Monitor SCr, K+, Mg++ ทุกวัน<br>Liposomal form มี nephrotoxicity น้อยกว่า conventional<br>Pre-hydrate with NSS 500 mL ก่อนให้ยา<br><strong>CRRT:</strong> ไม่ต้องปรับ dose',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | IDSA Aspergillosis Guidelines 2016'},
+
+  {id:'voriconazole',name:'Voriconazole','class':'af',sub:'Azole',badges:['af','avoid'],
+    recommended:'IV: 6 mg/kg q12h x2 → 4 mg/kg q12h; PO: 200-300 mg q12h',
+    dosingTable:[
+      {range:'>50',dose:'IV: 6→4 mg/kg; PO: 200-300 mg',freq:'q12h',note:'Normal'},
+      {range:'≤50',dose:'⚠ PO only: 200-300 mg',freq:'q12h',note:'หลีกเลี่ยง IV (SBECD)'},
+      {range:'<10 / HD',dose:'PO: 200 mg',freq:'q12h',note:'PO only'}
+    ],
+    info:'<strong>⚠ IV formulation:</strong> มี SBECD (sulfobutylether-β-cyclodextrin) ที่สะสมใน renal impairment<br>ถ้า CrCl ≤50 → เปลี่ยนเป็น PO หรือใช้ liposomal ampho B แทน<br><strong>TDM:</strong> Trough 1-5.5 mcg/mL<br><strong>Monitor:</strong> LFTs, visual disturbances',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | IDSA Aspergillosis Guidelines 2016'},
+
+  // ── ANTIVIRALS ──
+  {id:'acyclovir',name:'Acyclovir','class':'av',sub:'Nucleoside Analog',badges:['av','renal','nephrotox'],
+    recommended:'10 mg/kg q8h (HSV encephalitis)',
+    dosingTable:[
+      {range:'>50',dose:'10 mg/kg',freq:'q8h',note:'HSV encephalitis dose'},
+      {range:'25–50',dose:'10 mg/kg',freq:'q12h',note:''},
+      {range:'10–25',dose:'10 mg/kg',freq:'q24h',note:''},
+      {range:'<10 / HD',dose:'5 mg/kg',freq:'q24h + post-HD',note:'Give dose post-HD'}
+    ],
+    info:'<strong>⚠ Nephrotoxic:</strong> Crystalluria risk — hydrate with NSS 1 L ก่อนให้ยา<br>Infuse over ≥1 hour<br><strong>HD:</strong> Give supplemental dose post-HD<br><strong>Monitor:</strong> SCr, urine output, neurological status',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | Red Book 2024'},
+
+  {id:'ganciclovir',name:'Ganciclovir','class':'av',sub:'Nucleoside Analog',badges:['av','renal','hd'],
+    recommended:'5 mg/kg q12h (induction) → 5 mg/kg q24h (maintenance)',
+    dosingTable:[
+      {range:'≥70',dose:'5 mg/kg',freq:'q12h / q24h',note:'Induction / Maintenance'},
+      {range:'50–69',dose:'2.5 mg/kg',freq:'q12h / q24h',note:''},
+      {range:'25–49',dose:'2.5 / 1.25 mg/kg',freq:'q24h',note:''},
+      {range:'10–24',dose:'1.25 / 0.625 mg/kg',freq:'q24h',note:''},
+      {range:'<10 / HD',dose:'1.25 mg/kg',freq:'3x/wk post-HD',note:''}
+    ],
+    info:'<strong>Monitor:</strong> CBC 2-3x/wk (neutropenia risk), SCr<br><strong>HD:</strong> Give post-HD on dialysis days<br><strong>CRRT:</strong> 2.5 mg/kg q12h (induction) → q24h (maintenance)',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Transplant Infectious Disease Guidelines'},
+
+  // ── ANTICOAGULANTS ──
+  {id:'enoxaparin',name:'Enoxaparin','class':'ac',sub:'LMWH',badges:['ac','renal'],
+    recommended:'Treatment: 1 mg/kg q12h | Prophylaxis: 40 mg q24h',
+    dosingTable:[
+      {range:'>30',dose:'1 mg/kg',freq:'q12h',note:'Treatment dose'},
+      {range:'>30',dose:'40 mg',freq:'q24h',note:'Prophylaxis'},
+      {range:'≤30',dose:'1 mg/kg',freq:'q24h ⚠',note:'ลด frequency'},
+      {range:'≤30',dose:'30 mg',freq:'q24h',note:'Prophylaxis (ลด dose)'}
+    ],
+    info:'<strong>⚠ CrCl ≤30:</strong> LMWH สะสมได้ → พิจารณา UFH แทน<br><strong>Monitor:</strong> Anti-Xa level (target 0.5-1.0 IU/mL for treatment)<br><strong>Obesity:</strong> ใช้ actual body weight, cap ที่ 150 mg/dose<br><strong>HD:</strong> หลีกเลี่ยง LMWH → ใช้ UFH',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | CHEST Guidelines 2021'},
+
+  {id:'dabigatran',name:'Dabigatran','class':'ac',sub:'DOAC (Direct Thrombin Inhibitor)',badges:['ac','renal','avoid'],
+    recommended:'150 mg BID (AF) | 150 mg BID (VTE treatment)',
+    dosingTable:[
+      {range:'>50',dose:'150 mg',freq:'BID',note:'Normal dose'},
+      {range:'30–50',dose:'110 mg',freq:'BID',note:'ลด dose (age ≥80, P-gp inhib)'},
+      {range:'<30',dose:'⚠ Contraindicated',freq:'—',note:'ห้ามใช้'}
+    ],
+    info:'<strong>⚠ Renal elimination 80%:</strong> ห้ามใช้ถ้า CrCl <30<br><strong>Drug interaction:</strong> P-gp inhibitors (verapamil, dronedarone) → ลด dose<br><strong>Reversal:</strong> Idarucizumab (Praxbind)<br><strong>HD:</strong> Dialyzable — สามารถ remove ได้ 60% ใน 2-3 ชม.',
+    infoType:'red',
+    ref:'Lexicomp 2024 | ESC AF Guidelines 2024'},
+
+  // ── CARDIOVASCULAR ──
+  {id:'digoxin',name:'Digoxin','class':'cv',sub:'Cardiac Glycoside',badges:['cv','renal','nephrotox'],
+    recommended:'0.125-0.25 mg/day',
+    dosingTable:[
+      {range:'>50',dose:'0.125-0.25 mg',freq:'q24h',note:''},
+      {range:'10–50',dose:'0.0625-0.125 mg',freq:'q24h',note:'ลด dose 50%'},
+      {range:'<10 / HD',dose:'0.0625 mg',freq:'q48h',note:'By level'}
+    ],
+    info:'<strong>TDM:</strong> Target 0.5-0.9 ng/mL (HF) | 0.8-2.0 (AF)<br><strong>⚠ Toxicity risk:</strong> เพิ่มขึ้นเมื่อ K+ ต่ำ, renal impairment<br><strong>HD:</strong> Not significantly removed<br><strong>Drug interaction:</strong> Amiodarone, verapamil → ลด dose 50%',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | ACC/AHA HF Guidelines 2022'},
+
+  {id:'enalapril',name:'Enalapril','class':'cv',sub:'ACE Inhibitor',badges:['cv','renal'],
+    recommended:'2.5-20 mg/day (titrate)',
+    dosingTable:[
+      {range:'>30',dose:'2.5-20 mg',freq:'q12-24h',note:'Titrate to response'},
+      {range:'10–30',dose:'2.5-5 mg',freq:'q24h',note:'Start low'},
+      {range:'<10 / HD',dose:'2.5 mg',freq:'q24h',note:'Dialyzable'}
+    ],
+    info:'<strong>⚠ Monitor:</strong> K+, SCr (ยอมรับ SCr เพิ่ม ≤30% จาก baseline)<br>ถ้า SCr เพิ่ม >30% หรือ K+ >5.5 → ลด dose หรือหยุด<br><strong>HD:</strong> Give supplemental dose post-HD (20-25% dialyzable)',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | KDIGO CKD Guidelines 2024'},
+
+  // ── ANALGESICS ──
+  {id:'morphine',name:'Morphine','class':'analgesic',sub:'Opioid',badges:['analgesic','renal','avoid'],
+    recommended:'Normal dose (titrate to pain)',
+    dosingTable:[
+      {range:'>50',dose:'Normal dose',freq:'q4h PRN',note:'Titrate to pain'},
+      {range:'15–50',dose:'ลด 50-75%',freq:'q6-8h',note:'M6G สะสม'},
+      {range:'<15 / HD',dose:'⚠ หลีกเลี่ยง',freq:'—',note:'ใช้ fentanyl แทน'}
+    ],
+    info:'<strong>⚠ Active metabolite M6G:</strong> สะสมใน renal impairment → respiratory depression, sedation<br><strong>Alternative:</strong> Fentanyl (no active metabolites, ไม่ต้องปรับ dose)<br><strong>HD:</strong> M6G ถูก dialyze ได้บางส่วน แต่ยังเสี่ยง',
+    infoType:'red',
+    ref:'Lexicomp 2024 | Dean M. J Pain Symptom Manage 2004'},
+
+  {id:'gabapentin',name:'Gabapentin','class':'analgesic',sub:'Gabapentinoid',badges:['analgesic','renal'],
+    recommended:'300-1200 mg TID',
+    dosingTable:[
+      {range:'≥60',dose:'300-1200 mg',freq:'TID',note:'Normal dose'},
+      {range:'30–59',dose:'200-700 mg',freq:'BID',note:''},
+      {range:'15–29',dose:'100-300 mg',freq:'q24h',note:''},
+      {range:'<15 / HD',dose:'100-300 mg',freq:'post-HD',note:'Supplemental dose after HD'}
+    ],
+    info:'<strong>100% renal elimination:</strong> ต้องปรับ dose ตาม GFR เสมอ<br><strong>HD:</strong> Dialyzable — ให้ supplemental dose 125-350 mg post-HD<br><strong>Monitor:</strong> Sedation, dizziness, peripheral edema',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Bockbrader HN, et al. Clin Pharmacokinet 2010'},
+
+  // ── NEUROLOGY ──
+  {id:'levetiracetam',name:'Levetiracetam','class':'neuro',sub:'Antiepileptic',badges:['neuro','renal','hd'],
+    recommended:'500-1500 mg BID',
+    dosingTable:[
+      {range:'>80',dose:'500-1500 mg',freq:'q12h',note:'Normal dose'},
+      {range:'50–80',dose:'500-1000 mg',freq:'q12h',note:''},
+      {range:'30–50',dose:'250-750 mg',freq:'q12h',note:''},
+      {range:'<30 / HD',dose:'250-500 mg',freq:'q12h',note:'Supplement 250-500 mg post-HD'}
+    ],
+    info:'<strong>66% renal elimination:</strong> ต้องปรับ dose ตาม GFR<br><strong>HD:</strong> Dialyzable ~50% — ให้ supplemental dose 250-500 mg post-HD<br><strong>CRRT:</strong> 250-750 mg q12h<br><strong>IV ↔ PO:</strong> 1:1 conversion',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Epilepsia 2006'},
+
+  {id:'phenobarbital',name:'Phenobarbital','class':'neuro',sub:'Barbiturate',badges:['neuro','hd'],
+    recommended:'60-180 mg/day (ไม่ต้องปรับ dose แต่ระวัง sedation)',
+    dosingTable:[
+      {range:'>10',dose:'60-180 mg',freq:'q24h',note:'ไม่ต้องปรับ (hepatic metabolism)'},
+      {range:'<10 / HD',dose:'60-180 mg',freq:'q24h',note:'Supplement post-HD'}
+    ],
+    info:'<strong>Primarily hepatic metabolism</strong> — ไม่ต้องปรับ dose ตาม GFR<br>แต่ active metabolite อาจสะสมใน severe renal impairment → ระวัง sedation<br><strong>HD:</strong> 20-50% dialyzable — give supplement post-HD<br><strong>TDM:</strong> Target 15-40 mcg/mL',
+    infoType:'blue',
+    ref:'Lexicomp 2024 | Winter\'s Basic Clinical Pharmacokinetics'},
+
+  // ── CHEMOTHERAPY ──
+  {id:'methotrexate',name:'Methotrexate (High-dose)','class':'chemo',sub:'Antimetabolite',badges:['chemo','renal','nephrotox'],
+    recommended:'Per protocol + aggressive hydration + leucovorin rescue',
+    dosingTable:[
+      {range:'≥60',dose:'Per protocol',freq:'Per protocol',note:'ต้อง hydrate + alkalinize urine'},
+      {range:'<60',dose:'⚠ Hold/Reduce',freq:'—',note:'Delay until GFR ≥60'}
+    ],
+    info:'<strong>⚠ Nephrotoxic:</strong> MTX precipitates ใน renal tubules<br><strong>Mandatory:</strong> Aggressive hydration (3 L/m²/day) + Urine alkalinization (pH >7)<br><strong>Leucovorin rescue:</strong> ต้องให้ตาม MTX level protocol<br><strong>HD:</strong> High-flux HD หรือ CWHD อาจช่วยลด level ได้<br><strong>Monitor:</strong> MTX level, SCr q6-12h, CBC, LFTs',
+    infoType:'red',
+    ref:'Lexicomp 2024 | NCCN Guidelines | Howard SC, et al. NEJM 2016'},
+
+  {id:'cisplatin',name:'Cisplatin','class':'chemo',sub:'Platinum',badges:['chemo','nephrotox'],
+    recommended:'Per protocol + aggressive hydration',
+    dosingTable:[
+      {range:'≥60',dose:'Per protocol',freq:'Per cycle',note:'Pre/post hydration mandatory'},
+      {range:'45–59',dose:'ลด 25%',freq:'Per cycle',note:'พิจารณา carboplatin'},
+      {range:'<45',dose:'⚠ Contraindicated',freq:'—',note:'ใช้ carboplatin แทน'}
+    ],
+    info:'<strong>⚠ Highly nephrotoxic:</strong> Causes dose-dependent tubular injury<br><strong>Mandatory hydration:</strong> NSS 1-2 L pre/post + mannitol<br><strong>Alternative:</strong> Carboplatin (AUC-based, less nephrotoxic)<br><strong>Monitor:</strong> SCr, Mg++, K+, audiometry',
+    infoType:'red',
+    ref:'Lexicomp 2024 | NCCN Guidelines'},
+
+  // ── MISCELLANEOUS ──
+  {id:'allopurinol',name:'Allopurinol','class':'misc',sub:'Xanthine Oxidase Inhibitor',badges:['misc','renal'],
+    recommended:'100-300 mg/day',
+    dosingTable:[
+      {range:'>60',dose:'100-300 mg',freq:'q24h',note:'Titrate to uric acid <6'},
+      {range:'30–60',dose:'100-200 mg',freq:'q24h',note:''},
+      {range:'15–30',dose:'100 mg',freq:'q24h',note:''},
+      {range:'<15 / HD',dose:'100 mg',freq:'q48h',note:'Post-HD on dialysis days'}
+    ],
+    info:'<strong>Active metabolite Oxipurinol:</strong> สะสมใน renal impairment → เสี่ยง hypersensitivity syndrome<br><strong>HLA-B*5801:</strong> Screen ก่อนเริ่มยา (โดยเฉพาะ Thai/Asian) — ลด risk SJS/TEN<br><strong>HD:</strong> Dialyzable — give post-HD<br><strong>Alternative:</strong> Febuxostat (ไม่ต้องปรับ dose)',
+    infoType:'amber',
+    ref:'Lexicomp 2024 | ACR Gout Guidelines 2020'},
+
+  {id:'metformin',name:'Metformin','class':'misc',sub:'Biguanide',badges:['misc','renal','avoid'],
+    recommended:'500-1000 mg BID (max 2000 mg/day)',
+    dosingTable:[
+      {range:'≥45',dose:'500-1000 mg',freq:'BID',note:'Normal dose'},
+      {range:'30–44',dose:'500 mg',freq:'BID (max 1000)',note:'⚠ ลด dose + monitor'},
+      {range:'<30',dose:'⚠ Contraindicated',freq:'—',note:'Lactic acidosis risk'}
+    ],
+    info:'<strong>⚠ Lactic acidosis:</strong> Risk เพิ่มเมื่อ GFR <30<br><strong>GFR 30-44:</strong> ลด dose + ห้ามเริ่มยาใหม่ (ให้ต่อได้ถ้าใช้อยู่แล้ว)<br><strong>Hold:</strong> ก่อน contrast media, surgery, หรือ acute illness<br><strong>HD:</strong> Dialyzable — มี case reports ใช้ HD รักษา metformin-associated lactic acidosis',
+    infoType:'red',
+    ref:'Lexicomp 2024 | KDIGO Diabetes & CKD 2022 | FDA Label 2024'}
+];
+
+async function importCuratedRenal() {
+  if (state.renalDrugs.length > 0) {
+    if (!confirm('มีข้อมูลอยู่แล้ว ' + state.renalDrugs.length + ' รายการ\nระบบจะข้ามยาที่ซ้ำ — ต้องการ import CURATED ' + CURATED_RENAL_DRUGS.length + ' รายการ?')) return;
+  } else {
+    if (!confirm('Import ข้อมูล CURATED ' + CURATED_RENAL_DRUGS.length + ' ยา เข้าสู่ Google Sheets?')) return;
+  }
+
+  const drugs = CURATED_RENAL_DRUGS.map(d => ({
+    id: d.id, name: d.name, 'class': d['class'], sub: d.sub,
+    badges: d.badges, recommended: d.recommended,
+    dosingTable: d.dosingTable, info: d.info, infoType: d.infoType, ref: d.ref
+  }));
+
+  showLoading('กำลัง import ' + drugs.length + ' ยา...');
+  try {
+    const cfg = getConfig();
+    const postUrl = cfg.scriptUrl + '?action=bulkCreateRenalDrugs&user=' + encodeURIComponent(state.user?.email || 'unknown');
+    const body = JSON.stringify({ action: 'bulkCreateRenalDrugs', user: state.user?.email || 'unknown', drugs: drugs });
+
+    if (body.length < 6000) {
+      const result = await apiCall('bulkCreateRenalDrugs', { drugs });
+      toast('✅ Import สำเร็จ: เพิ่ม ' + result.created + ' ยา, ข้าม ' + result.skipped + ' ซ้ำ', 'success');
+    } else {
+      await fetch(postUrl, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: body,
+      });
+      await new Promise(r => setTimeout(r, 2500));
+      toast('✅ ส่งข้อมูล import แล้ว — กำลังโหลดใหม่...', 'success');
+    }
+    await loadRenalDrugs();
+  } catch (e) {
+    toast('❌ Import ล้มเหลว: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+/* ═══════════════════════════════════════════
+   ANALYTICS SUMMARY
+   ═══════════════════════════════════════════ */
+async function loadAnalyticsSummary() {
+  var cfg = getConfig();
+  if (!cfg.scriptUrl) {
+    showAnalyticsStatus('กรุณาตั้งค่า Script URL ก่อนใช้งาน Analytics', true);
+    return;
+  }
+  showLoading('กำลังโหลดข้อมูล analytics...');
+  try {
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 15000);
+    var res = await fetch(cfg.scriptUrl + '?action=raw', { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+    state.analyticsData = data;
+    renderAnalyticsSummary();
+    showAnalyticsStatus('');
+    toast('โหลด analytics สำเร็จ');
+  } catch (e) {
+    var msg = e.name === 'AbortError' ? 'Timeout — ลองอีกครั้ง' : e.message;
+    showAnalyticsStatus('❌ โหลด analytics ล้มเหลว: ' + msg, true);
+  }
+  hideLoading();
+}
+
+function showAnalyticsStatus(msg, isError) {
+  var el = document.getElementById('analytics-status');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = isError ? 'var(--danger-bg, #fef2f2)' : 'var(--surface)';
+  el.style.color = isError ? 'var(--danger, #ef4444)' : 'var(--text)';
+}
+
+function renderAnalyticsSummary() {
+  var d = state.analyticsData;
+  if (!d) return;
+
+  var now = new Date();
+  var day7ago = new Date(now - 7 * 86400000);
+  var day30ago = new Date(now - 30 * 86400000);
+
+  var sessions = d.sessions || [];
+  var searches = d.searches || [];
+  var errors = (d.errors || d.errorLog || []);
+
+  // ── DAU (30d average) ──
+  var sessionsLast30 = sessions.filter(function(s) {
+    return s.timestamp && new Date(s.timestamp) >= day30ago;
+  });
+  var dauMap = {};
+  sessionsLast30.forEach(function(s) {
+    var day = String(s.timestamp).substring(0, 10);
+    if (!dauMap[day]) dauMap[day] = new Set();
+    dauMap[day].add(s.user_id || s.session_id || 'anon');
+  });
+  var dauDays = Object.keys(dauMap);
+  var dauAvg = dauDays.length > 0
+    ? Math.round(dauDays.reduce(function(sum, day) { return sum + dauMap[day].size; }, 0) / dauDays.length)
+    : 0;
+
+  // ── Searches (7d) ──
+  var searchesLast7 = searches.filter(function(s) {
+    return s.timestamp && new Date(s.timestamp) >= day7ago;
+  });
+
+  // ── Errors (7d) ──
+  var errorsLast7 = errors.filter(function(e) {
+    return e.timestamp && new Date(e.timestamp) >= day7ago;
+  });
+  var sessionsLast7 = sessions.filter(function(s) {
+    return s.timestamp && new Date(s.timestamp) >= day7ago;
+  });
+  var errorRate = sessionsLast7.length > 0
+    ? (errorsLast7.length / sessionsLast7.length * 100).toFixed(1) + '%'
+    : '—';
+
+  // ── Render stats cards ──
+  document.getElementById('ana-dau').textContent = dauAvg;
+  document.getElementById('ana-searches').textContent = searchesLast7.length;
+  document.getElementById('ana-errors').textContent = errorsLast7.length;
+  document.getElementById('ana-error-rate').textContent = errorRate;
+
+  // ── Missing drugs: queries with no result click ──
+  renderMissingDrugs(searchesLast7);
+
+  // ── Top searched drugs ──
+  renderTopSearchedDrugs(searchesLast7);
+
+  // ── Recent errors ──
+  renderRecentErrors(errors);
+}
+
+function renderMissingDrugs(searches) {
+  // Searches where user typed a query but didn't click any drug result
+  var drugNames = state.drugs.map(function(d) {
+    return (d.name || d.genericName || '').toLowerCase();
+  });
+  var missingMap = {};
+  searches.forEach(function(s) {
+    var q = (s.query || '').trim().toLowerCase();
+    if (!q) return;
+    // Consider "missing" if no drug was clicked from this search
+    if (s.drug_clicked && String(s.drug_clicked).trim() !== '') return;
+    // Normalize and count
+    if (!missingMap[q]) missingMap[q] = 0;
+    missingMap[q]++;
+  });
+
+  // Filter out queries that actually match a drug in the DB
+  var missingList = Object.keys(missingMap)
+    .filter(function(q) {
+      return !drugNames.some(function(name) {
+        return name.indexOf(q) !== -1 || q.indexOf(name) !== -1;
+      });
+    })
+    .map(function(q) { return { query: q, count: missingMap[q] }; })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, 20);
+
+  var maxCount = missingList.length > 0 ? missingList[0].count : 1;
+  var tbody = document.getElementById('ana-missing-body');
+
+  if (missingList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">ไม่พบคำค้นที่ไม่มีในฐานข้อมูล</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = missingList.map(function(item, i) {
+    var pct = Math.round(item.count / maxCount * 100);
+    var urgency = item.count >= 5 ? 'priority-high' : item.count >= 2 ? 'priority-medium' : '';
+    return '<tr class="' + urgency + '">'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td><strong>' + escHtml(item.query) + '</strong></td>'
+      + '<td>' + item.count + '</td>'
+      + '<td><div class="analytics-bar-wrap"><div class="analytics-bar" style="width:' + pct + '%"></div></div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderTopSearchedDrugs(searches) {
+  var drugCount = {};
+  searches.forEach(function(s) {
+    var name = (s.drug_clicked || '').trim();
+    if (!name) return;
+    if (!drugCount[name]) drugCount[name] = 0;
+    drugCount[name]++;
+  });
+
+  var topDrugs = Object.keys(drugCount)
+    .map(function(name) { return { name: name, count: drugCount[name] }; })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, 20);
+
+  var maxCount = topDrugs.length > 0 ? topDrugs[0].count : 1;
+  var tbody = document.getElementById('ana-top-drugs-body');
+
+  if (topDrugs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">ไม่มีข้อมูลการค้นหา</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = topDrugs.map(function(item, i) {
+    var pct = Math.round(item.count / maxCount * 100);
+    var inDb = state.drugs.some(function(d) {
+      return (d.name || d.genericName || '').toLowerCase() === item.name.toLowerCase();
+    });
+    var badge = inDb ? '' : ' <span style="color:var(--warning);font-size:11px">(ไม่มีใน DB)</span>';
+    return '<tr>'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td>' + escHtml(item.name) + badge + '</td>'
+      + '<td>' + item.count + '</td>'
+      + '<td><div class="analytics-bar-wrap"><div class="analytics-bar analytics-bar-blue" style="width:' + pct + '%"></div></div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderRecentErrors(errors) {
+  var sorted = errors.slice().sort(function(a, b) {
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  }).slice(0, 20);
+
+  var tbody = document.getElementById('ana-errors-body');
+
+  if (sorted.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">ไม่มี errors</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(function(e) {
+    var sev = (e.severity || 'info').toLowerCase();
+    var sevClass = sev === 'high' || sev === 'critical' ? 'priority-high'
+      : sev === 'medium' ? 'priority-medium' : '';
+    return '<tr class="' + sevClass + '">'
+      + '<td style="white-space:nowrap;font-size:11px">' + escHtml(formatDate(e.timestamp)) + '</td>'
+      + '<td><span class="severity-badge severity-' + escHtml(sev) + '">' + escHtml(sev) + '</span></td>'
+      + '<td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">' + escHtml(e.message || '—') + '</td>'
+      + '<td style="font-size:11px">' + escHtml(e.page || e.url || '—') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════
    TAB NAVIGATION
    ═══════════════════════════════════════════ */
 function switchTab(tab) {
   // Editor ไม่สามารถเข้า tab ที่ถูกจำกัด
-  if (!isAdmin() && ['import', 'settings', 'users'].includes(tab)) {
+  if (!isAdmin() && ['import', 'settings', 'users', 'analytics'].includes(tab)) {
     toast('❌ คุณไม่มีสิทธิ์เข้าถึงส่วนนี้', 'error');
     return;
   }
@@ -4481,6 +5974,9 @@ function switchTab(tab) {
   if (tab === 'audit') renderAuditLog();
   if (tab === 'users') loadUsers();
   if (tab === 'quality') renderQualityDashboard();
+  if (tab === 'compat') loadCompatPairs();
+  if (tab === 'renal') loadRenalDrugs();
+  if (tab === 'analytics') loadAnalyticsSummary();
 }
 
 /* ═══════════════════════════════════════════
@@ -4552,15 +6048,40 @@ document.addEventListener('DOMContentLoaded', () => {
     goPage: function(e, t) { goPage(+t.dataset.page); },
     auditGoPage: function(e, t) { auditGoPage(+t.dataset.page); },
     changeRole: function(e, t) { changeRole(t.dataset.email, t.dataset.role); },
-    removeUser: function(e, t) { removeUser(t.dataset.email); }
+    removeUser: function(e, t) { removeUser(t.dataset.email); },
+    // Compatibility pairs
+    openCompatModal: function() { openCompatModal(); },
+    closeCompatModal: function() { closeCompatModal(); },
+    saveCompatPair: function() { saveCompatPair(); },
+    editCompatPair: function(e, t) { editCompatPair(t.dataset.id); },
+    deleteCompatPair: function(e, t) { deleteCompatPair(t.dataset.id); },
+    compatGoPage: function(e, t) { compatGoPage(+t.dataset.page); },
+    exportCompatCSV: function() { exportCompatCSV(); },
+    importCuratedPairs: function() { importCuratedPairs(); },
+    // Renal dosing
+    openRenalModal: function() { openRenalModal(); },
+    closeRenalModal: function() { closeRenalModal(); },
+    saveRenalDrug: function() { saveRenalDrug(); },
+    editRenalDrug: function(e, t) { editRenalDrug(t.dataset.id); },
+    deleteRenalDrug: function(e, t) { deleteRenalDrug(t.dataset.id); },
+    renalGoPage: function(e, t) { renalGoPage(+t.dataset.page); },
+    exportRenalCSV: function() { exportRenalCSV(); },
+    importCuratedRenal: function() { importCuratedRenal(); },
+    addRenalDosingRow: function() { addRenalDosingRow('', '', '', ''); },
+    removeRenalDosingRow: function(e, t) { t.closest('.renal-dosing-row').remove(); },
+    toggleRenalPreview: function(e, t) { toggleRenalPreview(t.dataset.preview === 'true'); }
   });
   IVDrugRef.delegate(document, 'input', {
-    filterDrugs: function() { filterDrugs(); }
+    filterDrugs: function() { filterDrugs(); },
+    filterCompat: function() { filterCompat(); },
+    filterRenal: function() { filterRenal(); }
   });
   IVDrugRef.delegate(document, 'change', {
     filterDrugs: function() { filterDrugs(); },
     handleImportFile: function(e) { handleImportFile(e); },
-    renderAuditLog: function() { renderAuditLog(); }
+    renderAuditLog: function() { renderAuditLog(); },
+    filterCompat: function() { filterCompat(); },
+    filterRenal: function() { filterRenal(); }
   });
 
   // Init Google Auth after GIS library loads

@@ -1626,6 +1626,7 @@ var IVDrugRef = (function() {
   // ANALYTICS
   // ============================================================
   const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
+  const ADMIN_GAS_URL = 'https://script.google.com/macros/s/AKfycbwJhLwY34rKpVVBE4aFRMOee6-lldazO64uOk0EXEA0Yvwgz6SA3kjeWt7-R6BSsNZT/exec';
   let _reqCount = 0;
 
   /**
@@ -1649,7 +1650,7 @@ var IVDrugRef = (function() {
    * @returns {boolean} True if analytics consent is given
    */
   function hasAnalyticsConsent() {
-    return localStorage.getItem('analyticsConsent') === 'true';
+    return true; // Always allow — matches v4.7 behavior
   }
 
   /**
@@ -1889,6 +1890,8 @@ var IVDrugRef = (function() {
     getSessionId,
     getUserId,
     hasAnalyticsConsent,
+    getAnalyticsUrl: function() { return ANALYTICS_URL; },
+    getAdminGasUrl: function() { return ADMIN_GAS_URL; },
 
     // Service Worker
     registerSW,

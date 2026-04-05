@@ -5925,8 +5925,11 @@ function renderTopSearchedDrugs(searches) {
 
   tbody.innerHTML = topDrugs.map(function(item, i) {
     var pct = Math.round(item.count / maxCount * 100);
+    var searchName = item.name.toLowerCase();
     var inDb = state.drugs.some(function(d) {
-      return (d.name || d.genericName || '').toLowerCase() === item.name.toLowerCase();
+      var dbName = (d.name || d.genericName || '').toLowerCase();
+      // Flexible match: exact, contains, or first-word match
+      return dbName === searchName || dbName.indexOf(searchName) !== -1 || searchName.indexOf(dbName) !== -1;
     });
     var badge = inDb ? '' : ' <span style="color:var(--warning);font-size:11px">(ไม่มีใน DB)</span>';
     return '<tr>'

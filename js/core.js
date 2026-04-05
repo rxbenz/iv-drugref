@@ -882,7 +882,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.2.0';
+  const VERSION = '5.3.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -932,7 +932,14 @@ var IVDrugRef = (function() {
     debounce,
     fmt,
     dom,
-    delegate
+    delegate,
+
+    // Clinical Decision Support — reference links
+    REF_LINKS: {
+      thaiFDA: 'https://pertento.fda.moph.go.th/FDA_SEARCH_DRUG/SEARCH_DRUG/FRM_SEARCH_DRUG.aspx',
+      nlem: 'https://nlem.hss.moph.go.th/',
+      kdigo: 'https://kdigo.org/guidelines/ckd-evaluation-and-management/'
+    }
   };
 })();
 

@@ -6,6 +6,7 @@
     {
       id: 'vancomycin', name: 'Vancomycin', sub: '500 mg, 1 g/vial — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🧬 Bayesian TDM →</a>',
       badges: ['badge-renal'],
+      maxDose: { value: 4000, unit: 'mg/day', ref: 'Rybak MJ, et al. ASHP/IDSA/PIDS 2020 Vancomycin Guidelines' },
       calc: function(pt) {
         const dose_low = Math.round(pt.wt * 15 / 250) * 250;
         const dose_high = Math.round(pt.wt * 20 / 250) * 250;
@@ -38,6 +39,7 @@
           + `<tr${pt.crcl<=10?' style="background:#fef2f2;font-weight:600;"':''}><td style="padding:4px 6px;border:1px solid #ddd;"><10 / HD</td><td style="padding:4px 6px;border:1px solid #ddd;">q48-72h</td><td style="padding:4px 6px;border:1px solid #ddd;">Re-dose when trough <15-20</td></tr>`
           + '</table>';
         return {
+          calculatedDose: dailyDose,
           title: `Vancomycin ${dose} mg IV ${freq}`,
           details: [
             { l: 'Weight-based dose', v: `15-20 mg/kg = ${dose_low}–${dose_high} mg` },
@@ -133,11 +135,13 @@
     {
       id: 'phenytoin', name: 'Phenytoin loading', sub: '250 mg/5 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-loading'],
+      maxDose: { value: 2000, unit: 'mg', ref: 'Lexicomp — Max single loading dose 2000 mg' },
       calc: function(pt) {
         const dose = Math.round(pt.wt * 20);
         const maxRate = pt.age >= 65 ? 25 : 50;
         const infuseMin = Math.ceil(dose / maxRate);
         return {
+          calculatedDose: dose,
           title: `Phenytoin ${dose} mg IV loading`,
           details: [
             { l: 'Loading dose', v: `20 mg/kg = ${dose} mg` },
@@ -154,11 +158,13 @@
     {
       id: 'valproate', name: 'Sodium Valproate loading', sub: '400 mg/4 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-loading'],
+      maxDose: { value: 3000, unit: 'mg', ref: 'Lexicomp — Max loading dose 40 mg/kg (usual max ~3000 mg)' },
       calc: function(pt) {
         const dose30 = Math.round(pt.wt * 30);
         const dose40 = Math.round(pt.wt * 40);
         const maintRate = (pt.wt * 1.5).toFixed(0);
         return {
+          calculatedDose: dose40,
           title: `Valproate ${dose30}–${dose40} mg IV loading`,
           details: [
             { l: 'Loading dose', v: `30-40 mg/kg = ${dose30}–${dose40} mg` },
@@ -174,6 +180,7 @@
     {
       id: 'levetiracetam', name: 'Levetiracetam loading', sub: '500 mg/5 mL',
       badges: ['badge-loading'],
+      maxDose: { value: 4500, unit: 'mg', ref: 'Lexicomp — Max loading dose 4500 mg' },
       calc: function(pt) {
         const dose = Math.round(pt.wt * 60 / 500) * 500;
         const doseMax = Math.min(dose, 4500);
@@ -182,6 +189,7 @@
         else if (pt.crcl < 50) maint = '500-750 mg IV q12h (CrCl 30-50)';
         else if (pt.crcl < 80) maint = '500-1000 mg IV q12h (CrCl 50-80)';
         return {
+          calculatedDose: dose,
           title: `Levetiracetam ${doseMax} mg IV loading`,
           details: [
             { l: 'Loading dose (SE)', v: `60 mg/kg = ${dose} mg (max 4500 mg)` },
@@ -197,11 +205,13 @@
     {
       id: 'alteplase', name: 'Alteplase (rt-PA)', sub: 'Actilyse 50 mg/50 mL',
       badges: ['badge-stroke'],
+      maxDose: { value: 90, unit: 'mg', ref: 'AHA/ASA 2019 — Max 90 mg total' },
       calc: function(pt) {
         const totalDose = Math.min(pt.wt * 0.9, 90).toFixed(1);
         const bolus = (totalDose * 0.1).toFixed(1);
         const infusion = (totalDose * 0.9).toFixed(1);
         return {
+          calculatedDose: parseFloat((pt.wt * 0.9).toFixed(1)),
           title: `Alteplase ${totalDose} mg (stroke protocol)`,
           details: [
             { l: 'Total dose', v: `0.9 mg/kg = ${totalDose} mg (max 90 mg)` },
@@ -217,6 +227,7 @@
     {
       id: 'tenecteplase', name: 'Tenecteplase', sub: 'Metalyse',
       badges: ['badge-stroke'],
+      maxDose: { value: 25, unit: 'mg (stroke)', ref: 'TASTE/AcT Trials — Max 25 mg for stroke' },
       calc: function(pt) {
         let dose_ami;
         if (pt.wt < 60) dose_ami = 30;
@@ -226,6 +237,7 @@
         else dose_ami = 50;
         const dose_stroke = Math.min(pt.wt * 0.25, 25).toFixed(1);
         return {
+          calculatedDose: parseFloat((pt.wt * 0.25).toFixed(1)),
           title: `Tenecteplase — single IV bolus`,
           details: [
             { l: 'Stroke dose', v: `0.25 mg/kg = ${dose_stroke} mg (max 25 mg)` },
@@ -414,6 +426,15 @@
           ${result.details.map(d => `<div class="detail-row"><span class="detail-label">${d.l}</span><span class="detail-value">${d.v}</span></div>`).join('')}
         </div>
         <div class="info-box ${result.infoType}" style="margin-top:14px;">${result.info}</div>
+        ${drug.maxDose && result.calculatedDose > drug.maxDose.value ? `<div class="cds-alert danger" style="margin-top:14px;">
+          <div class="cds-alert-title">⚠ เกินขนาดยาสูงสุดที่แนะนำ</div>
+          <div class="cds-alert-body">
+            ขนาดยาที่คำนวณได้ <strong>${result.calculatedDose} ${drug.maxDose.unit}</strong>
+            เกินค่าสูงสุด <strong>${drug.maxDose.value} ${drug.maxDose.unit}</strong><br>
+            กรุณาตรวจสอบและปรับขนาดยาตามความเหมาะสม
+          </div>
+          <div class="cds-alert-ref">📚 ${drug.maxDose.ref}</div>
+        </div>` : ''}
         <div class="share-row">
           <button class="btn" data-action="copyCalcResult">\ud83d\udccb \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01</button>
         </div>

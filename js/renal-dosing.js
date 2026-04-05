@@ -933,6 +933,21 @@
     filterDrugs();
   }
 
+  // CDS: Check if a drug is contraindicated at given GFR
+  function isDrugContraindicated(drug, gfr) {
+    if (gfr >= 30 || !gfr) return false;
+    if (!drug.badges || !drug.badges.includes('avoid')) return false;
+    try {
+      const pt = getPatient();
+      const data = drug.getDosing(gfr, pt);
+      const rec = (data.recommended || '').toLowerCase();
+      return rec.includes('contraindicated') || rec.includes('ห้ามใช้') ||
+             rec.includes('หลีกเลี่ยง') || rec.includes('avoid');
+    } catch (e) {
+      return true; // conservative: treat as contraindicated if can't check
+    }
+  }
+
   function renderDrugList(search = '') {
     const list = document.getElementById('drugList');
     let drugs = RENAL_DRUGS;
@@ -949,6 +964,14 @@
       return;
     }
 
+    // CDS: Check for severe CKD
+    const gfr = getActiveGFR();
+    const isSevereCKD = gfr && gfr < 30;
+    let ckdStage = null;
+    if (isSevereCKD && typeof IVDrugRef !== 'undefined' && IVDrugRef.getCKDStage) {
+      ckdStage = IVDrugRef.getCKDStage(gfr);
+    }
+
     const badgeLabels = {
       abx: 'Antibiotic', af: 'Antifungal', av: 'Antiviral', ac: 'Anticoagulant',
       chemo: 'Chemo', cv: 'Cardiovascular', analgesic: 'Analgesic', neuro: 'Neuro',
@@ -956,19 +979,33 @@
       avoid: '⚠ Avoid/Caution', nephrotox: 'Nephrotoxic'
     };
 
-    list.innerHTML = drugs.map(d => `
-      <div class="drug-item ${selectedDrug === d.id ? 'active' : ''}" data-action="selectDrug" data-id="${d.id}">
+    // CDS: CKD stage warning banner
+    let bannerHtml = '';
+    if (isSevereCKD && ckdStage) {
+      const kdigo = (typeof IVDrugRef !== 'undefined' && IVDrugRef.REF_LINKS) ? IVDrugRef.REF_LINKS.kdigo : '#';
+      bannerHtml = `<div class="cds-alert danger" style="margin:0 0 10px 0;">
+        <div class="cds-alert-title">⚠ CKD Stage ${ckdStage.stage} (GFR ${Math.round(gfr)} mL/min)</div>
+        <div class="cds-alert-body">ยาที่แสดงเป็นสีแดงมีข้อห้ามใช้หรือควรหลีกเลี่ยงในผู้ป่วย CKD ระยะนี้</div>
+        <div class="cds-alert-ref">📚 <a href="${kdigo}" target="_blank" rel="noopener">KDIGO CKD Guidelines</a></div>
+      </div>`;
+    }
+
+    list.innerHTML = bannerHtml + drugs.map(d => {
+      const contraindicated = isSevereCKD && isDrugContraindicated(d, gfr);
+      return `
+      <div class="drug-item ${selectedDrug === d.id ? 'active' : ''} ${contraindicated ? 'cds-contraindicated' : ''}" data-action="selectDrug" data-id="${d.id}">
         <div class="drug-item-header">
           <div>
             <div class="drug-item-name">${d.name}</div>
             <div class="drug-item-class">${d.sub}</div>
           </div>
+          ${contraindicated ? '<span class="badge badge-had" style="margin-left:auto;font-size:10px;">⚠ CI</span>' : ''}
         </div>
         <div class="drug-item-badges">
           ${d.badges.map(b => `<span class="badge badge-${b}">${badgeLabels[b] || b}</span>`).join('')}
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   function selectDrug(id) {

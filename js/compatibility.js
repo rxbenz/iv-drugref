@@ -249,6 +249,56 @@ function getCompatibility(drugA, drugB) {
   return { status: 'nodata', detail: 'ไม่มีข้อมูล compatibility โดยตรง\nตรวจสอบจาก Trissel\'s หรือ Lexicomp', source: 'none' };
 }
 
+// ===== CDS: ALTERNATIVE DRUG SUGGESTIONS =====
+const GENERIC_CATS = ['icu', 'had', 'emergency', 'pediatric'];
+
+function findAlternatives(incompatDrug, otherDrug) {
+  const cats = (incompatDrug.c || []).filter(c => !GENERIC_CATS.includes(c));
+  if (!cats.length) return [];
+  const candidates = DRUGS.filter(d =>
+    d.i !== incompatDrug.i &&
+    d.i !== otherDrug.i &&
+    (d.c || []).some(c => cats.includes(c))
+  );
+  const alts = [];
+  for (const cand of candidates) {
+    const r = getCompatibility(cand, otherDrug);
+    if (r.status === 'compatible') {
+      alts.push({ drug: cand, source: r.source });
+    }
+  }
+  return alts
+    .sort((a, b) => (a.source === 'curated' ? 0 : 1) - (b.source === 'curated' ? 0 : 1))
+    .slice(0, 5);
+}
+
+function buildCdsAlternatives(drugA, drugB) {
+  const altsA = findAlternatives(drugA, drugB);
+  const altsB = findAlternatives(drugB, drugA);
+  if (!altsA.length && !altsB.length) return '';
+
+  const renderChips = (alts, targetSelect) => alts.map(a =>
+    `<span class="cds-alt-chip" data-action="pickAlt" data-target="${targetSelect}" data-id="${a.drug.i}"` +
+    ` title="${a.source === 'curated' ? '📚 Curated' : '💊 Drug field'}">${a.drug.g}</span>`
+  ).join('');
+
+  let html = '<div class="cds-alert suggest" style="margin-top:12px;">';
+  html += '<div class="cds-alert-title">🔄 ทางเลือกยาที่เข้ากันได้ (Compatible Alternatives)</div>';
+  html += '<div class="cds-alert-body">';
+  if (altsA.length) {
+    html += `<div style="margin-bottom:6px;font-weight:500;">แทน ${drugA.g}:</div>`;
+    html += `<div class="cds-alt-chips">${renderChips(altsA, 'drugA')}</div>`;
+  }
+  if (altsB.length) {
+    html += `<div style="margin-top:8px;margin-bottom:6px;font-weight:500;">แทน ${drugB.g}:</div>`;
+    html += `<div class="cds-alt-chips">${renderChips(altsB, 'drugB')}</div>`;
+  }
+  html += '</div>';
+  html += '<div class="cds-alert-ref">📚 <a href="' + (typeof IVDrugRef !== 'undefined' && IVDrugRef.REF_LINKS ? IVDrugRef.REF_LINKS.thaiFDA : '#') + '" target="_blank" rel="noopener">ค้นหายาใน Thai FDA</a></div>';
+  html += '</div>';
+  return html;
+}
+
 // ===== PAIR CHECKER =====
 function populateSelects() {
   const sorted = [...DRUGS].sort((a, b) => a.g.localeCompare(b.g));
@@ -345,6 +395,11 @@ function checkPair() {
         <div class="value">${drugB.x || '-'}</div>
       </div>
     </div>`;
+
+  // CDS: Show alternative suggestions when incompatible
+  if (result.status === 'incompatible') {
+    container.innerHTML += buildCdsAlternatives(drugA, drugB);
+  }
 }
 
 // ===== MATRIX VIEW =====
@@ -582,7 +637,11 @@ document.addEventListener('click', e => {
     IVDrugRef.delegate(document, 'click', {
       switchMode: function(e, t) { switchMode(t.dataset.mode); },
       addMultiDrug: function(e, t) { addMultiDrug(+t.dataset.index); },
-      removeMultiDrug: function(e, t) { removeMultiDrug(+t.dataset.id); }
+      removeMultiDrug: function(e, t) { removeMultiDrug(+t.dataset.id); },
+      pickAlt: function(e, t) {
+        var sel = document.getElementById(t.dataset.target);
+        if (sel) { sel.value = t.dataset.id; checkPair(); }
+      }
     });
     IVDrugRef.delegate(document, 'change', {
       checkPair: function() { checkPair(); }

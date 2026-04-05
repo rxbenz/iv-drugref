@@ -2,8 +2,7 @@
    IV DrugRef PWA v5.0 — Shared Styles
    ============================================================ */
 
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+/* Google Fonts — loaded async via <link> in each HTML <head> (not @import) */
 
 /* ---- CSS Reset ---- */
 * { margin: 0; padding: 0; box-sizing: border-box; }

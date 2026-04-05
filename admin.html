@@ -2031,6 +2031,20 @@ body::before {
         </div>
       </div>
 
+      <!-- All Search Queries -->
+      <div class="analytics-section" style="margin-top:24px">
+        <h3 style="margin-bottom:8px">🔎 คำค้นหาทั้งหมด (7 วัน)</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          คำค้นสุดท้ายที่ user พิมพ์ในแต่ละ session — ดูว่า user กำลังหายาอะไร
+        </p>
+        <div class="table-wrap">
+          <table class="drug-table analytics-table">
+            <thead><tr><th>#</th><th>คำค้นหา</th><th>จำนวน sessions</th><th>พบยาใน DB?</th></tr></thead>
+            <tbody id="ana-all-queries-body"><tr><td colspan="4" style="text-align:center;color:var(--text-muted)">กดแท็บเพื่อโหลดข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Recent Errors -->
       <div class="analytics-section" style="margin-top:24px">
         <h3 style="margin-bottom:8px">⚠️ Errors ล่าสุด</h3>
@@ -5850,27 +5864,43 @@ function renderAnalyticsSummary() {
   // ── Top searched drugs ──
   renderTopSearchedDrugs(searchesLast7);
 
+  // ── All search queries ──
+  renderAllQueries(searchesLast7);
+
   // ── Recent errors ──
   renderRecentErrors(errors);
 }
 
 function renderMissingDrugs(searches) {
-  // Searches where user typed a query but didn't click any drug result
+  // Search data logs every keystroke: "c","ce","cef","ceft"...
+  // Strategy: group by session, take the LONGEST query per session
+  // as the user's intended search term. Then check if it matches any drug.
   var drugNames = state.drugs.map(function(d) {
     return (d.name || d.genericName || '').toLowerCase();
   });
-  var missingMap = {};
+
+  // Group searches by session_id, find the longest query per session
+  var sessionQueries = {};
   searches.forEach(function(s) {
     var q = (s.query || '').trim().toLowerCase();
-    if (!q) return;
-    // Consider "missing" if no drug was clicked from this search
-    if (s.drug_clicked && String(s.drug_clicked).trim() !== '') return;
-    // Normalize and count
+    var sid = s.session_id || 'unknown';
+    var clicked = (s.drug_clicked || '').trim();
+    if (!q || q.length < 3) return; // ignore very short partial typing
+    if (clicked) return; // user found what they wanted
+    // Keep the longest query per session (= final intended search)
+    if (!sessionQueries[sid] || q.length > sessionQueries[sid].length) {
+      sessionQueries[sid] = q;
+    }
+  });
+
+  // Count frequency of each final query
+  var missingMap = {};
+  Object.values(sessionQueries).forEach(function(q) {
     if (!missingMap[q]) missingMap[q] = 0;
     missingMap[q]++;
   });
 
-  // Filter out queries that actually match a drug in the DB
+  // Filter out queries that match a drug in the DB
   var missingList = Object.keys(missingMap)
     .filter(function(q) {
       return !drugNames.some(function(name) {
@@ -5925,18 +5955,59 @@ function renderTopSearchedDrugs(searches) {
 
   tbody.innerHTML = topDrugs.map(function(item, i) {
     var pct = Math.round(item.count / maxCount * 100);
-    var searchName = item.name.toLowerCase();
-    var inDb = state.drugs.some(function(d) {
-      var dbName = (d.name || d.genericName || '').toLowerCase();
-      // Flexible match: exact, contains, or first-word match
-      return dbName === searchName || dbName.indexOf(searchName) !== -1 || searchName.indexOf(dbName) !== -1;
-    });
-    var badge = inDb ? '' : ' <span style="color:var(--warning);font-size:11px">(ไม่มีใน DB)</span>';
     return '<tr>'
       + '<td>' + (i + 1) + '</td>'
-      + '<td>' + escHtml(item.name) + badge + '</td>'
+      + '<td>' + escHtml(item.name) + '</td>'
       + '<td>' + item.count + '</td>'
       + '<td><div class="analytics-bar-wrap"><div class="analytics-bar analytics-bar-blue" style="width:' + pct + '%"></div></div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderAllQueries(searches) {
+  // Group by session, take longest query per session as the intended search
+  var drugNames = state.drugs.map(function(d) {
+    return (d.name || d.genericName || '').toLowerCase();
+  });
+  var sessionQueries = {};
+  searches.forEach(function(s) {
+    var q = (s.query || '').trim().toLowerCase();
+    var sid = s.session_id || 'unknown';
+    if (!q || q.length < 2) return;
+    if (!sessionQueries[sid] || q.length > sessionQueries[sid].length) {
+      sessionQueries[sid] = q;
+    }
+  });
+
+  var queryMap = {};
+  Object.values(sessionQueries).forEach(function(q) {
+    if (!queryMap[q]) queryMap[q] = 0;
+    queryMap[q]++;
+  });
+
+  var allQueries = Object.keys(queryMap)
+    .map(function(q) { return { query: q, count: queryMap[q] }; })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, 30);
+
+  var tbody = document.getElementById('ana-all-queries-body');
+  if (allQueries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">ไม่มีข้อมูล</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = allQueries.map(function(item, i) {
+    var found = drugNames.some(function(name) {
+      return name.indexOf(item.query) !== -1 || item.query.indexOf(name) !== -1;
+    });
+    var status = found
+      ? '<span style="color:var(--success, #22c55e)">✅ มี</span>'
+      : '<span style="color:var(--danger, #ef4444);font-weight:600">❌ ไม่มี</span>';
+    return '<tr>'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td><strong>' + escHtml(item.query) + '</strong></td>'
+      + '<td>' + item.count + '</td>'
+      + '<td>' + status + '</td>'
       + '</tr>';
   }).join('');
 }

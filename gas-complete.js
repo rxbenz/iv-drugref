@@ -25,6 +25,8 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
+var GAS_VERSION = '5.1.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
+
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
 // DrugData อยู่ใน analytics spreadsheet (คนละ sheet กับ admin)
@@ -187,6 +189,10 @@ function doGet(e) {
     }
 
     switch (action) {
+      // ── Version Check ──
+      case 'version':
+        return jsonResponse({ version: GAS_VERSION });
+
       // ── Dashboard ──
       case 'raw':
         return handleRaw();

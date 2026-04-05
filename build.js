@@ -19,6 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // Minification libraries (only required for --prod)
 let CleanCSS;
@@ -29,6 +30,16 @@ const CSS_DIR = path.join(ROOT, 'css');
 const JS_DIR = path.join(ROOT, 'js');
 
 const DEV_MODE = process.argv.includes('--dev');
+
+// Auto-generate cache version from git commit hash
+function getBuildVersion() {
+  try {
+    const hash = execSync('git rev-parse --short HEAD', { cwd: ROOT }).toString().trim();
+    return hash; // e.g. "9674759"
+  } catch (e) {
+    return Date.now().toString(36); // fallback if no git
+  }
+}
 const PROD_MODE = process.argv.includes('--prod');
 
 // Pages and their CSS/JS dependencies (order matters)
@@ -97,7 +108,23 @@ function buildPage(htmlFile, cfg) {
   const cssTag = `<style>\n${cssContent}\n</style>`;
 
   // --- Production: inline JS (NO minification — preserves obfuscated code & onclick refs) ---
-  const jsContent = concatJS(cfg.js);
+  let jsContent = concatJS(cfg.js);
+
+  // Auto-inject build version into drugCacheVer (forces cache clear on every deploy)
+  const buildVer = getBuildVersion();
+  jsContent = jsContent.replace(
+    /drugCacheVer","[^"]*"/g,
+    `drugCacheVer","${buildVer}"`
+  ).replace(
+    /drugCacheVer"\)&&/g,  // the comparison check
+    `drugCacheVer")&&`
+  );
+  // Replace the comparison value too: "v5.1"!==localStorage.getItem("drugCacheVer")
+  jsContent = jsContent.replace(
+    /"[^"]*"!==localStorage\.getItem\("drugCacheVer"\)/g,
+    `"${buildVer}"!==localStorage.getItem("drugCacheVer")`
+  );
+
   const jsTag = `<script>\n${jsContent}\n</script>`;
 
   // Always remove external CSS <link> tags for our files

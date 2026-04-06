@@ -333,6 +333,80 @@
   display: block;
 }
 
+/* Matrix Search */
+.matrix-search-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.matrix-search {
+  width: 100%;
+  padding: 10px 36px 10px 14px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border .2s;
+}
+
+.matrix-search:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.matrix-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 6px;
+  line-height: 1;
+}
+
+.matrix-search-clear:hover {
+  color: var(--text);
+}
+
+/* Matrix highlight */
+.matrix-table tr.matrix-row-highlight > .row-header {
+  color: var(--blue);
+  font-weight: 700;
+  background: rgba(14, 165, 233, 0.08);
+}
+
+.matrix-table th.matrix-col-highlight {
+  color: var(--blue) !important;
+  font-weight: 700 !important;
+  background: rgba(14, 165, 233, 0.08);
+}
+
+.matrix-table tr.matrix-row-highlight > td > .matrix-cell,
+.matrix-table td.matrix-col-highlight > .matrix-cell {
+  outline: 2px solid var(--blue);
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+
+.matrix-table tr.matrix-row-dim > .row-header {
+  opacity: 0.3;
+}
+
+.matrix-table tr.matrix-row-dim > td > .matrix-cell {
+  opacity: 0.15;
+}
+
+.matrix-table th.matrix-col-dim {
+  opacity: 0.3;
+}
+
 .matrix-filter {
   display: flex;
   gap: 6px;

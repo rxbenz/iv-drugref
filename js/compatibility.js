@@ -425,6 +425,11 @@ function buildMatrixFilter() {
       matrixCat = val;
       container.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      // Clear matrix search on category change
+      var ms = document.getElementById('matrixSearch');
+      if (ms) { ms.value = ''; }
+      var mc = document.getElementById('matrixSearchClear');
+      if (mc) { mc.style.display = 'none'; }
       renderMatrix();
     };
     container.appendChild(btn);
@@ -666,10 +671,87 @@ document.addEventListener('click', e => {
       });
     }
 
+    // Matrix search — highlight row/column
+    var matrixSearchEl = document.getElementById('matrixSearch');
+    var matrixSearchClear = document.getElementById('matrixSearchClear');
+    if (matrixSearchEl) {
+      matrixSearchEl.addEventListener('input', function() {
+        highlightMatrixDrug(this.value);
+        matrixSearchClear.style.display = this.value ? '' : 'none';
+      });
+    }
+    if (matrixSearchClear) {
+      matrixSearchClear.addEventListener('click', function() {
+        matrixSearchEl.value = '';
+        matrixSearchEl.focus();
+        highlightMatrixDrug('');
+        this.style.display = 'none';
+      });
+    }
+
     // Send analytics
     if (typeof IVDrugRef !== 'undefined' && IVDrugRef.trackPageView) {
       IVDrugRef.trackPageView('compatibility');
     }
   });
+
+function highlightMatrixDrug(query) {
+  var table = document.querySelector('.matrix-table');
+  if (!table) return;
+  var q = query.trim().toLowerCase();
+  var rows = table.querySelectorAll('tr');
+  var colHeaders = rows[0] ? rows[0].querySelectorAll('th') : [];
+
+  // Clear previous highlights
+  table.querySelectorAll('.matrix-row-highlight, .matrix-row-dim').forEach(function(el) {
+    el.classList.remove('matrix-row-highlight', 'matrix-row-dim');
+  });
+  table.querySelectorAll('.matrix-col-highlight, .matrix-col-dim').forEach(function(el) {
+    el.classList.remove('matrix-col-highlight', 'matrix-col-dim');
+  });
+
+  if (!q) return;
+
+  // Find matching column indices (skip index 0 = corner)
+  var matchCols = [];
+  for (var ci = 1; ci < colHeaders.length; ci++) {
+    var colTitle = (colHeaders[ci].getAttribute('title') || colHeaders[ci].textContent).toLowerCase();
+    if (colTitle.includes(q)) {
+      matchCols.push(ci);
+      colHeaders[ci].classList.add('matrix-col-highlight');
+    } else {
+      colHeaders[ci].classList.add('matrix-col-dim');
+    }
+  }
+
+  // Find matching rows and highlight cells in matching columns
+  var hasMatch = matchCols.length > 0;
+  for (var ri = 1; ri < rows.length; ri++) {
+    var rowHeader = rows[ri].querySelector('.row-header');
+    if (!rowHeader) continue;
+    var rowTitle = (rowHeader.getAttribute('title') || rowHeader.textContent).toLowerCase();
+    var rowMatch = rowTitle.includes(q);
+    if (rowMatch) {
+      rows[ri].classList.add('matrix-row-highlight');
+      hasMatch = true;
+    } else {
+      rows[ri].classList.add('matrix-row-dim');
+    }
+    // Highlight cells in matching columns
+    if (matchCols.length > 0) {
+      var cells = rows[ri].querySelectorAll('td');
+      for (var k = 0; k < matchCols.length; k++) {
+        var idx = matchCols[k] - 1; // offset: first td = column index 1
+        if (cells[idx]) cells[idx].classList.add('matrix-col-highlight');
+      }
+    }
+  }
+
+  // If match found, scroll first highlighted row into view
+  if (hasMatch) {
+    var firstHL = table.querySelector('.matrix-row-highlight .row-header');
+    if (firstHL) firstHL.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
 
 })();

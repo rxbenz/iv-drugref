@@ -242,7 +242,6 @@
 
   function applyFabPosition(wrap, pos) {
     if (!pos) return;
-    // Clamp to viewport
     var vw = window.innerWidth, vh = window.innerHeight;
     var x = Math.max(0, Math.min(pos.x, vw - 54));
     var y = Math.max(0, Math.min(pos.y, vh - 54));
@@ -250,6 +249,17 @@
     wrap.style.right = 'auto';
     wrap.style.left = x + 'px';
     wrap.style.top = y + 'px';
+    updateSide(wrap, x);
+  }
+
+  function updateSide(wrap, x) {
+    // Toggle qa-left class so menu items grow in the correct direction
+    var vw = window.innerWidth;
+    if (x < vw / 2) {
+      wrap.classList.add('qa-left');
+    } else {
+      wrap.classList.remove('qa-left');
+    }
   }
 
   // ===== INIT =====
@@ -520,6 +530,7 @@
       wrap.style.left = snapX + 'px';
       wrap.style.top = snapY + 'px';
       saveFabPosition(snapX, snapY);
+      updateSide(wrap, snapX);
     }
 
     // Re-clamp on resize

@@ -11,7 +11,7 @@
   z-index: 350;
   display: flex;
   flex-direction: column-reverse;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   transition: left 0.25s cubic-bezier(0.32, 0.72, 0, 1),
               top 0.05s linear;
@@ -85,9 +85,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 .qa-menu-item:hover {
-  transform: translateX(-2px);
+  transform: translateX(-4px);
   box-shadow: var(--shadow-lg, 0 8px 24px rgba(0,0,0,0.08));
 }
+/* When FAB is on the left side, menu items grow rightward */
+.qa-fab-wrap.qa-left .qa-menu { align-items: flex-start; }
+.qa-fab-wrap.qa-left .qa-menu-item:hover { transform: translateX(4px); }
 .qa-menu-item:active { transform: scale(0.97); }
 .qa-menu-item .qa-icon { font-size: 18px; line-height: 1; }
 

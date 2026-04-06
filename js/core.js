@@ -656,6 +656,7 @@ var IVDrugRef = (function() {
   const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
   const ADMIN_GAS_URL = 'https://script.google.com/macros/s/AKfycbwJhLwY34rKpVVBE4aFRMOee6-lldazO64uOk0EXEA0Yvwgz6SA3kjeWt7-R6BSsNZT/exec';
   let _reqCount = 0;
+  let _reqWindowStart = Date.now();
 
   /**
    * Get anonymous session ID from localStorage
@@ -683,12 +684,14 @@ var IVDrugRef = (function() {
 
   /**
    * Send analytics event via sendBeacon or fetch
-   * Rate limited to 40 requests per page session
+   * Rate limited to 20 requests per minute (rolling window)
    * @param {Object} data - Event data to send
    */
   function sendAnalytics(data) {
     if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
-    if (_reqCount >= 40) return;
+    const now = Date.now();
+    if (now - _reqWindowStart > 60000) { _reqCount = 0; _reqWindowStart = now; }
+    if (_reqCount >= 20) return;
     _reqCount++;
     var enriched = {
       ...data,

@@ -426,78 +426,103 @@
     var fab = document.getElementById('qaFab');
     var wrap = document.getElementById('qaFabWrap');
 
-    function onStart(e) {
-      if (isOpen || activePanel) return; // don't drag while menu/panel open
-      var touch = e.touches ? e.touches[0] : e;
+    // --- Touch (mobile) ---
+    fab.addEventListener('touchstart', function(e) {
+      if (isOpen || activePanel) return;
+      var t = e.touches[0];
       isDragging = true;
       dragMoved = false;
-      dragStartX = touch.clientX;
-      dragStartY = touch.clientY;
+      dragStartX = t.clientX;
+      dragStartY = t.clientY;
       var rect = wrap.getBoundingClientRect();
       fabStartX = rect.left;
       fabStartY = rect.top;
       wrap.style.transition = 'none';
-      // Only prevent default on touch to stop scroll — NOT on mouse (preserves click)
-      if (e.touches) e.preventDefault();
-    }
+      // Do NOT preventDefault here — allows tap-to-click to work
+    }, { passive: true });
 
-    function onMove(e) {
+    document.addEventListener('touchmove', function(e) {
       if (!isDragging) return;
-      var touch = e.touches ? e.touches[0] : e;
-      var dx = touch.clientX - dragStartX;
-      var dy = touch.clientY - dragStartY;
+      var t = e.touches[0];
+      var dx = t.clientX - dragStartX;
+      var dy = t.clientY - dragStartY;
       if (!dragMoved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
       dragMoved = true;
-      if (e.touches) e.preventDefault(); // prevent scroll during drag
-      var newX = fabStartX + dx;
-      var newY = fabStartY + dy;
-      // Clamp to viewport
-      var vw = window.innerWidth, vh = window.innerHeight;
-      newX = Math.max(0, Math.min(newX, vw - 54));
-      newY = Math.max(0, Math.min(newY, vh - 54));
-      wrap.style.bottom = 'auto';
-      wrap.style.right = 'auto';
-      wrap.style.left = newX + 'px';
-      wrap.style.top = newY + 'px';
-    }
+      e.preventDefault(); // prevent scroll only once dragging starts
+      moveFab(fabStartX + dx, fabStartY + dy);
+    }, { passive: false });
 
-    function onEnd() {
+    document.addEventListener('touchend', function() {
       if (!isDragging) return;
       isDragging = false;
       wrap.style.transition = '';
       if (dragMoved) {
-        // Snap to nearest edge (left or right)
-        var rect = wrap.getBoundingClientRect();
-        var vw = window.innerWidth;
-        var centerX = rect.left + 27;
-        var snapX = centerX < vw / 2 ? 16 : vw - 54 - 16;
-        var snapY = Math.max(16, Math.min(rect.top, window.innerHeight - 54 - 16));
-        wrap.style.left = snapX + 'px';
-        wrap.style.top = snapY + 'px';
-        saveFabPosition(snapX, snapY);
+        snapToEdge();
+        dragMoved = false;
       }
-    }
+    });
 
-    // Touch events (mobile)
-    fab.addEventListener('touchstart', onStart, { passive: false });
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', onEnd);
+    // --- Mouse (desktop) ---
+    fab.addEventListener('mousedown', function(e) {
+      if (isOpen || activePanel) return;
+      isDragging = true;
+      dragMoved = false;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      var rect = wrap.getBoundingClientRect();
+      fabStartX = rect.left;
+      fabStartY = rect.top;
+      wrap.style.transition = 'none';
+    });
 
-    // Mouse events (desktop)
-    fab.addEventListener('mousedown', onStart);
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      var dx = e.clientX - dragStartX;
+      var dy = e.clientY - dragStartY;
+      if (!dragMoved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+      dragMoved = true;
+      moveFab(fabStartX + dx, fabStartY + dy);
+    });
 
-    // Override click — suppress if was dragging
+    document.addEventListener('mouseup', function() {
+      if (!isDragging) return;
+      isDragging = false;
+      wrap.style.transition = '';
+      if (dragMoved) snapToEdge();
+    });
+
+    // Suppress click after drag (both mouse & touch-generated clicks)
     fab.addEventListener('click', function(e) {
       if (dragMoved) {
         e.stopImmediatePropagation();
         e.preventDefault();
         dragMoved = false;
       }
-    }, true); // capture phase to intercept before normal click handler
+    }, true);
 
-    // Re-clamp on window resize
+    // Helpers
+    function moveFab(x, y) {
+      var vw = window.innerWidth, vh = window.innerHeight;
+      x = Math.max(0, Math.min(x, vw - 54));
+      y = Math.max(0, Math.min(y, vh - 54));
+      wrap.style.bottom = 'auto';
+      wrap.style.right = 'auto';
+      wrap.style.left = x + 'px';
+      wrap.style.top = y + 'px';
+    }
+
+    function snapToEdge() {
+      var rect = wrap.getBoundingClientRect();
+      var vw = window.innerWidth;
+      var centerX = rect.left + 27;
+      var snapX = centerX < vw / 2 ? 16 : vw - 54 - 16;
+      var snapY = Math.max(16, Math.min(rect.top, window.innerHeight - 54 - 16));
+      wrap.style.left = snapX + 'px';
+      wrap.style.top = snapY + 'px';
+      saveFabPosition(snapX, snapY);
+    }
+
+    // Re-clamp on resize
     window.addEventListener('resize', function() {
       var saved = loadFabPosition();
       if (saved) applyFabPosition(wrap, saved);

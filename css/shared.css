@@ -173,15 +173,24 @@ div.header .cross-link.calc-link:hover {
 .field input:focus, .field select:focus {
   outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
 }
+[data-theme="dark"] .field input, [data-theme="dark"] .field select {
+  background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text, #f1f5f9);
+}
 
 /* ---- Common section/card styles ---- */
 .section {
   background: #fff; border-radius: 12px;
   border: 1px solid #e2e8f0; margin-bottom: 16px; overflow: hidden;
 }
+[data-theme="dark"] .section {
+  background: var(--card, #0f1a2e); border-color: var(--card-border, #1e3050);
+}
 .section-header {
   padding: 12px 16px; font-size: 13px; font-weight: 600; color: #0ea5e9;
   border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 8px;
+}
+[data-theme="dark"] .section-header {
+  border-bottom-color: var(--card-border, #1e3050);
 }
 
 /* ---- Layout grids ---- */
@@ -204,6 +213,9 @@ div.header .cross-link.calc-link:hover {
   text-align: center; font-size: 11px; color: #dc2626; padding: 12px 16px;
   font-weight: 500; background: #fef2f2; border-radius: 8px; margin-top: 16px;
 }
+[data-theme="dark"] .disclaimer {
+  background: rgba(220,38,38,0.1); color: #fca5a5; border: 1px solid rgba(220,38,38,0.2);
+}
 
 /* ---- Info boxes ---- */
 .info-box {
@@ -212,6 +224,9 @@ div.header .cross-link.calc-link:hover {
 .info-box.blue { background: #e6f1fb; color: #0c447c; }
 .info-box.amber { background: #fef3c7; color: #92400e; }
 .info-box.red { background: #fef2f2; color: #991b1b; }
+[data-theme="dark"] .info-box.blue { background: rgba(14,165,233,0.1); color: #7dd3fc; }
+[data-theme="dark"] .info-box.amber { background: rgba(251,191,36,0.1); color: #fcd34d; }
+[data-theme="dark"] .info-box.red { background: rgba(248,113,113,0.1); color: #fca5a5; }
 
 /* ---- Buttons (shared across all pages) ---- */
 .btn {

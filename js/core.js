@@ -1236,7 +1236,10 @@ var IVDrugRef = (function() {
 // ============================================================
 (function(){
   var STORAGE_KEY = 'ivdrug_theme';
-  var ICONS = { light: '\u2600\uFE0F', dark: '\uD83C\uDF19', auto: '\uD83D\uDDA5\uFE0F' };
+  // SVG icons (Feather-style): sun, moon, monitor
+  var SVG_SUN = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+  var SVG_MOON = '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  var SVG_AUTO = '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>';
   var LABELS = { light: '\u0E2A\u0E27\u0E48\u0E32\u0E07', dark: '\u0E21\u0E37\u0E14', auto: '\u0E15\u0E32\u0E21\u0E23\u0E30\u0E1A\u0E1A' };
   var CYCLE = ['auto','light','dark'];
 
@@ -1246,7 +1249,6 @@ var IVDrugRef = (function() {
 
   function getEffective(pref) {
     if (pref === 'light' || pref === 'dark') return pref;
-    // auto: follow OS
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
@@ -1256,13 +1258,10 @@ var IVDrugRef = (function() {
     if (pref === 'light' || pref === 'dark') {
       root.setAttribute('data-theme', pref);
     } else {
-      // auto mode — remove attribute so CSS media query kicks in
       root.removeAttribute('data-theme');
     }
-    // Update meta theme-color for PWA status bar
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = effective === 'dark' ? '#0f172a' : '#ffffff';
-    // Update toggle button if exists
     updateButton(pref);
   }
 
@@ -1270,8 +1269,7 @@ var IVDrugRef = (function() {
     var btn = document.getElementById('themeToggleBtn');
     if (!btn) return;
     var effective = getEffective(pref);
-    // Show: sun when dark (click to go light), moon when light (click to go dark), monitor when auto
-    btn.textContent = pref === 'auto' ? ICONS.auto : (effective === 'dark' ? ICONS.light : ICONS.dark);
+    btn.innerHTML = pref === 'auto' ? SVG_AUTO : (effective === 'dark' ? SVG_SUN : SVG_MOON);
     btn.title = '\u0E18\u0E35\u0E21: ' + LABELS[pref || 'auto'];
   }
 
@@ -1285,20 +1283,25 @@ var IVDrugRef = (function() {
   }
 
   function injectButton() {
-    // Try header-inner first, then header, then header-simple
-    var container = document.querySelector('.header-inner') || document.querySelector('.header') || document.querySelector('.header-simple');
+    // Pick the best container for each page layout
+    var container = document.querySelector('.header-top')      // index, compatibility
+                 || document.querySelector('.header-actions')   // dashboard
+                 || document.querySelector('.header-inner')     // tdm
+                 || document.querySelector('div.header')        // calculator, renal, vanco-tdm
+                 || document.querySelector('.header');
     if (!container) return;
+    if (document.getElementById('themeToggleBtn')) return; // already injected
     var btn = document.createElement('button');
     btn.id = 'themeToggleBtn';
     btn.className = 'theme-toggle';
+    btn.type = 'button';
     btn.setAttribute('aria-label', '\u0E2A\u0E25\u0E31\u0E1A\u0E18\u0E35\u0E21');
-    btn.setAttribute('data-action', 'toggleTheme');
-    container.style.position = 'relative';
+    btn.onclick = function(e) { e.preventDefault(); toggle(); };
     container.appendChild(btn);
     updateButton(getStored() || 'auto');
   }
 
-  // Initialize immediately (before DOMContentLoaded) to prevent flash
+  // Initialize immediately to prevent flash
   apply(getStored() || 'auto');
 
   // Listen for OS theme changes (auto mode)
@@ -1316,15 +1319,7 @@ var IVDrugRef = (function() {
     injectButton();
   }
 
-  // Wire up delegate action
   IVDrugRef.toggleTheme = toggle;
-
-  // Also support data-action="toggleTheme" via delegate if available
-  if (IVDrugRef.delegate) {
-    document.addEventListener('DOMContentLoaded', function() {
-      IVDrugRef.delegate(document.body, { toggleTheme: toggle });
-    });
-  }
 })();
 
 // ============================================================

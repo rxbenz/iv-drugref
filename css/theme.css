@@ -261,8 +261,9 @@ body::before {
 }
 .header-inner {
   max-width: 900px; margin: 0 auto; padding: 14px 20px;
-  position: relative;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
+.header-inner h1 { flex: 1; min-width: 0; }
 
 /* Simple header (calculator, renal-dosing) */
 .header-simple {
@@ -320,32 +321,26 @@ body::before {
 
 /* ---- Theme Toggle Button ---- */
 .theme-toggle {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 50%;
-  width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
-  font-size: 16px;
   line-height: 1;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-  z-index: 10;
   padding: 0;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+.theme-toggle svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
 }
 .theme-toggle:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-focus);
   box-shadow: var(--shadow-glow);
-}
-
-/* Auto-detect dark theme for toggle when no explicit data-theme */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]) .theme-toggle {
-    background: var(--bg-card);
-    border-color: var(--border);
-  }
 }

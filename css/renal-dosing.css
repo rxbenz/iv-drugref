@@ -601,3 +601,49 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ============================================================
+   Dark theme adjustments
+   ============================================================ */
+[data-theme="dark"] .renal-result-box.cg { background: rgba(29,78,216,0.12); }
+[data-theme="dark"] .renal-result-box.ckd { background: rgba(21,128,61,0.12); }
+[data-theme="dark"] .renal-result-box.cg .renal-result-value { color: #60a5fa; }
+[data-theme="dark"] .renal-result-box.ckd .renal-result-value { color: #4ade80; }
+[data-theme="dark"] .renal-result-box { border-color: var(--card-border, #1e3050); }
+[data-theme="dark"] .renal-result-box.active { border-color: var(--accent-blue, #0ea5e9); }
+[data-theme="dark"] .renal-result-label { color: var(--text3, #94a3b8); }
+[data-theme="dark"] .renal-result-unit { color: var(--text3, #94a3b8); }
+[data-theme="dark"] .stage-1 { background: rgba(74,222,128,0.12); color: #86efac; }
+[data-theme="dark"] .stage-2 { background: rgba(52,211,153,0.12); color: #6ee7b7; }
+[data-theme="dark"] .stage-3a { background: rgba(250,204,21,0.12); color: #fde047; }
+[data-theme="dark"] .stage-3b { background: rgba(251,191,36,0.12); color: #fbbf24; }
+[data-theme="dark"] .stage-4 { background: rgba(251,146,60,0.12); color: #fb923c; }
+[data-theme="dark"] .stage-5 { background: rgba(248,113,113,0.12); color: #fca5a5; }
+[data-theme="dark"] .field-grid input,
+[data-theme="dark"] .field-grid select {
+  background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text, #f1f5f9);
+}
+[data-theme="dark"] .field-grid input:focus,
+[data-theme="dark"] .field-grid select:focus {
+  background: var(--bg2, #1a2332);
+}
+[data-theme="dark"] .formula-btn { background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text2, #cbd5e1); }
+[data-theme="dark"] .formula-btn.active { background: var(--accent-blue, #0ea5e9); color: #fff; border-color: var(--accent-blue); }
+[data-theme="dark"] .filter-tab { background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text2, #cbd5e1); }
+[data-theme="dark"] .filter-tab.active { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(14,165,233,0.08); }
+[data-theme="dark"] .drug-item { background: var(--card, #0f1a2e); border-color: var(--card-border, #1e3050); }
+[data-theme="dark"] .drug-item.active { background: rgba(14,165,233,0.08); border-color: var(--accent-blue); }
+[data-theme="dark"] .drug-item .drug-name { color: var(--text, #f1f5f9); }
+[data-theme="dark"] .badge-abx { background: rgba(29,78,216,0.15); color: #60a5fa; }
+[data-theme="dark"] .badge-av { background: rgba(124,58,237,0.15); color: #a78bfa; }
+[data-theme="dark"] .badge-ac { background: rgba(219,39,119,0.15); color: #f472b6; }
+[data-theme="dark"] .badge-misc { background: rgba(74,222,128,0.1); color: #86efac; }
+[data-theme="dark"] .badge-af { background: rgba(245,158,11,0.15); color: #fbbf24; }
+[data-theme="dark"] .badge-chemo { background: rgba(168,85,247,0.15); color: #c084fc; }
+[data-theme="dark"] .badge-cv { background: rgba(239,68,68,0.15); color: #f87171; }
+[data-theme="dark"] .badge-analgesic { background: rgba(14,165,233,0.15); color: #38bdf8; }
+[data-theme="dark"] .badge-neuro { background: rgba(99,102,241,0.15); color: #818cf8; }
+[data-theme="dark"] .search-box input { background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text, #f1f5f9); }
+[data-theme="dark"] .recom-section { background: var(--card, #0f1a2e); border-color: var(--card-border, #1e3050); }
+[data-theme="dark"] .recom-header-bar { background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); }
+[data-theme="dark"] .pediatric-block-msg { background: rgba(220,38,38,0.1); border-color: rgba(248,113,113,0.25); color: #fca5a5; }

@@ -8,10 +8,10 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--header-bg, rgba(255, 255, 255, 0.8));
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--header-border, var(--border));
   padding: 0;
 }
 
@@ -1398,7 +1398,9 @@
   transform: scale(1.25);
 }
 
-/* Dark theme adjustments */
+/* ============================================================
+   Dark theme adjustments
+   ============================================================ */
 [data-theme="dark"] .drug-chip:hover {
   background: rgba(14, 165, 233, 0.1);
 }
@@ -1407,4 +1409,32 @@
 }
 [data-theme="dark"] .drug-chip.chip-had {
   background: rgba(251, 191, 36, 0.1);
+}
+/* Index page dark mode — content elements */
+[data-theme="dark"] .info-item {
+  background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text, #f1f5f9);
+}
+[data-theme="dark"] .warning-box {
+  background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.25); color: #fca5a5;
+}
+[data-theme="dark"] .compat-ok {
+  background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); color: #86efac;
+}
+[data-theme="dark"] .compat-bad {
+  background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.2); color: #fca5a5;
+}
+[data-theme="dark"] .calc-note {
+  background: rgba(14,165,233,0.08); color: #7dd3fc;
+}
+[data-theme="dark"] .calc-field label {
+  color: #7dd3fc;
+}
+[data-theme="dark"] .calc-field input, [data-theme="dark"] .calc-field select {
+  background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text, #f1f5f9);
+}
+[data-theme="dark"] .drug-tag {
+  background: rgba(14,165,233,0.1); border-color: rgba(14,165,233,0.2); color: #7dd3fc;
+}
+[data-theme="dark"] .search-input {
+  background: var(--bg2, #1a2332); color: var(--text, #f1f5f9);
 }

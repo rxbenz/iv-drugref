@@ -120,8 +120,11 @@ localStorage keys for the quick access feature:
 
 The `#quickAccessZone` div sits between `#resultsInfo` and `#drugList` in `index.html`. It renders 3 sections (favorites, most used, recent) only when search is empty and filter is "all".
 
-### `monitoring` field — GAS-cached data is strings, not arrays
-When drug data is loaded from GAS (not from `drugs-data.json`), `monitoring` arrives as a comma-separated string. `renderCardBody()` calls `e.monitoring.map()` which throws `TypeError` on strings. The local JSON file has correct arrays. This is a **known pre-existing issue** when stale GAS-sourced data is in `localStorage.drugData_v4`. Clearing the cache (`localStorage.removeItem('drugData_v4')`) forces reload from the JSON file and resolves it. A proper fix should normalize `monitoring` to an array in `initDrugs()` or apply `normalizeDrugFields()` from admin.js to index.js.
+### `monitoring` field — GAS-cached data normalization (FIXED v5.3.6)
+GAS returns `monitoring` and `categories` as comma-separated strings. Fixed with two-layer normalization:
+1. `core.js` — normalizes `localStorage.drugData_v4` cache **before** `index.js` reads it (fixes initial render)
+2. `index.js` — monkey-patches `renderDrugCard` to normalize each drug as safety net
+Also normalizes `reconst`, `dilution`, `admin`, `stability`, `compat` from JSON strings to objects.
 
 ### Testing admin.html locally
 - Admin page requires Google Sign-in — most features won't work in local preview

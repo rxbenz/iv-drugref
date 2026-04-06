@@ -220,12 +220,49 @@
   var compatDrugA = null;
   var compatDrugB = null;
 
+  // ===== DRAG STATE =====
+  var FAB_POS_KEY = 'qaFabPosition';
+  var isDragging = false;
+  var dragStartX = 0, dragStartY = 0;
+  var fabStartX = 0, fabStartY = 0;
+  var dragMoved = false; // distinguish tap from drag
+  var DRAG_THRESHOLD = 8; // px before considered a drag
+
+  function saveFabPosition(x, y) {
+    try { localStorage.setItem(FAB_POS_KEY, JSON.stringify({ x: x, y: y })); } catch(e) {}
+  }
+
+  function loadFabPosition() {
+    try {
+      var raw = localStorage.getItem(FAB_POS_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return null;
+  }
+
+  function applyFabPosition(wrap, pos) {
+    if (!pos) return;
+    // Clamp to viewport
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var x = Math.max(0, Math.min(pos.x, vw - 54));
+    var y = Math.max(0, Math.min(pos.y, vh - 54));
+    wrap.style.bottom = 'auto';
+    wrap.style.right = 'auto';
+    wrap.style.left = x + 'px';
+    wrap.style.top = y + 'px';
+  }
+
   // ===== INIT =====
   loadDrugs();
 
   document.addEventListener('DOMContentLoaded', function() {
     injectHTML();
     bindEvents();
+    bindDrag();
+    // Restore saved position
+    var wrap = document.getElementById('qaFabWrap');
+    var saved = loadFabPosition();
+    if (saved) applyFabPosition(wrap, saved);
   });
 
   // ===== HTML INJECTION =====
@@ -381,6 +418,87 @@
     // Keyboard: Escape
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeAll();
+    });
+  }
+
+  // ===== DRAG TO REPOSITION =====
+  function bindDrag() {
+    var fab = document.getElementById('qaFab');
+    var wrap = document.getElementById('qaFabWrap');
+
+    function onStart(e) {
+      if (isOpen || activePanel) return; // don't drag while menu/panel open
+      var touch = e.touches ? e.touches[0] : e;
+      isDragging = true;
+      dragMoved = false;
+      dragStartX = touch.clientX;
+      dragStartY = touch.clientY;
+      var rect = wrap.getBoundingClientRect();
+      fabStartX = rect.left;
+      fabStartY = rect.top;
+      wrap.style.transition = 'none';
+      e.preventDefault();
+    }
+
+    function onMove(e) {
+      if (!isDragging) return;
+      var touch = e.touches ? e.touches[0] : e;
+      var dx = touch.clientX - dragStartX;
+      var dy = touch.clientY - dragStartY;
+      if (!dragMoved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+      dragMoved = true;
+      var newX = fabStartX + dx;
+      var newY = fabStartY + dy;
+      // Clamp to viewport
+      var vw = window.innerWidth, vh = window.innerHeight;
+      newX = Math.max(0, Math.min(newX, vw - 54));
+      newY = Math.max(0, Math.min(newY, vh - 54));
+      wrap.style.bottom = 'auto';
+      wrap.style.right = 'auto';
+      wrap.style.left = newX + 'px';
+      wrap.style.top = newY + 'px';
+    }
+
+    function onEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      wrap.style.transition = '';
+      if (dragMoved) {
+        // Snap to nearest edge (left or right)
+        var rect = wrap.getBoundingClientRect();
+        var vw = window.innerWidth;
+        var centerX = rect.left + 27;
+        var snapX = centerX < vw / 2 ? 16 : vw - 54 - 16;
+        var snapY = Math.max(16, Math.min(rect.top, window.innerHeight - 54 - 16));
+        wrap.style.left = snapX + 'px';
+        wrap.style.top = snapY + 'px';
+        saveFabPosition(snapX, snapY);
+      }
+    }
+
+    // Touch events (mobile)
+    fab.addEventListener('touchstart', onStart, { passive: false });
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+
+    // Mouse events (desktop)
+    fab.addEventListener('mousedown', onStart);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+
+    // Override click — suppress if was dragging
+    fab.addEventListener('click', function(e) {
+      if (dragMoved) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        dragMoved = false;
+      }
+    }, true); // capture phase to intercept before normal click handler
+
+    // Re-clamp on window resize
+    window.addEventListener('resize', function() {
+      var saved = loadFabPosition();
+      if (saved) applyFabPosition(wrap, saved);
     });
   }
 

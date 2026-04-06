@@ -13,6 +13,11 @@
   flex-direction: column-reverse;
   align-items: center;
   gap: 12px;
+  transition: left 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+              top 0.05s linear;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* ---- Main FAB Button ---- */
@@ -23,7 +28,7 @@
   background: var(--accent-blue, #0ea5e9);
   color: #fff;
   font-size: 22px;
-  cursor: pointer;
+  cursor: grab;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
   transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1),

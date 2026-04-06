@@ -937,7 +937,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.3.5';
+  const VERSION = '5.3.6';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -996,6 +996,37 @@ var IVDrugRef = (function() {
       kdigo: 'https://kdigo.org/guidelines/ckd-evaluation-and-management/'
     }
   };
+})();
+
+// ============================================================
+// NORMALIZE CACHED DRUG DATA — Fix GAS strings before index.js
+// ============================================================
+(function(){
+  try{
+    var raw=localStorage.getItem('drugData_v4');
+    if(!raw)return;
+    var drugs=JSON.parse(raw);
+    if(!Array.isArray(drugs))return;
+    var fixed=false;
+    drugs.forEach(function(d){
+      if(d.monitoring&&typeof d.monitoring==='string'){
+        var v=d.monitoring.trim();
+        if(v[0]==='['){try{d.monitoring=JSON.parse(v);fixed=true;return}catch(e){}}
+        d.monitoring=v.split(',').map(function(s){return s.trim()}).filter(Boolean);
+        fixed=true;
+      }
+      if(d.categories&&typeof d.categories==='string'){
+        var c=d.categories.trim();
+        if(c[0]==='['){try{d.categories=JSON.parse(c);fixed=true;return}catch(e){}}
+        d.categories=c.split(',').map(function(s){return s.trim()}).filter(Boolean);
+        fixed=true;
+      }
+      ['reconst','dilution','admin','stability','compat'].forEach(function(k){
+        if(d[k]&&typeof d[k]==='string'){try{d[k]=JSON.parse(d[k]);fixed=true}catch(e){}}
+      });
+    });
+    if(fixed)localStorage.setItem('drugData_v4',JSON.stringify(drugs));
+  }catch(e){}
 })();
 
 // ============================================================

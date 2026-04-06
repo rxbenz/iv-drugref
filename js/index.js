@@ -143,6 +143,36 @@ function dismissNPS(){
 }
 
 // ============================================================
+// NORMALIZE — Fix GAS-cached fields (strings → arrays/objects)
+// ============================================================
+function _normField(val){
+  if(!val)return val;
+  if(typeof val==='string'){
+    val=val.trim();
+    if(val[0]==='['||val[0]==='{'){try{return JSON.parse(val)}catch(e){}}
+    if(val.indexOf(',')>=0)return val.split(',').map(function(s){return s.trim()}).filter(Boolean);
+    return[val];
+  }
+  return val;
+}
+function _normDrug(d){
+  if(!d)return d;
+  if(d.monitoring&&typeof d.monitoring==='string') d.monitoring=_normField(d.monitoring);
+  if(d.categories&&typeof d.categories==='string') d.categories=_normField(d.categories);
+  ['reconst','dilution','admin','stability','compat'].forEach(function(k){
+    if(d[k]&&typeof d[k]==='string'){try{d[k]=JSON.parse(d[k])}catch(e){}}
+  });
+  d._normalized=true;
+  return d;
+}
+// Monkey-patch renderDrugCard to normalize each drug before rendering
+var _origRenderCard=renderDrugCard;
+renderDrugCard=function(drug){
+  if(!drug._normalized)_normDrug(drug);
+  return _origRenderCard(drug);
+};
+
+// ============================================================
 // FALLBACK — Show error + retry when drug data fails to load
 // ============================================================
 (function(){

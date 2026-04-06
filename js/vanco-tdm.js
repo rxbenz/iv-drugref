@@ -43,10 +43,17 @@ const PK_MODELS = [
 ];
 
 let selectedModel='auto', currentPK=null, mcmcSamples=[], allModelResults=[];
+let lastMCMCAcceptRate=0, lastMCMCSampleCount=0, lastSamplingWarnings=[];
 
 // --- Helpers (consolidated into core.js) ---
 function cockcroft(age,wt,scr,sex,ht){ return IVDrugRef.calcCockcroftGault(age,wt,scr,sex,ht); }
-function getPatient(){ var p=IVDrugRef.getPatientFromForm(); return{wt:p.wt,age:p.age,sex:p.sex,scr:p.scr,ht:p.ht}; }
+function getPatient(){
+  var p=IVDrugRef.getPatientFromForm();
+  var albEl=document.getElementById('ptAlb'), dialEl=document.getElementById('ptDialysis');
+  return{wt:p.wt,age:p.age,sex:p.sex,scr:p.scr,ht:p.ht,
+    albumin:albEl&&albEl.value?+albEl.value:null,
+    dialysis:dialEl?dialEl.value:'none'};
+}
 function updateCrCl(){
   const p=getPatient();
   const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);
@@ -94,6 +101,18 @@ function buildLevels(){
 }
 
 // --- Sampling Adequacy Analysis ---
+// Count doses whose infusion completed before a given time point
+function countCompletedDoses(dh, beforeTime){
+  let count=0;
+  for(const d of dh){
+    for(let n=0;n<d.nDoses;n++){
+      const infEnd=d.startTime+n*d.interval+d.infusion;
+      if(infEnd<=beforeTime) count++;
+    }
+  }
+  return count;
+}
+
 function analyzeSampling(){
   const dh=buildDoseHist(), lvls=buildLevels();
   const warnings=[];
@@ -105,14 +124,12 @@ function analyzeSampling(){
     lastDoseEnd=Math.max(lastDoseEnd, d.startTime + (d.nDoses-1)*d.interval + d.infusion);
   }
 
-  // Steady state check (≥4 doses at same interval)
-  const lastEntry=dh[dh.length-1];
-  const approxSS = lastEntry ? lastEntry.startTime + 3*lastEntry.interval : 0; // ~4th dose
-  
   for(const lv of lvls){
-    if(lv.time < approxSS && totalDoses>=1){
+    // Steady state check: count doses that finished infusion before sampling time
+    const dosesBeforeSample=countCompletedDoses(dh, lv.time);
+    if(dosesBeforeSample<4 && totalDoses>=1){
       warnings.push({type:'pre-ss', severity:'amber',
-        msg:`⚠ Level ที่ ${lv.value.toFixed(1)} mcg/mL เจาะก่อน steady state (ก่อน dose ที่ 4) — ผล Bayesian อาจไม่แม่นยำ`});
+        msg:`⚠ Level ที่ ${lv.value.toFixed(1)} mcg/mL เจาะหลัง dose ที่ ${dosesBeforeSample} (ก่อน steady state ≥4 doses) — ผล Bayesian อาจไม่แม่นยำ`});
     }
 
     // True trough check: should be ≤30min before next dose
@@ -138,24 +155,52 @@ function analyzeSampling(){
 function getRecommendedSamplingTimes(){
   const dh=buildDoseHist();
   if(dh.length===0) return [];
-  const lastEntry=dh[dh.length-1];
-  const ssStart = lastEntry.startTime + 3*lastEntry.interval; // 4th dose
   const recs=[];
-  
-  // Trough: 30 min before 4th dose or later dose
-  const troughTime = ssStart - 0.5;
-  if(troughTime>0 && referenceTime){
-    const trDt = new Date(referenceTime + troughTime*3600000);
-    recs.push({type:'trough', time:troughTime, dt:trDt,
-      label:`Trough: ${trDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (30 นาทีก่อน dose #${Math.round(ssStart/lastEntry.interval)+1})`});
+
+  // Find the start time of the 4th dose across all entries
+  const allDoseStarts=[];
+  for(const d of dh){
+    for(let n=0;n<d.nDoses;n++){
+      allDoseStarts.push({start:d.startTime+n*d.interval, infusion:d.infusion, interval:d.interval});
+    }
+  }
+  allDoseStarts.sort((a,b)=>a.start-b.start);
+  if(allDoseStarts.length<4){
+    // Not enough doses yet — recommend based on projected 4th dose
+    const lastEntry=dh[dh.length-1];
+    const totalNow=allDoseStarts.length;
+    const remaining=4-totalNow;
+    const projected=lastEntry.startTime+(lastEntry.nDoses-1)*lastEntry.interval+remaining*lastEntry.interval;
+    if(projected>0 && referenceTime){
+      const trDt=new Date(referenceTime+(projected-0.5)*3600000);
+      recs.push({type:'trough',time:projected-0.5,dt:trDt,
+        label:`Trough: ${trDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (30 นาทีก่อน dose #4)`});
+      const pkTime=projected+lastEntry.infusion+1;
+      const pkDt=new Date(referenceTime+pkTime*3600000);
+      recs.push({type:'peak',time:pkTime,dt:pkDt,
+        label:`Peak: ${pkDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (1 hr หลัง infusion dose #4)`});
+    }
+    return recs;
   }
 
-  // Peak: 1-2 hr after end of 4th dose infusion
-  const peakTime = ssStart + lastEntry.infusion + 1;
+  // 4th dose info (index 3)
+  const dose4=allDoseStarts[3];
+  const doseNum=4;
+
+  // Trough: 30 min before 4th dose
+  const troughTime=dose4.start-0.5;
+  if(troughTime>0 && referenceTime){
+    const trDt=new Date(referenceTime+troughTime*3600000);
+    recs.push({type:'trough',time:troughTime,dt:trDt,
+      label:`Trough: ${trDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (30 นาทีก่อน dose #${doseNum})`});
+  }
+
+  // Peak: 1 hr after end of 4th dose infusion
+  const peakTime=dose4.start+dose4.infusion+1;
   if(peakTime>0 && referenceTime){
-    const pkDt = new Date(referenceTime + peakTime*3600000);
-    recs.push({type:'peak', time:peakTime, dt:pkDt,
-      label:`Peak: ${pkDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (1 hr หลัง infusion dose #${Math.round(ssStart/lastEntry.interval)+1})`});
+    const pkDt=new Date(referenceTime+peakTime*3600000);
+    recs.push({type:'peak',time:peakTime,dt:pkDt,
+      label:`Peak: ${pkDt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} (1 hr หลัง infusion dose #${doseNum})`});
   }
 
   return recs;
@@ -554,8 +599,13 @@ function runBayesian(){
   document.getElementById('mcmcProgress').style.display='block';
   document.getElementById('resultsSection').style.display='none';
 
+  // Store sampling warnings before MCMC for report access
+  lastSamplingWarnings=analyzeSampling();
+
   runMCMC(pt,doseHist,measuredLvls,bestModel,currentPK,2000,function(samples,acceptRate){
     mcmcSamples=samples;
+    lastMCMCAcceptRate=acceptRate;
+    lastMCMCSampleCount=samples.length;
     document.getElementById('mcmcProgress').style.display='none';
     document.getElementById('resultsSection').style.display='block';
 
@@ -712,8 +762,12 @@ function buildVancoShareText() {
 
   var text = '=== Vancomycin TDM ===\n';
   text += '\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48: ' + dt + '\n\n';
-  text += '\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22: ' + sex + ' ' + pt.age + ' \u0e1b\u0e35 ' + pt.wt + ' kg SCr ' + pt.scr + '\n';
-  text += 'CrCl: ' + crcl.toFixed(1) + ' mL/min\n\n';
+  text += '\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22: ' + sex + ' ' + pt.age + ' \u0e1b\u0e35 ' + pt.wt + ' kg';
+  if (pt.ht) text += ' Ht ' + pt.ht + ' cm';
+  text += ' SCr ' + pt.scr + '\n';
+  text += 'CrCl: ' + crcl.toFixed(1) + ' mL/min';
+  if (pt.albumin) text += ' | Albumin: ' + pt.albumin.toFixed(1) + ' g/dL';
+  text += ' | Dialysis: ' + (pt.dialysis && pt.dialysis !== 'none' ? pt.dialysis : '\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e25\u0e49\u0e32\u0e07\u0e44\u0e15') + '\n\n';
 
   // Dose history
   text += '--- \u0e02\u0e19\u0e32\u0e14\u0e22\u0e32\u0e40\u0e14\u0e34\u0e21 ---\n';
@@ -742,6 +796,20 @@ function buildVancoShareText() {
   text += 'SS Peak: ' + currentPK.ssPeak.toFixed(1) + ' | SS Trough: ' + currentPK.ssTrough.toFixed(1) + '\n';
   text += 'PK: CL ' + currentPK.cl.toFixed(3) + ' L/hr | Vd ' + currentPK.vd.toFixed(1) + ' L | t\u00bd ' + currentPK.halflife.toFixed(1) + 'h\n';
   text += 'Model: ' + currentPK.model + '\n';
+
+  // Diagnostics
+  text += '\n--- Diagnostics ---\n';
+  // Sampling adequacy
+  var dh = buildDoseHist();
+  var totalDosesForReport = 0; for (var di = 0; di < dh.length; di++) totalDosesForReport += dh[di].nDoses;
+  var ssStatus = totalDosesForReport >= 4 ? '\u2705 At steady state (' + totalDosesForReport + ' doses)' : '\u26a0 Pre-steady state (' + totalDosesForReport + '/4 doses)';
+  text += 'Sampling: ' + ssStatus + '\n';
+  if (lastSamplingWarnings.length > 0) {
+    for (var wi = 0; wi < lastSamplingWarnings.length; wi++) {
+      text += '  ' + lastSamplingWarnings[wi].msg.replace(/<[^>]*>/g, '') + '\n';
+    }
+  }
+  text += 'MCMC: ' + lastMCMCSampleCount + ' samples | Accept rate ' + (lastMCMCAcceptRate * 100).toFixed(1) + '%\n';
 
   // Dose optimizer recommendation
   var opt = getOptData();
@@ -773,11 +841,15 @@ function buildVancoPrintData() {
   if (currentPK.auc24 < 400) { interp = 'Below target (<400)'; interpColor = '#d97706'; }
   else if (currentPK.auc24 > 600) { interp = 'Above target (>600)'; interpColor = '#dc2626'; }
 
+  var dialysisLabel = pt.dialysis && pt.dialysis !== 'none' ? pt.dialysis : '\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e25\u0e49\u0e32\u0e07\u0e44\u0e15';
   var patientHtml = '<div style="font-size:13px;line-height:1.8">' +
     '<b>\u0e40\u0e1e\u0e28:</b> ' + sex + ' &nbsp; <b>\u0e2d\u0e32\u0e22\u0e38:</b> ' + pt.age + ' \u0e1b\u0e35 &nbsp; ' +
-    '<b>\u0e19\u0e49\u0e33\u0e2b\u0e19\u0e31\u0e01:</b> ' + pt.wt + ' kg &nbsp; <b>SCr:</b> ' + pt.scr + ' mg/dL<br>' +
-    '<b>CrCl:</b> ' + crcl.toFixed(1) + ' mL/min' +
-    (pt.ht ? ' &nbsp; <b>\u0e2a\u0e48\u0e27\u0e19\u0e2a\u0e39\u0e07:</b> ' + pt.ht + ' cm' : '') +
+    '<b>\u0e19\u0e49\u0e33\u0e2b\u0e19\u0e31\u0e01:</b> ' + pt.wt + ' kg &nbsp; ' +
+    (pt.ht ? '<b>\u0e2a\u0e48\u0e27\u0e19\u0e2a\u0e39\u0e07:</b> ' + pt.ht + ' cm &nbsp; ' : '') +
+    '<b>SCr:</b> ' + pt.scr + ' mg/dL<br>' +
+    '<b>CrCl:</b> ' + crcl.toFixed(1) + ' mL/min &nbsp; ' +
+    (pt.albumin ? '<b>Albumin:</b> ' + pt.albumin.toFixed(1) + ' g/dL &nbsp; ' : '') +
+    '<b>Dialysis:</b> ' + dialysisLabel +
     '</div>';
 
   // Dose history table
@@ -821,6 +893,22 @@ function buildVancoPrintData() {
     '<td style="'+cellSt+'"><b>t\u00bd</b></td><td style="'+cellSt+'">' + currentPK.halflife.toFixed(1) + ' hr</td></tr>' +
     '</table>';
 
+  // Diagnostics section
+  var dh2 = buildDoseHist();
+  var totalDosesP = 0; for (var dk = 0; dk < dh2.length; dk++) totalDosesP += dh2[dk].nDoses;
+  var ssStatusP = totalDosesP >= 4;
+  var ssColor = ssStatusP ? '#16a34a' : '#d97706';
+  var diagHtml = '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:14px;font-size:11px">' +
+    '<div style="font-size:12px;font-weight:600;margin-bottom:6px">\ud83d\udd2c Diagnostics</div>' +
+    '<div><b>Sampling:</b> <span style="color:' + ssColor + '">' + (ssStatusP ? '\u2705 At steady state' : '\u26a0 Pre-steady state') + ' (' + totalDosesP + ' doses)</span></div>';
+  if (lastSamplingWarnings.length > 0) {
+    for (var wk = 0; wk < lastSamplingWarnings.length; wk++) {
+      diagHtml += '<div style="color:#d97706;margin-top:2px">' + lastSamplingWarnings[wk].msg.replace(/<[^>]*>/g, '') + '</div>';
+    }
+  }
+  diagHtml += '<div style="margin-top:4px"><b>MCMC:</b> ' + lastMCMCSampleCount + ' samples | Accept rate: ' + (lastMCMCAcceptRate * 100).toFixed(1) + '%</div>' +
+    '</div>';
+
   // Dose optimizer recommendation
   var optHtml = '';
   var opt = getOptData();
@@ -838,7 +926,7 @@ function buildVancoPrintData() {
       '</div>';
   }
 
-  var resultsHtml = doseHtml + lvlHtml + aucHtml + optHtml;
+  var resultsHtml = doseHtml + lvlHtml + aucHtml + diagHtml + optHtml;
 
   return {
     title: 'Vancomycin Bayesian TDM Report',
@@ -925,8 +1013,8 @@ function trackTDMResult(model, aucMAP, aucLo, aucHi, acceptRate, pt, pkResult, d
     sex: pt.sex,
     scr: pt.scr,
     crcl: crcl.toFixed(1),
-    albumin: '',
-    dialysis: '',
+    albumin: pt.albumin || '',
+    dialysis: pt.dialysis || '',
     dosing_weight: isObese ? abw.toFixed(1) : pt.wt,
     ibw: ibw.toFixed(1),
     // Obesity/elderly flags (new v5.1)

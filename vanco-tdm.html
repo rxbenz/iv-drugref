@@ -31,7 +31,8 @@
 <div class="container">
 <div class="card"><div class="card-head">👤 PATIENT</div><div class="card-body">
 <div class="row row-4" style="margin-bottom:10px"><div class="field"><label>Weight (kg)</label><input type="number" id="ptWt" value="70" min="20" max="300" step="0.1"></div><div class="field"><label>Age (yr)</label><input type="number" id="ptAge" value="55" min="18" max="120"></div><div class="field"><label>Sex</label><select id="ptSex"><option value="M">Male</option><option value="F">Female</option></select></div><div class="field"><label>SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div></div>
-<div class="row row-2"><div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div><div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly style="color:var(--blue);background:var(--bg3);border:none"></div></div></div></div>
+<div class="row row-2"><div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div><div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly style="color:var(--blue);background:var(--bg3);border:none"></div></div>
+<div class="row row-2" style="margin-top:8px"><div class="field"><label>Albumin (g/dL)</label><input type="number" id="ptAlb" value="" min="0.5" max="6" step="0.1" placeholder="ไม่ระบุ"></div><div class="field"><label>Dialysis</label><select id="ptDialysis"><option value="none">ไม่ได้ล้างไต</option><option value="HD">HD</option><option value="CRRT">CRRT</option><option value="PD">PD</option></select></div></div></div></div>
 
 <div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body"><div id="doseList"></div><button class="btn-add" data-action="addDose">+ เพิ่ม dose</button></div></div>
 <div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body"><div id="levelList"></div><button class="btn-add" data-action="addLevel">+ เพิ่ม level</button></div></div>
@@ -52,7 +53,7 @@
 <div id="optResult"></div><div class="dose-compare" id="doseCompare"></div></div></div>
 </div>
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้น ไม่ทดแทน clinical judgment<br>Bayesian MAP + MCMC | Models: Buelga 2005, Roberts 2011, Goti 2018<br>Ref: ASHP/IDSA Vancomycin Guidelines 2020 | สำหรับบุคลากรทางการแพทย์เท่านั้น</div>
-<div class="app-footer">IV DrugRef v5.7.3 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+<div class="app-footer">IV DrugRef v5.7.4 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 </div>
 
 <nav class="bottom-nav">

@@ -41,7 +41,7 @@
   <div class="field-grid">
     <div class="field-row-3">
       <div class="field">
-        <label for="ptWt">น้ำหนัก (kg)</label>
+        <label for="ptWt">น้ำหนัก (<span id="wtUnitLabel">kg</span>) <button type="button" class="unit-toggle" data-action="toggleWtUnit" title="สลับหน่วย kg/lbs">⇄ <span id="wtToggleText">lbs</span></button></label>
         <input type="number" id="ptWt" value="70" min="3" max="400" step="0.1" data-action="patientInput" aria-describedby="validationMessages">
       </div>
       <div class="field">
@@ -58,11 +58,11 @@
     </div>
     <div class="field-row">
       <div class="field">
-        <label for="ptScr">SCr (mg/dL)</label>
+        <label for="ptScr">SCr (<span id="scrUnitLabel">mg/dL</span>) <button type="button" class="unit-toggle" data-action="toggleScrUnit" title="สลับหน่วย mg/dL ↔ µmol/L">⇄ <span id="scrToggleText">µmol/L</span></button></label>
         <input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1" data-action="patientInput" aria-describedby="validationMessages">
       </div>
       <div class="field">
-        <label for="ptHt">ส่วนสูง (cm)</label>
+        <label for="ptHt">ส่วนสูง (<span id="htUnitLabel">cm</span>) <button type="button" class="unit-toggle" data-action="toggleHtUnit" title="สลับหน่วย cm/in">⇄ <span id="htToggleText">in</span></button></label>
         <input type="number" id="ptHt" value="165" min="40" max="250" data-action="patientInput" aria-describedby="validationMessages">
       </div>
     </div>
@@ -89,7 +89,7 @@
 </div>
 
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้นเท่านั้น ต้องใช้ clinical judgment ประกอบการตัดสินใจทุกครั้ง<br>ข้อมูลจาก Lexicomp, Trissel's, AHA/ACLS, IDSA, AES Guidelines</div>
-<div class="app-footer">IV DrugRef v5.7.9 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+<div class="app-footer">IV DrugRef v5.8.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 
 </div>
 

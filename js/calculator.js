@@ -532,6 +532,89 @@
     });
   }
 
+  // ====== Unit Conversion Toggles ======
+  var unitState = { wt: 'kg', ht: 'cm', scr: 'mgdl' };
+
+  function toggleWtUnit() {
+    var inp = document.getElementById('ptWt');
+    var label = document.getElementById('wtUnitLabel');
+    var togText = document.getElementById('wtToggleText');
+    var v = parseFloat(inp.value);
+    if (unitState.wt === 'kg') {
+      unitState.wt = 'lbs';
+      if (!isNaN(v)) inp.value = (v * 2.205).toFixed(1);
+      inp.step = '0.1'; inp.min = '7'; inp.max = '880';
+      label.textContent = 'lbs'; togText.textContent = 'kg';
+    } else {
+      unitState.wt = 'kg';
+      if (!isNaN(v)) inp.value = (v / 2.205).toFixed(1);
+      inp.step = '0.1'; inp.min = '3'; inp.max = '400';
+      label.textContent = 'kg'; togText.textContent = 'lbs';
+    }
+    updateCrCl(); calculate();
+  }
+
+  function toggleHtUnit() {
+    var inp = document.getElementById('ptHt');
+    var label = document.getElementById('htUnitLabel');
+    var togText = document.getElementById('htToggleText');
+    var v = parseFloat(inp.value);
+    if (unitState.ht === 'cm') {
+      unitState.ht = 'in';
+      if (!isNaN(v)) inp.value = (v / 2.54).toFixed(1);
+      inp.step = '0.1'; inp.min = '16'; inp.max = '98';
+      label.textContent = 'in'; togText.textContent = 'cm';
+    } else {
+      unitState.ht = 'cm';
+      if (!isNaN(v)) inp.value = (v * 2.54).toFixed(1);
+      inp.step = '0.1'; inp.min = '40'; inp.max = '250';
+      label.textContent = 'cm'; togText.textContent = 'in';
+    }
+    updateCrCl(); calculate();
+  }
+
+  function toggleScrUnit() {
+    var inp = document.getElementById('ptScr');
+    var label = document.getElementById('scrUnitLabel');
+    var togText = document.getElementById('scrToggleText');
+    var v = parseFloat(inp.value);
+    if (unitState.scr === 'mgdl') {
+      unitState.scr = 'umol';
+      if (!isNaN(v)) inp.value = (v * 88.4).toFixed(0);
+      inp.step = '1'; inp.min = '9'; inp.max = '1768';
+      label.textContent = 'µmol/L'; togText.textContent = 'mg/dL';
+    } else {
+      unitState.scr = 'mgdl';
+      if (!isNaN(v)) inp.value = (v / 88.4).toFixed(1);
+      inp.step = '0.1'; inp.min = '0.1'; inp.max = '20';
+      label.textContent = 'mg/dL'; togText.textContent = 'µmol/L';
+    }
+    updateCrCl(); calculate();
+  }
+
+  // Intercept getPatientFromForm to convert non-standard units back to kg/cm/mg/dL
+  var _origGetPt = IVDrugRef.getPatientFromForm;
+  IVDrugRef.getPatientFromForm = function() {
+    // Temporarily convert inputs to standard units for calculation
+    var wtInp = document.getElementById('ptWt');
+    var htInp = document.getElementById('ptHt');
+    var scrInp = document.getElementById('ptScr');
+    var wtOrig = wtInp.value, htOrig = htInp.value, scrOrig = scrInp.value;
+
+    if (unitState.wt === 'lbs') wtInp.value = (parseFloat(wtOrig) / 2.205).toFixed(1);
+    if (unitState.ht === 'in') htInp.value = (parseFloat(htOrig) * 2.54).toFixed(1);
+    if (unitState.scr === 'umol') scrInp.value = (parseFloat(scrOrig) / 88.4).toFixed(2);
+
+    var pt = _origGetPt.call(IVDrugRef);
+
+    // Restore displayed values
+    wtInp.value = wtOrig;
+    htInp.value = htOrig;
+    scrInp.value = scrOrig;
+
+    return pt;
+  };
+
   // ====== Event Delegation ======
   IVDrugRef.delegate(document, 'click', {
     selectDrug: function(e, t) { if (e.target.closest('a[href]')) return; selectDrug(t.dataset.id); },
@@ -539,7 +622,10 @@
       if (!lastCalcResult || !IVDrugRef.ShareExport) return;
       var text = buildCalcShareText(lastCalcResult.drug, lastCalcResult.pt, lastCalcResult.result);
       IVDrugRef.ShareExport.copyText(text, { page: 'calculator', drug: lastCalcResult.drug.name });
-    }
+    },
+    toggleWtUnit: toggleWtUnit,
+    toggleHtUnit: toggleHtUnit,
+    toggleScrUnit: toggleScrUnit
   });
   IVDrugRef.delegate(document, 'input', {
     patientInput: function() { updateCrCl(); calculate(); }

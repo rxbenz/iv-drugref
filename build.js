@@ -57,7 +57,7 @@ const PAGES = {
 // Static files to copy to dist
 const STATIC_FILES = [
   'manifest.json', 'sw.js', 'drugs-data.json',
-  'i18n.js', 'translations-en.js'
+  'i18n.js', 'translations-en.js', 'version.json'
 ];
 
 function readFile(filePath) {
@@ -193,6 +193,16 @@ function build() {
     } else {
       console.log(`  ${f.padEnd(25)}⚠ not found`);
     }
+  }
+
+  // Auto-inject build version into version.json (preserves forceUpdate flag)
+  const versionJsonPath = path.join(DIST, 'version.json');
+  if (fs.existsSync(versionJsonPath)) {
+    const buildVer = getBuildVersion();
+    const versionData = JSON.parse(fs.readFileSync(versionJsonPath, 'utf8'));
+    versionData.version = buildVer;
+    fs.writeFileSync(versionJsonPath, JSON.stringify(versionData, null, 2) + '\n');
+    console.log(`\n🔖 version.json: version set to "${buildVer}", forceUpdate=${versionData.forceUpdate}`);
   }
 
   // Copy icons/

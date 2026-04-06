@@ -838,6 +838,104 @@ var IVDrugRef = (function() {
 
 
   // ============================================================
+  // VERSION CHECK — Force Update Support (v5.3.8)
+  // ============================================================
+  // Polls version.json to detect new deploys.
+  // If forceUpdate=true and version mismatch → force reload immediately.
+  // If forceUpdate=false → rely on normal SW update toast.
+  // Checks: on page load, on visibilitychange, and every 5 minutes.
+
+  var VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  var _versionCheckTimer = null;
+  var _currentAppVersion = null; // set from version.json on first load
+
+  function checkForUpdate() {
+    fetch('version.json?_t=' + Date.now(), { cache: 'no-store' })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data || !data.version) return;
+
+        // First load: store current version
+        if (!_currentAppVersion) {
+          _currentAppVersion = data.version;
+          return;
+        }
+
+        // Version matches — nothing to do
+        if (data.version === _currentAppVersion) return;
+
+        console.log('[VersionCheck] New version:', data.version, '(current:', _currentAppVersion + ')', 'force:', data.forceUpdate);
+
+        if (data.forceUpdate) {
+          // Force update: show non-dismissable banner then reload
+          showForceUpdateBanner(data.version);
+        } else {
+          // Normal: let SW handle it (toast with dismiss option)
+          // Trigger SW update check
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.getRegistration().then(function(reg) {
+              if (reg) reg.update();
+            });
+          }
+        }
+      })
+      .catch(function() { /* offline or error — ignore */ });
+  }
+
+  function showForceUpdateBanner(newVersion) {
+    // Prevent duplicate banners
+    if (document.getElementById('force-update-banner')) return;
+
+    var banner = document.createElement('div');
+    banner.id = 'force-update-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;' +
+      'background:#dc2626;color:#fff;padding:16px 20px;text-align:center;' +
+      'font-size:15px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    banner.innerHTML = 'กำลังอัพเดตเป็นเวอร์ชัน ' + newVersion + ' ...';
+    document.body.appendChild(banner);
+
+    // Force SW to activate new version, then reload
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.getRegistration().then(function(reg) {
+        if (reg) {
+          reg.update().then(function() {
+            // Give SW time to install new version
+            setTimeout(function() {
+              if (reg.waiting) {
+                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+              }
+              // Reload after a short delay regardless
+              setTimeout(function() { window.location.reload(); }, 1500);
+            }, 2000);
+          });
+        } else {
+          // No SW — just reload
+          setTimeout(function() { window.location.reload(); }, 1500);
+        }
+      });
+    } else {
+      // No SW — just reload
+      setTimeout(function() { window.location.reload(); }, 1500);
+    }
+  }
+
+  function startVersionCheck() {
+    // Initial check after 3s (let page load first)
+    setTimeout(checkForUpdate, 3000);
+
+    // Periodic check
+    _versionCheckTimer = setInterval(checkForUpdate, VERSION_CHECK_INTERVAL);
+
+    // Check when tab becomes visible again
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        checkForUpdate();
+      }
+    });
+  }
+
+
+  // ============================================================
   // UTILITY HELPERS
   // ============================================================
 
@@ -979,8 +1077,9 @@ var IVDrugRef = (function() {
     getAnalyticsUrl: function() { return ANALYTICS_URL; },
     getAdminGasUrl: function() { return ADMIN_GAS_URL; },
 
-    // Service Worker
+    // Service Worker & Version Check
     registerSW,
+    startVersionCheck,
 
     // Utility helpers
     generateId,
@@ -1035,4 +1134,5 @@ var IVDrugRef = (function() {
 // Register service worker on page load
 document.addEventListener('DOMContentLoaded', () => {
   IVDrugRef.registerSW();
+  IVDrugRef.startVersionCheck();
 });

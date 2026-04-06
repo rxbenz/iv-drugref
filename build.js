@@ -44,13 +44,13 @@ const PROD_MODE = process.argv.includes('--prod');
 
 // Pages and their CSS/JS dependencies (order matters)
 const PAGES = {
-  'index.html':        { css: ['shared.css','theme.css','index.css'],       js: ['error-tracker.js','core.js','index.js'] },
-  'calculator.html':   { css: ['shared.css','theme.css','calculator.css'],  js: ['error-tracker.js','core.js','share-export.js','calculator.js'] },
-  'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css'],js: ['error-tracker.js','core.js','renal-dosing.js'] },
-  'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css'],js: ['error-tracker.js','core.js','compatibility.js'] },
+  'index.html':        { css: ['shared.css','theme.css','index.css','quick-actions.css'],       js: ['error-tracker.js','core.js','index.js','quick-actions.js'] },
+  'calculator.html':   { css: ['shared.css','theme.css','calculator.css','quick-actions.css'],  js: ['error-tracker.js','core.js','share-export.js','calculator.js','quick-actions.js'] },
+  'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css','quick-actions.css'],js: ['error-tracker.js','core.js','renal-dosing.js','quick-actions.js'] },
+  'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css','quick-actions.css'],js: ['error-tracker.js','core.js','compatibility.js','quick-actions.js'] },
   'admin.html':        { css: ['shared.css','theme.css','admin.css'],       js: ['error-tracker.js','core.js','admin.js'] },
-  'tdm.html':          { css: ['shared.css','theme.css','tdm.css'],          js: ['error-tracker.js','core.js','share-export.js','tdm.js'] },
-  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css'],    js: ['error-tracker.js','core.js','share-export.js','vanco-tdm.js'] },
+  'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css'],          js: ['error-tracker.js','core.js','share-export.js','tdm.js','quick-actions.js'] },
+  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css'],    js: ['error-tracker.js','core.js','share-export.js','vanco-tdm.js','quick-actions.js'] },
   'dashboard.html':    { css: ['shared.css','theme.css','dashboard.css'],    js: ['error-tracker.js','core.js','dashboard.js'] },
 };
 

@@ -186,8 +186,9 @@
         ckdLabelEl.textContent = 'eGFR (CKD-EPI 2021)';
       }
     }
-    var valCKDEl = document.getElementById('valCKD'); if (valCKDEl) valCKDEl.textContent = (activeFormula === 'ckd' ? ckdNonindexed : ckdIndexed).toFixed(1);
-    var ckdUnitEl = document.querySelector('#boxCKD .renal-result-unit'); if (ckdUnitEl) ckdUnitEl.textContent = activeFormula === 'ckd' ? 'mL/min (non-indexed for dosing)' : 'mL/min/1.73m²';
+    var showNonindexed = (pt.bsa > 2.0 || pt.bsa < 1.5);
+    var valCKDEl = document.getElementById('valCKD'); if (valCKDEl) valCKDEl.textContent = (showNonindexed ? ckdNonindexed : ckdIndexed).toFixed(1);
+    var ckdUnitEl = document.querySelector('#boxCKD .renal-result-unit'); if (ckdUnitEl) ckdUnitEl.textContent = showNonindexed ? 'mL/min (non-indexed for dosing)' : 'mL/min/1.73m²';
 
     const stageCG = IVDrugRef.getCKDStage(cg);
     const stageCKD = IVDrugRef.getCKDStage(ckdIndexed);

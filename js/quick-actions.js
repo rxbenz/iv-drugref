@@ -437,7 +437,8 @@
       fabStartX = rect.left;
       fabStartY = rect.top;
       wrap.style.transition = 'none';
-      e.preventDefault();
+      // Only prevent default on touch to stop scroll — NOT on mouse (preserves click)
+      if (e.touches) e.preventDefault();
     }
 
     function onMove(e) {
@@ -447,6 +448,7 @@
       var dy = touch.clientY - dragStartY;
       if (!dragMoved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
       dragMoved = true;
+      if (e.touches) e.preventDefault(); // prevent scroll during drag
       var newX = fabStartX + dx;
       var newY = fabStartY + dy;
       // Clamp to viewport

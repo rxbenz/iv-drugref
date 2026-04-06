@@ -690,16 +690,23 @@ var IVDrugRef = (function() {
     if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
     if (_reqCount >= 40) return;
     _reqCount++;
+    var enriched = {
+      ...data,
+      session_id: getSessionId(),
+      user_id: getUserId()
+    };
+    // Offline: queue to IndexedDB for later flush
+    if (!navigator.onLine) {
+      enriched.queued_at = new Date().toISOString();
+      queueAnalyticsEvent(enriched);
+      return;
+    }
     try {
-      const payload = JSON.stringify({
-        ...data,
-        session_id: getSessionId(),
-        user_id: getUserId()
-      });
+      var payload = JSON.stringify(enriched);
       if (navigator.sendBeacon) {
         navigator.sendBeacon(ANALYTICS_URL, payload);
       } else {
-        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+        fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(function() {});
       }
     } catch (e) { /* silent fail */ }
   }
@@ -1035,8 +1042,126 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.3.7';
+  const VERSION = '5.4.0';
   const APP_NAME = 'IV DrugRef';
+
+  // ============================================================
+  // INDEXEDDB HELPER — Offline analytics queue + drug data backup
+  // ============================================================
+  const IDB_NAME = 'iv-drugref-db';
+  const IDB_VERSION = 1;
+  let _dbPromise = null;
+
+  function openDB() {
+    if (_dbPromise) return _dbPromise;
+    _dbPromise = new Promise(function(resolve, reject) {
+      try {
+        var req = indexedDB.open(IDB_NAME, IDB_VERSION);
+        req.onupgradeneeded = function(e) {
+          var db = e.target.result;
+          if (!db.objectStoreNames.contains('analyticsQueue')) {
+            db.createObjectStore('analyticsQueue', { autoIncrement: true });
+          }
+          if (!db.objectStoreNames.contains('drugDataBackup')) {
+            db.createObjectStore('drugDataBackup', { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = function(e) { resolve(e.target.result); };
+        req.onerror = function() { _dbPromise = null; reject(req.error); };
+      } catch (e) { _dbPromise = null; reject(e); }
+    });
+    return _dbPromise;
+  }
+
+  function idbPut(storeName, data) {
+    return openDB().then(function(db) {
+      return new Promise(function(resolve, reject) {
+        var tx = db.transaction(storeName, 'readwrite');
+        tx.objectStore(storeName).put(data);
+        tx.oncomplete = function() { resolve(); };
+        tx.onerror = function() { reject(tx.error); };
+      });
+    }).catch(function() {});
+  }
+
+  function idbGetAll(storeName) {
+    return openDB().then(function(db) {
+      return new Promise(function(resolve, reject) {
+        var tx = db.transaction(storeName, 'readonly');
+        var req = tx.objectStore(storeName).getAll();
+        req.onsuccess = function() { resolve(req.result || []); };
+        req.onerror = function() { reject(req.error); };
+      });
+    }).catch(function() { return []; });
+  }
+
+  function idbGet(storeName, key) {
+    return openDB().then(function(db) {
+      return new Promise(function(resolve, reject) {
+        var tx = db.transaction(storeName, 'readonly');
+        var req = tx.objectStore(storeName).get(key);
+        req.onsuccess = function() { resolve(req.result); };
+        req.onerror = function() { reject(req.error); };
+      });
+    }).catch(function() { return null; });
+  }
+
+  function idbClear(storeName) {
+    return openDB().then(function(db) {
+      return new Promise(function(resolve, reject) {
+        var tx = db.transaction(storeName, 'readwrite');
+        tx.objectStore(storeName).clear();
+        tx.oncomplete = function() { resolve(); };
+        tx.onerror = function() { reject(tx.error); };
+      });
+    }).catch(function() {});
+  }
+
+  function idbCount(storeName) {
+    return openDB().then(function(db) {
+      return new Promise(function(resolve, reject) {
+        var tx = db.transaction(storeName, 'readonly');
+        var req = tx.objectStore(storeName).count();
+        req.onsuccess = function() { resolve(req.result); };
+        req.onerror = function() { reject(req.error); };
+      });
+    }).catch(function() { return 0; });
+  }
+
+  // ============================================================
+  // ANALYTICS OFFLINE QUEUE — Flush when back online
+  // ============================================================
+  const ANALYTICS_QUEUE_MAX = 200;
+
+  function flushAnalyticsQueue() {
+    if (!navigator.onLine || !ANALYTICS_URL) return Promise.resolve();
+    return idbGetAll('analyticsQueue').then(function(events) {
+      if (!events || events.length === 0) return;
+      var sendPromises = events.map(function(evt) {
+        try {
+          var payload = JSON.stringify(evt);
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon(ANALYTICS_URL, payload);
+          } else {
+            fetch(ANALYTICS_URL, { method: 'POST', body: payload, keepalive: true }).catch(function() {});
+          }
+        } catch (e) {}
+      });
+      return idbClear('analyticsQueue');
+    }).catch(function() {});
+  }
+
+  function queueAnalyticsEvent(data) {
+    return idbCount('analyticsQueue').then(function(count) {
+      if (count >= ANALYTICS_QUEUE_MAX) {
+        // Trim oldest: clear and re-add is simplest; acceptable for analytics
+        return idbClear('analyticsQueue').then(function() {
+          return idbPut('analyticsQueue', data);
+        });
+      }
+      return idbPut('analyticsQueue', data);
+    }).catch(function() {});
+  }
 
   // ============================================================
   // PUBLIC API
@@ -1071,11 +1196,17 @@ var IVDrugRef = (function() {
     // Analytics
     sendAnalytics,
     trackPageView,
+    flushAnalyticsQueue,
     getSessionId,
     getUserId,
     hasAnalyticsConsent,
     getAnalyticsUrl: function() { return ANALYTICS_URL; },
     getAdminGasUrl: function() { return ADMIN_GAS_URL; },
+
+    // IndexedDB helpers
+    idbPut,
+    idbGet,
+    idbGetAll,
 
     // Service Worker & Version Check
     registerSW,
@@ -1103,7 +1234,25 @@ var IVDrugRef = (function() {
 (function(){
   try{
     var raw=localStorage.getItem('drugData_v4');
-    if(!raw)return;
+
+    // If localStorage is empty, try restoring from IndexedDB backup
+    if(!raw){
+      IVDrugRef.idbGet('drugDataBackup','main').then(function(backup){
+        if(backup&&backup.drugs&&backup.drugs.length>0){
+          try{
+            localStorage.setItem('drugData_v4',JSON.stringify(backup.drugs));
+            localStorage.setItem('iv_drugref_last_sync',String(backup.timestamp||Date.now()));
+            console.log('[Core] Restored '+backup.drugs.length+' drugs from IndexedDB backup');
+            // Reload to let index.js pick up the restored data
+            if(typeof DRUGS==='undefined'||!window.DRUGS||window.DRUGS.length===0){
+              window.location.reload();
+            }
+          }catch(e){}
+        }
+      });
+      return;
+    }
+
     var drugs=JSON.parse(raw);
     if(!Array.isArray(drugs))return;
     var fixed=false;
@@ -1125,7 +1274,59 @@ var IVDrugRef = (function() {
       });
     });
     if(fixed)localStorage.setItem('drugData_v4',JSON.stringify(drugs));
+
+    // Backup to IndexedDB (fire-and-forget)
+    if(drugs.length>0){
+      localStorage.setItem('iv_drugref_last_sync',String(Date.now()));
+      IVDrugRef.idbPut('drugDataBackup',{id:'main',drugs:drugs,timestamp:Date.now()});
+    }
   }catch(e){}
+})();
+
+// ============================================================
+// OFFLINE BANNER — Persistent indicator across all pages
+// ============================================================
+(function(){
+  function formatThaiDate(ts){
+    if(!ts)return 'ไม่ทราบ';
+    var d=new Date(Number(ts));
+    if(isNaN(d.getTime()))return 'ไม่ทราบ';
+    var day=String(d.getDate()).padStart(2,'0');
+    var month=String(d.getMonth()+1).padStart(2,'0');
+    var year=d.getFullYear()+543; // Buddhist Era
+    var hour=String(d.getHours()).padStart(2,'0');
+    var min=String(d.getMinutes()).padStart(2,'0');
+    return day+'/'+month+'/'+year+' '+hour+':'+min;
+  }
+
+  var banner=document.createElement('div');
+  banner.id='offline-banner';
+  banner.className='offline-banner';
+  banner.setAttribute('role','status');
+  banner.setAttribute('aria-live','polite');
+  document.body.appendChild(banner);
+
+  function showBanner(){
+    var lastSync=localStorage.getItem('iv_drugref_last_sync');
+    banner.textContent='\u26A0 \u0E2D\u0E2D\u0E1F\u0E44\u0E25\u0E19\u0E4C\u0E42\u0E2B\u0E21\u0E14 \u2014 \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E25\u0E48\u0E32\u0E2A\u0E38\u0E14\u0E40\u0E21\u0E37\u0E48\u0E2D '+formatThaiDate(lastSync);
+    banner.classList.add('visible');
+    document.body.classList.add('has-offline-banner');
+  }
+
+  function hideBanner(){
+    banner.classList.remove('visible');
+    document.body.classList.remove('has-offline-banner');
+    // Flush queued analytics after coming back online
+    setTimeout(function(){
+      if(IVDrugRef.flushAnalyticsQueue)IVDrugRef.flushAnalyticsQueue();
+    },2000);
+  }
+
+  window.addEventListener('online',hideBanner);
+  window.addEventListener('offline',showBanner);
+
+  // Check initial state
+  if(!navigator.onLine)showBanner();
 })();
 
 // ============================================================

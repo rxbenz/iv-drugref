@@ -1042,7 +1042,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.7.4';
+  const VERSION = '5.7.5';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -1422,6 +1422,75 @@ var IVDrugRef = (function() {
   // Check initial state
   if(!navigator.onLine)showBanner();
 })();
+
+// ============================================================
+// GLOBAL ESC KEY — Close topmost modal/sheet/overlay
+// ============================================================
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
+
+  // Skip if user is in a contenteditable or input that handles Escape itself
+  var tag = (document.activeElement || {}).tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+    document.activeElement.blur();
+    return;
+  }
+
+  // --- index.html modals (highest z-index first) ---
+
+  // Quick Actions panel/FAB (z:1001/350) — handled by quick-actions.js already
+
+  // Filter sheet (z:1000)
+  var filterSheet = document.getElementById('filterSheet');
+  if (filterSheet && filterSheet.classList.contains('open')) {
+    if (typeof closeFilterSheet === 'function') closeFilterSheet();
+    return;
+  }
+
+  // NPS survey bottom sheet (dynamically injected)
+  var npsSheet = document.getElementById('npsSheet');
+  if (npsSheet && npsSheet.classList.contains('open')) {
+    if (typeof dismissNPS === 'function') dismissNPS();
+    return;
+  }
+
+  // Urgent alert modal (dynamically created, removed on close)
+  var urgentModal = document.getElementById('urgentModal');
+  if (urgentModal) {
+    if (typeof closeUrgentModal === 'function') closeUrgentModal();
+    return;
+  }
+
+  // Expanded drug card (toggleCard takes drug ID)
+  var expandedCard = document.querySelector('[data-drug-id].expanded');
+  if (expandedCard) {
+    var drugId = parseInt(expandedCard.getAttribute('data-drug-id'));
+    if (drugId && typeof toggleCard === 'function') toggleCard(drugId);
+    return;
+  }
+
+  // --- admin.html modals (z:500) ---
+  var diffModal = document.getElementById('diff-modal');
+  if (diffModal && diffModal.classList.contains('open')) {
+    if (typeof closeDiffModal === 'function') closeDiffModal();
+    return;
+  }
+  var drugModal = document.getElementById('drug-modal');
+  if (drugModal && drugModal.classList.contains('open')) {
+    if (typeof closeDrugModal === 'function') closeDrugModal();
+    return;
+  }
+  var compatModal = document.getElementById('compat-modal');
+  if (compatModal && compatModal.classList.contains('open')) {
+    if (typeof closeCompatModal === 'function') closeCompatModal();
+    return;
+  }
+  var renalModal = document.getElementById('renal-modal');
+  if (renalModal && renalModal.classList.contains('open')) {
+    if (typeof closeRenalModal === 'function') closeRenalModal();
+    return;
+  }
+});
 
 // ============================================================
 // AUTO-INITIALIZATION

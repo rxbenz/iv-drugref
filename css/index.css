@@ -1022,6 +1022,25 @@
   }
 }
 
+/* ---- Tablet breakpoint (768px–900px) ---- */
+@media (min-width: 768px) {
+  #drugList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  #drugList .drug-card {
+    margin-bottom: 0;
+  }
+  /* Expanded card spans both columns */
+  #drugList .drug-card.expanded {
+    grid-column: 1 / -1;
+  }
+  .filter-sheet-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
 /* Safe area support for notched devices */
 @supports (padding: env(safe-area-inset-bottom)) {
   .header {

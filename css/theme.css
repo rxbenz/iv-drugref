@@ -1,0 +1,351 @@
+/* ============================================================
+   IV DrugRef PWA v5.0 — Unified Theme
+   Single file with light (default) + dark (override) variables.
+   Respects prefers-color-scheme when no explicit preference set.
+   ============================================================ */
+
+/* ---- Light Theme (default) ---- */
+:root {
+  /* Standardized names */
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #e2e8f0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-input: #ffffff;
+  --border: #e2e8f0;
+  --border-focus: #0ea5e9;
+  --border-glow: rgba(14,165,233,0.15);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --accent-blue: #0ea5e9;
+  --accent-cyan: #0891b2;
+  --accent-emerald: #059669;
+  --accent-green: #059669;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
+  --accent-pink: #db2777;
+  --accent-purple: #7c3aed;
+  --accent-teal: #0d9488;
+  --had-bg: rgba(220,38,38,0.04);
+  --had-border: rgba(220,38,38,0.2);
+  --had-glow: rgba(220,38,38,0.08);
+  --tag-bg: rgba(14,165,233,0.06);
+  --tag-border: rgba(14,165,233,0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-xs: 6px;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-glow: 0 0 0 3px rgba(14,165,233,0.08);
+
+  /* Legacy names (mapped to light values for compat with tdm.css etc.) */
+  --bg: #f0f4f8;
+  --bg2: #e2e8f0;
+  --bg3: #cbd5e1;
+  --bg4: #94a3b8;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
+  --card-hover: #f8fafc;
+  --text: #1e293b;
+  --text2: #64748b;
+  --text3: #94a3b8;
+  --text4: #cbd5e1;
+  --blue: #0ea5e9;
+  --blue-dim: rgba(14,165,233,0.10);
+  --blue-glow: rgba(14,165,233,0.20);
+  --green: #059669;
+  --green-dim: rgba(5,150,105,0.10);
+  --amber: #d97706;
+  --amber-dim: rgba(217,119,6,0.10);
+  --red: #dc2626;
+  --red-dim: rgba(220,38,38,0.10);
+  --purple: #7c3aed;
+  --purple-dim: rgba(124,58,237,0.10);
+  --cyan: #0891b2;
+  --cyan-dim: rgba(8,145,178,0.10);
+  --teal: #0d9488;
+  --teal-dim: rgba(13,148,136,0.10);
+  --pink: #db2777;
+  --pink-dim: rgba(219,39,119,0.10);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+  --radius: 12px;
+
+  /* Theme-specific tokens (used in body/header styles below) */
+  --body-pattern-image: radial-gradient(circle, #cbd5e1 0.5px, transparent 0.5px);
+  --body-pattern-size: 24px 24px;
+  --body-pattern-opacity: 0.3;
+  --header-bg: rgba(255,255,255,0.85);
+  --header-border: var(--border);
+  --header-simple-bg: #fff;
+}
+
+/* ---- Dark Theme Override ---- */
+[data-theme="dark"] {
+  /* Standardized names */
+  --bg-primary: #0b1120;
+  --bg-secondary: #131c31;
+  --bg-card: #151e30;
+  --bg-card-hover: #1a2740;
+  --bg-input: #131c31;
+  --border: #1e3050;
+  --border-focus: #7dd3fc;
+  --border-glow: rgba(125,211,252,0.25);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #7dd3fc;
+  --accent-cyan: #22d3ee;
+  --accent-emerald: #34d399;
+  --accent-green: #4ade80;
+  --accent-amber: #fbbf24;
+  --accent-red: #f87171;
+  --accent-pink: #f472b6;
+  --accent-purple: #a78bfa;
+  --accent-teal: #2dd4bf;
+  --had-bg: rgba(248,113,113,0.06);
+  --had-border: rgba(248,113,113,0.2);
+  --had-glow: rgba(248,113,113,0.10);
+  --tag-bg: rgba(125,211,252,0.08);
+  --tag-border: rgba(125,211,252,0.18);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 0 3px rgba(125,211,252,0.12);
+
+  /* Legacy names */
+  --bg: #0b1120;
+  --bg2: #131c31;
+  --bg3: #1e293b;
+  --bg4: #334155;
+  --card: #151e30;
+  --card-border: #1e3050;
+  --card-hover: #1a2740;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --text4: #475569;
+  --blue: #7dd3fc;
+  --blue-dim: rgba(125,211,252,0.10);
+  --blue-glow: rgba(125,211,252,0.20);
+  --green: #4ade80;
+  --green-dim: rgba(74,222,128,0.10);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.10);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.10);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.10);
+  --cyan: #22d3ee;
+  --cyan-dim: rgba(34,211,238,0.10);
+  --teal: #2dd4bf;
+  --teal-dim: rgba(45,212,191,0.10);
+  --pink: #f472b6;
+  --pink-dim: rgba(244,114,182,0.10);
+
+  /* Theme-specific tokens */
+  --body-pattern-image:
+    linear-gradient(rgba(125,211,252,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125,211,252,0.015) 1px, transparent 1px);
+  --body-pattern-size: 40px 40px;
+  --body-pattern-opacity: 1;
+  --header-bg: rgba(19,28,49,0.85);
+  --header-border: var(--card-border);
+  --header-simple-bg: #131c31;
+}
+
+/* ---- Auto-detect (no explicit preference stored) ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --bg-primary: #0b1120;
+    --bg-secondary: #131c31;
+    --bg-card: #151e30;
+    --bg-card-hover: #1a2740;
+    --bg-input: #131c31;
+    --border: #1e3050;
+    --border-focus: #7dd3fc;
+    --border-glow: rgba(125,211,252,0.25);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #7dd3fc;
+    --accent-cyan: #22d3ee;
+    --accent-emerald: #34d399;
+    --accent-green: #4ade80;
+    --accent-amber: #fbbf24;
+    --accent-red: #f87171;
+    --accent-pink: #f472b6;
+    --accent-purple: #a78bfa;
+    --accent-teal: #2dd4bf;
+    --had-bg: rgba(248,113,113,0.06);
+    --had-border: rgba(248,113,113,0.2);
+    --had-glow: rgba(248,113,113,0.10);
+    --tag-bg: rgba(125,211,252,0.08);
+    --tag-border: rgba(125,211,252,0.18);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 0 3px rgba(125,211,252,0.12);
+
+    --bg: #0b1120;
+    --bg2: #131c31;
+    --bg3: #1e293b;
+    --bg4: #334155;
+    --card: #151e30;
+    --card-border: #1e3050;
+    --card-hover: #1a2740;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --text4: #475569;
+    --blue: #7dd3fc;
+    --blue-dim: rgba(125,211,252,0.10);
+    --blue-glow: rgba(125,211,252,0.20);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.10);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251,191,36,0.10);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.10);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.10);
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34,211,238,0.10);
+    --teal: #2dd4bf;
+    --teal-dim: rgba(45,212,191,0.10);
+    --pink: #f472b6;
+    --pink-dim: rgba(244,114,182,0.10);
+
+    --body-pattern-image:
+      linear-gradient(rgba(125,211,252,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(125,211,252,0.015) 1px, transparent 1px);
+    --body-pattern-size: 40px 40px;
+    --body-pattern-opacity: 1;
+    --header-bg: rgba(19,28,49,0.85);
+    --header-border: #1e3050;
+    --header-simple-bg: #131c31;
+  }
+}
+
+/* ---- Body ---- */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--sans);
+}
+
+/* Subtle pattern overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: var(--body-pattern-image);
+  background-size: var(--body-pattern-size);
+  opacity: var(--body-pattern-opacity);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Header ---- */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--header-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--header-border);
+}
+.header-inner {
+  max-width: 900px; margin: 0 auto; padding: 14px 20px;
+  position: relative;
+}
+
+/* Simple header (calculator, renal-dosing) */
+.header-simple {
+  background: var(--header-simple-bg); border-bottom: 1px solid var(--border); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100;
+}
+.header-simple a { color: var(--accent-blue); text-decoration: none; font-size: 14px; font-weight: 500; }
+.header-simple h1 { font-size: 16px; font-weight: 600; flex: 1; }
+
+/* ---- Header link pills ---- */
+.header-pill {
+  font-size: 11px; font-weight: 600; color: #7dd3fc; background: #1e293b;
+  border: 1.5px solid #7dd3fc; padding: 5px 12px; border-radius: 20px;
+  text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+  transition: all .2s;
+}
+.header-pill:hover { background: #334155; box-shadow: 0 0 12px rgba(125,211,252,0.2); }
+
+/* ---- Dark Card (used by TDM, compatibility, dashboard) ---- */
+[data-theme="dark"] .card,
+.card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.card-head {
+  padding: 10px 16px; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.5px; color: var(--text2);
+  border-bottom: 1px solid var(--card-border);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-body { padding: 14px 16px; }
+
+/* ---- Dark form fields ---- */
+.dark-field input, .dark-field select {
+  background: var(--bg2); border: 1px solid var(--card-border);
+  color: var(--text); border-radius: var(--radius-sm);
+  padding: 10px 12px; font-size: 14px; font-family: var(--mono);
+  width: 100%; outline: none; transition: border-color 0.2s;
+}
+.dark-field input:focus, .dark-field select:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-dim);
+}
+.dark-field label {
+  font-size: 11px; color: var(--text3); display: block;
+  margin-bottom: 4px; font-weight: 500;
+}
+
+/* ---- Progress bar ---- */
+.progress { background: var(--bg3); border-radius: 4px; height: 6px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+/* ---- Dark info boxes (theme-specific) ---- */
+[data-theme="dark"] .info-box { border-radius: 8px; padding: 8px 12px; font-size: 11px; line-height: 1.6; margin-top: 6px; }
+[data-theme="dark"] .info-box.green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+[data-theme="dark"] .info-box.amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
+[data-theme="dark"] .info-box.red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+[data-theme="dark"] .info-box.blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(125,211,252,0.2); }
+
+/* ---- Theme Toggle Button ---- */
+.theme-toggle {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  z-index: 10;
+  padding: 0;
+}
+.theme-toggle:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Auto-detect dark theme for toggle when no explicit data-theme */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .theme-toggle {
+    background: var(--bg-card);
+    border-color: var(--border);
+  }
+}

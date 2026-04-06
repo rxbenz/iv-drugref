@@ -44,14 +44,14 @@ const PROD_MODE = process.argv.includes('--prod');
 
 // Pages and their CSS/JS dependencies (order matters)
 const PAGES = {
-  'index.html':        { css: ['shared.css','theme-light.css','index.css'],       js: ['error-tracker.js','core.js','index.js'] },
-  'calculator.html':   { css: ['shared.css','theme-light.css','calculator.css'],  js: ['error-tracker.js','core.js','share-export.js','calculator.js'] },
-  'renal-dosing.html': { css: ['shared.css','theme-light.css','renal-dosing.css'],js: ['error-tracker.js','core.js','renal-dosing.js'] },
-  'compatibility.html':{ css: ['shared.css','theme-dark.css','compatibility.css'],js: ['error-tracker.js','core.js','compatibility.js'] },
-  'admin.html':        { css: ['shared.css','theme-light.css','admin.css'],       js: ['error-tracker.js','core.js','admin.js'] },
-  'tdm.html':          { css: ['shared.css','theme-dark.css','tdm.css'],          js: ['error-tracker.js','core.js','share-export.js','tdm.js'] },
-  'vanco-tdm.html':    { css: ['shared.css','theme-dark.css','vanco-tdm.css'],    js: ['error-tracker.js','core.js','share-export.js','vanco-tdm.js'] },
-  'dashboard.html':    { css: ['shared.css','theme-dark.css','dashboard.css'],    js: ['error-tracker.js','core.js','dashboard.js'] },
+  'index.html':        { css: ['shared.css','theme.css','index.css'],       js: ['error-tracker.js','core.js','index.js'] },
+  'calculator.html':   { css: ['shared.css','theme.css','calculator.css'],  js: ['error-tracker.js','core.js','share-export.js','calculator.js'] },
+  'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css'],js: ['error-tracker.js','core.js','renal-dosing.js'] },
+  'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css'],js: ['error-tracker.js','core.js','compatibility.js'] },
+  'admin.html':        { css: ['shared.css','theme.css','admin.css'],       js: ['error-tracker.js','core.js','admin.js'] },
+  'tdm.html':          { css: ['shared.css','theme.css','tdm.css'],          js: ['error-tracker.js','core.js','share-export.js','tdm.js'] },
+  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css'],    js: ['error-tracker.js','core.js','share-export.js','vanco-tdm.js'] },
+  'dashboard.html':    { css: ['shared.css','theme.css','dashboard.css'],    js: ['error-tracker.js','core.js','dashboard.js'] },
 };
 
 // Static files to copy to dist

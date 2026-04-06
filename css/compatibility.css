@@ -6,7 +6,7 @@
  ============================================================ */
 
 /* Compat result color variables (dark theme) */
-.theme-dark {
+[data-theme="dark"] {
   --green-bg: rgba(74, 222, 128, 0.08);
   --green-border: rgba(74, 222, 128, 0.25);
   --red-bg: rgba(248, 113, 113, 0.08);
@@ -78,7 +78,7 @@
 }
 
 /* Dark disclaimer override */
-.theme-dark .disclaimer {
+[data-theme="dark"] .disclaimer {
   background: var(--red-bg);
   color: var(--red);
   border: 1px solid var(--red-border);

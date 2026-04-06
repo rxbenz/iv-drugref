@@ -1399,12 +1399,12 @@
 }
 
 /* Dark theme adjustments */
-.theme-dark .drug-chip:hover {
+[data-theme="dark"] .drug-chip:hover {
   background: rgba(14, 165, 233, 0.1);
 }
-.theme-dark .qa-action:hover {
+[data-theme="dark"] .qa-action:hover {
   background: rgba(239, 68, 68, 0.1);
 }
-.theme-dark .drug-chip.chip-had {
+[data-theme="dark"] .drug-chip.chip-had {
   background: rgba(251, 191, 36, 0.1);
 }

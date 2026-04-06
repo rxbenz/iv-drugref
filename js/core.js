@@ -1224,8 +1224,107 @@ var IVDrugRef = (function() {
       thaiFDA: 'https://pertento.fda.moph.go.th/FDA_SEARCH_DRUG/SEARCH_DRUG/FRM_SEARCH_DRUG.aspx',
       nlem: 'https://nlem.hss.moph.go.th/',
       kdigo: 'https://kdigo.org/guidelines/ckd-evaluation-and-management/'
-    }
+    },
+
+    // Theme
+    toggleTheme: null // set by ThemeManager below
   };
+})();
+
+// ============================================================
+// THEME MANAGER — Unified dark/light toggle, persists to localStorage
+// ============================================================
+(function(){
+  var STORAGE_KEY = 'ivdrug_theme';
+  var ICONS = { light: '\u2600\uFE0F', dark: '\uD83C\uDF19', auto: '\uD83D\uDDA5\uFE0F' };
+  var LABELS = { light: '\u0E2A\u0E27\u0E48\u0E32\u0E07', dark: '\u0E21\u0E37\u0E14', auto: '\u0E15\u0E32\u0E21\u0E23\u0E30\u0E1A\u0E1A' };
+  var CYCLE = ['auto','light','dark'];
+
+  function getStored() {
+    try { return localStorage.getItem(STORAGE_KEY); } catch(e) { return null; }
+  }
+
+  function getEffective(pref) {
+    if (pref === 'light' || pref === 'dark') return pref;
+    // auto: follow OS
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function apply(pref) {
+    var effective = getEffective(pref);
+    var root = document.documentElement;
+    if (pref === 'light' || pref === 'dark') {
+      root.setAttribute('data-theme', pref);
+    } else {
+      // auto mode — remove attribute so CSS media query kicks in
+      root.removeAttribute('data-theme');
+    }
+    // Update meta theme-color for PWA status bar
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = effective === 'dark' ? '#0f172a' : '#ffffff';
+    // Update toggle button if exists
+    updateButton(pref);
+  }
+
+  function updateButton(pref) {
+    var btn = document.getElementById('themeToggleBtn');
+    if (!btn) return;
+    var effective = getEffective(pref);
+    // Show: sun when dark (click to go light), moon when light (click to go dark), monitor when auto
+    btn.textContent = pref === 'auto' ? ICONS.auto : (effective === 'dark' ? ICONS.light : ICONS.dark);
+    btn.title = '\u0E18\u0E35\u0E21: ' + LABELS[pref || 'auto'];
+  }
+
+  function toggle() {
+    var current = getStored() || 'auto';
+    var idx = CYCLE.indexOf(current);
+    var next = CYCLE[(idx + 1) % CYCLE.length];
+    try { localStorage.setItem(STORAGE_KEY, next); } catch(e) {}
+    apply(next);
+    return next;
+  }
+
+  function injectButton() {
+    // Try header-inner first, then header, then header-simple
+    var container = document.querySelector('.header-inner') || document.querySelector('.header') || document.querySelector('.header-simple');
+    if (!container) return;
+    var btn = document.createElement('button');
+    btn.id = 'themeToggleBtn';
+    btn.className = 'theme-toggle';
+    btn.setAttribute('aria-label', '\u0E2A\u0E25\u0E31\u0E1A\u0E18\u0E35\u0E21');
+    btn.setAttribute('data-action', 'toggleTheme');
+    container.style.position = 'relative';
+    container.appendChild(btn);
+    updateButton(getStored() || 'auto');
+  }
+
+  // Initialize immediately (before DOMContentLoaded) to prevent flash
+  apply(getStored() || 'auto');
+
+  // Listen for OS theme changes (auto mode)
+  try {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+      var pref = getStored() || 'auto';
+      if (pref === 'auto') apply('auto');
+    });
+  } catch(e) {}
+
+  // Inject toggle button when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectButton);
+  } else {
+    injectButton();
+  }
+
+  // Wire up delegate action
+  IVDrugRef.toggleTheme = toggle;
+
+  // Also support data-action="toggleTheme" via delegate if available
+  if (IVDrugRef.delegate) {
+    document.addEventListener('DOMContentLoaded', function() {
+      IVDrugRef.delegate(document.body, { toggleTheme: toggle });
+    });
+  }
 })();
 
 // ============================================================

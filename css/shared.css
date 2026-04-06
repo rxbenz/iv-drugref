@@ -78,13 +78,22 @@ body {
 .bottom-nav a.nav-active { color: #0ea5e9; font-weight: 600; }
 
 /* ---- Dark theme bottom nav override ---- */
-.theme-dark .bottom-nav {
+[data-theme="dark"] .bottom-nav {
   background: rgba(11,17,32,0.92);
   border-top-color: #1e3050;
 }
-.theme-dark .bottom-nav a { color: #64748b; }
-.theme-dark .bottom-nav a:hover { color: #7dd3fc; }
-.theme-dark .bottom-nav a.nav-active { color: #7dd3fc; }
+[data-theme="dark"] .bottom-nav a { color: #64748b; }
+[data-theme="dark"] .bottom-nav a:hover { color: #7dd3fc; }
+[data-theme="dark"] .bottom-nav a.nav-active { color: #7dd3fc; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .bottom-nav {
+    background: rgba(11,17,32,0.92);
+    border-top-color: #1e3050;
+  }
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .bottom-nav a { color: #64748b; }
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .bottom-nav a:hover { color: #7dd3fc; }
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .bottom-nav a.nav-active { color: #7dd3fc; }
+}
 
 /* ---- Common nav back button ---- */
 .nav-back {
@@ -145,8 +154,11 @@ div.header .cross-link.calc-link:hover {
   color: var(--text-muted, #94a3b8);
   opacity: 0.8;
 }
-.theme-dark .app-footer {
+[data-theme="dark"] .app-footer {
   color: var(--text3, #64748b);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .app-footer { color: var(--text3, #64748b); }
 }
 
 /* ---- Common form field styles ---- */
@@ -241,17 +253,20 @@ div.header .cross-link.calc-link:hover {
   font-size: 10px;
 }
 
-/* Light theme button overrides */
-.theme-light .btn {
+/* Light theme button defaults (applied unless dark) */
+:root:not([data-theme="dark"]) .btn {
   background: rgba(0, 0, 0, 0.04);
   color: var(--text-secondary, #64748b);
   border-color: var(--border, #e2e8f0);
 }
 
-.theme-light .btn:hover {
+:root:not([data-theme="dark"]) .btn:hover {
   background: rgba(0, 0, 0, 0.08);
   color: var(--text-primary, #1e293b);
 }
+
+/* Dark override via prefers-color-scheme for auto detection is not needed here
+   because the dark .btn defaults in the base rule above already use CSS vars */
 
 /* ---- Input Validation States ---- */
 .field input, .field select {
@@ -289,18 +304,18 @@ div.header .cross-link.calc-link:hover {
 }
 
 /* Dark theme input overrides */
-.theme-dark .field input.input-error {
+[data-theme="dark"] .field input.input-error {
   border-color: #f87171 !important;
   background: linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.06) 100%);
   box-shadow: 0 0 0 3px rgba(248,113,113,0.12), 0 1px 3px rgba(248,113,113,0.08);
 }
-.theme-dark .field input.input-warn {
+[data-theme="dark"] .field input.input-warn {
   border-color: #fbbf24 !important;
   background: linear-gradient(135deg, rgba(245,158,11,0.10) 0%, rgba(245,158,11,0.04) 100%);
   box-shadow: 0 0 0 3px rgba(251,191,36,0.10), 0 1px 3px rgba(251,191,36,0.06);
 }
-.theme-dark .field:has(input.input-error) label { color: #fca5a5; }
-.theme-dark .field:has(input.input-warn) label { color: #fde68a; }
+[data-theme="dark"] .field:has(input.input-error) label { color: #fca5a5; }
+[data-theme="dark"] .field:has(input.input-warn) label { color: #fde68a; }
 
 /* ---- Validation Message Container ---- */
 .validation-container {
@@ -364,23 +379,23 @@ div.header .cross-link.calc-link:hover {
 }
 
 /* Dark theme message overrides */
-.theme-dark .validation-error {
+[data-theme="dark"] .validation-error {
   background: linear-gradient(135deg, rgba(239,68,68,0.14) 0%, rgba(239,68,68,0.08) 100%);
   color: #fca5a5;
   border-color: rgba(248,113,113,0.20);
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
-.theme-dark .validation-error .v-icon {
+[data-theme="dark"] .validation-error .v-icon {
   background: rgba(239,68,68,0.25);
   color: #fca5a5;
 }
-.theme-dark .validation-warn {
+[data-theme="dark"] .validation-warn {
   background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%);
   color: #fde68a;
   border-color: rgba(251,191,36,0.18);
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
-.theme-dark .validation-warn .v-icon {
+[data-theme="dark"] .validation-warn .v-icon {
   background: rgba(245,158,11,0.20);
   color: #fde68a;
 }
@@ -448,20 +463,20 @@ div.header .cross-link.calc-link:hover {
 .ctx-add { font-weight: 700; font-size: 13px; }
 
 /* Dark theme overrides */
-.theme-dark .patient-ctx-bar {
+[data-theme="dark"] .patient-ctx-bar {
   background: var(--bg-card, #1e293b);
   border-color: var(--border, #334155);
 }
-.theme-dark .ctx-chip {
+[data-theme="dark"] .ctx-chip {
   border-color: var(--border, #334155);
   color: var(--text-secondary, #94a3b8);
 }
-.theme-dark .ctx-chip.active {
+[data-theme="dark"] .ctx-chip.active {
   background: rgba(6,182,212,0.15);
   border-color: var(--accent-cyan, #06b6d4);
   color: var(--text-primary, #f1f5f9);
 }
-.theme-dark .ctx-btn {
+[data-theme="dark"] .ctx-btn {
   border-color: var(--border, #334155);
   color: var(--text-secondary, #94a3b8);
 }
@@ -573,31 +588,31 @@ div.header .cross-link.calc-link:hover {
 }
 
 /* CDS dark theme */
-.theme-dark .cds-alert.danger {
+[data-theme="dark"] .cds-alert.danger {
   background: linear-gradient(135deg, rgba(239,68,68,0.14) 0%, rgba(239,68,68,0.08) 100%);
   color: #fca5a5;
   border-color: rgba(248,113,113,0.20);
 }
-.theme-dark .cds-alert.warning {
+[data-theme="dark"] .cds-alert.warning {
   background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%);
   color: #fde68a;
   border-color: rgba(251,191,36,0.18);
 }
-.theme-dark .cds-alert.suggest {
+[data-theme="dark"] .cds-alert.suggest {
   background: linear-gradient(135deg, rgba(14,165,233,0.12) 0%, rgba(14,165,233,0.06) 100%);
   color: #93c5fd;
   border-color: rgba(125,211,252,0.18);
 }
-.theme-dark .cds-alt-chip {
+[data-theme="dark"] .cds-alt-chip {
   background: rgba(5,150,105,0.15);
   border-color: rgba(52,211,153,0.25);
   color: #6ee7b7;
 }
-.theme-dark .drug-item.cds-contraindicated {
+[data-theme="dark"] .drug-item.cds-contraindicated {
   border-left-color: #f87171;
   background: rgba(239,68,68,0.08);
 }
-.theme-dark .drug-item.cds-contraindicated .drug-item-name {
+[data-theme="dark"] .drug-item.cds-contraindicated .drug-item-name {
   color: #fca5a5;
 }
 

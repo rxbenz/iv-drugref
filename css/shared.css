@@ -40,7 +40,7 @@ textarea:focus-visible {
 
 /* ---- Typography ---- */
 body {
-  font-family: 'IBM Plex Sans Thai', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;

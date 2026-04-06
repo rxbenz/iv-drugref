@@ -38,7 +38,7 @@
   --radius-xl: 24px;
   --radius-xs: 6px;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+  --font-sans: 'IBM Plex Sans Thai', sans-serif;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
@@ -74,7 +74,7 @@
   --pink: #db2777;
   --pink-dim: rgba(219,39,119,0.10);
   --mono: 'JetBrains Mono', monospace;
-  --sans: 'DM Sans', 'IBM Plex Sans Thai', sans-serif;
+  --sans: 'IBM Plex Sans Thai', sans-serif;
   --radius: 12px;
 
   /* Theme-specific tokens (used in body/header styles below) */

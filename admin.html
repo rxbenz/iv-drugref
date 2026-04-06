@@ -246,11 +246,17 @@
         <pre id="test-result" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px;font-family:var(--mono);white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
 
         <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
-        <h3 style="margin-bottom:12px">📦 Sync drugs-data.json</h3>
+        <h3 style="margin-bottom:12px">📦 Publish to GitHub</h3>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
           อัพเดทไฟล์ drugs-data.json (local fallback) ให้ตรงกับข้อมูลใน Google Sheets<br>
-          ถ้าไม่ sync — user ที่ offline หรือเข้าครั้งแรกจะเห็นข้อมูลเก่า
+          ถ้าไม่ publish — user ที่ offline หรือเข้าครั้งแรกจะเห็นข้อมูลเก่า
         </p>
+
+        <!-- Publish Status Banner -->
+        <div id="publish-status" style="margin-bottom:16px;padding:12px 16px;border-radius:var(--radius);font-size:13px;display:none">
+          <!-- Populated by checkSyncStatus() -->
+        </div>
+
         <div class="form-group" style="margin-bottom:16px">
           <label class="form-label">GitHub Personal Access Token</label>
           <input type="password" class="form-input" id="settings-gh-token"
@@ -264,7 +270,7 @@
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-outline" data-action="exportDrugsJSON">📥 Export JSON</button>
-          <button class="btn btn-primary" data-action="syncToGitHub">🔄 Sync to GitHub</button>
+          <button class="btn btn-primary" data-action="publishChanges" id="btn-publish">🚀 Publish Changes</button>
         </div>
         <div id="sync-result" style="display:none;margin-top:12px;padding:10px;border-radius:var(--radius);font-size:12px"></div>
       </div>

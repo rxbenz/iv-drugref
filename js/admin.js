@@ -351,6 +351,7 @@ async function loadDrugs() {
     renderDrugTable();
     updatePendingCount();
     applyRoleUI(); // ซ่อน/แสดง UI ตาม role
+    checkSyncStatus();
   } catch (e) {
     console.error(e);
     if (e.message && e.message.includes('ไม่มีสิทธิ์')) {
@@ -368,6 +369,7 @@ async function loadDrugs() {
       renderStats();
       renderDrugTable();
       applyRoleUI();
+      checkSyncStatus();
       toast('โหลดจาก cache — ไม่สามารถเชื่อมต่อ server', 'info');
     } else {
       toast('ไม่มีข้อมูลยา — กรุณาเชื่อมต่อ internet', 'error');
@@ -738,6 +740,7 @@ async function saveDrugAndApprove() {
 
     // Step 2: Approve
     await apiCall('approveDrug', { id: drugId, approver: state.user?.email });
+    logSyncChange('approve', data.generic);
     toast(`✅ ${data.generic} — บันทึกและอนุมัติแล้ว (pending → approved)`, 'success');
     closeDrugModal();
     await loadDrugs();
@@ -755,6 +758,7 @@ async function deleteDrug(id) {
   showLoading('กำลังลบ...');
   try {
     await apiCall('deleteDrug', { id });
+    logSyncChange('delete', drug?.generic || 'ID:' + id);
     toast(`ลบ ${drug?.generic} แล้ว`, 'success');
     await loadDrugs();
   } catch (e) {
@@ -774,6 +778,7 @@ async function approveDrug(id) {
   showLoading('กำลังอนุมัติ...');
   try {
     await apiCall('approveDrug', { id, approver: state.user?.email });
+    logSyncChange('approve', drug?.generic || 'ID:' + id);
     toast(`✅ อนุมัติ ${drug?.generic} แล้ว — จะปรากฏใน app หลัก`, 'success');
     await loadDrugs();
   } catch (e) {
@@ -787,6 +792,8 @@ async function rejectDrug(id, reason) {
   showLoading('กำลังส่งกลับ...');
   try {
     await apiCall('rejectDrug', { id, reason, reviewer: state.user?.email });
+    var rejectedDrug = state.drugs.find(function(d) { return d.id === id; });
+    logSyncChange('reject', rejectedDrug?.generic || 'ID:' + id);
     toast('ส่งกลับแก้ไขแล้ว', 'info');
     await loadDrugs();
   } catch (e) {
@@ -1437,6 +1444,112 @@ function saveSettings() {
 }
 
 /* ═══════════════════════════════════════════
+   PUBLISH CHANGE LOG & SYNC STATUS
+   ═══════════════════════════════════════════ */
+
+/** Simple string hash for change detection (FNV-1a 32-bit) */
+function hashStr(s) {
+  var h = 0x811c9dc5;
+  for (var i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
+
+/** Push a change entry to the sync change log */
+function logSyncChange(action, generic) {
+  var log = JSON.parse(localStorage.getItem(LS_PREFIX + 'syncChangeLog') || '[]');
+  log.push({ action: action, generic: generic || '', ts: new Date().toISOString() });
+  localStorage.setItem(LS_PREFIX + 'syncChangeLog', JSON.stringify(log));
+  checkSyncStatus();
+}
+
+/** Get the current sync change log */
+function getSyncChangeLog() {
+  return JSON.parse(localStorage.getItem(LS_PREFIX + 'syncChangeLog') || '[]');
+}
+
+/** Clear the sync change log and update sync state */
+function clearSyncState(jsonContent) {
+  localStorage.setItem(LS_PREFIX + 'syncChangeLog', '[]');
+  localStorage.setItem(LS_PREFIX + 'lastSyncHash', hashStr(jsonContent));
+  localStorage.setItem(LS_PREFIX + 'lastSyncTime', new Date().toISOString());
+  checkSyncStatus();
+}
+
+/** Check and display sync status in the publish panel */
+function checkSyncStatus() {
+  var el = document.getElementById('publish-status');
+  var btn = document.getElementById('btn-publish');
+  if (!el) return;
+
+  var log = getSyncChangeLog();
+  var lastTime = localStorage.getItem(LS_PREFIX + 'lastSyncTime');
+  var lastHash = localStorage.getItem(LS_PREFIX + 'lastSyncHash');
+  var approvedCount = state.drugs.filter(function(d) { return d.status === 'approved'; }).length;
+
+  // Also detect hash mismatch (e.g. direct DB edits not tracked by log)
+  var hasHashMismatch = false;
+  if (lastHash && state.drugs.length > 0) {
+    var currentHash = hashStr(buildDrugsDataJSON());
+    hasHashMismatch = currentHash !== lastHash;
+  }
+
+  var hasChanges = log.length > 0 || hasHashMismatch;
+
+  if (!hasChanges) {
+    // Up to date
+    el.style.display = 'block';
+    el.style.background = 'rgba(16,185,129,.08)';
+    el.style.border = '1px solid rgba(16,185,129,.2)';
+    el.style.color = 'var(--green, #10b981)';
+    var html = '<strong>Up to date</strong> — ไม่มีการเปลี่ยนแปลงที่ยังไม่ publish';
+    if (lastTime) html += '<br><span style="font-size:11px;opacity:.7">Publish ล่าสุด: ' + formatSyncTime(lastTime) + ' (' + approvedCount + ' drugs)</span>';
+    el.innerHTML = html;
+    if (btn) { btn.disabled = true; btn.textContent = '🚀 Publish Changes'; }
+  } else {
+    // Has pending changes
+    el.style.display = 'block';
+    el.style.background = 'rgba(245,158,11,.08)';
+    el.style.border = '1px solid rgba(245,158,11,.25)';
+    el.style.color = 'var(--warning, #f59e0b)';
+    var summary = buildChangeSummary(log, hasHashMismatch);
+    var html = '<strong>มีการเปลี่ยนแปลงที่ยังไม่ publish</strong>';
+    html += '<div style="margin-top:6px;font-size:12px;color:var(--text-secondary)">' + summary + '</div>';
+    html += '<div style="font-size:11px;margin-top:4px;opacity:.7">Approved drugs ปัจจุบัน: ' + approvedCount + '</div>';
+    if (lastTime) html += '<div style="font-size:11px;opacity:.7">Publish ล่าสุด: ' + formatSyncTime(lastTime) + '</div>';
+    el.innerHTML = html;
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Publish Changes (' + (log.length || '!') + ')'; }
+  }
+}
+
+function formatSyncTime(iso) {
+  try {
+    var d = new Date(iso);
+    return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
+      + ' ' + d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return iso; }
+}
+
+function buildChangeSummary(log, hasHashMismatch) {
+  if (log.length === 0 && hasHashMismatch) {
+    return 'ข้อมูลไม่ตรงกับที่ publish ล่าสุด';
+  }
+  var counts = {};
+  var ACTION_LABELS = { approve: 'อนุมัติ', delete: 'ลบ', reject: 'ส่งกลับ', import: 'import', edit: 'แก้ไข' };
+  log.forEach(function(entry) {
+    counts[entry.action] = (counts[entry.action] || 0) + 1;
+  });
+  var parts = [];
+  Object.keys(counts).forEach(function(action) {
+    parts.push((ACTION_LABELS[action] || action) + ' ' + counts[action] + ' รายการ');
+  });
+  if (hasHashMismatch && log.length > 0) parts.push('+ มีการเปลี่ยนแปลงอื่น');
+  return parts.join(' / ');
+}
+
+/* ═══════════════════════════════════════════
    DRUGS-DATA.JSON SYNC
    ═══════════════════════════════════════════ */
 
@@ -1469,19 +1582,56 @@ function exportDrugsJSON() {
   toast('📥 Export drugs-data.json สำเร็จ (' + count + ' รายการ)', 'success');
 }
 
-/** Sync drugs-data.json to GitHub via Contents API */
-async function syncToGitHub() {
+/** Publish drugs-data.json to GitHub via Contents API (semi-auto with confirmation) */
+async function publishChanges() {
   const cfg = getConfig();
   if (!cfg.ghToken) { toast('❌ กรุณาใส่ GitHub Token ในตั้งค่าก่อน', 'error'); return; }
   if (!cfg.ghRepo) { toast('❌ กรุณาใส่ GitHub Repo', 'error'); return; }
   if (state.drugs.length === 0) { toast('ไม่มีข้อมูลยา — โหลดข้อมูลก่อน', 'info'); return; }
+
+  // Build summary for confirmation
+  const log = getSyncChangeLog();
+  const json = buildDrugsDataJSON();
+  const count = JSON.parse(json).length;
+  const lastHash = localStorage.getItem(LS_PREFIX + 'lastSyncHash');
+  const hasHashMismatch = lastHash ? hashStr(json) !== lastHash : true;
+
+  if (!hasHashMismatch && log.length === 0) {
+    toast('ข้อมูลเป็นปัจจุบันแล้ว — ไม่มีอะไรต้อง publish', 'info');
+    return;
+  }
+
+  // Build commit message with change details
+  var commitParts = [];
+  if (log.length > 0) {
+    var counts = {};
+    log.forEach(function(entry) { counts[entry.action] = (counts[entry.action] || 0) + 1; });
+    Object.keys(counts).forEach(function(action) { commitParts.push(action + ' ' + counts[action]); });
+  }
+  var commitDetail = commitParts.length > 0 ? ' — ' + commitParts.join(', ') : '';
+  var commitMsg = 'Publish drugs-data.json (' + count + ' drugs)' + commitDetail;
+
+  // Confirmation dialog
+  var confirmText = 'Publish ' + count + ' approved drugs ไปยัง ' + cfg.ghRepo + '?\n\n';
+  if (log.length > 0) {
+    confirmText += 'การเปลี่ยนแปลง:\n';
+    var ACTION_LABELS = { approve: 'อนุมัติ', delete: 'ลบ', reject: 'ส่งกลับ', import: 'import', edit: 'แก้ไข' };
+    log.forEach(function(entry) {
+      confirmText += '  • ' + (ACTION_LABELS[entry.action] || entry.action) + ': ' + entry.generic + '\n';
+    });
+  } else {
+    confirmText += '(ข้อมูลเปลี่ยนแปลงจากแหล่งอื่น)\n';
+  }
+  confirmText += '\nCommit: ' + commitMsg;
+
+  if (!confirm(confirmText)) return;
 
   const resultEl = document.getElementById('sync-result');
   if (resultEl) {
     resultEl.style.display = 'block';
     resultEl.style.background = 'rgba(14,165,233,.08)';
     resultEl.style.color = 'var(--primary)';
-    resultEl.textContent = '🔄 กำลัง sync...';
+    resultEl.textContent = '🔄 กำลัง publish...';
   }
 
   try {
@@ -1494,14 +1644,12 @@ async function syncToGitHub() {
     const current = getRes.ok ? await getRes.json() : null;
     const sha = current ? current.sha : undefined;
 
-    // 2. Build new content
-    const json = buildDrugsDataJSON();
-    const count = JSON.parse(json).length;
+    // 2. Build content
     const content = btoa(unescape(encodeURIComponent(json)));
 
     // 3. PUT to GitHub
     const body = {
-      message: 'Sync drugs-data.json from admin (' + count + ' drugs)',
+      message: commitMsg,
       content: content,
       branch: 'main'
     };
@@ -1519,19 +1667,23 @@ async function syncToGitHub() {
     }
 
     const result = await putRes.json();
+
+    // Clear change log and update sync state
+    clearSyncState(json);
+
     if (resultEl) {
       resultEl.style.background = 'rgba(16,185,129,.08)';
       resultEl.style.color = 'var(--green, #10b981)';
-      resultEl.textContent = '✅ Sync สำเร็จ! ' + count + ' drugs → ' + cfg.ghRepo + '/main\nCommit: ' + (result.commit ? result.commit.sha.substring(0, 7) : 'ok') + '\nGitHub Pages จะ rebuild ภายใน 1-2 นาที';
+      resultEl.textContent = '✅ Publish สำเร็จ! ' + count + ' drugs → ' + cfg.ghRepo + '/main\nCommit: ' + (result.commit ? result.commit.sha.substring(0, 7) : 'ok') + '\nGitHub Pages จะ rebuild ภายใน 1-2 นาที';
     }
-    toast('✅ Sync to GitHub สำเร็จ (' + count + ' drugs)', 'success');
+    toast('✅ Publish to GitHub สำเร็จ (' + count + ' drugs)', 'success');
   } catch (e) {
     if (resultEl) {
       resultEl.style.background = 'rgba(239,68,68,.08)';
       resultEl.style.color = 'var(--danger, #ef4444)';
-      resultEl.textContent = '❌ Sync failed: ' + e.message;
+      resultEl.textContent = '❌ Publish failed: ' + e.message;
     }
-    toast('❌ Sync failed: ' + e.message, 'error');
+    toast('❌ Publish failed: ' + e.message, 'error');
   }
 }
 
@@ -2816,7 +2968,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSettings: function() { saveSettings(); },
     testConnection: function() { testConnection(); },
     exportDrugsJSON: function() { exportDrugsJSON(); },
-    syncToGitHub: function() { syncToGitHub(); },
+    publishChanges: function() { publishChanges(); },
     closeDrugModal: function() { closeDrugModal(); },
     togglePreview: function(e, t) { togglePreview(t.dataset.preview === 'true'); },
     saveDrug: function(e, t) { saveDrug(t.dataset.status); },

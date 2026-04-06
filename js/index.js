@@ -77,13 +77,29 @@ function incrementSessionCount(){
   return c;
 }
 
+var _npsIdleTimer=null;
 function checkNPS(){
   var count=parseInt(localStorage.getItem('npsSessionCount')||'0');
   var lastResp=parseInt(localStorage.getItem('npsLastResponse')||'0');
   var daysSince=(Date.now()-lastResp)/86400000;
   if(daysSince<90)return;
   var triggers=[5,10,20,40,80,160];
-  if(triggers.indexOf(count)>=0)setTimeout(showNPS,3000);
+  if(triggers.indexOf(count)<0)return;
+  // Wait 30s idle on index page, only show if not searching
+  _npsIdleTimer=setTimeout(function(){
+    var si=document.getElementById('searchInput');
+    if(si&&si.value.trim().length>0)return; // user is searching — skip
+    showNPS();
+  },30000);
+  // Reset timer if user starts searching
+  var si=document.getElementById('searchInput');
+  if(si){
+    var _npsResetIdle=function(){
+      if(_npsIdleTimer){clearTimeout(_npsIdleTimer);_npsIdleTimer=null;}
+    };
+    si.addEventListener('input',_npsResetIdle);
+    si.addEventListener('focus',_npsResetIdle);
+  }
 }
 
 function showNPS(){

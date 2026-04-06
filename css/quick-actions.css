@@ -11,8 +11,9 @@
   z-index: 350;
   display: flex;
   flex-direction: column-reverse;
-  align-items: flex-end;
+  align-items: center;
   gap: 12px;
+  width: 54px; /* match FAB size — prevents layout expansion */
   transition: left 0.25s cubic-bezier(0.32, 0.72, 0, 1),
               top 0.05s linear;
   touch-action: none;
@@ -53,6 +54,9 @@
 
 /* ---- FAB Menu Items ---- */
 .qa-menu {
+  position: absolute;
+  bottom: 66px; /* above FAB (54px + 12px gap) */
+  right: 0;
   display: flex;
   flex-direction: column-reverse;
   align-items: flex-end;
@@ -66,6 +70,12 @@
   pointer-events: auto;
   opacity: 1;
   transform: translateY(0);
+}
+/* When FAB is on left side, menu grows rightward */
+.qa-fab-wrap.qa-left .qa-menu {
+  right: auto;
+  left: 0;
+  align-items: flex-start;
 }
 
 .qa-menu-item {
@@ -88,8 +98,7 @@
   transform: translateX(-4px);
   box-shadow: var(--shadow-lg, 0 8px 24px rgba(0,0,0,0.08));
 }
-/* When FAB is on the left side, menu items grow rightward */
-.qa-fab-wrap.qa-left .qa-menu { align-items: flex-start; }
+/* Left-side hover direction */
 .qa-fab-wrap.qa-left .qa-menu-item:hover { transform: translateX(4px); }
 .qa-menu-item:active { transform: scale(0.97); }
 .qa-menu-item .qa-icon { font-size: 18px; line-height: 1; }

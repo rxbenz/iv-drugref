@@ -1,36 +1,123 @@
-/* Onboarding Tutorial — v5.9.0 */
+/* Onboarding Tutorial — v5.9.1 (multi-page) */
 (function () {
   'use strict';
 
-  var STEPS = [
-    {
-      target: '.search-wrap',
-      title: 'Search',
-      icon: 'magnifying-glass',
-      desc: 'พิมพ์ชื่อยาภาษาอังกฤษเพื่อค้นหา เช่น phenytoin, amiodarone — ระบบจะแสดงผลทันทีแบบ real-time',
-      position: 'below'
-    },
-    {
-      target: '#toolsZone',
-      title: 'Quick Tools & Filter',
-      icon: 'tools',
-      desc: 'เข้าถึงเครื่องมือคำนวณ (Dose Calc, TDM, Renal Dose, Compat) ได้เร็วจากตรงนี้ แล้วกดปุ่ม "ทั้งหมด" ด้านล่างเพื่อกรองหมวดยา',
-      position: 'below'
-    },
-    {
-      target: '.bottom-nav',
-      title: 'Navigation',
-      icon: 'nav',
-      desc: 'แถบด้านล่างใช้สลับระหว่างหน้าต่างๆ ของแอป ลองกดดูแต่ละหน้าได้เลย',
-      position: 'above'
-    }
-  ];
-
-  var ICONS = {
-    'magnifying-glass': '\uD83D\uDD0D',
-    'tools': '\uD83D\uDEE0\uFE0F',
-    'nav': '\uD83E\uDDED'
+  /* ── Per-page step definitions ── */
+  var PAGE_STEPS = {
+    index: [
+      {
+        target: '.search-wrap',
+        title: '\uD83D\uDD0D Search',
+        desc: '\u0E1E\u0E34\u0E21\u0E1E\u0E4C\u0E0A\u0E37\u0E48\u0E2D\u0E22\u0E32\u0E20\u0E32\u0E29\u0E32\u0E2D\u0E31\u0E07\u0E01\u0E24\u0E29\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E04\u0E49\u0E19\u0E2B\u0E32 \u0E40\u0E0A\u0E48\u0E19 phenytoin, amiodarone \u2014 \u0E23\u0E30\u0E1A\u0E1A\u0E08\u0E30\u0E41\u0E2A\u0E14\u0E07\u0E1C\u0E25\u0E17\u0E31\u0E19\u0E17\u0E35\u0E41\u0E1A\u0E1A real-time',
+        position: 'below'
+      },
+      {
+        target: '#toolsZone',
+        title: '\uD83D\uDEE0\uFE0F Quick Tools & Filter',
+        desc: '\u0E40\u0E02\u0E49\u0E32\u0E16\u0E36\u0E07\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E21\u0E37\u0E2D\u0E04\u0E33\u0E19\u0E27\u0E13 (Dose Calc, TDM, Renal Dose, Compat) \u0E44\u0E14\u0E49\u0E40\u0E23\u0E47\u0E27\u0E08\u0E32\u0E01\u0E15\u0E23\u0E07\u0E19\u0E35\u0E49 \u0E41\u0E25\u0E49\u0E27\u0E01\u0E14\u0E1B\u0E38\u0E48\u0E21 "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" \u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E01\u0E23\u0E2D\u0E07\u0E2B\u0E21\u0E27\u0E14\u0E22\u0E32',
+        position: 'below'
+      },
+      {
+        target: '.bottom-nav',
+        title: '\uD83E\uDDED Navigation',
+        desc: '\u0E41\u0E16\u0E1A\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\u0E43\u0E0A\u0E49\u0E2A\u0E25\u0E31\u0E1A\u0E23\u0E30\u0E2B\u0E27\u0E48\u0E32\u0E07\u0E2B\u0E19\u0E49\u0E32\u0E15\u0E48\u0E32\u0E07\u0E46 \u0E02\u0E2D\u0E07\u0E41\u0E2D\u0E1B \u0E25\u0E2D\u0E07\u0E01\u0E14\u0E14\u0E39\u0E41\u0E15\u0E48\u0E25\u0E30\u0E2B\u0E19\u0E49\u0E32\u0E44\u0E14\u0E49\u0E40\u0E25\u0E22',
+        position: 'above'
+      }
+    ],
+    calculator: [
+      {
+        target: '.section:first-of-type',
+        title: '\uD83D\uDCDD Patient Info',
+        desc: '\u0E01\u0E23\u0E2D\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22: \u0E19\u0E49\u0E33\u0E2B\u0E19\u0E31\u0E01, \u0E2D\u0E32\u0E22\u0E38, \u0E40\u0E1E\u0E28, SCr, \u0E2A\u0E48\u0E27\u0E19\u0E2A\u0E39\u0E07 \u2014 \u0E23\u0E30\u0E1A\u0E1A\u0E04\u0E33\u0E19\u0E27\u0E13 CrCl \u0E43\u0E2B\u0E49\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34 \u0E01\u0E14\u0E1B\u0E38\u0E48\u0E21\u0E2B\u0E19\u0E48\u0E27\u0E22\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E2A\u0E25\u0E31\u0E1A kg/lbs, mg/dL/\u00B5mol/L',
+        position: 'below'
+      },
+      {
+        target: '#drugGrid',
+        title: '\uD83D\uDC8A Drug Grid',
+        desc: '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E22\u0E32\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E04\u0E33\u0E19\u0E27\u0E13 \u0E23\u0E30\u0E1A\u0E1A\u0E08\u0E30\u0E41\u0E2A\u0E14\u0E07\u0E02\u0E19\u0E32\u0E14\u0E22\u0E32\u0E17\u0E35\u0E48\u0E41\u0E19\u0E30\u0E19\u0E33\u0E1E\u0E23\u0E49\u0E2D\u0E21 drip rate \u0E15\u0E32\u0E21\u0E19\u0E49\u0E33\u0E2B\u0E19\u0E31\u0E01\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22',
+        position: 'below'
+      },
+      {
+        target: '.bottom-nav',
+        title: '\uD83E\uDDED Navigation',
+        desc: '\u0E2A\u0E25\u0E31\u0E1A\u0E44\u0E1B\u0E2B\u0E19\u0E49\u0E32\u0E2D\u0E37\u0E48\u0E19\u0E44\u0E14\u0E49\u0E08\u0E32\u0E01\u0E41\u0E16\u0E1A\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07 \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22\u0E08\u0E30\u0E16\u0E39\u0E01\u0E2A\u0E48\u0E07\u0E15\u0E48\u0E2D\u0E23\u0E30\u0E2B\u0E27\u0E48\u0E32\u0E07\u0E2B\u0E19\u0E49\u0E32\u0E42\u0E14\u0E22\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34',
+        position: 'above'
+      }
+    ],
+    tdm: [
+      {
+        target: '#drugTabs',
+        title: '\uD83C\uDFAF Drug Tabs',
+        desc: '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E22\u0E32\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E15\u0E34\u0E14\u0E15\u0E32\u0E21\u0E23\u0E30\u0E14\u0E31\u0E1A\u0E22\u0E32: Vancomycin, Phenytoin, Aminoglycosides, Valproate, Tacrolimus, Digoxin, Warfarin',
+        position: 'below'
+      },
+      {
+        target: '#patientCard',
+        title: '\uD83D\uDCDD Patient Info',
+        desc: '\u0E01\u0E23\u0E2D\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22 + \u0E1C\u0E25 lab \u2014 \u0E23\u0E30\u0E1A\u0E1A\u0E04\u0E33\u0E19\u0E27\u0E13 CrCl \u0E43\u0E2B\u0E49\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34 \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E08\u0E30\u0E16\u0E39\u0E01\u0E2A\u0E48\u0E07\u0E15\u0E48\u0E2D\u0E44\u0E1B\u0E22\u0E31\u0E07\u0E2B\u0E19\u0E49\u0E32\u0E2D\u0E37\u0E48\u0E19\u0E42\u0E14\u0E22\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34',
+        position: 'below'
+      },
+      {
+        target: '#sec_vancomycin',
+        title: '\uD83E\uDDEA TDM Calculation',
+        desc: '\u0E43\u0E2A\u0E48\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 dose/level \u0E17\u0E35\u0E48\u0E44\u0E14\u0E49 \u0E41\u0E25\u0E49\u0E27\u0E01\u0E14 "Run" \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E04\u0E33\u0E19\u0E27\u0E13 PK parameters, AUC\u2082\u2084, \u0E41\u0E25\u0E30\u0E14\u0E39\u0E01\u0E23\u0E32\u0E1F\u0E1C\u0E25',
+        position: 'below'
+      }
+    ],
+    compatibility: [
+      {
+        target: '#modeTabs',
+        title: '\uD83D\uDD00 3 Modes',
+        desc: '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E42\u0E2B\u0E21\u0E14\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23: Pair Check (\u0E40\u0E17\u0E35\u0E22\u0E1A 2 \u0E15\u0E31\u0E27), Matrix (\u0E14\u0E39\u0E15\u0E32\u0E23\u0E32\u0E07\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14), Multi-Drug (\u0E40\u0E0A\u0E47\u0E04\u0E2B\u0E25\u0E32\u0E22\u0E15\u0E31\u0E27\u0E1E\u0E23\u0E49\u0E2D\u0E21\u0E01\u0E31\u0E19)',
+        position: 'below'
+      },
+      {
+        target: '#pairSection',
+        title: '\uD83D\uDC8A Pair Check',
+        desc: '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E22\u0E32 A \u0E41\u0E25\u0E30\u0E22\u0E32 B \u0E08\u0E32\u0E01 dropdown \u0E23\u0E30\u0E1A\u0E1A\u0E08\u0E30\u0E41\u0E2A\u0E14\u0E07\u0E1C\u0E25\u0E04\u0E27\u0E32\u0E21\u0E40\u0E02\u0E49\u0E32\u0E01\u0E31\u0E19\u0E44\u0E14\u0E49 (\u0E40\u0E02\u0E35\u0E22\u0E27/\u0E41\u0E14\u0E07/\u0E40\u0E2B\u0E25\u0E37\u0E2D\u0E07) \u0E1E\u0E23\u0E49\u0E2D\u0E21\u0E41\u0E2B\u0E25\u0E48\u0E07\u0E2D\u0E49\u0E32\u0E07\u0E2D\u0E34\u0E07 \u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E14 Quick Chip \u0E22\u0E32 ICU \u0E22\u0E2D\u0E14\u0E19\u0E34\u0E22\u0E21',
+        position: 'below'
+      },
+      {
+        target: '.bottom-nav',
+        title: '\uD83E\uDDED Navigation',
+        desc: '\u0E25\u0E2D\u0E07\u0E2A\u0E25\u0E31\u0E1A\u0E44\u0E1B\u0E42\u0E2B\u0E21\u0E14 Matrix \u0E2B\u0E23\u0E37\u0E2D Multi-Drug \u0E44\u0E14\u0E49\u0E08\u0E32\u0E01\u0E41\u0E16\u0E1A\u0E14\u0E49\u0E32\u0E19\u0E1A\u0E19',
+        position: 'above'
+      }
+    ],
+    'renal-dosing': [
+      {
+        target: '.section:first-of-type',
+        title: '\uD83D\uDCDD Patient Info',
+        desc: '\u0E01\u0E23\u0E2D\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E04\u0E33\u0E19\u0E27\u0E13 CrCl/eGFR \u0E41\u0E25\u0E49\u0E27\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2A\u0E39\u0E15\u0E23 Cockcroft-Gault \u0E2B\u0E23\u0E37\u0E2D CKD-EPI \u0E44\u0E14\u0E49',
+        position: 'below'
+      },
+      {
+        target: '#drugSearch',
+        title: '\uD83D\uDD0D Drug Search + Filter',
+        desc: '\u0E04\u0E49\u0E19\u0E2B\u0E32\u0E22\u0E32\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E23\u0E2D\u0E07\u0E15\u0E32\u0E21\u0E2B\u0E21\u0E27\u0E14 (Antibiotics, Antifungals \u0E2F\u0E25\u0E2F) \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E14\u0E39\u0E02\u0E19\u0E32\u0E14\u0E22\u0E32\u0E17\u0E35\u0E48\u0E41\u0E19\u0E30\u0E19\u0E33\u0E15\u0E32\u0E21 GFR \u0E02\u0E2D\u0E07\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22',
+        position: 'below'
+      },
+      {
+        target: '.bottom-nav',
+        title: '\uD83E\uDDED Navigation',
+        desc: '\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22\u0E08\u0E30\u0E16\u0E39\u0E01\u0E2A\u0E48\u0E07\u0E15\u0E48\u0E2D\u0E44\u0E1B\u0E22\u0E31\u0E07 Dose Calc \u0E2B\u0E23\u0E37\u0E2D TDM \u0E42\u0E14\u0E22\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34',
+        position: 'above'
+      }
+    ]
   };
+
+  /* ── Detect current page ── */
+  function detectPage() {
+    var path = location.pathname.split('/').pop() || 'index.html';
+    var name = path.replace('.html', '');
+    return name || 'index';
+  }
+
+  var pageName = detectPage();
+  var STEPS = PAGE_STEPS[pageName];
+  if (!STEPS) return; // no tutorial for this page
+
+  var LS_KEY = 'hasSeenOnboarding_' + pageName;
 
   var currentStep = 0;
   var backdropEl = null;
@@ -61,9 +148,7 @@
 
     var isLast = idx === STEPS.length - 1;
     tooltipEl.innerHTML =
-      '<div class="onboarding-tooltip-title">' +
-        (ICONS[step.icon] || '') + ' ' + step.title +
-      '</div>' +
+      '<div class="onboarding-tooltip-title">' + step.title + '</div>' +
       '<div class="onboarding-tooltip-desc">' + step.desc + '</div>' +
       '<div class="onboarding-dots">' + dots + '</div>' +
       '<div class="onboarding-actions">' +
@@ -91,7 +176,7 @@
       tooltipEl.style.bottom = (window.innerHeight - rect.top + 12) + 'px';
     } else {
       tooltipEl.style.bottom = '';
-      tooltipEl.style.top = (rect.bottom + 12) + 'px';
+      tooltipEl.style.top = Math.min(rect.bottom + 12, window.innerHeight - 200) + 'px';
     }
   }
 
@@ -127,7 +212,7 @@
   }
 
   function endTutorial() {
-    localStorage.setItem('hasSeenOnboarding', 'true');
+    localStorage.setItem(LS_KEY, 'true');
 
     if (prevHighlight) {
       prevHighlight.classList.remove('onboarding-highlight');
@@ -166,15 +251,16 @@
     });
   } else {
     document.addEventListener('click', function (e) {
-      var action = e.target.getAttribute('data-action') || (e.target.closest && e.target.closest('[data-action]') || {}).getAttribute && e.target.closest('[data-action]').getAttribute('data-action');
+      var btn = e.target.closest ? e.target.closest('[data-action]') : null;
+      var action = (btn && btn.getAttribute('data-action')) || e.target.getAttribute('data-action');
       if (action === 'nextTutorial') showStep(currentStep + 1);
       if (action === 'skipTutorial') endTutorial();
       if (action === 'showTutorial') startTutorial();
     });
   }
 
-  /* --- Auto-show on first visit --- */
-  if (!localStorage.getItem('hasSeenOnboarding')) {
+  /* --- Auto-show on first visit to this page --- */
+  if (!localStorage.getItem(LS_KEY)) {
     setTimeout(startTutorial, 800);
   }
 })();

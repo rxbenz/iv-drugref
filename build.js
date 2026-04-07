@@ -44,7 +44,7 @@ const PROD_MODE = process.argv.includes('--prod');
 
 // Pages and their CSS/JS dependencies (order matters)
 const PAGES = {
-  'index.html':        { css: ['shared.css','theme.css','index.css','quick-actions.css'],       js: ['error-tracker.js','core.js','index.js','quick-actions.js'] },
+  'index.html':        { css: ['shared.css','theme.css','index.css','quick-actions.css','onboarding.css'],       js: ['error-tracker.js','core.js','index.js','quick-actions.js','onboarding.js'] },
   'calculator.html':   { css: ['shared.css','theme.css','calculator.css','quick-actions.css'],  js: ['error-tracker.js','core.js','share-export.js','calculator.js','quick-actions.js'] },
   'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css','quick-actions.css'],js: ['error-tracker.js','core.js','renal-dosing.js','quick-actions.js'] },
   'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css','quick-actions.css'],js: ['error-tracker.js','core.js','compatibility.js','quick-actions.js'] },

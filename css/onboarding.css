@@ -1,0 +1,140 @@
+/* Onboarding Tutorial Overlay — v5.9.0 */
+
+.onboarding-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.65);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.onboarding-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Highlighted element pops above backdrop */
+.onboarding-highlight {
+  position: relative;
+  z-index: 2001 !important;
+  border-radius: 12px;
+  box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.45), 0 0 0 9999px rgba(0, 0, 0, 0.65);
+  transition: box-shadow 0.35s;
+}
+
+/* Tooltip bubble */
+.onboarding-tooltip {
+  position: fixed;
+  z-index: 2002;
+  background: var(--bg-card, #fff);
+  color: var(--text-primary, #1e293b);
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 320px;
+  width: calc(100vw - 40px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.onboarding-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.onboarding-tooltip-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.onboarding-tooltip-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 16px;
+}
+
+/* Step dots */
+.onboarding-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border, #e2e8f0);
+  transition: background 0.25s, transform 0.25s;
+}
+.onboarding-dot.active {
+  background: #0ea5e9;
+  transform: scale(1.25);
+}
+
+/* Action buttons */
+.onboarding-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.onboarding-skip {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-muted, #94a3b8);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+}
+.onboarding-skip:hover {
+  color: var(--text-secondary, #64748b);
+}
+
+.onboarding-next {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #0ea5e9;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.onboarding-next:hover {
+  background: #0284c7;
+}
+
+/* Help icon in header */
+.onboarding-help-btn {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-muted, #94a3b8);
+  background: none;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s, border-color 0.2s;
+}
+.onboarding-help-btn:hover {
+  color: #0ea5e9;
+  border-color: #0ea5e9;
+}

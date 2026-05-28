@@ -168,7 +168,7 @@
       } catch(e) {}
     }
 
-    var ver = (typeof IVDrugRef !== 'undefined' && IVDrugRef.VERSION) ? IVDrugRef.VERSION : '5.1.0';
+    var ver = (typeof IVDrugRef !== 'undefined' && IVDrugRef.VERSION) ? IVDrugRef.VERSION : '5.9.3';
     var html = '<div style="font-family:sans-serif;color:#000;background:#fff;padding:24px;max-width:700px;margin:0 auto">' +
       '<h2 style="margin:0 0 4px;font-size:18px;color:#0f172a">' + (opts.title || 'IV DrugRef Report') + '</h2>' +
       '<div style="font-size:11px;color:#64748b;margin-bottom:16px">\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48: ' + thaiDateTime() + '</div>' +

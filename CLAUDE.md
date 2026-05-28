@@ -120,6 +120,45 @@ localStorage keys for the quick access feature:
 
 The `#quickAccessZone` div sits between `#resultsInfo` and `#drugList` in `index.html`. It renders 3 sections (favorites, most used, recent) only when search is empty and filter is "all".
 
+### Pediatric Safety Guard (v5.9.3)
+Centralized module `js/pediatric-guard.js` enforces age-gated access to
+adult-only clinical decision support:
+
+- **Block (age <18)** in all Bayesian TDM contexts (vanco/aminoglycoside/
+  phenytoin/valproate/digoxin/tacrolimus/warfarin) — population PK models
+  are derived from adult cohorts and are NOT validated for pediatrics.
+- **Block (age <1)** in every context — both Schwartz and CG are invalid
+  for infants.
+- **Warn (age <18)** in `calculator.html` and `renal-dosing.html` because
+  adult dose thresholds (mL/min absolute) don't map cleanly to Schwartz
+  eGFR (mL/min/1.73m² indexed).
+
+Integration points (single chokepoint per page):
+
+| Page | Banner element | Trigger |
+|---|---|---|
+| `tdm.html` | `#tdmGuardBanner` | `updateCrCl()` + every `*Run` action |
+| `vanco-tdm.html` | `#vancoGuardBanner` | `updateCrCl()` + `runBayesian()` |
+| `calculator.html` | `#calcGuardBanner` | `updateCrCl()` |
+| `renal-dosing.html` | `#renalGuardBanner` | `recalc()` |
+
+Each `enforce(pt, context, opts)` call:
+1. Computes guard status from `pt.age` + context type.
+2. Renders/clears the banner (uses existing `.info-box.red`/`.amber`).
+3. Disables run buttons via `opts.disableSelectors` (block-only).
+4. Throttled analytics event `pediatric_guard` (5s rolling per context).
+
+**Known limitation**: This is a guard layer only. The underlying silent
+CG override in `tdm.js:294,353` and `vanco-tdm.js` (`bayesianMAP`/
+`runMCMC` recompute CG even when display shows Schwartz) is intentionally
+left for Phase 2 to keep the surface area of this safety fix small.
+
+**Display consistency (v5.9.3 follow-up)**: `vanco-tdm.js` `updateCrCl()`
+now shows Schwartz eGFR for age <18 (matching `tdm.js`), so the CrCl
+field reads identically across both pages for the same pediatric patient.
+This is display-only — the engine still computes CG internally (Phase 2),
+which is safe because the guard blocks pediatric Bayesian calculation.
+
 ### `monitoring` field — GAS-cached data normalization (FIXED v5.3.6)
 GAS returns `monitoring` and `categories` as comma-separated strings. Fixed with two-layer normalization:
 1. `core.js` — normalizes `localStorage.drugData_v4` cache **before** `index.js` reads it (fixes initial render)

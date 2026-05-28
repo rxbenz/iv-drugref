@@ -56,10 +56,43 @@ function getPatient(){
 }
 function updateCrCl(){
   const p=getPatient();
-  const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);
-  let label=crcl.toFixed(1)+' mL/min';
-  if(p.ht>0){const htIn=p.ht/2.54;const ibw=p.sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(p.wt>ibw*1.3)label+=' (ABW)';if(p.age>=65&&p.scr<0.7)label+=' ⚠elderly';}
-  var crclEl=document.getElementById('ptCrCl'); if(crclEl) crclEl.value=label;
+  var crclEl=document.getElementById('ptCrCl');
+  // Display-only formula selection — mirrors tdm.js updateCrCl().
+  // Pediatric (age <18) shows Schwartz eGFR; adults show Cockcroft-Gault.
+  // NOTE: the Bayesian engine (bayesianMAP/runMCMC) still computes CG
+  // internally — that silent override is Phase 2. Safe here because the
+  // pediatric guard blocks Bayesian calculation for age <18 anyway.
+  if(p.age>0 && p.age<18 && p.ht>0){
+    const crcl=IVDrugRef.calcSchwartz(p.ht,p.scr);
+    if(crclEl) crclEl.value=crcl.toFixed(1)+' mL/min/1.73m² (Schwartz)';
+  } else {
+    const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);
+    let label=crcl.toFixed(1)+' mL/min';
+    if(p.ht>0){const htIn=p.ht/2.54;const ibw=p.sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(p.wt>ibw*1.3)label+=' (ABW)';if(p.age>=65&&p.scr<0.7)label+=' ⚠elderly';}
+    if(crclEl) crclEl.value=label;
+  }
+  updateGuard(p);
+}
+
+// ── Pediatric safety guard wiring ─────────────────────────
+var _GUARD_BTN_SELECTORS = [
+  '[data-action="runBayesian"]',
+  '[data-action="runWithModel"]'
+];
+function updateGuard(pt){
+  if(!window.PediatricGuard) return;
+  pt = pt || getPatient();
+  window.PediatricGuard.enforce(pt, window.PediatricGuard.CONTEXTS.VANCO_BAYESIAN, {
+    banner: 'vancoGuardBanner',
+    disableSelectors: _GUARD_BTN_SELECTORS
+  });
+}
+function guardBlocked(){
+  if(!window.PediatricGuard) return false;
+  return window.PediatricGuard.enforce(getPatient(), window.PediatricGuard.CONTEXTS.VANCO_BAYESIAN, {
+    banner: 'vancoGuardBanner',
+    disableSelectors: _GUARD_BTN_SELECTORS
+  });
 }
 
 // --- Dose & Level State (datetime-based) ---
@@ -554,6 +587,9 @@ function drawGraph(pk,doseHist,measuredLvls,optDose,optInterval,optInfusion,mcmc
 // MAIN RUN
 // ============================================================
 function runBayesian(){
+  // Pediatric safety guard — abort if blocked
+  if(guardBlocked()) return;
+
   const pt=getPatient();
   const doseHist=buildDoseHist();
   const measuredLvls=buildLevels();
@@ -824,7 +860,7 @@ function buildVancoShareText() {
     text += 'Predicted Peak: ' + opt.peak.toFixed(1) + ' | Trough: ' + opt.trough.toFixed(1) + '\n';
   }
 
-  text += '\n---\nIV DrugRef v' + (IVDrugRef.VERSION || '5.1.0') + '\nhttps://rxbenz.github.io/iv-drugref/\n';
+  text += '\n---\nIV DrugRef v' + (IVDrugRef.VERSION || '5.9.3') + '\nhttps://rxbenz.github.io/iv-drugref/\n';
   text += '\u26a0 \u0e43\u0e0a\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e33\u0e19\u0e27\u0e13 \u0e44\u0e21\u0e48\u0e17\u0e14\u0e41\u0e17\u0e19 clinical judgment';
   return text;
 }

@@ -25,10 +25,13 @@ const TDMHub = (function() {
     });
 
     // Ensure TDM-specific fields are present
+    const icuEl = document.getElementById('ptICU'), hemeEl = document.getElementById('ptHeme');
     return {
       ...basePatient,
       alb: basePatient.alb || 4.0,
       dialysis: basePatient.dialysis || 'none',
+      icu: !!(icuEl && icuEl.checked),
+      heme: !!(hemeEl && hemeEl.checked),
       crcl: 0 // Will be calculated in updateCrCl()
     };
   }
@@ -164,44 +167,78 @@ const TDMHub = (function() {
   // ============================================================
 
   const VancoTDM = (function() {
+    // Per-model CrCl helpers (each paper uses a different method).
+    // Verified coefficients, Phase 2b v5.10.0. AUC24,ss = daily_dose / CL
+    // (exact, compartment-independent). 2-comp models use Vss = Vc+Vp.
+    // NOTE: duplicated in vanco-tdm.js for now; shared module = separate PR.
+    const _vCgPlain = pt => { let c = (140 - pt.age) * pt.wt / (72 * pt.scr); if (pt.sex === 'F') c *= 0.85; return c; };
+    const _vLbw = (wt, ht, sex) => { const bmi = wt / Math.pow(ht / 100, 2); return sex === 'M' ? 9270 * wt / (6680 + 216 * bmi) : 9270 * wt / (8780 + 244 * bmi); };
+    const _vCgLbw = pt => { const lbw = _vLbw(pt.wt, pt.ht, pt.sex); let c = (140 - pt.age) * lbw / (72 * pt.scr); if (pt.sex === 'F') c *= 0.85; if (pt.scr < 0.6) c = Math.min(c, 120); return c; };
+    const _vCgGoti = pt => { const scr = (pt.scr < 1 && pt.age > 60) ? 1 : pt.scr; let c = (140 - pt.age) * pt.wt / (72 * scr); if (pt.sex === 'F') c *= 0.85; return Math.min(c, 150); };
+    const _vCgAdaneBsa = pt => { const scr = pt.scr < 1 ? 1 : pt.scr; let c = (140 - pt.age) * pt.wt / (72 * scr); if (pt.sex === 'F') c *= 0.85; const bsa = IVDrugRef.calcBSA(pt.ht, pt.wt) || 1.73; return c * 1.73 / bsa; };
+    const _vJelliffe = pt => { let c = (98 - 0.8 * (pt.age - 20)) / pt.scr; if (pt.sex === 'F') c *= 0.9; return Math.max(c, 0); };
+    const _vDial = pt => (pt.dialysis && pt.dialysis !== 'none') ? 1 : 0;
+
     const PK_MODELS = [
       {
-        id: 'buelga', name: 'Buelga 2005', pop: 'General adults',
+        id: 'buelga', name: 'Buelga 2005', pop: 'Hematologic malignancy',
         ref: 'Antimicrob Agents Chemother 2005;49:4934-41',
-        clFn: crcl => 0.0048 * crcl, vdFn: (wt, ht, sex) => 0.65 * wt,
+        crclFn: _vCgPlain,
+        clFn: pt => 0.0648 * _vCgPlain(pt),                 // 1.08 × CLcr(L/h)
+        vdFn: pt => 0.98 * pt.wt,
         omega_cl: 0.25, omega_vd: 0.15, sigma: 0.10
       },
       {
-        id: 'roberts', name: 'Roberts 2011', pop: 'ICU / Critically ill',
-        ref: 'Antimicrob Agents Chemother 2011;55:2704-9',
-        clFn: crcl => 0.024 * crcl + 1.93, vdFn: (wt, ht, sex) => 0.511 * wt,
+        id: 'llopis', name: 'Llopis-Salvia 2006', pop: 'Critically ill (ICU)',
+        ref: 'J Clin Pharm Ther 2006;31:447-54',
+        crclFn: _vCgLbw,
+        clFn: pt => 0.034 * _vCgLbw(pt) + 0.015 * pt.wt,
+        vdFn: pt => 1.734 * pt.wt,                          // Vss = Vc(0.414·TBW) + Vp(1.32·TBW)
         omega_cl: 0.30, omega_vd: 0.20, sigma: 0.12
       },
       {
-        id: 'goti', name: 'Goti 2018', pop: 'Hospitalized adults',
-        ref: 'Clin Pharmacokinet 2018;57:367-82',
-        clFn: crcl => 0.0154 * crcl + 0.32, vdFn: (wt, ht, sex) => 0.70 * wt,
+        id: 'goti', name: 'Goti 2018', pop: 'General hospitalized (±dialysis)',
+        ref: 'Ther Drug Monit 2018;40:212-21',
+        crclFn: _vCgGoti,
+        clFn: pt => 4.5 * Math.pow(_vCgGoti(pt) / 120, 0.8) * Math.pow(0.7, _vDial(pt)),
+        vdFn: pt => 58.4 * (pt.wt / 70) * (_vDial(pt) ? 0.5 : 1) + 38.4,  // Vss = Vc(×0.5 if HD) + Vp(38.4)
         omega_cl: 0.22, omega_vd: 0.18, sigma: 0.08
       },
       {
-        id: 'adane', name: 'Adane 2015', pop: 'Obese (BMI ≥30)',
+        id: 'adane', name: 'Adane 2015', pop: 'Extremely obese (BMI≥40)',
         ref: 'Pharmacotherapy 2015;35:127-139',
-        clFn: crcl => 0.0169 * crcl + 0.94, vdFn: (wt, ht, sex) => {
-          if (!ht || ht <= 0) return 0.55 * wt;
-          const htIn = ht / 2.54, ibw = sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
-          return 0.55 * (wt > ibw * 1.3 ? ibw + 0.4 * (wt - ibw) : wt);
-        },
+        crclFn: _vCgAdaneBsa,
+        clFn: pt => 6.54 * (_vCgAdaneBsa(pt) / 125),
+        vdFn: pt => 0.51 * pt.wt,
         omega_cl: 0.28, omega_vd: 0.22, sigma: 0.11
       },
       {
-        id: 'bourguignon', name: 'Bourguignon 2016', pop: 'Elderly (≥80 yr)',
+        id: 'bourguignon', name: 'Bourguignon 2016', pop: 'Elderly >80yr',
         ref: 'Antimicrob Agents Chemother 2016;60:4563-7',
-        clFn: crcl => 0.0117 * crcl + 0.28, vdFn: (wt, ht, sex) => 0.52 * wt,
+        crclFn: _vJelliffe,
+        clFn: pt => { const kel = 0.0229 + 0.00088 * _vJelliffe(pt); return kel * (23.35 + 0.211 * pt.wt); }, // CL = kel × V
+        vdFn: pt => 23.35 + 0.211 * pt.wt,
         omega_cl: 0.35, omega_vd: 0.20, sigma: 0.13
       }
     ];
 
-    let selectedModel = 'auto', currentPK = null, mcmcSamples = [], allModelResults = [];
+    let selectedModel = 'goti', currentPK = null, mcmcSamples = [], allModelResults = [];
+
+    // Population-aware model matching from patient covariates (soft recommendation).
+    // Returns array of {id, reason}. Replaces OFV auto-select; user picks the model.
+    function getMatchedModels(pt) {
+      if (!pt) pt = getPatient();
+      const matches = [], ids = {};
+      const bmi = pt.ht > 0 ? pt.wt / Math.pow(pt.ht / 100, 2) : 0;
+      const add = (id, reason) => { if (!ids[id]) { ids[id] = 1; matches.push({ id, reason }); } };
+      if (pt.dialysis && pt.dialysis !== 'none') add('goti', 'Dialysis → Goti 2018 (dialysis covariate)');
+      if (bmi >= 40) add('adane', `BMI ${bmi.toFixed(1)} → Adane 2015 (extremely obese)`);
+      if (pt.age >= 80) add('bourguignon', `อายุ ${pt.age} ปี → Bourguignon 2016 (elderly >80)`);
+      if (pt.icu) add('llopis', 'ICU / critically ill → Llopis-Salvia 2006');
+      if (pt.heme) add('buelga', 'Hematologic malignancy → Buelga 2005');
+      if (matches.length === 0) add('goti', 'General population → Goti 2018 (validated กว้างสุด)');
+      return matches;
+    }
     let doses = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 3, dateTime: '' }];
     let levels = [{ value: 15, dateTime: '' }];
     let refTime = null;
@@ -353,8 +390,8 @@ const TDMHub = (function() {
 
     // Bayesian MAP estimation with grid search + Nelder-Mead
     function bayesianMAP(pt, doseHist, measuredLevels, model) {
-      const crcl = IVDrugRef.calcCockcroftGault(pt.age, pt.wt, pt.scr, pt.sex, pt.ht);
-      const popCL = model.clFn(crcl), popVd = model.vdFn(pt.wt, pt.ht, pt.sex);
+      const crcl = model.crclFn(pt);
+      const popCL = model.clFn(pt), popVd = model.vdFn(pt);
 
       function obj(cl, vd) {
         if (cl <= 0 || vd <= 0 || !isFinite(cl) || !isFinite(vd)) return 1e10;
@@ -412,8 +449,8 @@ const TDMHub = (function() {
 
     // MCMC sampling (adaptive random walk)
     function runMCMC(pt, doseHist, measuredLevels, model, mapR, nSamp, cb) {
-      const crcl = IVDrugRef.calcCockcroftGault(pt.age, pt.wt, pt.scr, pt.sex, pt.ht);
-      const popCL = model.clFn(crcl), popVd = model.vdFn(pt.wt, pt.ht, pt.sex);
+      const crcl = model.crclFn(pt);
+      const popCL = model.clFn(pt), popVd = model.vdFn(pt);
 
       function logPost(cl, vd) {
         if (cl <= 0 || vd <= 0 || !isFinite(cl) || !isFinite(vd)) return -1e10;
@@ -632,19 +669,25 @@ const TDMHub = (function() {
     }
 
     function renderModelSelect() {
-      const pt = getPatient();
-      const bmi = pt.wt / ((pt.ht / 100) ** 2);
-      const recModel = bmi >= 30 ? 'adane' : pt.age >= 80 ? 'bourguignon' : null;
-      const all = [{ id: 'auto', name: 'Auto-select', pop: 'Best fit (lowest OFV)' }, ...PK_MODELS];
       const el = document.getElementById('vancoModelSelect');
       if (!el) return;
-      el.innerHTML = all.map(m => `
+      const pt = getPatient();
+      const matches = getMatchedModels(pt);
+      const recIds = {}; matches.forEach(x => recIds[x.id] = 1);
+      // No auto-select card; user picks. ⭐ marks population matches.
+      el.innerHTML = PK_MODELS.map(m => `
         <div class="model-card ${selectedModel === m.id ? 'active' : ''}" data-action="vancoSetModel" data-model="${m.id}">
-          <div class="mc-name">${m.name} ${m.id === recModel ? '<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>' : ''}</div><div class="mc-sub">${m.pop}</div></div>`).join('');
-      if (recModel) {
-        let msg = recModel === 'adane' ? `⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Obesity model)` : `👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly model)`;
-        el.innerHTML += `<div class="info-box amber" style="font-size:11px;margin-top:6px">${msg}</div>`;
+          <div class="mc-name">${m.name} ${recIds[m.id] ? '<span style="color:var(--amber);font-size:10px">⭐ match</span>' : ''}</div><div class="mc-sub">${m.pop}</div></div>`).join('');
+      let msg;
+      if (matches.length === 1) {
+        msg = `<strong>📋 Recommended (จาก patient profile):</strong><br>⭐ ${matches[0].reason}`;
+      } else {
+        msg = `<strong>📋 ผู้ป่วยตรงกับหลาย population:</strong><br>`
+          + matches.map(x => '✓ ' + x.reason).join('<br>')
+          + `<br><strong>⚠️ กรุณาเลือกตามภาวะที่เด่นที่สุดทางคลินิก</strong> — หากไม่แน่ใจ → Goti 2018 (validated กว้างสุด)`;
       }
+      msg += `<br><span style="opacity:.7">ระบบ<strong>แนะนำ</strong>เท่านั้น — เภสัชกรเลือก model เอง (OFV แสดงเป็นข้อมูลเสริมหลัง run)</span>`;
+      el.innerHTML += `<div class="info-box amber" style="font-size:11px;margin-top:6px">${msg}</div>`;
     }
 
     function updateOptimizer() {
@@ -699,6 +742,7 @@ const TDMHub = (function() {
 
     return {
       init() { renderDoses(); renderLevels(); renderModelSelect(); },
+      renderModelSelect() { renderModelSelect(); },
       addDose() {
         const l = doses[doses.length - 1];
         const nextDt = l.dateTime ? new Date(new Date(l.dateTime).getTime() + l.interval * l.nDoses * 3600000).toISOString().slice(0, 16) : '';
@@ -741,13 +785,11 @@ const TDMHub = (function() {
           return { ...pk, auc24, ssPeak: ss.peak, ssTrough: ss.trough };
         });
 
-        let bestIdx = 0;
-        if (selectedModel === 'auto')
-          bestIdx = allModelResults.reduce((bi, r, i) => r.objValue < allModelResults[bi].objValue ? i : bi, 0);
-        else {
-          bestIdx = PK_MODELS.findIndex(m => m.id === selectedModel);
-          if (bestIdx < 0) bestIdx = 0;
-        }
+        // Use the user-selected model (no OFV auto-switch — population
+        // appropriateness must not be overridden by a numeric best-fit).
+        let bestIdx = PK_MODELS.findIndex(m => m.id === selectedModel);
+        if (bestIdx < 0) bestIdx = PK_MODELS.findIndex(m => m.id === 'goti');
+        if (bestIdx < 0) bestIdx = 0;
         currentPK = allModelResults[bestIdx];
         const bestModel = PK_MODELS[bestIdx];
 
@@ -1615,14 +1657,16 @@ const TDMHub = (function() {
         if (el) el.addEventListener('input', () => {
           updateCrCl();
           updatePhenyCorrection();
+          VancoTDM.renderModelSelect();
         });
       });
 
-      ['ptSex', 'ptDialysis'].forEach(id => {
+      ['ptSex', 'ptDialysis', 'ptICU', 'ptHeme'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('change', () => {
           updateCrCl();
           updatePhenyCorrection();
+          VancoTDM.renderModelSelect();
         });
       });
 

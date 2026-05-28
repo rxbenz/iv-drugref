@@ -78,6 +78,10 @@
       <div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly></div>
       <div class="field"><label>Dialysis</label><select id="ptDialysis"><option value="none">None</option><option value="HD">HD</option><option value="CRRT">CRRT</option></select></div>
     </div>
+    <div class="row" style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ptICU"> ICU / Critically ill</label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ptHeme"> Hematologic malignancy</label>
+    </div>
   </div>
 </div>
 
@@ -85,6 +89,8 @@
      VANCOMYCIN SECTION
      ============================================================ -->
 <div class="drug-section active" id="sec_vancomycin" role="tabpanel" aria-labelledby="tab_vancomycin">
+
+  <div class="info-box amber" style="font-size:11px;margin:0 0 12px">ℹ️ <strong>AUC calculation updated (v5.10.0)</strong> — PK model coefficients corrected against primary papers. ตรวจสอบผลกับ institutional protocol ก่อนใช้ทางคลินิก</div>
 
   <div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body">
     <div id="vancoDoseList"></div>
@@ -536,7 +542,7 @@
   สำหรับบุคลากรทางการแพทย์เท่านั้น
 </div>
 
-<div class="app-footer">IV DrugRef v5.9.3 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+<div class="app-footer">IV DrugRef v5.10.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 
 </div><!-- end container -->
 

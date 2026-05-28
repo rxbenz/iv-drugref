@@ -120,6 +120,32 @@ localStorage keys for the quick access feature:
 
 The `#quickAccessZone` div sits between `#resultsInfo` and `#drugList` in `index.html`. It renders 3 sections (favorites, most used, recent) only when search is empty and filter is "all".
 
+### Vancomycin PK coefficient correction (v5.10.0) — clinical calc change
+Phase 2b fix for inflated AUC (root cause: wrong `clFn` clearance slopes →
+CL 2–10× too low → AUC 2–3× too high → under-dosing). All 5 vanco PK
+models in `js/vanco-tdm.js` and `js/tdm.js` (VancoTDM) re-derived from
+primary papers:
+
+- Engine stays **1-compartment** (Option B). `AUC24,ss = daily_dose / CL`
+  is exact and compartment-independent, so correct CL = correct AUC.
+  2-comp models (Llopis, Goti) use **Vss = Vc+Vp** as the single V (V only
+  affects peak/trough shape, not interval AUC).
+- Model interface changed: `clFn(crcl)` → **`clFn(pt)`**, plus per-model
+  **`crclFn(pt)`** and `vdFn(pt)`, because each paper uses a different CrCl
+  method (CG-plain / CG-LBW+cap120 / CG-truncate150+SCr-adj / CG-BSA-1.73 /
+  Jelliffe). Engine call sites updated in `bayesianMAP` + `runMCMC` (both files).
+- `roberts` (id+name) → **`llopis` / Llopis-Salvia 2006** (was mislabeled).
+- Bourguignon: paper gives `kel`, not CL → `CL = kel × V`.
+- Recommend logic: Adane trigger BMI≥40 (was ≥30), general default → **Goti ⭐**;
+  startup model still `auto` (lowest OFV).
+- Interim amber banner in both vanco UIs: "AUC calculation updated (v5.10.0)".
+
+Verified (45M/70kg/170cm/SCr1.0, 1000mg q12h): Buelga CL 5.99 (AUC 324),
+Goti CL 3.65 (AUC 535), Llopis CL 3.49 (AUC 561, CG-LBW). Old Goti 1167 → 535.
+
+**Still duplicated** across the two files (shared `PK_MODELS` module = separate
+PR). 2-comp engine + 4-param fit = future Option A if peak/trough fidelity needed.
+
 ### Pediatric Safety Guard (v5.9.3)
 Centralized module `js/pediatric-guard.js` enforces age-gated access to
 adult-only clinical decision support:

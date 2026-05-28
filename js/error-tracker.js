@@ -41,7 +41,7 @@
     },
 
     // App metadata
-    APP_VERSION: '5.10.0',
+    APP_VERSION: '5.11.0',
     APP_NAME: 'IV DrugRef PWA'
   };
 

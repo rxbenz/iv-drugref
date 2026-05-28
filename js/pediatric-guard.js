@@ -36,8 +36,11 @@
     WARN: 'warn'
   };
 
+  // VANCO_BAYESIAN removed from the 1-17 block list as of v5.11.0: vancomycin
+  // now has a pediatric-validated model (Colin 2019) for ages 1-17, so the
+  // vanco page handles peds itself. Infant <1 is still blocked for ALL contexts
+  // (handled by the isInfant branch). Other Bayesian drugs remain adult-only.
   var BLOCK_CONTEXTS = [
-    CONTEXTS.VANCO_BAYESIAN,
     CONTEXTS.AMINOGLYCOSIDE_BAYESIAN,
     CONTEXTS.PHENYTOIN_BAYESIAN,
     CONTEXTS.VALPROATE_BAYESIAN,

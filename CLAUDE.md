@@ -120,6 +120,35 @@ localStorage keys for the quick access feature:
 
 The `#quickAccessZone` div sits between `#resultsInfo` and `#drugList` in `index.html`. It renders 3 sections (favorites, most used, recent) only when search is empty and filter is "all".
 
+### Pediatric vancomycin via Colin 2019 (v5.11.0) — unblock peds 1-17
+Closes the loop on the v5.9.3 pediatric guard (which temporarily blocked all
+peds vanco Bayesian). Vancomycin now has an age-routed pediatric model:
+
+- **Age routing** (both `vanco-tdm.js` + `tdm.js` VancoTDM): `<1` still BLOCKED
+  by guard (no neonate PMA/GA infra yet); **1-17 → Colin 2019** (single model);
+  `≥18` → adult 5-model path (v5.10.0, unchanged — no regression).
+- **Guard change** (`pediatric-guard.js`): `VANCO_BAYESIAN` removed from the
+  1-17 block list (vanco has a peds-validated model now). The `isInfant` (<1)
+  branch still blocks ALL contexts including vanco. Other Bayesian drugs
+  (aminoglycoside/phenytoin/…) remain adult-only (still in BLOCK_CONTEXTS).
+- **Colin model** (Clin Pharmacokinet 2019;58:767-80, verified vs Table 3 +
+  Eq 5-13): `CL = θCL·FSize^0.75·FMat·FDecline·FSCR·(×1.294 if heme)`,
+  `Vss = (42.9+41.7)·WGT/70` (2-comp → single V for the 1-comp engine).
+  **Unit traps:** FMat uses PMA in **weeks**, FDecline/SCRstd use PMA in
+  **years**; SCr in **mg/dL** (no μmol conversion); FDecline exponents BOTH
+  negative (`PMA^-γ2 / (PMA^-γ2 + AGE50^-γ2)`). PMA(yr)=age+40/52.
+  Golden verified: 35yo/70kg/SCr0.83 → CL 4.10; 60yo/65kg/SCr0.97 → CL 2.55.
+- **Level policy:** peds without a measured level → population estimate shown
+  as a **starting reference only** (no AUC-based dose recommendation, per
+  ASHP/IDSA 2020); a measured level enables full Bayesian AUC dosing.
+- **SCr sanity warning** (peds, non-blocking): SCr<0.2 mg/dL (FSCR sensitive)
+  or SCr high-for-age.
+- **omega/sigma** not in the paper excerpt → moderate priors (0.25/0.20/0.10);
+  flagged — the measured-level posterior dominates these. Confirm if BSV values
+  are available.
+
+Still duplicated across the two files (shared `PK_MODELS`/peds module = future PR).
+
 ### Vancomycin PK coefficient correction (v5.10.0) — clinical calc change
 Phase 2b fix for inflated AUC (root cause: wrong `clFn` clearance slopes →
 CL 2–10× too low → AUC 2–3× too high → under-dosing). All 5 vanco PK

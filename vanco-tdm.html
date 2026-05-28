@@ -35,6 +35,8 @@
 <div class="row row-2" style="margin-top:8px"><div class="field"><label>Albumin (g/dL)</label><input type="number" id="ptAlb" value="" min="0.5" max="6" step="0.1" placeholder="ไม่ระบุ"></div><div class="field"><label>Dialysis</label><select id="ptDialysis"><option value="none">ไม่ได้ล้างไต</option><option value="HD">HD</option><option value="CRRT">CRRT</option><option value="PD">PD</option></select></div></div>
 <div id="vancoGuardBanner" style="display:none;"></div></div></div>
 
+<div class="info-box amber" style="font-size:11px;margin:0 0 12px">ℹ️ <strong>AUC calculation updated (v5.10.0)</strong> — PK model coefficients corrected against primary papers. ตรวจสอบผลกับ institutional protocol ก่อนใช้ทางคลินิก</div>
+
 <div class="card"><div class="card-head">💊 DOSE HISTORY</div><div class="card-body"><div id="doseList"></div><button class="btn-add" data-action="addDose">+ เพิ่ม dose</button></div></div>
 <div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body"><div id="levelList"></div><button class="btn-add" data-action="addLevel">+ เพิ่ม level</button></div></div>
 
@@ -54,7 +56,7 @@
 <div id="optResult"></div><div class="dose-compare" id="doseCompare"></div></div></div>
 </div>
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้น ไม่ทดแทน clinical judgment<br>Bayesian MAP + MCMC | Models: Buelga 2005, Roberts 2011, Goti 2018<br>Ref: ASHP/IDSA Vancomycin Guidelines 2020 | สำหรับบุคลากรทางการแพทย์เท่านั้น</div>
-<div class="app-footer">IV DrugRef v5.9.3 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+<div class="app-footer">IV DrugRef v5.10.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 </div>
 
 <nav class="bottom-nav">

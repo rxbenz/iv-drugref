@@ -8,37 +8,59 @@
 
 // ============================================================
 // VANCOMYCIN BAYESIAN TDM v2.0
-// 3 PK Models + MAP (Nelder-Mead) + MCMC (Metropolis-Hastings)
+// 1-compartment engine (CL, V). AUC24,ss = daily_dose / CL (exact,
+// compartment-independent), so corrected CL = corrected AUC.
+// Coefficients verified against primary papers (Phase 2b, v5.10.0).
+// 2-comp models (Llopis, Goti) use Vss = Vc+Vp as the single V.
 // ============================================================
 
+// --- Per-model CrCl helpers (each paper uses a different method) ---
+// NOTE: intentionally duplicated in tdm.js for now; shared module = separate PR.
+function _vCgPlain(pt){ var c=(140-pt.age)*pt.wt/(72*pt.scr); if(pt.sex==='F')c*=0.85; return c; }
+function _vLbw(wt,ht,sex){ var bmi=wt/Math.pow(ht/100,2); return sex==='M'?9270*wt/(6680+216*bmi):9270*wt/(8780+244*bmi); }
+function _vCgLbw(pt){ // Llopis-Salvia: CG with lean body weight; SCr<0.6 → cap CrCl 120
+  var lbw=_vLbw(pt.wt,pt.ht,pt.sex); var c=(140-pt.age)*lbw/(72*pt.scr); if(pt.sex==='F')c*=0.85;
+  if(pt.scr<0.6) c=Math.min(c,120); return c; }
+function _vCgGoti(pt){ // Goti: CG plain; SCr<1 & age>60 → SCr=1; truncate at 150
+  var scr=(pt.scr<1&&pt.age>60)?1:pt.scr; var c=(140-pt.age)*pt.wt/(72*scr); if(pt.sex==='F')c*=0.85;
+  return Math.min(c,150); }
+function _vCgAdaneBsa(pt){ // Adane: CG TBW; SCr<1 → 1; normalize to 1.73m²
+  var scr=pt.scr<1?1:pt.scr; var c=(140-pt.age)*pt.wt/(72*scr); if(pt.sex==='F')c*=0.85;
+  var bsa=IVDrugRef.calcBSA(pt.ht,pt.wt)||1.73; return c*1.73/bsa; }
+function _vJelliffe(pt){ // Bourguignon: Jelliffe 1973 (mL/min/1.73m²)
+  var c=(98-0.8*(pt.age-20))/pt.scr; if(pt.sex==='F')c*=0.9; return Math.max(c,0); }
+function _vDial(pt){ return (pt.dialysis&&pt.dialysis!=='none')?1:0; }
+
 const PK_MODELS = [
-  { id:'buelga', name:'Buelga 2005', pop:'General adults',
+  { id:'buelga', name:'Buelga 2005', pop:'Hematologic malignancy',
     ref:'Antimicrob Agents Chemother 2005;49:4934-41',
-    clFn:(crcl)=>0.0048*crcl, vdFn:(wt)=>0.65*wt,
+    crclFn:_vCgPlain,
+    clFn:(pt)=>0.0648*_vCgPlain(pt),            // 1.08 × CLcr(L/h) = 0.0648 × CrCl(mL/min)
+    vdFn:(pt)=>0.98*pt.wt,
     omega_cl:0.25, omega_vd:0.15, sigma:0.10 },
-  { id:'roberts', name:'Roberts 2011', pop:'ICU / Critically ill',
-    ref:'Antimicrob Agents Chemother 2011;55:2704-9',
-    clFn:(crcl)=>0.024*crcl+1.93, vdFn:(wt)=>0.511*wt,
+  { id:'llopis', name:'Llopis-Salvia 2006', pop:'Critically ill (ICU)',
+    ref:'J Clin Pharm Ther 2006;31:447-54',
+    crclFn:_vCgLbw,
+    clFn:(pt)=>0.034*_vCgLbw(pt)+0.015*pt.wt,
+    vdFn:(pt)=>1.734*pt.wt,                     // Vss = Vc(0.414·TBW) + Vp(1.32·TBW)
     omega_cl:0.30, omega_vd:0.20, sigma:0.12 },
-  { id:'goti', name:'Goti 2018', pop:'Hospitalized adults',
-    ref:'Clin Pharmacokinet 2018;57:367-82',
-    clFn:(crcl)=>0.0154*crcl+0.32, vdFn:(wt)=>0.70*wt,
+  { id:'goti', name:'Goti 2018', pop:'General hospitalized (±dialysis)',
+    ref:'Ther Drug Monit 2018;40:212-21',
+    crclFn:_vCgGoti,
+    clFn:(pt)=>4.5*Math.pow(_vCgGoti(pt)/120,0.8)*Math.pow(0.7,_vDial(pt)),
+    vdFn:(pt)=>58.4*(pt.wt/70)*(_vDial(pt)?0.5:1)+38.4,  // Vss = Vc(58.4·WT/70, ×0.5 if HD) + Vp(38.4)
     omega_cl:0.22, omega_vd:0.18, sigma:0.08 },
-  { id:'adane', name:'Adane 2015', pop:'Obese (BMI ≥30)',
+  { id:'adane', name:'Adane 2015', pop:'Extremely obese (BMI≥40)',
     ref:'Pharmacotherapy 2015;35:127-139',
-    // 1-comp model: CL = 0.0169*CrCl + 0.94, Vd = 0.55*ABW (adjusted body weight)
-    clFn:(crcl)=>0.0169*crcl+0.94, vdFn:(wt,ht,sex)=>{
-      if(!ht||ht<=0) return 0.55*wt;
-      const htIn=ht/2.54; const ibw=sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);
-      const abw = wt > ibw*1.3 ? ibw+0.4*(wt-ibw) : wt;
-      return 0.55*abw;
-    },
-    omega_cl:0.28, omega_vd:0.22, sigma:0.11,
-    useABW:true },
-  { id:'bourguignon', name:'Bourguignon 2016', pop:'Elderly (≥80 yr)',
+    crclFn:_vCgAdaneBsa,
+    clFn:(pt)=>6.54*(_vCgAdaneBsa(pt)/125),
+    vdFn:(pt)=>0.51*pt.wt,
+    omega_cl:0.28, omega_vd:0.22, sigma:0.11 },
+  { id:'bourguignon', name:'Bourguignon 2016', pop:'Elderly >80yr',
     ref:'Antimicrob Agents Chemother 2016;60:4563-7',
-    // CL = 0.0117*CrCl + 0.28, Vd = 0.52*TBW
-    clFn:(crcl)=>0.0117*crcl+0.28, vdFn:(wt)=>0.52*wt,
+    crclFn:_vJelliffe,
+    clFn:(pt)=>{ var kel=0.0229+0.00088*_vJelliffe(pt); return kel*(23.35+0.211*pt.wt); }, // CL = kel × V
+    vdFn:(pt)=>23.35+0.211*pt.wt,
     omega_cl:0.35, omega_vd:0.20, sigma:0.13 }
 ];
 
@@ -313,12 +335,11 @@ function renderSamplingAdvice(){
 // --- Model Selection UI ---
 function getRecommendedModel(pt){
   if(!pt) pt=getPatient();
-  const ht=pt.ht||170, htIn=ht/2.54;
-  const ibw = pt.sex==='M' ? 50+2.3*(htIn-60) : 45.5+2.3*(htIn-60);
+  const ht=pt.ht||170;
   const bmi = pt.wt / ((ht/100)**2);
-  if(bmi >= 30 || pt.wt > ibw*1.3) return 'adane';
-  if(pt.age >= 80) return 'bourguignon';
-  return null; // auto is fine
+  if(bmi >= 40) return 'adane';          // Adane validated in extremely obese (BMI≥40)
+  if(pt.age >= 80) return 'bourguignon'; // Bourguignon validated in elderly >80
+  return 'goti';                         // Goti = general-population default recommendation
 }
 
 function renderModelSelect(){
@@ -335,8 +356,9 @@ function renderModelSelect(){
     const pt=getPatient();
     const bmi = pt.wt/((pt.ht/100)**2);
     let msg='';
-    if(recModel==='adane') msg=`<strong>⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Obesity model)</strong><br>Model นี้ใช้ ABW สำหรับ Vd + CrCl ที่ adjusted → แม่นยำกว่า general models ในคนอ้วน`;
-    else if(recModel==='bourguignon') msg=`<strong>👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly model)</strong><br>Validated ในผู้ป่วย >80 ปี ที่มี CL ต่ำกว่า general population`;
+    if(recModel==='adane') msg=`<strong>⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Extremely obese BMI≥40)</strong><br>Validated ในผู้ป่วยอ้วนมาก — CrCl BSA-normalized`;
+    else if(recModel==='bourguignon') msg=`<strong>👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly >80yr)</strong><br>Validated ในผู้ป่วย >80 ปี (Jelliffe CrCl, CL ต่ำกว่า general)`;
+    else msg=`<strong>⭐ แนะนำ Goti 2018 (General hospitalized)</strong><br>General-population model, best predictive performance (Broeker 2019). เลือก Auto เพื่อ best-fit ตาม OFV`;
     document.getElementById('modelSelect').innerHTML+=`<div class="info-box amber" style="font-size:11px;margin-top:8px">${msg}</div>`;
   }
 }
@@ -399,8 +421,8 @@ function ssPeakTrough(cl,vd,dose,interval,infusion){
 // BAYESIAN MAP: Grid search + Nelder-Mead
 // ============================================================
 function bayesianMAP(pt,doseHist,measuredLevels,model){
-  const crcl=cockcroft(pt.age,pt.wt,pt.scr,pt.sex,pt.ht);
-  const popCL=model.clFn(crcl), popVd=model.vdFn(pt.wt,pt.ht,pt.sex);
+  const crcl=model.crclFn(pt);
+  const popCL=model.clFn(pt), popVd=model.vdFn(pt);
 
   function obj(cl,vd){
     if(cl<=0||vd<=0||!isFinite(cl)||!isFinite(vd))return 1e10;
@@ -447,8 +469,8 @@ function bayesianMAP(pt,doseHist,measuredLevels,model){
 // MCMC: Metropolis-Hastings (async batched)
 // ============================================================
 function runMCMC(pt,doseHist,measuredLevels,model,mapR,nSamp,cb){
-  const crcl=cockcroft(pt.age,pt.wt,pt.scr,pt.sex,pt.ht);
-  const popCL=model.clFn(crcl),popVd=model.vdFn(pt.wt,pt.ht,pt.sex);
+  const crcl=model.crclFn(pt);
+  const popCL=model.clFn(pt),popVd=model.vdFn(pt);
 
   function logPost(cl,vd){
     if(cl<=0||vd<=0||!isFinite(cl)||!isFinite(vd))return -1e10;

@@ -56,10 +56,21 @@ function getPatient(){
 }
 function updateCrCl(){
   const p=getPatient();
-  const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);
-  let label=crcl.toFixed(1)+' mL/min';
-  if(p.ht>0){const htIn=p.ht/2.54;const ibw=p.sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(p.wt>ibw*1.3)label+=' (ABW)';if(p.age>=65&&p.scr<0.7)label+=' ⚠elderly';}
-  var crclEl=document.getElementById('ptCrCl'); if(crclEl) crclEl.value=label;
+  var crclEl=document.getElementById('ptCrCl');
+  // Display-only formula selection — mirrors tdm.js updateCrCl().
+  // Pediatric (age <18) shows Schwartz eGFR; adults show Cockcroft-Gault.
+  // NOTE: the Bayesian engine (bayesianMAP/runMCMC) still computes CG
+  // internally — that silent override is Phase 2. Safe here because the
+  // pediatric guard blocks Bayesian calculation for age <18 anyway.
+  if(p.age>0 && p.age<18 && p.ht>0){
+    const crcl=IVDrugRef.calcSchwartz(p.ht,p.scr);
+    if(crclEl) crclEl.value=crcl.toFixed(1)+' mL/min/1.73m² (Schwartz)';
+  } else {
+    const crcl=cockcroft(p.age,p.wt,p.scr,p.sex,p.ht);
+    let label=crcl.toFixed(1)+' mL/min';
+    if(p.ht>0){const htIn=p.ht/2.54;const ibw=p.sex==='M'?50+2.3*(htIn-60):45.5+2.3*(htIn-60);if(p.wt>ibw*1.3)label+=' (ABW)';if(p.age>=65&&p.scr<0.7)label+=' ⚠elderly';}
+    if(crclEl) crclEl.value=label;
+  }
   updateGuard(p);
 }
 

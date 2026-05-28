@@ -149,9 +149,15 @@ Each `enforce(pt, context, opts)` call:
 4. Throttled analytics event `pediatric_guard` (5s rolling per context).
 
 **Known limitation**: This is a guard layer only. The underlying silent
-CG override in `tdm.js:294,353` and `vanco-tdm.js:369,417` (Bayesian
-recomputes CG even when display shows Schwartz) is intentionally left
-for Phase 2 to keep the surface area of this safety fix small.
+CG override in `tdm.js:294,353` and `vanco-tdm.js` (`bayesianMAP`/
+`runMCMC` recompute CG even when display shows Schwartz) is intentionally
+left for Phase 2 to keep the surface area of this safety fix small.
+
+**Display consistency (v5.9.3 follow-up)**: `vanco-tdm.js` `updateCrCl()`
+now shows Schwartz eGFR for age <18 (matching `tdm.js`), so the CrCl
+field reads identically across both pages for the same pediatric patient.
+This is display-only — the engine still computes CG internally (Phase 2),
+which is safe because the guard blocks pediatric Bayesian calculation.
 
 ### `monitoring` field — GAS-cached data normalization (FIXED v5.3.6)
 GAS returns `monitoring` and `categories` as comma-separated strings. Fixed with two-layer normalization:

@@ -248,6 +248,13 @@ const TDMHub = (function() {
       crclFn: pt => IVDrugRef.calcSchwartz(pt.ht, pt.scr), clFn: _colinCL, vdFn: _colinVss, omega_cl: 0.279, omega_vd: 0.586, sigma: 0.215 };
     const isPedsVanco = pt => pt && typeof pt.age === 'number' && pt.age >= 1 && pt.age < 18;
     const _pedsScrWarn = pt => pt.scr < 0.2 ? '⚠ SCr <0.2 mg/dL — ค่าต่ำผิดปกติ; FSCR sensitive → CL อาจ overestimate' : (pt.scr > 1.5 && pt.age < 12 ? '⚠ SCr สูงผิดวัย — ตรวจสอบค่าและภาวะไต' : '');
+    // Peds peak/trough disclaimer (v5.11.1) — bilingual via current i18n language.
+    const _pedsPkTroughDisclaimer = () => {
+      const en = !!(window.IVDrugRefI18n && window.IVDrugRefI18n.getCurrentLang && window.IVDrugRefI18n.getCurrentLang() === 'en');
+      return en
+        ? 'Predicted peak/trough are 1-compartment approximations. In pediatrics, AUC₂₄ is the most reliable target (400-600 mg·h/L); interpret peak/trough as supportive only, not as a sole basis for dose adjustment.'
+        : 'ค่า Peak/Trough ที่แสดงเป็น 1-compartment approximation — สำหรับเด็ก AUC₂₄ เป็นค่าที่เชื่อถือได้ที่สุด (target 400-600 mg·h/L) ส่วน peak/trough ใช้ประกอบการพิจารณา ไม่ควรใช้ตัดสินปรับขนาดยาเดี่ยว ๆ';
+    };
 
     // Population-aware model matching from patient covariates (soft recommendation).
     // Returns array of {id, reason}. Replaces OFV auto-select; user picks the model.
@@ -902,7 +909,8 @@ const TDMHub = (function() {
           if (ciEl)
             ciEl.innerHTML = `
               <div class="info-box cyan" style="font-size:11px"><b>90% Credible Intervals (${samples.length} MCMC samples):</b><br>
-              AUC₂₄: ${aucLo.toFixed(0)}–${aucHi.toFixed(0)} | CL: ${clLo.toFixed(3)}–${clHi.toFixed(3)} L/hr</div>`;
+              AUC₂₄: ${aucLo.toFixed(0)}–${aucHi.toFixed(0)} | CL: ${clLo.toFixed(3)}–${clHi.toFixed(3)} L/hr</div>`
+              + (currentPK.modelId === 'colin' ? `<div class="info-box amber" style="font-size:11px;margin-top:6px">🧒 ${_pedsPkTroughDisclaimer()}</div>` : '');
 
           const tblEl = document.getElementById('vancoPkTable');
           if (tblEl)

@@ -143,9 +143,11 @@ peds vanco Bayesian). Vancomycin now has an age-routed pediatric model:
   ASHP/IDSA 2020); a measured level enables full Bayesian AUC dosing.
 - **SCr sanity warning** (peds, non-blocking): SCr<0.2 mg/dL (FSCR sensitive)
   or SCr high-for-age.
-- **omega/sigma** not in the paper excerpt → moderate priors (0.25/0.20/0.10);
-  flagged — the measured-level posterior dominates these. Confirm if BSV values
-  are available.
+- **Priors** (Colin Table 3, verified): ω_CL 0.279 (27.9% CV); ω_Vss 0.586
+  (lognormal combine of V1 27.3% + V2 97.9% IIV — size-invariant, one value
+  for all ages); residual proportional 0.215. Engine is proportional-only →
+  paper's additive error term (1.23 mg/L SD) NOT modeled (backlog, tied to the
+  2-comp engine that would carry separate V1/V2 IIV).
 
 Still duplicated across the two files (shared `PK_MODELS`/peds module = future PR).
 

@@ -86,13 +86,16 @@ function _colinCL(pt){
   return CL;
 }
 function _colinVss(pt){ return (COLIN.theta_V1+COLIN.theta_V2)*(pt.wt/70.0); } // 84.6×(WGT/70)
-// omega/sigma not given in paper excerpt → moderate priors (flagged); Bayesian fit
-// with a measured level dominates these for the posterior.
+// Priors from Colin 2019 Table 3 (verified): ω_CL 27.9% CV → 0.279;
+// ω_Vss 0.586 (lognormal combine of V1 27.3% + V2 97.9% IIV, size-invariant);
+// residual proportional 0.215. NOTE: paper's combined error also has an
+// additive term (1.23 mg/L SD) — engine is proportional-only, so additive is
+// NOT modeled here (flagged for backlog / future 2-comp engine).
 var COLIN_MODEL = { id:'colin', name:'Colin 2019', pop:'Pediatric 1-17yr',
   ref:'Clin Pharmacokinet 2019;58:767-80',
   crclFn:(pt)=>IVDrugRef.calcSchwartz(pt.ht,pt.scr),  // display only (Schwartz eGFR)
   clFn:_colinCL, vdFn:_colinVss,
-  omega_cl:0.25, omega_vd:0.20, sigma:0.10 };
+  omega_cl:0.279, omega_vd:0.586, sigma:0.215 };
 
 // Age routing: <1 blocked by guard, 1-17 → Colin (peds), ≥18 → adult 5-model.
 function isPedsVanco(pt){ return pt && typeof pt.age==='number' && pt.age>=1 && pt.age<18; }

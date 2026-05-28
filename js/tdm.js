@@ -240,8 +240,12 @@ const TDMHub = (function() {
       return CL;
     };
     const _colinVss = pt => (COLIN.theta_V1 + COLIN.theta_V2) * (pt.wt / 70.0);
+    // Priors from Colin 2019 Table 3: ω_CL 0.279 (27.9% CV); ω_Vss 0.586
+    // (lognormal combine of V1 27.3% + V2 97.9% IIV, size-invariant); residual
+    // proportional 0.215. Engine is proportional-only → additive term (1.23 mg/L)
+    // NOT modeled (backlog). Must match vanco-tdm.js.
     const COLIN_MODEL = { id: 'colin', name: 'Colin 2019', pop: 'Pediatric 1-17yr', ref: 'Clin Pharmacokinet 2019;58:767-80',
-      crclFn: pt => IVDrugRef.calcSchwartz(pt.ht, pt.scr), clFn: _colinCL, vdFn: _colinVss, omega_cl: 0.25, omega_vd: 0.20, sigma: 0.10 };
+      crclFn: pt => IVDrugRef.calcSchwartz(pt.ht, pt.scr), clFn: _colinCL, vdFn: _colinVss, omega_cl: 0.279, omega_vd: 0.586, sigma: 0.215 };
     const isPedsVanco = pt => pt && typeof pt.age === 'number' && pt.age >= 1 && pt.age < 18;
     const _pedsScrWarn = pt => pt.scr < 0.2 ? '⚠ SCr <0.2 mg/dL — ค่าต่ำผิดปกติ; FSCR sensitive → CL อาจ overestimate' : (pt.scr > 1.5 && pt.age < 12 ? '⚠ SCr สูงผิดวัย — ตรวจสอบค่าและภาวะไต' : '');
 

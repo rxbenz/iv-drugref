@@ -394,6 +394,15 @@ function _pedsScrWarn(pt){
   return '';
 }
 
+// Peds peak/trough disclaimer (v5.11.1): peak/trough are 1-comp approximations;
+// AUC₂₄ is the reliable peds target. Bilingual via current i18n language.
+function _pedsPkTroughDisclaimer(){
+  var en = !!(window.IVDrugRefI18n && window.IVDrugRefI18n.getCurrentLang && window.IVDrugRefI18n.getCurrentLang()==='en');
+  return en
+    ? 'Predicted peak/trough are 1-compartment approximations. In pediatrics, AUC₂₄ is the most reliable target (400-600 mg·h/L); interpret peak/trough as supportive only, not as a sole basis for dose adjustment.'
+    : 'ค่า Peak/Trough ที่แสดงเป็น 1-compartment approximation — สำหรับเด็ก AUC₂₄ เป็นค่าที่เชื่อถือได้ที่สุด (target 400-600 mg·h/L) ส่วน peak/trough ใช้ประกอบการพิจารณา ไม่ควรใช้ตัดสินปรับขนาดยาเดี่ยว ๆ';
+}
+
 // --- Model Selection UI (population-aware soft recommendation) ---
 function renderModelSelect(){
   const pt=getPatient();
@@ -783,7 +792,8 @@ function runBayesian(){
 
     document.getElementById('ciInfo').innerHTML=`
       <div class="info-box cyan" style="font-size:11px"><b>90% Credible Intervals (${samples.length} MCMC samples):</b><br>
-      AUC₂₄: ${aucLo.toFixed(0)}–${aucHi.toFixed(0)} &nbsp;|&nbsp; CL: ${clLo.toFixed(3)}–${clHi.toFixed(3)} L/hr &nbsp;|&nbsp; Ke: ${keLo.toFixed(4)}–${keHi.toFixed(4)} hr⁻¹</div>`;
+      AUC₂₄: ${aucLo.toFixed(0)}–${aucHi.toFixed(0)} &nbsp;|&nbsp; CL: ${clLo.toFixed(3)}–${clHi.toFixed(3)} L/hr &nbsp;|&nbsp; Ke: ${keLo.toFixed(4)}–${keHi.toFixed(4)} hr⁻¹</div>`
+      + (currentPK.modelId==='colin'?`<div class="info-box amber" style="font-size:11px;margin-top:6px">🧒 ${_pedsPkTroughDisclaimer()}</div>`:'');
 
     document.getElementById('pkTable').innerHTML=`
       <tr><td>Method</td><td style="color:var(--blue)">${currentPK.method} + MCMC</td></tr>

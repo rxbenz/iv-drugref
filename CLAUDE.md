@@ -151,6 +151,13 @@ peds vanco Bayesian). Vancomycin now has an age-routed pediatric model:
 
 Still duplicated across the two files (shared `PK_MODELS`/peds module = future PR).
 
+**Peak/trough disclaimer (v5.11.1)**: peds results (Colin path, `modelId==='colin'`)
+append a bilingual amber info-box after the CI block stating peak/trough are
+1-comp approximations and AUC₂₄ is the reliable peds target — because ω_Vss
+is a lognormal approximation of V1+V2 (V2 IIV 97.9%), so AUC is robust but the
+V-derived peak/trough are less reliable. UI-only (`_pedsPkTroughDisclaimer()` in
+both files, via `IVDrugRefI18n.getCurrentLang()`); no calc/equation change.
+
 ### Vancomycin PK coefficient correction (v5.10.0) — clinical calc change
 Phase 2b fix for inflated AUC (root cause: wrong `clFn` clearance slopes →
 CL 2–10× too low → AUC 2–3× too high → under-dosing). All 5 vanco PK

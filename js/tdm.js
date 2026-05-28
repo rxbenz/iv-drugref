@@ -25,10 +25,13 @@ const TDMHub = (function() {
     });
 
     // Ensure TDM-specific fields are present
+    const icuEl = document.getElementById('ptICU'), hemeEl = document.getElementById('ptHeme');
     return {
       ...basePatient,
       alb: basePatient.alb || 4.0,
       dialysis: basePatient.dialysis || 'none',
+      icu: !!(icuEl && icuEl.checked),
+      heme: !!(hemeEl && hemeEl.checked),
       crcl: 0 // Will be calculated in updateCrCl()
     };
   }
@@ -219,7 +222,23 @@ const TDMHub = (function() {
       }
     ];
 
-    let selectedModel = 'auto', currentPK = null, mcmcSamples = [], allModelResults = [];
+    let selectedModel = 'goti', currentPK = null, mcmcSamples = [], allModelResults = [];
+
+    // Population-aware model matching from patient covariates (soft recommendation).
+    // Returns array of {id, reason}. Replaces OFV auto-select; user picks the model.
+    function getMatchedModels(pt) {
+      if (!pt) pt = getPatient();
+      const matches = [], ids = {};
+      const bmi = pt.ht > 0 ? pt.wt / Math.pow(pt.ht / 100, 2) : 0;
+      const add = (id, reason) => { if (!ids[id]) { ids[id] = 1; matches.push({ id, reason }); } };
+      if (pt.dialysis && pt.dialysis !== 'none') add('goti', 'Dialysis → Goti 2018 (dialysis covariate)');
+      if (bmi >= 40) add('adane', `BMI ${bmi.toFixed(1)} → Adane 2015 (extremely obese)`);
+      if (pt.age >= 80) add('bourguignon', `อายุ ${pt.age} ปี → Bourguignon 2016 (elderly >80)`);
+      if (pt.icu) add('llopis', 'ICU / critically ill → Llopis-Salvia 2006');
+      if (pt.heme) add('buelga', 'Hematologic malignancy → Buelga 2005');
+      if (matches.length === 0) add('goti', 'General population → Goti 2018 (validated กว้างสุด)');
+      return matches;
+    }
     let doses = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 3, dateTime: '' }];
     let levels = [{ value: 15, dateTime: '' }];
     let refTime = null;
@@ -650,21 +669,25 @@ const TDMHub = (function() {
     }
 
     function renderModelSelect() {
-      const pt = getPatient();
-      const bmi = pt.wt / ((pt.ht / 100) ** 2);
-      const recModel = bmi >= 40 ? 'adane' : pt.age >= 80 ? 'bourguignon' : 'goti';
-      const all = [{ id: 'auto', name: 'Auto-select', pop: 'Best fit (lowest OFV)' }, ...PK_MODELS];
       const el = document.getElementById('vancoModelSelect');
       if (!el) return;
-      el.innerHTML = all.map(m => `
+      const pt = getPatient();
+      const matches = getMatchedModels(pt);
+      const recIds = {}; matches.forEach(x => recIds[x.id] = 1);
+      // No auto-select card; user picks. ⭐ marks population matches.
+      el.innerHTML = PK_MODELS.map(m => `
         <div class="model-card ${selectedModel === m.id ? 'active' : ''}" data-action="vancoSetModel" data-model="${m.id}">
-          <div class="mc-name">${m.name} ${m.id === recModel ? '<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>' : ''}</div><div class="mc-sub">${m.pop}</div></div>`).join('');
-      if (recModel) {
-        let msg = recModel === 'adane' ? `⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Extremely obese BMI≥40)`
-          : recModel === 'bourguignon' ? `👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly >80yr)`
-          : `⭐ แนะนำ Goti 2018 (General hospitalized) — เลือก Auto เพื่อ best-fit ตาม OFV`;
-        el.innerHTML += `<div class="info-box amber" style="font-size:11px;margin-top:6px">${msg}</div>`;
+          <div class="mc-name">${m.name} ${recIds[m.id] ? '<span style="color:var(--amber);font-size:10px">⭐ match</span>' : ''}</div><div class="mc-sub">${m.pop}</div></div>`).join('');
+      let msg;
+      if (matches.length === 1) {
+        msg = `<strong>📋 Recommended (จาก patient profile):</strong><br>⭐ ${matches[0].reason}`;
+      } else {
+        msg = `<strong>📋 ผู้ป่วยตรงกับหลาย population:</strong><br>`
+          + matches.map(x => '✓ ' + x.reason).join('<br>')
+          + `<br><strong>⚠️ กรุณาเลือกตามภาวะที่เด่นที่สุดทางคลินิก</strong> — หากไม่แน่ใจ → Goti 2018 (validated กว้างสุด)`;
       }
+      msg += `<br><span style="opacity:.7">ระบบ<strong>แนะนำ</strong>เท่านั้น — เภสัชกรเลือก model เอง (OFV แสดงเป็นข้อมูลเสริมหลัง run)</span>`;
+      el.innerHTML += `<div class="info-box amber" style="font-size:11px;margin-top:6px">${msg}</div>`;
     }
 
     function updateOptimizer() {
@@ -719,6 +742,7 @@ const TDMHub = (function() {
 
     return {
       init() { renderDoses(); renderLevels(); renderModelSelect(); },
+      renderModelSelect() { renderModelSelect(); },
       addDose() {
         const l = doses[doses.length - 1];
         const nextDt = l.dateTime ? new Date(new Date(l.dateTime).getTime() + l.interval * l.nDoses * 3600000).toISOString().slice(0, 16) : '';
@@ -761,13 +785,11 @@ const TDMHub = (function() {
           return { ...pk, auc24, ssPeak: ss.peak, ssTrough: ss.trough };
         });
 
-        let bestIdx = 0;
-        if (selectedModel === 'auto')
-          bestIdx = allModelResults.reduce((bi, r, i) => r.objValue < allModelResults[bi].objValue ? i : bi, 0);
-        else {
-          bestIdx = PK_MODELS.findIndex(m => m.id === selectedModel);
-          if (bestIdx < 0) bestIdx = 0;
-        }
+        // Use the user-selected model (no OFV auto-switch — population
+        // appropriateness must not be overridden by a numeric best-fit).
+        let bestIdx = PK_MODELS.findIndex(m => m.id === selectedModel);
+        if (bestIdx < 0) bestIdx = PK_MODELS.findIndex(m => m.id === 'goti');
+        if (bestIdx < 0) bestIdx = 0;
         currentPK = allModelResults[bestIdx];
         const bestModel = PK_MODELS[bestIdx];
 
@@ -1635,14 +1657,16 @@ const TDMHub = (function() {
         if (el) el.addEventListener('input', () => {
           updateCrCl();
           updatePhenyCorrection();
+          VancoTDM.renderModelSelect();
         });
       });
 
-      ['ptSex', 'ptDialysis'].forEach(id => {
+      ['ptSex', 'ptDialysis', 'ptICU', 'ptHeme'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('change', () => {
           updateCrCl();
           updatePhenyCorrection();
+          VancoTDM.renderModelSelect();
         });
       });
 

@@ -64,7 +64,7 @@ const PK_MODELS = [
     omega_cl:0.35, omega_vd:0.20, sigma:0.13 }
 ];
 
-let selectedModel='auto', currentPK=null, mcmcSamples=[], allModelResults=[];
+let selectedModel='goti', currentPK=null, mcmcSamples=[], allModelResults=[];
 let lastMCMCAcceptRate=0, lastMCMCSampleCount=0, lastSamplingWarnings=[];
 
 // --- Helpers (consolidated into core.js) ---
@@ -72,9 +72,28 @@ function cockcroft(age,wt,scr,sex,ht){ return IVDrugRef.calcCockcroftGault(age,w
 function getPatient(){
   var p=IVDrugRef.getPatientFromForm();
   var albEl=document.getElementById('ptAlb'), dialEl=document.getElementById('ptDialysis');
+  var icuEl=document.getElementById('ptICU'), hemeEl=document.getElementById('ptHeme');
   return{wt:p.wt,age:p.age,sex:p.sex,scr:p.scr,ht:p.ht,
     albumin:albEl&&albEl.value?+albEl.value:null,
-    dialysis:dialEl?dialEl.value:'none'};
+    dialysis:dialEl?dialEl.value:'none',
+    icu:!!(icuEl&&icuEl.checked),
+    heme:!!(hemeEl&&hemeEl.checked)};
+}
+
+// Population-aware model matching from patient covariates (soft recommendation).
+// Returns array of {id, reason}. Replaces OFV auto-select; user picks the model.
+function getMatchedModels(pt){
+  if(!pt) pt=getPatient();
+  var matches=[], ids={};
+  var bmi=(pt.ht>0)?pt.wt/Math.pow(pt.ht/100,2):0;
+  function add(id,reason){ if(!ids[id]){ids[id]=1;matches.push({id:id,reason:reason});} }
+  if(pt.dialysis && pt.dialysis!=='none') add('goti','Dialysis → Goti 2018 (dialysis covariate)');
+  if(bmi>=40) add('adane','BMI '+bmi.toFixed(1)+' → Adane 2015 (extremely obese)');
+  if(pt.age>=80) add('bourguignon','อายุ '+pt.age+' ปี → Bourguignon 2016 (elderly >80)');
+  if(pt.icu) add('llopis','ICU / critically ill → Llopis-Salvia 2006');
+  if(pt.heme) add('buelga','Hematologic malignancy → Buelga 2005');
+  if(matches.length===0) add('goti','General population → Goti 2018 (validated กว้างสุด)');
+  return matches;
 }
 function updateCrCl(){
   const p=getPatient();
@@ -332,35 +351,29 @@ function renderSamplingAdvice(){
   adviceEl.innerHTML=html;
 }
 
-// --- Model Selection UI ---
-function getRecommendedModel(pt){
-  if(!pt) pt=getPatient();
-  const ht=pt.ht||170;
-  const bmi = pt.wt / ((ht/100)**2);
-  if(bmi >= 40) return 'adane';          // Adane validated in extremely obese (BMI≥40)
-  if(pt.age >= 80) return 'bourguignon'; // Bourguignon validated in elderly >80
-  return 'goti';                         // Goti = general-population default recommendation
-}
-
+// --- Model Selection UI (population-aware soft recommendation) ---
 function renderModelSelect(){
-  const recModel = getRecommendedModel();
-  const all=[{id:'auto',name:'Auto-select',pop:'Best fit (lowest OFV)'},...PK_MODELS];
-  document.getElementById('modelSelect').innerHTML=all.map(m=>{
-    const isRec = m.id===recModel;
+  const pt=getPatient();
+  const matches=getMatchedModels(pt);
+  const recIds={}; matches.forEach(x=>recIds[x.id]=1);
+  // Model cards — no auto-select; user picks. ⭐ marks population matches.
+  document.getElementById('modelSelect').innerHTML=PK_MODELS.map(m=>{
+    const isRec=!!recIds[m.id];
     return `<div class="model-card ${selectedModel===m.id?'active':''}" data-action="selectModel" data-model="${m.id}">
-      <div class="mc-name">${m.name} ${isRec?'<span style="color:var(--amber);font-size:10px">⭐ แนะนำ</span>':''}</div>
+      <div class="mc-name">${m.name} ${isRec?'<span style="color:var(--amber);font-size:10px">⭐ match</span>':''}</div>
       <div class="mc-sub">${m.pop}${m.ref?' — '+m.ref:''}</div></div>`;
   }).join('');
-  // Show recommendation info
-  if(recModel){
-    const pt=getPatient();
-    const bmi = pt.wt/((pt.ht/100)**2);
-    let msg='';
-    if(recModel==='adane') msg=`<strong>⚠ BMI ${bmi.toFixed(1)} → แนะนำ Adane 2015 (Extremely obese BMI≥40)</strong><br>Validated ในผู้ป่วยอ้วนมาก — CrCl BSA-normalized`;
-    else if(recModel==='bourguignon') msg=`<strong>👴 อายุ ${pt.age} ปี → แนะนำ Bourguignon 2016 (Elderly >80yr)</strong><br>Validated ในผู้ป่วย >80 ปี (Jelliffe CrCl, CL ต่ำกว่า general)`;
-    else msg=`<strong>⭐ แนะนำ Goti 2018 (General hospitalized)</strong><br>General-population model, best predictive performance (Broeker 2019). เลือก Auto เพื่อ best-fit ตาม OFV`;
-    document.getElementById('modelSelect').innerHTML+=`<div class="info-box amber" style="font-size:11px;margin-top:8px">${msg}</div>`;
+  // Recommendation info box
+  let msg;
+  if(matches.length===1){
+    msg=`<strong>📋 Recommended (จาก patient profile):</strong><br>⭐ ${matches[0].reason}`;
+  } else {
+    msg=`<strong>📋 ผู้ป่วยตรงกับหลาย population:</strong><br>`
+      + matches.map(x=>'✓ '+x.reason).join('<br>')
+      + `<br><strong>⚠️ กรุณาเลือกตามภาวะที่เด่นที่สุดทางคลินิก</strong> — หากไม่แน่ใจ → Goti 2018 (validated กว้างสุด)`;
   }
+  msg+=`<br><span style="opacity:.7">ระบบ<strong>แนะนำ</strong>เท่านั้น — เภสัชกรเลือก model เอง (OFV แสดงเป็นข้อมูลเสริมหลัง run)</span>`;
+  document.getElementById('modelSelect').innerHTML+=`<div class="info-box amber" style="font-size:11px;margin-top:8px">${msg}</div>`;
 }
 
 // ============================================================
@@ -631,14 +644,11 @@ function runBayesian(){
     return{...pk,auc24,ssPeak:ss.peak,ssTrough:ss.trough};
   });
 
-  // Select best
-  let bestIdx=0;
-  if(selectedModel==='auto'){
-    bestIdx=allModelResults.reduce((bi,r,i)=>r.objValue<allModelResults[bi].objValue?i:bi,0);
-  } else {
-    bestIdx=PK_MODELS.findIndex(m=>m.id===selectedModel);
-    if(bestIdx<0)bestIdx=0;
-  }
+  // Use the user-selected model (no OFV auto-switch — population appropriateness
+  // must not be overridden by a numeric best-fit). Default 'goti'.
+  let bestIdx=PK_MODELS.findIndex(m=>m.id===selectedModel);
+  if(bestIdx<0)bestIdx=PK_MODELS.findIndex(m=>m.id==='goti');
+  if(bestIdx<0)bestIdx=0;
   currentPK=allModelResults[bestIdx];
   const bestModel=PK_MODELS[bestIdx];
 
@@ -1090,10 +1100,14 @@ function trackTDMResult(model, aucMAP, aucLo, aucHi, acceptRate, pt, pkResult, d
   });
 }
 
-  // Event listeners
+  // Event listeners — patient covariates also refresh the model recommendation
   ['ptWt','ptAge','ptSex','ptScr','ptHt'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.addEventListener('input',updateCrCl);
+    if(el) el.addEventListener('input',()=>{updateCrCl();renderModelSelect();});
+  });
+  ['ptDialysis','ptICU','ptHeme'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change',renderModelSelect);
   });
   ['optDose','optInterval','optInfusion'].forEach(id=>{
     const el = document.getElementById(id);

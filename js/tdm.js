@@ -69,7 +69,69 @@ const TDMHub = (function() {
       }
       if (crclEl) crclEl.value = label;
     }
+
+    // Re-evaluate pediatric guard for the currently active TDM section
+    updateGuardForActiveTab(p);
+
     return p;
+  }
+
+  // Map a TDM tab id → pediatric-guard context identifier
+  function _guardContextForDrug(drug) {
+    if (!window.PediatricGuard) return null;
+    var C = window.PediatricGuard.CONTEXTS;
+    switch (drug) {
+      case 'vancomycin':      return C.VANCO_BAYESIAN;
+      case 'aminoglycoside':  return C.AMINOGLYCOSIDE_BAYESIAN;
+      case 'phenytoin':       return C.PHENYTOIN_BAYESIAN;
+      case 'valproate':       return C.VALPROATE_BAYESIAN;
+      case 'tacrolimus':      return C.TACROLIMUS_BAYESIAN;
+      case 'digoxin':         return C.DIGOXIN_BAYESIAN;
+      case 'warfarin':        return C.WARFARIN_BAYESIAN;
+      default: return null;
+    }
+  }
+
+  // Selectors for run/calculate buttons across all TDM sections
+  var _RUN_BUTTON_SELECTORS = [
+    '[data-action="vancoRun"]',
+    '[data-action="vancoRunModel"]',
+    '[data-action="phenytoinRun"]',
+    '[data-action="agRun"]',
+    '[data-action="vpaRun"]',
+    '[data-action="tacrolimusRun"]',
+    '[data-action="digoxinRun"]',
+    '[data-action="warfarinINRRun"]',
+    '[data-action="warfarinPGxRun"]'
+  ];
+
+  function updateGuardForActiveTab(pt) {
+    if (!window.PediatricGuard) return;
+    pt = pt || getPatient();
+    var drug = window.TDMHub && window.TDMHub.getActiveDrug ? window.TDMHub.getActiveDrug() : (typeof activeDrug !== 'undefined' ? activeDrug : 'vancomycin');
+    var ctx = _guardContextForDrug(drug);
+    if (!ctx) {
+      window.PediatricGuard.hideBanner(document.getElementById('tdmGuardBanner'));
+      window.PediatricGuard.enableButtons(_RUN_BUTTON_SELECTORS);
+      return;
+    }
+    window.PediatricGuard.enforce(pt, ctx, {
+      banner: 'tdmGuardBanner',
+      disableSelectors: _RUN_BUTTON_SELECTORS
+    });
+  }
+
+  // Returns true when the run should be aborted (pediatric block active)
+  function _guardBlocked(drug) {
+    if (!window.PediatricGuard) return false;
+    var ctx = _guardContextForDrug(drug);
+    if (!ctx) return false;
+    var pt = getPatient();
+    var blocked = window.PediatricGuard.enforce(pt, ctx, {
+      banner: 'tdmGuardBanner',
+      disableSelectors: _RUN_BUTTON_SELECTORS
+    });
+    return blocked;
   }
 
   // ============================================================
@@ -2221,7 +2283,10 @@ const TDMHub = (function() {
 
     // Utilities
     updateCrCl: updateCrCl,
-    getPatient: getPatient
+    getPatient: getPatient,
+    getActiveDrug: function() { return activeDrug; },
+    _guardBlocked: _guardBlocked,
+    _updateGuardForActiveTab: updateGuardForActiveTab
   };
 })();
 
@@ -2235,26 +2300,26 @@ if (document.readyState === 'loading') {
 // ====== Event Delegation (replaces inline onclick/onchange in tdm.html) ======
 IVDrugRef.delegate(document, 'click', {
   goBack: function(e) { if (history.length > 1) { e.preventDefault(); history.back(); } },
-  switchDrug: function(e, t) { TDMHub.switchDrug(t.dataset.drug); },
+  switchDrug: function(e, t) { TDMHub.switchDrug(t.dataset.drug); TDMHub._updateGuardForActiveTab && TDMHub._updateGuardForActiveTab(); },
   vancoAddDose: function() { TDMHub.VancoTDM_addDose(); },
   vancoAddLevel: function() { TDMHub.VancoTDM_addLevel(); },
   vancoRemoveDose: function(e, t) { TDMHub.VancoTDM_removeDose(+t.dataset.index); },
   vancoRemoveLevel: function(e, t) { TDMHub.VancoTDM_removeLevel(+t.dataset.index); },
   vancoSetModel: function(e, t) { TDMHub.VancoTDM_setModel(t.dataset.model); },
-  vancoRunModel: function(e, t) { TDMHub.VancoTDM_setModel(t.dataset.model); TDMHub.VancoTDM_run(); },
-  vancoRun: function() { TDMHub.VancoTDM_run(); },
+  vancoRunModel: function(e, t) { if (TDMHub._guardBlocked('vancomycin')) return; TDMHub.VancoTDM_setModel(t.dataset.model); TDMHub.VancoTDM_run(); },
+  vancoRun: function() { if (TDMHub._guardBlocked('vancomycin')) return; TDMHub.VancoTDM_run(); },
   vancoDoseOption: function(e, t) {
     var d = document.getElementById('vancoOptDose'); if (d) d.value = t.dataset.dose;
     var q = document.getElementById('vancoOptInterval'); if (q) q.value = t.dataset.q;
     TDMHub.VancoTDM_updateOpt();
   },
-  phenytoinRun: function() { TDMHub.PhenytoinTDM_run(); },
-  agRun: function() { TDMHub.AminoglycosideTDM_run(); },
-  vpaRun: function() { TDMHub.ValproateTDM_run(); },
-  tacrolimusRun: function() { TDMHub.TacrolimusTDM_run(); },
-  digoxinRun: function() { TDMHub.DigoxinTDM_run(); },
-  warfarinINRRun: function() { TDMHub.WarfarinTDM_runINR(); },
-  warfarinPGxRun: function() { TDMHub.WarfarinTDM_runPGx(); },
+  phenytoinRun: function() { if (TDMHub._guardBlocked('phenytoin')) return; TDMHub.PhenytoinTDM_run(); },
+  agRun: function() { if (TDMHub._guardBlocked('aminoglycoside')) return; TDMHub.AminoglycosideTDM_run(); },
+  vpaRun: function() { if (TDMHub._guardBlocked('valproate')) return; TDMHub.ValproateTDM_run(); },
+  tacrolimusRun: function() { if (TDMHub._guardBlocked('tacrolimus')) return; TDMHub.TacrolimusTDM_run(); },
+  digoxinRun: function() { if (TDMHub._guardBlocked('digoxin')) return; TDMHub.DigoxinTDM_run(); },
+  warfarinINRRun: function() { if (TDMHub._guardBlocked('warfarin')) return; TDMHub.WarfarinTDM_runINR(); },
+  warfarinPGxRun: function() { if (TDMHub._guardBlocked('warfarin')) return; TDMHub.WarfarinTDM_runPGx(); },
   shareTDM: function(e, t) { tdmShareLine(t.dataset.drug); },
   exportTDM: function(e, t) { tdmExportPdf(t.dataset.drug); }
 });
@@ -2395,7 +2460,7 @@ function buildVancoTDMShareText() {
     text += 'Predicted Peak: ' + opt.peak.toFixed(1) + ' | Trough: ' + opt.trough.toFixed(1) + '\n';
   }
 
-  var ver = IVDrugRef.VERSION || '5.1.0';
+  var ver = IVDrugRef.VERSION || '5.9.3';
   text += '\n---\nIV DrugRef v' + ver + '\nhttps://rxbenz.github.io/iv-drugref/\n';
   text += '\u26a0 \u0e43\u0e0a\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e33\u0e19\u0e27\u0e13 \u0e44\u0e21\u0e48\u0e17\u0e14\u0e41\u0e17\u0e19 clinical judgment';
   return text;
@@ -2417,7 +2482,7 @@ function buildTDMShareText(drug) {
   if (pt.crcl) text += 'CrCl: ' + (typeof pt.crcl === 'number' ? pt.crcl.toFixed(1) : pt.crcl) + ' mL/min\n';
   text += '\n';
   text += extractTDMResultText(drug) + '\n';
-  var ver = IVDrugRef.VERSION || '5.1.0';
+  var ver = IVDrugRef.VERSION || '5.9.3';
   text += '\n---\nIV DrugRef v' + ver + '\nhttps://rxbenz.github.io/iv-drugref/\n';
   text += '\u26a0 \u0e43\u0e0a\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e0a\u0e48\u0e27\u0e22\u0e04\u0e33\u0e19\u0e27\u0e13 \u0e44\u0e21\u0e48\u0e17\u0e14\u0e41\u0e17\u0e19 clinical judgment';
   return text;

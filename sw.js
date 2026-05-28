@@ -1,12 +1,14 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.7.5
+// IV Drug Reference PWA — Service Worker v5.9.3
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
 // v5.7.5: Global ESC key to close modals/sheets/overlays
+// v5.9.3: Pediatric Safety Guard (blocks adult-only Bayesian TDM in <18 yr;
+//         warns for calculator/renal-dosing). Reconciles version drift.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.7.5';
+const CACHE_NAME = 'iv-drugref-v5.9.3';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

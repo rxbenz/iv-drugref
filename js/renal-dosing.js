@@ -95,6 +95,13 @@
     // Render validation messages (validation runs inside getPatientFromForm)
     IVDrugRef.renderValidationMessages('validationMessages', pt.validation);
 
+    // Pediatric safety guard (warn-level; never blocks)
+    if (window.PediatricGuard) {
+      window.PediatricGuard.enforce(pt, window.PediatricGuard.CONTEXTS.RENAL_DOSING, {
+        banner: 'renalGuardBanner'
+      });
+    }
+
     // Block calculation on hard errors
     if (!pt.validation.allValid) {
       var el;

@@ -71,6 +71,7 @@
       <div class="field"><label>SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div>
     </div>
     <div id="validationMessages" class="validation-container" style="display:none;"></div>
+    <div id="tdmGuardBanner" style="display:none;"></div>
     <div class="row row-4">
       <div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div>
       <div class="field"><label>Albumin (g/dL)</label><input type="number" id="ptAlb" value="4.0" min="0.5" max="6" step="0.1"></div>
@@ -535,7 +536,7 @@
   สำหรับบุคลากรทางการแพทย์เท่านั้น
 </div>
 
-<div class="app-footer">IV DrugRef v5.9.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+<div class="app-footer">IV DrugRef v5.9.3 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 
 </div><!-- end container -->
 
@@ -567,6 +568,7 @@
 <!-- BUILD:JS -->
 <script src="js/error-tracker.js"></script>
 <script src="js/core.js"></script>
+<script src="js/pediatric-guard.js"></script>
 <script src="js/share-export.js"></script>
 <script src="js/tdm.js"></script>
 <script src="js/quick-actions.js"></script>

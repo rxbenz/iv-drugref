@@ -257,9 +257,10 @@
 
     try {
       if (!window.IVDrugRef || typeof window.IVDrugRef.sendAnalytics !== 'function') return;
+      // Payload follows the GAS receiver convention: routed by `type`, and
+      // session_id/user_id are added by IVDrugRef.sendAnalytics() enrichment.
       window.IVDrugRef.sendAnalytics({
         type: 'pediatric_guard',
-        event: 'pediatric_blocked',
         context: context,
         severity: (status && status.severity) || null,
         reason: (status && status.reason) || null,

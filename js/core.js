@@ -659,19 +659,35 @@ var IVDrugRef = (function() {
   let _reqWindowStart = Date.now();
 
   /**
-   * Get anonymous session ID from localStorage
-   * @returns {string} Session ID or empty string
+   * Get anonymous session ID from localStorage (lazy-init, rotates daily).
+   * Mirrors the scheme calculator.js uses so all pages share one ID.
+   * @returns {string} Session ID
    */
   function getSessionId() {
-    return localStorage.getItem('anonSessionId') || '';
+    var today = new Date().toISOString().substring(0, 10);
+    var id = localStorage.getItem('anonSessionId');
+    var idDate = localStorage.getItem('anonSessionDate');
+    if (!id || idDate !== today) {
+      id = 'u' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      try {
+        localStorage.setItem('anonSessionId', id);
+        localStorage.setItem('anonSessionDate', today);
+      } catch (e) {}
+    }
+    return id;
   }
 
   /**
-   * Get anonymous user ID from localStorage
-   * @returns {string} User ID or empty string
+   * Get anonymous user ID from localStorage (lazy-init, persistent).
+   * @returns {string} User ID
    */
   function getUserId() {
-    return localStorage.getItem('anonUserId') || '';
+    var uid = localStorage.getItem('anonUserId');
+    if (!uid) {
+      uid = 'p' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+      try { localStorage.setItem('anonUserId', uid); } catch (e) {}
+    }
+    return uid;
   }
 
   /**

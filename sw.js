@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.10.0
+// IV Drug Reference PWA — Service Worker v5.11.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -8,9 +8,11 @@
 //         warns for calculator/renal-dosing). Reconciles version drift.
 // v5.10.0: Vancomycin PK coefficient correction (Phase 2b) — all 5 models
 //          re-derived from primary papers; fixes inflated AUC (under-dosing).
+// v5.11.0: Pediatric vancomycin Bayesian unblocked for age 1-17 via Colin 2019
+//          model (age-routed); infant <1 still blocked. Adult path unchanged.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.10.0';
+const CACHE_NAME = 'iv-drugref-v5.11.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

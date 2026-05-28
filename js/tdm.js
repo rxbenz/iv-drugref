@@ -224,6 +224,31 @@ const TDMHub = (function() {
 
     let selectedModel = 'goti', currentPK = null, mcmcSamples = [], allModelResults = [];
 
+    // PEDIATRIC MODEL — Colin 2019 (age 1-17). 2-comp paper → Vss=V1+V2 in 1-comp.
+    // Verified vs paper (golden 35yo CL≈4.10, 60yo CL≈2.55). SCr mg/dL.
+    // omega/sigma not in paper excerpt → moderate priors (Bayesian fit dominates).
+    const COLIN = { theta_CL: 5.31, theta_V1: 42.9, theta_V2: 41.7, PMA50: 46.4, gamma1: 2.89, AGE50: 61.6, gamma2: 2.24, theta_SCR: 0.649, theta_STDY10: 0.294 };
+    const _colinPMAyr = pt => pt.age + 40.0 / 52.0;
+    const _colinCL = pt => {
+      const FSize = pt.wt / 70.0, PMAyr = _colinPMAyr(pt), PMAwk = PMAyr * 52.0;
+      const FMat = Math.pow(PMAwk, COLIN.gamma1) / (Math.pow(PMAwk, COLIN.gamma1) + Math.pow(COLIN.PMA50, COLIN.gamma1));
+      const FDecline = Math.pow(PMAyr, -COLIN.gamma2) / (Math.pow(PMAyr, -COLIN.gamma2) + Math.pow(COLIN.AGE50, -COLIN.gamma2));
+      const SCRstd = Math.exp(-1.228 + Math.log10(PMAyr) * 0.672 + 6.27 * Math.exp(-3.11 * PMAyr));
+      const FSCR = Math.exp(-COLIN.theta_SCR * (pt.scr - SCRstd));
+      let CL = COLIN.theta_CL * Math.pow(FSize, 0.75) * FMat * FDecline * FSCR;
+      if (pt.heme) CL *= (1 + COLIN.theta_STDY10);
+      return CL;
+    };
+    const _colinVss = pt => (COLIN.theta_V1 + COLIN.theta_V2) * (pt.wt / 70.0);
+    // Priors from Colin 2019 Table 3: ω_CL 0.279 (27.9% CV); ω_Vss 0.586
+    // (lognormal combine of V1 27.3% + V2 97.9% IIV, size-invariant); residual
+    // proportional 0.215. Engine is proportional-only → additive term (1.23 mg/L)
+    // NOT modeled (backlog). Must match vanco-tdm.js.
+    const COLIN_MODEL = { id: 'colin', name: 'Colin 2019', pop: 'Pediatric 1-17yr', ref: 'Clin Pharmacokinet 2019;58:767-80',
+      crclFn: pt => IVDrugRef.calcSchwartz(pt.ht, pt.scr), clFn: _colinCL, vdFn: _colinVss, omega_cl: 0.279, omega_vd: 0.586, sigma: 0.215 };
+    const isPedsVanco = pt => pt && typeof pt.age === 'number' && pt.age >= 1 && pt.age < 18;
+    const _pedsScrWarn = pt => pt.scr < 0.2 ? '⚠ SCr <0.2 mg/dL — ค่าต่ำผิดปกติ; FSCR sensitive → CL อาจ overestimate' : (pt.scr > 1.5 && pt.age < 12 ? '⚠ SCr สูงผิดวัย — ตรวจสอบค่าและภาวะไต' : '');
+
     // Population-aware model matching from patient covariates (soft recommendation).
     // Returns array of {id, reason}. Replaces OFV auto-select; user picks the model.
     function getMatchedModels(pt) {
@@ -672,6 +697,15 @@ const TDMHub = (function() {
       const el = document.getElementById('vancoModelSelect');
       if (!el) return;
       const pt = getPatient();
+      // Pediatric (1-17): Colin 2019 path — single model, disclaimer + SCr warning.
+      if (isPedsVanco(pt)) {
+        selectedModel = 'colin';
+        const scrW = _pedsScrWarn(pt);
+        el.innerHTML = `<div class="model-card active"><div class="mc-name">Colin 2019 ⭐ pediatric</div><div class="mc-sub">Pediatric 1-17yr — Clin Pharmacokinet 2019;58:767-80</div></div>`
+          + `<div class="info-box amber" style="font-size:11px;margin-top:6px"><strong>🧒 Pediatric vancomycin (Colin 2019)</strong><br>Model validated on limited data (pooled n=118). <strong>Bayesian estimation ด้วย measured level แนะนำอย่างยิ่ง</strong> — population-only เป็น starting reference เท่านั้น. ตรวจสอบกับ institutional protocol`
+          + (scrW ? `<br><span style="color:var(--red)">${scrW}</span>` : '') + `</div>`;
+        return;
+      }
       const matches = getMatchedModels(pt);
       const recIds = {}; matches.forEach(x => recIds[x.id] = 1);
       // No auto-select card; user picks. ⭐ marks population matches.
@@ -717,6 +751,13 @@ const TDMHub = (function() {
 
     function genDoseOpts() {
       if (!currentPK) return;
+      // Pediatric without a measured level: no AUC-based dose recommendation
+      // from population-only (per 2020 guideline) — show requirement note.
+      if (currentPK.pedsNoLevel) {
+        const dc = document.getElementById('vancoDoseCompare');
+        if (dc) dc.innerHTML = `<div class="info-box amber" style="font-size:11px">🧒 <strong>Pediatric:</strong> ไม่แสดง dose recommendation จาก population-only — กรุณาเจาะ measured level แล้ว run อีกครั้งเพื่อ Bayesian AUC-guided dosing. Population estimate เป็น <strong>starting reference</strong> เท่านั้น</div>`;
+        return;
+      }
       const qs = [8, 12, 24, 36, 48], ds = [500, 750, 1000, 1250, 1500, 1750, 2000];
       let opts = [];
       for (const q of qs)
@@ -777,7 +818,11 @@ const TDMHub = (function() {
         if (!refTime) { alert('กรุณากรอกเวลาให้ยา dose แรกก่อน'); return; }
 
         const doseHist = buildDH(), measuredLvls = buildLV();
-        allModelResults = PK_MODELS.map(m => {
+        // Age routing: peds 1-17 → Colin 2019 only; adults → 5-model panel.
+        const peds = isPedsVanco(pt);
+        const pedsNoLevel = peds && measuredLvls.length === 0;
+        const MODELS = peds ? [COLIN_MODEL] : PK_MODELS;
+        allModelResults = MODELS.map(m => {
           const pk = bayesianMAP(pt, doseHist, measuredLvls, m);
           const lastD = doseHist[doseHist.length - 1];
           const auc24 = calcAUC_ss(pk.cl, pk.vd, lastD.amount, lastD.interval, lastD.infusion) * (24 / lastD.interval);
@@ -785,24 +830,30 @@ const TDMHub = (function() {
           return { ...pk, auc24, ssPeak: ss.peak, ssTrough: ss.trough };
         });
 
-        // Use the user-selected model (no OFV auto-switch — population
-        // appropriateness must not be overridden by a numeric best-fit).
-        let bestIdx = PK_MODELS.findIndex(m => m.id === selectedModel);
-        if (bestIdx < 0) bestIdx = PK_MODELS.findIndex(m => m.id === 'goti');
-        if (bestIdx < 0) bestIdx = 0;
+        // Select model: peds → Colin (0); adults → user-selected (no OFV auto-switch).
+        let bestIdx;
+        if (peds) { bestIdx = 0; }
+        else {
+          bestIdx = MODELS.findIndex(m => m.id === selectedModel);
+          if (bestIdx < 0) bestIdx = MODELS.findIndex(m => m.id === 'goti');
+          if (bestIdx < 0) bestIdx = 0;
+        }
         currentPK = allModelResults[bestIdx];
-        const bestModel = PK_MODELS[bestIdx];
+        currentPK.pedsNoLevel = pedsNoLevel;
+        const bestModel = MODELS[bestIdx];
 
         const el = document.getElementById('vancoModelCompare');
         if (el)
           el.innerHTML = '<div class="model-grid">' + allModelResults.map((r, i) => {
             const cls = r.auc24 >= 400 && r.auc24 <= 600 ? 'green' : (r.auc24 < 400 ? 'amber' : 'red');
-            return `<div class="model-card ${i === bestIdx ? 'active' : ''}" data-action="vancoRunModel" data-model="${PK_MODELS[i].id}">
-              <div class="mc-name">${r.model} ${i === bestIdx ? '⭐' : ''}</div><div class="mc-sub">${PK_MODELS[i].pop}</div>
-              <div class="mc-auc" style="color:var(--${cls})">AUC₂₄ ${r.auc24.toFixed(0)}</div>
+            const action = peds ? '' : `data-action="vancoRunModel" data-model="${MODELS[i].id}"`;
+            return `<div class="model-card ${i === bestIdx ? 'active' : ''}" ${action}>
+              <div class="mc-name">${r.model} ${i === bestIdx ? '⭐' : ''}</div><div class="mc-sub">${MODELS[i].pop}</div>
+              <div class="mc-auc" style="color:var(--${cls})">AUC₂₄ ${r.auc24.toFixed(0)}${pedsNoLevel ? ' (population)' : ''}</div>
               <div style="font-size:10px;color:var(--text3);margin-top:3px">CL ${r.cl.toFixed(2)} | Vd ${r.vd.toFixed(1)} | t½ ${r.halflife.toFixed(1)}h</div>
               <div style="font-size:10px;color:var(--text3)">OFV ${r.objValue.toFixed(2)}</div></div>`;
-          }).join('') + '</div>';
+          }).join('') + '</div>'
+          + (peds ? `<div class="info-box amber" style="font-size:11px;margin-top:8px"><strong>🧒 Colin 2019 (pediatric)</strong> — validated on limited data (pooled n=118). ${pedsNoLevel ? '<strong>Population estimate เท่านั้น</strong> — ต้องเจาะ measured level เพื่อ AUC-guided dosing; ไม่ใช้ population-only เป็น dose recommendation.' : 'Bayesian estimate ด้วย measured level.'} ตรวจสอบกับ institutional protocol</div>` : '');
 
         const progEl = document.getElementById('vancoMcmcProgress');
         const resEl = document.getElementById('vancoResults');

@@ -4,18 +4,28 @@
 IV Drug Quick Reference PWA for healthcare professionals. Thai-language UI.
 Single-page modules: drug lookup, IV compatibility, renal dosing, calculators, TDM, admin panel.
 
+> **Communication**: Reply to the user (project owner) in **Thai**. The product
+> UI and user-facing strings are Thai; keep code comments/commit messages in
+> English unless an existing string is already Thai.
+
 ## Architecture
 
 ### Single Source → Auto Build → Deploy
 ```
 v5.0-modular/          ← ONLY working directory (this repo)
-├── *.html             ← Source HTML (references external css/js)
-├── css/*.css          ← Modular stylesheets
+├── *.html             ← Source HTML (references external css/js) — 8 pages
+├── css/*.css          ← Modular stylesheets (per-page + shared.css, theme.css)
 ├── js/*.js            ← Modular JavaScript
-├── build.js           ← Inlines CSS/JS into HTML for production
+├── i18n.js, translations-en.js, drugs-data.json, version.json, sw.js, manifest.json
+│                      ← Root-level static files (copied as-is, NOT inlined)
+├── build.js           ← Inlines CSS/JS into HTML for production (PAGES config)
 ├── .github/workflows/deploy.yml  ← GitHub Actions auto-deploy
 └── dist/              ← Built output (gitignored)
 ```
+
+> **Current version: 5.11.1** (see `package.json` / `version.json`). When
+> shipping a release, bump the version string in `package.json`, `version.json`,
+> `sw.js`, and the per-page footers so the force-update path fires.
 
 **Deploy flow**: `git push main` → GitHub Actions → `node build.js --prod` → inline CSS/JS → deploy to GitHub Pages
 
@@ -26,20 +36,38 @@ v5.0-modular/          ← ONLY working directory (this repo)
 
 **Local push**: Pre-push hook creates `local/YYYYMMDD-HHMMSS` backup tag
 
+### Pages (8 total)
+`index` (drug lookup) · `calculator` · `renal-dosing` · `compatibility` ·
+`tdm` · `vanco-tdm` · `admin` · `dashboard` (analytics). Each page = one
+`*.html` + its `css/*.css` + `js/*.js`, wired together in the `PAGES` object
+of `build.js` (CSS/JS load order matters there).
+
 ### Key Files
 | File | Purpose |
 |------|---------|
-| `js/core.js` | Shared utilities, GAS API calls, theme, i18n |
-| `js/index.js` | Drug lookup page — 167 drugs, DRUGS array, search/filter |
+| `js/core.js` | Shared utilities, GAS API calls, theme, i18n bootstrap, cache normalization |
+| `js/index.js` | Drug lookup page — DRUGS array, search/filter (line 7 is minified — see below) |
 | `js/compatibility.js` | IV compatibility checker — CURATED_PAIRS, DRUGS array, normKey() |
-| `js/admin.js` | Admin panel — CRUD for compatibility pairs + renal drugs via GAS |
+| `js/admin.js` | Admin panel — CRUD for compatibility pairs + drug data via GAS, diff/review modal |
+| `js/renal-admin-block.js` | Admin panel — renal-dosing CRUD (loaded inside admin context) |
 | `js/renal-dosing.js` | Renal dosing page — 26 drugs with GFR-based dosing tables |
-| `js/calculator.js` | Clinical calculators (CrCl, BSA, IBW, drip rate) |
-| `js/tdm.js` | TDM calculations |
-| `js/vanco-tdm.js` | Vancomycin AUC-based TDM |
+| `js/curated-renal-drugs.js` | `CURATED_RENAL_DRUGS` hardcoded reference data (26 drugs) for bulk import |
+| `js/calculator.js` | Clinical calculators (CrCl, BSA, IBW, drip rate) + unit toggles |
+| `js/tdm.js` | TDM calculations — multi-drug Bayesian (`VancoTDM` lives here too) |
+| `js/vanco-tdm.js` | Vancomycin AUC-based TDM (standalone page) |
+| `js/pediatric-guard.js` | Centralized age-gated safety guard (`enforce(pt, context, opts)`) |
+| `js/dashboard.js` | Analytics dashboard v6.1 — cross-filter engine, Chart.js, GAS analytics data |
+| `js/quick-actions.js` | Cross-page floating action button (FAB): quick search / compat / drip rate |
+| `js/onboarding.js` | First-run tutorial overlay (per-page step definitions) |
+| `js/share-export.js` | Clipboard copy, LINE share, print-to-PDF for results |
 | `js/error-tracker.js` | Error logging to GAS |
+| `i18n.js` / `translations-en.js` | Root-level i18n (NOT inlined — copied static to `dist/`) |
+| `drugs-data.json` | Static fallback drug dataset (166 drugs); copied static to `dist/` |
+| `sw.js` | Service worker — PWA cache, push notifications, force-update logic |
+| `version.json` | `{version, forceUpdate}` — fetched network-only by `sw.js` for cache busting |
 | `gas-complete.js` | Google Apps Script backend (NOT deployed via git — copy manually to GAS editor) |
-| `build.js` | Build script: inlines CSS/JS, injects cache version |
+| `gas-update-rating-nps.js` | GAS snippet to add (drug rating + NPS endpoints) — paste into existing GAS |
+| `build.js` | Build script: inlines CSS/JS per `PAGES`, injects cache version |
 
 ### Two GAS Deployments (Same Code, Different Spreadsheets)
 Both use `gas-complete.js` but bound to different Google Sheets:
@@ -69,6 +97,19 @@ Used in compatibility.js to match CURATED pair names to DRUGS array entries.
 - Source code has placeholder `drugCacheVer` value
 - `build.js` replaces it with git commit hash during production build
 - On every deploy, users' browsers auto-clear stale localStorage drug data
+
+### Service worker + version.json — force-update path
+`sw.js` is a PWA service worker (offline cache, push notifications, urgent
+alert background sync). It caches everything **except** `version.json`, which
+is always fetched network-only. `version.json` = `{version, forceUpdate}`:
+when `forceUpdate` is true (or the version changes), the client busts the SW
+cache and reloads. The SW header carries its own version string (currently
+`v5.11.1`), and its top-of-file changelog is a useful release log.
+
+**Release checklist when bumping version**: update `package.json`,
+`version.json`, the `sw.js` version constant + changelog, and the per-page
+footer version strings together — otherwise the force-update won't trigger
+consistently.
 
 ### CURATED_PAIRS / CURATED_RENAL_DRUGS
 Hardcoded reference data in `js/admin.js` for bulk importing to Google Sheets via admin panel.
@@ -253,6 +294,12 @@ npm run build:dev    # Copy files to dist/ (external refs)
 npm run build:prod   # Full production build (inline + minify)
 npx http-server .    # Serve locally
 ```
+
+> **Note**: `npm test` in `package.json` points to `test/clinical-formulas.test.js`,
+> but that file/dir does **not** exist in the repo — there is currently no
+> automated test suite. Verify clinical changes manually (or add the test file
+> first). The `dependencies` block also lists `docx`/`terser`, but the live
+> build only uses `clean-css` (JS is intentionally not minified).
 
 ### Rollback
 ```bash

@@ -8,6 +8,12 @@ Single-page modules: drug lookup, IV compatibility, renal dosing, calculators, T
 > UI and user-facing strings are Thai; keep code comments/commit messages in
 > English unless an existing string is already Thai.
 
+> **Before changing anything**: follow the development rules in
+> [`CONTRIBUTING.md`](CONTRIBUTING.md) — `main` = production (push auto-deploys),
+> so work on a feature branch, build clean, verify clinical changes against
+> primary sources + golden values, then merge via PR. See
+> [`ROADMAP.md`](ROADMAP.md) for prioritized backlog.
+
 ## Architecture
 
 ### Single Source → Auto Build → Deploy

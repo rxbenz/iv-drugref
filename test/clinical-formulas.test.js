@@ -144,7 +144,7 @@ test('CKD stage boundaries (G1/G2/G3a/G3b/G4/G5)', () => {
 // ═══════════════════════ Vancomycin PK models ════════════════════════════
 // Golden CLs from CLAUDE.md (v5.10.0 correction), verified vs primary papers.
 // Reference patient: 45yo M, 70kg, 170cm, SCr 1.0.
-const { models } = loadVancoModels();
+const { models, VancoPK } = loadVancoModels();
 const REF = { age: 45, wt: 70, ht: 170, scr: 1.0, sex: 'M', heme: false, dialysis: 'none' };
 
 test('Vanco/Buelga — CL 5.99 L/h (golden, v5.10.0)', () => {
@@ -209,4 +209,19 @@ test('All 5 adult vanco models present with required fns + priors', () => {
       assert.ok(m[p] > 0, `${id}.${p} must be a positive prior`);
     }
   }
+});
+
+// ───────────────────────── age routing boundary ──────────────────────────
+// isPedsVanco gates which model path runs: <1 blocked (guard), 1-17 → Colin,
+// ≥18 → adult. A wrong boundary = wrong PK model for a real patient.
+test('isPedsVanco — routes only ages [1, 18) to the pediatric model', () => {
+  const peds = (age) => !!VancoPK.isPedsVanco({ age }); // coerce (fn may short-circuit to null)
+  assert.equal(peds(0.9), false, 'infant <1 not peds-routed (guard blocks)');
+  assert.equal(peds(1), true);
+  assert.equal(peds(10), true);
+  assert.equal(peds(17.9), true);
+  assert.equal(peds(18), false, 'adult boundary');
+  assert.equal(peds(40), false);
+  assert.ok(!VancoPK.isPedsVanco(null), 'null patient → falsy');
+  assert.ok(!VancoPK.isPedsVanco({}), 'missing age → falsy');
 });

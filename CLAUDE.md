@@ -59,8 +59,9 @@ of `build.js` (CSS/JS load order matters there).
 | `js/renal-dosing.js` | Renal dosing page — 26 drugs with GFR-based dosing tables |
 | `js/curated-renal-drugs.js` | `CURATED_RENAL_DRUGS` hardcoded reference data (26 drugs) for bulk import |
 | `js/calculator.js` | Clinical calculators (CrCl, BSA, IBW, drip rate) + unit toggles |
-| `js/tdm.js` | TDM calculations — multi-drug Bayesian (`VancoTDM` lives here too) |
-| `js/vanco-tdm.js` | Vancomycin AUC-based TDM (standalone page) |
+| `js/tdm.js` | TDM calculations — multi-drug Bayesian (`VancoTDM` lives here too; consumes `js/pk-models.js`) |
+| `js/vanco-tdm.js` | Vancomycin AUC-based TDM (standalone page; consumes `js/pk-models.js`) |
+| `js/pk-models.js` | **Shared** vanco PK models (5 adult + Colin 2019 peds) → `window.VancoPK`; used by both TDM pages |
 | `js/pediatric-guard.js` | Centralized age-gated safety guard (`enforce(pt, context, opts)`) |
 | `js/dashboard.js` | Analytics dashboard v6.1 — cross-filter engine, Chart.js, GAS analytics data |
 | `js/quick-actions.js` | Cross-page floating action button (FAB): quick search / compat / drip rate |
@@ -196,7 +197,8 @@ peds vanco Bayesian). Vancomycin now has an age-routed pediatric model:
   paper's additive error term (1.23 mg/L SD) NOT modeled (backlog, tied to the
   2-comp engine that would carry separate V1/V2 IIV).
 
-Still duplicated across the two files (shared `PK_MODELS`/peds module = future PR).
+As of P1.1 the Colin model + PK_MODELS live in the shared `js/pk-models.js`
+(see below) — no longer duplicated across the two files.
 
 **Peak/trough disclaimer (v5.11.1)**: peds results (Colin path, `modelId==='colin'`)
 append a bilingual amber info-box after the CI block stating peak/trough are
@@ -228,8 +230,28 @@ primary papers:
 Verified (45M/70kg/170cm/SCr1.0, 1000mg q12h): Buelga CL 5.99 (AUC 324),
 Goti CL 3.65 (AUC 535), Llopis CL 3.49 (AUC 561, CG-LBW). Old Goti 1167 → 535.
 
-**Still duplicated** across the two files (shared `PK_MODELS` module = separate
-PR). 2-comp engine + 4-param fit = future Option A if peak/trough fidelity needed.
+**Now unified** in the shared `js/pk-models.js` (ROADMAP P1.1) — both `tdm.js`
+(`VancoTDM`) and `vanco-tdm.js` consume `window.VancoPK`, so a coefficient fix
+lands in one place. 2-comp engine + 4-param fit = future Option A if peak/trough
+fidelity needed.
+
+### Shared vanco PK models — `js/pk-models.js` (v-P1.1)
+Single source of truth for the vancomycin population-PK models (5 adult +
+Colin 2019 pediatric), the per-model CrCl helpers, and `isPedsVanco` age
+routing. Exposes `window.VancoPK = { PK_MODELS, COLIN_MODEL, isPedsVanco }`.
+
+- **Load order matters**: `pk-models.js` must load **after `core.js`** (models
+  call `IVDrugRef.calcBSA`/`calcSchwartz` lazily) and **before `tdm.js` /
+  `vanco-tdm.js`**. Wired in `index.html`/`vanco-tdm.html` script tags **and**
+  in the `PAGES` js arrays of `build.js` (both must agree).
+- **Consumers**: `tdm.js` does `const { PK_MODELS, COLIN_MODEL, isPedsVanco } =
+  window.VancoPK;` inside the `VancoTDM` IIFE; `vanco-tdm.js` reads the same off
+  `window.VancoPK`. Neither file defines the models anymore.
+- **When editing a coefficient**: change it in `pk-models.js` only, then run
+  `npm test` — `test/clinical-formulas.test.js` loads this module directly and
+  asserts the golden CLs, so both pages are covered by one test.
+- Engine integration (`bayesianMAP`/`runMCMC`) still lives in each page (uses
+  the shared models). Extracting the engine too is a possible future step.
 
 ### Pediatric Safety Guard (v5.9.3)
 Centralized module `js/pediatric-guard.js` enforces age-gated access to
@@ -302,14 +324,16 @@ npx http-server .    # Serve locally
 ```
 
 > **Tests**: `npm test` runs `test/clinical-formulas.test.js` via `node --test`
-> (Node 18+). It loads the **real** `core.js` + vanco PK models in a `vm`
-> sandbox (browser globals stubbed — see `test/helpers/load-clinical.js`) and
-> asserts the golden values documented in this file (CG/Schwartz/IBW/ABW/BSA/
-> CKD-EPI + the 5 adult vanco models + Colin 2019). CI gates deploy on it.
-> When you change any dosing formula, update/extend these tests. Still on the
-> backlog (ROADMAP P0.1): full Bayesian MAP/MCMC integration tests (blocked on
-> the duplicated `PK_MODELS` — P1.1). The `dependencies` block also lists
-> `docx`/`terser`, but the live build only uses `clean-css` (JS not minified).
+> (Node 18+). It loads the **real** `core.js` + the shared `js/pk-models.js` in
+> a `vm` sandbox (browser globals stubbed — see `test/helpers/load-clinical.js`)
+> and asserts the golden values documented in this file (CG/Schwartz/IBW/ABW/
+> BSA/CKD-EPI + the 5 adult vanco models + Colin 2019 + `isPedsVanco` routing).
+> Because both TDM pages now consume `js/pk-models.js` (P1.1), this one test
+> covers the models on both pages. CI gates deploy on it. When you change any
+> dosing formula, update/extend these tests. Still on the backlog (ROADMAP
+> P0.1): full Bayesian MAP/MCMC **engine** integration tests (the engine still
+> lives per-page). The `dependencies` block also lists `docx`/`terser`, but the
+> live build only uses `clean-css` (JS not minified).
 
 ### Rollback
 ```bash

@@ -26,8 +26,9 @@
   - ผูก CI แล้ว: step `npm test` ใน `deploy.yml` รันก่อน build → deploy ล้มถ้า test แดง
 - **เหลือทำ (🟡)**:
   - integration test ของ Bayesian engine (`bayesianMAP`/`runMCMC`, AUC₂₄ end-to-end)
-    — ติดที่ engine ผูกกับ DOM หนัก + `PK_MODELS` ซ้ำสองไฟล์ → ทำง่ายขึ้นหลัง **P1.1**
-  - golden test ฝั่ง `tdm.js` VancoTDM (ปัจจุบัน cover เฉพาะ `vanco-tdm.js`)
+    — ติดที่ engine ผูกกับ DOM หนัก (engine ยังอยู่แยกในแต่ละเพจ)
+  - ~~golden test ฝั่ง `tdm.js`~~ ✅ ปิดแล้วโดย P1.1 (ทั้งสองเพจใช้ `pk-models.js`
+    ชุดเดียว → test เดียวคุมทั้งคู่)
 - **Effort เหลือ**: S–M · **ผลตอบแทน**: สูงมาก (safety net ให้ refactor P1)
 
 ### P0.2 ปิด silent CG override ใน Bayesian engine (Phase 2)
@@ -54,14 +55,24 @@
 
 ## P1 — หนี้ทางสถาปัตยกรรม & Operational
 
-### P1.1 รวม PK_MODELS + helper vanco ที่ซ้ำสองไฟล์เป็น shared module
-- **ปัญหา** (ระบุซ้ำ 3 จุดใน `CLAUDE.md` ว่าเป็น "future PR"): โมเดล PK 5 ตัว
-  + helper อยู่ทั้ง `tdm.js` (`VancoTDM`, line 182) และ `vanco-tdm.js` (line 34)
-  — ~40 ฟังก์ชันซ้ำ; แก้ที่เดียวลืมอีกที่ = สูตรสองหน้าไม่ตรงกัน
-- **ทำอะไร**: แยก `js/pk-models.js` (PK_MODELS + crclFn/clFn/vdFn + bayesian
-  helpers) ให้ทั้งสองเพจ import; เพิ่มเข้า `PAGES` ใน `build.js`
-- **Effort**: M · **ผลตอบแทน**: สูง (ตัดต้นตอ bug "แก้ไม่ครบสองที่")
-- **ต้องมี P0.1 ก่อน** เพื่อกัน regression ตอน refactor
+### P1.1 รวม PK_MODELS + helper vanco ที่ซ้ำสองไฟล์เป็น shared module — ✅ DONE
+- **ปัญหาเดิม**: โมเดล PK 5 ตัว + helper + Colin อยู่ทั้ง `tdm.js` (`VancoTDM`)
+  และ `vanco-tdm.js` — ~40 ฟังก์ชันซ้ำ; แก้ที่เดียวลืมอีกที่ = สูตรสองหน้าไม่ตรงกัน
+- **ทำแล้ว (✅)**:
+  - พิสูจน์ก่อนรวม: เทียบ 2 implementation 360,000 ครั้ง (20k random patients
+    × ทุก fn) → **maxRelDiff 0, identical** จึงรวมได้โดยไม่เปลี่ยนพฤติกรรม
+  - สร้าง `js/pk-models.js` → `window.VancoPK = {PK_MODELS, COLIN_MODEL, isPedsVanco}`
+    (เก็บ coefficient/comment provenance ไว้ที่เดียว)
+  - `tdm.js` + `vanco-tdm.js` เลิก define เอง → destructure จาก `window.VancoPK`
+  - wired ใน `tdm.html`/`vanco-tdm.html` (script tag) + `PAGES` ใน `build.js`
+    (load หลัง core.js, ก่อน tdm/vanco-tdm) — verify built dist: VancoPK def
+    มาก่อน consumer + ไม่มี external ref ค้าง (404)
+  - test loader โหลด shared module ตรง ๆ → 1 test คุมโมเดลทั้งสองเพจ; เพิ่ม
+    `isPedsVanco` boundary test (รวม 31 เคส ผ่านหมด); build:prod ผ่าน
+- **ผลพลอยได้**: ปิด sub-item ของ P0.1 ("golden test ฝั่ง tdm.js") — ตอนนี้
+  tdm.js ใช้โมเดลชุดเดียวกับที่ test คุมแล้ว
+- **หมายเหตุ release**: เป็น refactor ไม่เปลี่ยนพฤติกรรม แต่แตะ runtime JS →
+  ตอน merge ขึ้น production ควร bump version (5.11.1→5.11.2) ตาม CONTRIBUTING §5
 
 ### P1.2 Deploy `gas-complete.js` ขึ้น GAS ทั้งสอง editor + re-import
 - **ปัญหา** (Pending Items): เวอร์ชันล่าสุดมี upsert bulk import + version

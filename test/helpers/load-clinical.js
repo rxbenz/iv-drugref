@@ -100,24 +100,19 @@ function loadCore() {
   return { IVDrugRef: sandbox.IVDrugRef, sandbox };
 }
 
-// ---- Load vanco PK_MODELS + COLIN_MODEL (vanco-tdm.js pure section) ----
+// ---- Load the shared vanco PK models (js/pk-models.js) ----
+// Post-P1.1: PK_MODELS + COLIN_MODEL live in one shared module consumed by
+// both tdm.js and vanco-tdm.js, so testing it covers both pages.
 function loadVancoModels() {
   const { IVDrugRef, sandbox } = loadCore();
-  const full = readJs('vanco-tdm.js');
-  const start = full.indexOf('function _vCgPlain');
-  const endMark = 'sigma:0.215 };';
-  const end = full.indexOf(endMark);
-  if (start < 0 || end < 0) {
-    throw new Error('Could not locate vanco PK model section in vanco-tdm.js (refactor? update loader)');
-  }
-  let slice = full.slice(start, end + endMark.length);
-  slice += '\n;globalThis.PK_MODELS = PK_MODELS; globalThis.COLIN_MODEL = COLIN_MODEL;';
-  sandbox.IVDrugRef = IVDrugRef; // models reference IVDrugRef.calcBSA / calcSchwartz
-  vm.runInContext(slice, sandbox, { filename: 'vanco-tdm.js#models' });
+  // pk-models.js references IVDrugRef (global) and sets window.VancoPK
+  vm.runInContext(readJs('pk-models.js'), sandbox, { filename: 'pk-models.js' });
+  const VancoPK = sandbox.window.VancoPK;
+  if (!VancoPK) throw new Error('pk-models.js did not expose window.VancoPK');
   const byId = {};
-  for (const m of sandbox.PK_MODELS) byId[m.id] = m;
-  byId.colin = sandbox.COLIN_MODEL;
-  return { models: byId, IVDrugRef };
+  for (const m of VancoPK.PK_MODELS) byId[m.id] = m;
+  byId.colin = VancoPK.COLIN_MODEL;
+  return { models: byId, VancoPK, IVDrugRef };
 }
 
 module.exports = { loadCore, loadVancoModels };

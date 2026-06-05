@@ -49,8 +49,8 @@ const PAGES = {
   'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css','quick-actions.css','onboarding.css'],js: ['error-tracker.js','core.js','pediatric-guard.js','renal-dosing.js','quick-actions.js','onboarding.js'] },
   'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css','quick-actions.css','onboarding.css'],js: ['error-tracker.js','core.js','compatibility.js','quick-actions.js','onboarding.js'] },
   'admin.html':        { css: ['shared.css','theme.css','admin.css'],       js: ['error-tracker.js','core.js','admin.js'] },
-  'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css','onboarding.css'],          js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','tdm.js','quick-actions.js','onboarding.js'] },
-  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css'],    js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','vanco-tdm.js','quick-actions.js'] },
+  'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css','onboarding.css'],          js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','tdm.js','quick-actions.js','onboarding.js'] },
+  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css'],    js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','vanco-tdm.js','quick-actions.js'] },
   'dashboard.html':    { css: ['shared.css','theme.css','dashboard.css'],    js: ['error-tracker.js','core.js','dashboard.js'] },
 };
 

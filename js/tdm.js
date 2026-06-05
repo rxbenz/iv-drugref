@@ -167,86 +167,15 @@ const TDMHub = (function() {
   // ============================================================
 
   const VancoTDM = (function() {
-    // Per-model CrCl helpers (each paper uses a different method).
-    // Verified coefficients, Phase 2b v5.10.0. AUC24,ss = daily_dose / CL
-    // (exact, compartment-independent). 2-comp models use Vss = Vc+Vp.
-    // NOTE: duplicated in vanco-tdm.js for now; shared module = separate PR.
-    const _vCgPlain = pt => { let c = (140 - pt.age) * pt.wt / (72 * pt.scr); if (pt.sex === 'F') c *= 0.85; return c; };
-    const _vLbw = (wt, ht, sex) => { const bmi = wt / Math.pow(ht / 100, 2); return sex === 'M' ? 9270 * wt / (6680 + 216 * bmi) : 9270 * wt / (8780 + 244 * bmi); };
-    const _vCgLbw = pt => { const lbw = _vLbw(pt.wt, pt.ht, pt.sex); let c = (140 - pt.age) * lbw / (72 * pt.scr); if (pt.sex === 'F') c *= 0.85; if (pt.scr < 0.6) c = Math.min(c, 120); return c; };
-    const _vCgGoti = pt => { const scr = (pt.scr < 1 && pt.age > 60) ? 1 : pt.scr; let c = (140 - pt.age) * pt.wt / (72 * scr); if (pt.sex === 'F') c *= 0.85; return Math.min(c, 150); };
-    const _vCgAdaneBsa = pt => { const scr = pt.scr < 1 ? 1 : pt.scr; let c = (140 - pt.age) * pt.wt / (72 * scr); if (pt.sex === 'F') c *= 0.85; const bsa = IVDrugRef.calcBSA(pt.ht, pt.wt) || 1.73; return c * 1.73 / bsa; };
-    const _vJelliffe = pt => { let c = (98 - 0.8 * (pt.age - 20)) / pt.scr; if (pt.sex === 'F') c *= 0.9; return Math.max(c, 0); };
-    const _vDial = pt => (pt.dialysis && pt.dialysis !== 'none') ? 1 : 0;
-
-    const PK_MODELS = [
-      {
-        id: 'buelga', name: 'Buelga 2005', pop: 'Hematologic malignancy',
-        ref: 'Antimicrob Agents Chemother 2005;49:4934-41',
-        crclFn: _vCgPlain,
-        clFn: pt => 0.0648 * _vCgPlain(pt),                 // 1.08 × CLcr(L/h)
-        vdFn: pt => 0.98 * pt.wt,
-        omega_cl: 0.25, omega_vd: 0.15, sigma: 0.10
-      },
-      {
-        id: 'llopis', name: 'Llopis-Salvia 2006', pop: 'Critically ill (ICU)',
-        ref: 'J Clin Pharm Ther 2006;31:447-54',
-        crclFn: _vCgLbw,
-        clFn: pt => 0.034 * _vCgLbw(pt) + 0.015 * pt.wt,
-        vdFn: pt => 1.734 * pt.wt,                          // Vss = Vc(0.414·TBW) + Vp(1.32·TBW)
-        omega_cl: 0.30, omega_vd: 0.20, sigma: 0.12
-      },
-      {
-        id: 'goti', name: 'Goti 2018', pop: 'General hospitalized (±dialysis)',
-        ref: 'Ther Drug Monit 2018;40:212-21',
-        crclFn: _vCgGoti,
-        clFn: pt => 4.5 * Math.pow(_vCgGoti(pt) / 120, 0.8) * Math.pow(0.7, _vDial(pt)),
-        vdFn: pt => 58.4 * (pt.wt / 70) * (_vDial(pt) ? 0.5 : 1) + 38.4,  // Vss = Vc(×0.5 if HD) + Vp(38.4)
-        omega_cl: 0.22, omega_vd: 0.18, sigma: 0.08
-      },
-      {
-        id: 'adane', name: 'Adane 2015', pop: 'Extremely obese (BMI≥40)',
-        ref: 'Pharmacotherapy 2015;35:127-139',
-        crclFn: _vCgAdaneBsa,
-        clFn: pt => 6.54 * (_vCgAdaneBsa(pt) / 125),
-        vdFn: pt => 0.51 * pt.wt,
-        omega_cl: 0.28, omega_vd: 0.22, sigma: 0.11
-      },
-      {
-        id: 'bourguignon', name: 'Bourguignon 2016', pop: 'Elderly >80yr',
-        ref: 'Antimicrob Agents Chemother 2016;60:4563-7',
-        crclFn: _vJelliffe,
-        clFn: pt => { const kel = 0.0229 + 0.00088 * _vJelliffe(pt); return kel * (23.35 + 0.211 * pt.wt); }, // CL = kel × V
-        vdFn: pt => 23.35 + 0.211 * pt.wt,
-        omega_cl: 0.35, omega_vd: 0.20, sigma: 0.13
-      }
-    ];
+    // PK models live in js/pk-models.js (shared with vanco-tdm.js, ROADMAP P1.1).
+    // Loaded as a separate <script> before tdm.js; exposes window.VancoPK.
+    // See pk-models.js for coefficient provenance / primary-source references.
+    const { PK_MODELS, COLIN_MODEL, isPedsVanco } = window.VancoPK;
 
     let selectedModel = 'goti', currentPK = null, mcmcSamples = [], allModelResults = [];
 
-    // PEDIATRIC MODEL — Colin 2019 (age 1-17). 2-comp paper → Vss=V1+V2 in 1-comp.
-    // Verified vs paper (golden 35yo CL≈4.10, 60yo CL≈2.55). SCr mg/dL.
-    // omega/sigma not in paper excerpt → moderate priors (Bayesian fit dominates).
-    const COLIN = { theta_CL: 5.31, theta_V1: 42.9, theta_V2: 41.7, PMA50: 46.4, gamma1: 2.89, AGE50: 61.6, gamma2: 2.24, theta_SCR: 0.649, theta_STDY10: 0.294 };
-    const _colinPMAyr = pt => pt.age + 40.0 / 52.0;
-    const _colinCL = pt => {
-      const FSize = pt.wt / 70.0, PMAyr = _colinPMAyr(pt), PMAwk = PMAyr * 52.0;
-      const FMat = Math.pow(PMAwk, COLIN.gamma1) / (Math.pow(PMAwk, COLIN.gamma1) + Math.pow(COLIN.PMA50, COLIN.gamma1));
-      const FDecline = Math.pow(PMAyr, -COLIN.gamma2) / (Math.pow(PMAyr, -COLIN.gamma2) + Math.pow(COLIN.AGE50, -COLIN.gamma2));
-      const SCRstd = Math.exp(-1.228 + Math.log10(PMAyr) * 0.672 + 6.27 * Math.exp(-3.11 * PMAyr));
-      const FSCR = Math.exp(-COLIN.theta_SCR * (pt.scr - SCRstd));
-      let CL = COLIN.theta_CL * Math.pow(FSize, 0.75) * FMat * FDecline * FSCR;
-      if (pt.heme) CL *= (1 + COLIN.theta_STDY10);
-      return CL;
-    };
-    const _colinVss = pt => (COLIN.theta_V1 + COLIN.theta_V2) * (pt.wt / 70.0);
-    // Priors from Colin 2019 Table 3: ω_CL 0.279 (27.9% CV); ω_Vss 0.586
-    // (lognormal combine of V1 27.3% + V2 97.9% IIV, size-invariant); residual
-    // proportional 0.215. Engine is proportional-only → additive term (1.23 mg/L)
-    // NOT modeled (backlog). Must match vanco-tdm.js.
-    const COLIN_MODEL = { id: 'colin', name: 'Colin 2019', pop: 'Pediatric 1-17yr', ref: 'Clin Pharmacokinet 2019;58:767-80',
-      crclFn: pt => IVDrugRef.calcSchwartz(pt.ht, pt.scr), clFn: _colinCL, vdFn: _colinVss, omega_cl: 0.279, omega_vd: 0.586, sigma: 0.215 };
-    const isPedsVanco = pt => pt && typeof pt.age === 'number' && pt.age >= 1 && pt.age < 18;
+    // Colin 2019 pediatric model (COLIN_MODEL) + isPedsVanco are provided by the
+    // shared js/pk-models.js (destructured above). _pedsScrWarn is UI-only.
     const _pedsScrWarn = pt => pt.scr < 0.2 ? '⚠ SCr <0.2 mg/dL — ค่าต่ำผิดปกติ; FSCR sensitive → CL อาจ overestimate' : (pt.scr > 1.5 && pt.age < 12 ? '⚠ SCr สูงผิดวัย — ตรวจสอบค่าและภาวะไต' : '');
     // Peds peak/trough disclaimer (v5.11.1) — bilingual via current i18n language.
     const _pedsPkTroughDisclaimer = () => {

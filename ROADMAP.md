@@ -1,0 +1,134 @@
+# IV DrugRef PWA — Roadmap
+
+> สถานะปัจจุบัน: **v5.11.1** · จัดลำดับตามความเหมาะสม: ความปลอดภัยผู้ป่วย →
+> ความถูกต้องของข้อมูล → หนี้ทางสถาปัตยกรรม → ฟีเจอร์ → การขัดเกลา
+> (อ้างอิงจาก code จริง + Pending Items ใน `CLAUDE.md`)
+
+นิยามระดับความสำคัญ:
+- **P0** — กระทบความปลอดภัย/ความถูกต้องทางคลินิกโดยตรง ต้องทำก่อน
+- **P1** — หนี้ทางสถาปัตยกรรม/operational ที่บล็อกงานอื่น
+- **P2** — ความสดของข้อมูล + ฟีเจอร์ที่ค้างไว้
+- **P3** — คุณภาพโค้ด/ความปลอดภัยเชิงป้องกัน/ขัดเกลา
+
+---
+
+## P0 — ความปลอดภัย & ความถูกต้องทางคลินิก (ทำก่อน)
+
+### P0.1 สร้าง automated test suite สำหรับสูตรคลินิก ⭐ สำคัญที่สุด
+- **ปัญหา**: `package.json` ชี้ `npm test` → `test/clinical-formulas.test.js`
+  แต่ไฟล์/โฟลเดอร์ **ไม่มีจริง** → ตอนนี้แอปคำนวณยา (CrCl, BSA, IBW, Bayesian
+  TDM, vanco AUC) โดย **ไม่มี test ครอบเลยสักตัว**
+- **เสี่ยง**: การแก้สูตร (เช่น v5.10.0 vanco CL correction) ตรวจด้วยมือล้วน ๆ
+  หากพลาดคือ under/over-dosing ผู้ป่วยจริง
+- **ทำอะไร**: เขียน `test/clinical-formulas.test.js` ด้วย `node --test`
+  ครอบ golden values ที่มีอยู่แล้วใน `CLAUDE.md` (เช่น Colin: 35yo/70kg/SCr0.83
+  → CL 4.10; Buelga/Goti/Llopis ที่ 45M/70kg/SCr1.0) + CrCl/BSA/IBW edge cases
+- **ผูกกับ CI**: เพิ่ม step `npm test` ใน `.github/workflows/deploy.yml`
+  ให้ build ล้มถ้า test แดง
+- **Effort**: M · **ผลตอบแทน**: สูงมาก (เปิดทางให้ refactor P1 อย่างปลอดภัย)
+
+### P0.2 ปิด silent CG override ใน Bayesian engine (Phase 2)
+- **ปัญหา** (ระบุไว้ใน `CLAUDE.md`): `tdm.js` / `vanco-tdm.js` แสดง Schwartz
+  eGFR สำหรับเด็ก แต่ engine (`bayesianMAP`/`runMCMC`) ยัง **คำนวณ CG ภายในเงียบ ๆ**
+  → ค่าที่แสดงกับค่าที่ใช้คำนวณไม่ตรงกัน
+- **สถานะความเสี่ยงปัจจุบัน**: ถูกกั้นไว้ชั่วคราวด้วย `pediatric-guard.js`
+  (block peds Bayesian) จึงยังไม่ระเบิด — แต่เป็น "กับดักรอวันสะดุด" ถ้ามีใคร
+  ปลดล็อกโมเดล peds เพิ่มในอนาคต (เหมือนที่ Colin 2019 ปลด 1–17 ไปแล้ว)
+- **ทำอะไร**: ให้ engine รับ CrCl method มาจาก layer เดียวกับที่ใช้ display
+  (เลิก recompute CG ซ้ำในเครื่องคิดเลข)
+- **Effort**: M · **ผลตอบแทน**: สูง (ปิดความไม่สอดคล้อง display↔engine)
+
+### P0.3 2-compartment engine (peak/trough fidelity)
+- **ปัญหา**: engine เป็น 1-comp; AUC₂₄ แม่นยำ (compartment-independent) แต่
+  peak/trough เป็นค่าประมาณ — v5.11.1 ต้องขึ้น disclaimer amber ในเด็ก
+  (ω_Vss เป็น lognormal approx ของ V1+V2, V2 IIV 97.9%)
+- **ทำอะไร**: Option A — 2-comp engine + 4-param fit แยก V1/V2 IIV; เปิดทาง
+  ให้ Colin additive residual error term (1.23 mg/L SD) ที่ตอนนี้ยังไม่ถูกโมเดล
+- **Effort**: L · **ผลตอบแทน**: กลาง (เฉพาะเคสที่ต้องพึ่ง peak/trough จริง)
+- **ขึ้นกับ**: ควรทำหลัง P0.1 (มี test กันถดถอย) และ P1.1 (มี shared module)
+
+---
+
+## P1 — หนี้ทางสถาปัตยกรรม & Operational
+
+### P1.1 รวม PK_MODELS + helper vanco ที่ซ้ำสองไฟล์เป็น shared module
+- **ปัญหา** (ระบุซ้ำ 3 จุดใน `CLAUDE.md` ว่าเป็น "future PR"): โมเดล PK 5 ตัว
+  + helper อยู่ทั้ง `tdm.js` (`VancoTDM`, line 182) และ `vanco-tdm.js` (line 34)
+  — ~40 ฟังก์ชันซ้ำ; แก้ที่เดียวลืมอีกที่ = สูตรสองหน้าไม่ตรงกัน
+- **ทำอะไร**: แยก `js/pk-models.js` (PK_MODELS + crclFn/clFn/vdFn + bayesian
+  helpers) ให้ทั้งสองเพจ import; เพิ่มเข้า `PAGES` ใน `build.js`
+- **Effort**: M · **ผลตอบแทน**: สูง (ตัดต้นตอ bug "แก้ไม่ครบสองที่")
+- **ต้องมี P0.1 ก่อน** เพื่อกัน regression ตอน refactor
+
+### P1.2 Deploy `gas-complete.js` ขึ้น GAS ทั้งสอง editor + re-import
+- **ปัญหา** (Pending Items): เวอร์ชันล่าสุดมี upsert bulk import + version
+  endpoint + `previousData` diff แต่ยังไม่ได้ deploy ขึ้น Admin + Analytics GAS
+- **ทำอะไร**: copy ขึ้นทั้งสอง editor → New deployment → re-import CURATED
+  compatibility pairs ผ่าน admin panel → ลบคู่ Valproic+Meropenem (PK interaction
+  ไม่ใช่ Y-site) ด้วยมือ
+- **Effort**: S (งานมือ ทำครั้งเดียว) · **ผลตอบแทน**: สูง (ปลดล็อก P2.2)
+
+---
+
+## P2 — ความสดของข้อมูล & ฟีเจอร์ค้าง
+
+### P2.1 ต่อ `renal-dosing.html` ให้ดึงจาก Google Sheet
+- **ปัญหา**: ตอนนี้ renal dosing 26 ตัว hardcode ใน `js/curated-renal-drugs.js`
+  ขณะที่ฝั่ง admin (`renal-admin-block.js`) มี CRUD เขียนลง Sheet อยู่แล้ว
+  → แก้ใน Sheet แต่หน้าจริงไม่อัปเดต
+- **ทำอะไร**: ให้ `renal-dosing.js` fetch จาก GAS (เหมือน drug data) + fallback
+  เป็น hardcode เมื่อ offline
+- **Effort**: M · **ขึ้นกับ P1.2** (GAS endpoint พร้อม)
+
+### P2.2 Admin GAS version-check UI
+- **ปัญหา**: endpoint `?action=version` มีแล้ว แต่ UI ยังไม่สร้าง → ไม่รู้ว่า
+  GAS ที่ deploy ตรงกับโค้ดล่าสุดไหม
+- **ทำอะไร**: badge/ปุ่มในแผง admin แสดงเวอร์ชัน GAS เทียบกับ `version.json`
+- **Effort**: S · **ขึ้นกับ P1.2**
+
+### P2.3 จัดการ normKey() collision อย่างชัดเจน
+- **ปัญหา** (ระบุใน `CLAUDE.md`): `normKey()` ตัดคำแรก → Calcium gluconate &
+  Calcium chloride ชนกันเป็น `"calcium"` (potassium/sodium ก็เช่นกัน) →
+  จับคู่ compatibility ผิดเกลือได้
+- **ทำอะไร**: เพิ่ม disambiguation map สำหรับเกลือที่รู้ว่าชน หรือ key รองด้วยคำที่ 2
+- **Effort**: M · **ผลตอบแทน**: กลาง (ความถูกต้องของ compatibility checker)
+
+---
+
+## P3 — คุณภาพโค้ด, ความปลอดภัยเชิงป้องกัน, ขัดเกลา
+
+### P3.1 Audit XSS surface (`innerHTML`)
+- **ปัญหา**: `innerHTML` ใช้หนาแน่นทั่วโค้ด (admin 49, tdm 48, dashboard 23…)
+  `dashboard.js` v6.1 hardened XSS แล้ว แต่ไฟล์อื่นยังไม่ผ่านการ audit
+- **ทำอะไร**: ตรวจจุดที่ interpolate ค่าจากผู้ใช้/GAS เข้า `innerHTML` →
+  เปลี่ยนเป็น `textContent`/escape helper (โดยเฉพาะ admin ที่รับ input จากผู้ใช้)
+- **Effort**: M
+
+### P3.2 ลบ `console.log` ออกจาก production path
+- **ปัญหา**: เหลือ debug log ใน core/admin/compatibility/index/error-tracker
+- **ทำอะไร**: ตัดออก หรือ gate ด้วย flag debug; ให้ `build.js --prod` strip ให้
+- **Effort**: S
+
+### P3.3 ทบทวน dependencies ที่ไม่ถูกใช้
+- **ปัญหา**: `package.json` ลิสต์ `docx` + `terser` แต่ build จริงใช้แค่
+  `clean-css` (JS ไม่ minify โดยตั้งใจ)
+- **ทำอะไร**: ยืนยันว่าไม่มีสคริปต์ไหนใช้ แล้วถอดออก (ลดผิวการโจมตี + ขนาด install)
+- **Effort**: S
+
+---
+
+## ลำดับการลงมือที่แนะนำ (critical path)
+
+```
+P0.1 (tests + CI)  ──►  P1.1 (shared PK module)  ──►  P0.2 (CG override)
+       │                                                     │
+       └──────────────►  P0.3 (2-comp engine, ทำทีหลังสุดของสาย clinical)
+P1.2 (GAS deploy)  ──►  P2.1 (renal จาก Sheet) + P2.2 (version UI)
+P3.x  ทำแทรกได้ตลอด (independent)
+```
+
+**เหตุผลของลำดับ**: เริ่มที่ **P0.1 (tests)** เพราะมันคือ "safety net" ที่ทำให้
+งาน refactor ที่เหลือ (โดยเฉพาะ P1.1 + P0.2 + P0.3 ซึ่งแตะสูตรคลินิก) ทำได้
+โดยไม่กลัวถดถอยเงียบ ๆ จากนั้น **P1.1** ก่อน **P0.2/P0.3** เพราะมี code เดียว
+ให้แก้แทนที่จะแก้สองไฟล์ ฝั่ง **P1.2 (GAS)** เป็นสายขนานที่ปลดล็อก P2 ทั้งก้อน
+ส่วน **P3** เป็นงานอิสระแทรกได้ทุกเมื่อ

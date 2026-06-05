@@ -301,11 +301,15 @@ npm run build:prod   # Full production build (inline + minify)
 npx http-server .    # Serve locally
 ```
 
-> **Note**: `npm test` in `package.json` points to `test/clinical-formulas.test.js`,
-> but that file/dir does **not** exist in the repo — there is currently no
-> automated test suite. Verify clinical changes manually (or add the test file
-> first). The `dependencies` block also lists `docx`/`terser`, but the live
-> build only uses `clean-css` (JS is intentionally not minified).
+> **Tests**: `npm test` runs `test/clinical-formulas.test.js` via `node --test`
+> (Node 18+). It loads the **real** `core.js` + vanco PK models in a `vm`
+> sandbox (browser globals stubbed — see `test/helpers/load-clinical.js`) and
+> asserts the golden values documented in this file (CG/Schwartz/IBW/ABW/BSA/
+> CKD-EPI + the 5 adult vanco models + Colin 2019). CI gates deploy on it.
+> When you change any dosing formula, update/extend these tests. Still on the
+> backlog (ROADMAP P0.1): full Bayesian MAP/MCMC integration tests (blocked on
+> the duplicated `PK_MODELS` — P1.1). The `dependencies` block also lists
+> `docx`/`terser`, but the live build only uses `clean-css` (JS not minified).
 
 ### Rollback
 ```bash

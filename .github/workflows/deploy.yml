@@ -49,6 +49,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run clinical formula tests
+        run: npm test   # gate deploy on clinical regression tests (P0.1)
+
       - name: Build production
         run: node build.js --prod
 

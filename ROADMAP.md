@@ -14,18 +14,21 @@
 
 ## P0 — ความปลอดภัย & ความถูกต้องทางคลินิก (ทำก่อน)
 
-### P0.1 สร้าง automated test suite สำหรับสูตรคลินิก ⭐ สำคัญที่สุด
-- **ปัญหา**: `package.json` ชี้ `npm test` → `test/clinical-formulas.test.js`
-  แต่ไฟล์/โฟลเดอร์ **ไม่มีจริง** → ตอนนี้แอปคำนวณยา (CrCl, BSA, IBW, Bayesian
-  TDM, vanco AUC) โดย **ไม่มี test ครอบเลยสักตัว**
-- **เสี่ยง**: การแก้สูตร (เช่น v5.10.0 vanco CL correction) ตรวจด้วยมือล้วน ๆ
-  หากพลาดคือ under/over-dosing ผู้ป่วยจริง
-- **ทำอะไร**: เขียน `test/clinical-formulas.test.js` ด้วย `node --test`
-  ครอบ golden values ที่มีอยู่แล้วใน `CLAUDE.md` (เช่น Colin: 35yo/70kg/SCr0.83
-  → CL 4.10; Buelga/Goti/Llopis ที่ 45M/70kg/SCr1.0) + CrCl/BSA/IBW edge cases
-- **ผูกกับ CI**: เพิ่ม step `npm test` ใน `.github/workflows/deploy.yml`
-  ให้ build ล้มถ้า test แดง
-- **Effort**: M · **ผลตอบแทน**: สูงมาก (เปิดทางให้ refactor P1 อย่างปลอดภัย)
+### P0.1 สร้าง automated test suite สำหรับสูตรคลินิก ⭐ สำคัญที่สุด — 🟡 IN PROGRESS
+- **ปัญหาเดิม**: `npm test` ชี้ไฟล์ที่ไม่มีจริง → แอปคำนวณยาโดยไม่มี test เลย
+- **ทำแล้ว (✅)**:
+  - `test/clinical-formulas.test.js` (`node --test`, 30 เคส) โหลด **โค้ดจริง**
+    (`core.js` + vanco PK models) ใน `vm` sandbox โดยไม่แก้ไฟล์แอป
+    (`test/helpers/load-clinical.js` stub browser globals)
+  - ครอบ golden values จาก `CLAUDE.md`: CG/CG-raw/Schwartz/IBW/ABW/BSA/BMI/
+    CKD-EPI 2021/CKD stage + vanco 5 โมเดล (Buelga 5.99, Goti 3.65, Llopis 3.49)
+    + Colin 2019 (35yo→4.10, 60yo→2.55, heme ×1.294)
+  - ผูก CI แล้ว: step `npm test` ใน `deploy.yml` รันก่อน build → deploy ล้มถ้า test แดง
+- **เหลือทำ (🟡)**:
+  - integration test ของ Bayesian engine (`bayesianMAP`/`runMCMC`, AUC₂₄ end-to-end)
+    — ติดที่ engine ผูกกับ DOM หนัก + `PK_MODELS` ซ้ำสองไฟล์ → ทำง่ายขึ้นหลัง **P1.1**
+  - golden test ฝั่ง `tdm.js` VancoTDM (ปัจจุบัน cover เฉพาะ `vanco-tdm.js`)
+- **Effort เหลือ**: S–M · **ผลตอบแทน**: สูงมาก (safety net ให้ refactor P1)
 
 ### P0.2 ปิด silent CG override ใน Bayesian engine (Phase 2)
 - **ปัญหา** (ระบุไว้ใน `CLAUDE.md`): `tdm.js` / `vanco-tdm.js` แสดง Schwartz

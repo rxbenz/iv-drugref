@@ -8,6 +8,21 @@ Single-page modules: drug lookup, IV compatibility, renal dosing, calculators, T
 > UI and user-facing strings are Thai; keep code comments/commit messages in
 > English unless an existing string is already Thai.
 
+> **Working style — ผู้ใช้คือเภสัชกรที่เพิ่งเริ่มเขียนโปรแกรม** (เชี่ยวชาญเภสัชกรรม
+> สูงมาก แต่ไม่คุ้นศัพท์ dev) ต้องปรับวิธีทำงานดังนี้ — ใช้กับทุก session:
+> 1. **อธิบายก่อนทำ** — ก่อนรันคำสั่งหรือสร้าง/แก้ไฟล์สำคัญ บอกสั้น ๆ ว่ากำลังจะ
+>    ทำอะไรและทำไม อย่าทำเงียบ ๆ
+> 2. **ทำทีละขั้นเล็ก แล้วหยุด** ให้ผู้ใช้ถาม/ยืนยัน อย่ารวบหลายขั้นรวดเดียวจน
+>    ตามไม่ทัน (งานใหญ่ → ซอยเป็นขั้น ๆ)
+> 3. **อธิบายศัพท์ใหม่ครั้งแรกที่เจอ** — เช่น RLS, migration, environment variable,
+>    branch, commit — ขยายความสั้น ๆ เป็นภาษาไทย
+> 4. **เมื่อเกิด error อธิบายว่ามันแปลว่าอะไร + จะแก้ยังไง** ไม่ใช่แก้ให้เงียบ ๆ
+>    เพื่อให้ผู้ใช้ได้เรียนรู้ไปด้วย
+> 5. **เทียบกับงานเภสัชกรรมเมื่อช่วยให้เข้าใจ** เช่น foreign key เหมือนใบสั่งยา
+>    ที่อ้าง HN, RLS เหมือนตู้ยาเสพติดที่ล็อกที่ตัวตู้, git branch เหมือนร่าง
+>    ฉลากยาเวอร์ชันใหม่ที่ยังไม่แทนของจริงบนชั้น
+> 6. **ภาษาไทยเป็นหลัก** ทับศัพท์อังกฤษได้เมื่อเป็นศัพท์เทคนิคที่ไม่มีคำไทยที่ดีกว่า
+
 > **Before changing anything**: follow the development rules in
 > [`CONTRIBUTING.md`](CONTRIBUTING.md) — `main` = production (push auto-deploys),
 > so work on a feature branch, build clean, verify clinical changes against

@@ -437,3 +437,15 @@ test('2-comp runMCMC2c — smoke: samples finite, accRate in [0,1], progress fir
   assert.ok(samples.every(s => s.cl > 0 && s.v1 > 0 && s.v2 > 0 && isFinite(s.ke)), 'finite positive samples');
   assert.ok(lastPct >= 0, 'onProgress was called');
 });
+
+test('2-comp auto-dispatch — predictAuto/peakTroughAuto route by pk shape', () => {
+  const cl = 3.65, v1 = 58.4, q = 6.5, v2 = 38.4, vd = v1 + v2;
+  const pk2 = { cl, v1, v2, q, vd };          // 2-comp pk → bi-exponential path
+  const pk1 = { cl, vd };                       // 1-comp pk → single-exp path
+  near(e2c.predictAuto(6, pk2, TC_DOSES), e2c.predictConc2c(6, cl, v1, q, v2, TC_DOSES), 1e-9, '2-comp predict routed');
+  near(e2c.predictAuto(6, pk1, TC_DOSES), VancoPK.engine.predictConc(6, cl, vd, TC_DOSES), 1e-9, '1-comp predict routed');
+  const pt2 = e2c.peakTroughAuto(pk2, 1000, 12, 1), pt1 = e2c.peakTroughAuto(pk1, 1000, 12, 1);
+  near(pt2.peak, e2c.ssPeakTrough2c(cl, v1, q, v2, 1000, 12, 1).peak, 1e-9, '2-comp peak routed');
+  near(pt1.peak, VancoPK.engine.ssPeakTrough(cl, vd, 1000, 12, 1).peak, 1e-9, '1-comp peak routed');
+  assert.ok(pt2.peak !== pt1.peak, 'the two paths give different peaks (dispatch is real)');
+});

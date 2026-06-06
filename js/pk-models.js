@@ -446,7 +446,7 @@
         if(!isFinite(pCL)||!isFinite(pV1)||!isFinite(pV2))continue;
         var pLP=logPost(pCL,pV1,pV2);
         if(isFinite(pLP)&&pLP>-1e9&&Math.log(Math.random())<pLP-lp){cl=pCL;v1=pV1;v2=pV2;lp=pLP;accepted++;}
-        if(i>=burnin&&cl>0&&v1>0&&v2>0)samples.push({cl:cl,v1:v1,v2:v2,vd:v1+v2,ke:cl/(v1+v2)});
+        if(i>=burnin&&cl>0&&v1>0&&v2>0)samples.push({cl:cl,v1:v1,v2:v2,q:q,vd:v1+v2,ke:cl/(v1+v2)});
       }
       batch=end;
       if(onProgress)onProgress(Math.round(batch/total*100),samples.length,nSamp);
@@ -455,8 +455,24 @@
     step();
   }
 
+  // Auto-dispatch helpers so the TDM pages call ONE function regardless of
+  // compartment count: a 2-comp pk/sample carries v1/v2/q (from bayesianMAP2c /
+  // runMCMC2c), a 1-comp one only cl/vd. Keeps the per-page call sites identical
+  // and the dispatch logic in the shared module (P0.3a philosophy).
+  function predictAuto(t,pk,doseHist){
+    return (pk && pk.v1!=null && pk.q!=null)
+      ? predictConc2c(t,pk.cl,pk.v1,pk.q,pk.v2,doseHist)
+      : predictConc(t,pk.cl,pk.vd,doseHist);
+  }
+  function peakTroughAuto(pk,dose,interval,infusion){
+    return (pk && pk.v1!=null && pk.q!=null)
+      ? ssPeakTrough2c(pk.cl,pk.v1,pk.q,pk.v2,dose,interval,infusion)
+      : ssPeakTrough(pk.cl,pk.vd,dose,interval,infusion);
+  }
+
   var engine2c = { macro:_macro2c, predictConc2c:predictConc2c, ssPeakTrough2c:ssPeakTrough2c,
-    bayesianMAP2c:bayesianMAP2c, runMCMC2c:runMCMC2c };
+    bayesianMAP2c:bayesianMAP2c, runMCMC2c:runMCMC2c,
+    predictAuto:predictAuto, peakTroughAuto:peakTroughAuto };
 
   global.VancoPK = { PK_MODELS: PK_MODELS, COLIN_MODEL: COLIN_MODEL, isPedsVanco: isPedsVanco,
     engine: engine, engine2c: engine2c };

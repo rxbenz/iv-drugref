@@ -168,6 +168,45 @@
     pure มาทดสอบ; รวม 54 test) + build:prod 8 เพจผ่าน
 - **Effort**: M · **ผลตอบแทน**: กลาง (ความถูกต้องของ compatibility checker)
 
+### P2.4 เพิ่มสารน้ำ (IV fluids/diluents) เป็น entity ใน Compat + drug–fluid compatibility
+- **ปัญหา/ที่มา** (ผู้ใช้ร้องขอ): ปัจจุบันสารน้ำ (D5W/NSS/RL) เป็นแค่ token
+  ในข้อความ `CURATED`/field `.x`/`.y` — **เลือกใน Matrix/multi-drug ไม่ได้**
+  (DRUGS array ไม่มี category สารน้ำ). ผู้ใช้อยากเช็ค "ยา × สารน้ำ" ตรง ๆ
+- **รายการสารน้ำที่ขอ**: NSS (0.9% NaCl), 0.45% Sodium chloride (½NS),
+  D5W, D5NSS (D5+0.9%), D5N/2S (D5+0.45%), Ringer's Lactate (RL/LR)
+  — เผื่อขยาย: D10W, Sterile water (SWFI), D5LR, 3% NaCl, Acetar/balanced
+- **⚠️ ข้อควรระวังคลินิก (สำคัญ — ออกแบบให้ถูกก่อน)**: "drug–fluid
+  compatibility" = ความเข้ากันได้ตอนใช้สารน้ำเป็น **diluent/admixture**
+  (เจือจาง/ผสมในถุงเดียว) ซึ่ง **คนละเรื่อง** กับ Y-site co-administration
+  ของยา 2 ตัวที่ checker ทำอยู่. แหล่งอ้างอิงคนละชุด (Trissel's Handbook on
+  Injectable Drugs / package insert / stability study) → ควรแยก semantic หรือ
+  ติด label/badge ให้ผู้ใช้รู้ว่าเป็น "diluent compat" ไม่ใช่ "Y-site"
+- **ทำอะไร (ข้อเสนอ — ยังไม่ลงมือ)**:
+  1. **Data model**: เพิ่มสารน้ำเป็น category ใหม่ใน DRUGS (`c:["fluid"]`)
+     หรือแยกเป็น `FLUIDS` list + ตาราง compat แยก (ตัดสินใจตอนเริ่ม)
+  2. **Canonical naming/alias**: สารน้ำชื่อเดียวกันเขียนได้หลายแบบ
+     (NSS = 0.9% NaCl = Sodium chloride 0.9%; D5N/2S = D5 + ½NS) → ต้องนิยาม
+     key มาตรฐาน + alias. หมายเหตุ: `keyCandidates` (P2.3) คุม NaCl variants
+     ได้บางส่วน แต่ "D5NSS"/"D5N/2S" จะถูก strip ตัวเลขเพี้ยน → ต้อง map ตรง ๆ
+  3. **ข้อมูล compat ต้องมาจาก primary source** — เภสัชกร (เจ้าของ) จัดหา/
+     verify เป็นชุด ๆ **ห้ามแต่งค่าเอง** (patient safety). เริ่มจากชุดเล็กที่
+     verify แล้ว แล้วค่อยขยายผ่าน admin panel เหมือน CURATED_PAIRS
+- **ขึ้นกับ**: P2.3 (✅ key disambiguation) · **Effort**: L ·
+  **ผลตอบแทน**: สูง (เป็นคำถามหน้างานบ่อย)
+
+### P2.5 Redesign UI/UX หน้า Compatibility ให้ค้นหาง่ายขึ้น
+- **ปัญหา/ที่มา** (ผู้ใช้ร้องขอ): ตอนนี้มี 2 ส่วน — **Matrix** (กริดยา×ยาทั้งหมด
+  `#matrixScroll` + ค้นหา + filter หมวด) และ **multi-drug builder**
+  (`.multi-drug-area` พิมพ์เพิ่มยาทีละตัว) — กริดใหญ่/overwhelming, ค้นห้ายาก
+- **ทำอะไร (ข้อเสนอ — ยังไม่ลงมือ)**:
+  - โหมด/แท็บแยกที่เข้าใจง่าย เช่น "ยา + ยา" กับ "ยา + สารน้ำ" (รับ P2.4)
+  - autocomplete/typeahead ที่ดีขึ้น + chip ของที่เลือก, รองรับชื่อการค้า/ย่อ
+  - จัดกลุ่มผลลัพธ์ตามสถานะ (✅ compatible / ❌ incompatible / ⚠️ variable /
+    – no-data) + badge แหล่งที่มา/ความเชื่อมั่น (curated vs drug-field vs none)
+  - mobile-first (ผู้ใช้ส่วนใหญ่เปิดบนมือถือข้างเตียง)
+- **ขึ้นกับ**: P2.4 (เอา fluids เข้า data model ก่อน แล้วค่อยจัด UI รอบเดียว) ·
+  **Effort**: M–L · **ผลตอบแทน**: สูง (ลด friction การใช้งานจริง)
+
 ---
 
 ## P3 — คุณภาพโค้ด, ความปลอดภัยเชิงป้องกัน, ขัดเกลา

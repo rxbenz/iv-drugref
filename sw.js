@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.12.0
+// IV Drug Reference PWA — Service Worker v5.13.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -16,9 +16,12 @@
 //          VancoPK.engine; compatibility salt-key disambiguation (no cross-salt
 //          leak); XSS hardening (IVDrugRef.escHtml); prod console.log strip;
 //          automated clinical test suite + CI.
+// v5.13.0: Compatibility UI redesign — unified search-driven Check (typeahead +
+//          chips; 2 drugs = pair detail, 3+ = grouped-by-status); replaces the
+//          3-tab/dropdown layout. Mobile-first. Compat render now escaped.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.12.0';
+const CACHE_NAME = 'iv-drugref-v5.13.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

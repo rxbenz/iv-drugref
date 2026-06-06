@@ -49,8 +49,8 @@ const PAGES = {
   'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css','quick-actions.css','onboarding.css'],js: ['error-tracker.js','core.js','pediatric-guard.js','renal-dosing.js','quick-actions.js','onboarding.js'] },
   'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css','quick-actions.css','onboarding.css'],js: ['error-tracker.js','core.js','compatibility.js','quick-actions.js','onboarding.js'] },
   'admin.html':        { css: ['shared.css','theme.css','admin.css'],       js: ['error-tracker.js','core.js','admin.js'] },
-  'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css','onboarding.css'],          js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','tdm.js','quick-actions.js','onboarding.js'] },
-  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css'],    js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','vanco-tdm.js','quick-actions.js'] },
+  'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css','onboarding.css'],          js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','tdm.js','quick-actions.js','onboarding.js'] },
+  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css'],    js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','vanco-tdm.js','quick-actions.js'] },
   'dashboard.html':    { css: ['shared.css','theme.css','dashboard.css'],    js: ['error-tracker.js','core.js','dashboard.js'] },
 };
 
@@ -124,6 +124,20 @@ function buildPage(htmlFile, cfg) {
     /"[^"]*"!==localStorage\.getItem\("drugCacheVer"\)/g,
     `"${buildVer}"!==localStorage.getItem("drugCacheVer")`
   );
+
+  // Production: strip debug logging (keep console.warn/error). index.js line 7
+  // is pre-obfuscated, so instead of deleting statements (which needs paren
+  // balancing) we token-replace console.log/info/debug → a no-op shim. This is
+  // safe (no `window.console`/`x.console.log` usage exists), preserves any side
+  // effects in the arguments, and leaves dev builds (no --prod) fully logged.
+  if (PROD_MODE) {
+    const n = (jsContent.match(/console\.(log|info|debug)\b/g) || []).length;
+    if (n > 0) {
+      jsContent = 'var __ivNoLog=function(){};\n'
+        + jsContent.replace(/console\.(log|info|debug)\b/g, '__ivNoLog');
+      console.log(`  🧹 ${htmlFile}: stripped ${n} debug console.* call(s)`);
+    }
+  }
 
   const jsTag = `<script>\n${jsContent}\n</script>`;
 

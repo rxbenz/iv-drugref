@@ -1238,6 +1238,18 @@ var IVDrugRef = (function() {
     dom,
     delegate,
 
+    // Security — canonical HTML escaper (XSS hardening, ROADMAP P3.1). Use on any
+    // user- or GAS/Sheet-derived string before putting it into innerHTML or a
+    // quoted HTML attribute. Escapes & < > " ' ; nullish → '' (no "undefined").
+    escHtml: function(s) {
+      return (s == null ? '' : String(s))
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    },
+
     // Clinical Decision Support — reference links
     REF_LINKS: {
       thaiFDA: 'https://pertento.fda.moph.go.th/FDA_SEARCH_DRUG/SEARCH_DRUG/FRM_SEARCH_DRUG.aspx',

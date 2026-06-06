@@ -4,18 +4,49 @@
 IV Drug Quick Reference PWA for healthcare professionals. Thai-language UI.
 Single-page modules: drug lookup, IV compatibility, renal dosing, calculators, TDM, admin panel.
 
+> **Communication**: Reply to the user (project owner) in **Thai**. The product
+> UI and user-facing strings are Thai; keep code comments/commit messages in
+> English unless an existing string is already Thai.
+
+> **Working style — ผู้ใช้คือเภสัชกรที่เพิ่งเริ่มเขียนโปรแกรม** (เชี่ยวชาญเภสัชกรรม
+> สูงมาก แต่ไม่คุ้นศัพท์ dev) ต้องปรับวิธีทำงานดังนี้ — ใช้กับทุก session:
+> 1. **อธิบายก่อนทำ** — ก่อนรันคำสั่งหรือสร้าง/แก้ไฟล์สำคัญ บอกสั้น ๆ ว่ากำลังจะ
+>    ทำอะไรและทำไม อย่าทำเงียบ ๆ
+> 2. **ทำทีละขั้นเล็ก แล้วหยุด** ให้ผู้ใช้ถาม/ยืนยัน อย่ารวบหลายขั้นรวดเดียวจน
+>    ตามไม่ทัน (งานใหญ่ → ซอยเป็นขั้น ๆ)
+> 3. **อธิบายศัพท์ใหม่ครั้งแรกที่เจอ** — เช่น RLS, migration, environment variable,
+>    branch, commit — ขยายความสั้น ๆ เป็นภาษาไทย
+> 4. **เมื่อเกิด error อธิบายว่ามันแปลว่าอะไร + จะแก้ยังไง** ไม่ใช่แก้ให้เงียบ ๆ
+>    เพื่อให้ผู้ใช้ได้เรียนรู้ไปด้วย
+> 5. **เทียบกับงานเภสัชกรรมเมื่อช่วยให้เข้าใจ** เช่น foreign key เหมือนใบสั่งยา
+>    ที่อ้าง HN, RLS เหมือนตู้ยาเสพติดที่ล็อกที่ตัวตู้, git branch เหมือนร่าง
+>    ฉลากยาเวอร์ชันใหม่ที่ยังไม่แทนของจริงบนชั้น
+> 6. **ภาษาไทยเป็นหลัก** ทับศัพท์อังกฤษได้เมื่อเป็นศัพท์เทคนิคที่ไม่มีคำไทยที่ดีกว่า
+
+> **Before changing anything**: follow the development rules in
+> [`CONTRIBUTING.md`](CONTRIBUTING.md) — `main` = production (push auto-deploys),
+> so work on a feature branch, build clean, verify clinical changes against
+> primary sources + golden values, then merge via PR. See
+> [`ROADMAP.md`](ROADMAP.md) for prioritized backlog.
+
 ## Architecture
 
 ### Single Source → Auto Build → Deploy
 ```
 v5.0-modular/          ← ONLY working directory (this repo)
-├── *.html             ← Source HTML (references external css/js)
-├── css/*.css          ← Modular stylesheets
+├── *.html             ← Source HTML (references external css/js) — 8 pages
+├── css/*.css          ← Modular stylesheets (per-page + shared.css, theme.css)
 ├── js/*.js            ← Modular JavaScript
-├── build.js           ← Inlines CSS/JS into HTML for production
+├── i18n.js, translations-en.js, drugs-data.json, version.json, sw.js, manifest.json
+│                      ← Root-level static files (copied as-is, NOT inlined)
+├── build.js           ← Inlines CSS/JS into HTML for production (PAGES config)
 ├── .github/workflows/deploy.yml  ← GitHub Actions auto-deploy
 └── dist/              ← Built output (gitignored)
 ```
+
+> **Current version: 5.11.1** (see `package.json` / `version.json`). When
+> shipping a release, bump the version string in `package.json`, `version.json`,
+> `sw.js`, and the per-page footers so the force-update path fires.
 
 **Deploy flow**: `git push main` → GitHub Actions → `node build.js --prod` → inline CSS/JS → deploy to GitHub Pages
 
@@ -26,20 +57,39 @@ v5.0-modular/          ← ONLY working directory (this repo)
 
 **Local push**: Pre-push hook creates `local/YYYYMMDD-HHMMSS` backup tag
 
+### Pages (8 total)
+`index` (drug lookup) · `calculator` · `renal-dosing` · `compatibility` ·
+`tdm` · `vanco-tdm` · `admin` · `dashboard` (analytics). Each page = one
+`*.html` + its `css/*.css` + `js/*.js`, wired together in the `PAGES` object
+of `build.js` (CSS/JS load order matters there).
+
 ### Key Files
 | File | Purpose |
 |------|---------|
-| `js/core.js` | Shared utilities, GAS API calls, theme, i18n |
-| `js/index.js` | Drug lookup page — 167 drugs, DRUGS array, search/filter |
+| `js/core.js` | Shared utilities, GAS API calls, theme, i18n bootstrap, cache normalization |
+| `js/index.js` | Drug lookup page — DRUGS array, search/filter (line 7 is minified — see below) |
 | `js/compatibility.js` | IV compatibility checker — CURATED_PAIRS, DRUGS array, normKey() |
-| `js/admin.js` | Admin panel — CRUD for compatibility pairs + renal drugs via GAS |
+| `js/admin.js` | Admin panel — CRUD for compatibility pairs + drug data via GAS, diff/review modal |
+| `js/renal-admin-block.js` | Admin panel — renal-dosing CRUD (loaded inside admin context) |
 | `js/renal-dosing.js` | Renal dosing page — 26 drugs with GFR-based dosing tables |
-| `js/calculator.js` | Clinical calculators (CrCl, BSA, IBW, drip rate) |
-| `js/tdm.js` | TDM calculations |
-| `js/vanco-tdm.js` | Vancomycin AUC-based TDM |
+| `js/curated-renal-drugs.js` | `CURATED_RENAL_DRUGS` hardcoded reference data (26 drugs) for bulk import |
+| `js/calculator.js` | Clinical calculators (CrCl, BSA, IBW, drip rate) + unit toggles |
+| `js/tdm.js` | TDM calculations — multi-drug Bayesian (`VancoTDM` lives here too; consumes `js/pk-models.js`) |
+| `js/vanco-tdm.js` | Vancomycin AUC-based TDM (standalone page; consumes `js/pk-models.js`) |
+| `js/pk-models.js` | **Shared** vanco PK models (5 adult + Colin 2019 peds) → `window.VancoPK`; used by both TDM pages |
+| `js/pediatric-guard.js` | Centralized age-gated safety guard (`enforce(pt, context, opts)`) |
+| `js/dashboard.js` | Analytics dashboard v6.1 — cross-filter engine, Chart.js, GAS analytics data |
+| `js/quick-actions.js` | Cross-page floating action button (FAB): quick search / compat / drip rate |
+| `js/onboarding.js` | First-run tutorial overlay (per-page step definitions) |
+| `js/share-export.js` | Clipboard copy, LINE share, print-to-PDF for results |
 | `js/error-tracker.js` | Error logging to GAS |
+| `i18n.js` / `translations-en.js` | Root-level i18n (NOT inlined — copied static to `dist/`) |
+| `drugs-data.json` | Static fallback drug dataset (166 drugs); copied static to `dist/` |
+| `sw.js` | Service worker — PWA cache, push notifications, force-update logic |
+| `version.json` | `{version, forceUpdate}` — fetched network-only by `sw.js` for cache busting |
 | `gas-complete.js` | Google Apps Script backend (NOT deployed via git — copy manually to GAS editor) |
-| `build.js` | Build script: inlines CSS/JS, injects cache version |
+| `gas-update-rating-nps.js` | GAS snippet to add (drug rating + NPS endpoints) — paste into existing GAS |
+| `build.js` | Build script: inlines CSS/JS per `PAGES`, injects cache version |
 
 ### Two GAS Deployments (Same Code, Different Spreadsheets)
 Both use `gas-complete.js` but bound to different Google Sheets:
@@ -59,16 +109,60 @@ Both use `gas-complete.js` but bound to different Google Sheets:
 
 ## Key Technical Details
 
-### normKey() — Drug Name Matching
+### normKey() / keyCandidates() — Drug Name Matching
 Used in compatibility.js to match CURATED pair names to DRUGS array entries.
-- Takes first alphabetical word: `"20% Mannitol"` → `"mannitol"`, `"Potassium chloride (KCl)"` → `"potassium"`
-- Splits on spaces, commas, parentheses, slashes
-- **Known collision**: Calcium gluconate & Calcium chloride both → `"calcium"`; similarly potassium, sodium variants
+- `normKey` takes the first alphabetical word: `"20% Mannitol"` → `"mannitol"`,
+  `"Potassium chloride (KCl)"` → `"potassium"` (splits on spaces, commas,
+  parentheses, slashes). Kept as the generic-key helper.
+- **Salt-collision fix (P2.3)**: `normKey` alone collapsed every salt of a
+  cation to one key (Calcium gluconate & Calcium chloride → `"calcium"`; the 4
+  sodium salts → `"sodium"`), so one salt's curated pair leaked onto a different
+  salt. `keyCandidates(name)` now returns most-specific-first keys: for a cation
+  prefix (`CATION_PREFIXES` = calcium/potassium/sodium/magnesium/…) with a 2nd
+  word it returns `[cation+anion, cation]` (e.g. `["calciumgluconate","calcium"]`),
+  otherwise `[firstWord]`. `CURATED_MAP` stores each curated name under its
+  most-specific key; `getCompatibility` probes specific→generic. Net effect:
+  a salt-specific curated entry wins, a **bare-cation** entry (the DB's
+  intentional generic, e.g. `"Potassium"` = KCl additive) still matches every
+  salt as a fallback, and one salt's specific data **never** leaks to another
+  salt of the same cation. Locked by 4 tests (`loadCompatibility` in the test
+  helper slices the file's IIFE to expose the pure matchers).
+
+### XSS hardening — `IVDrugRef.escHtml()` (ROADMAP P3.1)
+Canonical HTML escaper in `core.js` (escapes `& < > " '`; nullish → `''`). **Any
+user- or GAS/Sheet-derived string** put into `innerHTML` or a quoted attribute
+must go through it (GAS/Sheet data is admin-authored → stored-XSS vector).
+- `index.js` drug-card renderer is in the **obfuscated line-7 blob** (can't edit
+  in place): the `renderDrugCard` monkey-patch hands `_origRenderCard` a
+  **deep-escaped copy** (`_escDeep`) so the rendered HTML is safe while the raw
+  `DRUGS` entry (used by search/filter) is untouched. Urgent alerts are escaped
+  by wrapping the global `handleUrgentAlertsUpdate` (escape display fields on a
+  copy, keep `id` for dismiss). Quick-access chips + star `data-name` escape
+  inline.
+- `admin.js` / `renal-admin-block.js` have their own (textContent-based)
+  `escHtml`; both are XSS-routed except the few gaps fixed in P3.1.
+- **Known 🟡 (not live today)**: `compatibility.js` + `renal-dosing.js` render
+  developer-controlled **static** arrays unescaped — escape these when they're
+  wired to GAS (P2.1/P2.4). `share-export.js printReport` is an HTML passthrough;
+  never feed it raw user/GAS strings.
 
 ### drugCacheVer — Cache Busting
 - Source code has placeholder `drugCacheVer` value
 - `build.js` replaces it with git commit hash during production build
 - On every deploy, users' browsers auto-clear stale localStorage drug data
+
+### Service worker + version.json — force-update path
+`sw.js` is a PWA service worker (offline cache, push notifications, urgent
+alert background sync). It caches everything **except** `version.json`, which
+is always fetched network-only. `version.json` = `{version, forceUpdate}`:
+when `forceUpdate` is true (or the version changes), the client busts the SW
+cache and reloads. The SW header carries its own version string (currently
+`v5.11.1`), and its top-of-file changelog is a useful release log.
+
+**Release checklist when bumping version**: update `package.json`,
+`version.json`, the `sw.js` version constant + changelog, and the per-page
+footer version strings together — otherwise the force-update won't trigger
+consistently.
 
 ### CURATED_PAIRS / CURATED_RENAL_DRUGS
 Hardcoded reference data in `js/admin.js` for bulk importing to Google Sheets via admin panel.
@@ -149,7 +243,14 @@ peds vanco Bayesian). Vancomycin now has an age-routed pediatric model:
   paper's additive error term (1.23 mg/L SD) NOT modeled (backlog, tied to the
   2-comp engine that would carry separate V1/V2 IIV).
 
-Still duplicated across the two files (shared `PK_MODELS`/peds module = future PR).
+As of P1.1 the Colin model + PK_MODELS live in the shared `js/pk-models.js`
+(see below) — no longer duplicated across the two files. As of **P0.3a** the
+1-compartment **engine** (`predictConc`/`calcAUC_ss`/`ssPeakTrough`/
+`bayesianMAP`/`runMCMC`) is also there under `window.VancoPK.engine`; both pages
+destructure it (runMCMC progress via an `onProgress(pct,n,target)` callback so
+each page keeps its own bar IDs). The engine is compartment-agnostic (model
+passed in), so a future 2-comp swap (P0.3b, blocked on per-paper Q + V1/V2 IIV)
+lands once. Engine output is golden-locked in `test/clinical-formulas.test.js`.
 
 **Peak/trough disclaimer (v5.11.1)**: peds results (Colin path, `modelId==='colin'`)
 append a bilingual amber info-box after the CI block stating peak/trough are
@@ -157,6 +258,52 @@ append a bilingual amber info-box after the CI block stating peak/trough are
 is a lognormal approximation of V1+V2 (V2 IIV 97.9%), so AUC is robust but the
 V-derived peak/trough are less reliable. UI-only (`_pedsPkTroughDisclaimer()` in
 both files, via `IVDrugRefI18n.getCurrentLang()`); no calc/equation change.
+> Superseded by v5.12.0 (peak/trough now from a real 2-comp model); the
+> disclaimer text was updated to keep AUC₂₄ primary (V2 IIV ~98%), not removed.
+
+### Two-compartment vanco engine (v5.12.0 / P0.3b) — peak/trough fidelity
+The 1-comp engine gives exact AUC₂₄ (`=dose/CL`, compartment-independent) but
+only approximate peak/trough. v5.12.0 adds a **2-compartment path** for the 3
+models that are actually 2-comp in their source papers — **Llopis / Goti /
+Colin** — while Buelga/Adane/Bourguignon stay 1-comp (they have no peripheral
+compartment). **AUC and the dose recommendation never change** — only the
+displayed peak/trough (and the graph shape) get more accurate.
+
+- **Verified params** (from primary PDFs, not secondary sources) live in a
+  `tc:{}` sub-object on each 2-comp model in `js/pk-models.js`, leaving the
+  1-comp fields untouched: `Q` (intercompartmental clearance), `vcFn`/`vpFn`
+  (V1/V2), and per-compartment `omega_cl/omega_v1/omega_v2`. Headline values:
+  Llopis Q=7.48 L/h (Table 3 θ4); Goti Q=6.5 L/h (Table 2); Colin
+  Q2=3.22·(WGT/70)^**0.75** (allometric — paper: "exponent 1 for volume, 0.75
+  for clearance terms"). **No IIV on Q in any of the three** → the fit varies
+  CL/V1/V2 (3 params) with Q fixed.
+- **`window.VancoPK.engine2c`** (in `pk-models.js`): `predictConc2c`
+  (bi-exponential, macro-constant form + superposition), `ssPeakTrough2c`
+  (analytic steady-state), `bayesianMAP2c` (grid + 3-param Nelder-Mead),
+  `runMCMC2c` (3-param Metropolis), and `predictAuto`/`peakTroughAuto` that
+  **dispatch by pk shape** (a 2-comp pk/sample carries `v1/v2/q`) so the two
+  TDM pages' call sites stay compartment-agnostic.
+- **Wiring** (`vanco-tdm.js` + `tdm.js`): model **ranking stays 1-comp**
+  (objValue comparable across the panel); once a model is chosen, if it has
+  `.tc` the engine re-fits it with `bayesianMAP2c`/`runMCMC2c` and the curve,
+  MCMC band, peak/trough stats, and dose-optimization peak/trough all flow
+  through `predictAuto`/`peakTroughAuto`. The proposed-regimen carryover now
+  continues the old dose history (exact for 1- & 2-comp) instead of a 1-comp
+  `exp(-ke·Δt)` tail. `method` reads "Bayesian MAP (2-comp)".
+- **Verified by tests** (50 total): Q→∞ collapses `predictConc2c` exactly to
+  the 1-comp engine (Vd=Vc+Vp); interval AUC stays `dose/CL`; analytic SS ==
+  numeric superposition; 2-comp peak > 1-comp peak (the fidelity gain); MAP
+  no-levels falls back to population CL/V1/V2; MAP recovers a perturbed CL from
+  a simulated trough; higher trough → lower CL; runMCMC2c smoke; auto-dispatch
+  routes correctly.
+- **Same prior/residual convention as the 1-comp engine** (proportional
+  residual + omega divisor) so the two behave consistently. The papers'
+  **additive** residual term (Colin 1.23 / Goti 3.4 / Llopis r2 mg/L) is kept
+  in `tc.sigma_add` but **not yet modeled** (engine is proportional-only, as on
+  the 1-comp Colin path) — a documented backlog item.
+- **Version bump pending**: bump 5.11.1→**5.12.0** (package.json / version.json
+  / sw.js + changelog / per-page footers) **at merge to main**, per the P1.1
+  precedent (this is a runtime-JS clinical change, not yet shipped).
 
 ### Vancomycin PK coefficient correction (v5.10.0) — clinical calc change
 Phase 2b fix for inflated AUC (root cause: wrong `clFn` clearance slopes →
@@ -181,8 +328,28 @@ primary papers:
 Verified (45M/70kg/170cm/SCr1.0, 1000mg q12h): Buelga CL 5.99 (AUC 324),
 Goti CL 3.65 (AUC 535), Llopis CL 3.49 (AUC 561, CG-LBW). Old Goti 1167 → 535.
 
-**Still duplicated** across the two files (shared `PK_MODELS` module = separate
-PR). 2-comp engine + 4-param fit = future Option A if peak/trough fidelity needed.
+**Now unified** in the shared `js/pk-models.js` (ROADMAP P1.1) — both `tdm.js`
+(`VancoTDM`) and `vanco-tdm.js` consume `window.VancoPK`, so a coefficient fix
+lands in one place. 2-comp engine + 4-param fit = future Option A if peak/trough
+fidelity needed.
+
+### Shared vanco PK models — `js/pk-models.js` (v-P1.1)
+Single source of truth for the vancomycin population-PK models (5 adult +
+Colin 2019 pediatric), the per-model CrCl helpers, and `isPedsVanco` age
+routing. Exposes `window.VancoPK = { PK_MODELS, COLIN_MODEL, isPedsVanco }`.
+
+- **Load order matters**: `pk-models.js` must load **after `core.js`** (models
+  call `IVDrugRef.calcBSA`/`calcSchwartz` lazily) and **before `tdm.js` /
+  `vanco-tdm.js`**. Wired in `index.html`/`vanco-tdm.html` script tags **and**
+  in the `PAGES` js arrays of `build.js` (both must agree).
+- **Consumers**: `tdm.js` does `const { PK_MODELS, COLIN_MODEL, isPedsVanco } =
+  window.VancoPK;` inside the `VancoTDM` IIFE; `vanco-tdm.js` reads the same off
+  `window.VancoPK`. Neither file defines the models anymore.
+- **When editing a coefficient**: change it in `pk-models.js` only, then run
+  `npm test` — `test/clinical-formulas.test.js` loads this module directly and
+  asserts the golden CLs, so both pages are covered by one test.
+- Engine integration (`bayesianMAP`/`runMCMC`) still lives in each page (uses
+  the shared models). Extracting the engine too is a possible future step.
 
 ### Pediatric Safety Guard (v5.9.3)
 Centralized module `js/pediatric-guard.js` enforces age-gated access to
@@ -212,16 +379,27 @@ Each `enforce(pt, context, opts)` call:
 3. Disables run buttons via `opts.disableSelectors` (block-only).
 4. Throttled analytics event `pediatric_guard` (5s rolling per context).
 
-**Known limitation**: This is a guard layer only. The underlying silent
-CG override in `tdm.js:294,353` and `vanco-tdm.js` (`bayesianMAP`/
-`runMCMC` recompute CG even when display shows Schwartz) is intentionally
-left for Phase 2 to keep the surface area of this safety fix small.
+**Silent CG override — RESOLVED (was Phase 2 / ROADMAP P0.2)**: The v5.9.3 note
+described `bayesianMAP`/`runMCMC` recomputing adult Cockcroft-Gault even when the
+display showed Schwartz. That is no longer true. Both vanco engines now read
+CrCl + clearance from `model.crclFn(pt)` / `model.clFn(pt)` (v5.10.0), and the
+peds path routes to **Colin** whose `crclFn` is Schwartz and whose `clFn` is
+SCr-driven (no CG) (v5.11.0). Verified: for a peds patient the engine CrCl
+equals the displayed Schwartz, not adult CG. Locked by regression tests in
+`test/clinical-formulas.test.js` ("display↔engine CrCl consistency (P0.2 guard)").
 
 **Display consistency (v5.9.3 follow-up)**: `vanco-tdm.js` `updateCrCl()`
-now shows Schwartz eGFR for age <18 (matching `tdm.js`), so the CrCl
-field reads identically across both pages for the same pediatric patient.
-This is display-only — the engine still computes CG internally (Phase 2),
-which is safe because the guard blocks pediatric Bayesian calculation.
+shows Schwartz eGFR for age <18 (matching `tdm.js`), so the CrCl field reads
+identically across both pages for the same pediatric patient — and now the
+engine agrees (see "RESOLVED" above).
+
+**Non-vanco Bayesian drugs** (phenytoin/aminoglycoside/valproate/tacrolimus/
+digoxin/warfarin) are safe-by-construction: each `run()` calls
+`const pt = updateCrCl()` **once** and uses that same `pt` for both the display
+and the engine (e.g. AG: `p.popKe(pt.crcl)`), so display and engine read the
+identical `.crcl` — which `updateCrCl()` already routes as Schwartz for peds /
+CG for adult. Plus the guard blocks <18 from these drugs entirely. No silent CG
+override exists; no hardening warranted (see ROADMAP P0.2 investigation note).
 
 ### `monitoring` field — GAS-cached data normalization (FIXED v5.3.6)
 GAS returns `monitoring` and `categories` as comma-separated strings. Fixed with two-layer normalization:
@@ -253,6 +431,18 @@ npm run build:dev    # Copy files to dist/ (external refs)
 npm run build:prod   # Full production build (inline + minify)
 npx http-server .    # Serve locally
 ```
+
+> **Tests**: `npm test` runs `test/clinical-formulas.test.js` via `node --test`
+> (Node 18+). It loads the **real** `core.js` + the shared `js/pk-models.js` in
+> a `vm` sandbox (browser globals stubbed — see `test/helpers/load-clinical.js`)
+> and asserts the golden values documented in this file (CG/Schwartz/IBW/ABW/
+> BSA/CKD-EPI + the 5 adult vanco models + Colin 2019 + `isPedsVanco` routing).
+> Because both TDM pages now consume `js/pk-models.js` (P1.1), this one test
+> covers the models on both pages. CI gates deploy on it. When you change any
+> dosing formula, update/extend these tests. The engine (MAP/MCMC) is now shared
+> in `js/pk-models.js` (`VancoPK.engine`, ROADMAP P0.3a) and has integration
+> golden tests. The only build dependency is `clean-css` — `docx`/`terser` were
+> removed (ROADMAP P3.3) since the live build never used them (JS not minified).
 
 ### Rollback
 ```bash

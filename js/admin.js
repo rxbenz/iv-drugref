@@ -1180,8 +1180,8 @@ function processImportData(data, filename) {
   const area = document.getElementById('import-preview');
   area.innerHTML = `
     <div class="import-status ${errors.length ? 'error' : 'success'}" style="margin-top:16px">
-      📄 ${filename} — พบ ${data.length} rows, valid ${valid.length} rows
-      ${errors.length ? `<br>⚠️ ${errors.length} errors: ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? '...' : ''}` : ''}
+      📄 ${escHtml(filename)} — พบ ${data.length} rows, valid ${valid.length} rows
+      ${errors.length ? `<br>⚠️ ${errors.length} errors: ${escHtml(errors.slice(0, 3).join('; '))}${errors.length > 3 ? '...' : ''}` : ''}
     </div>
     <div class="import-preview">
       <div class="table-wrap" style="margin-top:12px">
@@ -1543,7 +1543,7 @@ function buildChangeSummary(log, hasHashMismatch) {
   });
   var parts = [];
   Object.keys(counts).forEach(function(action) {
-    parts.push((ACTION_LABELS[action] || action) + ' ' + counts[action] + ' รายการ');
+    parts.push((ACTION_LABELS[action] || escHtml(action)) + ' ' + counts[action] + ' รายการ');
   });
   if (hasHashMismatch && log.length > 0) parts.push('+ มีการเปลี่ยนแปลงอื่น');
   return parts.join(' / ');
@@ -2063,7 +2063,7 @@ function renderRenalStats() {
   const el = document.getElementById('renal-stats');
   if (el) el.innerHTML = `
     <div class="stat-card"><div class="stat-label">ยาทั้งหมด</div><div class="stat-value primary">${total}</div></div>
-    ${topClasses.map(([c,n]) => `<div class="stat-card"><div class="stat-label">${CLASS_LABELS[c] || c}</div><div class="stat-value">${n}</div></div>`).join('')}
+    ${topClasses.map(([c,n]) => `<div class="stat-card"><div class="stat-label">${CLASS_LABELS[c] || escHtml(c)}</div><div class="stat-value">${n}</div></div>`).join('')}
   `;
   const countEl = document.getElementById('renal-total-count');
   if (countEl) countEl.textContent = total;

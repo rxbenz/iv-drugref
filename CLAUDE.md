@@ -296,16 +296,24 @@ Each `enforce(pt, context, opts)` call:
 3. Disables run buttons via `opts.disableSelectors` (block-only).
 4. Throttled analytics event `pediatric_guard` (5s rolling per context).
 
-**Known limitation**: This is a guard layer only. The underlying silent
-CG override in `tdm.js:294,353` and `vanco-tdm.js` (`bayesianMAP`/
-`runMCMC` recompute CG even when display shows Schwartz) is intentionally
-left for Phase 2 to keep the surface area of this safety fix small.
+**Silent CG override — RESOLVED (was Phase 2 / ROADMAP P0.2)**: The v5.9.3 note
+described `bayesianMAP`/`runMCMC` recomputing adult Cockcroft-Gault even when the
+display showed Schwartz. That is no longer true. Both vanco engines now read
+CrCl + clearance from `model.crclFn(pt)` / `model.clFn(pt)` (v5.10.0), and the
+peds path routes to **Colin** whose `crclFn` is Schwartz and whose `clFn` is
+SCr-driven (no CG) (v5.11.0). Verified: for a peds patient the engine CrCl
+equals the displayed Schwartz, not adult CG. Locked by regression tests in
+`test/clinical-formulas.test.js` ("display↔engine CrCl consistency (P0.2 guard)").
 
 **Display consistency (v5.9.3 follow-up)**: `vanco-tdm.js` `updateCrCl()`
-now shows Schwartz eGFR for age <18 (matching `tdm.js`), so the CrCl
-field reads identically across both pages for the same pediatric patient.
-This is display-only — the engine still computes CG internally (Phase 2),
-which is safe because the guard blocks pediatric Bayesian calculation.
+shows Schwartz eGFR for age <18 (matching `tdm.js`), so the CrCl field reads
+identically across both pages for the same pediatric patient — and now the
+engine agrees (see "RESOLVED" above).
+
+**Non-vanco Bayesian drugs** (phenytoin/aminoglycoside/valproate/tacrolimus/
+digoxin/warfarin) remain **adult-only** (guard blocks <18), so no display↔engine
+peds mismatch is reachable. They read `pt.crcl` set by `updateCrCl()` (Schwartz
+for peds / CG for adult) — see P0.2 defense-in-depth notes in `ROADMAP.md`.
 
 ### `monitoring` field — GAS-cached data normalization (FIXED v5.3.6)
 GAS returns `monitoring` and `categories` as comma-separated strings. Fixed with two-layer normalization:

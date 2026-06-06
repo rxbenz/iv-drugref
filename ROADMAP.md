@@ -31,16 +31,25 @@
     ชุดเดียว → test เดียวคุมทั้งคู่)
 - **Effort เหลือ**: S–M · **ผลตอบแทน**: สูงมาก (safety net ให้ refactor P1)
 
-### P0.2 ปิด silent CG override ใน Bayesian engine (Phase 2)
-- **ปัญหา** (ระบุไว้ใน `CLAUDE.md`): `tdm.js` / `vanco-tdm.js` แสดง Schwartz
-  eGFR สำหรับเด็ก แต่ engine (`bayesianMAP`/`runMCMC`) ยัง **คำนวณ CG ภายในเงียบ ๆ**
-  → ค่าที่แสดงกับค่าที่ใช้คำนวณไม่ตรงกัน
-- **สถานะความเสี่ยงปัจจุบัน**: ถูกกั้นไว้ชั่วคราวด้วย `pediatric-guard.js`
-  (block peds Bayesian) จึงยังไม่ระเบิด — แต่เป็น "กับดักรอวันสะดุด" ถ้ามีใคร
-  ปลดล็อกโมเดล peds เพิ่มในอนาคต (เหมือนที่ Colin 2019 ปลด 1–17 ไปแล้ว)
-- **ทำอะไร**: ให้ engine รับ CrCl method มาจาก layer เดียวกับที่ใช้ display
-  (เลิก recompute CG ซ้ำในเครื่องคิดเลข)
-- **Effort**: M · **ผลตอบแทน**: สูง (ปิดความไม่สอดคล้อง display↔engine)
+### P0.2 ปิด silent CG override ใน Bayesian engine — ✅ RESOLVED (ส่วนใหญ่แก้ไปแล้ว)
+- **ปัญหาเดิม** (โน้ต v5.9.3): หน้าจอแสดง Schwartz (เด็ก) แต่ engine
+  (`bayesianMAP`/`runMCMC`) แอบคำนวณ CG (ผู้ใหญ่) → display≠engine
+- **ผลการสำรวจ (สำคัญ)**: bug นี้ **ถูกแก้ไปแล้ว** โดยงานรุ่นหลัง —
+  - v5.10.0: engine เปลี่ยนมาใช้ `model.crclFn(pt)` / `model.clFn(pt)`
+    (แต่ละโมเดลคิดไตเอง ไม่ hardcode CG)
+  - v5.11.0: เด็ก 1-17 → Colin model (crclFn = Schwartz, clFn ใช้ SCr ตรง ๆ)
+  - พิสูจน์ด้วยเคสเด็กจริง (อายุ 10): engine CrCl = Schwartz 139.4 = หน้าจอ
+    (ไม่ใช่ adult CG 135.4); Colin CL ไม่พึ่ง CG เลย
+- **ทำแล้ว (✅)**:
+  - เพิ่ม regression test "display↔engine CrCl consistency (P0.2 guard)" ล็อกไว้
+    (peds → Schwartz ไม่ใช่ CG; Colin CL เป็น SCr-driven) — กันถอยกลับ
+  - แก้โน้ต stale ใน `CLAUDE.md` (เลิกบอกว่ายังค้าง)
+- **non-vanco (defense-in-depth, 🟡 optional เหลือ)**: phenytoin/AG/valproate/
+  tacrolimus/digoxin/warfarin เป็นยาผู้ใหญ่ล้วน (guard บล็อกเด็ก) อ่าน
+  `pt.crcl` ที่ `updateCrCl()` ตั้งไว้ (Schwartz สำหรับเด็ก/CG สำหรับผู้ใหญ่)
+  → ไม่มี mismatch ที่เข้าถึงได้จริง; การ harden เพิ่ม value ต่ำ (ไม่มีโมเดล
+  เด็ก validated สำหรับยากลุ่มนี้อยู่แล้ว) — ดูบันทึกการสำรวจด้านล่าง
+- **Effort เหลือ**: เกือบ 0 (เหลือแค่ตัดสินใจ non-vanco) · **ผลตอบแทน**: สูง
 
 ### P0.3 2-compartment engine (peak/trough fidelity)
 - **ปัญหา**: engine เป็น 1-comp; AUC₂₄ แม่นยำ (compartment-independent) แต่

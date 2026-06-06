@@ -225,3 +225,29 @@ test('isPedsVanco — routes only ages [1, 18) to the pediatric model', () => {
   assert.ok(!VancoPK.isPedsVanco(null), 'null patient → falsy');
   assert.ok(!VancoPK.isPedsVanco({}), 'missing age → falsy');
 });
+
+// ──────────────── display↔engine CrCl consistency (P0.2 guard) ────────────
+// Regression lock for the old "silent CG override": for a pediatric vanco
+// patient, the engine's CrCl (model.crclFn — what the Colin path feeds/shows)
+// must equal Bedside Schwartz (the displayed value), NOT the adult Cockcroft-
+// Gault. v5.10.0 (model.crclFn/clFn) + v5.11.0 (Colin) closed this; these tests
+// fail loudly if a future change reintroduces the adult-CG path for peds.
+test('Peds vanco — engine CrCl uses Schwartz (display), not adult CG', () => {
+  const peds = { age: 10, wt: 30, ht: 135, scr: 0.4, sex: 'M', heme: false, dialysis: 'none' };
+  const schwartz = IVDrugRef.calcSchwartz(peds.ht, peds.scr);
+  const adultCG = IVDrugRef.calcCockcroftGault(peds.age, peds.wt, peds.scr, peds.sex, peds.ht);
+  assert.ok(Math.abs(schwartz - adultCG) > 0.5, 'precondition: Schwartz and CG differ enough to detect');
+  // Colin is the model the peds path selects (isPedsVanco → [COLIN_MODEL])
+  assert.ok(VancoPK.isPedsVanco(peds), 'age 10 routes to Colin');
+  near(models.colin.crclFn(peds), schwartz, 0.05, 'engine CrCl == Schwartz');
+  assert.ok(Math.abs(models.colin.crclFn(peds) - adultCG) > 0.5, 'engine CrCl is NOT adult CG');
+});
+
+test('Peds vanco — Colin clearance is SCr-driven, independent of adult CG', () => {
+  // Identical covariates, only SCr differs: Colin CL must respond via its own
+  // SCr maturation model (FSCR), confirming it does not route through CG.
+  const base = { age: 8, wt: 25, ht: 128, scr: 0.4, heme: false };
+  const higherScr = { ...base, scr: 0.8 };
+  assert.ok(models.colin.clFn(higherScr) < models.colin.clFn(base),
+    'higher SCr → lower Colin CL (SCr-driven maturation, no CG)');
+});

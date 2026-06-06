@@ -12,8 +12,12 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Claude session files
-.claude/
+# Claude session files (ignore local state, but TRACK the shared hook + settings
+# so Claude Code on the web picks them up after merge to the default branch)
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+.claude/settings.local.json
 
 # Legacy / deprecated files
 admin-bundled.html

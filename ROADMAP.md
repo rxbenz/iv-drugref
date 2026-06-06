@@ -44,12 +44,15 @@
   - เพิ่ม regression test "display↔engine CrCl consistency (P0.2 guard)" ล็อกไว้
     (peds → Schwartz ไม่ใช่ CG; Colin CL เป็น SCr-driven) — กันถอยกลับ
   - แก้โน้ต stale ใน `CLAUDE.md` (เลิกบอกว่ายังค้าง)
-- **non-vanco (defense-in-depth, 🟡 optional เหลือ)**: phenytoin/AG/valproate/
-  tacrolimus/digoxin/warfarin เป็นยาผู้ใหญ่ล้วน (guard บล็อกเด็ก) อ่าน
-  `pt.crcl` ที่ `updateCrCl()` ตั้งไว้ (Schwartz สำหรับเด็ก/CG สำหรับผู้ใหญ่)
-  → ไม่มี mismatch ที่เข้าถึงได้จริง; การ harden เพิ่ม value ต่ำ (ไม่มีโมเดล
-  เด็ก validated สำหรับยากลุ่มนี้อยู่แล้ว) — ดูบันทึกการสำรวจด้านล่าง
-- **Effort เหลือ**: เกือบ 0 (เหลือแค่ตัดสินใจ non-vanco) · **ผลตอบแทน**: สูง
+- **non-vanco — ลงลึกแล้ว (✅ ปลอดภัยโดยโครงสร้าง ไม่ต้องแก้)**:
+  ตรวจ run path จริงของ phenytoin/AG/valproate/tacrolimus/digoxin/warfarin
+  ทุกตัวทำ `const pt = updateCrCl();` **ครั้งเดียว** แล้วใช้ `pt` ตัวนั้นทั้ง
+  แสดงผล + คำนวณ (เช่น AG: `popKe = p.popKe(pt.crcl)`) → display กับ engine
+  ใช้ object เดียวกัน field เดียวกัน **เป็นไปไม่ได้ที่จะไม่ตรงกัน**; และ
+  `updateCrCl()` route Schwartz ให้เด็กอยู่แล้ว (บรรทัด 60-64) → ไม่มี CG
+  override. ชั้นความปลอดภัย 2 ชั้น: (1) guard บล็อกเด็ก (2) updateCrCl ให้
+  Schwartz. **สรุป: ไม่ harden** เพราะจะเป็น churn บนโค้ดคลินิกที่ถูกอยู่แล้ว
+- **สถานะ**: ✅ ปิด — ไม่เหลืองานโค้ด (P0.2 = verified resolved + protected by tests)
 
 ### P0.3 2-compartment engine (peak/trough fidelity)
 - **ปัญหา**: engine เป็น 1-comp; AUC₂₄ แม่นยำ (compartment-independent) แต่

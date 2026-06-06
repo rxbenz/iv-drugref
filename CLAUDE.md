@@ -311,9 +311,12 @@ identically across both pages for the same pediatric patient — and now the
 engine agrees (see "RESOLVED" above).
 
 **Non-vanco Bayesian drugs** (phenytoin/aminoglycoside/valproate/tacrolimus/
-digoxin/warfarin) remain **adult-only** (guard blocks <18), so no display↔engine
-peds mismatch is reachable. They read `pt.crcl` set by `updateCrCl()` (Schwartz
-for peds / CG for adult) — see P0.2 defense-in-depth notes in `ROADMAP.md`.
+digoxin/warfarin) are safe-by-construction: each `run()` calls
+`const pt = updateCrCl()` **once** and uses that same `pt` for both the display
+and the engine (e.g. AG: `p.popKe(pt.crcl)`), so display and engine read the
+identical `.crcl` — which `updateCrCl()` already routes as Schwartz for peds /
+CG for adult. Plus the guard blocks <18 from these drugs entirely. No silent CG
+override exists; no hardening warranted (see ROADMAP P0.2 investigation note).
 
 ### `monitoring` field — GAS-cached data normalization (FIXED v5.3.6)
 GAS returns `monitoring` and `categories` as comma-separated strings. Fixed with two-layer normalization:

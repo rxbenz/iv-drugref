@@ -172,18 +172,24 @@ const TDMHub = (function() {
     // See pk-models.js for coefficient provenance / primary-source references.
     const { PK_MODELS, COLIN_MODEL, isPedsVanco } = window.VancoPK;
     const { predictConc, calcAUC_ss, ssPeakTrough, bayesianMAP, runMCMC } = window.VancoPK.engine;
+    // 2-comp (P0.3b): same engine helpers as vanco-tdm — bayesianMAP2c/runMCMC2c
+    // fit CL/V1/V2 (Q fixed) for Llopis/Goti/Colin; predictAuto/peakTroughAuto
+    // dispatch by pk shape so call sites stay compartment-agnostic. AUC unchanged.
+    const { bayesianMAP2c, runMCMC2c, predictAuto, peakTroughAuto } = window.VancoPK.engine2c;
 
     let selectedModel = 'goti', currentPK = null, mcmcSamples = [], allModelResults = [];
 
     // Colin 2019 pediatric model (COLIN_MODEL) + isPedsVanco are provided by the
     // shared js/pk-models.js (destructured above). _pedsScrWarn is UI-only.
     const _pedsScrWarn = pt => pt.scr < 0.2 ? '⚠ SCr <0.2 mg/dL — ค่าต่ำผิดปกติ; FSCR sensitive → CL อาจ overestimate' : (pt.scr > 1.5 && pt.age < 12 ? '⚠ SCr สูงผิดวัย — ตรวจสอบค่าและภาวะไต' : '');
-    // Peds peak/trough disclaimer (v5.11.1) — bilingual via current i18n language.
+    // Peds peak/trough disclaimer (v5.11.1 → v5.12.0): now the validated 2-comp
+    // Colin model (not a 1-comp approximation), but V2 IIV ~98% so AUC₂₄ stays
+    // primary. Bilingual via current i18n language.
     const _pedsPkTroughDisclaimer = () => {
       const en = !!(window.IVDrugRefI18n && window.IVDrugRefI18n.getCurrentLang && window.IVDrugRefI18n.getCurrentLang() === 'en');
       return en
-        ? 'Predicted peak/trough are 1-compartment approximations. In pediatrics, AUC₂₄ is the most reliable target (400-600 mg·h/L); interpret peak/trough as supportive only, not as a sole basis for dose adjustment.'
-        : 'ค่า Peak/Trough ที่แสดงเป็น 1-compartment approximation — สำหรับเด็ก AUC₂₄ เป็นค่าที่เชื่อถือได้ที่สุด (target 400-600 mg·h/L) ส่วน peak/trough ใช้ประกอบการพิจารณา ไม่ควรใช้ตัดสินปรับขนาดยาเดี่ยว ๆ';
+        ? 'Peak/trough now use the validated 2-compartment model. Because peripheral-volume variability is large in children (V2 IIV ~98%), AUC₂₄ remains the most reliable target (400-600 mg·h/L); interpret peak/trough as supportive only, not as a sole basis for dose adjustment.'
+        : 'ค่า Peak/Trough คำนวณด้วยโมเดล 2-compartment ที่ validated แล้ว แต่เนื่องจากความแปรปรวนของ peripheral volume ในเด็กสูงมาก (V2 IIV ~98%) AUC₂₄ จึงยังเป็นค่าที่เชื่อถือได้ที่สุด (target 400-600 mg·h/L) ส่วน peak/trough ใช้ประกอบการพิจารณา ไม่ควรใช้ตัดสินปรับขนาดยาเดี่ยว ๆ';
     };
 
     // Population-aware model matching from patient covariates (soft recommendation).
@@ -378,7 +384,7 @@ const TDMHub = (function() {
         for (let t = 0; t <= maxTime; t += st) {
           const concs = [];
           for (let si = 0; si < mcmc.length; si += Math.max(1, Math.floor(mcmc.length / 300)))
-            concs.push(predictConc(t, mcmc[si].cl, mcmc[si].vd, doseHist));
+            concs.push(predictAuto(t, mcmc[si], doseHist));
           concs.sort((a, b) => a - b);
           const lo = concs[Math.floor(concs.length * 0.05)], hi = concs[Math.floor(concs.length * 0.95)];
           ctx.fillStyle = 'rgba(56,189,248,0.08)';
@@ -392,7 +398,7 @@ const TDMHub = (function() {
       ctx.beginPath();
       let first = true;
       for (let t = 0; t <= maxTime; t += 0.3) {
-        const c = predictConc(t, pk.cl, pk.vd, doseHist);
+        const c = predictAuto(t, pk, doseHist);
         const x = tX(t), y = cY(c);
         if (first) {
           ctx.moveTo(x, y);
@@ -404,14 +410,14 @@ const TDMHub = (function() {
       // Proposed dosing curve
       const optStart = maxTime;
       const optDH = [{ amount: optDose, interval: optInterval, infusion: optInfusion, startTime: optStart, nDoses: 3 }];
-      const carryConc = predictConc(maxTime, pk.cl, pk.vd, doseHist);
       ctx.strokeStyle = '#4ade80';
       ctx.lineWidth = 1.5;
       ctx.setLineDash([5, 3]);
       ctx.beginPath();
       first = true;
       for (let t = optStart; t <= totalTime; t += 0.3) {
-        const cNew = predictConc(t, pk.cl, pk.vd, optDH), cCarry = carryConc * Math.exp(-pk.ke * (t - optStart));
+        // carryover = old dose history still decaying (exact for 1- & 2-comp)
+        const cNew = predictAuto(t, pk, optDH), cCarry = predictAuto(t, pk, doseHist);
         const x = tX(t), y = cY(cNew + cCarry);
         if (first) {
           ctx.moveTo(x, y);
@@ -519,7 +525,7 @@ const TDMHub = (function() {
       document.getElementById('vancoOptInfusionVal').textContent = oif + ' hr';
 
       const auc24 = calcAUC_ss(currentPK.cl, currentPK.vd, od, oi, oif) * (24 / oi);
-      const ss = ssPeakTrough(currentPK.cl, currentPK.vd, od, oi, oif);
+      const ss = peakTroughAuto(currentPK, od, oi, oif);
       let cls = 'green', msg = '✅ In target';
       if (auc24 < 400) { cls = 'amber'; msg = '⚠ Below target'; }
       else if (auc24 > 600) { cls = 'red'; msg = '⚠ Above target'; }
@@ -549,7 +555,7 @@ const TDMHub = (function() {
         for (const d of ds) {
           const auc = calcAUC_ss(currentPK.cl, currentPK.vd, d, q, 1) * (24 / q);
           if (auc >= 300 && auc <= 750) {
-            const ss = ssPeakTrough(currentPK.cl, currentPK.vd, d, q, 1);
+            const ss = peakTroughAuto(currentPK, d, q, 1);
             opts.push({ dose: d, q, auc, tr: ss.trough, pk: ss.peak, ok: auc >= 400 && auc <= 600 });
           }
         }
@@ -594,7 +600,7 @@ const TDMHub = (function() {
         if (!el || !currentPK) return null;
         var od = +el.value, oi = +document.getElementById('vancoOptInterval').value, oif = +document.getElementById('vancoOptInfusion').value;
         var auc24 = calcAUC_ss(currentPK.cl, currentPK.vd, od, oi, oif) * (24/oi);
-        var ss = ssPeakTrough(currentPK.cl, currentPK.vd, od, oi, oif);
+        var ss = peakTroughAuto(currentPK, od, oi, oif);
         return { dose: od, interval: oi, infusion: oif, auc24: auc24, peak: ss.peak, trough: ss.trough };
       },
       run() {
@@ -627,6 +633,18 @@ const TDMHub = (function() {
         currentPK.pedsNoLevel = pedsNoLevel;
         const bestModel = MODELS[bestIdx];
 
+        // P0.3b: 2-comp re-fit of the chosen model (CL/V1/V2, Q fixed) so the
+        // displayed peak/trough + graph use the bi-exponential shape. Ranking
+        // above stays 1-comp; AUC=dose/CL unchanged → dose rec never moves.
+        const use2c = !!bestModel.tc;
+        if (use2c) {
+          const pk2 = bayesianMAP2c(pt, doseHist, measuredLvls, bestModel);
+          const lastD = doseHist[doseHist.length - 1];
+          const auc24 = calcAUC_ss(pk2.cl, pk2.vd, lastD.amount, lastD.interval, lastD.infusion) * (24 / lastD.interval);
+          const ss = peakTroughAuto(pk2, lastD.amount, lastD.interval, lastD.infusion);
+          currentPK = { ...pk2, auc24, ssPeak: ss.peak, ssTrough: ss.trough, pedsNoLevel };
+        }
+
         const el = document.getElementById('vancoModelCompare');
         if (el)
           el.innerHTML = '<div class="model-grid">' + allModelResults.map((r, i) => {
@@ -645,7 +663,7 @@ const TDMHub = (function() {
         if (progEl) progEl.style.display = 'block';
         if (resEl) resEl.style.display = 'none';
 
-        runMCMC(pt, doseHist, measuredLvls, bestModel, currentPK, 2000, function(samples, acceptRate) {
+        (use2c ? runMCMC2c : runMCMC)(pt, doseHist, measuredLvls, bestModel, currentPK, 2000, function(samples, acceptRate) {
           mcmcSamples = samples;
           if (progEl) progEl.style.display = 'none';
           if (resEl) resEl.style.display = 'block';

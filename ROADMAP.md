@@ -24,12 +24,15 @@
     CKD-EPI 2021/CKD stage + vanco 5 โมเดล (Buelga 5.99, Goti 3.65, Llopis 3.49)
     + Colin 2019 (35yo→4.10, 60yo→2.55, heme ×1.294)
   - ผูก CI แล้ว: step `npm test` ใน `deploy.yml` รันก่อน build → deploy ล้มถ้า test แดง
-- **เหลือทำ (🟡)**:
-  - integration test ของ Bayesian engine (`bayesianMAP`/`runMCMC`, AUC₂₄ end-to-end)
-    — ติดที่ engine ผูกกับ DOM หนัก (engine ยังอยู่แยกในแต่ละเพจ)
+- **เหลือทำ**:
+  - ~~integration test ของ Bayesian engine (`bayesianMAP`/`runMCMC`, AUC₂₄
+    end-to-end)~~ ✅ ปิดแล้วโดย **P0.3a** (engine ย้ายเข้า `VancoPK.engine` →
+    test โหลดตรง ๆ ได้ ไม่ติด DOM; เพิ่ม 7 engine golden test)
   - ~~golden test ฝั่ง `tdm.js`~~ ✅ ปิดแล้วโดย P1.1 (ทั้งสองเพจใช้ `pk-models.js`
     ชุดเดียว → test เดียวคุมทั้งคู่)
-- **Effort เหลือ**: S–M · **ผลตอบแทน**: สูงมาก (safety net ให้ refactor P1)
+- **สถานะ**: เป้าหมายหลักครบ (unit golden + engine integration + CI) →
+  เหลือเฉพาะการขยาย coverage เชิงลึกในอนาคต
+- **Effort เหลือ**: เกือบ 0 · **ผลตอบแทน**: สูงมาก (safety net ให้ refactor)
 
 ### P0.2 ปิด silent CG override ใน Bayesian engine — ✅ RESOLVED (ส่วนใหญ่แก้ไปแล้ว)
 - **ปัญหาเดิม** (โน้ต v5.9.3): หน้าจอแสดง Schwartz (เด็ก) แต่ engine
@@ -54,14 +57,37 @@
   Schwartz. **สรุป: ไม่ harden** เพราะจะเป็น churn บนโค้ดคลินิกที่ถูกอยู่แล้ว
 - **สถานะ**: ✅ ปิด — ไม่เหลืองานโค้ด (P0.2 = verified resolved + protected by tests)
 
-### P0.3 2-compartment engine (peak/trough fidelity)
+### P0.3a รวม Bayesian engine ที่ซ้ำ 2 ไฟล์เป็น shared module — ✅ DONE
+- **ปัญหาเดิม**: engine (`predictConc`/`calcAUC_ss`/`ssPeakTrough`/`bayesianMAP`/
+  `runMCMC`) ซ้ำกันใน `vanco-tdm.js` และ `tdm.js` (VancoTDM) — เหมือน PK_MODELS
+  ก่อน P1.1; แก้ที่เดียวลืมอีกที่ = สูตรสองหน้าไม่ตรงกัน
+- **ทำแล้ว (✅)**:
+  - subagent เทียบ implementation ทั้งสองฝั่งแบบ exhaustive → ฟังก์ชันคณิต 4 ตัว
+    **identical**; `runMCMC` ต่างแค่ DOM element id → extract ได้ไม่เปลี่ยนพฤติกรรม
+  - ย้าย engine ทั้ง 5 เข้า `js/pk-models.js` → `window.VancoPK.engine`
+    (parameterize progress ของ runMCMC ผ่าน `onProgress(pct,n,target)` callback)
+  - ทั้งสองเพจ destructure จาก shared; call site ส่ง onProgress ของตัวเอง
+    (vanco-tdm: mcmcBar/mcmcStatus · tdm: vancoMcmcBar/vancoMcmcStatus)
+  - tacrolimus engine (คนละ IIFE, signature ต่าง) ไม่ถูกแตะ; build:prod ทั้งสอง
+    เพจ inline engine มาก่อน consumer + ไม่มี external ref ค้าง
+  - เพิ่ม 7 engine golden test (AUC24 324/535/561, peak/trough, MAP population +
+    directional, runMCMC smoke) → **ปิด P0.1 ข้อค้าง "engine integration test"**
+- **ผลพลอยได้**: 2-comp swap (P0.3b) จะแก้ engine ที่เดียว ไม่ใช่สองที่
+
+### P0.3b สลับ 1-comp → 2-comp จริง (peak/trough fidelity) — 🔴 BLOCKED (รอข้อมูล)
 - **ปัญหา**: engine เป็น 1-comp; AUC₂₄ แม่นยำ (compartment-independent) แต่
   peak/trough เป็นค่าประมาณ — v5.11.1 ต้องขึ้น disclaimer amber ในเด็ก
   (ω_Vss เป็น lognormal approx ของ V1+V2, V2 IIV 97.9%)
+- **ตัวบล็อก (สำรวจแล้ว)**: โค้ดยัง **ไม่มีค่า Q (intercompartmental clearance)**
+  เลย (ทั้งโค้ด+คอมเมนต์), Vc/Vp มีแค่คอมเมนต์ของ Llopis/Goti, ω แยกถัง
+  (ω_Vc/ω_Vp/ω_Q) ไม่มี — ต้องดึงจากเปเปอร์ต้นฉบับ (Llopis/Goti/Colin) แล้วให้
+  ผู้เชี่ยวชาญตรวจรับ **ห้ามเดาค่าบน engine จ่ายยาจริง**. อนึ่ง 3/6 โมเดล
+  (Buelga/Adane/Bourguignon) เป็น 1-comp โดยกำเนิด
 - **ทำอะไร**: Option A — 2-comp engine + 4-param fit แยก V1/V2 IIV; เปิดทาง
   ให้ Colin additive residual error term (1.23 mg/L SD) ที่ตอนนี้ยังไม่ถูกโมเดล
-- **Effort**: L · **ผลตอบแทน**: กลาง (เฉพาะเคสที่ต้องพึ่ง peak/trough จริง)
-- **ขึ้นกับ**: ควรทำหลัง P0.1 (มี test กันถดถอย) และ P1.1 (มี shared module)
+- **Effort**: L · **ผลตอบแทน**: กลาง (เฉพาะเคสที่ต้องพึ่ง peak/trough จริง;
+  AUC₂₄ ซึ่งเป็นเป้าหมายจ่ายยาจริงแม่นอยู่แล้ว)
+- **ขึ้นกับ**: P0.3a (✅ engine ที่เดียว) + ต้องมี Q/priors ที่ verify แล้ว
 
 ---
 
@@ -146,9 +172,10 @@
 ## ลำดับการลงมือที่แนะนำ (critical path)
 
 ```
-P0.1 (tests + CI)  ──►  P1.1 (shared PK module)  ──►  P0.2 (CG override)
-       │                                                     │
-       └──────────────►  P0.3 (2-comp engine, ทำทีหลังสุดของสาย clinical)
+P0.1 ✅(tests+CI) ─► P1.1 ✅(shared models) ─► P0.2 ✅(CG override resolved)
+       │                       │
+       │                       └─► P0.3a ✅(shared engine) ─► P0.3b 🔴(2-comp, รอ Q)
+       └──────────────────────────────────────────────────────────┘
 P1.2 (GAS deploy)  ──►  P2.1 (renal จาก Sheet) + P2.2 (version UI)
 P3.x  ทำแทรกได้ตลอด (independent)
 ```

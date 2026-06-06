@@ -213,7 +213,13 @@ peds vanco Bayesian). Vancomycin now has an age-routed pediatric model:
   2-comp engine that would carry separate V1/V2 IIV).
 
 As of P1.1 the Colin model + PK_MODELS live in the shared `js/pk-models.js`
-(see below) — no longer duplicated across the two files.
+(see below) — no longer duplicated across the two files. As of **P0.3a** the
+1-compartment **engine** (`predictConc`/`calcAUC_ss`/`ssPeakTrough`/
+`bayesianMAP`/`runMCMC`) is also there under `window.VancoPK.engine`; both pages
+destructure it (runMCMC progress via an `onProgress(pct,n,target)` callback so
+each page keeps its own bar IDs). The engine is compartment-agnostic (model
+passed in), so a future 2-comp swap (P0.3b, blocked on per-paper Q + V1/V2 IIV)
+lands once. Engine output is golden-locked in `test/clinical-formulas.test.js`.
 
 **Peak/trough disclaimer (v5.11.1)**: peds results (Colin path, `modelId==='colin'`)
 append a bilingual amber info-box after the CI block stating peak/trough are

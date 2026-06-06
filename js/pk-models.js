@@ -53,13 +53,25 @@
       crclFn:_vCgLbw,
       clFn:function(pt){ return 0.034*_vCgLbw(pt)+0.015*pt.wt; },
       vdFn:function(pt){ return 1.734*pt.wt; },              // Vss = Vc(0.414·TBW) + Vp(1.32·TBW)
-      omega_cl:0.30, omega_vd:0.20, sigma:0.12 },
+      omega_cl:0.30, omega_vd:0.20, sigma:0.12,
+      // 2-comp (P0.3b) verified vs Llopis Table 3 (primary PDF): θ4 Q=7.48 L/h
+      // (fixed, no covariate, no IIV); IIV %CV CL 29.2/Vc 36.4/Vp 39.8;
+      // residual proportional-additive r1 23.9, r2 18.5 (units per paper).
+      tc:{ vcFn:function(pt){ return 0.414*pt.wt; }, vpFn:function(pt){ return 1.32*pt.wt; },
+        qFn:function(pt){ return 7.48; },
+        omega_cl:0.292, omega_v1:0.364, omega_v2:0.398, sigma_prop:0.239, sigma_add:18.5 } },
     { id:'goti', name:'Goti 2018', pop:'General hospitalized (±dialysis)',
       ref:'Ther Drug Monit 2018;40:212-21',
       crclFn:_vCgGoti,
       clFn:function(pt){ return 4.5*Math.pow(_vCgGoti(pt)/120,0.8)*Math.pow(0.7,_vDial(pt)); },
       vdFn:function(pt){ return 58.4*(pt.wt/70)*(_vDial(pt)?0.5:1)+38.4; },  // Vss = Vc(58.4·WT/70, ×0.5 if HD) + Vp(38.4)
-      omega_cl:0.22, omega_vd:0.18, sigma:0.08 },
+      omega_cl:0.22, omega_vd:0.18, sigma:0.08,
+      // 2-comp (P0.3b) verified vs Goti Table 2 (primary PDF): Q=6.5 L/h (fixed,
+      // no IIV); IIV %CV CL 39.8/Vc 81.6/Vp 57.1; residual additive 3.4 mg/L +
+      // proportional 22.7%. Vc carries the ×0.5 HD effect; Vp fixed 38.4 L.
+      tc:{ vcFn:function(pt){ return 58.4*(pt.wt/70)*(_vDial(pt)?0.5:1); }, vpFn:function(pt){ return 38.4; },
+        qFn:function(pt){ return 6.5; },
+        omega_cl:0.398, omega_v1:0.816, omega_v2:0.571, sigma_prop:0.227, sigma_add:3.4 } },
     { id:'adane', name:'Adane 2015', pop:'Extremely obese (BMI≥40)',
       ref:'Pharmacotherapy 2015;35:127-139',
       crclFn:_vCgAdaneBsa,
@@ -95,16 +107,25 @@
     return CL;
   }
   function _colinVss(pt){ return (COLIN.theta_V1+COLIN.theta_V2)*(pt.wt/70.0); } // 84.6×(WGT/70)
+  // 2-comp params verified vs Colin Table 3 + structural eqns (primary PDF):
+  // V1/V2 scale (WGT/70)^1 (isometric), Q2 scales (WGT/70)^0.75 (allometric,
+  // exponent confirmed p.- "exponent of 1 for volume, 0.75 for clearance terms
+  // CL, Q2, Q3"). Final model removed IIV on Q2 (η1-η3 = CL,V1,V2 only).
+  function _colinV1(pt){ return COLIN.theta_V1*(pt.wt/70.0); }   // 42.9·(WGT/70)
+  function _colinV2(pt){ return COLIN.theta_V2*(pt.wt/70.0); }   // 41.7·(WGT/70)
+  function _colinQ(pt){ return COLIN.theta_Q2*Math.pow(pt.wt/70.0,0.75); } // 3.22·(WGT/70)^0.75
   // Priors from Colin 2019 Table 3 (verified): ω_CL 27.9% CV → 0.279;
   // ω_Vss 0.586 (lognormal combine of V1 27.3% + V2 97.9% IIV, size-invariant);
   // residual proportional 0.215. NOTE: paper's combined error also has an
-  // additive term (1.23 mg/L SD) — engine is proportional-only, so additive is
-  // NOT modeled here (flagged for backlog / future 2-comp engine).
+  // additive term (1.23 mg/L SD) — 1-comp engine is proportional-only, so
+  // additive is NOT modeled there (carried in tc.sigma_add for the 2-comp path).
   var COLIN_MODEL = { id:'colin', name:'Colin 2019', pop:'Pediatric 1-17yr',
     ref:'Clin Pharmacokinet 2019;58:767-80',
     crclFn:function(pt){ return IVDrugRef.calcSchwartz(pt.ht,pt.scr); },  // display only (Schwartz eGFR)
     clFn:_colinCL, vdFn:_colinVss,
-    omega_cl:0.279, omega_vd:0.586, sigma:0.215 };
+    omega_cl:0.279, omega_vd:0.586, sigma:0.215,
+    tc:{ vcFn:_colinV1, vpFn:_colinV2, qFn:_colinQ,
+      omega_cl:0.279, omega_v1:0.273, omega_v2:0.979, sigma_prop:0.215, sigma_add:1.23 } };
 
   // Age routing: <1 blocked by guard, 1-17 → Colin (peds), ≥18 → adult 5-model.
   function isPedsVanco(pt){ return pt && typeof pt.age==='number' && pt.age>=1 && pt.age<18; }
@@ -270,5 +291,63 @@
   var engine = { predictConc:predictConc, calcAUC_ss:calcAUC_ss, ssPeakTrough:ssPeakTrough,
     bayesianMAP:bayesianMAP, runMCMC:runMCMC };
 
-  global.VancoPK = { PK_MODELS: PK_MODELS, COLIN_MODEL: COLIN_MODEL, isPedsVanco: isPedsVanco, engine: engine };
+  // ============================================================
+  // 2-COMPARTMENT ENGINE (P0.3b) — central-compartment conc, IV infusion
+  // ============================================================
+  // Bi-exponential (macro-constant) solution with zero-order infusion +
+  // superposition. Verified: (1) Q→∞ collapses exactly to the 1-comp engine
+  // with Vd=Vc+Vp at every time point; (2) interval AUC at steady state still
+  // equals dose/CL (compartment-independent — AUC dosing stays robust); (3)
+  // the analytic steady-state peak/trough below matches numeric superposition.
+  // Inputs are CL, Vc(=V1), Q, Vp(=V2) — the model's tc.{vcFn,qFn,vpFn}. Q
+  // carries no IIV in all three 2-comp papers (Llopis/Goti/Colin), so a Bayesian
+  // fit varies CL/Vc/Vp with Q fixed (handled in the fit, not here).
+  function _macro2c(cl,v1,q,v2){
+    var k10=cl/v1, k12=q/v1, k21=q/v2;
+    var sum=k10+k12+k21, disc=Math.sqrt(sum*sum-4*k10*k21);
+    var alpha=(sum+disc)/2, beta=(sum-disc)/2;
+    var A=(alpha-k21)/(v1*(alpha-beta));   // bolus coefficients (include 1/V1)
+    var B=(k21-beta)/(v1*(alpha-beta));
+    return { alpha:alpha, beta:beta, A:A, B:B };
+  }
+  function predictConc2c(t,cl,v1,q,v2,doseHist){
+    if(!(cl>0)||!(v1>0)||!(v2>0)||!(q>0)||!isFinite(cl)||!isFinite(v1)||!isFinite(q)||!isFinite(v2))return 0;
+    var m=_macro2c(cl,v1,q,v2);
+    if(!isFinite(m.alpha)||!isFinite(m.beta)||m.alpha<=0||m.beta<=0)return 0;
+    var c=0;
+    for(var di=0;di<doseHist.length;di++){
+      var d=doseHist[di]; if(!d.infusion||d.infusion<=0)continue;
+      var k0=d.amount/d.infusion;
+      for(var n=0;n<d.nDoses;n++){
+        var tau0=t-(d.startTime+n*d.interval); if(tau0<=0)continue;
+        var T=d.infusion;
+        if(tau0<=T){
+          c+=k0*((m.A/m.alpha)*(1-Math.exp(-m.alpha*tau0))+(m.B/m.beta)*(1-Math.exp(-m.beta*tau0)));
+        } else {
+          c+=k0*((m.A/m.alpha)*(1-Math.exp(-m.alpha*T))*Math.exp(-m.alpha*(tau0-T))
+                +(m.B/m.beta)*(1-Math.exp(-m.beta*T))*Math.exp(-m.beta*(tau0-T)));
+        }
+      }
+    }
+    return isFinite(c)?c:0;
+  }
+  // Analytic steady-state peak (end of infusion) & trough (end of interval)
+  function ssPeakTrough2c(cl,v1,q,v2,dose,interval,infusion){
+    if(!(cl>0)||!(v1>0)||!(v2>0)||!(q>0)||!(infusion>0)||!(interval>0))return{peak:NaN,trough:NaN};
+    var m=_macro2c(cl,v1,q,v2);
+    if(!isFinite(m.alpha)||!isFinite(m.beta)||m.alpha<=0||m.beta<=0)return{peak:NaN,trough:NaN};
+    var k0=dose/infusion, peak=0, trough=0;
+    var terms=[[m.A,m.alpha],[m.B,m.beta]];
+    for(var i=0;i<terms.length;i++){
+      var C=terms[i][0], lam=terms[i][1];
+      var acc=1/(1-Math.exp(-lam*interval));
+      var base=(C*k0/lam)*(1-Math.exp(-lam*infusion))*acc;
+      peak+=base; trough+=base*Math.exp(-lam*(interval-infusion));
+    }
+    return{peak:isFinite(peak)?peak:NaN,trough:isFinite(trough)?trough:NaN};
+  }
+  var engine2c = { macro:_macro2c, predictConc2c:predictConc2c, ssPeakTrough2c:ssPeakTrough2c };
+
+  global.VancoPK = { PK_MODELS: PK_MODELS, COLIN_MODEL: COLIN_MODEL, isPedsVanco: isPedsVanco,
+    engine: engine, engine2c: engine2c };
 })(typeof window !== 'undefined' ? window : this);

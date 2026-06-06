@@ -322,3 +322,68 @@ test('engine runMCMC — produces samples and reports progress (smoke)', async (
   assert.ok(samples.every(s => s.cl > 0 && s.vd > 0 && isFinite(s.ke)), 'finite positive samples');
   assert.ok(lastPct >= 0, 'onProgress was called');
 });
+
+// ═══════════════════ 2-compartment engine (P0.3b) ═════════════════════════
+// Verified vs primary PDFs (Llopis/Goti/Colin Tables). The bi-exponential
+// engine must (1) collapse to the 1-comp engine when Q→∞ (V=Vc+Vp), (2) keep
+// interval AUC = dose/CL (compartment-independent), (3) match numeric
+// superposition for the analytic steady-state peak/trough. These lock the math
+// before it is wired into the TDM pages.
+const e2c = VancoPK.engine2c;
+const TC_REF = { age: 45, wt: 70, ht: 170, scr: 1.0, sex: 'M', dialysis: 'none', heme: false };
+const TC_DOSES = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 8, startTime: 0 }];
+
+test('2-comp models — Llopis/Goti/Colin expose verified tc {vcFn,vpFn,qFn,ω}', () => {
+  for (const id of ['llopis', 'goti', 'colin']) {
+    const tc = models[id].tc;
+    assert.ok(tc, id + ' has tc');
+    for (const fn of ['vcFn', 'vpFn', 'qFn']) assert.equal(typeof tc[fn], 'function', id + '.' + fn);
+    for (const k of ['omega_cl', 'omega_v1', 'omega_v2']) assert.ok(tc[k] > 0, id + '.' + k);
+  }
+  // spot-check the headline verified numbers (primary-PDF values)
+  assert.equal(models.llopis.tc.qFn(TC_REF), 7.48, 'Llopis Q=7.48 L/h');
+  assert.equal(models.goti.tc.qFn(TC_REF), 6.5, 'Goti Q=6.5 L/h');
+  near(models.colin.tc.qFn({ wt: 70 }), 3.22, 1e-9, 'Colin Q=3.22 at 70kg');
+  near(models.colin.tc.qFn({ wt: 35 }), 3.22 * Math.pow(0.5, 0.75), 1e-6, 'Colin Q allometric ^0.75');
+});
+
+test('2-comp predictConc2c — collapses to 1-comp exactly as Q→∞ (Vd=Vc+Vp)', () => {
+  const cl = 3.65, v1 = 58.4, v2 = 38.4;
+  for (const t of [1, 6, 12, 84, 90, 95.5]) {
+    const twoC = e2c.predictConc2c(t, cl, v1, 1e7, v2, TC_DOSES);
+    const oneC = VancoPK.engine.predictConc(t, cl, v1 + v2, TC_DOSES);
+    near(twoC, oneC, 1e-3, `Q→∞ matches 1-comp at t=${t}`);
+  }
+});
+
+test('2-comp — interval AUC at steady state still equals dose/CL', () => {
+  // Numerically integrate the 2-comp curve over the last (near-SS) interval.
+  const cl = 3.65, v1 = 58.4, q = 6.5, v2 = 38.4, tau = 12, start = 7 * 12;
+  const N = 4000, dt = tau / N; let auc = 0;
+  for (let i = 0; i < N; i++) auc += e2c.predictConc2c(start + i * dt + dt / 2, cl, v1, q, v2, TC_DOSES) * dt;
+  // near steady state the interval AUC approaches dose/CL from below
+  const exact = 1000 / cl;
+  assert.ok(auc > exact * 0.95 && auc <= exact, `2-comp interval AUC ${auc.toFixed(1)} ≈ dose/CL ${exact.toFixed(1)}`);
+});
+
+test('2-comp ssPeakTrough2c — matches numeric superposition; peak>trough>0', () => {
+  const cl = 3.65, v1 = 58.4, q = 6.5, v2 = 38.4;
+  const longDoses = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 40, startTime: 0 }];
+  const lastStart = 39 * 12;
+  const numPeak = e2c.predictConc2c(lastStart + 1, cl, v1, q, v2, longDoses);
+  const numTrough = e2c.predictConc2c(lastStart + 12 - 1e-6, cl, v1, q, v2, longDoses);
+  const an = e2c.ssPeakTrough2c(cl, v1, q, v2, 1000, 12, 1);
+  near(an.peak, numPeak, 0.02, 'analytic peak == numeric SS');
+  near(an.trough, numTrough, 0.02, 'analytic trough == numeric SS');
+  assert.ok(an.peak > an.trough && an.trough > 0, 'peak > trough > 0');
+});
+
+test('2-comp — Goti peak is higher than the 1-comp peak (fidelity gain)', () => {
+  // The whole point: central-compartment peak exceeds the 1-comp approximation
+  // while AUC is unchanged. Goti REF 1000mg q12h: 2-comp peak ~32, 1-comp ~28.
+  const cl = models.goti.clFn(TC_REF);
+  const two = e2c.ssPeakTrough2c(cl, models.goti.tc.vcFn(TC_REF), models.goti.tc.qFn(TC_REF), models.goti.tc.vpFn(TC_REF), 1000, 12, 1);
+  const one = VancoPK.engine.ssPeakTrough(cl, models.goti.vdFn(TC_REF), 1000, 12, 1);
+  assert.ok(two.peak > one.peak, `2-comp peak ${two.peak.toFixed(1)} > 1-comp ${one.peak.toFixed(1)}`);
+  near(two.peak, 32.2, 0.6, '2-comp Goti peak ≈ 32');
+});

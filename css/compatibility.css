@@ -782,3 +782,84 @@
     min-width: 20px;
   }
 }
+
+/* ===== Unified Check section (P2.5 redesign) ===== */
+.check-section { display: none; }
+.check-section.active { display: block; }
+.check-search-wrap { position: relative; }
+
+.check-hint {
+  color: var(--text3);
+  font-size: 12.5px;
+  text-align: center;
+  padding: 18px 12px;
+  line-height: 1.6;
+}
+
+.check-summary {
+  font-size: 12px;
+  color: var(--text2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  line-height: 1.9;
+}
+.check-summary b { font-weight: 700; }
+.t-red { color: var(--red); }
+.t-green { color: var(--green); }
+.t-amber { color: #f59e0b; }
+.t-muted { color: var(--text3); }
+
+/* source badge on the 2-drug detail banner */
+.src-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* grouped pairwise results (3+ drugs) */
+.result-group {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.result-group .group-header {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.result-group .group-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(128, 128, 128, .18);
+  border-radius: 20px;
+  padding: 1px 9px;
+}
+.result-group.i .group-header { background: rgba(239, 68, 68, .12); color: #ef4444; }
+.result-group.v .group-header { background: rgba(245, 158, 11, .14); color: #f59e0b; }
+.result-group.c .group-header { background: rgba(34, 197, 94, .13); color: #22c55e; }
+.result-group.n .group-header { background: var(--bg); color: var(--text2); }
+
+.pair-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+.pair-row .pair-names { flex: 1; word-break: break-word; }
+.pair-row .src-mini { font-size: 12px; opacity: .75; }
+.result-group.i .pair-row { border-left: 3px solid #ef4444; }
+.result-group.v .pair-row { border-left: 3px solid #f59e0b; }
+.result-group.c .pair-row { border-left: 3px solid #22c55e; }
+.result-group.n .pair-row { border-left: 3px solid var(--border); }

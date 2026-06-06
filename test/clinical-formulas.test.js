@@ -494,3 +494,19 @@ test('compat — NO cross-salt leak (the P2.3 safety fix) ⭐', () => {
   assert.notEqual(r2.status, 'incompatible', 'nitroprusside must not inherit bicarbonate incompatibility');
   assert.notEqual(r2.source, 'curated', 'no curated match for a different sodium salt');
 });
+
+// ═══════════ IVDrugRef.escHtml — XSS escaper (P3.1) ══════════════════════════
+test('escHtml escapes all five HTML-significant chars', () => {
+  assert.equal(IVDrugRef.escHtml('<img src=x onerror=alert(1)>'),
+    '&lt;img src=x onerror=alert(1)&gt;');
+  assert.equal(IVDrugRef.escHtml(`& < > " '`), '&amp; &lt; &gt; &quot; &#39;');
+  // attribute-breakout payload is neutralised
+  assert.ok(!IVDrugRef.escHtml('a" onmouseover="evil()').includes('"'));
+});
+
+test('escHtml: nullish → empty string (no literal "undefined"/"null")', () => {
+  assert.equal(IVDrugRef.escHtml(undefined), '');
+  assert.equal(IVDrugRef.escHtml(null), '');
+  assert.equal(IVDrugRef.escHtml(0), '0');      // 0 is a value, not nullish
+  assert.equal(IVDrugRef.escHtml('safe text'), 'safe text');
+});

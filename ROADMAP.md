@@ -211,11 +211,32 @@
 
 ## P3 — คุณภาพโค้ด, ความปลอดภัยเชิงป้องกัน, ขัดเกลา
 
-### P3.1 Audit XSS surface (`innerHTML`)
-- **ปัญหา**: `innerHTML` ใช้หนาแน่นทั่วโค้ด (admin 49, tdm 48, dashboard 23…)
-  `dashboard.js` v6.1 hardened XSS แล้ว แต่ไฟล์อื่นยังไม่ผ่านการ audit
-- **ทำอะไร**: ตรวจจุดที่ interpolate ค่าจากผู้ใช้/GAS เข้า `innerHTML` →
-  เปลี่ยนเป็น `textContent`/escape helper (โดยเฉพาะ admin ที่รับ input จากผู้ใช้)
+### P3.1 Audit XSS surface (`innerHTML`) — ✅ DONE (genuine sinks ปิดแล้ว)
+- **ปัญหาเดิม**: `innerHTML` ใช้หนาแน่นทั่วโค้ด (~185 จุด); `dashboard.js` v6.1
+  hardened แล้ว แต่ไฟล์อื่นยังไม่ audit
+- **Audit (subagent, อ่านอย่างเดียว)**: ส่วนใหญ่ปลอดภัย (static template / ตัวเลข
+  ที่ coerce แล้ว / ผ่าน escaper อยู่แล้ว). พบจุดฉีดจริง **🔴 14 จุด** ที่ data จาก
+  user/GAS ไหลเข้า sink โดยไม่ escape — **tdm/vanco/calculator ปลอดภัยหมด** (render
+  แต่ตัวเลข computed)
+- **ทำแล้ว (✅)**:
+  - เพิ่ม escaper กลาง `IVDrugRef.escHtml()` ใน `core.js` (escape `& < > " '`,
+    nullish→'') — รวม escaper ที่เคยกระจาย 3 ที่ (admin/quick-actions/dashboard)
+    ให้มีตัวมาตรฐานเดียว + 2 unit test
+  - **index.js** (surface ใหญ่สุด — drug data จาก GAS → ผู้ใช้ทุกคน): renderer
+    หลักอยู่ใน blob obfuscated (แก้ตรงไม่ได้) → ส่ง **deep-escaped copy** (`_escDeep`)
+    เข้า `_origRenderCard` ตอน render (ไม่แตะ DRUGS ต้นฉบับ → search/filter ไม่พัง);
+    quick-access chips ×3 + star `data-name` escape ตรง; urgent-alert banner+modal
+    ปิดผ่าน wrap `handleUrgentAlertsUpdate` (escape display fields บน copy, คง id
+    ไว้ให้ dismiss ทำงาน)
+  - **admin.js** (3): filename อัปโหลด, audit action fallback, renal class fallback
+  - **renal-admin-block.js** (3): renal class ×2, `data.info` (textarea ผู้ใช้)
+  - build:prod 8 เพจ + built JS ทุกหน้า valid (รวม obfuscated) + 56 test ผ่าน
+- **เหลือ/ติดตามต่อ (🟡 ไม่ใช่ช่องโหว่วันนี้)**:
+  - `compatibility.js` (6 จุด) + `renal-dosing.js` (2 จุด) render จาก **static array**
+    (developer-controlled) → ยังไม่ใช่ stored-XSS; จะกลายเป็น 🔴 เมื่อ wire เข้า GAS
+    → escape ตอนทำ **P2.1/P2.4** (มี `escHtml` กลางรออยู่แล้ว)
+  - `share-export.js:printReport` เป็น HTML passthrough — caller ปัจจุบันส่งแต่
+    ตัวเลข/static; ระวังอย่าส่ง user/GAS string ดิบในอนาคต
 - **Effort**: M
 
 ### P3.2 ลบ `console.log` ออกจาก production path — ✅ DONE

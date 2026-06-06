@@ -41,7 +41,7 @@ function renderRenalStats() {
   const el = document.getElementById('renal-stats');
   if (el) el.innerHTML = `
     <div class="stat-card"><div class="stat-label">ยาทั้งหมด</div><div class="stat-value primary">${total}</div></div>
-    ${topClasses.map(([c,n]) => `<div class="stat-card"><div class="stat-label">${CLASS_LABELS[c] || c}</div><div class="stat-value">${n}</div></div>`).join('')}
+    ${topClasses.map(([c,n]) => `<div class="stat-card"><div class="stat-label">${CLASS_LABELS[c] || escHtml(c || '')}</div><div class="stat-value">${n}</div></div>`).join('')}
   `;
   const countEl = document.getElementById('renal-total-count');
   if (countEl) countEl.textContent = total;
@@ -63,7 +63,7 @@ function renderRenalTable() {
       <tr>
         <td style="color:var(--text-muted);font-size:12px">${start + idx + 1}</td>
         <td><strong>${escHtml(d.name || '')}</strong><br><span style="font-size:11px;color:var(--text-muted)">${escHtml(d.id || '')}</span></td>
-        <td><span class="badge">${CLASS_LABELS[d['class']] || d['class'] || ''}</span></td>
+        <td><span class="badge">${CLASS_LABELS[d['class']] || escHtml(d['class'] || '')}</span></td>
         <td style="font-size:12px">${escHtml(d.sub || '')}</td>
         <td style="font-size:12px">${(d.dosingTable || []).length} ranges</td>
         <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${d.infoType === 'red' ? '#ef4444' : d.infoType === 'amber' ? '#f59e0b' : d.infoType === 'teal' ? '#14b8a6' : '#3b82f6'}"></span> ${INFO_TYPE_LABELS[d.infoType] || ''}</td>
@@ -233,7 +233,7 @@ function renderRenalPreview() {
       <div style="margin-bottom:12px">${badgeHtml}</div>
       ${data.recommended ? `<div style="background:#ecfdf5;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:16px"><div style="font-size:11px;font-weight:600;color:#059669;margin-bottom:4px">RECOMMENDED DOSE</div><div style="font-weight:600;color:#047857">${escHtml(data.recommended)}</div></div>` : ''}
       <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px"><thead><tr style="background:#f8fafc"><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">GFR</th><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">Dose</th><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">Freq</th><th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)">Note</th></tr></thead><tbody>${tableRows}</tbody></table>
-      ${data.info ? `<div style="background:${bgColor};border-left:4px solid ${borderColor};border-radius:0 8px 8px 0;padding:12px;margin-bottom:12px;font-size:13px">${data.info}</div>` : ''}
+      ${data.info ? `<div style="background:${bgColor};border-left:4px solid ${borderColor};border-radius:0 8px 8px 0;padding:12px;margin-bottom:12px;font-size:13px">${escHtml(data.info)}</div>` : ''}
       ${data.ref ? `<div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:var(--text-muted)"><strong>Ref:</strong> ${escHtml(data.ref)}</div>` : ''}
     </div>`;
 }

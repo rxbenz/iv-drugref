@@ -21,7 +21,7 @@ function renderStarRating(drug){
   }
   var rated=existing?' rated':'';
   var label=existing?'<span class="rating-thanks">\u2605 '+existing.rating+'/5</span><span class="rating-edit" data-action="editRating" data-id="'+drug.id+'">แก้ไข</span>':'<span class="rating-label">ให้คะแนนยานี้</span>';
-  return '<div class="card-rating" data-drug-id="'+drug.id+'">'+label+'<span class="stars'+rated+'" data-action="rateDrug" data-id="'+drug.id+'" data-name="'+drug.generic+'">'+stars+'</span></div>';
+  return '<div class="card-rating" data-drug-id="'+drug.id+'">'+label+'<span class="stars'+rated+'" data-action="rateDrug" data-id="'+drug.id+'" data-name="'+IVDrugRef.escHtml(drug.generic)+'">'+stars+'</span></div>';
 }
 
 function handleStarClick(drugId,drugName,starVal){
@@ -181,11 +181,22 @@ function _normDrug(d){
   d._normalized=true;
   return d;
 }
+// XSS hardening (ROADMAP P3.1): the obfuscated card renderer interpolates GAS/
+// Sheet drug fields straight into innerHTML. We can't edit that minified blob,
+// so we hand it an HTML-escaped DEEP COPY at render time. The original DRUGS
+// entry is left untouched, so search/filter/comparison still see raw values.
+function _escDeep(v){
+  if(v==null)return v;
+  if(typeof v==='string')return IVDrugRef.escHtml(v);
+  if(Array.isArray(v))return v.map(_escDeep);
+  if(typeof v==='object'){var o={};for(var k in v){if(Object.prototype.hasOwnProperty.call(v,k))o[k]=_escDeep(v[k]);}return o;}
+  return v;
+}
 // Monkey-patch renderDrugCard to normalize each drug before rendering
 var _origRenderCard=renderDrugCard;
 renderDrugCard=function(drug){
   if(!drug._normalized)_normDrug(drug);
-  return _origRenderCard(drug);
+  return _origRenderCard(_escDeep(drug));
 };
 
 // ============================================================
@@ -366,7 +377,7 @@ function renderFavoritesSection(drugs){
   var chips=drugs.map(function(d){
     var hadCls=d.had?' chip-had':'';
     return '<button class="drug-chip'+hadCls+'" data-action="jumpDrug" data-id="'+d.id+'">'
-      +'<span class="chip-star">\u2605</span>'+d.generic+'</button>';
+      +'<span class="chip-star">\u2605</span>'+IVDrugRef.escHtml(d.generic)+'</button>';
   }).join('');
   return '<div class="qa-section">'
     +'<div class="qa-header">'
@@ -382,7 +393,7 @@ function renderMostUsedSection(drugs){
   var chips=drugs.map(function(d,i){
     var hadCls=d.had?' chip-had':'';
     return '<button class="drug-chip'+hadCls+'" data-action="jumpDrug" data-id="'+d.id+'">'
-      +'<span class="chip-rank">'+(i+1)+'</span>'+d.generic
+      +'<span class="chip-rank">'+(i+1)+'</span>'+IVDrugRef.escHtml(d.generic)
       +'<span style="font-size:10px;opacity:0.5">('+counts[d.id]+')</span></button>';
   }).join('');
   return '<div class="qa-section">'
@@ -397,7 +408,7 @@ function renderRecentSection(drugs){
   var chips=drugs.map(function(d){
     var hadCls=d.had?' chip-had':'';
     return '<button class="drug-chip'+hadCls+'" data-action="jumpDrug" data-id="'+d.id+'">'
-      +d.generic+'</button>';
+      +IVDrugRef.escHtml(d.generic)+'</button>';
   }).join('');
   return '<div class="qa-section">'
     +'<div class="qa-header">'
@@ -479,6 +490,27 @@ updateList=function(){
   _origUpdateList();
   renderQuickAccess();
 };
+
+// XSS hardening (ROADMAP P3.1): urgent-alert banner + modal live in the
+// obfuscated blob and render GAS-authored alert fields straight into innerHTML.
+// handleUrgentAlertsUpdate(alerts) is the single chokepoint (it stores into the
+// global activeUrgentAlerts that both renderers read), so escape the display
+// fields on a COPY here before the original stores them. id and other fields are
+// left raw so dismiss-by-id still works.
+if(typeof handleUrgentAlertsUpdate==='function'){
+  var _origHandleUrgentAlertsUpdate=handleUrgentAlertsUpdate;
+  handleUrgentAlertsUpdate=function(alerts,t){
+    var safe=Array.isArray(alerts)?alerts.map(function(a){
+      if(!a||typeof a!=='object')return a;
+      var c={};for(var k in a){if(Object.prototype.hasOwnProperty.call(a,k))c[k]=a[k];}
+      ['drugName','title','message','actionRequired'].forEach(function(f){
+        if(typeof c[f]==='string')c[f]=IVDrugRef.escHtml(c[f]);
+      });
+      return c;
+    }):alerts;
+    return _origHandleUrgentAlertsUpdate(safe,t);
+  };
+}
 
 // --- Register New Delegate Actions ---
 IVDrugRef.delegate(document,'click',{

@@ -128,6 +128,24 @@ Used in compatibility.js to match CURATED pair names to DRUGS array entries.
   salt of the same cation. Locked by 4 tests (`loadCompatibility` in the test
   helper slices the file's IIFE to expose the pure matchers).
 
+### XSS hardening — `IVDrugRef.escHtml()` (ROADMAP P3.1)
+Canonical HTML escaper in `core.js` (escapes `& < > " '`; nullish → `''`). **Any
+user- or GAS/Sheet-derived string** put into `innerHTML` or a quoted attribute
+must go through it (GAS/Sheet data is admin-authored → stored-XSS vector).
+- `index.js` drug-card renderer is in the **obfuscated line-7 blob** (can't edit
+  in place): the `renderDrugCard` monkey-patch hands `_origRenderCard` a
+  **deep-escaped copy** (`_escDeep`) so the rendered HTML is safe while the raw
+  `DRUGS` entry (used by search/filter) is untouched. Urgent alerts are escaped
+  by wrapping the global `handleUrgentAlertsUpdate` (escape display fields on a
+  copy, keep `id` for dismiss). Quick-access chips + star `data-name` escape
+  inline.
+- `admin.js` / `renal-admin-block.js` have their own (textContent-based)
+  `escHtml`; both are XSS-routed except the few gaps fixed in P3.1.
+- **Known 🟡 (not live today)**: `compatibility.js` + `renal-dosing.js` render
+  developer-controlled **static** arrays unescaped — escape these when they're
+  wired to GAS (P2.1/P2.4). `share-export.js printReport` is an HTML passthrough;
+  never feed it raw user/GAS strings.
+
 ### drugCacheVer — Cache Busting
 - Source code has placeholder `drugCacheVer` value
 - `build.js` replaces it with git commit hash during production build

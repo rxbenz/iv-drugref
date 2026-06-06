@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.11.1
+// IV Drug Reference PWA — Service Worker v5.12.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -12,9 +12,13 @@
 //          model (age-routed); infant <1 still blocked. Adult path unchanged.
 // v5.11.1: Peds peak/trough disclaimer (1-comp approximation; AUC₂₄ is the
 //          reliable peds target). UI-only; no calc change.
+// v5.12.0: 2-comp PK engine (peak/trough fidelity); shared pk-models.js +
+//          VancoPK.engine; compatibility salt-key disambiguation (no cross-salt
+//          leak); XSS hardening (IVDrugRef.escHtml); prod console.log strip;
+//          automated clinical test suite + CI.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.11.1';
+const CACHE_NAME = 'iv-drugref-v5.12.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

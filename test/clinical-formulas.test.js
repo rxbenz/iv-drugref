@@ -251,3 +251,74 @@ test('Peds vanco — Colin clearance is SCr-driven, independent of adult CG', ()
   assert.ok(models.colin.clFn(higherScr) < models.colin.clFn(base),
     'higher SCr → lower Colin CL (SCr-driven maturation, no CG)');
 });
+
+// ═══════════════════ PK engine (shared, P0.3a) ════════════════════════════
+// The 1-compartment engine (predictConc/calcAUC_ss/ssPeakTrough/bayesianMAP)
+// was extracted verbatim from the two TDM pages into VancoPK.engine. These
+// lock its end-to-end output so the extraction — and a future 2-comp swap
+// (P0.3b) — cannot drift. bayesianMAP has no RNG → safe to golden-lock; runMCMC
+// has RNG → smoke-tested only. Closes the P0.1 "engine integration test" item.
+const engine = VancoPK.engine;
+const ENG_REF = { age: 45, wt: 70, ht: 170, scr: 1.0, sex: 'M', dialysis: 'none', heme: false };
+const ENG_DOSES = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 5, startTime: 0 }];
+
+test('engine — exposes the 5 PK functions', () => {
+  for (const fn of ['predictConc', 'calcAUC_ss', 'ssPeakTrough', 'bayesianMAP', 'runMCMC'])
+    assert.equal(typeof engine[fn], 'function', fn + ' present');
+});
+
+test('engine calcAUC_ss — reproduces CLAUDE.md golden AUC24 (1000mg q12h)', () => {
+  // AUC24 = calcAUC_ss(tau) × (24/tau); golden values documented in CLAUDE.md.
+  const auc24 = (id) => engine.calcAUC_ss(models[id].clFn(ENG_REF), models[id].vdFn(ENG_REF), 1000, 12, 1) * 2;
+  near(auc24('buelga'), 324, 1.0, 'Buelga AUC24');
+  near(auc24('goti'),   535, 1.0, 'Goti AUC24');
+  near(auc24('llopis'), 561, 1.0, 'Llopis AUC24');
+});
+
+test('engine calcAUC_ss — numeric AUC tracks exact daily_dose/CL (within ~4%)', () => {
+  // At steady state AUC24 = daily_dose/CL exactly; the numeric integrator sits
+  // slightly under due to carry-term clamping. Guards the integration math.
+  const cl = models.goti.clFn(ENG_REF);
+  const auc24 = engine.calcAUC_ss(cl, models.goti.vdFn(ENG_REF), 1000, 12, 1) * 2;
+  const exact = 2000 / cl;
+  assert.ok(auc24 <= exact && auc24 > exact * 0.96, `numeric ${auc24.toFixed(1)} just under exact ${exact.toFixed(1)}`);
+});
+
+test('engine ssPeakTrough — golden peak/trough, peak>trough, trough>0', () => {
+  const pt = engine.ssPeakTrough(models.goti.clFn(ENG_REF), models.goti.vdFn(ENG_REF), 1000, 12, 1);
+  near(pt.peak, 27.9, 0.2, 'Goti peak');
+  near(pt.trough, 18.4, 0.2, 'Goti trough');
+  assert.ok(pt.peak > pt.trough && pt.trough > 0, 'peak > trough > 0');
+});
+
+test('engine bayesianMAP — no levels returns the population estimate exactly', () => {
+  const r = engine.bayesianMAP(ENG_REF, ENG_DOSES, [], models.goti);
+  assert.equal(r.method, 'Population PK');
+  near(r.cl, r.popCL, 1e-9, 'cl == popCL');
+  near(r.vd, r.popVd, 1e-9, 'vd == popVd');
+});
+
+test('engine bayesianMAP — a higher-than-predicted trough lowers estimated CL', () => {
+  // Single trough mostly informs CL (deterministic optimizer, no RNG).
+  const popPred = engine.predictConc(54, models.goti.clFn(ENG_REF), models.goti.vdFn(ENG_REF), ENG_DOSES);
+  const high = engine.bayesianMAP(ENG_REF, ENG_DOSES, [{ time: 54, value: popPred * 1.5 }], models.goti);
+  assert.equal(high.method, 'Bayesian MAP');
+  assert.ok(high.cl < high.popCL, `higher level → CL ${high.cl.toFixed(2)} < pop ${high.popCL.toFixed(2)}`);
+});
+
+test('engine runMCMC — produces samples and reports progress (smoke)', async () => {
+  const lvls = [{ time: 54, value: 18 }];
+  const map = engine.bayesianMAP(ENG_REF, ENG_DOSES, lvls, models.goti);
+  let lastPct = -1;
+  // runMCMC batches via setTimeout(0); wrap in a Promise so the test awaits the
+  // final cb and the assertions actually run (otherwise they'd never fire).
+  const { samples, accRate } = await new Promise((resolve) => {
+    engine.runMCMC(ENG_REF, ENG_DOSES, lvls, models.goti, map, 500,
+      (samples, accRate) => resolve({ samples, accRate }),
+      (pct) => { lastPct = pct; });
+  });
+  assert.ok(samples.length > 0, 'returned samples');
+  assert.ok(accRate >= 0 && accRate <= 1, 'acceptance rate in [0,1]');
+  assert.ok(samples.every(s => s.cl > 0 && s.vd > 0 && isFinite(s.ke)), 'finite positive samples');
+  assert.ok(lastPct >= 0, 'onProgress was called');
+});

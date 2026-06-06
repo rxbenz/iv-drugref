@@ -346,7 +346,117 @@
     }
     return{peak:isFinite(peak)?peak:NaN,trough:isFinite(trough)?trough:NaN};
   }
-  var engine2c = { macro:_macro2c, predictConc2c:predictConc2c, ssPeakTrough2c:ssPeakTrough2c };
+  // Standard Nelder-Mead for the 3-param (CL,V1,V2) simplex.
+  function _nelderMead3(simplex,f,maxIt){
+    var n=3, alpha=1, gamma=2, rho=0.5, sh=0.5;
+    var pts=simplex.map(function(p){return p.slice();});
+    for(var it=0;it<maxIt;it++){
+      pts.sort(function(a,b){return f(a)-f(b);});
+      var c=[0,0,0];
+      for(var i=0;i<n;i++)for(var j=0;j<n;j++)c[j]+=pts[i][j]/n;   // centroid of best n
+      var worst=pts[n];
+      var xr=c.map(function(cj,j){return cj+alpha*(cj-worst[j]);}); // reflect
+      var fr=f(xr);
+      if(fr<f(pts[0])){
+        var xe=c.map(function(cj,j){return cj+gamma*(xr[j]-cj);});  // expand
+        pts[n]=f(xe)<fr?xe:xr;
+      } else if(fr<f(pts[n-1])){
+        pts[n]=xr;
+      } else {
+        var xc=c.map(function(cj,j){return cj+rho*(worst[j]-cj);}); // contract
+        if(f(xc)<f(worst)){ pts[n]=xc; }
+        else { for(var k=1;k<=n;k++)pts[k]=pts[0].map(function(p0,j){return p0+sh*(pts[k][j]-p0);}); } // shrink
+      }
+      pts.sort(function(a,b){return f(a)-f(b);});
+      if(Math.abs(f(pts[0])-f(pts[n]))<1e-10)break;
+    }
+    return pts;
+  }
+
+  // ----- 2-comp Bayesian MAP: fit CL, V1, V2 (Q fixed; no IIV on Q in any of
+  // the 3 papers). Same prior/residual convention as the 1-comp engine
+  // (proportional residual + omega divisor) so behaviour matches — only the
+  // compartment structure differs. Additive residual (tc.sigma_add) is a
+  // documented future refinement, as on the 1-comp Colin path.
+  function bayesianMAP2c(pt,doseHist,measuredLevels,model){
+    var tc=model.tc;
+    var crcl=model.crclFn(pt);
+    var popCL=model.clFn(pt), popV1=tc.vcFn(pt), popV2=tc.vpFn(pt), q=tc.qFn(pt);
+    var sigma=(tc.sigma_prop!=null?tc.sigma_prop:model.sigma);
+    function obj(cl,v1,v2){
+      if(cl<=0||v1<=0||v2<=0||!isFinite(cl)||!isFinite(v1)||!isFinite(v2))return 1e10;
+      var eCL=Math.log(cl/popCL),eV1=Math.log(v1/popV1),eV2=Math.log(v2/popV2);
+      var o=eCL*eCL/tc.omega_cl+eV1*eV1/tc.omega_v1+eV2*eV2/tc.omega_v2;
+      if(!isFinite(o))return 1e10;
+      for(var i=0;i<measuredLevels.length;i++){
+        var lv=measuredLevels[i];
+        var pred=predictConc2c(lv.time,cl,v1,q,v2,doseHist);
+        if(pred<=0||!isFinite(pred))return 1e10;
+        o+=Math.pow(Math.log(lv.value)-Math.log(pred),2)/sigma;
+        if(!isFinite(o))return 1e10;
+      }
+      return o;
+    }
+    // Grid pre-search over CL & V1 scale (V2 left at population — prior-anchored)
+    var bCL=popCL,bV1=popV1,bObj=obj(popCL,popV1,popV2);
+    for(var ci=0.3;ci<=3;ci+=0.15)for(var vi=0.5;vi<=2;vi+=0.15){
+      var o=obj(popCL*ci,popV1*vi,popV2);if(o<bObj){bObj=o;bCL=popCL*ci;bV1=popV1*vi;}
+    }
+    var f=function(p){return obj(p[0],p[1],p[2]);};
+    var sx=_nelderMead3([[bCL,bV1,popV2],[bCL*1.05,bV1,popV2],[bCL,bV1*1.05,popV2],[bCL,bV1,popV2*1.05]],f,400);
+    sx.sort(function(a,b){return f(a)-f(b);});
+    var r=sx[0], cl=r[0],v1=r[1],v2=r[2],vss=v1+v2;
+    return {cl:cl,v1:v1,v2:v2,q:q,vd:vss,ke:cl/vss,halflife:Math.LN2/(cl/vss),
+      popCL:popCL,popV1:popV1,popV2:popV2,popVd:popV1+popV2,crcl:crcl,objValue:f(r),
+      method:measuredLevels.length>0?'Bayesian MAP (2-comp)':'Population PK (2-comp)',
+      model:model.name,modelId:model.id};
+  }
+
+  // ----- 2-comp MCMC: Metropolis-Hastings over (CL,V1,V2), Q fixed -----
+  function runMCMC2c(pt,doseHist,measuredLevels,model,mapR,nSamp,cb,onProgress){
+    var tc=model.tc;
+    var popCL=model.clFn(pt),popV1=tc.vcFn(pt),popV2=tc.vpFn(pt),q=tc.qFn(pt);
+    var sigma=(tc.sigma_prop!=null?tc.sigma_prop:model.sigma);
+    function logPost(cl,v1,v2){
+      if(cl<=0||v1<=0||v2<=0||!isFinite(cl)||!isFinite(v1)||!isFinite(v2))return -1e10;
+      var lp=-0.5*(Math.pow(Math.log(cl/popCL),2)/tc.omega_cl
+                  +Math.pow(Math.log(v1/popV1),2)/tc.omega_v1
+                  +Math.pow(Math.log(v2/popV2),2)/tc.omega_v2);
+      if(!isFinite(lp))return -1e10;
+      for(var i=0;i<measuredLevels.length;i++){
+        var lv=measuredLevels[i];
+        var pred=predictConc2c(lv.time,cl,v1,q,v2,doseHist);
+        if(pred<=0||!isFinite(pred))return -1e10;
+        lp-=0.5*Math.pow(Math.log(lv.value)-Math.log(pred),2)/sigma;
+        if(!isFinite(lp))return -1e10;
+      }
+      return lp;
+    }
+    var samples=[];
+    var cl=mapR.cl,v1=mapR.v1,v2=mapR.v2,lp=logPost(cl,v1,v2);
+    // step scaled 2.4/√d (d=3) per the optimal-scaling heuristic for mixing
+    var s=2.4/Math.sqrt(3);
+    var sdCL=Math.sqrt(tc.omega_cl)*popCL*0.15, sdV1=Math.sqrt(tc.omega_v1)*popV1*0.15, sdV2=Math.sqrt(tc.omega_v2)*popV2*0.15;
+    var accepted=0, burnin=Math.floor(nSamp*0.3), total=nSamp+burnin, batch=0, batchSz=100;
+    function randn(){var u1=Math.max(Math.random(),1e-15),u2=Math.random();return Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);}
+    function step(){
+      var end=Math.min(batch+batchSz,total);
+      for(var i=batch;i<end;i++){
+        var pCL=cl+randn()*sdCL*s,pV1=v1+randn()*sdV1*s,pV2=v2+randn()*sdV2*s;
+        if(!isFinite(pCL)||!isFinite(pV1)||!isFinite(pV2))continue;
+        var pLP=logPost(pCL,pV1,pV2);
+        if(isFinite(pLP)&&pLP>-1e9&&Math.log(Math.random())<pLP-lp){cl=pCL;v1=pV1;v2=pV2;lp=pLP;accepted++;}
+        if(i>=burnin&&cl>0&&v1>0&&v2>0)samples.push({cl:cl,v1:v1,v2:v2,vd:v1+v2,ke:cl/(v1+v2)});
+      }
+      batch=end;
+      if(onProgress)onProgress(Math.round(batch/total*100),samples.length,nSamp);
+      if(batch<total)setTimeout(step,0); else cb(samples,accepted/total);
+    }
+    step();
+  }
+
+  var engine2c = { macro:_macro2c, predictConc2c:predictConc2c, ssPeakTrough2c:ssPeakTrough2c,
+    bayesianMAP2c:bayesianMAP2c, runMCMC2c:runMCMC2c };
 
   global.VancoPK = { PK_MODELS: PK_MODELS, COLIN_MODEL: COLIN_MODEL, isPedsVanco: isPedsVanco,
     engine: engine, engine2c: engine2c };

@@ -387,3 +387,53 @@ test('2-comp — Goti peak is higher than the 1-comp peak (fidelity gain)', () =
   assert.ok(two.peak > one.peak, `2-comp peak ${two.peak.toFixed(1)} > 1-comp ${one.peak.toFixed(1)}`);
   near(two.peak, 32.2, 0.6, '2-comp Goti peak ≈ 32');
 });
+
+// ── 2-comp Bayesian fit (P0.3b inc2): fit CL,V1,V2 with Q fixed ───────────
+test('2-comp MAP — no levels falls back exactly to population CL/V1/V2', () => {
+  const pt = { ...TC_REF };
+  const r = e2c.bayesianMAP2c(pt, TC_DOSES, [], models.goti);
+  near(r.cl, models.goti.clFn(pt), 1e-6, 'CL = population');
+  near(r.v1, models.goti.tc.vcFn(pt), 1e-6, 'V1 = population');
+  near(r.v2, models.goti.tc.vpFn(pt), 1e-6, 'V2 = population');
+  assert.equal(r.method, 'Population PK (2-comp)');
+  near(r.q, 6.5, 1e-9, 'Q fixed at population (6.5)');
+});
+
+test('2-comp MAP — recovers CL from a measured trough; method flagged', () => {
+  // Forward-simulate a trough from known (perturbed) params, then fit it back.
+  const pt = { ...TC_REF };
+  const m = models.goti, tc = m.tc;
+  const trueCL = m.clFn(pt) * 1.3, v1 = tc.vcFn(pt), v2 = tc.vpFn(pt), q = tc.qFn(pt);
+  const doses = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 10, startTime: 0 }];
+  const tTrough = 9 * 12 - 0.5;               // near end of 10th interval, ~SS
+  const obs = e2c.predictConc2c(tTrough, trueCL, v1, q, v2, doses);
+  const r = e2c.bayesianMAP2c(pt, doses, [{ time: tTrough, value: obs }], m);
+  assert.ok(r.cl > m.clFn(pt) && r.cl < trueCL * 1.1, `fitted CL ${r.cl.toFixed(2)} moved toward truth ${trueCL.toFixed(2)}`);
+  near(r.cl, trueCL, trueCL * 0.12, 'CL recovered within 12% from single trough');
+  assert.equal(r.method, 'Bayesian MAP (2-comp)');
+});
+
+test('2-comp MAP — higher measured trough drives a lower fitted CL', () => {
+  const pt = { ...TC_REF };
+  const doses = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 8, startTime: 0 }];
+  const t = 7 * 12 - 0.5;
+  const lo = e2c.bayesianMAP2c(pt, doses, [{ time: t, value: 10 }], models.goti).cl;
+  const hi = e2c.bayesianMAP2c(pt, doses, [{ time: t, value: 25 }], models.goti).cl;
+  assert.ok(hi < lo, `higher trough (25) → lower CL ${hi.toFixed(2)} < ${lo.toFixed(2)} (trough 10)`);
+});
+
+test('2-comp runMCMC2c — smoke: samples finite, accRate in [0,1], progress fires', async () => {
+  const pt = { ...TC_REF };
+  const doses = [{ amount: 1000, interval: 12, infusion: 1, nDoses: 8, startTime: 0 }];
+  const levels = [{ time: 7 * 12 - 0.5, value: 15 }];
+  const map = e2c.bayesianMAP2c(pt, doses, levels, models.goti);
+  let lastPct = -1;
+  const { samples, accRate } = await new Promise((res) => {
+    e2c.runMCMC2c(pt, doses, levels, models.goti, map, 600,
+      (s, a) => res({ samples: s, accRate: a }), (pct) => { lastPct = pct; });
+  });
+  assert.ok(samples.length > 0, 'returned samples');
+  assert.ok(accRate >= 0 && accRate <= 1, 'acceptance rate in [0,1]');
+  assert.ok(samples.every(s => s.cl > 0 && s.v1 > 0 && s.v2 > 0 && isFinite(s.ke)), 'finite positive samples');
+  assert.ok(lastPct >= 0, 'onProgress was called');
+});

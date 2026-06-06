@@ -218,9 +218,20 @@
   เปลี่ยนเป็น `textContent`/escape helper (โดยเฉพาะ admin ที่รับ input จากผู้ใช้)
 - **Effort**: M
 
-### P3.2 ลบ `console.log` ออกจาก production path
-- **ปัญหา**: เหลือ debug log ใน core/admin/compatibility/index/error-tracker
-- **ทำอะไร**: ตัดออก หรือ gate ด้วย flag debug; ให้ `build.js --prod` strip ให้
+### P3.2 ลบ `console.log` ออกจาก production path — ✅ DONE
+- **ปัญหาเดิม**: เหลือ debug log ใน core/admin/compatibility/index/error-tracker
+- **ทำแล้ว (✅)**: ให้ `build.js --prod` strip ให้ (source ไม่ถูกแตะ → dev ยัง
+  log ครบผ่าน external refs)
+  - **วิธี**: token-replace `console.(log|info|debug)` → no-op shim `__ivNoLog`
+    (prepend `var __ivNoLog=function(){};`). เลือกแบบ token เพราะ `index.js`
+    บรรทัด 7 เป็น **obfuscated** — การลบทั้ง statement ต้อง balance วงเล็บ
+    (เสี่ยง); token-replace ปลอดภัย (ยืนยันไม่มี `window.console`/`x.console.log`),
+    คง side-effect ใน args, และ **เก็บ `console.warn`/`console.error`** ไว้
+  - **ผล**: built ทุกหน้า console.log/info/debug = 0, warn/error คงไว้; built JS
+    ทุกหน้า valid syntax (รวม index obfuscated + tdm/vanco clinical engine);
+    54 test ผ่าน. strip 5–7 call/หน้า
+  - **คงไว้โดยตั้งใจ**: `sw.js` (8 logs) เป็น static-copy + เป็น service-worker
+    lifecycle console (คนละ console กับหน้าเพจ) → มีประโยชน์ debug PWA update path
 - **Effort**: S
 
 ### P3.3 ทบทวน dependencies ที่ไม่ถูกใช้ — ✅ DONE

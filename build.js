@@ -125,6 +125,20 @@ function buildPage(htmlFile, cfg) {
     `"${buildVer}"!==localStorage.getItem("drugCacheVer")`
   );
 
+  // Production: strip debug logging (keep console.warn/error). index.js line 7
+  // is pre-obfuscated, so instead of deleting statements (which needs paren
+  // balancing) we token-replace console.log/info/debug → a no-op shim. This is
+  // safe (no `window.console`/`x.console.log` usage exists), preserves any side
+  // effects in the arguments, and leaves dev builds (no --prod) fully logged.
+  if (PROD_MODE) {
+    const n = (jsContent.match(/console\.(log|info|debug)\b/g) || []).length;
+    if (n > 0) {
+      jsContent = 'var __ivNoLog=function(){};\n'
+        + jsContent.replace(/console\.(log|info|debug)\b/g, '__ivNoLog');
+      console.log(`  🧹 ${htmlFile}: stripped ${n} debug console.* call(s)`);
+    }
+  }
+
   const jsTag = `<script>\n${jsContent}\n</script>`;
 
   // Always remove external CSS <link> tags for our files

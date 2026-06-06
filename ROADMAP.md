@@ -74,20 +74,34 @@
     directional, runMCMC smoke) → **ปิด P0.1 ข้อค้าง "engine integration test"**
 - **ผลพลอยได้**: 2-comp swap (P0.3b) จะแก้ engine ที่เดียว ไม่ใช่สองที่
 
-### P0.3b สลับ 1-comp → 2-comp จริง (peak/trough fidelity) — 🔴 BLOCKED (รอข้อมูล)
-- **ปัญหา**: engine เป็น 1-comp; AUC₂₄ แม่นยำ (compartment-independent) แต่
+### P0.3b สลับ 1-comp → 2-comp จริง (peak/trough fidelity) — ✅ DONE
+- **ปัญหาเดิม**: engine เป็น 1-comp; AUC₂₄ แม่นยำ (compartment-independent) แต่
   peak/trough เป็นค่าประมาณ — v5.11.1 ต้องขึ้น disclaimer amber ในเด็ก
-  (ω_Vss เป็น lognormal approx ของ V1+V2, V2 IIV 97.9%)
-- **ตัวบล็อก (สำรวจแล้ว)**: โค้ดยัง **ไม่มีค่า Q (intercompartmental clearance)**
-  เลย (ทั้งโค้ด+คอมเมนต์), Vc/Vp มีแค่คอมเมนต์ของ Llopis/Goti, ω แยกถัง
-  (ω_Vc/ω_Vp/ω_Q) ไม่มี — ต้องดึงจากเปเปอร์ต้นฉบับ (Llopis/Goti/Colin) แล้วให้
-  ผู้เชี่ยวชาญตรวจรับ **ห้ามเดาค่าบน engine จ่ายยาจริง**. อนึ่ง 3/6 โมเดล
-  (Buelga/Adane/Bourguignon) เป็น 1-comp โดยกำเนิด
-- **ทำอะไร**: Option A — 2-comp engine + 4-param fit แยก V1/V2 IIV; เปิดทาง
-  ให้ Colin additive residual error term (1.23 mg/L SD) ที่ตอนนี้ยังไม่ถูกโมเดล
-- **Effort**: L · **ผลตอบแทน**: กลาง (เฉพาะเคสที่ต้องพึ่ง peak/trough จริง;
-  AUC₂₄ ซึ่งเป็นเป้าหมายจ่ายยาจริงแม่นอยู่แล้ว)
-- **ขึ้นกับ**: P0.3a (✅ engine ที่เดียว) + ต้องมี Q/priors ที่ verify แล้ว
+- **ตัวบล็อกเดิม (ปลดแล้ว)**: ไม่มีค่า Q/ω แยกถัง → **ดึงจาก PDF ต้นฉบับ** (เภสัชกร
+  ส่ง PDF เข้ามา, Mahidol access) แล้ว verify ทีละค่า:
+  - **Llopis 2006 Table 3**: Q=7.48 L/h (θ4, fixed), IIV %CV CL 29.2/Vc 36.4/Vp 39.8
+  - **Goti 2018 Table 2**: Q=6.5 L/h (fixed), IIV CL 39.8/Vc 81.6/Vp 57.1
+  - **Colin 2019 Table 3**: Q2=3.22·(WT/70)^0.75 (allometric exp ยืนยันจาก text),
+    IIV CL 27.9/V1 27.3/V2 97.9 — final model **ไม่มี IIV บน Q2**
+  - ทั้ง 3 โมเดล Q ไม่มี IIV → fit CL/V1/V2 (3 param), ตรึง Q
+- **ทำแล้ว (✅)** — ซอยเป็น 4 increment, commit ละขั้น, test ทุกขั้น:
+  - **inc1**: ใส่ param ที่ verify เป็น `tc:{}` บนโมเดล (ไม่แตะ field 1-comp เดิม) +
+    `engine2c` bi-exponential (predictConc2c/ssPeakTrough2c). พิสูจน์ 3 ทาง: Q→∞
+    ลู่เป็น 1-comp เป๊ะ, AUC คงที่ (dose/CL), analytic SS = numeric superposition
+  - **inc2**: `bayesianMAP2c` (grid + 3-param Nelder-Mead) + `runMCMC2c` (3-param
+    Metropolis). prior/residual convention เดียวกับ 1-comp เดิม → พฤติกรรมสอดคล้อง
+  - **inc3a**: `predictAuto`/`peakTroughAuto` auto-dispatch ตาม pk shape (v1/q) →
+    call site ทั้ง 2 เพจเหมือนเดิม; **inc3b**: wire เข้า `vanco-tdm.js` + `tdm.js`
+    (re-fit โมเดล 2-comp ที่เลือก, MCMC, กราฟ, optimization peak/trough)
+  - การจัดอันดับโมเดลคงใช้ 1-comp (objValue เทียบกันได้); **AUC=dose/CL ไม่เปลี่ยน
+    → dose recommendation ไม่ขยับ** เปลี่ยนแค่ความแม่นของ peak/trough ที่แสดง
+  - 11 test ใหม่ (รวม 50) + build:prod ทั้ง 2 เพจผ่าน + disclaimer เด็กอัปเดต
+    (peak/trough = 2-comp validated แล้ว แต่ AUC₂₄ ยัง primary เพราะ V2 IIV ~98%)
+- **เหลือทำ (backlog เล็ก)**: (1) additive residual term (Colin 1.23/Goti 3.4/Llopis
+  r2 mg/L) ยังไม่ถูกโมเดล — engine ยัง proportional-only ตาม 1-comp เดิม; เก็บไว้ใน
+  `tc.sigma_add` พร้อมต่อยอด (2) **bump version 5.11.1→5.12.0** ตอน merge ขึ้น main
+  (package.json/version.json/sw.js/footer) ตาม precedent P1.1
+- **ขึ้นกับ**: P0.3a (✅ engine ที่เดียว → wire แก้จุดเดียว สะท้อนสองเพจ)
 
 ---
 

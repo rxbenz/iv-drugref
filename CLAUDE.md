@@ -227,6 +227,52 @@ append a bilingual amber info-box after the CI block stating peak/trough are
 is a lognormal approximation of V1+V2 (V2 IIV 97.9%), so AUC is robust but the
 V-derived peak/trough are less reliable. UI-only (`_pedsPkTroughDisclaimer()` in
 both files, via `IVDrugRefI18n.getCurrentLang()`); no calc/equation change.
+> Superseded by v5.12.0 (peak/trough now from a real 2-comp model); the
+> disclaimer text was updated to keep AUC₂₄ primary (V2 IIV ~98%), not removed.
+
+### Two-compartment vanco engine (v5.12.0 / P0.3b) — peak/trough fidelity
+The 1-comp engine gives exact AUC₂₄ (`=dose/CL`, compartment-independent) but
+only approximate peak/trough. v5.12.0 adds a **2-compartment path** for the 3
+models that are actually 2-comp in their source papers — **Llopis / Goti /
+Colin** — while Buelga/Adane/Bourguignon stay 1-comp (they have no peripheral
+compartment). **AUC and the dose recommendation never change** — only the
+displayed peak/trough (and the graph shape) get more accurate.
+
+- **Verified params** (from primary PDFs, not secondary sources) live in a
+  `tc:{}` sub-object on each 2-comp model in `js/pk-models.js`, leaving the
+  1-comp fields untouched: `Q` (intercompartmental clearance), `vcFn`/`vpFn`
+  (V1/V2), and per-compartment `omega_cl/omega_v1/omega_v2`. Headline values:
+  Llopis Q=7.48 L/h (Table 3 θ4); Goti Q=6.5 L/h (Table 2); Colin
+  Q2=3.22·(WGT/70)^**0.75** (allometric — paper: "exponent 1 for volume, 0.75
+  for clearance terms"). **No IIV on Q in any of the three** → the fit varies
+  CL/V1/V2 (3 params) with Q fixed.
+- **`window.VancoPK.engine2c`** (in `pk-models.js`): `predictConc2c`
+  (bi-exponential, macro-constant form + superposition), `ssPeakTrough2c`
+  (analytic steady-state), `bayesianMAP2c` (grid + 3-param Nelder-Mead),
+  `runMCMC2c` (3-param Metropolis), and `predictAuto`/`peakTroughAuto` that
+  **dispatch by pk shape** (a 2-comp pk/sample carries `v1/v2/q`) so the two
+  TDM pages' call sites stay compartment-agnostic.
+- **Wiring** (`vanco-tdm.js` + `tdm.js`): model **ranking stays 1-comp**
+  (objValue comparable across the panel); once a model is chosen, if it has
+  `.tc` the engine re-fits it with `bayesianMAP2c`/`runMCMC2c` and the curve,
+  MCMC band, peak/trough stats, and dose-optimization peak/trough all flow
+  through `predictAuto`/`peakTroughAuto`. The proposed-regimen carryover now
+  continues the old dose history (exact for 1- & 2-comp) instead of a 1-comp
+  `exp(-ke·Δt)` tail. `method` reads "Bayesian MAP (2-comp)".
+- **Verified by tests** (50 total): Q→∞ collapses `predictConc2c` exactly to
+  the 1-comp engine (Vd=Vc+Vp); interval AUC stays `dose/CL`; analytic SS ==
+  numeric superposition; 2-comp peak > 1-comp peak (the fidelity gain); MAP
+  no-levels falls back to population CL/V1/V2; MAP recovers a perturbed CL from
+  a simulated trough; higher trough → lower CL; runMCMC2c smoke; auto-dispatch
+  routes correctly.
+- **Same prior/residual convention as the 1-comp engine** (proportional
+  residual + omega divisor) so the two behave consistently. The papers'
+  **additive** residual term (Colin 1.23 / Goti 3.4 / Llopis r2 mg/L) is kept
+  in `tc.sigma_add` but **not yet modeled** (engine is proportional-only, as on
+  the 1-comp Colin path) — a documented backlog item.
+- **Version bump pending**: bump 5.11.1→**5.12.0** (package.json / version.json
+  / sw.js + changelog / per-page footers) **at merge to main**, per the P1.1
+  precedent (this is a runtime-JS clinical change, not yet shipped).
 
 ### Vancomycin PK coefficient correction (v5.10.0) — clinical calc change
 Phase 2b fix for inflated AUC (root cause: wrong `clFn` clearance slopes →

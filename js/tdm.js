@@ -171,6 +171,7 @@ const TDMHub = (function() {
     // Loaded as a separate <script> before tdm.js; exposes window.VancoPK.
     // See pk-models.js for coefficient provenance / primary-source references.
     const { PK_MODELS, COLIN_MODEL, isPedsVanco } = window.VancoPK;
+    const { predictConc, calcAUC_ss, ssPeakTrough, bayesianMAP, runMCMC } = window.VancoPK.engine;
 
     let selectedModel = 'goti', currentPK = null, mcmcSamples = [], allModelResults = [];
 
@@ -301,162 +302,10 @@ const TDMHub = (function() {
       el.innerHTML = h;
     }
 
-    // PK prediction (1-compartment model)
-    function predictConc(t, cl, vd, doseHist) {
-      if (!vd || vd <= 0 || !cl || !isFinite(cl) || !isFinite(vd)) return 0;
-      const ke = cl / vd;
-      if (!isFinite(ke) || ke <= 0) return 0;
-      let conc = 0;
-      for (const dh of doseHist) {
-        if (!dh.infusion || dh.infusion <= 0) continue;
-        for (let n = 0; n < dh.nDoses; n++) {
-          const tS = dh.startTime + n * dh.interval, tE = tS + dh.infusion, k0 = dh.amount / dh.infusion;
-          if (t <= tS) continue;
-          if (t <= tE) conc += (k0 / (ke * vd)) * (1 - Math.exp(-ke * (t - tS)));
-          else conc += (k0 / (ke * vd)) * (1 - Math.exp(-ke * dh.infusion)) * Math.exp(-ke * (t - tE));
-        }
-      }
-      return isFinite(conc) ? conc : 0;
-    }
-
-    function calcAUC_ss(cl, vd, dose, interval, infusion) {
-      if (!cl || !vd || cl <= 0 || vd <= 0 || !infusion || infusion <= 0 || !interval || interval <= 0) return NaN;
-      const ke = cl / vd;
-      if (!isFinite(ke) || ke <= 0) return NaN;
-      const k0 = dose / infusion, acc = 1 / (1 - Math.exp(-ke * interval));
-      const N = 300, dt = interval / N;
-      let auc = 0;
-      for (let i = 0; i < N; i++) {
-        const t = i * dt + dt / 2;
-        let c;
-        if (t <= infusion) {
-          c = (k0 / (ke * vd)) * (1 - Math.exp(-ke * t)) + (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion)) * Math.exp(-ke * (interval - infusion + t)) * Math.max(acc - 1, 0);
-        } else {
-          c = (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion)) * acc * Math.exp(-ke * (t - infusion));
-        }
-        auc += Math.max(c, 0) * dt;
-      }
-      return auc;
-    }
-
-    function ssPeakTrough(cl, vd, dose, interval, infusion) {
-      if (!cl || !vd || cl <= 0 || vd <= 0 || !infusion || infusion <= 0 || !interval || interval <= 0) return { peak: NaN, trough: NaN };
-      const ke = cl / vd;
-      if (!isFinite(ke) || ke <= 0) return { peak: NaN, trough: NaN };
-      const k0 = dose / infusion, acc = 1 / (1 - Math.exp(-ke * interval));
-      const peak = (k0 / (ke * vd)) * (1 - Math.exp(-ke * infusion)) * acc;
-      const trough = peak * Math.exp(-ke * (interval - infusion));
-      return { peak: isFinite(peak) ? peak : NaN, trough: isFinite(trough) ? trough : NaN };
-    }
-
-    // Bayesian MAP estimation with grid search + Nelder-Mead
-    function bayesianMAP(pt, doseHist, measuredLevels, model) {
-      const crcl = model.crclFn(pt);
-      const popCL = model.clFn(pt), popVd = model.vdFn(pt);
-
-      function obj(cl, vd) {
-        if (cl <= 0 || vd <= 0 || !isFinite(cl) || !isFinite(vd)) return 1e10;
-        let o = Math.pow(Math.log(cl / popCL), 2) / model.omega_cl + Math.pow(Math.log(vd / popVd), 2) / model.omega_vd;
-        if (!isFinite(o)) return 1e10;
-        for (const lv of measuredLevels) {
-          const pred = predictConc(lv.time, cl, vd, doseHist);
-          if (pred <= 0 || !isFinite(pred)) return 1e10;
-          o += Math.pow(Math.log(lv.value) - Math.log(pred), 2) / model.sigma;
-          if (!isFinite(o)) return 1e10;
-        }
-        return o;
-      }
-
-      // Grid search
-      let bCL = popCL, bVd = popVd, bObj = obj(popCL, popVd);
-      for (let ci = 0.3; ci <= 3; ci += 0.1)
-        for (let vi = 0.5; vi <= 2; vi += 0.1) {
-          const o = obj(popCL * ci, popVd * vi);
-          if (o < bObj) { bObj = o; bCL = popCL * ci; bVd = popVd * vi; }
-        }
-
-      // Nelder-Mead optimization
-      let sx = [{ cl: bCL, vd: bVd }, { cl: bCL * 1.05, vd: bVd }, { cl: bCL, vd: bVd * 1.05 }];
-      const f = p => obj(p.cl, p.vd);
-      for (let it = 0; it < 300; it++) {
-        sx.sort((a, b) => f(a) - f(b));
-        const cx = (sx[0].cl + sx[1].cl) / 2, cy = (sx[0].vd + sx[1].vd) / 2;
-        const r = { cl: 2 * cx - sx[2].cl, vd: 2 * cy - sx[2].vd }, fr = f(r);
-        if (fr < f(sx[0])) {
-          const e = { cl: 3 * cx - 2 * sx[2].cl, vd: 3 * cy - 2 * sx[2].vd };
-          sx[2] = f(e) < fr ? e : r;
-        } else if (fr < f(sx[1]))
-          sx[2] = r;
-        else {
-          const c2 = { cl: (cx + sx[2].cl) / 2, vd: (cy + sx[2].vd) / 2 };
-          if (f(c2) < f(sx[2]))
-            sx[2] = c2;
-          else {
-            sx[1] = { cl: (sx[0].cl + sx[1].cl) / 2, vd: (sx[0].vd + sx[1].vd) / 2 };
-            sx[2] = { cl: (sx[0].cl + sx[2].cl) / 2, vd: (sx[0].vd + sx[2].vd) / 2 };
-          }
-        }
-        if (Math.abs(f(sx[0]) - f(sx[2])) < 1e-10) break;
-      }
-      sx.sort((a, b) => f(a) - f(b));
-      const r = sx[0];
-      return {
-        cl: r.cl, vd: r.vd, ke: r.cl / r.vd, halflife: Math.LN2 / (r.cl / r.vd),
-        popCL, popVd, crcl, objValue: f(r),
-        method: measuredLevels.length > 0 ? 'Bayesian MAP' : 'Population PK',
-        model: model.name, modelId: model.id
-      };
-    }
-
-    // MCMC sampling (adaptive random walk)
-    function runMCMC(pt, doseHist, measuredLevels, model, mapR, nSamp, cb) {
-      const crcl = model.crclFn(pt);
-      const popCL = model.clFn(pt), popVd = model.vdFn(pt);
-
-      function logPost(cl, vd) {
-        if (cl <= 0 || vd <= 0 || !isFinite(cl) || !isFinite(vd)) return -1e10;
-        let lp = -0.5 * (Math.pow(Math.log(cl / popCL), 2) / model.omega_cl + Math.pow(Math.log(vd / popVd), 2) / model.omega_vd);
-        if (!isFinite(lp)) return -1e10;
-        for (const lv of measuredLevels) {
-          const pred = predictConc(lv.time, cl, vd, doseHist);
-          if (pred <= 0 || !isFinite(pred)) return -1e10;
-          lp -= 0.5 * Math.pow(Math.log(lv.value) - Math.log(pred), 2) / model.sigma;
-          if (!isFinite(lp)) return -1e10;
-        }
-        return lp;
-      }
-
-      const samples = [];
-      let cl = mapR.cl, vd = mapR.vd, lp = logPost(cl, vd);
-      const sdCL = Math.sqrt(model.omega_cl) * popCL * 0.15, sdVd = Math.sqrt(model.omega_vd) * popVd * 0.15;
-      let accepted = 0;
-      const burnin = Math.floor(nSamp * 0.3), total = nSamp + burnin;
-      let batch = 0;
-      const batchSz = 100;
-
-      function step() {
-        const end = Math.min(batch + batchSz, total);
-        for (let i = batch; i < end; i++) {
-          const u1 = Math.max(Math.random(), 1e-15), u2 = Math.random();
-          const z1 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-          const z2 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
-          const pCL = cl + z1 * sdCL * 2.4, pVd = vd + z2 * sdVd * 2.4;
-          if (!isFinite(pCL) || !isFinite(pVd)) continue;
-          const pLP = logPost(pCL, pVd);
-          if (isFinite(pLP) && pLP > -1e9 && Math.log(Math.random()) < pLP - lp) { cl = pCL; vd = pVd; lp = pLP; accepted++; }
-          if (i >= burnin && cl > 0 && vd > 0 && isFinite(cl) && isFinite(vd)) samples.push({ cl, vd, ke: cl / vd });
-        }
-        batch = end;
-        const pct = Math.round(batch / total * 100);
-        const barEl = document.getElementById('vancoMcmcBar');
-        const statusEl = document.getElementById('vancoMcmcStatus');
-        if (barEl) barEl.style.width = pct + '%';
-        if (statusEl) statusEl.textContent = 'MCMC ' + pct + '% (' + samples.length + '/' + nSamp + ' samples)';
-        if (batch < total) setTimeout(step, 0);
-        else cb(samples, accepted / total);
-      }
-      step();
-    }
+    // PK ENGINE — extracted to js/pk-models.js (VancoPK.engine), ROADMAP P0.3a.
+    // predictConc/calcAUC_ss/ssPeakTrough/bayesianMAP/runMCMC come from the
+    // VancoPK.engine destructure at the top of this IIFE; runMCMC progress UI
+    // (vancoMcmcBar/vancoMcmcStatus) is supplied via onProgress at the call site.
 
     // Graph rendering with concentration curves
     function drawGraph(pk, doseHist, measuredLvls, optDose, optInterval, optInfusion, mcmc) {
@@ -878,6 +727,11 @@ const TDMHub = (function() {
             dose_history: JSON.stringify(doses.map(d => ({ amount: d.amount, interval: d.interval, infusion: d.infusion, start: d.startTime, n: d.nDoses }))),
             num_dose_entries: doses.length
           });
+        }, function(pct, n, tgt) {
+          const barEl = document.getElementById('vancoMcmcBar');
+          const statusEl = document.getElementById('vancoMcmcStatus');
+          if (barEl) barEl.style.width = pct + '%';
+          if (statusEl) statusEl.textContent = 'MCMC ' + pct + '% (' + n + '/' + tgt + ' samples)';
         });
       }
     };

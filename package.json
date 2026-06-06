@@ -23,8 +23,6 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "clean-css": "^5.3.3",
-    "docx": "^9.6.1",
-    "terser": "^5.46.1"
+    "clean-css": "^5.3.3"
   }
 }

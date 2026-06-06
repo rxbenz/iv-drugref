@@ -421,10 +421,10 @@ npx http-server .    # Serve locally
 > BSA/CKD-EPI + the 5 adult vanco models + Colin 2019 + `isPedsVanco` routing).
 > Because both TDM pages now consume `js/pk-models.js` (P1.1), this one test
 > covers the models on both pages. CI gates deploy on it. When you change any
-> dosing formula, update/extend these tests. Still on the backlog (ROADMAP
-> P0.1): full Bayesian MAP/MCMC **engine** integration tests (the engine still
-> lives per-page). The `dependencies` block also lists `docx`/`terser`, but the
-> live build only uses `clean-css` (JS not minified).
+> dosing formula, update/extend these tests. The engine (MAP/MCMC) is now shared
+> in `js/pk-models.js` (`VancoPK.engine`, ROADMAP P0.3a) and has integration
+> golden tests. The only build dependency is `clean-css` — `docx`/`terser` were
+> removed (ROADMAP P3.3) since the live build never used them (JS not minified).
 
 ### Rollback
 ```bash

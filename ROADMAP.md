@@ -223,10 +223,13 @@
 - **ทำอะไร**: ตัดออก หรือ gate ด้วย flag debug; ให้ `build.js --prod` strip ให้
 - **Effort**: S
 
-### P3.3 ทบทวน dependencies ที่ไม่ถูกใช้
-- **ปัญหา**: `package.json` ลิสต์ `docx` + `terser` แต่ build จริงใช้แค่
+### P3.3 ทบทวน dependencies ที่ไม่ถูกใช้ — ✅ DONE
+- **ปัญหาเดิม**: `package.json` ลิสต์ `docx` + `terser` แต่ build จริงใช้แค่
   `clean-css` (JS ไม่ minify โดยตั้งใจ)
-- **ทำอะไร**: ยืนยันว่าไม่มีสคริปต์ไหนใช้ แล้วถอดออก (ลดผิวการโจมตี + ขนาด install)
+- **ทำแล้ว (✅)**: ยืนยัน `build.js` อ้าง `terser` แค่ใน comment, `docx` ไม่ถูก
+  อ้างเลย → ถอดทั้งสองออกจาก `dependencies` (เหลือ `clean-css`); regenerate
+  `package-lock.json` (node_modules: 3→1 package); build:prod + 54 test ผ่าน;
+  แก้โน้ต CLAUDE.md ให้ตรง
 - **Effort**: S
 
 ---

@@ -109,11 +109,24 @@ Both use `gas-complete.js` but bound to different Google Sheets:
 
 ## Key Technical Details
 
-### normKey() — Drug Name Matching
+### normKey() / keyCandidates() — Drug Name Matching
 Used in compatibility.js to match CURATED pair names to DRUGS array entries.
-- Takes first alphabetical word: `"20% Mannitol"` → `"mannitol"`, `"Potassium chloride (KCl)"` → `"potassium"`
-- Splits on spaces, commas, parentheses, slashes
-- **Known collision**: Calcium gluconate & Calcium chloride both → `"calcium"`; similarly potassium, sodium variants
+- `normKey` takes the first alphabetical word: `"20% Mannitol"` → `"mannitol"`,
+  `"Potassium chloride (KCl)"` → `"potassium"` (splits on spaces, commas,
+  parentheses, slashes). Kept as the generic-key helper.
+- **Salt-collision fix (P2.3)**: `normKey` alone collapsed every salt of a
+  cation to one key (Calcium gluconate & Calcium chloride → `"calcium"`; the 4
+  sodium salts → `"sodium"`), so one salt's curated pair leaked onto a different
+  salt. `keyCandidates(name)` now returns most-specific-first keys: for a cation
+  prefix (`CATION_PREFIXES` = calcium/potassium/sodium/magnesium/…) with a 2nd
+  word it returns `[cation+anion, cation]` (e.g. `["calciumgluconate","calcium"]`),
+  otherwise `[firstWord]`. `CURATED_MAP` stores each curated name under its
+  most-specific key; `getCompatibility` probes specific→generic. Net effect:
+  a salt-specific curated entry wins, a **bare-cation** entry (the DB's
+  intentional generic, e.g. `"Potassium"` = KCl additive) still matches every
+  salt as a fallback, and one salt's specific data **never** leaks to another
+  salt of the same cation. Locked by 4 tests (`loadCompatibility` in the test
+  helper slices the file's IIFE to expose the pure matchers).
 
 ### drugCacheVer — Cache Busting
 - Source code has placeholder `drugCacheVer` value

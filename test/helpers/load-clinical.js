@@ -115,4 +115,25 @@ function loadVancoModels() {
   return { models: byId, VancoPK, IVDrugRef };
 }
 
-module.exports = { loadCore, loadVancoModels };
+// ---- Load the IV compatibility checker (js/compatibility.js) ----
+// The whole file is one IIFE `(function(){ … })()`. We cut off the DOM trailer
+// (the `document.addEventListener('click', …)` onward), export the functions
+// under test, then re-close the IIFE ourselves — so only the pure data +
+// matching logic runs (no DOM at load).
+function loadCompatibility() {
+  const { sandbox } = loadCore();
+  let src = readJs('compatibility.js');
+  const cut = src.indexOf("document.addEventListener('click'");
+  if (cut > 0) src = src.slice(0, cut);
+  src += '\n;globalThis.getCompatibility=getCompatibility;globalThis.keyCandidates=keyCandidates;globalThis.normKey=normKey;\n})();';
+  vm.runInContext(src, sandbox, { filename: 'compatibility.js' });
+  if (!sandbox.getCompatibility) throw new Error('compatibility.js did not expose getCompatibility');
+  return {
+    getCompatibility: sandbox.getCompatibility,
+    keyCandidates: sandbox.keyCandidates,
+    normKey: sandbox.normKey,
+    sandbox,
+  };
+}
+
+module.exports = { loadCore, loadVancoModels, loadCompatibility };

@@ -152,11 +152,20 @@
 - **ทำอะไร**: badge/ปุ่มในแผง admin แสดงเวอร์ชัน GAS เทียบกับ `version.json`
 - **Effort**: S · **ขึ้นกับ P1.2**
 
-### P2.3 จัดการ normKey() collision อย่างชัดเจน
-- **ปัญหา** (ระบุใน `CLAUDE.md`): `normKey()` ตัดคำแรก → Calcium gluconate &
-  Calcium chloride ชนกันเป็น `"calcium"` (potassium/sodium ก็เช่นกัน) →
-  จับคู่ compatibility ผิดเกลือได้
-- **ทำอะไร**: เพิ่ม disambiguation map สำหรับเกลือที่รู้ว่าชน หรือ key รองด้วยคำที่ 2
+### P2.3 จัดการ normKey() collision อย่างชัดเจน — ✅ DONE
+- **ปัญหาเดิม**: `normKey()` ตัดคำแรก → Calcium gluconate & Calcium chloride
+  ชนเป็น `"calcium"`, เกลือ sodium 4 ตัว (bicarbonate/nitroprusside/thiosulfate/
+  valproate) ชนเป็น `"sodium"` → curated pair ของเกลือหนึ่งรั่วไปทับอีกเกลือ
+- **ทำแล้ว (✅)**: เพิ่ม `keyCandidates(name)` คืน key เรียงจากเจาะจง→ทั่วไป —
+  cation prefix (`CATION_PREFIXES`) + คำที่ 2 → `[cation+anion, cation]` (เช่น
+  `["calciumgluconate","calcium"]`), อื่น ๆ → `[firstWord]`. `CURATED_MAP` เก็บ
+  ชื่อใต้ key เจาะจงสุด; `getCompatibility` probe specific→generic
+  - **ผลความปลอดภัย**: เกลือเฉพาะแยกกันชัด (gluconate ไม่รับค่า chloride),
+    Sodium nitroprusside/thiosulfate/valproate **เลิกรับ** incompatible ของ
+    Sodium bicarbonate ผิด ๆ; แต่ bare cation ("Potassium"=KCl additive) ยัง
+    fallback แมตช์ทุกเกลือตามเจตนาเดิมของ DB
+  - lock ด้วย 4 test (เพิ่ม `loadCompatibility` ใน helper — slice IIFE เปิดฟังก์ชัน
+    pure มาทดสอบ; รวม 54 test) + build:prod 8 เพจผ่าน
 - **Effort**: M · **ผลตอบแทน**: กลาง (ความถูกต้องของ compatibility checker)
 
 ---

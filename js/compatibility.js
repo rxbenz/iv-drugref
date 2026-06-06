@@ -118,10 +118,19 @@ const CURATED=[
 ['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['20% Mannitol','Potassium chloride','i'],
 ];
 
-// Build fast lookup: key = sorted pair of first-word-lowercase → status
+// Cation prefixes whose salts collide under a first-word key (P2.3). Names that
+// start with one of these AND have a second word get a SPECIFIC key
+// (cation+anion, e.g. "calciumgluconate") so different salts never share data;
+// the generic cation key is kept as a fallback so the curated DB's intentional
+// bare-cation entries (e.g. "Potassium" = KCl additive) still match every salt.
+const CATION_PREFIXES = new Set(['calcium','potassium','sodium','magnesium','ammonium','ferric','ferrous','zinc']);
+
+// Build fast lookup: key = sorted pair of canonical keys → status. Curated names
+// are stored under their MOST-SPECIFIC key (keyCandidates[0]) so bare "Calcium"
+// and "Calcium chloride" land on distinct keys.
 const CURATED_MAP = {};
 CURATED.forEach(([a, b, s]) => {
-  const key = [normKey(a), normKey(b)].sort().join('|');
+  const key = [keyCandidates(a)[0], keyCandidates(b)[0]].sort().join('|');
   CURATED_MAP[key] = s;
 });
 
@@ -134,7 +143,7 @@ function rebuildCuratedMap(pairs) {
   // pairs = [[drugA, drugB, result], ...]
   Object.keys(CURATED_MAP).forEach(k => delete CURATED_MAP[k]);
   pairs.forEach(([a, b, s]) => {
-    const key = [normKey(a), normKey(b)].sort().join('|');
+    const key = [keyCandidates(a)[0], keyCandidates(b)[0]].sort().join('|');
     CURATED_MAP[key] = s;
   });
 }
@@ -173,14 +182,29 @@ function loadCompatPairsFromSheet() {
 }
 
 // Enhanced drug matching
+// Split a name into lowercase alpha-only words, dropping "20%", "5%", "(", etc.
+function normWords(generic) {
+  return generic.toLowerCase().split(/[\s,()\/]+/)
+    .map(w => w.replace(/[^a-z]/g, ''))
+    .filter(w => w.length > 0);
+}
+// Generic key = first alphabetical word (original behavior; kept for callers).
 function normKey(generic) {
-  // Find first word that contains letters (skip "20%", "5%", etc.)
-  const words = generic.toLowerCase().split(/[\s,()\/]+/);
-  for (const w of words) {
-    const cleaned = w.replace(/[^a-z]/g, '');
-    if (cleaned.length > 0) return cleaned;
-  }
-  return generic.toLowerCase().replace(/[^a-z]/g, '');
+  const words = normWords(generic);
+  return words.length ? words[0] : generic.toLowerCase().replace(/[^a-z]/g, '');
+}
+// Candidate keys, most-specific first. For colliding cation salts this is
+// [cation+anion, cation] (e.g. "Calcium gluconate" → ["calciumgluconate",
+// "calcium"]); for everything else (and bare cations) just [firstWord].
+// Lookups probe specific→generic so a salt-specific curated entry wins, but a
+// bare-cation entry still matches as a fallback — and one salt's specific data
+// never leaks to a different salt of the same cation.
+function keyCandidates(generic) {
+  const words = normWords(generic);
+  if (!words.length) return [normKey(generic)];
+  const cation = words[0];
+  if (CATION_PREFIXES.has(cation) && words.length >= 2) return [cation + words[1], cation];
+  return [cation];
 }
 
 function parseNames(text) {
@@ -206,14 +230,18 @@ function findDrugMatch(name) {
 function getCompatibility(drugA, drugB) {
   if (drugA.i === drugB.i) return { status: 'self', detail: '', source: '' };
   
-  const ka = normKey(drugA.g);
-  const kb = normKey(drugB.g);
-  const curatedKey = [ka, kb].sort().join('|');
-  
-  // 1) Check curated database first (highest confidence)
-  if (CURATED_MAP[curatedKey]) {
-    const s = CURATED_MAP[curatedKey];
-    const status = s === 'c' ? 'compatible' : s === 'i' ? 'incompatible' : 'variable';
+  // 1) Check curated database first (highest confidence). Probe candidate keys
+  // most-specific → generic so a salt-specific entry wins; falls back to the
+  // bare-cation entry, and never matches a different salt of the same cation.
+  const ca = keyCandidates(drugA.g);
+  const cb = keyCandidates(drugB.g);
+  let curatedHit = null;
+  for (const ka of ca) { for (const kb of cb) {
+    const k = [ka, kb].sort().join('|');
+    if (CURATED_MAP[k]) { curatedHit = CURATED_MAP[k]; break; }
+  } if (curatedHit) break; }
+  if (curatedHit) {
+    const status = curatedHit === 'c' ? 'compatible' : curatedHit === 'i' ? 'incompatible' : 'variable';
     return { status, detail: `${drugA.g} + ${drugB.g}`, source: 'curated' };
   }
   

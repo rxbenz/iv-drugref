@@ -17,7 +17,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { loadCore, loadVancoModels } = require('./helpers/load-clinical');
+const { loadCore, loadVancoModels, loadCompatibility } = require('./helpers/load-clinical');
 
 const { IVDrugRef } = loadCore();
 
@@ -448,4 +448,49 @@ test('2-comp auto-dispatch — predictAuto/peakTroughAuto route by pk shape', ()
   near(pt2.peak, e2c.ssPeakTrough2c(cl, v1, q, v2, 1000, 12, 1).peak, 1e-9, '2-comp peak routed');
   near(pt1.peak, VancoPK.engine.ssPeakTrough(cl, vd, 1000, 12, 1).peak, 1e-9, '1-comp peak routed');
   assert.ok(pt2.peak !== pt1.peak, 'the two paths give different peaks (dispatch is real)');
+});
+
+// ═══════════ IV compatibility salt-key disambiguation (P2.3) ══════════════
+// normKey collapsed every salt of a cation to one key (Calcium gluconate &
+// Calcium chloride → "calcium"; the 4 sodium salts → "sodium"), so one salt's
+// curated pair leaked onto a different salt. keyCandidates() now gives each
+// specific salt its own key (cation+anion) with the bare cation as a fallback.
+const compat = loadCompatibility();
+const drug = (i, g, y = '-', x = '-') => ({ i, g, y, x, c: [] });
+
+test('compat keyCandidates — specific salts distinct, bare cation generic', () => {
+  // .join() to compare across the vm-sandbox realm (arrays aren't reference-equal)
+  const kc = (n) => compat.keyCandidates(n).join('|');
+  assert.equal(kc('Calcium gluconate'), 'calciumgluconate|calcium');
+  assert.equal(kc('Calcium chloride 10%'), 'calciumchloride|calcium');
+  assert.equal(kc('Potassium chloride (KCl)'), 'potassiumchloride|potassium');
+  assert.equal(kc('Potassium phosphate'), 'potassiumphosphate|potassium');
+  assert.equal(kc('Sodium nitroprusside'), 'sodiumnitroprusside|sodium');
+  assert.equal(kc('Calcium'), 'calcium');   // bare cation = generic only
+  assert.equal(kc('Heparin'), 'heparin');    // non-salt unchanged
+});
+
+test('compat — specific salt curated entries resolve to the right salt', () => {
+  // Ceftriaxone + both calcium salts are curated incompatible (specific entries)
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium gluconate'), drug(2, 'Ceftriaxone')).status, 'incompatible');
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium chloride 10%'), drug(2, 'Ceftriaxone')).status, 'incompatible');
+  // Calcium chloride + Dobutamine is curated compatible (chloride-specific)
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium chloride 10%'), drug(3, 'Dobutamine')).status, 'compatible');
+});
+
+test('compat — bare-cation curated entries still match every salt (fallback)', () => {
+  // "Calcium" + "Sodium bicarbonate" curated incompatible → applies to gluconate too
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium gluconate'), drug(2, 'Sodium bicarbonate')).status, 'incompatible');
+  // bare "Potassium" (KCl additive) curated compatible with Norepinephrine
+  assert.equal(compat.getCompatibility(drug(1, 'Potassium chloride (KCl)'), drug(2, 'Norepinephrine')).status, 'compatible');
+});
+
+test('compat — NO cross-salt leak (the P2.3 safety fix) ⭐', () => {
+  // Calcium chloride+Dobutamine is curated 'c' — must NOT leak to Calcium gluconate
+  const r1 = compat.getCompatibility(drug(1, 'Calcium gluconate'), drug(3, 'Dobutamine'));
+  assert.notEqual(r1.source, 'curated', 'gluconate must not inherit chloride curated data');
+  // Sodium bicarbonate+Caspofungin is curated 'i' — must NOT leak to Sodium nitroprusside
+  const r2 = compat.getCompatibility(drug(1, 'Sodium nitroprusside'), drug(4, 'Caspofungin'));
+  assert.notEqual(r2.status, 'incompatible', 'nitroprusside must not inherit bicarbonate incompatibility');
+  assert.notEqual(r2.source, 'curated', 'no curated match for a different sodium salt');
 });

@@ -305,21 +305,21 @@ function buildCdsAlternatives(drugA, drugB) {
   const altsB = findAlternatives(drugB, drugA);
   if (!altsA.length && !altsB.length) return '';
 
-  const renderChips = (alts, targetSelect) => alts.map(a =>
-    `<span class="cds-alt-chip" data-action="pickAlt" data-target="${targetSelect}" data-id="${a.drug.i}"` +
-    ` title="${a.source === 'curated' ? '📚 Curated' : '💊 Drug field'}">${a.drug.g}</span>`
+  const renderChips = (alts, replaceId) => alts.map(a =>
+    `<span class="cds-alt-chip" data-action="pickAlt" data-replace="${replaceId}" data-id="${a.drug.i}"` +
+    ` title="${a.source === 'curated' ? '📚 Curated' : '💊 Drug field'}">${IVDrugRef.escHtml(a.drug.g)}</span>`
   ).join('');
 
   let html = '<div class="cds-alert suggest" style="margin-top:12px;">';
   html += '<div class="cds-alert-title">🔄 ทางเลือกยาที่เข้ากันได้ (Compatible Alternatives)</div>';
   html += '<div class="cds-alert-body">';
   if (altsA.length) {
-    html += `<div style="margin-bottom:6px;font-weight:500;">แทน ${drugA.g}:</div>`;
-    html += `<div class="cds-alt-chips">${renderChips(altsA, 'drugA')}</div>`;
+    html += `<div style="margin-bottom:6px;font-weight:500;">แทน ${IVDrugRef.escHtml(drugA.g)}:</div>`;
+    html += `<div class="cds-alt-chips">${renderChips(altsA, drugA.i)}</div>`;
   }
   if (altsB.length) {
-    html += `<div style="margin-top:8px;margin-bottom:6px;font-weight:500;">แทน ${drugB.g}:</div>`;
-    html += `<div class="cds-alt-chips">${renderChips(altsB, 'drugB')}</div>`;
+    html += `<div style="margin-top:8px;margin-bottom:6px;font-weight:500;">แทน ${IVDrugRef.escHtml(drugB.g)}:</div>`;
+    html += `<div class="cds-alt-chips">${renderChips(altsB, drugB.i)}</div>`;
   }
   html += '</div>';
   html += '<div class="cds-alert-ref">📚 <a href="' + (typeof IVDrugRef !== 'undefined' && IVDrugRef.REF_LINKS ? IVDrugRef.REF_LINKS.thaiFDA : '#') + '" target="_blank" rel="noopener">ค้นหายาใน Thai FDA</a></div>';
@@ -329,105 +329,88 @@ function buildCdsAlternatives(drugA, drugB) {
 
 // ===== PAIR CHECKER =====
 function populateSelects() {
-  const sorted = [...DRUGS].sort((a, b) => a.g.localeCompare(b.g));
-  ['drugA', 'drugB'].forEach(id => {
-    const sel = document.getElementById(id);
-    sorted.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = d.i;
-      opt.textContent = d.g + (d.h ? ' ⚠' : '');
-      sel.appendChild(opt);
-    });
-  });
-  
-  // Quick chips for ICU drugs
+  // Quick chips for ICU/critical drugs — tap to add to the check selection
   const icuDrugs = DRUGS.filter(d => d.c.includes('icu') || d.c.includes('cardiovascular') || d.h);
   const chips = document.getElementById('quickChips');
+  if (!chips) return;
+  chips.innerHTML = '';
   icuDrugs.sort((a,b) => a.g.localeCompare(b.g)).forEach(d => {
     const btn = document.createElement('button');
     btn.className = 'chip' + (d.h ? ' had' : '');
     btn.textContent = d.g.split(' ')[0] + (d.h ? ' ⚠' : '');
-    btn.onclick = () => {
-      const selA = document.getElementById('drugA');
-      const selB = document.getElementById('drugB');
-      if (!selA.value) { selA.value = d.i; checkPair(); }
-      else if (!selB.value || selB.value === selA.value) { selB.value = d.i; checkPair(); }
-      else { selA.value = selB.value; selB.value = d.i; checkPair(); }
-    };
+    btn.onclick = () => addMultiDrug(d.i);
     chips.appendChild(btn);
   });
 }
 
-function checkPair() {
-  const aId = parseInt(document.getElementById('drugA').value);
-  const bId = parseInt(document.getElementById('drugB').value);
-  const container = document.getElementById('pairResult');
-  
-  if (!aId || !bId) {
-    container.innerHTML = '<div class="compat-result select-drugs">เลือกยา 2 ตัวเพื่อตรวจสอบ Compatibility</div>';
-    return;
-  }
-  if (aId === bId) {
-    container.innerHTML = '<div class="compat-result select-drugs">กรุณาเลือกยาคนละตัว</div>';
-    return;
-  }
-  
-  const drugA = DRUGS.find(d => d.i === aId);
-  const drugB = DRUGS.find(d => d.i === bId);
-  const result = getCompatibility(drugA, drugB);
-
-  // Send analytics
-  if (typeof IVDrugRef !== 'undefined' && IVDrugRef.sendAnalytics) {
-    IVDrugRef.sendAnalytics({
-      type: 'compat_usage',
-      mode: 'pair',
-      drug_a: drugA.g,
-      drug_b: drugB.g,
-      result_status: result.status,
-      result_source: result.source,
-      drugs_count: 2,
-      pairs_total: 1,
-      pairs_compatible: result.status === 'compatible' ? 1 : 0,
-      pairs_incompatible: result.status === 'incompatible' ? 1 : 0
-    });
-  }
-
+// Rich 2-drug detail card (status banner + Y-site/incompat fields + CDS alts).
+// Returns HTML; called by checkMultiCompat when exactly 2 drugs are selected.
+function renderPairDetail(drugA, drugB, result) {
+  const esc = IVDrugRef.escHtml;
   const icons = { compatible: '✅', incompatible: '❌', variable: '⚠️', nodata: '❓' };
   const labels = { compatible: 'Y-site Compatible', incompatible: 'INCOMPATIBLE', variable: 'Variable / Caution', nodata: 'No Direct Data' };
   const srcLabels = { curated: '📚 Trissel\'s / Curated DB', drugfield: '💊 Drug-specific field', text: '📝 Text analysis', none: '—' };
   const srcBg = { curated: 'rgba(14,165,233,.08)', drugfield: 'rgba(5,150,105,.08)', text: 'rgba(217,119,6,.08)', none: 'rgba(100,116,139,.06)' };
-  
-  container.innerHTML = `
+
+  let html = `
     <div class="compat-result ${result.status}">
       <div class="result-status">${icons[result.status]} ${labels[result.status]}</div>
       <div class="result-detail" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
-        <span>${drugA.g} + ${drugB.g}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;background:${srcBg[result.source]}">${srcLabels[result.source]}</span>
+        <span>${esc(drugA.g)} + ${esc(drugB.g)}</span>
+        <span class="src-badge" style="background:${srcBg[result.source]}">${srcLabels[result.source]}</span>
       </div>
     </div>
     <div class="compat-details">
       <div class="detail-card">
-        <div class="label green">✓ ${drugA.g} — Y-site Compatible</div>
-        <div class="value">${drugA.y || '-'}</div>
+        <div class="label green">✓ ${esc(drugA.g)} — Y-site Compatible</div>
+        <div class="value">${esc(drugA.y || '-')}</div>
       </div>
       <div class="detail-card">
-        <div class="label red">✕ ${drugA.g} — Incompatible</div>
-        <div class="value">${drugA.x || '-'}</div>
+        <div class="label red">✕ ${esc(drugA.g)} — Incompatible</div>
+        <div class="value">${esc(drugA.x || '-')}</div>
       </div>
       <div class="detail-card">
-        <div class="label green">✓ ${drugB.g} — Y-site Compatible</div>
-        <div class="value">${drugB.y || '-'}</div>
+        <div class="label green">✓ ${esc(drugB.g)} — Y-site Compatible</div>
+        <div class="value">${esc(drugB.y || '-')}</div>
       </div>
       <div class="detail-card">
-        <div class="label red">✕ ${drugB.g} — Incompatible</div>
-        <div class="value">${drugB.x || '-'}</div>
+        <div class="label red">✕ ${esc(drugB.g)} — Incompatible</div>
+        <div class="value">${esc(drugB.x || '-')}</div>
       </div>
     </div>`;
 
-  // CDS: Show alternative suggestions when incompatible
-  if (result.status === 'incompatible') {
-    container.innerHTML += buildCdsAlternatives(drugA, drugB);
-  }
+  if (result.status === 'incompatible') html += buildCdsAlternatives(drugA, drugB);
+  return html;
+}
+
+// Grouped pairwise results for 3+ selected drugs (by status, most severe first).
+function renderGroupedResults(pairs) {
+  const esc = IVDrugRef.escHtml;
+  const groups = [
+    ['incompatible', '❌', 'ไม่เข้ากัน', 'i'],
+    ['variable', '⚠️', 'แปรผัน / ระวัง', 'v'],
+    ['nodata', '❓', 'ไม่มีข้อมูล', 'n'],
+    ['compatible', '✅', 'เข้ากันได้', 'c']
+  ];
+  const srcShort = { curated: '📚', drugfield: '💊', text: '📝', none: '' };
+  const counts = pairs.reduce((m, p) => { m[p.result.status] = (m[p.result.status] || 0) + 1; return m; }, {});
+
+  let html = `<div class="check-summary">📊 ${pairs.length} คู่ — `
+    + `<b class="t-red">${counts.incompatible || 0} ไม่เข้ากัน</b> · `
+    + `<b class="t-amber">${counts.variable || 0} ระวัง</b> · `
+    + `<b class="t-green">${counts.compatible || 0} เข้ากัน</b> · `
+    + `<b class="t-muted">${counts.nodata || 0} ไม่มีข้อมูล</b></div>`;
+
+  groups.forEach(([status, icon, label, c]) => {
+    const gp = pairs.filter(p => p.result.status === status);
+    if (!gp.length) return;
+    html += `<div class="result-group ${c}"><div class="group-header">${icon} ${label} <span class="group-count">${gp.length}</span></div>`;
+    html += gp.map(p => `<div class="pair-row ${c}"><span class="pair-names">${esc(p.a.g)} + ${esc(p.b.g)}</span>`
+      + (srcShort[p.result.source] ? `<span class="src-mini" title="${esc(p.result.source)}">${srcShort[p.result.source]}</span>` : '')
+      + `</div>`).join('');
+    html += `</div>`;
+  });
+  return html;
 }
 
 // ===== MATRIX VIEW =====
@@ -531,10 +514,10 @@ function filterSuggestions() {
   
   if (matches.length === 0) { container.classList.remove('show'); return; }
   
-  container.innerHTML = matches.map(d => 
+  container.innerHTML = matches.map(d =>
     `<div class="drug-sug-item" data-action="addMultiDrug" data-index="${d.i}">
-      <span class="sug-generic">${d.g}</span>${d.h ? ' ⚠' : ''}
-      <span class="sug-trade">${d.t}</span>
+      <span class="sug-generic">${IVDrugRef.escHtml(d.g)}</span>${d.h ? ' ⚠' : ''}
+      <span class="sug-trade">${IVDrugRef.escHtml(d.t)}</span>
     </div>`
   ).join('');
   container.classList.add('show');
@@ -559,35 +542,29 @@ function renderMultiDrugs() {
   const container = document.getElementById('selectedDrugs');
   container.innerHTML = selectedMultiDrugs.map(id => {
     const d = DRUGS.find(dr => dr.i === id);
-    return `<span class="sel-chip ${d.h ? 'had-chip' : ''}">${d.g.split(' ')[0]}${d.h ? ' ⚠' : ''} <span class="remove" data-action="removeMultiDrug" data-id="${id}">×</span></span>`;
+    return `<span class="sel-chip ${d.h ? 'had-chip' : ''}">${IVDrugRef.escHtml(d.g.split(' ')[0])}${d.h ? ' ⚠' : ''} <span class="remove" data-action="removeMultiDrug" data-id="${id}">×</span></span>`;
   }).join('');
 }
 
 function checkMultiCompat() {
   const container = document.getElementById('multiResults');
-  if (selectedMultiDrugs.length < 2) {
-    container.innerHTML = '<p style="color:var(--text3);font-size:12px;text-align:center;padding:12px 0;">เลือกอย่างน้อย 2 ยาเพื่อตรวจสอบ</p>';
+  if (!container) return;
+  const n = selectedMultiDrugs.length;
+  if (n < 2) {
+    container.innerHTML = n === 1
+      ? '<p class="check-hint">➕ เพิ่มอีกอย่างน้อย 1 ยาเพื่อเปรียบเทียบ</p>'
+      : '<p class="check-hint">🔍 ค้นหาแล้วเพิ่มยา ≥2 ตัว (หรือยา + น้ำเกลือ) เพื่อตรวจสอบ compatibility</p>';
     return;
   }
-  
+
+  const drugs = selectedMultiDrugs.map(id => DRUGS.find(d => d.i === id)).filter(Boolean);
   const pairs = [];
-  for (let i = 0; i < selectedMultiDrugs.length; i++) {
-    for (let j = i + 1; j < selectedMultiDrugs.length; j++) {
-      const dA = DRUGS.find(d => d.i === selectedMultiDrugs[i]);
-      const dB = DRUGS.find(d => d.i === selectedMultiDrugs[j]);
-      const result = getCompatibility(dA, dB);
-      pairs.push({ a: dA, b: dB, result });
+  for (let i = 0; i < drugs.length; i++) {
+    for (let j = i + 1; j < drugs.length; j++) {
+      pairs.push({ a: drugs[i], b: drugs[j], result: getCompatibility(drugs[i], drugs[j]) });
     }
   }
-  
-  // Sort: incompatible first
-  const order = { incompatible: 0, variable: 1, nodata: 2, compatible: 3 };
-  pairs.sort((a, b) => order[a.result.status] - order[b.result.status]);
-  
-  const icons = { compatible: '✓', incompatible: '✕', variable: '!', nodata: '?' };
-  const labels = { compatible: 'COMPAT', incompatible: 'INCOMPAT', variable: 'VARIABLE', nodata: 'NO DATA' };
-  const cls = s => s === 'compatible' ? 'c' : s === 'incompatible' ? 'i' : s === 'variable' ? 'v' : 'n';
-  
+
   const incompCount = pairs.filter(p => p.result.status === 'incompatible').length;
   const compatCount = pairs.filter(p => p.result.status === 'compatible').length;
 
@@ -595,40 +572,29 @@ function checkMultiCompat() {
   if (typeof IVDrugRef !== 'undefined' && IVDrugRef.sendAnalytics) {
     IVDrugRef.sendAnalytics({
       type: 'compat_usage',
-      mode: 'multi',
-      drug_a: '',
-      drug_b: '',
-      result_status: incompCount > 0 ? 'has_incompatible' : 'compatible',
-      result_source: 'multi',
-      drugs_count: selectedMultiDrugs.length,
+      mode: n === 2 ? 'pair' : 'multi',
+      drug_a: n === 2 ? drugs[0].g : '',
+      drug_b: n === 2 ? drugs[1].g : '',
+      result_status: n === 2 ? pairs[0].result.status : (incompCount > 0 ? 'has_incompatible' : 'compatible'),
+      result_source: n === 2 ? pairs[0].result.source : 'multi',
+      drugs_count: n,
       pairs_total: pairs.length,
       pairs_compatible: compatCount,
       pairs_incompatible: incompCount
     });
   }
 
-  let summary = `<div style="font-size:12px;color:var(--text2);margin-bottom:10px;padding:8px 10px;background:var(--bg);border-radius:8px;">
-    📊 ${pairs.length} pairs checked — 
-    <span style="color:var(--green);font-weight:600">${compatCount} compatible</span>, 
-    <span style="color:var(--red);font-weight:600">${incompCount} incompatible</span>, 
-    <span style="color:var(--text3)">${pairs.length - compatCount - incompCount} no data/variable</span>
-  </div>`;
-  
-  container.innerHTML = summary + pairs.map(p => `
-    <div class="multi-pair">
-      <div class="pair-icon ${cls(p.result.status)}">${icons[p.result.status]}</div>
-      <span class="pair-names">${p.a.g.split(' ')[0]} + ${p.b.g.split(' ')[0]}</span>
-      <span class="pair-type ${cls(p.result.status)}">${labels[p.result.status]}</span>
-    </div>
-  `).join('');
+  // Exactly 2 drugs → rich detail; 3+ → grouped-by-status overview
+  container.innerHTML = (n === 2)
+    ? renderPairDetail(drugs[0], drugs[1], pairs[0].result)
+    : renderGroupedResults(pairs);
 }
 
 // ===== MODE SWITCHING =====
 function switchMode(mode) {
   document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
-  document.getElementById('pairSection').classList.toggle('active', mode === 'pair');
+  document.getElementById('checkSection').classList.toggle('active', mode === 'check');
   document.getElementById('matrixSection').classList.toggle('active', mode === 'matrix');
-  document.getElementById('combinedSection').classList.toggle('active', mode === 'combined');
 
   if (mode === 'matrix') {
     renderMatrix();
@@ -672,12 +638,10 @@ document.addEventListener('click', e => {
       addMultiDrug: function(e, t) { addMultiDrug(+t.dataset.index); },
       removeMultiDrug: function(e, t) { removeMultiDrug(+t.dataset.id); },
       pickAlt: function(e, t) {
-        var sel = document.getElementById(t.dataset.target);
-        if (sel) { sel.value = t.dataset.id; checkPair(); }
+        // Swap the incompatible drug for the chosen compatible alternative
+        removeMultiDrug(+t.dataset.replace);
+        addMultiDrug(+t.dataset.id);
       }
-    });
-    IVDrugRef.delegate(document, 'change', {
-      checkPair: function() { checkPair(); }
     });
     IVDrugRef.delegate(document, 'input', {
       filterSuggestions: function() { filterSuggestions(); }

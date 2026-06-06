@@ -510,3 +510,35 @@ test('escHtml: nullish → empty string (no literal "undefined"/"null")', () => 
   assert.equal(IVDrugRef.escHtml(0), '0');      // 0 is a value, not nullish
   assert.equal(IVDrugRef.escHtml('safe text'), 'safe text');
 });
+
+// ═══════════ Compatibility Check render functions (P2.5 redesign) ═════════════
+test('renderPairDetail — status + both names + Y-site/incompat fields, escaped', () => {
+  const a = { i: 1, g: 'Furosemide', y: 'Heparin', x: 'Midazolam' };
+  const b = { i: 2, g: 'Dopamine', y: '-', x: '-' };
+  const html = compat.renderPairDetail(a, b, { status: 'incompatible', source: 'curated' });
+  assert.match(html, /INCOMPATIBLE/);
+  assert.match(html, /compat-result incompatible/);
+  assert.match(html, /Furosemide \+ Dopamine/);
+  assert.match(html, /Trissel/);                 // source badge label
+});
+
+test('renderPairDetail — escapes hostile drug fields (no raw tag)', () => {
+  const a = { i: 1, g: '<img src=x onerror=alert(1)>', y: '-', x: '-' };
+  const b = { i: 2, g: 'Dopamine', y: '-', x: '-' };
+  const html = compat.renderPairDetail(a, b, { status: 'compatible', source: 'none' });
+  assert.ok(!html.includes('<img src=x'), 'raw injected tag must not appear');
+  assert.match(html, /&lt;img src=x/);
+});
+
+test('renderGroupedResults — groups by status with counts (3+ drugs)', () => {
+  const pairs = [
+    { a: { g: 'A' }, b: { g: 'B' }, result: { status: 'incompatible', source: 'curated' } },
+    { a: { g: 'A' }, b: { g: 'C' }, result: { status: 'compatible', source: 'curated' } },
+    { a: { g: 'B' }, b: { g: 'C' }, result: { status: 'nodata', source: 'none' } }
+  ];
+  const html = compat.renderGroupedResults(pairs);
+  assert.match(html, /3 คู่/);                    // summary count
+  assert.match(html, /result-group i/);          // incompatible group present
+  assert.match(html, /result-group c/);          // compatible group present
+  assert.match(html, /A \+ B/);
+});

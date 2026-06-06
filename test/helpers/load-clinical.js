@@ -125,13 +125,16 @@ function loadCompatibility() {
   let src = readJs('compatibility.js');
   const cut = src.indexOf("document.addEventListener('click'");
   if (cut > 0) src = src.slice(0, cut);
-  src += '\n;globalThis.getCompatibility=getCompatibility;globalThis.keyCandidates=keyCandidates;globalThis.normKey=normKey;\n})();';
+  src += '\n;globalThis.getCompatibility=getCompatibility;globalThis.keyCandidates=keyCandidates;globalThis.normKey=normKey;'
+    + 'globalThis.renderPairDetail=renderPairDetail;globalThis.renderGroupedResults=renderGroupedResults;\n})();';
   vm.runInContext(src, sandbox, { filename: 'compatibility.js' });
   if (!sandbox.getCompatibility) throw new Error('compatibility.js did not expose getCompatibility');
   return {
     getCompatibility: sandbox.getCompatibility,
     keyCandidates: sandbox.keyCandidates,
     normKey: sandbox.normKey,
+    renderPairDetail: sandbox.renderPairDetail,
+    renderGroupedResults: sandbox.renderGroupedResults,
     sandbox,
   };
 }

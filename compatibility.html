@@ -40,35 +40,26 @@
 </div>
 </div>
 <div class="mode-tabs" id="modeTabs" role="tablist" aria-label="Compatibility check mode">
-<button class="mode-tab active" data-mode="pair" data-action="switchMode" role="tab" aria-selected="true">💊 Pair Check</button>
+<button class="mode-tab active" data-mode="check" data-action="switchMode" role="tab" aria-selected="true">🔍 ตรวจสอบ</button>
 <button class="mode-tab" data-mode="matrix" data-action="switchMode" role="tab" aria-selected="false">📊 Matrix</button>
-<button class="mode-tab" data-mode="combined" data-action="switchMode" role="tab" aria-selected="false">🔬 Multi-Drug</button>
 </div>
 </div>
 </header>
 
 <main class="content">
-<!-- ===== MODE 1: PAIR CHECKER ===== -->
-<div class="pair-section active" id="pairSection">
-<div class="pair-selectors">
-<div class="drug-select-wrap">
-<select class="drug-select" id="drugA" data-action="checkPair">
-<option value="">— เลือกยา A —</option>
-</select>
+<!-- ===== MODE 1: CHECK (unified search) ===== -->
+<div class="check-section active" id="checkSection">
+<div class="multi-drug-area">
+<div class="check-search-wrap">
+<input type="text" class="multi-search" id="multiSearch" placeholder="🔍 พิมพ์ชื่อยา/น้ำเกลือ เพื่อเพิ่ม…" autocomplete="off" data-action="filterSuggestions" aria-label="ค้นหายาเพื่อเพิ่ม">
+<div class="drug-suggestions" id="drugSuggestions"></div>
 </div>
-<div class="vs-badge">VS</div>
-<div class="drug-select-wrap">
-<select class="drug-select" id="drugB" data-action="checkPair">
-<option value="">— เลือกยา B —</option>
-</select>
-</div>
-</div>
-<div id="pairResult">
-<div class="compat-result select-drugs">เลือกยา 2 ตัวเพื่อตรวจสอบ Compatibility</div>
-</div>
-<div class="quick-chips">
-<div class="quick-chips-title">🔥 ICU/Critical drugs (quick select)</div>
+<div class="selected-drugs" id="selectedDrugs"></div>
+<div class="quick-chips" id="quickChipsWrap">
+<div class="quick-chips-title">🔥 ICU/Critical (แตะเพื่อเพิ่ม)</div>
 <div class="chips-wrap" id="quickChips"></div>
+</div>
+<div class="multi-results" id="multiResults"></div>
 </div>
 </div>
 
@@ -88,21 +79,10 @@
 </div>
 </div>
 
-<!-- ===== MODE 3: COMBINED/MULTI-DRUG ===== -->
-<div class="combined-section" id="combinedSection">
-<div class="multi-drug-area">
-<div class="multi-title">🔬 Multi-Drug Compatibility Check</div>
-<input type="text" class="multi-search" id="multiSearch" placeholder="พิมพ์ชื่อยาเพื่อเพิ่ม..." autocomplete="off" data-action="filterSuggestions">
-<div class="drug-suggestions" id="drugSuggestions"></div>
-<div class="selected-drugs" id="selectedDrugs"></div>
-<div class="multi-results" id="multiResults"></div>
-</div>
-</div>
-
 <div class="disclaimer">
 <strong>⚠️ Disclaimer:</strong> ข้อมูล Compatibility เป็นเครื่องมือสนับสนุนทางคลินิกเบื้องต้น ผลอาจแตกต่างตาม concentration, diluent, temperature และ contact time ต้องตรวจสอบกับ Trissel's Handbook, Lexicomp หรือแหล่งอ้างอิงปฐมภูมิก่อนใช้จริงทุกครั้ง ไม่ทดแทนดุลยพินิจทางวิชาชีพ
 </div>
-<div class="app-footer">IV DrugRef v5.12.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+<div class="app-footer">IV DrugRef v5.13.0 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 </main>
 
 <div class="matrix-tooltip" id="matrixTooltip"></div>

@@ -542,3 +542,72 @@ test('renderGroupedResults — groups by status with counts (3+ drugs)', () => {
   assert.match(html, /result-group c/);          // compatible group present
   assert.match(html, /A \+ B/);
 });
+
+// ═══════════ Drug × Fluid diluent compatibility (P2.4) ═══════════════════════
+const fluidOf = (key) => compat.DRUGS.find(d => d.isFluid && d.key === key);
+const drugOf = (g) => compat.DRUGS.find(d => !d.isFluid && d.g === g);
+
+test('fluidKey — resolves aliases, fixes digit-strip (D5W≠D10W), non-fluid→null', () => {
+  assert.equal(compat.fluidKey('D5W'), 'd5w');
+  assert.equal(compat.fluidKey('NSS'), 'nss');
+  assert.equal(compat.fluidKey('0.9% NaCl'), 'nss');
+  assert.equal(compat.fluidKey('0.45% NaCl'), 'halfns');
+  assert.equal(compat.fluidKey('LR'), 'rl');
+  assert.equal(compat.fluidKey('D10W'), 'd10w');
+  assert.notEqual(compat.fluidKey('D5W'), compat.fluidKey('D10W')); // digit-strip bug fixed
+  assert.equal(compat.fluidKey('Dopamine'), null);
+});
+
+test('fluids are selectable entities (9 fluids, isFluid flagged)', () => {
+  const fluids = compat.DRUGS.filter(d => d.isFluid);
+  assert.equal(fluids.length, 9);
+  assert.ok(fluidOf('d5w') && fluidOf('nss') && fluidOf('rl'));
+});
+
+test('drug×fluid CURATED — Phenytoin + D5W = incompatible (diluent, curated)', () => {
+  const r = compat.getCompatibility(drugOf('Phenytoin'), fluidOf('d5w'));
+  assert.equal(r.status, 'incompatible');
+  assert.equal(r.kind, 'diluent');
+  assert.equal(r.source, 'curated');
+});
+
+test('drug×fluid CURATED — Amphotericin B + NSS = incompatible (order-independent)', () => {
+  const r = compat.getCompatibility(fluidOf('nss'), drugOf('Amphotericin B (conventional)'));
+  assert.equal(r.status, 'incompatible');
+  assert.equal(r.kind, 'diluent');
+});
+
+test('drug×fluid derived from .x field — Ertapenem + D5W = incompatible (drugfield)', () => {
+  const r = compat.getCompatibility(drugOf('Ertapenem'), fluidOf('d5w'));
+  assert.equal(r.status, 'incompatible');
+  assert.equal(r.source, 'drugfield');
+});
+
+test('drug×fluid derived from .y field — Oxytocin + NSS = compatible', () => {
+  const r = compat.getCompatibility(drugOf('Oxytocin'), fluidOf('nss'));
+  assert.equal(r.status, 'compatible');
+  assert.equal(r.kind, 'diluent');
+});
+
+test('drug×fluid no record → nodata "verify" (never guesses)', () => {
+  const r = compat.getCompatibility(drugOf('Adenosine'), fluidOf('swfi'));
+  assert.equal(r.status, 'nodata');
+  assert.equal(r.kind, 'diluent');
+  assert.match(r.detail, /Trissel/);
+});
+
+test('fluid + fluid → nodata (not a meaningful admixture question)', () => {
+  assert.equal(compat.getCompatibility(fluidOf('nss'), fluidOf('d5w')).status, 'nodata');
+});
+
+test('"ns" alias does not false-match inside words like "solutions"', () => {
+  const fake = { i: 1, g: 'TestDrug', y: '-', x: 'Alkaline solutions, Most drugs', c: [] };
+  assert.equal(compat.getCompatibility(fake, fluidOf('nss')).status, 'nodata');
+});
+
+test('diluent render shows admixture badge + no Y-site CDS alternatives', () => {
+  const r = compat.getCompatibility(drugOf('Phenytoin'), fluidOf('d5w'));
+  const html = compat.renderPairDetail(drugOf('Phenytoin'), fluidOf('d5w'), r);
+  assert.match(html, /Diluent \/ admixture/);
+  assert.ok(!html.includes('ทางเลือกยาที่เข้ากันได้')); // CDS alt block absent for diluent
+});

@@ -126,7 +126,8 @@ function loadCompatibility() {
   const cut = src.indexOf("document.addEventListener('click'");
   if (cut > 0) src = src.slice(0, cut);
   src += '\n;globalThis.getCompatibility=getCompatibility;globalThis.keyCandidates=keyCandidates;globalThis.normKey=normKey;'
-    + 'globalThis.renderPairDetail=renderPairDetail;globalThis.renderGroupedResults=renderGroupedResults;\n})();';
+    + 'globalThis.renderPairDetail=renderPairDetail;globalThis.renderGroupedResults=renderGroupedResults;'
+    + 'globalThis.fluidKey=fluidKey;globalThis.DRUGS=DRUGS;\n})();';
   vm.runInContext(src, sandbox, { filename: 'compatibility.js' });
   if (!sandbox.getCompatibility) throw new Error('compatibility.js did not expose getCompatibility');
   return {
@@ -135,6 +136,8 @@ function loadCompatibility() {
     normKey: sandbox.normKey,
     renderPairDetail: sandbox.renderPairDetail,
     renderGroupedResults: sandbox.renderGroupedResults,
+    fluidKey: sandbox.fluidKey,
+    DRUGS: sandbox.DRUGS,
     sandbox,
   };
 }

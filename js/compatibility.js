@@ -17,6 +17,61 @@ DRUGS.forEach(d => {
   if (!drugMap[short]) drugMap[short] = d;
 });
 
+// ===== IV FLUIDS / DILUENTS (P2.4) =====
+// Fluids are added as selectable pseudo-drug entities (isFluid:true) so users can
+// check "drug × fluid" compatibility. IMPORTANT: a drug–fluid result here means
+// compatibility when the fluid is used as a DILUENT / admixture (mixed in the same
+// bag), which is a DIFFERENT question from Y-site co-administration of two drugs.
+// Results are DERIVED ONLY from the existing pharmacist-curated drug fields
+// (.y/.x) + the CURATED DB — never fabricated. When the drug record does not
+// mention the fluid we return "no data → verify with Trissel's", never a guess.
+const FLUIDS = [
+  { i: 9001, g: 'NSS (0.9% NaCl)',         key: 'nss',      aliases: ['nss','ns','0.9% nacl','0.9% sodium chloride','sodium chloride 0.9%','normal saline','nacl 0.9%','น้ำเกลือ'] },
+  { i: 9002, g: '½NS (0.45% NaCl)',        key: 'halfns',   aliases: ['½ns','1/2ns','0.45% nacl','0.45% sodium chloride','sodium chloride 0.45%','half normal saline','n/2'] },
+  { i: 9003, g: 'D5W (5% Dextrose)',       key: 'd5w',      aliases: ['d5w','d5/w','5% dextrose','dextrose 5%','d5','5%d/w','dextrose water'] },
+  { i: 9004, g: 'D5NSS (D5 + 0.9% NaCl)',  key: 'd5nss',    aliases: ['d5nss','d5/nss','d5ns','d5s','5% dextrose in nss','5% dextrose in 0.9% nacl','dextrose 5% in normal saline'] },
+  { i: 9005, g: 'D5N/2S (D5 + 0.45%)',     key: 'd5halfns', aliases: ['d5n/2','d5n/2s','d5half','5% dextrose in 0.45% nacl','dextrose 5% in half normal saline'] },
+  { i: 9006, g: "Ringer's Lactate (RL)",   key: 'rl',       aliases: ['rl','lr',"ringer's lactate",'ringers lactate','ringer lactate','lactated ringer',"lactated ringer's",'lactated ringers','hartmann',"hartmann's"] },
+  // ---- expansion set (mostly resolves to "no data" until verified) ----
+  { i: 9007, g: 'D10W (10% Dextrose)',     key: 'd10w',     aliases: ['d10w','d10/w','10% dextrose','dextrose 10%','d10'] },
+  { i: 9008, g: 'SWFI (Sterile water)',    key: 'swfi',     aliases: ['swfi','sterile water','sterile water for injection','water for injection','wfi'] },
+  { i: 9009, g: 'Balanced (Acetar/Plasma-Lyte)', key: 'balanced', aliases: ['acetar','balanced solution','balanced crystalloid','plasma-lyte','plasmalyte','plasma lyte','isolyte','acetated ringer'] }
+];
+// Selectable & searchable; their own y/x are empty (we derive from the partner
+// DRUG's curated fields). t = alias list (powers the typeahead search).
+const FLUID_DRUGS = FLUIDS.map(f => ({
+  i: f.i, g: f.g, t: f.aliases.join(', '), h: false, c: ['fluid'], y: '-', x: '-',
+  isFluid: true, key: f.key, aliases: f.aliases
+}));
+DRUGS.push(...FLUID_DRUGS);
+
+// Normalize a raw token (lowercase, collapse spaces, tidy "0.9 %" → "0.9%").
+function normFluidAlias(s) {
+  return String(s).toLowerCase().trim().replace(/\s+/g, ' ').replace(/\s*%\s*/g, '%');
+}
+// raw name/token → fluid canonical key, or null. Does NOT use normWords (which
+// strips digits and would collapse D5W/D10W); uses exact normalized-alias match.
+const FLUID_ALIAS_MAP = {};
+FLUIDS.forEach(f => {
+  FLUID_ALIAS_MAP[f.key] = f.key;
+  f.aliases.forEach(a => { FLUID_ALIAS_MAP[normFluidAlias(a)] = f.key; });
+});
+function fluidKey(name) {
+  if (!name) return null;
+  const n = normFluidAlias(name);
+  return FLUID_ALIAS_MAP[n] || FLUID_ALIAS_MAP[n.replace(/\s/g, '')] || null;
+}
+function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+// Does a drug's free-text field mention this fluid? Word-boundary match (so "ns"
+// won't hit inside "solutions") on the raw text — robust to parseNames' filters.
+function textMentionsFluid(text, fluid) {
+  if (!text) return false;
+  const t = ' ' + text.toLowerCase().replace(/\\n/g, ' ').replace(/\n/g, ' ') + ' ';
+  return fluid.aliases.some(a => new RegExp('(^|[^a-z0-9])' + escapeRe(normFluidAlias(a)) + '($|[^a-z0-9])').test(t));
+}
+// CURATED key for a name: fluid key if it's a fluid, else most-specific drug key.
+function curatedKeyFor(name) { return fluidKey(name) || keyCandidates(name)[0]; }
+
 // ===== CURATED Y-SITE COMPATIBILITY DATABASE =====
 // Source: Trissel's Handbook on Injectable Drugs, 21st Ed. + Lexicomp IV Compatibility
 // c=compatible, i=incompatible, v=variable/conflicting data
@@ -130,7 +185,7 @@ const CATION_PREFIXES = new Set(['calcium','potassium','sodium','magnesium','amm
 // and "Calcium chloride" land on distinct keys.
 const CURATED_MAP = {};
 CURATED.forEach(([a, b, s]) => {
-  const key = [keyCandidates(a)[0], keyCandidates(b)[0]].sort().join('|');
+  const key = [curatedKeyFor(a), curatedKeyFor(b)].sort().join('|');
   CURATED_MAP[key] = s;
 });
 
@@ -143,7 +198,7 @@ function rebuildCuratedMap(pairs) {
   // pairs = [[drugA, drugB, result], ...]
   Object.keys(CURATED_MAP).forEach(k => delete CURATED_MAP[k]);
   pairs.forEach(([a, b, s]) => {
-    const key = [keyCandidates(a)[0], keyCandidates(b)[0]].sort().join('|');
+    const key = [curatedKeyFor(a), curatedKeyFor(b)].sort().join('|');
     CURATED_MAP[key] = s;
   });
 }
@@ -227,9 +282,45 @@ function findDrugMatch(name) {
   return null;
 }
 
+// Drug × fluid compatibility (DILUENT / admixture semantics — NOT Y-site).
+// Order of evidence: (1) CURATED DB, (2) the drug's own curated .x/.y fields,
+// (3) no record → "verify" (never a guess). Always tags kind:'diluent'.
+function getDrugFluidCompat(drugA, drugB) {
+  const fluid = drugA.isFluid ? drugA : drugB;
+  const drug  = drugA.isFluid ? drugB : drugA;
+  // fluid + fluid is not a meaningful admixture question
+  if (drug.isFluid) {
+    return { status: 'nodata', kind: 'diluent', source: 'none',
+      detail: 'เลือกยา 1 ตัวเพื่อตรวจกับสารน้ำ (สารน้ำ + สารน้ำ ไม่ใช่คำถาม diluent)' };
+  }
+  // 1) CURATED DB (pharmacist-verified): probe drug-key × fluid-key
+  const fk = fluid.key;
+  for (const dk of keyCandidates(drug.g)) {
+    const hit = CURATED_MAP[[dk, fk].sort().join('|')];
+    if (hit) {
+      const status = hit === 'c' ? 'compatible' : hit === 'i' ? 'incompatible' : 'variable';
+      return { status, kind: 'diluent', source: 'curated', detail: `${drug.g} + ${fluid.g}` };
+    }
+  }
+  // 2) Derive from the drug's own curated diluent fields (.x = incompatible wins)
+  if (textMentionsFluid(drug.x, fluid)) {
+    return { status: 'incompatible', kind: 'diluent', source: 'drugfield',
+      detail: `${drug.g} ระบุไม่เข้ากัน/ห้ามใช้กับ ${fluid.g}:\n${drug.x}` };
+  }
+  if (textMentionsFluid(drug.y, fluid)) {
+    return { status: 'compatible', kind: 'diluent', source: 'drugfield',
+      detail: `${drug.g} ระบุเข้ากันได้กับ ${fluid.g}:\n${drug.y}` };
+  }
+  // 3) No record → do NOT guess
+  return { status: 'nodata', kind: 'diluent', source: 'none',
+    detail: `ไม่มีข้อมูล ${drug.g} + ${fluid.g} โดยตรง\nตรวจสอบจาก Trissel's / package insert ก่อนผสม` };
+}
+
 function getCompatibility(drugA, drugB) {
   if (drugA.i === drugB.i) return { status: 'self', detail: '', source: '' };
-  
+  // P2.4: drug × fluid → diluent/admixture path (separate semantics from Y-site)
+  if (drugA.isFluid || drugB.isFluid) return getDrugFluidCompat(drugA, drugB);
+
   // 1) Check curated database first (highest confidence). Probe candidate keys
   // most-specific → generic so a salt-specific entry wins; falls back to the
   // bare-cation entry, and never matches a different salt of the same cation.
@@ -341,11 +432,60 @@ function populateSelects() {
     btn.onclick = () => addMultiDrug(d.i);
     chips.appendChild(btn);
   });
+
+  // Fluid / diluent quick chips (P2.4)
+  const fchips = document.getElementById('fluidChips');
+  if (fchips) {
+    fchips.innerHTML = '';
+    DRUGS.filter(d => d.isFluid).forEach(d => {
+      const btn = document.createElement('button');
+      btn.className = 'chip fluid';
+      btn.textContent = '💧 ' + d.g.split(' ')[0];
+      btn.onclick = () => addMultiDrug(d.i);
+      fchips.appendChild(btn);
+    });
+  }
 }
 
 // Rich 2-drug detail card (status banner + Y-site/incompat fields + CDS alts).
 // Returns HTML; called by checkMultiCompat when exactly 2 drugs are selected.
+// Diluent-specific detail card (drug × fluid) — clearly labelled as admixture,
+// NOT Y-site. No CDS alternatives (different reference set).
+function renderDiluentDetail(drug, fluid, result) {
+  const esc = IVDrugRef.escHtml;
+  const icons = { compatible: '✅', incompatible: '❌', variable: '⚠️', nodata: '❓' };
+  const labels = {
+    compatible: 'เข้ากันได้ — ใช้เป็น diluent ได้',
+    incompatible: 'ไม่เข้ากัน — ห้ามใช้เป็น diluent',
+    variable: 'แปรผัน / ระวัง',
+    nodata: 'ไม่มีข้อมูลโดยตรง'
+  };
+  const srcLabels = { curated: '📚 Trissel\'s / Curated DB', drugfield: '💊 ข้อมูลในตัวยา', text: '📝 Text', none: '—' };
+  let html = `
+    <div class="compat-result ${result.status}">
+      <div class="result-status">${icons[result.status]} ${labels[result.status]}</div>
+      <div class="diluent-badge">💧 Diluent / admixture compatibility — ไม่ใช่ Y-site co-administration</div>
+      <div class="result-detail" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+        <span><b>${esc(drug.g)}</b> + 💧 ${esc(fluid.g)}</span>
+        <span class="src-badge">${srcLabels[result.source] || '—'}</span>
+      </div>
+    </div>`;
+  if (result.detail) {
+    html += `<div class="detail-card"><div class="value">${esc(result.detail)}</div></div>`;
+  }
+  if (result.status === 'nodata') {
+    html += `<div class="cds-alert" style="margin-top:10px"><div class="cds-alert-body">⚠️ ไม่มีข้อมูลในฐานข้อมูล — ยืนยันกับ Trissel's Handbook / package insert / เภสัชกร ก่อนผสมจริง</div></div>`;
+  }
+  return html;
+}
+
 function renderPairDetail(drugA, drugB, result) {
+  // drug × fluid → diluent card (separate semantics)
+  if (drugA.isFluid || drugB.isFluid) {
+    const fluid = drugA.isFluid ? drugA : drugB;
+    const drug = drugA.isFluid ? drugB : drugA;
+    return renderDiluentDetail(drug, fluid, result);
+  }
   const esc = IVDrugRef.escHtml;
   const icons = { compatible: '✅', incompatible: '❌', variable: '⚠️', nodata: '❓' };
   const labels = { compatible: 'Y-site Compatible', incompatible: 'INCOMPATIBLE', variable: 'Variable / Caution', nodata: 'No Direct Data' };
@@ -405,9 +545,12 @@ function renderGroupedResults(pairs) {
     const gp = pairs.filter(p => p.result.status === status);
     if (!gp.length) return;
     html += `<div class="result-group ${c}"><div class="group-header">${icon} ${label} <span class="group-count">${gp.length}</span></div>`;
-    html += gp.map(p => `<div class="pair-row ${c}"><span class="pair-names">${esc(p.a.g)} + ${esc(p.b.g)}</span>`
-      + (srcShort[p.result.source] ? `<span class="src-mini" title="${esc(p.result.source)}">${srcShort[p.result.source]}</span>` : '')
-      + `</div>`).join('');
+    html += gp.map(p => {
+      const fluidMark = (p.a.isFluid || p.b.isFluid) ? '<span class="src-mini" title="diluent / admixture">💧</span>' : '';
+      return `<div class="pair-row ${c}"><span class="pair-names">${esc(p.a.g)} + ${esc(p.b.g)}</span>${fluidMark}`
+        + (srcShort[p.result.source] ? `<span class="src-mini" title="${esc(p.result.source)}">${srcShort[p.result.source]}</span>` : '')
+        + `</div>`;
+    }).join('');
     html += `</div>`;
   });
   return html;
@@ -448,10 +591,12 @@ function buildMatrixFilter() {
 }
 
 function renderMatrix() {
+  // Matrix is drug × drug only — exclude fluid pseudo-entities (P2.4)
+  const POOL = DRUGS.filter(d => !d.isFluid);
   let drugs;
-  if (matrixCat === 'all') drugs = [...DRUGS].sort((a,b) => a.g.localeCompare(b.g)).slice(0, 35);
-  else if (matrixCat === 'had') drugs = DRUGS.filter(d => d.h).sort((a,b) => a.g.localeCompare(b.g)).slice(0, 30);
-  else drugs = DRUGS.filter(d => d.c.includes(matrixCat)).sort((a,b) => a.g.localeCompare(b.g)).slice(0, 30);
+  if (matrixCat === 'all') drugs = [...POOL].sort((a,b) => a.g.localeCompare(b.g)).slice(0, 35);
+  else if (matrixCat === 'had') drugs = POOL.filter(d => d.h).sort((a,b) => a.g.localeCompare(b.g)).slice(0, 30);
+  else drugs = POOL.filter(d => d.c.includes(matrixCat)).sort((a,b) => a.g.localeCompare(b.g)).slice(0, 30);
   
   if (drugs.length < 2) {
     var ms = document.getElementById('matrixScroll'); if (ms) ms.innerHTML = '<p style="color:var(--text3);font-size:13px;padding:20px 0;">ไม่พอสร้าง matrix</p>';
@@ -516,7 +661,7 @@ function filterSuggestions() {
   
   container.innerHTML = matches.map(d =>
     `<div class="drug-sug-item" data-action="addMultiDrug" data-index="${d.i}">
-      <span class="sug-generic">${IVDrugRef.escHtml(d.g)}</span>${d.h ? ' ⚠' : ''}
+      <span class="sug-generic">${d.isFluid ? '💧 ' : ''}${IVDrugRef.escHtml(d.g)}</span>${d.h ? ' ⚠' : ''}
       <span class="sug-trade">${IVDrugRef.escHtml(d.t)}</span>
     </div>`
   ).join('');
@@ -542,7 +687,9 @@ function renderMultiDrugs() {
   const container = document.getElementById('selectedDrugs');
   container.innerHTML = selectedMultiDrugs.map(id => {
     const d = DRUGS.find(dr => dr.i === id);
-    return `<span class="sel-chip ${d.h ? 'had-chip' : ''}">${IVDrugRef.escHtml(d.g.split(' ')[0])}${d.h ? ' ⚠' : ''} <span class="remove" data-action="removeMultiDrug" data-id="${id}">×</span></span>`;
+    const cls = d.isFluid ? 'fluid-chip' : (d.h ? 'had-chip' : '');
+    const label = (d.isFluid ? '💧 ' : '') + IVDrugRef.escHtml(d.g.split(' ')[0]) + (d.h ? ' ⚠' : '');
+    return `<span class="sel-chip ${cls}">${label} <span class="remove" data-action="removeMultiDrug" data-id="${id}">×</span></span>`;
   }).join('');
 }
 

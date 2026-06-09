@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.13.0
+// IV Drug Reference PWA — Service Worker v5.14.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -19,9 +19,13 @@
 // v5.13.0: Compatibility UI redesign — unified search-driven Check (typeahead +
 //          chips; 2 drugs = pair detail, 3+ = grouped-by-status); replaces the
 //          3-tab/dropdown layout. Mobile-first. Compat render now escaped.
+// v5.14.0: IV fluids as selectable entities + drug–fluid DILUENT compatibility
+//          (NSS/½NS/D5W/D5NSS/D5N2S/RL + D10W/SWFI/balanced). Derived only from
+//          curated DB + drug .x/.y fields; no-data→verify. fluidKey fixes the
+//          D5W/D10W digit-strip key collision. Badged as admixture (not Y-site).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.13.0';
+const CACHE_NAME = 'iv-drugref-v5.14.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

@@ -863,3 +863,32 @@
 .result-group.v .pair-row { border-left: 3px solid #f59e0b; }
 .result-group.c .pair-row { border-left: 3px solid #22c55e; }
 .result-group.n .pair-row { border-left: 3px solid var(--border); }
+
+/* ===== IV Fluids / Diluent (P2.4) ===== */
+.chip.fluid {
+  border-color: rgba(56, 189, 248, .45);
+  color: var(--blue);
+  background: rgba(56, 189, 248, .07);
+}
+.chip.fluid:hover { border-color: var(--blue); }
+
+.sel-chip.fluid-chip {
+  border-color: rgba(56, 189, 248, .5);
+  color: var(--blue);
+  background: rgba(56, 189, 248, .08);
+}
+
+/* default badge background (diluent card sets no inline bg) */
+.src-badge { background: rgba(100, 116, 139, .12); }
+
+.diluent-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue);
+  background: rgba(56, 189, 248, .1);
+  border: 1px solid rgba(56, 189, 248, .25);
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin: 6px 0 8px;
+  display: inline-block;
+}

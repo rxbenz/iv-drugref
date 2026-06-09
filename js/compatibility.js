@@ -171,6 +171,38 @@ const CURATED=[
 // Audit additions: critical missing pairs
 ['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium chloride','i'],
 ['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['20% Mannitol','Potassium chloride','i'],
+// ===== DRUG–FLUID (DILUENT) COMPATIBILITY — P2.4, pharmacist-reviewed (v5.15.0) =====
+// Source: package inserts/SmPC + Trissel's + NHS/Medusa + stability studies.
+// DILUENT/admixture (drug mixed in the bag) — NOT Y-site. See docs/drug-fluid-compatibility.md.
+// Fluid names resolve via fluidKey(): NSS, D5W, RL, SWFI.
+// -- incompatible (i) --
+['Hydralazine IV','D5W','i'],            // dextrose degrades hydralazine (SmPC)
+['Tenecteplase','D5W','i'],              // precipitation w/ dextrose (TNKase PI); flush line w/ NSS
+['Nicardipine','RL','i'],                // Cardene IV PI (also incompat w/ NaHCO3)
+['Potassium phosphate','RL','i'],        // calcium phosphate precipitation (RL contains Ca)
+['Sodium bicarbonate','RL','i'],         // calcium carbonate precipitation (RL contains Ca)
+['Propofol','NSS','i'],                  // dilute with D5W only (Diprivan PI)
+['Cisatracurium','RL','i'],              // plain LR incompatible (Nimbex PI) — D5/LR is OK
+['Thiopental','RL','i'],                 // alkaline; incompatible with Ringer's (SmPC)
+['Glycopyrrolate','RL','i'],             // Lactated Ringer's incompatible (PI) — plain Ringer's OK
+['Albumin 20%','SWFI','i'],              // sterile water → fatal hemolysis (PI, contraindicated)
+// -- variable / caution (v) --
+['Amiodarone','NSS','v'],                // manufacturer: D5W only; some short-term NSS data
+['Norepinephrine','NSS','v'],            // NSS alone not recommended; dextrose protects (Levophed PI)
+['Adrenaline (Epinephrine)','NSS','v'],  // NSS alone not recommended for infusion (PI)
+['Furosemide','D5W','v'],                // alkaline drug unstable in acidic D5W (PI) — prefer NSS/RL
+['Atracurium','RL','v'],                 // degrades faster in LR (PI) — avoid
+['Midazolam','RL','v'],                  // compatible only up to 4 h in LR (PI)
+['Remifentanil','RL','v'],               // compatible only up to 4 h in LR/D5LR (PI)
+['Haloperidol','NSS','v'],               // precipitation reported in NSS (off-label IV; ASHP/Trissel)
+['Polymyxin B','NSS','v'],               // D5W is the labeled vehicle; NSS not specified
+['Lidocaine','NSS','v'],                 // D5W is the labeled infusion diluent; NSS not specified
+// -- compatible (c): must-use confirmations --
+['Amiodarone','D5W','c'],['Sodium nitroprusside','D5W','c'],['Propofol','D5W','c'],
+['Hydralazine IV','NSS','c'],['Tenecteplase','NSS','c'],['Desmopressin (DDAVP)','NSS','c'],
+['Cisatracurium','D5W','c'],['Cisatracurium','NSS','c'],
+['Rocuronium','RL','c'],['Sugammadex','RL','c'],
+['Albumin 20%','NSS','c'],['Albumin 20%','D5W','c'],
 ];
 
 // Cation prefixes whose salts collide under a first-word key (P2.3). Names that

@@ -611,3 +611,31 @@ test('diluent render shows admixture badge + no Y-site CDS alternatives', () => 
   assert.match(html, /Diluent \/ admixture/);
   assert.ok(!html.includes('ทางเลือกยาที่เข้ากันได้')); // CDS alt block absent for diluent
 });
+
+// ═══════════ Imported drug–fluid CURATED pairs (P2.4 pharmacist-reviewed) ═════
+test('imported pairs: Amiodarone NSS=variable / D5W=compatible (D5W-only drug)', () => {
+  const aN = compat.getCompatibility(drugOf('Amiodarone'), fluidOf('nss'));
+  assert.equal(aN.status, 'variable');
+  assert.equal(aN.source, 'curated');
+  assert.equal(compat.getCompatibility(drugOf('Amiodarone'), fluidOf('d5w')).status, 'compatible');
+});
+
+test('imported pairs: Tenecteplase + D5W = incompatible (precipitation)', () => {
+  assert.equal(compat.getCompatibility(drugOf('Tenecteplase'), fluidOf('d5w')).status, 'incompatible');
+});
+
+test('imported pairs: Albumin 20% + SWFI = incompatible (hemolysis)', () => {
+  assert.equal(compat.getCompatibility(drugOf('Albumin 20%'), fluidOf('swfi')).status, 'incompatible');
+});
+
+test('imported pairs: RL incompatibilities (Nicardipine, K-phosphate, NaHCO3)', () => {
+  assert.equal(compat.getCompatibility(drugOf('Nicardipine'), fluidOf('rl')).status, 'incompatible');
+  assert.equal(compat.getCompatibility(drugOf('Potassium phosphate'), fluidOf('rl')).status, 'incompatible');
+  assert.equal(compat.getCompatibility(drugOf('Sodium bicarbonate'), fluidOf('rl')).status, 'incompatible');
+});
+
+test('imported pairs: Norepinephrine + NSS = variable (dextrose preferred)', () => {
+  const r = compat.getCompatibility(drugOf('Norepinephrine (Levophed)'), fluidOf('nss'));
+  assert.equal(r.status, 'variable');
+  assert.equal(r.kind, 'diluent');
+});

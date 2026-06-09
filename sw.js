@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.14.0
+// IV Drug Reference PWA — Service Worker v5.15.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -23,9 +23,13 @@
 //          (NSS/½NS/D5W/D5NSS/D5N2S/RL + D10W/SWFI/balanced). Derived only from
 //          curated DB + drug .x/.y fields; no-data→verify. fluidKey fixes the
 //          D5W/D10W digit-strip key collision. Badged as admixture (not Y-site).
+// v5.15.0: Seed pharmacist-reviewed drug–fluid diluent pairs into CURATED
+//          (32 pairs: amiodarone/nitroprusside/propofol D5W-only, tenecteplase &
+//          hydralazine + dextrose = incompat, albumin+SWFI, RL incompatibilities,
+//          furosemide/norepi/epi cautions). Sourced (docs/drug-fluid-compatibility.md).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.14.0';
+const CACHE_NAME = 'iv-drugref-v5.15.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

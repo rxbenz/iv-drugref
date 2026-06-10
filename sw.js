@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.15.0
+// IV Drug Reference PWA — Service Worker v5.15.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -27,9 +27,13 @@
 //          (32 pairs: amiodarone/nitroprusside/propofol D5W-only, tenecteplase &
 //          hydralazine + dextrose = incompat, albumin+SWFI, RL incompatibilities,
 //          furosemide/norepi/epi cautions). Sourced (docs/drug-fluid-compatibility.md).
+// v5.15.1: Fix — drug–fluid pairs vanished after the Google-Sheet compat sync.
+//          rebuildCuratedMap() rebuilt CURATED_MAP from sheet (drug-drug only),
+//          wiping the code-side fluid pairs. Moved them to FLUID_CURATED +
+//          re-applied (fill-if-missing) after every (re)build.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.15.0';
+const CACHE_NAME = 'iv-drugref-v5.15.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

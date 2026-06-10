@@ -127,7 +127,7 @@ function loadCompatibility() {
   if (cut > 0) src = src.slice(0, cut);
   src += '\n;globalThis.getCompatibility=getCompatibility;globalThis.keyCandidates=keyCandidates;globalThis.normKey=normKey;'
     + 'globalThis.renderPairDetail=renderPairDetail;globalThis.renderGroupedResults=renderGroupedResults;'
-    + 'globalThis.fluidKey=fluidKey;globalThis.DRUGS=DRUGS;\n})();';
+    + 'globalThis.fluidKey=fluidKey;globalThis.DRUGS=DRUGS;globalThis.rebuildCuratedMap=rebuildCuratedMap;\n})();';
   vm.runInContext(src, sandbox, { filename: 'compatibility.js' });
   if (!sandbox.getCompatibility) throw new Error('compatibility.js did not expose getCompatibility');
   return {
@@ -138,6 +138,7 @@ function loadCompatibility() {
     renderGroupedResults: sandbox.renderGroupedResults,
     fluidKey: sandbox.fluidKey,
     DRUGS: sandbox.DRUGS,
+    rebuildCuratedMap: sandbox.rebuildCuratedMap,
     sandbox,
   };
 }

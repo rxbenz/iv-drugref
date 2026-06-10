@@ -639,3 +639,17 @@ test('imported pairs: Norepinephrine + NSS = variable (dextrose preferred)', () 
   assert.equal(r.status, 'variable');
   assert.equal(r.kind, 'diluent');
 });
+
+// ═══════════ Drug-fluid pairs survive Google-Sheet sync (P2.4 fix, v5.15.1) ═══
+// MUST be the last compat test — rebuildCuratedMap() mutates the shared CURATED_MAP.
+test('drug-fluid CURATED pairs survive a sheet rebuildCuratedMap (sheet=drug-drug only)', () => {
+  // Simulate the GAS sheet sync: drug-drug pairs only, NO fluid pairs.
+  compat.rebuildCuratedMap([['Heparin','Vancomycin','i'], ['Calcium gluconate','Ceftriaxone','i']]);
+  // fluid pairs must still be present (re-applied after rebuild)
+  const aN = compat.getCompatibility(drugOf('Amiodarone'), fluidOf('nss'));
+  assert.equal(aN.status, 'variable');
+  assert.equal(aN.source, 'curated');
+  assert.equal(compat.getCompatibility(drugOf('Tenecteplase'), fluidOf('d5w')).status, 'incompatible');
+  // and the simulated sheet drug-drug pair is also active
+  assert.equal(compat.getCompatibility(drugOf('Heparin'), drugOf('Vancomycin')).status, 'incompatible');
+});

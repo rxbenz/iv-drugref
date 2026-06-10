@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.15.2
+// IV Drug Reference PWA — Service Worker v5.15.3
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -34,9 +34,13 @@
 // v5.15.2: Version-display fix — stale header badges (TDM v1.0, Vanco v2.0,
 //          Compat v5.0) + core.js VERSION (was 5.11.1) now driven by a single
 //          source: core.js fills [data-app-version] from IVDrugRef.VERSION.
+// v5.15.3: Safety + UX. C1: block calc on blank patient fields (validate raw
+//          before defaulting; wired vanco-tdm). UX: answer-first drug cards
+//          (diluent+rate line), "ตรวจ IV Compatibility" cross-link, and ?search=
+//          /?drug= deep-link support (fixes the FAB quick-search link).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.15.2';
+const CACHE_NAME = 'iv-drugref-v5.15.3';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

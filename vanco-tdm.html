@@ -26,7 +26,7 @@
 <body>
 <a href="#content" class="skip-to-content">Skip to content</a>
 
-<div class="header"><a href="calculator.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>กลับ</a><h1>Vancomycin Bayesian TDM</h1><span class="ver" data-app-version>v5.15.2</span></div>
+<div class="header"><a href="calculator.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>กลับ</a><h1>Vancomycin Bayesian TDM</h1><span class="ver" data-app-version>v5.15.3</span></div>
 <div id="patientCtxBar"></div>
 <div class="container">
 <div class="card"><div class="card-head">👤 PATIENT</div><div class="card-body">
@@ -35,6 +35,8 @@
 <div class="row row-2" style="margin-top:8px"><div class="field"><label>Albumin (g/dL)</label><input type="number" id="ptAlb" value="" min="0.5" max="6" step="0.1" placeholder="ไม่ระบุ"></div><div class="field"><label>Dialysis</label><select id="ptDialysis"><option value="none">ไม่ได้ล้างไต</option><option value="HD">HD</option><option value="CRRT">CRRT</option><option value="PD">PD</option></select></div></div>
 <div class="row" style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px"><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ptICU" data-action="patientCovariate"> ICU / Critically ill</label><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ptHeme" data-action="patientCovariate"> Hematologic malignancy</label></div>
 <div id="vancoGuardBanner" style="display:none;"></div></div></div>
+
+<div id="validationMessages" class="validation-messages" style="display:none;margin:0 0 12px"></div>
 
 <div class="info-box amber" style="font-size:11px;margin:0 0 12px">ℹ️ <strong>AUC calculation updated (v5.10.0)</strong> — PK model coefficients corrected against primary papers. ตรวจสอบผลกับ institutional protocol ก่อนใช้ทางคลินิก</div>
 
@@ -57,7 +59,7 @@
 <div id="optResult"></div><div class="dose-compare" id="doseCompare"></div></div></div>
 </div>
 <div class="disclaimer">⚠ เครื่องมือช่วยคำนวณเบื้องต้น ไม่ทดแทน clinical judgment<br>Bayesian MAP + MCMC | Models: Buelga 2005, Roberts 2011, Goti 2018<br>Ref: ASHP/IDSA Vancomycin Guidelines 2020 | สำหรับบุคลากรทางการแพทย์เท่านั้น</div>
-<div class="app-footer">IV DrugRef v5.15.2 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+<div class="app-footer">IV DrugRef v5.15.3 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
 </div>
 
 <nav class="bottom-nav">

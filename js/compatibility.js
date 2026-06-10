@@ -825,6 +825,21 @@ document.addEventListener('click', e => {
     buildMatrixFilter();
     checkMultiCompat();
 
+    // M-3: pre-select a drug from a ?drug=/?search= deep-link (e.g. from a drug
+    // card's "ตรวจ IV Compatibility" cross-link), then wait for a partner drug.
+    try {
+      var _p = new URLSearchParams(location.search);
+      var _q = _p.get('drug') || _p.get('search');
+      if (_q) {
+        var _ql = _q.trim().toLowerCase();
+        var _hit = DRUGS.filter(function(d){ return !d.isFluid; }).find(function(d){
+          var g = (d.g || '').toLowerCase();
+          return g === _ql || g.indexOf(_ql) === 0 || (_ql.length > 3 && _ql.indexOf(g) === 0) || normKey(d.g) === normKey(_q);
+        });
+        if (_hit) addMultiDrug(_hit.i);
+      }
+    } catch (e) { /* ignore deep-link errors */ }
+
     // Event delegation — replaces all inline handlers
     IVDrugRef.delegate(document, 'click', {
       switchMode: function(e, t) { switchMode(t.dataset.mode); },

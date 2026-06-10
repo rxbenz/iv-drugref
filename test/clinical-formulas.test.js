@@ -653,3 +653,17 @@ test('drug-fluid CURATED pairs survive a sheet rebuildCuratedMap (sheet=drug-dru
   // and the simulated sheet drug-drug pair is also active
   assert.equal(compat.getCompatibility(drugOf('Heparin'), drugOf('Vancomycin')).status, 'incompatible');
 });
+
+// ═══════════ C1: blank patient field must not be masked by a default ═════════
+test('C1: validatePatientInput errors on present-but-blank (NaN), skips absent (undefined)', () => {
+  const { IVDrugRef } = loadCore();
+  // all present & valid
+  assert.equal(IVDrugRef.validatePatientInput({age:55, wt:70, scr:1.0, ht:170}).allValid, true);
+  // present but blank (NaN) → must error (the phantom-default bug)
+  let v = IVDrugRef.validatePatientInput({age:55, wt:NaN, scr:1.0, ht:170});
+  assert.equal(v.allValid, false);
+  assert.ok(v.errors.length >= 1);
+  assert.equal(IVDrugRef.validatePatientInput({age:55, wt:70, scr:NaN, ht:170}).allValid, false);
+  // absent on this page (undefined) → not flagged, stays valid
+  assert.equal(IVDrugRef.validatePatientInput({age:55, wt:70, scr:1.0, ht:undefined}).allValid, true);
+});

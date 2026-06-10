@@ -1457,3 +1457,44 @@
 [data-theme="dark"] .search-input {
   background: var(--bg2, #1a2332); color: var(--text, #f1f5f9);
 }
+
+/* ===== UX: answer-first card line (QW-1) + cross-links (M-3) ===== */
+.card-answerline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 14px 10px;
+  margin-top: -4px;
+}
+.card-answerline .ans-chip {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text2, #475569);
+  background: var(--bg2, rgba(148,163,184,.1));
+  border: 1px solid var(--border, rgba(148,163,184,.2));
+  border-radius: 6px;
+  padding: 2px 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-crosslinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.card-crosslinks .xlink {
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--blue, #0ea5e9);
+  background: rgba(56, 189, 248, .1);
+  border: 1px solid rgba(56, 189, 248, .3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.card-crosslinks .xlink:hover { background: rgba(56, 189, 248, .2); }

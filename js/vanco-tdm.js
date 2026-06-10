@@ -38,6 +38,7 @@ function getPatient(){
   var albEl=document.getElementById('ptAlb'), dialEl=document.getElementById('ptDialysis');
   var icuEl=document.getElementById('ptICU'), hemeEl=document.getElementById('ptHeme');
   return{wt:p.wt,age:p.age,sex:p.sex,scr:p.scr,ht:p.ht,
+    validation:p.validation,
     albumin:albEl&&albEl.value?+albEl.value:null,
     dialysis:dialEl?dialEl.value:'none',
     icu:!!(icuEl&&icuEl.checked),
@@ -62,6 +63,14 @@ function getMatchedModels(pt){
 function updateCrCl(){
   const p=getPatient();
   var crclEl=document.getElementById('ptCrCl');
+  // Block on missing/invalid patient inputs so a blank field can't compute on a
+  // phantom default (C1). renderValidationMessages no-ops if the container/errors absent.
+  IVDrugRef.renderValidationMessages('validationMessages', p.validation);
+  if(p.validation && !p.validation.allValid){
+    if(crclEl) crclEl.value='— (กรอกค่าให้ครบ)';
+    updateGuard(p);
+    return;
+  }
   // Display-only formula selection — mirrors tdm.js updateCrCl().
   // Pediatric (age <18) shows Schwartz eGFR; adults show Cockcroft-Gault.
   // NOTE: the Bayesian engine (bayesianMAP/runMCMC) still computes CG
@@ -476,6 +485,12 @@ function runBayesian(){
   if(guardBlocked()) return;
 
   const pt=getPatient();
+  // Block calculation on missing/invalid patient inputs (C1)
+  if(pt.validation && !pt.validation.allValid){
+    IVDrugRef.renderValidationMessages('validationMessages', pt.validation);
+    alert('กรุณากรอกข้อมูลผู้ป่วยให้ครบและถูกต้องก่อนคำนวณ');
+    return;
+  }
   const doseHist=buildDoseHist();
   const measuredLvls=buildLevels();
 

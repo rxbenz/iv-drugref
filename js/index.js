@@ -541,3 +541,69 @@ IVDrugRef.delegate(document,'click',{
 if(typeof DRUGS!=='undefined'&&DRUGS.length>0){
   renderQuickAccess();
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// UX: answer-first cards (QW-1), drug-card cross-links (M-3), deep-link (QW-2)
+// ══════════════════════════════════════════════════════════════════════════
+
+// Read a sub-field that may be an object, a JSON string (GAS), or absent.
+function _uxField(v, key){
+  if(!v) return '';
+  if(typeof v==='string'){ try{ v=JSON.parse(v); }catch(e){ return ''; } }
+  return (v && typeof v==='object' && v[key]!=null) ? String(v[key]) : '';
+}
+function _uxFirstLine(s){ return String(s||'').split(/\\n|\n/)[0].trim(); }
+
+// QW-1: one-line clinical scent on the collapsed card (diluent + infusion rate).
+function _uxAnswerLine(drug){
+  var dil=_uxFirstLine(_uxField(drug.dilution,'diluent'));
+  var rate=_uxFirstLine(_uxField(drug.admin,'rate'));
+  var parts=[];
+  if(dil) parts.push('💧 '+dil);
+  if(rate) parts.push('⏱ '+rate);
+  if(!parts.length) return '';
+  return '<div class="card-answerline">'+parts.map(function(p){
+    return '<span class="ans-chip">'+IVDrugRef.escHtml(p)+'</span>';
+  }).join('')+'</div>';
+}
+
+// M-3: cross-module link at the top of the expanded body (compat covers all drugs).
+function _uxCrossLinks(drug){
+  var g=(drug.generic||'').trim();
+  if(!g) return '';
+  return '<div class="card-crosslinks">'
+    +'<a class="xlink" href="compatibility.html?drug='+encodeURIComponent(g)+'">🔗 ตรวจ IV Compatibility</a>'
+    +'</div>';
+}
+
+// Wrap renderDrugCard (outermost): inject answer-line before the body + cross-link inside it.
+var _uxOrigRenderCard=renderDrugCard;
+renderDrugCard=function(drug){
+  var html=_uxOrigRenderCard(drug);
+  var line=_uxAnswerLine(drug);
+  var links=_uxCrossLinks(drug);
+  if(line||links){
+    html=html.replace('<div class="card-body">', line+'<div class="card-body">'+links);
+  }
+  return html;
+};
+
+// QW-2: honor ?search= / ?drug= deep-link once drugs have loaded (fixes the FAB
+// quick-search link that pointed at index.html?search= but was never read).
+(function(){
+  var applied=false, _prevUpdateList=updateList;
+  updateList=function(){
+    _prevUpdateList();
+    if(!applied && typeof DRUGS!=='undefined' && DRUGS.length>0){
+      applied=true;
+      try{
+        var p=new URLSearchParams(location.search);
+        var q=p.get('search')||p.get('drug');
+        if(q){
+          var si=document.getElementById('searchInput');
+          if(si){ si.value=q; si.dispatchEvent(new Event('input',{bubbles:true})); }
+        }
+      }catch(e){ /* ignore deep-link errors */ }
+    }
+  };
+})();

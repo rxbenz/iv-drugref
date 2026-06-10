@@ -111,6 +111,11 @@ var IVDrugRef = (function() {
     for (var i = 0; i < fields.length; i++) {
       var f = fields[i];
       var val = values[f];
+      if (val === undefined) {
+        // Field not present on this page → no input to validate, use default.
+        results[f] = { valid: true, level: 'ok', messages: [] };
+        continue;
+      }
       var result = validateField(f, val);
       results[f] = result;
 
@@ -359,19 +364,35 @@ var IVDrugRef = (function() {
       return el ? el.value : def;
     };
 
-    const age = getVal(ids.age, 55);
-    const wt = getVal(ids.wt, 70);
-    const ht = getVal(ids.ht, 170);
-    const sex = getStr(ids.sex, 'M');
-    const scr = getVal(ids.scr, 1.0);
-    const alb = getVal(ids.alb, 4.0);
-    const dialysis = getStr(ids.dialysis, 'none');
+    // Raw numeric read: NaN if the field is present-but-blank, undefined if the
+    // field is absent on this page. Lets validation tell "left blank" (must
+    // error) from "not a field here" (use default silently). [C1 fix]
+    const getRaw = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return undefined;
+      return parseFloat(el.value); // '' → NaN
+    };
+    const ageRaw = getRaw(ids.age);
+    const wtRaw = getRaw(ids.wt);
+    const htRaw = getRaw(ids.ht);
+    const scrRaw = getRaw(ids.scr);
 
-    // Run validation and apply visual feedback
+    // Validate the RAW values BEFORE applying display defaults, so a cleared
+    // field can no longer be masked by a phantom default. Callers gate on
+    // validation.allValid, so the defaults below never reach a shown result. [C1]
     const validation = validatePatientInput(
-      { age: age, wt: wt, scr: scr, ht: ht },
+      { age: ageRaw, wt: wtRaw, scr: scrRaw, ht: htRaw },
       { age: ids.age, wt: ids.wt, scr: ids.scr, ht: ids.ht }
     );
+
+    const _def = (v, d) => (v === undefined || isNaN(v)) ? d : v;
+    const age = _def(ageRaw, 55);
+    const wt = _def(wtRaw, 70);
+    const ht = _def(htRaw, 170);
+    const sex = getStr(ids.sex, 'M');
+    const scr = _def(scrRaw, 1.0);
+    const alb = getVal(ids.alb, 4.0);
+    const dialysis = getStr(ids.dialysis, 'none');
 
     const ibw = Math.round(calcIBW(ht, sex) * 10) / 10;
     const abw = Math.round(calcABW(wt, ibw) * 10) / 10;

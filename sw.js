@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.15.1
+// IV Drug Reference PWA — Service Worker v5.15.2
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -31,9 +31,12 @@
 //          rebuildCuratedMap() rebuilt CURATED_MAP from sheet (drug-drug only),
 //          wiping the code-side fluid pairs. Moved them to FLUID_CURATED +
 //          re-applied (fill-if-missing) after every (re)build.
+// v5.15.2: Version-display fix — stale header badges (TDM v1.0, Vanco v2.0,
+//          Compat v5.0) + core.js VERSION (was 5.11.1) now driven by a single
+//          source: core.js fills [data-app-version] from IVDrugRef.VERSION.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.15.1';
+const CACHE_NAME = 'iv-drugref-v5.15.2';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

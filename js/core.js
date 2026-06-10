@@ -1061,7 +1061,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.11.1';
+  const VERSION = '5.15.2';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -1530,4 +1530,12 @@ document.addEventListener('keydown', function(e) {
 document.addEventListener('DOMContentLoaded', () => {
   IVDrugRef.registerSW();
   IVDrugRef.startVersionCheck();
+  // Single source of truth for the displayed app version: fill any element with
+  // a [data-app-version] attribute from IVDrugRef.VERSION so per-page header
+  // badges never go stale on release (static text is the no-JS fallback).
+  try {
+    document.querySelectorAll('[data-app-version]').forEach(el => {
+      el.textContent = 'v' + IVDrugRef.VERSION;
+    });
+  } catch (e) { /* non-critical */ }
 });

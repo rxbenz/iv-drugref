@@ -208,10 +208,80 @@ const FLUID_CURATED = [
   ['Rocuronium','RL','c'],['Sugammadex','RL','c'],
   ['Albumin 20%','NSS','c'],['Albumin 20%','D5W','c'],
 ];
-// Overlay FLUID_CURATED onto CURATED_MAP (fill-if-missing → a sheet entry can
-// still override a fluid pair if ever added there). Called after every (re)build.
+
+// ===== DRUG–FLUID (DILUENT) DERIVED — auto-generated from each drug's
+// dilution.diluent field in drugs-data.json (the diluent a pharmacist already
+// authored per drug). A fluid named as a diluent → compatible; a fluid the field
+// marks "ห้าม/incompatible" → incompatible. Applied AFTER FLUID_CURATED with
+// fill-if-missing, so the hand-reviewed FLUID_CURATED / sheet entries always win
+// over a derived one (e.g. Amiodarone+NSS stays "variable", not "incompatible").
+// Regenerate when diluent fields change. SEPARATE from CURATED for the same
+// sheet-rebuild reason as FLUID_CURATED.
+const FLUID_DERIVED = [
+  ["5-Fluorouracil (5-FU)","D5W","c"],["5-Fluorouracil (5-FU)","NSS","c"],["Abciximab","D5W","c"],["Abciximab","NSS","c"],
+  ["Acyclovir","D5W","c"],["Acyclovir","NSS","c"],["Adrenaline (Epinephrine)","D5W","c"],["Amikacin","D5W","c"],
+  ["Amikacin","NSS","c"],["Amoxicillin/Clavulanic acid","D5W","c"],["Amoxicillin/Clavulanic acid","NSS","c"],["Amphotericin B (conventional)","D5W","c"],
+  ["Ampicillin","D5W","c"],["Ampicillin","NSS","c"],["Anidulafungin","D5W","c"],["Anidulafungin","NSS","c"],
+  ["Atracurium","D5W","c"],["Atracurium","NSS","c"],["Azithromycin IV","D5W","c"],["Azithromycin IV","NSS","c"],
+  ["Bevacizumab","D5W","i"],["Bevacizumab","NSS","c"],["Bupivacaine","NSS","c"],["Calcium chloride 10%","D5W","c"],
+  ["Calcium chloride 10%","NSS","c"],["Calcium gluconate","D5W","c"],["Calcium gluconate","NSS","c"],["Carboplatin","D5W","c"],
+  ["Carboplatin","NSS","c"],["Caspofungin","NSS","c"],["Caspofungin","RL","c"],["Cefazolin","D5W","c"],
+  ["Cefazolin","NSS","c"],["Cefepime","D5W","c"],["Cefepime","NSS","c"],["Cefoperazone/Sulbactam","D5W","c"],
+  ["Cefoperazone/Sulbactam","NSS","c"],["Cefotaxime","D5W","c"],["Cefotaxime","NSS","c"],["Ceftazidime","D5W","c"],
+  ["Ceftazidime","NSS","c"],["Ceftazidime/Avibactam","RL","c"],["Ceftriaxone","D5W","c"],["Ceftriaxone","NSS","c"],
+  ["Cisplatin","D5W","i"],["Cisplatin","NSS","c"],["Clindamycin","D5W","c"],["Clindamycin","NSS","c"],
+  ["Colistimethate sodium (CMS)","D5W","c"],["Colistimethate sodium (CMS)","NSS","c"],["Cotrimoxazole (TMP/SMX)","D5W","c"],["Cotrimoxazole (TMP/SMX)","NSS","c"],
+  ["Cyclophosphamide","D5W","c"],["Cyclophosphamide","NSS","c"],["Daptomycin","D5W","i"],["Daptomycin","NSS","c"],
+  ["Deferoxamine","D5W","c"],["Deferoxamine","NSS","c"],["Dexamethasone","D5W","c"],["Dexamethasone","NSS","c"],
+  ["Dexmedetomidine","NSS","c"],["Diazepam","D5W","i"],["Diazepam","NSS","i"],["Diclofenac","D5W","c"],
+  ["Diclofenac","NSS","c"],["Digoxin","D5W","c"],["Digoxin","NSS","c"],["Digoxin-specific antibody (DigiFab)","NSS","c"],
+  ["Diltiazem IV","D5W","c"],["Diltiazem IV","NSS","c"],["Dimenhydrinate","NSS","c"],["Dobutamine","D5W","c"],
+  ["Dobutamine","NSS","c"],["Docetaxel","D5W","c"],["Docetaxel","NSS","c"],["Dopamine","D5W","c"],
+  ["Dopamine","NSS","c"],["Doripenem","D5W","c"],["Doripenem","NSS","c"],["Doxorubicin","D5W","c"],
+  ["Doxorubicin","NSS","c"],["Eculizumab","D5W","c"],["Eculizumab","NSS","c"],["Eculizumab","RL","c"],
+  ["Ephedrine","NSS","c"],["Ertapenem","D5W","i"],["Ertapenem","NSS","c"],["Ertapenem","RL","i"],
+  ["Esmolol","D5W","c"],["Esmolol","NSS","c"],["Etoposide (VP-16)","D5W","c"],["Etoposide (VP-16)","NSS","c"],
+  ["Fentanyl","D5W","c"],["Fentanyl","NSS","c"],["Flumazenil","D5W","c"],["Flumazenil","NSS","c"],
+  ["Fosfomycin","D5W","c"],["Fosfomycin","NSS","c"],["Furosemide","NSS","c"],["Ganciclovir","D5W","c"],
+  ["Ganciclovir","NSS","c"],["Gemcitabine","NSS","c"],["Gentamicin","D5W","c"],["Gentamicin","NSS","c"],
+  ["Glucagon","D5W","c"],["Glyceryl trinitrate (NTG)","D5W","c"],["Glyceryl trinitrate (NTG)","NSS","c"],["Haloperidol","D5W","c"],
+  ["Heparin","D5W","c"],["Heparin","NSS","c"],["Human Insulin (Regular)","D5W","c"],["Human Insulin (Regular)","NSS","c"],
+  ["Hydrocortisone","D5W","c"],["Hydrocortisone","NSS","c"],["Ifosfamide","D5W","c"],["Ifosfamide","NSS","c"],
+  ["Infliximab","NSS","c"],["Irinotecan","D5W","c"],["Irinotecan","NSS","c"],["Isoproterenol","D5W","c"],
+  ["Isoproterenol","NSS","c"],["Ketamine","D5W","c"],["Ketamine","NSS","c"],["Labetalol","D5W","c"],
+  ["Labetalol","NSS","c"],["Levetiracetam","D5W","c"],["Levetiracetam","NSS","c"],["Levetiracetam","RL","c"],
+  ["Lidocaine","D5W","c"],["Liposomal Amphotericin B","D5W","c"],["Liposomal Amphotericin B","NSS","i"],["Liposomal Amphotericin B","RL","i"],
+  ["Magnesium sulfate","D5W","c"],["Magnesium sulfate","NSS","c"],["Meropenem","D5W","c"],["Meropenem","NSS","c"],
+  ["Mesna","D5W","c"],["Mesna","NSS","c"],["Methotrexate IV (high-dose)","D5W","c"],["Methotrexate IV (high-dose)","NSS","c"],
+  ["Methylprednisolone","D5W","c"],["Methylprednisolone","NSS","c"],["Metoclopramide","D5W","c"],["Metoclopramide","NSS","c"],
+  ["Micafungin","D5W","c"],["Micafungin","NSS","c"],["Midazolam","D5W","c"],["Midazolam","NSS","c"],
+  ["Milrinone","D5W","c"],["Milrinone","NSS","c"],["Morphine","D5W","c"],["Morphine","NSS","c"],
+  ["N-Acetylcysteine IV (NAC)","D5W","c"],["Naloxone","D5W","c"],["Naloxone","NSS","c"],["Natalizumab","NSS","c"],
+  ["Nicardipine","D5W","c"],["Nicardipine","NSS","c"],["Norepinephrine (Levophed)","D5NSS","c"],["Norepinephrine (Levophed)","D5W","c"],
+  ["Omeprazole","D5W","c"],["Omeprazole","NSS","c"],["Omeprazole","RL","i"],["Ondansetron","D5W","c"],
+  ["Ondansetron","NSS","c"],["Oxaliplatin","D5W","c"],["Oxaliplatin","NSS","i"],["Oxytocin","NSS","c"],
+  ["Oxytocin","RL","c"],["Paclitaxel","D5W","c"],["Paclitaxel","NSS","c"],["Pantoprazole","D5W","c"],
+  ["Pantoprazole","NSS","c"],["Pembrolizumab","D5W","i"],["Pembrolizumab","NSS","c"],["Penicillin G (Benzylpenicillin)","D5W","c"],
+  ["Penicillin G (Benzylpenicillin)","NSS","c"],["Pethidine (Meperidine)","D5W","c"],["Pethidine (Meperidine)","NSS","c"],["Phenobarbital","NSS","c"],
+  ["Phenylephrine","D5W","c"],["Phenylephrine","NSS","c"],["Phenytoin","NSS","c"],["Phytomenadione (Vitamin K1)","D5W","c"],
+  ["Phytomenadione (Vitamin K1)","NSS","c"],["Piperacillin/Tazobactam","D5W","c"],["Piperacillin/Tazobactam","NSS","c"],["Polymyxin B","D5W","c"],
+  ["Potassium chloride (KCl)","D5W","c"],["Potassium chloride (KCl)","NSS","c"],["Potassium phosphate","D5W","c"],["Potassium phosphate","NSS","c"],
+  ["Protamine sulfate","D5W","c"],["Protamine sulfate","NSS","c"],["Remdesivir","D5W","c"],["Remdesivir","NSS","c"],
+  ["Remifentanil","D5W","c"],["Remifentanil","NSS","c"],["Rituximab","D5W","c"],["Rituximab","NSS","c"],
+  ["Rocuronium","D5W","c"],["Rocuronium","NSS","c"],["Sodium nitroprusside","NSS","i"],["Sodium thiosulfate","D5W","c"],
+  ["Sodium thiosulfate","NSS","c"],["Sodium Valproate","D5W","c"],["Sodium Valproate","NSS","c"],["Streptomycin","NSS","c"],
+  ["Sulbactam (standalone)","D5W","c"],["Sulbactam (standalone)","NSS","c"],["Terbutaline IV","D5W","c"],["Terbutaline IV","NSS","c"],
+  ["Tetracosactide (ACTH)","NSS","c"],["Thiopental","D5W","c"],["Thiopental","NSS","c"],["Tigecycline","D5W","c"],
+  ["Tigecycline","NSS","c"],["Tocilizumab","NSS","c"],["Tramadol","D5W","c"],["Tramadol","NSS","c"],
+  ["Tranexamic acid","D5W","c"],["Tranexamic acid","NSS","c"],["Trastuzumab","D5W","i"],["Trastuzumab","NSS","c"],
+  ["Vancomycin","D5W","c"],["Vancomycin","NSS","c"],["Vincristine","D5W","c"],["Vincristine","NSS","c"],
+  ["Voriconazole","D5W","c"],["Voriconazole","NSS","c"],
+];
+// Overlay FLUID_CURATED then FLUID_DERIVED onto CURATED_MAP (fill-if-missing → a
+// sheet entry can still override a fluid pair if ever added there). Called after
+// every (re)build. Precedence: CURATED/sheet > FLUID_CURATED > FLUID_DERIVED.
 function applyFluidCurated() {
-  FLUID_CURATED.forEach(([a, b, s]) => {
+  [...FLUID_CURATED, ...FLUID_DERIVED].forEach(([a, b, s]) => {
     const key = [curatedKeyFor(a), curatedKeyFor(b)].sort().join('|');
     if (!(key in CURATED_MAP)) CURATED_MAP[key] = s;
   });

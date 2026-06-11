@@ -577,10 +577,32 @@ test('drug×fluid CURATED — Amphotericin B + NSS = incompatible (order-indepen
   assert.equal(r.kind, 'diluent');
 });
 
-test('drug×fluid derived from .x field — Ertapenem + D5W = incompatible (drugfield)', () => {
-  const r = compat.getCompatibility(drugOf('Ertapenem'), fluidOf('d5w'));
+test('drug×fluid derived from .x field — Acyclovir + D10W = incompatible (drugfield)', () => {
+  // Drugfield fallback (step 2): no curated/derived entry, so the drug's own
+  // .x text ("D10W, ...") is parsed. Ertapenem+D5W now has an explicit derived
+  // entry (resolves via curated) — see FLUID_DERIVED test below.
+  const r = compat.getCompatibility(drugOf('Acyclovir'), fluidOf('d10w'));
   assert.equal(r.status, 'incompatible');
   assert.equal(r.source, 'drugfield');
+});
+
+test('drug×fluid FLUID_DERIVED — Calcium gluconate + NSS = compatible (curated)', () => {
+  // Derived from drugs-data.json dilution.diluent ("NSS หรือ D5W").
+  const r = compat.getCompatibility(drugOf('Calcium gluconate'), fluidOf('nss'));
+  assert.equal(r.status, 'compatible');
+  assert.equal(r.kind, 'diluent');
+  assert.equal(r.source, 'curated');
+});
+
+test('drug×fluid FLUID_DERIVED — Oxaliplatin + NSS = incompatible (degrades; curated)', () => {
+  const r = compat.getCompatibility(drugOf('Oxaliplatin'), fluidOf('nss'));
+  assert.equal(r.status, 'incompatible');
+  assert.equal(r.kind, 'diluent');
+});
+
+test('drug×fluid FLUID_DERIVED does not override reviewed FLUID_CURATED — Amiodarone + NSS stays variable', () => {
+  const r = compat.getCompatibility(drugOf('Amiodarone'), fluidOf('nss'));
+  assert.equal(r.status, 'variable');
 });
 
 test('drug×fluid derived from .y field — Oxytocin + NSS = compatible', () => {

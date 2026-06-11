@@ -115,8 +115,8 @@
       "storage": "เก็บ RT ห้ามแช่เย็น"
     },
     "compat": {
-      "ysite": "-",
-      "incompat": "-"
+      "ysite": "ไม่ให้ Y-site — rapid IV push เดี่ยว แล้ว flush NSS ทันที",
+      "incompat": "ให้ผ่าน line เดี่ยว ใกล้ตัวผู้ป่วยที่สุด"
     },
     "precautions": "• ใช้ IV site ใกล้หัวใจที่สุด (antecubital/central)\n• เตรียม crash cart\n• T½ <10 sec → ต้องให้เร็วมาก\n• CI: 2nd/3rd degree AV block, SSS",
     "monitoring": [
@@ -664,7 +664,9 @@
     "trade": "Botox / Dysport Inj.",
     "strength": "100 U (Botox)\n500 U (Dysport)",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "neuro"
+    ],
     "reconst": {
       "solvent": "NSS (preservative-free)\nห้ามเขย่า!",
       "volume": "Botox 100U: 1-4 mL\nDysport 500U: 2.5 mL",
@@ -1008,7 +1010,9 @@
     "trade": "Chlorpheniramine Inj. 10 mg/mL",
     "strength": "10 mg/mL amp",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "emergency"
+    ],
     "reconst": {
       "solvent": "Ready to use",
       "volume": "-",
@@ -1466,7 +1470,7 @@
       "storage": "RT ป้องกันแสง\nAdsorbs to PVC"
     },
     "compat": {
-      "ysite": "-",
+      "ysite": "ห้าม Y-site (ตกตะกอนกับยาส่วนใหญ่ + ดูดติด PVC)\nให้ IV push เดี่ยว ใกล้ตัวผู้ป่วย",
       "incompat": "IV fluids ทุกชนิด (ห้ามเจือจาง)\nAdsorbs to PVC → ใช้ glass/polyolefin"
     },
     "precautions": "• ห้ามเจือจาง/ผสมกับยาอื่น!\n• Adsorbs to PVC tubing\n• Respiratory depression → เตรียม Flumazenil\n• Propylene glycol toxicity (high dose)\n• IM ดูดซึมไม่ดี\n• ห้าม intra-arterial",
@@ -1556,7 +1560,7 @@
       "storage": "RT ป้องกันแสง"
     },
     "compat": {
-      "ysite": "-",
+      "ysite": "Ciprofloxacin, Furosemide, Heparin, KCl, Lidocaine, Midazolam, Milrinone, Morphine, Ranitidine, Verapamil, Cefepime",
       "incompat": "Dobutamine, Fluconazole, Insulin, Amiodarone"
     },
     "precautions": "• Dilute ≥4x ก่อนให้ IV\n• ห้าม IM\n• ระวัง hypoK → ↑toxicity\n• Drug interactions มาก\n• Narrow therapeutic index\n• ระวังสูงอายุ, renal impairment",
@@ -1579,7 +1583,9 @@
     "trade": "Dimenhydrinate Inj. 50 mg/mL",
     "strength": "50 mg/mL amp",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "gi"
+    ],
     "reconst": {
       "solvent": "Ready to use",
       "volume": "-",
@@ -1775,8 +1781,8 @@
       "storage": "RT ห้ามแช่เย็น"
     },
     "compat": {
-      "ysite": "-",
-      "incompat": "-"
+      "ysite": "ห้ามผสม/Y-site กับยาอื่น",
+      "incompat": "ห้าม mix กับยาอื่น\nFlush NSS หรือ D5W ก่อน-หลัง IV bolus"
     },
     "precautions": "• SC เท่านั้น (ห้าม IM)\n• ห้ามไล่ air bubble (air lock design)\n• สลับซ้าย-ขวาทุกครั้ง\n• ห้ามถูบริเวณฉีด\n• ระวัง HIT\n• ปรับขนาด CrCl <30",
     "monitoring": [
@@ -2581,7 +2587,9 @@
     "trade": "Buscopan Inj. 20 mg/mL",
     "strength": "20 mg/mL amp",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "gi"
+    ],
     "reconst": {
       "solvent": "Ready to use",
       "volume": "-",
@@ -3201,7 +3209,9 @@
     "trade": "Metoclopramide Inj. 10 mg/2 mL",
     "strength": "5 mg/mL",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "gi"
+    ],
     "reconst": {
       "solvent": "Ready to use",
       "volume": "-",
@@ -3575,7 +3585,7 @@
       "storage": "RT ป้องกันแสง\nใช้ PE tubing เท่านั้น"
     },
     "compat": {
-      "ysite": "-",
+      "ysite": "Co-infuse ผ่าน 3-way กับ carrier ที่ไหลอยู่ (อัตรา ~40 mL/hr):\nNSS, D5W, LR, Mannitol 10%, Albumin 5%\n(ห้ามใช้สาย/ถุง PVC)",
       "incompat": "PVC (adsorbs!)\nMost IV drugs (dedicated line)"
     },
     "precautions": "• SAH vasospasm prophylaxis → เริ่มภายใน 96 hr\n• ห้ามใช้ PVC! (adsorbs → ลด bioavailability)\n• ใช้ PE/polyethylene tubing & syringe เท่านั้น\n• PO preferred เมื่อเป็นไปได้\n• ห้าม IV push!\n• Hold ถ้า SBP <90",
@@ -3641,7 +3651,9 @@
     "trade": "Omeprazole Inj. 40 mg",
     "strength": "40 mg/vial",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "gi"
+    ],
     "reconst": {
       "solvent": "SWFI/D5W 10 mL",
       "volume": "10 mL",
@@ -3681,7 +3693,9 @@
     "trade": "Ondansetron Inj. 4/8 mg",
     "strength": "2 mg/mL",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "gi"
+    ],
     "reconst": {
       "solvent": "Ready to use",
       "volume": "-",
@@ -3720,7 +3734,9 @@
     "trade": "Pantoprazole Inj. 40 mg",
     "strength": "40 mg/vial",
     "ed": "E",
-    "categories": [],
+    "categories": [
+      "gi"
+    ],
     "reconst": {
       "solvent": "NSS 10 mL",
       "volume": "10 mL",
@@ -4044,7 +4060,7 @@
       "storage": "RT ห้ามแช่เย็น (ตกตะกอน)\nต้องใส"
     },
     "compat": {
-      "ysite": "-",
+      "ysite": "ห้าม Y-site กับยาส่วนใหญ่ (ตกตะกอน)\nFlush NSS ก่อน-หลัง",
       "incompat": "D5W (ตกตะกอน!)\nMost drugs (แยก line)\nLipid, TPN"
     },
     "precautions": "• ใช้ NSS เท่านั้น! D5W ตกตะกอน!\n• ต้องใช้ 0.22 μm in-line filter\n• ตกตะกอนง่ายมาก → สังเกตตลอด\n• Purple glove syndrome (extravasation)\n• Cardiac toxicity ถ้าให้เร็ว\n• Concentration-dependent PK\n• Strong enzyme inducer",
@@ -4664,8 +4680,8 @@
       "storage": "2-8°C (เปิดแล้ว 24 hr RT)"
     },
     "compat": {
-      "ysite": "-",
-      "incompat": "-"
+      "ysite": "ห้ามผสมกับยาอื่น\nFlush NSS ก่อน-หลัง",
+      "incompat": "Verapamil, Ondansetron, Ranitidine (ตกตะกอนทางกายภาพ)"
     },
     "precautions": "• Selective: Rocuronium/Vecuronium เท่านั้น\n• ไม่ reverse Succinylcholine/Cisatracurium\n• ลด OC efficacy 7 วัน\n• Bradycardia (rare)\n• ปรับ dose ใน severe renal",
     "monitoring": [
@@ -4929,7 +4945,7 @@
       "storage": "2-8°C ป้องกันแสง"
     },
     "compat": {
-      "ysite": "-",
+      "ysite": "ห้ามผสม/Y-site กับยาอื่น (dedicated line)\nFlush NSS ก่อน-หลัง",
       "incompat": "ห้ามผสมกับยาอื่น"
     },
     "precautions": "• ใช้ใน autoimmune encephalitis, NMOSD\n• Immunosuppression → serious infections\n• Screen TB/HBV ก่อนเริ่ม\n• ระวัง GI perforation\n• Mask infection signs (suppress CRP/fever)",

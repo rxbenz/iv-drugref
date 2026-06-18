@@ -165,6 +165,21 @@
 
 .ar-filter-hint { font-size: 10px; color: var(--text-muted, #94a3b8); margin-top: 6px; }
 
+/* ---- share / export action bar ---- */
+.ar-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
+.ar-act-btn {
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  background: var(--bg2, #f8fafc); border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 8px 14px; cursor: pointer; color: var(--text-secondary, #475569);
+  transition: border-color .15s, color .15s, background .15s;
+}
+.ar-act-btn:hover { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; }
+.ar-act-btn:active { transform: translateY(1px); }
+[data-theme="dark"] .ar-act-btn {
+  background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text2, #cbd5e1);
+}
+[data-theme="dark"] .ar-act-btn:hover { border-color: #0ea5e9; color: #38bdf8; background: #16263c; }
+
 /* ---- expandable card ---- */
 .ar-row-head { cursor: pointer; }
 .ar-head-right { display: flex; align-items: center; gap: 8px; flex: none; }

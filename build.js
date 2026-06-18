@@ -48,7 +48,7 @@ const PAGES = {
   'calculator.html':   { css: ['shared.css','theme.css','calculator.css','quick-actions.css','onboarding.css'],  js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','calculator.js','quick-actions.js','onboarding.js'] },
   'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css','quick-actions.css','onboarding.css'],js: ['error-tracker.js','core.js','pediatric-guard.js','renal-dosing.js','quick-actions.js','onboarding.js'] },
   'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css','quick-actions.css','onboarding.css'],js: ['error-tracker.js','core.js','compatibility.js','quick-actions.js','onboarding.js'] },
-  'allergy.html':      { css: ['shared.css','theme.css','allergy.css'],     js: ['error-tracker.js','core.js','allergy-data.js','allergy.js'] },
+  'allergy.html':      { css: ['shared.css','theme.css','allergy.css'],     js: ['error-tracker.js','core.js','allergy-data.js','share-export.js','allergy.js'] },
   'admin.html':        { css: ['shared.css','theme.css','admin.css'],       js: ['error-tracker.js','core.js','admin.js'] },
   'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css','onboarding.css'],          js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','tdm.js','quick-actions.js','onboarding.js'] },
   'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css'],    js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','vanco-tdm.js','quick-actions.js'] },

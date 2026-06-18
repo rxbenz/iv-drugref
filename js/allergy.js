@@ -245,6 +245,99 @@
 
   var lastReport = null;
 
+  // ---- share / export ----------------------------------------------------
+  var SITE_URL = 'https://rxbenz.github.io/iv-drugref/';
+  function tierLabelOf(item) {
+    return A.TIERS[item.tier] ? A.TIERS[item.tier].label : item.tier;
+  }
+
+  function actionsHtml() {
+    return '<div class="ar-actions">' +
+      '<button type="button" class="ar-act-btn" data-act="copy">📋 คัดลอก</button>' +
+      '<button type="button" class="ar-act-btn" data-act="line">💬 LINE</button>' +
+      '<button type="button" class="ar-act-btn" data-act="pdf">🖨️ PDF</button>' +
+    '</div>';
+  }
+
+  // plain-text version (for clipboard / LINE)
+  function buildShareText(report) {
+    var a = report.allergen, sev = report.severity;
+    var L = ['🛡️ ผลตรวจแพ้ข้ามยา — IV DrugRef',
+      'แพ้: ' + a.generic + ' (' + a.th + ')',
+      'อาการ: ' + sev.label];
+    if (report.calloutNote) L.push('', report.calloutNote);
+    function block(title, items) {
+      if (!items || !items.length) return;
+      L.push('', title);
+      items.forEach(function (it) {
+        L.push('• ' + it.drug.generic + ' (' + it.drug.th + ') — ' +
+          tierLabelOf(it) + (it.pct ? ' ' + it.pct : ''));
+      });
+    }
+    block('🚫 ควรหลีกเลี่ยง:', report.avoid);
+    block('⚠️ ใช้ด้วยความระมัดระวัง:', report.caution);
+    block('✅ ปลอดภัยกว่า:', report.safer);
+    if (report.nonBetaLactam) {
+      L.push('', '🟢 ทางเลือกนอกกลุ่ม beta-lactam:');
+      report.nonBetaLactam.forEach(function (g) { L.push('• ' + g.class + ': ' + g.drugs.join(', ')); });
+    }
+    L.push('', '⚠️ เครื่องมือช่วยประเมินเบื้องต้น — ใช้ clinical judgment ประกอบ', SITE_URL);
+    return L.join('\n');
+  }
+
+  // HTML version (for print-to-PDF); all dynamic strings escaped (printReport is
+  // an HTML passthrough — never feed it raw strings)
+  function printGroupHtml(title, items) {
+    if (!items || !items.length) return '';
+    var rows = items.map(function (it) {
+      var d = it.drug;
+      return '<li><strong>' + esc(d.generic) + '</strong> (' + esc(d.th) + ') — ' +
+        esc(tierLabelOf(it)) + (it.pct ? ' ' + esc(it.pct) : '') +
+        (it.reason ? '<br><span style="color:#64748b;font-size:11px">' + esc(it.reason) + '</span>' : '') +
+        '</li>';
+    }).join('');
+    return '<div style="margin-bottom:10px"><div style="font-weight:600;font-size:13px;margin-bottom:4px">' +
+      esc(title) + '</div><ul style="margin:0;padding-left:18px;font-size:12px">' + rows + '</ul></div>';
+  }
+
+  function doPrint(report) {
+    var SE = window.IVDrugRef && window.IVDrugRef.ShareExport;
+    if (!SE) return;
+    var a = report.allergen, sev = report.severity;
+    var patientHtml = '<div style="font-size:13px"><strong>แพ้:</strong> ' +
+      esc(a.generic) + ' (' + esc(a.th) + ')<br><strong>อาการ:</strong> ' + esc(sev.label) + '</div>';
+    var results = '';
+    if (report.calloutNote) {
+      results += '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;' +
+        'padding:8px;font-size:12px;margin-bottom:10px">' + esc(report.calloutNote) + '</div>';
+    }
+    results += printGroupHtml('🚫 ควรหลีกเลี่ยง', report.avoid);
+    results += printGroupHtml('⚠️ ใช้ด้วยความระมัดระวัง', report.caution);
+    results += printGroupHtml('✅ ปลอดภัยกว่า', report.safer);
+    if (report.nonBetaLactam) {
+      var alt = report.nonBetaLactam.map(function (g) {
+        return '<li>' + esc(g.class) + ': ' + esc(g.drugs.join(', ')) + '</li>';
+      }).join('');
+      results += '<div style="margin-bottom:10px"><div style="font-weight:600;font-size:13px;margin-bottom:4px">' +
+        '🟢 ทางเลือกนอกกลุ่ม beta-lactam</div><ul style="margin:0;padding-left:18px;font-size:12px">' + alt + '</ul></div>';
+    }
+    SE.printReport({
+      title: '🛡️ ผลตรวจแพ้ข้ามยา',
+      patientHtml: patientHtml,
+      resultsHtml: results,
+      analytics: { page: 'allergy', drug: a.generic }
+    });
+  }
+
+  function handleAction(act) {
+    if (!lastReport) return;
+    var SE = window.IVDrugRef && window.IVDrugRef.ShareExport;
+    var ana = { page: 'allergy', drug: lastReport.allergen.generic };
+    if (act === 'copy') { if (SE) SE.copyText(buildShareText(lastReport), ana); }
+    else if (act === 'line') { if (SE) SE.shareToLine(buildShareText(lastReport), ana); }
+    else if (act === 'pdf') { doPrint(lastReport); }
+  }
+
   // build one group, applying the active-tier filter; '' when nothing shown
   function groupHtml(titleClass, icon, title, items) {
     var shown = items.filter(function (it) { return isShown(it.tier); });
@@ -270,6 +363,8 @@
       '<strong>กรณี:</strong> แพ้ ' + esc(a.generic) + ' (' + esc(a.th) + ') · ' +
       '<strong>อาการ:</strong> ' + esc(sev.label) +
       '<div style="font-size:12px;margin-top:6px;opacity:.9">' + esc(report.severityNote || sev.note) + '</div></div>';
+
+    html += actionsHtml();
 
     // prominent callout (e.g. NSAID single-drug vs cross-reactive distinction)
     if (report.calloutNote) {
@@ -366,6 +461,8 @@
 
     // tier filter (show-only), quick presets, and expand/collapse of a card
     resultEl.addEventListener('click', function (e) {
+      var actBtn = e.target.closest && e.target.closest('.ar-act-btn');
+      if (actBtn) { handleAction(actBtn.getAttribute('data-act')); return; }
       var chip = e.target.closest && e.target.closest('.ar-legend-chip');
       if (chip) {
         var t = chip.getAttribute('data-tier');

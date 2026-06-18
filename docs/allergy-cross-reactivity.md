@@ -1,22 +1,28 @@
-# Allergy Cross-Reactivity Reference — Beta-Lactam (Phase 1 DRAFT)
+# Allergy Cross-Reactivity Reference — Beta-Lactam (Phase 1)
 
-> 🟡 **สถานะ: ฉบับร่าง รอเภสัชกร verify** — ยังห้ามนำขึ้นระบบจริงจนกว่าจะติ๊ก
-> verify ครบและยืนยัน full-text แล้ว (ดู "หมายเหตุความน่าเชื่อถือ" ด้านล่าง)
+> 🟢 **สถานะ: ตัวเลข/คำแนะนำ beta-lactam ยืนยันกับ full-text แล้ว (2026-06-18)**
+> — ตรวจกับ PDF แหล่งปฐมภูมิ 12 ไฟล์ (Picard 2019, Khan 2022, Zagursky 2018,
+> Romano 2015/2016, pharmacy/clinician reviews, Trubiano 2022). เหลือเภสัชกร
+> สอบทานเชิงคลินิกขั้นสุดท้าย + เห็นชอบ threshold/tier ก่อน lock เข้า Phase 2
 >
 > ขอบเขต Phase 1 = **beta-lactam เท่านั้น** (penicillins, cephalosporins,
 > carbapenems, monobactam). กลุ่มอื่น (sulfa, NSAID, anticonvulsant + HLA)
-> อยู่ Phase 5 — มีโครงตั้งต้นไว้ท้ายไฟล์
+> อยู่ Phase 5 — โครง HLA ท้ายไฟล์ **ยังรอ verify**
 
 ---
 
-## ⚠️ หมายเหตุความน่าเชื่อถือ (อ่านก่อน verify)
+## ✅ สถานะการ verify
 
-- การ research รอบนี้ **WebFetch ถูก block (HTTP 403) ทั้ง session** ดึง full-text
-  PDF ไม่ได้ → ทุกค่ามาจาก **search snippet** ของแหล่งปฐมภูมิ
-- ค่าที่ snippet คืนมาแบบ **verbatim และตรงกันหลายแหล่ง** (เช่น เลขชุด Picard 2019
-  และถ้อยคำ Khan 2022) = ความเชื่อมั่นสูง แต่ยังควรเปิด full-text ยืนยันเลข/คำพูด
-  ก่อน publish
-- ทุกแถวมีคอลัมน์ **✅ verify** — ติ๊กเมื่อคุณตรวจกับแหล่งจริงแล้ว
+- รอบแรก research ผ่าน search snippet (WebFetch โดน block 403) → **รอบนี้เภสัชกร
+  ส่ง full-text PDF 12 ไฟล์มาแล้ว ผมตรวจซ้ำทุกค่ากับต้นฉบับ** ผล: ตัวเลข
+  beta-lactam ทั้งหมด**ตรงกับ full-text** (รายละเอียด + คำ verbatim อยู่ในแต่ละหัวข้อ)
+- ✅ = ยืนยันกับ full-text แล้ว · ☐ = รอเภสัชกรสอบทานคลินิก/เห็นชอบ threshold
+- จุดที่ปรับหลังอ่าน full-text:
+  - **ceftazidime ↔ aztreonam** แชร์ R1 เหมือนกันเป๊ะ — ยืนยันตรงจาก Khan 2022
+    (ดูข้อ 3); ส่วนการจัด ceftazidime อยู่กลุ่ม aminothiazole นั้นแชร์แค่ "วง"
+    แต่ oxime ต่าง → คง caveat ไว้
+  - ค่า "ภาพรวม ~2%" = Khan 2022 อ้าง post-1980 12 studies → 8/417 = **2%**
+    (ตำราเก่า 8–10% เป็นค่าเกินจริง)
 
 ---
 
@@ -29,10 +35,14 @@
 | 🟡 ต่ำ (low) | R1 ต่างกัน แต่ยังเป็น beta-lactam | ~2% |
 | 🟢 น้อยมาก (negligible) | side chain ไม่ซ้ำ / โครงสร้างต่างกลุ่มสิ้นเชิง | <1% |
 
-> เลขอ้างอิงหลักจาก **Picard 2019 meta-analysis** [3] (penicillin-allergic, n=1269):
-> same/amino-R1 = **16.45%**, intermediate = **5.60%**, dissimilar = **2.11%**,
-> carbapenem = **0.87%**. ภาพรวม pen→ceph "≤2%" จาก Khan 2022 [1]
-> (ค่าในตำราเก่า ~10% เป็นการประเมินเกินจริงจากการปนเปื้อน penicillin ในยุค 1960–70 — ใส่เป็นหมายเหตุ ไม่ใช่ค่าหลัก) [7]
+> ✅ **เลขหลักจาก Picard 2019 meta-analysis [3] (penicillin-allergic) — ตรงกับ full-text:**
+> - aminocephalosporin (same R1, similarity=1): **16.45%** (95% CI 11.07–23.75)
+> - intermediate (similarity 0.563–0.714): **5.60%** (95% CI 3.46–8.95)
+> - low similarity (<0.4), ทุก generation: **2.11%** (95% CI 0.98–4.46)
+> - carbapenem (ทุกตัว): **0.87%** (95% CI 0.32–2.32) — meta จาก 1127 ผู้ป่วย
+>
+> ✅ ภาพรวม pen→ceph **~2%** = Khan 2022 [1] (post-1980, 12 studies → 8/417 = 2%);
+> ค่าตำราเก่า 8–10% เกินจริง (ยุคแรก cephalosporin ปนเปื้อน penicillin) — เป็นหมายเหตุ ไม่ใช่ค่าหลัก
 
 ---
 
@@ -40,19 +50,20 @@
 
 | ปฏิกิริยาที่ผู้ป่วยเคยเป็น | แนวทาง | challenge / test dose | ✅ verify |
 |---|---|---|---|
-| ผื่น maculopapular ไม่รุนแรง (delayed, benign) | low-risk → ทางเลือก R1 ต่างใช้ได้ | direct oral challenge ได้ ไม่ต้อง skin test [1] | ☐ |
-| IgE immediate: ลมพิษ / angioedema / anaphylaxis | risk-stratify; เลือก R1 ต่าง/cefazolin/carbapenem/aztreonam | high-risk ต้อง skin test ก่อน challenge [1][2] | ☐ |
-| **SCAR: SJS / TEN / DRESS / AGEP** | **หลีกเลี่ยงยาต้นเหตุ + ยาที่โครงสร้างใกล้เคียง (มักเลี่ยงทั้งกลุ่ม)** | **ห้าม challenge / desensitization โดยเด็ดขาด** [1][6] | ☐ |
-| ปฏิกิริยารุนแรงอื่น (interstitial nephritis, hemolytic anemia) | หลีกเลี่ยง | **ห้าม re-exposure** [1] | ☐ |
+| ผื่น maculopapular ไม่รุนแรง (delayed, benign) | low-risk → ทางเลือก R1 ต่างใช้ได้ | direct oral challenge ได้ ไม่ต้อง skin test [1] | ✅ |
+| IgE immediate: ลมพิษ / angioedema / anaphylaxis | risk-stratify; เลือก R1 ต่าง/cefazolin/carbapenem/aztreonam | high-risk ต้อง skin test ก่อน challenge [1][2] | ✅ |
+| **SCAR: SJS / TEN / DRESS / AGEP** | **หลีกเลี่ยงยาต้นเหตุ + ยาที่โครงสร้างใกล้เคียง (มักเลี่ยงทั้งกลุ่ม)** | **ห้าม challenge / desensitization โดยเด็ดขาด** [1][6] | ✅ |
+| ปฏิกิริยารุนแรงอื่น (interstitial nephritis, hemolytic anemia, cytopenias, DILI, nephritis…) | หลีกเลี่ยง | **ห้าม re-exposure** [1] | ✅ |
 
-> **คำ verbatim-quality จาก Khan 2022 [1]:** *"For patients with a history of TEN,
-> SJS, DRESS, interstitial nephritis, or hemolytic anemia, reexposure through either
-> drug challenge or desensitization is contraindicated, unless there are special
-> circumstances."* + delayed intradermal test ห้ามใน SJS/TEN
+> ✅ **ยืนยันจาก Khan 2022 [1] — TABLE IV "Contraindications to drug challenges"**
+> ระบุชัด: SJS/TEN, DRESS, AGEP, severe drug anaphylaxis, cytopenias, drug-induced
+> liver injury, nephritis ฯลฯ + ข้อความ: *"Avoidance of all beta-lactams is generally
+> recommended in [SCARs]"* และ delayed intradermal test ห้ามใน SJS/TEN
 >
-> **กฎ SCAR (Trubiano 2022 [6]):** skin/patch test ที่ผลลบ **ไม่สามารถ "clear" ยาได้**
-> (sensitivity ต่ำ: SJS/TEN ~9–24%, DRESS ~32–80%) → ถ้าเคยเป็น SCAR ให้ถือว่า
-> "ห้ามใช้ + เลี่ยงยาใกล้เคียง" ไว้ก่อน
+> ✅ **กฎ SCAR (Trubiano 2022 [6]) — verbatim:** *"If the testing is non-conclusive or
+> negative, it is recommended to avoid the suspected culprit drug and any structurally
+> similar drug in future"* + *"A negative patch test does not exclude"* (skin test ผลลบ
+> ไม่ "clear" ยา) → ถ้าเคยเป็น SCAR ให้ถือว่า "ห้ามใช้ + เลี่ยงยาใกล้เคียง" ไว้ก่อน
 
 ---
 
@@ -60,11 +71,17 @@
 
 | กลุ่ม R1 | ยาในกลุ่ม (แพ้ข้ามกันเอง) | หมายเหตุ | ✅ verify |
 |---|---|---|---|
-| **Amoxicillin cluster** | Amoxicillin · Cefadroxil · Cefprozil · Cefatrizine | R1 = hydroxy-aminobenzyl [4][7] | ☐ |
-| **Ampicillin cluster** | Ampicillin · Cephalexin (cefalexin) · Cefaclor · Cephradine · Cephaloglycin · Loracarbef | R1 = aminobenzyl [4][7] | ☐ |
-| **Aminothiazole-methoxyimino** | Cefotaxime · Ceftriaxone · Cefepime · Cefpodoxime · Cefuroxime | Ceftriaxone+Cefotaxime R1 เหมือนกันเป๊ะ [5][7] | ☐ |
-| **Alkoxyimino (ceftazidime/aztreonam)** | **Ceftazidime ↔ Aztreonam** (R1 เหมือนกัน) | ⚠️ **อย่าจัด ceftazidime ไว้กลุ่ม methoxyimino** — เป็นจุดที่ chart ทั่วไปมักผิด [7] | ☐ |
-| **Unique (ไม่ซ้ำใคร)** | **Cefazolin** | R1 และ R2 ไม่ซ้ำ beta-lactam ใดเลย → ปลอดภัยสุด [1][8] | ☐ |
+| **Amoxicillin cluster** | Amoxicillin · Cefadroxil · Cefprozil · Cefatrizine | R1 = hydroxy-aminobenzyl [4][7] | ✅ |
+| **Ampicillin cluster** | Ampicillin · Cephalexin (cefalexin) · Cefaclor · Cephradine · Cephaloglycin · Loracarbef | R1 = aminobenzyl [4][7] | ✅ |
+| **Aminothiazole-methoxyimino** | Cefotaxime · Ceftriaxone · Cefepime · Cefpodoxime · Cefuroxime | Ceftriaxone+Cefotaxime R1 เหมือนกันเป๊ะ [5][7] | ✅ |
+| **Alkoxyimino (ceftazidime/aztreonam)** | **Ceftazidime ↔ Aztreonam** (R1 เหมือนกัน) | ⚠️ **อย่าจัด ceftazidime ไว้กลุ่ม methoxyimino** — เป็นจุดที่ chart ทั่วไปมักผิด [7] | ✅ |
+| **Unique (ไม่ซ้ำใคร)** | **Cefazolin** | R1 และ R2 ไม่ซ้ำ beta-lactam ใดเลย → ปลอดภัยสุด [1][8] | ✅ |
+
+> ✅ **ยืนยันจาก full-text** — pharmacy review [7]: *"[Amoxicillin] has the same side
+> chain as … cefadroxil, cefprozil, … cefatrizine. Ampicillin has the same side chain
+> as cefaclor, cephalexin, cephradine, cephaloglycin and loracarbef. **Distinctly,
+> cefazolin does [not share a side chain]**."* · Khan 2022 [1]: *"aztreonam and
+> ceftazidime sharing an **identical R1 side chain**."*
 
 ---
 
@@ -75,18 +92,18 @@
 #### 🚫 ควรหลีกเลี่ยง
 | ยาเป้าหมาย | % แพ้ข้าม | tier | เหตุผล | ref | ✅ |
 |---|---|---|---|---|---|
-| Penicillins อื่น (Pen G/V, piperacillin, cloxacillin…) | ถือว่าแพ้ทั้งกลุ่ม | 🔴 | แกน penicillin เดียวกัน | [1] | ☐ |
-| Cefadroxil, Cefprozil (แพ้ amoxicillin) | ~16% | 🔴 | R1 เหมือน amoxicillin | [3][4] | ☐ |
-| Cephalexin, Cefaclor, Cephradine, Loracarbef (แพ้ ampicillin) | ~16% | 🔴 | R1 เหมือน ampicillin | [3][4] | ☐ |
+| Penicillins อื่น (Pen G/V, piperacillin, cloxacillin…) | ถือว่าแพ้ทั้งกลุ่ม | 🔴 | แกน penicillin เดียวกัน | [1] | ✅ |
+| Cefadroxil, Cefprozil (แพ้ amoxicillin) | ~16% (CI 11–24) | 🔴 | R1 เหมือน amoxicillin | [3][4] | ✅ |
+| Cephalexin, Cefaclor, Cephradine, Loracarbef (แพ้ ampicillin) | ~16% (CI 11–24) | 🔴 | R1 เหมือน ampicillin | [3][4] | ✅ |
 
 #### ✅ ทางเลือกที่ปลอดภัยกว่า
 | ยาเป้าหมาย | % แพ้ข้าม | tier | เหตุผล / เงื่อนไข | ref | ✅ |
 |---|---|---|---|---|---|
-| **Cefazolin** | ~0.7–0.8% | 🟢 | R1 ไม่ซ้ำใคร — ให้ได้แม้มีประวัติ anaphylaxis (ยกเว้น SCAR) | [1][8] | ☐ |
-| Carbapenem (meropenem, imipenem, ertapenem) | ~0.87% | 🟢 | แพ้ข้ามต่ำมาก; non-anaphylactic ให้ได้ไม่ต้องทดสอบ | [1][3] | ☐ |
-| Aztreonam | <1% | 🟢 | ไม่แพ้ข้ามกับ penicillin — **ยกเว้นแพ้ Ceftazidime** (R1 เดียวกัน) | [1] | ☐ |
-| Ceftriaxone, Cefotaxime, Cefuroxime, Cefepime, Ceftazidime | ~2.1% | 🟡 | R1 ต่างจาก aminopenicillin; ผื่นไม่รุนแรง พิจารณาใช้/graded challenge | [1][3] | ☐ |
-| Non-beta-lactam (ดูข้อ 5) | N/A | 🟢 | ต่างกลุ่มสิ้นเชิง — เลือกตาม indication | [2] | ☐ |
+| **Cefazolin** | ~0.7% | 🟢 | R1 ไม่ซ้ำใคร — Khan: ให้ได้แม้มีประวัติ anaphylaxis (ยกเว้น SCAR) | [1][8] | ✅ |
+| Carbapenem (meropenem, imipenem, ertapenem) | 0.87% (CI 0.32–2.32) | 🟢 | Khan: ให้ได้ทุกกรณีไม่ต้องทดสอบ (ยกเว้น SCAR) | [1][3] | ✅ |
+| Aztreonam | <1% | 🟢 | ไม่แพ้ข้ามกับ penicillin — **ยกเว้นแพ้ Ceftazidime** (R1 เดียวกัน) | [1] | ✅ |
+| Ceftriaxone, Cefotaxime, Cefuroxime, Cefepime, Ceftazidime | 2.11% (CI 0.98–4.46) | 🟡 | R1 ต่างจาก aminopenicillin; ผื่นไม่รุนแรง พิจารณาใช้/graded challenge | [1][3] | ✅ |
+| Non-beta-lactam (ดูข้อ 5) | N/A | 🟢 | ต่างกลุ่มสิ้นเชิง — เลือกตาม indication | [2] | ✅ |
 
 > หมายเหตุ severity: ตารางนี้ใช้กับประวัติ IgE/ผื่นทั่วไป — **ถ้าเคยเป็น SCAR
 > ให้เลี่ยง beta-lactam ทั้งหมดและห้าม challenge** (ดูข้อ 2)
@@ -146,10 +163,17 @@
 
 ---
 
-## ✅ Checklist สำหรับเภสัชกร verify
-- [ ] ยืนยันเลข Picard 2019 (16.45 / 5.60 / 2.11 / 0.87%) กับ full-text [3]
-- [ ] ยืนยันถ้อยคำ contraindication SCAR ของ Khan 2022 [1]
-- [ ] ยืนยัน R1 groupings (โดยเฉพาะ ceftazidime↔aztreonam, cefazolin unique)
-- [ ] ยืนยัน cefazolin % (~0.7–0.8%) และเงื่อนไข "ให้ได้แม้ anaphylaxis ยกเว้น SCAR"
-- [ ] เห็นชอบ tier/threshold ที่ใช้ (16/5.6/2.1/<1%)
-- [ ] เห็นชอบรายการ non-beta-lactam alternatives
+## Checklist การ verify
+
+**ยืนยันกับ full-text แล้ว (โดย Claude, 2026-06-18):**
+- [x] เลข Picard 2019 (16.45 / 5.60 / 2.11 / 0.87% + 95% CI) — ตรง full-text [3]
+- [x] contraindication SCAR ของ Khan 2022 — TABLE IV + "avoidance of all beta-lactams" [1]
+- [x] R1 groupings (amoxicillin/ampicillin cluster, ceftazidime↔aztreonam identical R1, cefazolin "distinctly" unique) [1][7]
+- [x] cefazolin ~0.7% + เงื่อนไข "ให้ได้แม้ anaphylaxis ยกเว้น SCAR" [1][8]
+- [x] carbapenem/aztreonam management ของ Khan [1]; Romano range 2.8–31.2% [5]
+
+**เหลือเภสัชกรสอบทาน/เห็นชอบ (clinical sign-off):**
+- [ ] เห็นชอบ tier/threshold ที่ใช้ (16 / 5.6 / 2.1 / <1%) เหมาะกับ UI ไหม
+- [ ] เห็นชอบรายการ non-beta-lactam alternatives + วิธี gating ตาม severity
+- [ ] ตัดสินใจ: ต้องเติมตาราง 4.2 (แพ้ Pen G/V) และ 4.3 (แพ้ cephalosporin) ให้เต็มก่อน Phase 2 หรือไม่
+- [ ] HLA (ข้อ 6, Phase 5) — ยังรอ verify จากไฟล์ CPIC/Sukasem ที่ส่งมา (ทำตอนถึง Phase 5)

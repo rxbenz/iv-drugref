@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Mockup A2 — แถบซ้ายซ่อนได้ (auto-hide / swipe / ปุ่ม ‹‹ ››)</title>
+<title>Mockup A3 — แถบซ้ายซ่อนได้ (CSS-only toggle + JS swipe/auto-hide)</title>
 <style>
   :root{
     --bg:#f5f7fa; --surface:#ffffff; --border:#e5e7eb;
@@ -20,18 +20,19 @@
   html,body{margin:0;height:100%;overflow:hidden}
   body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans Thai',sans-serif;
     background:var(--bg);color:var(--text-primary)}
+  .nt{position:absolute;opacity:0;width:0;height:0;pointer-events:none}  /* CSS toggle state */
 
   .app{position:fixed;inset:0;overflow:hidden}
 
-  /* ===== Right column = full width; only content scrolls ===== */
+  /* full-width content column; only .scroll moves */
   .main{position:absolute;inset:0;display:flex;flex-direction:column}
   .topbar{flex:none;height:var(--topbar);background:var(--surface);
-    border-bottom:1px solid var(--border);padding:0 12px 0 8px;
+    border-bottom:1px solid var(--border);padding:0 12px 0 6px;
     display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);z-index:10}
   .topbar .logo{font-size:16px;font-weight:800}
   .topbar .grow{flex:1}
-  .menubtn{font:inherit;font-size:20px;background:0 0;border:none;cursor:pointer;
-    color:var(--text-secondary);padding:4px 8px;border-radius:10px;line-height:1}
+  .menubtn{font-size:21px;color:var(--text-secondary);padding:4px 9px;border-radius:10px;
+    cursor:pointer;line-height:1;user-select:none}
   .menubtn:hover{background:var(--accent-soft)}
   .ghost{font:inherit;font-size:12px;background:0 0;border:1px solid var(--border);
     border-radius:18px;padding:5px 12px;cursor:pointer;color:var(--text-secondary)}
@@ -52,20 +53,18 @@
   .foot button{font:inherit;font-size:11px;background:0 0;border:1px solid var(--border);
     border-radius:16px;padding:3px 12px;cursor:pointer;color:var(--text-muted)}
 
-  /* ===== Scrim (tap to close, mobile) ===== */
+  /* scrim (a <label> → tap closes, pure CSS) */
   .scrim{position:absolute;inset:0;background:rgba(15,23,42,.34);opacity:0;
     pointer-events:none;transition:opacity .22s;z-index:28}
-  .app.open .scrim{opacity:1;pointer-events:auto}
 
-  /* ===== Left rail drawer (slides over content) ===== */
+  /* left rail drawer */
   .rail{position:absolute;top:0;bottom:0;left:0;z-index:30;
     width:calc(var(--rail) + env(safe-area-inset-left,0px));
     background:var(--surface);border-right:1px solid var(--border);box-shadow:var(--shadow);
     display:flex;flex-direction:column;align-items:center;
     padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px)) env(safe-area-inset-left,0px);
     gap:3px;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    transform:translateX(-101%);transition:transform .22s ease}
-  .app.open .rail{transform:translateX(0)}
+    transform:translateX(-102%);transition:transform .22s ease}
   .rail .brand{font-size:21px;padding:4px 0 8px;flex:none}
   .bm{width:54px;display:flex;flex-direction:column;align-items:center;gap:2px;
     padding:7px 0;border-radius:12px;cursor:pointer;color:var(--text-secondary);
@@ -75,15 +74,20 @@
   .bm:hover{background:var(--accent-soft);color:var(--accent)}
   .bm.active{background:var(--accent);color:#fff}
 
-  /* ===== Toggle tab on the left edge (‹‹ / ››) ===== */
+  /* edge toggle (a <label> → tap toggles, pure CSS) */
   .toggle{position:absolute;top:50%;left:0;z-index:31;transform:translateY(-50%);
-    width:26px;height:54px;border:1px solid var(--border);border-left:none;
+    width:26px;height:56px;border:1px solid var(--border);border-left:none;
     background:var(--surface);color:var(--accent);box-shadow:var(--shadow);
-    border-radius:0 12px 12px 0;cursor:pointer;font-size:15px;font-weight:800;
-    display:flex;align-items:center;justify-content:center;
-    transition:left .22s ease,opacity .3s;opacity:.92}
-  .app.open .toggle{left:calc(var(--rail) + env(safe-area-inset-left,0px))}
-  /* fade the edge toggle while actively scrolling so it doesn't distract */
+    border-radius:0 13px 13px 0;cursor:pointer;font-size:15px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;user-select:none;
+    transition:left .22s ease,opacity .3s;opacity:.95}
+  .toggle::before{content:"\203A\203A"}            /* ›› = open it */
+
+  /* ===== CSS-only open state (checkbox :checked) ===== */
+  .nt:checked ~ .app .rail{transform:translateX(0)}
+  .nt:checked ~ .app .scrim{opacity:1;pointer-events:auto}
+  .nt:checked ~ .app .toggle{left:calc(var(--rail) + env(safe-area-inset-left,0px))}
+  .nt:checked ~ .app .toggle::before{content:"\2039\2039"}   /* ‹‹ = close it */
   .app.scrolling .toggle{opacity:.32}
 
   /* popup */
@@ -100,11 +104,13 @@
 </style>
 </head>
 <body data-theme="light">
- <div class="app open" id="app">
+ <!-- CSS toggle state: checked = rail open. Labels below flip it with NO JavaScript -->
+ <input type="checkbox" id="nt" class="nt" checked>
 
+ <div class="app" id="app">
   <div class="main">
     <div class="topbar">
-      <button class="menubtn" id="menuBtn" title="เมนู">☰</button>
+      <label class="menubtn" for="nt" title="ซ่อน/แสดงเมนู">☰</label>
       <span class="logo">IV DrugRef</span>
       <span class="vchip">v5.15.3</span>
       <span class="grow"></span>
@@ -113,13 +119,14 @@
 
     <div class="scroll" id="scroll">
       <div class="content">
-        <h2>แบบ A2 — แถบซ้ายซ่อนได้</h2>
+        <h2>แบบ A3 — แถบซ้ายซ่อนได้</h2>
         <p style="color:var(--text-muted);font-size:13px">
-          เนื้อหา <b>เต็มความกว้างเสมอ</b> · แถบเมนูเป็น drawer ลอยทับ เปิด/ปิดได้ 4 ทาง:<br>
-          ① ปุ่ม <b>‹‹ / ››</b> ขอบซ้าย &nbsp; ② ปุ่ม <b>☰</b> มุมบนซ้าย &nbsp;
-          ③ <b>ปัดขวา</b>จากขอบซ้าย = เปิด, <b>ปัดซ้าย</b> = ปิด &nbsp;
-          ④ <b>auto-hide</b> เมื่อเลื่อนอ่านลง (เลื่อนขึ้นจะโผล่กลับ)<br>
-          เปิดอยู่แล้วแตะ <b>พื้นมืด</b> ด้านขวาเพื่อปิดก็ได้.
+          เนื้อหา <b>เต็มความกว้างเสมอ</b> · เปิด/ปิดแถบได้ 4 ทาง:<br>
+          ① ปุ่ม <b>‹‹ / ››</b> ขอบซ้าย &nbsp; ② ปุ่ม <b>☰</b> บนซ้าย
+          &nbsp;(สองอันนี้เป็น <b>CSS ล้วน</b> — ทำงานแม้ JS ปิด)<br>
+          ③ <b>ปัด</b>ขวา=เปิด / ซ้าย=ปิด &nbsp; ④ <b>auto-hide</b> ตอนเลื่อนลง
+          &nbsp;(สองอันนี้เป็น JS — ต้องเปิดในเบราว์เซอร์จริง)<br>
+          เปิดอยู่ → แตะ <b>พื้นมืด</b> ขวาเพื่อปิด.
         </p>
         <div class="card">
           <input class="search" placeholder="🔍 ค้นหายา เช่น vancomycin, KCl ...">
@@ -144,11 +151,11 @@
     </div>
   </div>
 
-  <!-- scrim -->
-  <div class="scrim" id="scrim"></div>
+  <!-- scrim = label → tap closes (pure CSS) -->
+  <label class="scrim" for="nt"></label>
 
-  <!-- left rail drawer: 7 user pages -->
-  <nav class="rail" id="rail">
+  <!-- left rail: 7 user pages -->
+  <nav class="rail">
     <span class="brand">💉</span>
     <a class="bm active"><span class="ic">💉</span><span class="lb">ค้นหายา</span></a>
     <a class="bm"><span class="ic">🧮</span><span class="lb">คำนวณ</span></a>
@@ -159,9 +166,8 @@
     <a class="bm"><span class="ic">🛡️</span><span class="lb">แพ้ยา</span></a>
   </nav>
 
-  <!-- edge toggle -->
-  <button class="toggle" id="toggle" title="ซ่อน/แสดงเมนู">‹‹</button>
-
+  <!-- edge toggle = label → tap toggles (pure CSS) -->
+  <label class="toggle" for="nt" title="ซ่อน/แสดงเมนู"></label>
  </div>
 
   <div class="modal" id="m" onclick="if(event.target===this)this.classList.remove('open2')">
@@ -176,48 +182,35 @@
   </div>
 
   <script>
-    var app=document.getElementById('app'), toggle=document.getElementById('toggle'),
-        scrim=document.getElementById('scrim'), menuBtn=document.getElementById('menuBtn'),
+    /* JS ENHANCEMENT ONLY (swipe + auto-hide). Toggle/scrim work without this. */
+    var nt=document.getElementById('nt'), app=document.getElementById('app'),
         scroller=document.getElementById('scroll');
+    function setOpen(o){ if(nt) nt.checked=o; }
+    function isOpen(){ return nt && nt.checked; }
 
-    function setOpen(o){
-      app.classList.toggle('open', o);
-      toggle.textContent = o ? '‹‹' : '››';
-    }
-    function isOpen(){ return app.classList.contains('open'); }
-
-    toggle.addEventListener('click', function(){ setOpen(!isOpen()); });
-    menuBtn.addEventListener('click', function(){ setOpen(!isOpen()); });
-    scrim.addEventListener('click', function(){ setOpen(false); });
-
-    /* auto-hide on scroll down, reveal on scroll up */
-    var lastY=0, ticking=false, scrollTimer=null;
-    scroller.addEventListener('scroll', function(){
+    /* auto-hide on scroll down */
+    var lastY=0, ticking=false, st=null;
+    if(scroller) scroller.addEventListener('scroll', function(){
       var y=scroller.scrollTop;
-      app.classList.add('scrolling');
-      clearTimeout(scrollTimer);
-      scrollTimer=setTimeout(function(){ app.classList.remove('scrolling'); },500);
-      if(!ticking){
-        requestAnimationFrame(function(){
-          if(y>lastY+6 && y>40){ setOpen(false); }      // scrolling down → hide
-          else if(y<lastY-6){ /* scrolling up: leave as-is (don't force open) */ }
-          lastY=y; ticking=false;
-        });
-        ticking=true;
-      }
+      app.classList.add('scrolling'); clearTimeout(st);
+      st=setTimeout(function(){ app.classList.remove('scrolling'); },500);
+      if(!ticking){ requestAnimationFrame(function(){
+        if(y>lastY+6 && y>40) setOpen(false);
+        lastY=y; ticking=false;
+      }); ticking=true; }
     });
 
-    /* swipe: right-from-left-edge = open, left = close */
+    /* swipe: right-from-edge opens, left closes */
     var sx=0, sy=0, tracking=false;
     document.addEventListener('touchstart', function(e){
       var t=e.touches[0]; sx=t.clientX; sy=t.clientY;
-      tracking = isOpen() ? true : (sx<30);   // open: swipe anywhere; closed: only from edge
+      tracking = isOpen() ? true : (sx<30);
     }, {passive:true});
     document.addEventListener('touchend', function(e){
       if(!tracking) return; tracking=false;
       var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
-      if(Math.abs(dx)<45 || Math.abs(dy)>Math.abs(dx)) return;  // not a horizontal swipe
-      if(dx>0) setOpen(true); else setOpen(false);
+      if(Math.abs(dx)<45 || Math.abs(dy)>Math.abs(dx)) return;
+      setOpen(dx>0);
     }, {passive:true});
 
     function t(){var b=document.body;b.dataset.theme=b.dataset.theme==='dark'?'light':'dark';}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Nav + Footer redesign (เพื่อการตัดสินใจ)</title>
+<style>
+  /* ===== palette (เลียนแบบแอปจริงคร่าว ๆ) ===== */
+  :root{
+    --bg:#f5f7fa; --surface:#ffffff; --border:#e5e7eb;
+    --text-primary:#1f2937; --text-secondary:#4b5563; --text-muted:#9ca3af;
+    --accent:#3b82f6; --accent-soft:#eff6ff;
+    --rail-bg:#ffffff; --shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  [data-theme="dark"]{
+    --bg:#0f172a; --surface:#1e293b; --border:#334155;
+    --text-primary:#f1f5f9; --text-secondary:#cbd5e1; --text-muted:#94a3b8;
+    --accent:#60a5fa; --accent-soft:#1e3a5f;
+    --rail-bg:#1e293b; --shadow:0 2px 8px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans Thai',sans-serif;
+    background:var(--bg);color:var(--text-primary);line-height:1.5;padding-bottom:60px}
+  h1,h2,h3{margin:.4em 0}
+  .wrap{max-width:920px;margin:0 auto;padding:16px}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:18px;margin:16px 0;box-shadow:var(--shadow)}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;
+    background:var(--accent-soft);color:var(--accent);margin-bottom:8px}
+  .muted{color:var(--text-muted);font-size:12px}
+  .pin{position:fixed;top:12px;right:12px;z-index:99;background:var(--surface);
+    border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;
+    font:inherit;font-size:12px;box-shadow:var(--shadow);color:var(--text-primary)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.cols{grid-template-columns:1fr}}
+  .before,.after{border-radius:12px;padding:14px;font-size:12px}
+  .before{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+  [data-theme="dark"] .before{background:#3f1d1d;border-color:#7f1d1d;color:#fca5a5}
+  .after{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+  [data-theme="dark"] .after{background:#064e3b;border-color:#10b981;color:#6ee7b7}
+
+  /* ===== ตัวอย่าง "หน้าจำลอง" สำหรับ Variant A (side bookmarks) ===== */
+  .demo{position:relative;border:1px dashed var(--border);border-radius:14px;
+    height:360px;overflow:hidden;background:var(--bg);margin-top:10px}
+  .demo-content{padding:18px;height:100%;overflow:auto}
+  .demo-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:12px;margin-bottom:10px}
+
+  /* --- Variant A: ที่คั่นหนังสือแนวตั้ง (right edge) --- */
+  .rail{position:absolute;top:50%;right:0;transform:translateY(-50%);
+    display:flex;flex-direction:column;gap:6px;z-index:5}
+  .bm{display:flex;align-items:center;gap:6px;justify-content:flex-end;
+    background:var(--rail-bg);border:1px solid var(--border);border-right:none;
+    border-radius:10px 0 0 10px;padding:8px 10px;cursor:pointer;
+    box-shadow:var(--shadow);transition:.15s;color:var(--text-secondary);
+    width:46px;overflow:hidden;white-space:nowrap}
+  .bm .ic{font-size:18px;flex:none}
+  .bm .lb{font-size:12px;font-weight:600;opacity:0;width:0;transition:.15s}
+  .rail:hover .bm,.bm:hover{width:130px}
+  .rail:hover .bm .lb,.bm:hover .lb{opacity:1;width:auto}
+  .bm.active{background:var(--accent);color:#fff;border-color:var(--accent);
+    width:150px;padding-left:14px}
+  .bm.active .lb{opacity:1;width:auto}
+
+  /* --- Variant B: bottom bar กระชับ + overflow --- */
+  .bbar{position:absolute;left:0;right:0;bottom:0;display:flex;
+    background:var(--rail-bg);border-top:1px solid var(--border);box-shadow:var(--shadow)}
+  .bbar a{flex:1;text-align:center;padding:8px 2px;cursor:pointer;color:var(--text-secondary);
+    font-size:10px;text-decoration:none}
+  .bbar a .ic{display:block;font-size:18px}
+  .bbar a.active{color:var(--accent);font-weight:700}
+
+  /* ===== footer mockups ===== */
+  .foot-old{font-size:11px;color:var(--text-muted);text-align:center}
+  .foot-old .box{border-radius:10px;padding:10px;margin:8px 0;text-align:left;font-size:10px}
+  .foot-old .red{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+  .foot-old .blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a5f}
+
+  .foot-new{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    font-size:11px;color:var(--text-muted);padding:8px 12px;border-top:1px solid var(--border)}
+  .foot-new b{color:var(--text-secondary)}
+  .foot-new button{font:inherit;font-size:11px;background:0 0;border:1px solid var(--border);
+    border-radius:16px;padding:3px 12px;cursor:pointer;color:var(--text-muted)}
+  .chip{font-size:10px;background:var(--accent-soft);color:var(--accent);
+    padding:2px 8px;border-radius:12px;font-weight:700}
+</style>
+</head>
+<body data-theme="light">
+<button class="pin" onclick="document.body.dataset.theme = document.body.dataset.theme==='dark'?'light':'dark'">🌓 สลับ light/dark</button>
+
+<div class="wrap">
+  <h1>🔖 Mockup: ออกแบบ Nav + Footer ใหม่</h1>
+  <p class="muted">ไฟล์นี้เป็นแค่ภาพตัวอย่างเพื่อตัดสินใจ — ยังไม่ได้แตะหน้าจริง เปิดดู/กดเล่นได้ กดปุ่มขวาบนเพื่อสลับโหมดมืด</p>
+
+  <!-- ============ เป้าหมาย ============ -->
+  <div class="panel">
+    <span class="tag">เป้าหมาย 3 ข้อ</span>
+    <ol style="margin:0;padding-left:20px;font-size:14px">
+      <li><b>Nav แบบที่คั่นหนังสือ</b> — ติดขอบจอ ไม่กินพื้นที่เนื้อหา เข้าทุกหน้าได้รวดเร็ว</li>
+      <li><b>Footer เดียวใช้ทุกหน้า</b> — กระชับเป็นแถบบาง ๆ รายละเอียดยาว (disclaimer/license) ย้ายเข้า popup</li>
+      <li><b>เลข version จุดเดียว</b> — แก้ที่เดียวแล้วเปลี่ยนทุกหน้า (ตอนนี้ฝังมือ 7 จุดใน HTML)</li>
+    </ol>
+  </div>
+
+  <!-- ============ NAV variant A ============ -->
+  <div class="panel">
+    <span class="tag">ตัวเลือก A (แนะนำ) — ที่คั่นหนังสือแนวตั้ง ติดขอบขวา</span>
+    <p style="font-size:13px;margin:4px 0">หน้าปัจจุบันสติ๊กออกมา (แท็บสี) ที่เหลือพับเก็บเป็นไอคอนเล็ก ๆ — <b>เอาเมาส์ชี้/แตะ</b>เพื่อกางป้ายชื่อ. รองรับครบ 8 หน้า โดยไม่เบียดเนื้อหา</p>
+    <div class="demo">
+      <div class="demo-content">
+        <div class="demo-card"><b>💉 ค้นหายา</b><br><span class="muted">นี่คือพื้นที่เนื้อหาหน้าเว็บ — ที่คั่นลอยอยู่ขอบขวา ไม่ทับเนื้อหา</span></div>
+        <div class="demo-card">เลื่อน/อ่านเนื้อหาได้ตามปกติ ที่คั่นอยู่กับที่เสมอ (fixed)</div>
+        <div class="demo-card">บนมือถือ ที่คั่นจะแคบ (แตะเพื่อกาง) — ประหยัดพื้นที่</div>
+      </div>
+      <div class="rail">
+        <div class="bm active"><span class="lb">ค้นหายา</span><span class="ic">💉</span></div>
+        <div class="bm"><span class="lb">คำนวณ</span><span class="ic">🧮</span></div>
+        <div class="bm"><span class="lb">TDM</span><span class="ic">🎯</span></div>
+        <div class="bm"><span class="lb">Vanco TDM</span><span class="ic">🧪</span></div>
+        <div class="bm"><span class="lb">Renal</span><span class="ic">🧬</span></div>
+        <div class="bm"><span class="lb">เข้ากันได้</span><span class="ic">🔗</span></div>
+        <div class="bm"><span class="lb">แพ้ข้ามยา</span><span class="ic">🛡️</span></div>
+        <div class="bm"><span class="lb">Dashboard</span><span class="ic">📊</span></div>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:8px">หมายเหตุ: หน้า "แพ้ข้ามยา 🛡️" (โปรเจกต์ใหม่) ใส่ในแถบนี้ได้เลย แทนการเพิ่มปุ่มเดี่ยว ๆ ในหน้า index</p>
+  </div>
+
+  <!-- ============ NAV variant B ============ -->
+  <div class="panel">
+    <span class="tag">ตัวเลือก B — แถบล่างกระชับ (ของเดิมแต่ปรับ)</span>
+    <p style="font-size:13px;margin:4px 0">คงรูปแบบแถบล่างเดิม (คุ้นมือผู้ใช้) แต่บีบให้เตี้ยลง + ปุ่ม "เพิ่มเติม" สำหรับหน้าที่เกิน 5</p>
+    <div class="demo">
+      <div class="demo-content">
+        <div class="demo-card"><b>💉 ค้นหายา</b><br><span class="muted">แถบอยู่ล่างสุด เหมือนแอปมือถือทั่วไป</span></div>
+        <div class="demo-card">ข้อดี: คุ้นเคย • ข้อเสีย: กินพื้นที่ล่าง, 8 หน้าใส่ไม่หมดต้องมี "เพิ่มเติม"</div>
+      </div>
+      <div class="bbar">
+        <a class="active"><span class="ic">💉</span>ค้นหายา</a>
+        <a><span class="ic">🧮</span>คำนวณ</a>
+        <a><span class="ic">🎯</span>TDM</a>
+        <a><span class="ic">🧬</span>Renal</a>
+        <a><span class="ic">⋯</span>เพิ่มเติม</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="panel">
+    <span class="tag">Footer — before / after</span>
+    <div class="cols">
+      <div>
+        <div class="muted" style="font-weight:700;margin-bottom:6px">ตอนนี้ (ยาว ~120px, ซ้ำทุกหน้า)</div>
+        <div class="before foot-old">
+          <div class="box red">⚠️ Disclaimer ... (ข้อความยาว 4-5 บรรทัด)</div>
+          <div>💉 IV Drug Quick Reference PWA<br>จัดทำโดย ภก.ฐาปนัท ...<br>สถาบันประสาทวิทยา</div>
+          <div class="box blue">📜 License CC BY-NC-SA 4.0 ... (ยาว)</div>
+          <div>เวอร์ชัน <b style="color:#dc2626">5.15.3</b> ← ฝังมือทุกหน้า</div>
+        </div>
+      </div>
+      <div>
+        <div class="muted" style="font-weight:700;margin-bottom:6px">ใหม่ (แถบเดียว ~36px, สร้างจาก JS)</div>
+        <div class="after" style="padding:0">
+          <div class="foot-new">
+            <span>💉 <b>IV DrugRef</b></span>
+            <span class="chip" id="vchip">v5.15.3</span>
+            <span>· ภก.ฐาปนัท นาคครุฑ</span>
+            <button>ℹ️ เกี่ยวกับ / Disclaimer</button>
+          </div>
+          <div style="padding:8px 12px;font-size:11px" class="muted">
+            ↑ Disclaimer + License + แหล่งอ้างอิง ย้ายเข้า popup (กดปุ่ม ℹ️)<br>
+            ↑ เลข version ดึงจากค่าเดียว <code>APP_VERSION</code> — แก้ที่เดียว เปลี่ยนทุกหน้า
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ วิธีทำให้ "จุดเดียว" จริง ============ -->
+  <div class="panel">
+    <span class="tag">เบื้องหลัง — ทำยังไงให้ footer/nav/version เป็น "จุดเดียว"</span>
+    <p style="font-size:13px;margin:4px 0">สร้างไฟล์ใหม่ <code>js/site-chrome.js</code> ตัวเดียว ทำหน้าที่ฉีด nav + footer เข้าทุกหน้า:</p>
+    <ul style="font-size:13px">
+      <li>แต่ละหน้า HTML เหลือแค่ที่ว่าง 1 จุด เช่น <code>&lt;div id="siteFooter"&gt;&lt;/div&gt;</code> → JS เติมให้</li>
+      <li>เลข version อยู่ในค่าเดียว <code>const APP_VERSION = '5.15.3'</code> (หรืออ่านจาก <code>version.json</code>)</li>
+      <li>ลบ footer ยาว ๆ ที่ copy ซ้ำออกจาก 8 หน้า — เหลือ source เดียว</li>
+      <li>เข้ากับ build.js ได้ (inline JS ตอน deploy เหมือนไฟล์ js อื่น)</li>
+    </ul>
+    <p class="muted">เทียบงานเภสัชฯ: เหมือนทำ "แม่แบบฉลากยา" แผ่นเดียว แล้วทุกซองดึงไปใช้ — แก้แม่แบบที่เดียว ทุกซองเปลี่ยนตาม ไม่ต้องไล่แก้ทีละซอง</p>
+  </div>
+
+  <div class="panel" style="border-color:var(--accent)">
+    <span class="tag">ขอบเขตงาน (ถ้าตัดสินใจทำ)</span>
+    <p style="font-size:13px;margin:4px 0">แตะ 8 หน้า HTML + เพิ่ม 1 ไฟล์ JS + แก้ build.js + CSS — งานกลาง ๆ ควรทำเป็น branch แยกและทดสอบทุกหน้า ก่อน merge. <b>ตัดสินใจได้ว่า: ทำเลย / ลง roadmap ไว้ก่อน</b></p>
+  </div>
+</div>
+</body>
+</html>

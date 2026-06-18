@@ -396,14 +396,19 @@
     const sev = SEVERITY_BY_ID[severityId] || SEVERITY_BY_ID.unknown;
     const isScar = !!sev.blockAllBetaLactam;   // the SCAR severity flag
 
-    // cross-reactive antibiotics -> always avoid (high); exclude the drug the
-    // patient is actually allergic to (don't list it against itself)
-    const avoid = g.crossReactive.filter(function (d) { return d.id !== allergenId; }).map(function (d) {
+    // in-class cross-reactive drugs. Default = avoid (high). For groups where
+    // modern evidence shows LOW in-class cross-reactivity (crossClassCaution,
+    // e.g. fluoroquinolones ~2-5%), they are "caution" for non-SCAR severities
+    // and only escalate to "avoid (high)" at SCAR. Exclude the culprit itself.
+    const crossAsCaution = !!g.crossClassCaution && !isScar;
+    const crossList = g.crossReactive.filter(function (d) { return d.id !== allergenId; }).map(function (d) {
       return {
         drug: { generic: d.generic, th: d.th, class: d.sub },
-        decision: 'avoid', tier: 'high', pct: 'แพ้ข้ามได้',
-        reason: g.crossReason, refs: g.refs,
-        advice: isScar ? 'หลีกเลี่ยงทั้งหมด · ห้าม challenge' : ''
+        decision: crossAsCaution ? 'caution' : 'avoid',
+        tier: crossAsCaution ? 'low' : 'high',
+        pct: d.pct || (crossAsCaution ? 'แพ้ข้ามต่ำ' : 'แพ้ข้ามได้'),
+        reason: d.reason || g.crossReason, refs: g.refs,
+        advice: d.advice || (isScar ? 'หลีกเลี่ยงทั้งหมด · ห้าม challenge' : '')
       };
     });
 
@@ -463,8 +468,10 @@
       severity: sev,
       severityNote: note,
       calloutNote: callout,
-      avoid: avoid,
-      caution: scarDowngradesSafe ? cautionItems.concat(safeItems) : cautionItems,
+      avoid: crossAsCaution ? [] : crossList,
+      caution: cautionItems
+        .concat(crossAsCaution ? crossList : [])
+        .concat(scarDowngradesSafe ? safeItems : []),
       safer: scarDowngradesSafe ? [] : safeItems,
       nonBetaLactam: null,   // for NBL the "safe" list already names the alternatives
       blocked: false,

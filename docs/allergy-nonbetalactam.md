@@ -247,6 +247,56 @@ COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
 
 ---
 
+## กลุ่มที่ 4 — Fluoroquinolone (DRAFT 🟡 รอ verify)
+
+### 🔑 ใจความ: หลักฐานใหม่ — แพ้ข้ามในกลุ่ม "ต่ำ" (ไม่ใช่สูงอย่างที่เคยเชื่อ)
+เดิมเชื่อว่า FQ แพ้ข้ามกันสูง → เลี่ยงทั้งกลุ่ม. **หลักฐานใหม่ (2022-2025)** พบว่า
+แพ้ข้ามในกลุ่มจริง ๆ **ต่ำ ~2-5%** (cipro 2.5% / levo 2.0% / moxi 5.3%; บางการศึกษา 0%)
+→ การเลี่ยงทั้งกลุ่ม **อาจไม่จำเป็น** ยกเว้น SCAR
+
+> ⚠️ จุดสำคัญ: **oral challenge เป็นวิธีเดียว**ที่ยืนยันว่าใช้ FQ ตัวอื่นได้
+> (skin test/BAT บอกได้แค่ว่าแพ้กลุ่ม แต่ทำนาย tolerance รายตัวไม่ได้)
+> → ค่าตั้งต้นที่ปลอดภัยสุด = ใช้ยา **นอกกลุ่ม FQ**
+
+### ⚠️ FQ ตัวอื่นในกลุ่ม (caution — ไม่ใช่ avoid เด็ดขาด, ยกเว้น SCAR)
+| ยา | หมายเหตุ |
+|---|---|
+| Ciprofloxacin | แพ้ข้าม ~2.5% |
+| Levofloxacin | แพ้ข้าม ~2.0% (cipro→levo มัก tolerate) |
+| Moxifloxacin | แพ้ข้าม ~5.3% (สูงสุด, โครงสร้างต่าง) |
+| Ofloxacin, Norfloxacin | ข้อมูลจำกัด |
+
+> 💡 default = **caution** (low ~2-5%); ถ้าจำเป็นต้องใช้ FQ อีกตัว → ยืนยันด้วย oral
+> challenge. **SCAR (SJS/TEN/DRESS) → escalate เป็น avoid ทั้งกลุ่ม · ห้าม challenge**
+
+### ✅ ปลอดภัย — ยาต่างกลุ่ม (ไม่มีปัญหาแพ้ข้ามกับ FQ)
+เลือกตามชนิดการติดเชื้อ: Beta-lactam (ถ้าไม่แพ้), Macrolide (Azithromycin),
+TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
+
+### กฎ severity (Fluoroquinolone)
+- **mild/IgE** → FQ ตัวอื่น = "ระวัง" (~2-5%); ใช้ยานอกกลุ่มก่อน, ถ้าจำเป็นต้องใช้ FQ
+  ตัวอื่น → oral challenge
+- **SCAR** → เลี่ยง FQ **ทั้งกลุ่ม**เด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น
+- ยานอกกลุ่ม FQ คงเป็น "ปลอดภัย" แม้ SCAR (`keepSafeOnScar`)
+
+### อ้างอิงกลุ่ม Fluoroquinolone
+- **fqCohort2022** — Immediate Hypersensitivity to Fluoroquinolones: A Cohort Assessing
+  Cross-Reactivity. *Open Forum Infect Dis* 2022;9(4):ofac106.
+- **fqInClass2023** — In-Class Cross-Reactivity among Hospitalized Patients with
+  Hypersensitivity Reactions to Fluoroquinolones. *Antimicrob Agents Chemother* 2023.
+- **eaaci2025fq** — Gelincik A, et al. Diagnosis of Quinolone Hypersensitivity: An
+  EAACI Position Paper. *Allergy* 2025.
+
+### Checklist verify (กลุ่ม Fluoroquinolone)
+- [ ] เห็นชอบแนวคิดใหม่: แพ้ข้ามในกลุ่ม **ต่ำ** → FQ ตัวอื่น = "ระวัง" (ไม่ใช่ avoid) ใน non-SCAR
+- [ ] เห็นชอบ SCAR → escalate เป็น avoid ทั้งกลุ่ม
+- [ ] เห็นชอบ moxifloxacin = เสี่ยงสูงสุด (~5.3%)
+- [ ] เห็นชอบรายการ ✅ ยานอกกลุ่ม (เลือกตามการติดเชื้อ)
+- [ ] เห็นชอบ callout: oral challenge = วิธีเดียวยืนยัน tolerance; ใช้ยานอกกลุ่มก่อน
+- [ ] ตัดสิน: ค่าตั้งต้นเป็น "caution" เหมาะ หรืออยากให้เป็น "avoid" แบบ conservative
+
+---
+
 ## Checklist verify (กลุ่ม Sulfonamide) — ✅ ครบ 2026-06-18
 - [x] เห็นชอบ "myth-buster": non-antibiotic sulfonamide = ปลอดภัย (ไม่มี N4 arylamine)
 - [x] เห็นชอบรายการ 🚫 ควรเลี่ยง (sulfonamide antibiotics)

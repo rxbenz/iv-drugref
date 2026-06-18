@@ -41,7 +41,10 @@
     fqInClass2023: 'In-Class Cross-Reactivity among Hospitalized Patients with Hypersensitivity Reactions to Fluoroquinolones. Antimicrob Agents Chemother 2023.',
     eaaci2025fq: 'Gelincik A, et al. Diagnosis of Quinolone Hypersensitivity: An EAACI Position Paper. Allergy 2025.',
     bhole2012: 'Bhole MV, et al. IgE-mediated allergy to local anaesthetics: separating fact from perception — a UK perspective. Br J Anaesth 2012;108(6):903-11.',
-    harboe2010: 'Harboe T, et al. Suspected allergy to local anaesthetics: follow-up in 135 cases. Acta Anaesthesiol Scand 2010;54(5):536-42.'
+    harboe2010: 'Harboe T, et al. Suspected allergy to local anaesthetics: follow-up in 135 cases. Acta Anaesthesiol Scand 2010;54(5):536-42.',
+    esur2025cm: 'ESUR Contrast Media Safety Committee. Hypersensitivity reactions to contrast media: Part 1 & 2 (updated guidelines). Eur Radiol 2025.',
+    icmClass2024: 'Cross-reactivity in hypersensitivity reactions to contrast agents: new classification and guide for clinical practice. Eur Radiol 2024;34. (carbamoyl side-chain grouping)',
+    icmSkinTest2024: 'Skin Test Reactivity Patterns in Patients Allergic to Iodinated Contrast Media: A Refined View. J Allergy Clin Immunol Pract 2024;12(11). (PMID 39056227)'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -480,6 +483,59 @@
       noteScar: 'SCAR จาก amide LA (พบยากมาก): เลี่ยง amide ทั้งกลุ่ม · ห้าม challenge · ใช้ ester LA ภายใต้การดูแล',
       scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม amide',
       singleDrugCallout: '💡 การแพ้ amide LA จริงพบ <1% — ส่วนใหญ่เป็นปฏิกิริยาไม่ใช่ภูมิแพ้ (vasovagal / ใจสั่นจาก epinephrine / วิตกกังวล / พิษจากยา) ควรซักประวัติให้แน่ใจก่อน · แพ้ข้าม amide↔amide ต่ำ/ไม่แน่นอน → ใช้ ester LA ได้ หรือยืนยัน amide ตัวอื่นด้วย skin test + graded challenge · ระวัง metabisulfite ในสูตรผสม epinephrine'
+    },
+    // ── Iodinated contrast media (ICM) ───────────────────────────────────────
+    // Cross-reactivity tracks the CARBAMOYL SIDE CHAIN, not "iodine": agents that
+    // share a side-chain cluster cross-react strongly (~60-77%), agents from a
+    // different cluster are lower-risk but unpredictable → confirm a safe
+    // alternative with skin testing. Modelled with clusterAware so SAME-cluster
+    // agents = avoid (high) and DIFFERENT-cluster = caution (skin-test to confirm).
+    // Key myths busted in the callout: "iodine"/seafood allergy is unrelated;
+    // routine premedication is no longer recommended (ESUR 2025, weak evidence).
+    {
+      id: 'icm',
+      label: 'Iodinated Contrast Media (สารทึบรังสีไอโอดีน)',
+      refs: ['esur2025cm', 'icmClass2024', 'icmSkinTest2024'],
+      clusterAware: true,     // cross-reactivity by carbamoyl side-chain cluster
+      keepSafeOnScar: true,   // gadolinium / non-contrast are a different class
+      // clusters: A=classic dihydroxypropyl-carbamoyl, B=distinct side chain
+      //   (common alternatives), C=mixed (iopromide), D=ionic (older agents)
+      allergens: [
+        { id: 'iohexol',     generic: 'Iohexol',     th: 'ไอโอเฮกซอล',   trade: ['Omnipaque'], cluster: 'carbamoylA' },
+        { id: 'iomeprol',    generic: 'Iomeprol',    th: 'ไอโอเมพรอล',   trade: ['Iomeron'],   cluster: 'carbamoylA' },
+        { id: 'ioversol',    generic: 'Ioversol',    th: 'ไอโอเวอร์ซอล', trade: ['Optiray'],   cluster: 'carbamoylA' },
+        { id: 'iodixanol',   generic: 'Iodixanol',   th: 'ไอโอดิกซานอล', trade: ['Visipaque'], cluster: 'carbamoylA' },
+        { id: 'iopamidol',   generic: 'Iopamidol',   th: 'ไอโอพามิดอล',  trade: ['Iopamiro', 'Isovue'], cluster: 'distinctB' },
+        { id: 'iobitridol',  generic: 'Iobitridol',  th: 'ไอโอบิทริดอล', trade: ['Xenetix'],   cluster: 'distinctB' },
+        { id: 'iopromide',   generic: 'Iopromide',   th: 'ไอโอโพรไมด์',  trade: ['Ultravist'], cluster: 'mixedC' },
+        { id: 'ioxaglate',   generic: 'Ioxaglate',   th: 'ไอโอซากเลต',   trade: ['Hexabrix'],  cluster: 'ionicD' },
+        { id: 'diatrizoate', generic: 'Diatrizoate', th: 'ไดอะไทรโซเอต', trade: ['Urografin', 'Gastrografin'], cluster: 'ionicD' }
+      ],
+      // all other ICM — engine assigns avoid/caution per cluster vs the culprit
+      crossReason: 'สารทึบรังสีไอโอดีน — แพ้ข้ามตาม side chain (carbamoyl); side chain เดียวกัน = แพ้ข้ามสูง',
+      crossReactive: [
+        { id: 'iohexol',     generic: 'Iohexol',     th: 'ไอโอเฮกซอล',   sub: 'Side chain A (classic carbamoyl)', cluster: 'carbamoylA' },
+        { id: 'iomeprol',    generic: 'Iomeprol',    th: 'ไอโอเมพรอล',   sub: 'Side chain A (classic carbamoyl)', cluster: 'carbamoylA' },
+        { id: 'ioversol',    generic: 'Ioversol',    th: 'ไอโอเวอร์ซอล', sub: 'Side chain A (classic carbamoyl)', cluster: 'carbamoylA' },
+        { id: 'iodixanol',   generic: 'Iodixanol',   th: 'ไอโอดิกซานอล', sub: 'Side chain A (classic carbamoyl, dimer)', cluster: 'carbamoylA' },
+        { id: 'iopamidol',   generic: 'Iopamidol',   th: 'ไอโอพามิดอล',  sub: 'Side chain B (ต่างกลุ่ม)', cluster: 'distinctB' },
+        { id: 'iobitridol',  generic: 'Iobitridol',  th: 'ไอโอบิทริดอล', sub: 'Side chain B (ต่างกลุ่ม)', cluster: 'distinctB' },
+        { id: 'iopromide',   generic: 'Iopromide',   th: 'ไอโอโพรไมด์',  sub: 'Side chain C (ผสม)', cluster: 'mixedC' },
+        { id: 'ioxaglate',   generic: 'Ioxaglate',   th: 'ไอโอซากเลต',   sub: 'Ionic dimer (ต่างกลุ่ม)', cluster: 'ionicD' },
+        { id: 'diatrizoate', generic: 'Diatrizoate', th: 'ไดอะไทรโซเอต', sub: 'Ionic monomer (ต่างกลุ่ม)', cluster: 'ionicD' }
+      ],
+      // safe — structurally unrelated alternatives (no cross-reactivity with ICM)
+      safeReason: 'คนละ class กับ ICM → ไม่แพ้ข้าม (เลือกตามความเหมาะสมของการตรวจ)',
+      safe: [
+        { generic: 'Gadolinium-based contrast (MRI)', th: 'สารทึบรังสีแกโดลิเนียม', sub: 'คนละ class — ไม่แพ้ข้ามกับ ICM' },
+        { generic: 'การตรวจที่ไม่ใช้สารทึบรังสี / อัลตราซาวด์', th: 'ทางเลือกไม่ใช้ ICM', sub: 'พิจารณาตามข้อบ่งชี้' },
+        { generic: 'ICM ตัวที่ skin test ผ่าน (ต่าง side chain)', th: 'ICM ที่ทดสอบแล้วว่าใช้ได้', sub: 'ยืนยันโดยผู้เชี่ยวชาญ' }
+      ],
+      noteMild: 'แพ้ ICM (non-immediate/ผื่น): เลี่ยงตัวเดิม + ตัว side chain เดียวกัน → เลือก side chain ต่างกลุ่ม และยืนยันด้วย skin test',
+      noteIge:  'แพ้ ICM (immediate): เลี่ยงตัวเดิม + ตัว side chain เดียวกัน → เลือก side chain ต่างกลุ่มที่ skin test ผ่าน · premedication ไม่ใช่ทางออกที่เชื่อถือได้ (ESUR 2025)',
+      noteScar: 'SCAR จาก ICM (พบยาก): เลี่ยง ICM ทั้งหมดเด็ดขาด · ห้าม challenge · พิจารณา GBCA/การตรวจอื่น',
+      scarCautionNote: 'กรณี SCAR: เลี่ยง ICM ทั้งหมด',
+      singleDrugCallout: '⚠️ ความเชื่อผิด: การแพ้ ICM "ไม่ใช่" การแพ้ไอโอดีน และ "ไม่เกี่ยวกับการแพ้อาหารทะเล/กุ้งหอยปูปลา" — ห้ามใช้ประวัติแพ้อาหารทะเลมาห้ามให้ ICM · 💡 การแพ้ข้ามขึ้นกับ side chain (carbamoyl): ตัว side chain เดียวกันแพ้ข้ามสูง (~60-77%) → เลือกตัว side chain ต่างกลุ่ม + ยืนยันด้วย skin test (วิธีเดียวที่เชื่อถือได้) · premedication ด้วย steroid/antihistamine ไม่แนะนำให้ใช้ routinely แล้ว (ESUR 2025 — หลักฐานไม่ดีพอ การเปลี่ยนตัวยาสำคัญกว่า) · Gadolinium (MRI) ไม่แพ้ข้ามกับ ICM'
     }
   ];
 
@@ -542,21 +598,41 @@
     const sev = SEVERITY_BY_ID[severityId] || SEVERITY_BY_ID.unknown;
     const isScar = !!sev.blockAllBetaLactam;   // the SCAR severity flag
 
-    // in-class cross-reactive drugs. Default = avoid (high). For groups where
-    // modern evidence shows LOW in-class cross-reactivity (crossClassCaution,
-    // e.g. fluoroquinolones ~2-5%), they are "caution" for non-SCAR severities
-    // and only escalate to "avoid (high)" at SCAR. Exclude the culprit itself.
+    // in-class cross-reactive drugs — each carries its own decision/tier so the
+    // partition below is decision-driven (handles every group shape uniformly):
+    //   • default                  → avoid (high)
+    //   • crossClassCaution        → caution (low) non-SCAR; escalate avoid at SCAR
+    //     (modern LOW in-class cross-reactivity, e.g. fluoroquinolones ~2-5%)
+    //   • clusterAware             → per side-chain cluster: SAME cluster as culprit
+    //     = avoid (high) (e.g. iodinated contrast sharing a carbamoyl side chain,
+    //     ~60-77% cross-react); DIFFERENT cluster = caution (lower but unpredictable
+    //     → confirm with skin testing). SCAR escalates all to avoid.
+    // Exclude the culprit itself.
     const crossAsCaution = !!g.crossClassCaution && !isScar;
+    const culpritCluster = a.cluster;
     const crossList = g.crossReactive.filter(function (d) { return d.id !== allergenId; }).map(function (d) {
+      let decision, tier, pctDefault;
+      if (g.clusterAware) {
+        const sameCluster = !!d.cluster && !!culpritCluster && d.cluster === culpritCluster;
+        if (isScar || sameCluster) { decision = 'avoid'; tier = 'high'; }
+        else { decision = 'caution'; tier = 'low'; }
+        pctDefault = sameCluster ? 'แพ้ข้ามสูง (side chain เดียวกัน)'
+                                 : 'เสี่ยงแพ้ข้าม — ยืนยันด้วย skin test';
+      } else {
+        decision = crossAsCaution ? 'caution' : 'avoid';
+        tier = crossAsCaution ? 'low' : 'high';
+        pctDefault = crossAsCaution ? 'แพ้ข้ามต่ำ' : 'แพ้ข้ามได้';
+      }
       return {
         drug: { generic: d.generic, th: d.th, class: d.sub },
-        decision: crossAsCaution ? 'caution' : 'avoid',
-        tier: crossAsCaution ? 'low' : 'high',
-        pct: d.pct || (crossAsCaution ? 'แพ้ข้ามต่ำ' : 'แพ้ข้ามได้'),
+        decision: decision, tier: tier,
+        pct: d.pct || pctDefault,
         reason: d.reason || g.crossReason, refs: g.refs,
         advice: d.advice || (isScar ? 'หลีกเลี่ยงทั้งหมด · ห้าม challenge' : '')
       };
     });
+    const crossAvoid = crossList.filter(function (x) { return x.decision === 'avoid'; });
+    const crossCaution = crossList.filter(function (x) { return x.decision === 'caution'; });
 
     // safe alternatives -> "safer" normally; downgraded to "caution" if SCAR —
     // UNLESS the group opts out (keepSafeOnScar: e.g. non-aromatic AEDs are the
@@ -614,9 +690,9 @@
       severity: sev,
       severityNote: note,
       calloutNote: callout,
-      avoid: crossAsCaution ? [] : crossList,
+      avoid: crossAvoid,
       caution: cautionItems
-        .concat(crossAsCaution ? crossList : [])
+        .concat(crossCaution)
         .concat(scarDowngradesSafe ? safeItems : []),
       safer: scarDowngradesSafe ? [] : safeItems,
       nonBetaLactam: null,   // for NBL the "safe" list already names the alternatives

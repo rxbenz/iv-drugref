@@ -399,6 +399,51 @@ test('NBL: amide SCAR -> other amides escalate to avoid, esters stay safe', () =
     'esters remain safe at SCAR (keepSafeOnScar, cross-class)');
 });
 
+// ──────────────── non-beta-lactam: Iodinated contrast media (clusterAware) ──
+test('NBL: ICM group is clusterAware with side-chain clusters', () => {
+  const g = A.NBL_GROUPS.find((x) => x.id === 'icm');
+  assert.ok(g, 'icm group present');
+  assert.equal(g.clusterAware, true);
+  assert.equal(g.keepSafeOnScar, true);
+  assert.equal(A.NBL_INDEX.iohexol.allergen.cluster, 'carbamoylA');
+});
+
+test('NBL: iohexol/IgE -> same side-chain cluster = avoid, different = caution', () => {
+  const r = A.buildReport('iohexol', 'ige');
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  // same cluster A (iomeprol/ioversol/iodixanol) -> avoid high
+  assert.ok(avoidG.includes('Iomeprol') && avoidG.includes('Ioversol') && avoidG.includes('Iodixanol'));
+  assert.ok(!avoidG.includes('Iohexol'), 'culprit excluded');
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  // different clusters (iopamidol/iopromide/diatrizoate) -> caution low
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  assert.ok(cautionG.includes('Iopamidol') && cautionG.includes('Iopromide') && cautionG.includes('Diatrizoate'));
+  assert.ok(r.caution.filter((x) => x.drug.class && /Side chain/.test(x.drug.class))
+    .every((x) => x.tier === 'low'));
+  // gadolinium stays safe
+  assert.ok(r.safer.some((x) => /Gadolinium/i.test(x.drug.generic)));
+});
+
+test('NBL: ICM SCAR -> ALL other ICM escalate to avoid, alternatives safe', () => {
+  const r = A.buildReport('iopamidol', 'scar');
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  // every other ICM (both clusters) now avoid
+  assert.ok(avoidG.includes('Iohexol') && avoidG.includes('Iobitridol') && avoidG.includes('Iopromide'));
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  assert.ok(r.safer.some((x) => /Gadolinium/i.test(x.drug.generic)),
+    'GBCA stays safe at SCAR (keepSafeOnScar)');
+});
+
+test('NBL: clusterAware refactor leaves non-cluster groups unchanged', () => {
+  // sulfonamide (default avoid) still avoids cross-reactive antibiotics
+  const s = A.buildReport('cotrimoxazole', 'ige');
+  assert.ok(s.avoid.length > 0 && s.avoid.every((x) => x.tier === 'high'));
+  // fluoroquinolone (crossClassCaution) still caution non-SCAR
+  const f = A.buildReport('ciprofloxacin', 'ige');
+  assert.equal(f.avoid.length, 0);
+  assert.ok(f.caution.some((x) => x.drug.generic === 'Levofloxacin'));
+});
+
 // ───────────────────────── overrides precedence ──────────────────────────
 test('override beats structural rule (cefazolin target wins over low default)', () => {
   // cefazolin is a cephalosporin; without override a penicillin->ceph default

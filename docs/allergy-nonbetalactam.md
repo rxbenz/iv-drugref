@@ -359,3 +359,59 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 
 > Encoded ใน `js/allergy-data.js` (groups `la-ester` + `la-amide`), locked โดย
 > 4 tests ใน `test/allergy-data.test.js` (รวม 125 tests ผ่าน).
+
+---
+
+## กลุ่มที่ 6 — Iodinated Contrast Media (สารทึบรังสีไอโอดีน) — ✅ verify + encode แล้ว 2026-06-18
+
+### หลักการ: แพ้ข้ามตาม "side chain" (carbamoyl) ไม่ใช่ "ไอโอดีน"
+- การแพ้ ICM **ไม่ใช่การแพ้ไอโอดีน** และ **ไม่เกี่ยวกับการแพ้อาหารทะเล/กุ้งหอยปูปลา**
+  (myth สำคัญ — ห้ามใช้ประวัติแพ้อาหารทะเลมาห้ามให้ ICM)
+- แพ้ข้ามขึ้นกับ **carbamoyl side chain**: ตัวที่ side chain เหมือนกันแพ้ข้าม
+  **สูง ~60-77%** · ตัวที่ side chain ต่างกลุ่ม = เสี่ยงต่ำกว่าแต่ **คาดเดาไม่ได้**
+  → ยืนยันตัวที่ปลอดภัยด้วย **skin test** (วิธีเดียวที่เชื่อถือได้)
+
+### การจัดกลุ่ม side chain (cluster)
+| Cluster | Agents (trade) | หมายเหตุ |
+|---|---|---|
+| A — classic dihydroxypropyl-carbamoyl | Iohexol (Omnipaque), Iomeprol (Iomeron), Ioversol (Optiray), Iodixanol (Visipaque) | แพ้ข้ามกันสูง 60-77% |
+| B — distinct side chain | Iopamidol (Iopamiro/Isovue), Iobitridol (Xenetix) | มักเป็นตัวเลือกสำรอง |
+| C — mixed | Iopromide (Ultravist) | classic + modified |
+| D — ionic (เก่า) | Ioxaglate (Hexabrix), Diatrizoate (Urografin/Gastrografin) | high-osmolar/ionic |
+
+### Premedication (ESUR 2025)
+- **ไม่แนะนำให้ใช้ premedication (steroid/antihistamine) แบบ routine แล้ว** —
+  หลักฐานประสิทธิภาพไม่ดีพอ; reaction ที่เกิดทั้งที่ premedicate มักรุนแรงเท่าเดิม
+- เน้น **เปลี่ยนตัวยา (side chain ต่างกลุ่ม) + allergy workup (skin test)** แทน
+
+### ทางเลือกปลอดภัย (คนละ class — ไม่แพ้ข้าม)
+- **Gadolinium (MRI)** — คนละ class ไม่แพ้ข้ามกับ ICM (มี hypersensitivity ของตัวเองแต่พบน้อย)
+- การตรวจที่ไม่ใช้สารทึบรังสี / อัลตราซาวด์
+- ICM ตัวที่ skin test ผ่าน
+
+### โมเดลข้อมูล: NBL group เดียว + flag `clusterAware` (engine enhancement)
+แพ้ข้ามขึ้นกับ side-chain cluster (คล้ายแนวคิด R1 ของ beta-lactam) → เพิ่ม flag
+`clusterAware` ใน `buildNblReport`:
+- allergen + crossReactive แต่ละตัวมี field `cluster`
+- **same cluster** กับตัวที่แพ้ → avoid (high) · **different cluster** → caution (low, แนะนำ skin test)
+- **SCAR** → escalate avoid ทุกตัว · `keepSafeOnScar` → GBCA/ทางเลือกยังปลอดภัย
+- refactor การแบ่ง avoid/caution ให้ decision-driven (`crossAvoid`/`crossCaution`)
+  → กลุ่มเดิม (default / crossClassCaution) พฤติกรรมไม่เปลี่ยน (locked โดย regression test)
+
+### Checklist verify (กลุ่ม ICM) — ✅ ครบ 2026-06-18
+- [x] เห็นชอบ myth-buster: ไม่ใช่แพ้ไอโอดีน / ไม่เกี่ยวอาหารทะเล
+- [x] เห็นชอบจัดกลุ่ม side chain (A/B/C/D) + same cluster = แพ้ข้ามสูง
+- [x] เห็นชอบ "skin test = วิธีเดียวยืนยันตัวปลอดภัย"
+- [x] เห็นชอบ premedication ไม่ routine (ESUR 2025) → เปลี่ยนตัวยาสำคัญกว่า
+- [x] เห็นชอบ Gadolinium = ทางเลือกคนละ class
+
+### อ้างอิงกลุ่ม ICM
+- **esur2025cm** — ESUR Contrast Media Safety Committee. Hypersensitivity
+  reactions to contrast media: Part 1 & 2 (updated). *Eur Radiol* 2025.
+- **icmClass2024** — Cross-reactivity in hypersensitivity reactions to contrast
+  agents: new classification and guide for clinical practice. *Eur Radiol* 2024.
+- **icmSkinTest2024** — Skin Test Reactivity Patterns in Patients Allergic to
+  Iodinated Contrast Media: A Refined View. *JACI Pract* 2024 (PMID 39056227).
+
+> Encoded ใน `js/allergy-data.js` (group `icm` + `clusterAware` engine flag),
+> locked โดย 4 tests ใน `test/allergy-data.test.js` (รวม 129 tests ผ่าน).

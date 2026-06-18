@@ -180,6 +180,72 @@ COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
 
 ---
 
+## กลุ่มที่ 3 — Anticonvulsant (aromatic AEDs) + HLA (DRAFT 🟡 รอ verify)
+
+### 🔑 ใจความ: 2 แกน — (1) แพ้ข้ามใน aromatic AEDs (2) HLA pharmacogenomic
+ยากันชักกลุ่ม **aromatic** (มีวงแหวน aromatic) แพ้ข้ามกันสูงมาก โดยเฉพาะปฏิกิริยา
+รุนแรง (SCAR). **HLA-B*15:02 พบบ่อยในคนไทย** → เป็นความเสี่ยงสำคัญต่อ SJS/TEN
+
+### 🚫 แพ้ข้ามกัน — Aromatic AEDs (เลี่ยงทั้งกลุ่มถ้าเคยแพ้ตัวใดตัวหนึ่ง)
+| ยา | หมายเหตุ |
+|---|---|
+| Carbamazepine | aromatic; เสี่ยงสูงสุด + ผูกกับ HLA-B*15:02 |
+| Oxcarbazepine | aromatic; HLA-B*15:02 (Thai/Chinese) |
+| Phenytoin / Fosphenytoin | aromatic; HLA-B*15:02 (อ่อนกว่า CBZ) |
+| Phenobarbital / Primidone | aromatic (barbiturate) |
+| Lamotrigine | aromatic; แพ้ข้ามกับ CBZ ได้ + ตัวมันเองเสี่ยง SJS |
+
+> **อัตราแพ้ข้าม aromatic AEDs ~40-58%** (บางการศึกษาสูงถึง 80%) และ
+> **สูงขึ้นตามความรุนแรง**: MPE ~8% · SJS ~29% · SJS/TEN overlap ~50%
+
+### ✅ ปลอดภัยกว่า — Non-aromatic AEDs (ไม่แพ้ข้ามกับ aromatic)
+| ยา | กลุ่ม |
+|---|---|
+| Valproic acid / Valproate | non-aromatic |
+| Levetiracetam | non-aromatic |
+| Gabapentin, Pregabalin | gabapentinoid |
+| Topiramate | non-aromatic |
+| Benzodiazepines (clonazepam/clobazam) | non-aromatic |
+| Lacosamide, Vigabatrin | non-aromatic |
+
+> ⚠️ **Zonisamide** ไม่ใส่ในรายการปลอดภัย — เป็น sulfonamide-derivative (เสี่ยง SJS
+> คนละกลไก) → จัดเป็น "ระวัง"
+
+### 🧬 HLA callout (แสดงเด่น — สำคัญสำหรับคนไทย)
+- **HLA-B*15:02** (ไทย prevalence ~8-27%): CPIC 2017 → **ห้ามใช้ carbamazepine
+  + oxcarbazepine** ในผู้ที่มี allele นี้; CPIC phenytoin 2020 → เลี่ยง phenytoin/
+  fosphenytoin ถ้ามีทางเลือก (association อ่อนกว่า)
+- **HLA-A*31:01**: เสี่ยง carbamazepine-induced MPE/DRESS/SJS → CPIC แนะนำเลี่ยง
+  carbamazepine ถ้ามีทางเลือก
+- 💡 แนะนำตรวจ HLA-B*15:02 **ก่อนเริ่ม** carbamazepine/oxcarbazepine ในคนไทย
+  (มาตรฐานในไทยแล้ว)
+
+### กฎ severity (Anticonvulsant)
+- ปฏิกิริยาเป็น **T-cell delayed** เป็นหลัก (ไม่ใช่ IgE)
+- **mild (MPE)** → แพ้ข้าม ~8%; แนะนำเปลี่ยนเป็น non-aromatic เพื่อความปลอดภัย
+- **SCAR (SJS/TEN/DRESS)** → เลี่ยง aromatic AEDs **ทั้งหมด**เด็ดขาด · ห้าม challenge ·
+  ใช้ non-aromatic เท่านั้น
+
+### อ้างอิงกลุ่ม Anticonvulsant
+- **cpic2017cbz** — Phillips EJ, et al. CPIC Guideline for HLA Genotype and Use of
+  Carbamazepine and Oxcarbazepine: 2017 Update. *Clin Pharmacol Ther* 2018;103(4):574-581.
+- **cpic2020phenytoin** — Karnes JH, et al. CPIC Guideline for CYP2C9 and HLA-B
+  Genotypes and Phenytoin Dosing: 2020 Update. *Clin Pharmacol Ther* 2021;109(2):302-309.
+- **aedCrossReview** — Rashes/hypersensitivity reactions associated with antiepileptic
+  drugs: review. *Seizure / Epilepsy Behav* 2019.
+- **thaiHLA2022** — Implementation of HLA-B*15:02 Genotyping as Standard-of-Care …
+  in Thailand. *Front Pharmacol* 2022;13:867490.
+
+### Checklist verify (กลุ่ม Anticonvulsant)
+- [ ] เห็นชอบรายการ 🚫 aromatic AEDs (รวม lamotrigine อยู่ในกลุ่มเลี่ยง)
+- [ ] เห็นชอบรายการ ✅ non-aromatic (valproate/levetiracetam/gabapentinoid/topiramate/BZD/lacosamide)
+- [ ] เห็นชอบ zonisamide = "ระวัง" (sulfonamide-derivative)
+- [ ] เห็นชอบ HLA callout (B*15:02 + A*31:01) แสดงเด่น
+- [ ] ยืนยันตัวเลข: แพ้ข้าม 40-58% · MPE 8% / SJS 29% / overlap 50% · Thai B*15:02 ~8-27%
+- [ ] ตัดสิน: phenytoin + HLA-B*15:02 → คงเป็น "เลี่ยงถ้ามีทางเลือก" หรือ "ห้าม"
+
+---
+
 ## Checklist verify (กลุ่ม Sulfonamide) — ✅ ครบ 2026-06-18
 - [x] เห็นชอบ "myth-buster": non-antibiotic sulfonamide = ปลอดภัย (ไม่มี N4 arylamine)
 - [x] เห็นชอบรายการ 🚫 ควรเลี่ยง (sulfonamide antibiotics)

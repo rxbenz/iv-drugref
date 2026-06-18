@@ -26,7 +26,10 @@
     romano2016: 'Romano A, et al. Cross-reactivity & tolerability of aztreonam/cephalosporins in T-cell-mediated penicillin hypersensitivity. JACI 2016.',
     pharmReview: 'Cephalosporins: A Focus on Side Chains and beta-Lactam Cross-Reactivity. Pharmacy (review) PMC6789778.',
     jaa2021:    'beta-Lactam Allergy and Cross-Reactivity: A Clinician’s Guide. J Asthma Allergy 2021. PMC7822086.',
-    trubiano2022: 'Trubiano JA, et al. The assessment of severe cutaneous adverse drug reactions. Aust Prescr 2022.'
+    trubiano2022: 'Trubiano JA, et al. The assessment of severe cutaneous adverse drug reactions. Aust Prescr 2022.',
+    strom2003:  'Strom BL, et al. Absence of cross-reactivity between sulfonamide antibiotics and sulfonamide nonantibiotics. N Engl J Med 2003;349(17):1628-35.',
+    brackett2004: 'Brackett CC, et al. Likelihood and mechanisms of cross-allergenicity between sulfonamide antibiotics and other drugs containing a sulfonamide functional group. Pharmacotherapy 2004;24(7):856-70.',
+    ccjm2025:   'Can my patient with a “sulfa allergy” receive celecoxib or other nonantimicrobial sulfonamides? Cleve Clin J Med 2025;92(3):147.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -166,12 +169,65 @@
       advice: 'ผื่นไม่รุนแรง พิจารณาใช้ได้/graded challenge ตามดุลพินิจ' };
   }
 
-  // --- 9. Build a full report for one allergen + severity -------------------
-  // Returns { allergen, severity, avoid:[], safer:[], nonBetaLactam, blocked }
+  // --- 9. Non-beta-lactam groups (Phase 4.1; verified 2026-06-18) -----------
+  // Different mechanism than R1 side chains -> curated per group, NOT via
+  // computeRelation. See docs/allergy-nonbetalactam.md.
+  const NBL_GROUPS = [
+    {
+      id: 'sulfonamide',
+      label: 'Sulfonamides',
+      refs: ['strom2003', 'brackett2004', 'khan2022', 'ccjm2025'],
+      // selectable allergens (the sulfonamide ANTIBIOTIC the patient reacted to)
+      allergens: [
+        { id: 'cotrimoxazole', generic: 'Trimethoprim-Sulfamethoxazole', th: 'โคไตรม็อกซาโซล', trade: ['Bactrim', 'Septrin'] },
+        { id: 'sulfadiazine',  generic: 'Sulfadiazine',  th: 'ซัลฟาไดอะซีน',  trade: [] },
+        { id: 'sulfasalazine', generic: 'Sulfasalazine', th: 'ซัลฟาซาลาซีน', trade: ['Salazopyrin'] }
+      ],
+      // cross-reactive (avoid) — other sulfonamide ANTIBIOTICS (share N4 arylamine)
+      crossReason: 'sulfonamide antibiotic เหมือนกัน (มีหมู่ N4 arylamine + วงแทนที่ N1)',
+      crossReactive: [
+        { id: 'sulfadiazine',  generic: 'Sulfadiazine',  th: 'ซัลฟาไดอะซีน',  sub: 'Sulfonamide antibiotic' },
+        { id: 'sulfasalazine', generic: 'Sulfasalazine', th: 'ซัลฟาซาลาซีน', sub: 'Sulfonamide antibiotic' },
+        { generic: 'Sulfacetamide', th: 'ซัลฟาเซตาไมด์', sub: 'Sulfonamide antibiotic (เฉพาะที่/ตา)' },
+        { id: 'cotrimoxazole', generic: 'Cotrimoxazole (TMP-SMX)', th: 'โคไตรม็อกซาโซล', sub: 'Sulfonamide antibiotic' }
+      ],
+      // safe — NON-antibiotic sulfonamides (no N4 arylamine -> no immune cross-reactivity)
+      safeReason: 'non-antibiotic sulfonamide ไม่มีหมู่ N4 arylamine → ไม่แพ้ข้ามเชิงภูมิคุ้มกัน (Strom 2003)',
+      safe: [
+        { generic: 'Hydrochlorothiazide', th: 'ไฮโดรคลอโรไทอะไซด์', sub: 'Thiazide diuretic' },
+        { generic: 'Furosemide',   th: 'ฟูโรซีไมด์',   sub: 'Loop diuretic' },
+        { generic: 'Acetazolamide', th: 'อะเซตาโซลาไมด์', sub: 'Carbonic anhydrase inhibitor' },
+        { generic: 'Celecoxib',    th: 'ซีลีค็อกซิบ',  sub: 'COX-2 selective NSAID' },
+        { generic: 'Glipizide',    th: 'กลิพิไซด์',    sub: 'Sulfonylurea' },
+        { generic: 'Sumatriptan',  th: 'ซูมาทริปแทน',  sub: 'Triptan' }
+      ],
+      // per-severity guidance note shown at the top of the report
+      noteMild: 'Low-risk: Khan 2022 แนะนำ direct oral challenge ต่อ TMP-SMX ได้',
+      noteIge: 'หลีกเลี่ยง sulfonamide antibiotic; non-antibiotic sulfonamide ใช้ได้',
+      noteScar: 'อาการรุนแรง (SCAR): หลีกเลี่ยง sulfonamide antibiotic ทั้งหมด · ห้าม challenge',
+      // SCAR: non-antibiotic sulfonamides become "caution" (per pharmacist decision)
+      scarCautionNote: 'กรณี SCAR: พิจารณาหลีกเลี่ยงถ้าไม่จำเป็น (แม้ทางทฤษฎีไม่แพ้ข้าม)'
+    }
+  ];
+
+  const NBL_INDEX = {};   // allergenId -> { group, allergen }
+  NBL_GROUPS.forEach(function (g) {
+    g.allergens.forEach(function (a) { NBL_INDEX[a.id] = { group: g, allergen: a }; });
+  });
+
+  // --- 10. Build report ------------------------------------------------------
+  // Dispatch: beta-lactam allergen -> R1 engine; non-beta-lactam -> curated group.
+  // Both return { allergen, severity, severityNote, avoid:[], caution:[],
+  //   safer:[], nonBetaLactam|null, blocked, isNbl }
   function buildReport(allergenId, severityId) {
+    if (DRUG_BY_ID[allergenId]) return buildBetaLactamReport(allergenId, severityId);
+    if (NBL_INDEX[allergenId])  return buildNblReport(allergenId, severityId);
+    return null;
+  }
+
+  function buildBetaLactamReport(allergenId, severityId) {
     const a = DRUG_BY_ID[allergenId];
     const sev = SEVERITY_BY_ID[severityId] || SEVERITY_BY_ID.unknown;
-    if (!a) return null;
 
     const avoid = [];
     const safer = [];
@@ -190,23 +246,73 @@
       }
     });
 
-    // sort by tier severity (high first for avoid, negligible first for safer)
     avoid.sort(function (x, y) { return TIERS[x.tier].order - TIERS[y.tier].order; });
     safer.sort(function (x, y) { return TIERS[y.tier].order - TIERS[x.tier].order; });
 
     return {
       allergen: a,
       severity: sev,
+      severityNote: sev.note,
       avoid: avoid,
+      caution: [],
       safer: sev.blockAllBetaLactam ? [] : safer,
       nonBetaLactam: NON_BETA_LACTAM,
-      blocked: sev.blockAllBetaLactam
+      blocked: sev.blockAllBetaLactam,
+      isNbl: false
+    };
+  }
+
+  function buildNblReport(allergenId, severityId) {
+    const ref = NBL_INDEX[allergenId];
+    const g = ref.group;
+    const a = ref.allergen;
+    const sev = SEVERITY_BY_ID[severityId] || SEVERITY_BY_ID.unknown;
+    const isScar = !!sev.blockAllBetaLactam;   // the SCAR severity flag
+
+    // cross-reactive antibiotics -> always avoid (high); exclude the drug the
+    // patient is actually allergic to (don't list it against itself)
+    const avoid = g.crossReactive.filter(function (d) { return d.id !== allergenId; }).map(function (d) {
+      return {
+        drug: { generic: d.generic, th: d.th, class: d.sub },
+        decision: 'avoid', tier: 'high', pct: 'แพ้ข้ามได้',
+        reason: g.crossReason, refs: g.refs,
+        advice: isScar ? 'หลีกเลี่ยงทั้งหมด · ห้าม challenge' : ''
+      };
+    });
+
+    // non-antibiotic sulfonamides -> safe normally; "caution" if SCAR
+    const safeItems = g.safe.map(function (d) {
+      return {
+        drug: { generic: d.generic, th: d.th, class: d.sub },
+        decision: isScar ? 'caution' : 'safer',
+        tier: isScar ? 'moderate' : 'negligible',
+        pct: isScar ? 'ระวัง' : 'ไม่แพ้ข้าม',
+        reason: g.safeReason, refs: g.refs,
+        advice: isScar ? g.scarCautionNote : ''
+      };
+    });
+
+    let note = g.noteIge;
+    if (isScar) note = g.noteScar;
+    else if (sev.id === 'mild' || sev.id === 'unknown') note = g.noteMild;
+
+    return {
+      allergen: { generic: a.generic, th: a.th, class: g.label, trade: a.trade },
+      severity: sev,
+      severityNote: note,
+      avoid: avoid,
+      caution: isScar ? safeItems : [],
+      safer: isScar ? [] : safeItems,
+      nonBetaLactam: null,   // for NBL the "safe" list already names the alternatives
+      blocked: false,
+      isNbl: true
     };
   }
 
   root.AllergyData = {
     REFS: REFS, TIERS: TIERS, CLUSTERS: CLUSTERS, DRUGS: DRUGS, DRUG_BY_ID: DRUG_BY_ID,
     OVERRIDES: OVERRIDES, SEVERITY: SEVERITY, NON_BETA_LACTAM: NON_BETA_LACTAM,
+    NBL_GROUPS: NBL_GROUPS, NBL_INDEX: NBL_INDEX,
     computeRelation: computeRelation, buildReport: buildReport
   };
 

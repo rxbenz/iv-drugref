@@ -38,6 +38,14 @@
       });
       html += '</optgroup>';
     });
+    // non-beta-lactam groups (Phase 4.1) — one optgroup per group
+    (A.NBL_GROUPS || []).forEach(function (g) {
+      html += '<optgroup label="' + esc(g.label) + '">';
+      g.allergens.forEach(function (a) {
+        html += '<option value="' + esc(a.id) + '">' + esc(a.th + ' (' + a.generic + ')') + '</option>';
+      });
+      html += '</optgroup>';
+    });
     allergenSel.innerHTML = html;
 
     // severity select
@@ -81,7 +89,7 @@
     return '<div class="ar-detail">' +
       dl('ชื่อการค้า', trade) +
       dl('กลุ่มยา', esc(classLabel(d))) +
-      dl('R1 side chain', esc(clusterText(d))) +
+      ((d.unique || 'cluster' in d) ? dl('R1 side chain', esc(clusterText(d))) : '') +
       dl('โอกาสแพ้ข้าม', pctLine) +
       dl('เหตุผล', esc(item.reason)) +
       (item.advice ? dl('คำแนะนำ', '💡 ' + esc(item.advice)) : '') +
@@ -127,6 +135,7 @@
       });
     }
     collect(report.avoid);
+    collect(report.caution);
     collect(report.safer);
     var li = Object.keys(keys)
       .filter(function (k) { return A.REFS[k]; })
@@ -189,7 +198,7 @@
     html += '<div class="info-box blue" style="margin-bottom:14px">' +
       '<strong>กรณี:</strong> แพ้ ' + esc(a.generic) + ' (' + esc(a.th) + ') · ' +
       '<strong>อาการ:</strong> ' + esc(sev.label) +
-      '<div style="font-size:12px;margin-top:6px;opacity:.9">' + esc(sev.note) + '</div></div>';
+      '<div style="font-size:12px;margin-top:6px;opacity:.9">' + esc(report.severityNote || sev.note) + '</div></div>';
 
     html += controlsHtml();
 
@@ -202,19 +211,22 @@
         'ให้เลือกยานอกกลุ่ม beta-lactam เท่านั้น</div>';
       html += groupHtml('ar-avoid-title', '🚫', 'หลีกเลี่ยงทั้งหมด', report.avoid);
     } else {
-      // safest first: show the "safer" group before the "avoid" group
+      // safest first: safer -> caution -> avoid
       html += groupHtml('ar-safer-title', '✅', 'ปลอดภัยกว่า / พิจารณาใช้ได้', report.safer);
+      html += groupHtml('ar-caution-title', '⚠️', 'ใช้ด้วยความระมัดระวัง', report.caution || []);
       html += groupHtml('ar-avoid-title', '🚫', 'ควรหลีกเลี่ยง', report.avoid);
     }
 
     // nothing matches the current filter
-    var anyShown = report.avoid.concat(report.safer).some(function (it) { return isShown(it.tier); });
+    var anyShown = report.avoid.concat(report.caution || [], report.safer)
+      .some(function (it) { return isShown(it.tier); });
     if (!anyShown) {
       html += '<div class="info-box amber">ไม่มีรายการตรงกับตัวกรอง — แตะ “แสดงทั้งหมด” ด้านบน</div>';
     }
 
-    // always show non-beta-lactam alternatives + references
-    html += altHtml();
+    // beta-lactam reports list non-beta-lactam alternatives; NBL reports already
+    // name their safe options, so skip the generic alternatives box there
+    if (report.nonBetaLactam) html += altHtml();
     html += refsHtml(report);
 
     resultEl.innerHTML = html;

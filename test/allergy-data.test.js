@@ -149,6 +149,57 @@ test('unknown severity does not block (data-driven default)', () => {
   assert.ok(r.safer.length > 0);
 });
 
+// ───────────────────────── non-beta-lactam: Sulfonamides (Phase 4.1) ──────
+test('NBL: sulfonamide group exists with allergens indexed', () => {
+  const g = A.NBL_GROUPS.find((x) => x.id === 'sulfonamide');
+  assert.ok(g, 'sulfonamide group present');
+  assert.ok(A.NBL_INDEX.cotrimoxazole, 'cotrimoxazole indexed as an allergen');
+});
+
+test('NBL: cotrimoxazole/IgE -> avoid sulfonamide antibiotics, safe non-antibiotics', () => {
+  const r = A.buildReport('cotrimoxazole', 'ige');
+  assert.equal(r.isNbl, true);
+  assert.equal(r.blocked, false);
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Sulfadiazine'));
+  assert.ok(saferG.includes('Celecoxib'));        // non-antibiotic -> safe
+  assert.ok(saferG.includes('Furosemide'));
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  assert.ok(r.safer.every((x) => x.tier === 'negligible'));
+});
+
+test('NBL: cotrimoxazole excluded from its own avoid list', () => {
+  const r = A.buildReport('cotrimoxazole', 'ige');
+  assert.ok(!r.avoid.some((x) => /TMP-SMX|Cotrimoxazole/.test(x.drug.generic)),
+    'patient drug should not be listed against itself');
+});
+
+test('NBL: SCAR -> non-antibiotic sulfonamides become caution (not safe, not blocked)', () => {
+  const r = A.buildReport('cotrimoxazole', 'scar');
+  assert.equal(r.blocked, false);                 // sulfonamide SCAR != block-all
+  assert.equal(r.safer.length, 0);
+  assert.ok(r.caution.length > 0);
+  assert.ok(r.caution.every((x) => x.tier === 'moderate'));
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+});
+
+test('NBL: report names safe options itself (no generic alternatives box)', () => {
+  const r = A.buildReport('cotrimoxazole', 'ige');
+  assert.equal(r.nonBetaLactam, null);
+});
+
+test('NBL: unknown allergen id returns null', () => {
+  assert.equal(A.buildReport('not-a-drug', 'ige'), null);
+});
+
+test('beta-lactam report shape unchanged (has caution:[] + isNbl:false)', () => {
+  const r = A.buildReport('amoxicillin', 'ige');
+  assert.equal(r.isNbl, false);
+  assert.deepEqual(r.caution, []);
+  assert.ok(r.nonBetaLactam && r.nonBetaLactam.length > 0);
+});
+
 // ───────────────────────── overrides precedence ──────────────────────────
 test('override beats structural rule (cefazolin target wins over low default)', () => {
   // cefazolin is a cephalosporin; without override a penicillin->ceph default

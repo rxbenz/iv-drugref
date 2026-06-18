@@ -12,8 +12,10 @@
   font-size: 11px; font-weight: 600; color: var(--text-muted, #94a3b8);
 }
 .ar-avoid-title { color: #b91c1c; }
+.ar-caution-title { color: #b45309; }
 .ar-safer-title { color: #047857; }
 [data-theme="dark"] .ar-avoid-title { color: #fca5a5; }
+[data-theme="dark"] .ar-caution-title { color: #fdba74; }
 [data-theme="dark"] .ar-safer-title { color: #6ee7b7; }
 
 /* ---- a single drug row ---- */

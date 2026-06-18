@@ -1,7 +1,8 @@
 # Allergy Cross-Reactivity — Non-Beta-Lactam Groups (Phase 4.1)
 
-> 🟡 **สถานะ: DRAFT — รอเภสัชกร verify ก่อน encode** (ตามกฎ feature-plan ข้อ 11/13:
-> ข้อมูลคลินิกต้องมี reference + ผ่าน verify ก่อนขึ้นระบบ; ทำทีละกลุ่ม ไม่รวบ)
+> 🟢 **กลุ่ม Sulfonamide: เภสัชกร verify แล้ว + encode แล้ว (2026-06-18)**
+> SCAR rule = non-antibiotic sulfonamide เป็น "ระวัง/หลีกถ้าไม่จำเป็น" (conservative).
+> กลุ่มถัดไป (NSAID ฯลฯ) ยังเป็น DRAFT — ทำทีละกลุ่ม ไม่รวบ (feature-plan ข้อ 11/13).
 >
 > ไฟล์นี้ต่อยอดจาก `allergy-cross-reactivity.md` (beta-lactam, Phase 1 ปิดแล้ว)
 > ขยายไปกลุ่มยานอก beta-lactam ทีละกลุ่ม — **กลุ่มที่ 1 = Sulfonamides**
@@ -96,9 +97,13 @@ avoid/safer แบบเดียวกัน (UI/หน้าตาเหมื
 
 ---
 
-## Checklist verify (กลุ่ม Sulfonamide)
-- [ ] เห็นชอบ "myth-buster": non-antibiotic sulfonamide = ปลอดภัย (ไม่มี N4 arylamine)
-- [ ] เห็นชอบรายการ 🚫 ควรเลี่ยง (sulfonamide antibiotics)
-- [ ] เห็นชอบรายการ ✅ ปลอดภัย (thiazide/loop/CA-I/celecoxib/sulfonylurea/triptan)
-- [ ] ตัดสิน: กรณี **SCAR** ให้ระบุ non-antibiotic sulfonamide เป็น "ปลอดภัย" หรือ "ระวัง"
-- [ ] เห็นชอบ data model `NBL_GROUPS` (แยกจาก engine R1)
+## Checklist verify (กลุ่ม Sulfonamide) — ✅ ครบ 2026-06-18
+- [x] เห็นชอบ "myth-buster": non-antibiotic sulfonamide = ปลอดภัย (ไม่มี N4 arylamine)
+- [x] เห็นชอบรายการ 🚫 ควรเลี่ยง (sulfonamide antibiotics)
+- [x] เห็นชอบรายการ ✅ ปลอดภัย (thiazide/loop/CA-I/celecoxib/sulfonylurea/triptan)
+- [x] กรณี **SCAR** → non-antibiotic sulfonamide = **"ระวัง/หลีกถ้าไม่จำเป็น"** (caution, conservative)
+- [x] เห็นชอบ data model `NBL_GROUPS` (แยกจาก engine R1)
+
+> Encoded ใน `js/allergy-data.js` (`NBL_GROUPS` + `buildNblReport`), wired ใน
+> `js/allergy.js` (dropdown + กลุ่ม "ใช้ด้วยความระมัดระวัง"), locked โดย 7 tests
+> ใน `test/allergy-data.test.js` (รวม 104 tests ผ่าน).

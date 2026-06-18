@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Mockup A — แถบไอคอนซ้าย ตรึงนิ่ง (Fixed Shell + Inner Scroll)</title>
+<title>Mockup A2 — แถบซ้ายซ่อนได้ (auto-hide / swipe / ปุ่ม ‹‹ ››)</title>
 <style>
   :root{
     --bg:#f5f7fa; --surface:#ffffff; --border:#e5e7eb;
     --text-primary:#1f2937; --text-secondary:#4b5563; --text-muted:#9ca3af;
     --accent:#3b82f6; --accent-soft:#eff6ff; --shadow:0 2px 10px rgba(0,0,0,.10);
-    --rail:62px; --topbar:52px;
+    --rail:64px; --topbar:52px;
   }
   [data-theme="dark"]{
     --bg:#0f172a; --surface:#1e293b; --border:#334155;
@@ -17,20 +17,56 @@
     --accent:#60a5fa; --accent-soft:#1e3a5f; --shadow:0 2px 10px rgba(0,0,0,.5);
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;overflow:hidden}   /* no body scroll → no fixed jitter */
+  html,body{margin:0;height:100%;overflow:hidden}
   body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans Thai',sans-serif;
     background:var(--bg);color:var(--text-primary)}
 
-  /* full-viewport shell: nothing is "position:fixed over a scrolling body" */
-  .app{position:fixed;inset:0;display:flex}
+  .app{position:fixed;inset:0;overflow:hidden}
 
-  /* ===== Left rail (static part of shell, steady) ===== */
-  .rail{width:calc(var(--rail) + env(safe-area-inset-left,0px));flex:none;
+  /* ===== Right column = full width; only content scrolls ===== */
+  .main{position:absolute;inset:0;display:flex;flex-direction:column}
+  .topbar{flex:none;height:var(--topbar);background:var(--surface);
+    border-bottom:1px solid var(--border);padding:0 12px 0 8px;
+    display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);z-index:10}
+  .topbar .logo{font-size:16px;font-weight:800}
+  .topbar .grow{flex:1}
+  .menubtn{font:inherit;font-size:20px;background:0 0;border:none;cursor:pointer;
+    color:var(--text-secondary);padding:4px 8px;border-radius:10px;line-height:1}
+  .menubtn:hover{background:var(--accent-soft)}
+  .ghost{font:inherit;font-size:12px;background:0 0;border:1px solid var(--border);
+    border-radius:18px;padding:5px 12px;cursor:pointer;color:var(--text-secondary)}
+  .vchip{font-size:10px;background:var(--accent-soft);color:var(--accent);padding:2px 9px;border-radius:12px;font-weight:700}
+
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .content{padding:16px;max-width:760px;margin:0 auto}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .search{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;
+    font:inherit;background:var(--bg);color:var(--text-primary)}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:14px;
+    background:var(--accent-soft);color:var(--accent);font-weight:700;margin:2px}
+  h2{margin:.2em 0}
+  .foot{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+    font-size:11px;color:var(--text-muted);padding:14px 12px calc(14px + env(safe-area-inset-bottom,0px))}
+  .foot b{color:var(--text-secondary)}
+  .foot button{font:inherit;font-size:11px;background:0 0;border:1px solid var(--border);
+    border-radius:16px;padding:3px 12px;cursor:pointer;color:var(--text-muted)}
+
+  /* ===== Scrim (tap to close, mobile) ===== */
+  .scrim{position:absolute;inset:0;background:rgba(15,23,42,.34);opacity:0;
+    pointer-events:none;transition:opacity .22s;z-index:28}
+  .app.open .scrim{opacity:1;pointer-events:auto}
+
+  /* ===== Left rail drawer (slides over content) ===== */
+  .rail{position:absolute;top:0;bottom:0;left:0;z-index:30;
+    width:calc(var(--rail) + env(safe-area-inset-left,0px));
     background:var(--surface);border-right:1px solid var(--border);box-shadow:var(--shadow);
     display:flex;flex-direction:column;align-items:center;
     padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px)) env(safe-area-inset-left,0px);
-    gap:3px;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .rail .brand{font-size:21px;padding:6px 0 8px;flex:none}
+    gap:3px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    transform:translateX(-101%);transition:transform .22s ease}
+  .app.open .rail{transform:translateX(0)}
+  .rail .brand{font-size:21px;padding:4px 0 8px;flex:none}
   .bm{width:54px;display:flex;flex-direction:column;align-items:center;gap:2px;
     padding:7px 0;border-radius:12px;cursor:pointer;color:var(--text-secondary);
     text-decoration:none;flex:none;transition:background .14s,color .14s}
@@ -39,38 +75,21 @@
   .bm:hover{background:var(--accent-soft);color:var(--accent)}
   .bm.active{background:var(--accent);color:#fff}
 
-  /* ===== Right column: static topbar + the ONLY scroller ===== */
-  .main{flex:1;min-width:0;display:flex;flex-direction:column}
-  .topbar{flex:none;height:var(--topbar);background:var(--surface);
-    border-bottom:1px solid var(--border);padding:0 16px;
-    display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
-  .topbar .logo{font-size:17px;font-weight:800}
-  .topbar .grow{flex:1}
-  .ghost{font:inherit;font-size:12px;background:0 0;border:1px solid var(--border);
-    border-radius:18px;padding:5px 12px;cursor:pointer;color:var(--text-secondary)}
-  .vchip{font-size:10px;background:var(--accent-soft);color:var(--accent);padding:2px 9px;border-radius:12px;font-weight:700}
-
-  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}  /* <-- only this moves */
-  .content{padding:16px;max-width:680px;margin:0 auto}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
-    padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
-  .search{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;
-    font:inherit;background:var(--bg);color:var(--text-primary)}
-  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:14px;
-    background:var(--accent-soft);color:var(--accent);font-weight:700;margin:2px}
-  h2{margin:.2em 0}
-
-  /* compact footer (scrolls at end of content) */
-  .foot{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
-    font-size:11px;color:var(--text-muted);padding:14px 12px calc(14px + env(safe-area-inset-bottom,0px))}
-  .foot b{color:var(--text-secondary)}
-  .foot button{font:inherit;font-size:11px;background:0 0;border:1px solid var(--border);
-    border-radius:16px;padding:3px 12px;cursor:pointer;color:var(--text-muted)}
+  /* ===== Toggle tab on the left edge (‹‹ / ››) ===== */
+  .toggle{position:absolute;top:50%;left:0;z-index:31;transform:translateY(-50%);
+    width:26px;height:54px;border:1px solid var(--border);border-left:none;
+    background:var(--surface);color:var(--accent);box-shadow:var(--shadow);
+    border-radius:0 12px 12px 0;cursor:pointer;font-size:15px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    transition:left .22s ease,opacity .3s;opacity:.92}
+  .app.open .toggle{left:calc(var(--rail) + env(safe-area-inset-left,0px))}
+  /* fade the edge toggle while actively scrolling so it doesn't distract */
+  .app.scrolling .toggle{opacity:.32}
 
   /* popup */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;
     justify-content:center;z-index:50;padding:20px}
-  .modal.open{display:flex}
+  .modal.open2{display:flex}
   .sheet{background:var(--surface);border-radius:16px;max-width:440px;width:100%;padding:20px;
     max-height:80vh;overflow:auto;box-shadow:var(--shadow)}
   .sheet .box{border-radius:10px;padding:12px;margin:8px 0;font-size:12px;line-height:1.6}
@@ -81,9 +100,55 @@
 </style>
 </head>
 <body data-theme="light">
- <div class="app">
-  <!-- left rail: 7 user pages, steady (part of the non-scrolling shell) -->
-  <nav class="rail">
+ <div class="app open" id="app">
+
+  <div class="main">
+    <div class="topbar">
+      <button class="menubtn" id="menuBtn" title="เมนู">☰</button>
+      <span class="logo">IV DrugRef</span>
+      <span class="vchip">v5.15.3</span>
+      <span class="grow"></span>
+      <button class="ghost" onclick="t()">🌓 โหมด</button>
+    </div>
+
+    <div class="scroll" id="scroll">
+      <div class="content">
+        <h2>แบบ A2 — แถบซ้ายซ่อนได้</h2>
+        <p style="color:var(--text-muted);font-size:13px">
+          เนื้อหา <b>เต็มความกว้างเสมอ</b> · แถบเมนูเป็น drawer ลอยทับ เปิด/ปิดได้ 4 ทาง:<br>
+          ① ปุ่ม <b>‹‹ / ››</b> ขอบซ้าย &nbsp; ② ปุ่ม <b>☰</b> มุมบนซ้าย &nbsp;
+          ③ <b>ปัดขวา</b>จากขอบซ้าย = เปิด, <b>ปัดซ้าย</b> = ปิด &nbsp;
+          ④ <b>auto-hide</b> เมื่อเลื่อนอ่านลง (เลื่อนขึ้นจะโผล่กลับ)<br>
+          เปิดอยู่แล้วแตะ <b>พื้นมืด</b> ด้านขวาเพื่อปิดก็ได้.
+        </p>
+        <div class="card">
+          <input class="search" placeholder="🔍 ค้นหายา เช่น vancomycin, KCl ...">
+          <div style="margin-top:10px"><span class="pill">⭐ ยาที่ใช้บ่อย</span><span class="pill">🕐 ดูล่าสุด</span></div>
+        </div>
+        <div class="card"><b>💉 Vancomycin</b><br><span style="color:var(--text-muted);font-size:13px">Antibiotic · ดูข้อมูลการบริหารยา IV แบบเต็มความกว้าง</span></div>
+        <div class="card"><b>💧 Potassium chloride (KCl)</b><br><span style="color:var(--text-muted);font-size:13px">Electrolyte · ห้าม IV push</span></div>
+        <div class="card" style="text-align:center;color:var(--text-muted);font-size:13px">↓ เลื่อนลงเพื่อดู auto-hide · เลื่อนขึ้นแถบจะโผล่ ↑</div>
+        <div class="card"><b>🧪 Meropenem</b><br><span style="color:var(--text-muted);font-size:13px">Carbapenem</span></div>
+        <div class="card"><b>🧪 Piperacillin/Tazobactam</b><br><span style="color:var(--text-muted);font-size:13px">Penicillin</span></div>
+        <div class="card"><b>💊 Phenytoin</b><br><span style="color:var(--text-muted);font-size:13px">Anticonvulsant</span></div>
+        <div class="card"><b>💊 Amikacin</b><br><span style="color:var(--text-muted);font-size:13px">Aminoglycoside</span></div>
+        <div class="card"><b>💊 Digoxin</b><br><span style="color:var(--text-muted);font-size:13px">Cardiac glycoside</span></div>
+        <div class="card"><b>💊 Furosemide</b><br><span style="color:var(--text-muted);font-size:13px">Loop diuretic</span></div>
+
+        <div class="foot">
+          <span>💉 <b>IV DrugRef</b></span><span class="vchip">v5.15.3</span>
+          <span>· ภก.ฐาปนัท นาคครุฑ · สถาบันประสาทวิทยา</span>
+          <button onclick="document.getElementById('m').classList.add('open2')">ℹ️ เกี่ยวกับ / Disclaimer / License</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- scrim -->
+  <div class="scrim" id="scrim"></div>
+
+  <!-- left rail drawer: 7 user pages -->
+  <nav class="rail" id="rail">
     <span class="brand">💉</span>
     <a class="bm active"><span class="ic">💉</span><span class="lb">ค้นหายา</span></a>
     <a class="bm"><span class="ic">🧮</span><span class="lb">คำนวณ</span></a>
@@ -94,51 +159,68 @@
     <a class="bm"><span class="ic">🛡️</span><span class="lb">แพ้ยา</span></a>
   </nav>
 
-  <div class="main">
-    <div class="topbar">
-      <span class="logo">IV DrugRef</span>
-      <span class="vchip">v5.15.3</span>
-      <span class="grow"></span>
-      <button class="ghost" onclick="t()">🌓 โหมด</button>
-    </div>
+  <!-- edge toggle -->
+  <button class="toggle" id="toggle" title="ซ่อน/แสดงเมนู">‹‹</button>
 
-    <div class="scroll">
-      <div class="content">
-        <h2>แบบ A — แถบไอคอนซ้าย ตรึงนิ่ง</h2>
-        <p style="color:var(--text-muted);font-size:13px">รอบนี้ใช้เทคนิค <b>โครงจอตรึงเต็มหน้า + เลื่อนเฉพาะกล่องเนื้อหา</b> (ไม่ใช่ fixed ลอยทับ body) → แถบซ้าย/บน <b>นิ่งสนิท ไม่กระตุก</b> แม้บนมือถือ. ลองเลื่อนขึ้นลงเร็ว ๆ ดู. <b>7 หน้าผู้ใช้</b> (dashboard/admin ไม่อยู่ในแถบ).</p>
-        <div class="card">
-          <input class="search" placeholder="🔍 ค้นหายา เช่น vancomycin, KCl ...">
-          <div style="margin-top:10px"><span class="pill">⭐ ยาที่ใช้บ่อย</span><span class="pill">🕐 ดูล่าสุด</span></div>
-        </div>
-        <div class="card"><b>💉 Vancomycin</b><br><span style="color:var(--text-muted);font-size:13px">Antibiotic · ดูข้อมูลการบริหารยา IV</span></div>
-        <div class="card"><b>💧 Potassium chloride (KCl)</b><br><span style="color:var(--text-muted);font-size:13px">Electrolyte · ห้าม IV push</span></div>
-        <div class="card" style="text-align:center;color:var(--text-muted);font-size:13px">... เลื่อนดูเนื้อหาได้ แถบซ้าย + บน อยู่กับที่เสมอ ...</div>
-        <div class="card"><b>🧪 Meropenem</b><br><span style="color:var(--text-muted);font-size:13px">Carbapenem</span></div>
-        <div class="card"><b>🧪 Piperacillin/Tazobactam</b><br><span style="color:var(--text-muted);font-size:13px">Penicillin</span></div>
-        <div class="card"><b>💊 Phenytoin</b><br><span style="color:var(--text-muted);font-size:13px">Anticonvulsant</span></div>
-
-        <!-- compact footer -->
-        <div class="foot">
-          <span>💉 <b>IV DrugRef</b></span><span class="vchip">v5.15.3</span>
-          <span>· ภก.ฐาปนัท นาคครุฑ · สถาบันประสาทวิทยา</span>
-          <button onclick="document.getElementById('m').classList.add('open')">ℹ️ เกี่ยวกับ / Disclaimer / License</button>
-        </div>
-      </div>
-    </div>
-  </div>
  </div>
 
-  <div class="modal" id="m" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" id="m" onclick="if(event.target===this)this.classList.remove('open2')">
     <div class="sheet">
       <h3 style="margin-top:0">ℹ️ เกี่ยวกับแอปนี้</h3>
       <div class="box red"><b>⚠️ Disclaimer</b> — เครื่องมือสนับสนุนการตัดสินใจทางคลินิกเท่านั้น ไม่ทดแทนดุลยพินิจวิชาชีพ ตรวจสอบกับแหล่งอ้างอิงปฐมภูมิเสมอ</div>
       <div style="font-size:13px;text-align:center;margin:10px 0">จัดทำโดย ภก.ฐาปนัท นาคครุฑ (Benz)<br>กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา</div>
       <div class="box blue"><b>📜 License</b> — CC BY-NC-SA 4.0 · ใช้/แชร์/ดัดแปลงได้ ให้เครดิต · ห้ามเชิงพาณิชย์</div>
-      <div style="font-size:11px;color:var(--text-muted);text-align:center">แหล่งอ้างอิง: Lexicomp, Trissel's, AHFS, ISMP, Package Inserts · <b>เวอร์ชัน 5.15.3</b></div>
-      <div style="text-align:center;margin-top:14px"><button class="ghost" onclick="document.getElementById('m').classList.remove('open')">ปิด</button></div>
+      <div style="font-size:11px;color:var(--text-muted);text-align:center">แหล่งอ้างอิง: Lexicomp, Trissel's, AHFS, ISMP · <b>เวอร์ชัน 5.15.3</b></div>
+      <div style="text-align:center;margin-top:14px"><button class="ghost" onclick="document.getElementById('m').classList.remove('open2')">ปิด</button></div>
     </div>
   </div>
 
-  <script>function t(){var b=document.body;b.dataset.theme=b.dataset.theme==='dark'?'light':'dark';}</script>
+  <script>
+    var app=document.getElementById('app'), toggle=document.getElementById('toggle'),
+        scrim=document.getElementById('scrim'), menuBtn=document.getElementById('menuBtn'),
+        scroller=document.getElementById('scroll');
+
+    function setOpen(o){
+      app.classList.toggle('open', o);
+      toggle.textContent = o ? '‹‹' : '››';
+    }
+    function isOpen(){ return app.classList.contains('open'); }
+
+    toggle.addEventListener('click', function(){ setOpen(!isOpen()); });
+    menuBtn.addEventListener('click', function(){ setOpen(!isOpen()); });
+    scrim.addEventListener('click', function(){ setOpen(false); });
+
+    /* auto-hide on scroll down, reveal on scroll up */
+    var lastY=0, ticking=false, scrollTimer=null;
+    scroller.addEventListener('scroll', function(){
+      var y=scroller.scrollTop;
+      app.classList.add('scrolling');
+      clearTimeout(scrollTimer);
+      scrollTimer=setTimeout(function(){ app.classList.remove('scrolling'); },500);
+      if(!ticking){
+        requestAnimationFrame(function(){
+          if(y>lastY+6 && y>40){ setOpen(false); }      // scrolling down → hide
+          else if(y<lastY-6){ /* scrolling up: leave as-is (don't force open) */ }
+          lastY=y; ticking=false;
+        });
+        ticking=true;
+      }
+    });
+
+    /* swipe: right-from-left-edge = open, left = close */
+    var sx=0, sy=0, tracking=false;
+    document.addEventListener('touchstart', function(e){
+      var t=e.touches[0]; sx=t.clientX; sy=t.clientY;
+      tracking = isOpen() ? true : (sx<30);   // open: swipe anywhere; closed: only from edge
+    }, {passive:true});
+    document.addEventListener('touchend', function(e){
+      if(!tracking) return; tracking=false;
+      var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+      if(Math.abs(dx)<45 || Math.abs(dy)>Math.abs(dx)) return;  // not a horizontal swipe
+      if(dx>0) setOpen(true); else setOpen(false);
+    }, {passive:true});
+
+    function t(){var b=document.body;b.dataset.theme=b.dataset.theme==='dark'?'light':'dark';}
+  </script>
 </body>
 </html>

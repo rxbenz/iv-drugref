@@ -180,7 +180,7 @@ COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
 
 ---
 
-## กลุ่มที่ 3 — Anticonvulsant (aromatic AEDs) + HLA (DRAFT 🟡 รอ verify)
+## กลุ่มที่ 3 — Anticonvulsant (aromatic AEDs) + HLA (✅ verify + encode แล้ว 2026-06-18)
 
 ### 🔑 ใจความ: 2 แกน — (1) แพ้ข้ามใน aromatic AEDs (2) HLA pharmacogenomic
 ยากันชักกลุ่ม **aromatic** (มีวงแหวน aromatic) แพ้ข้ามกันสูงมาก โดยเฉพาะปฏิกิริยา
@@ -236,13 +236,14 @@ COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
 - **thaiHLA2022** — Implementation of HLA-B*15:02 Genotyping as Standard-of-Care …
   in Thailand. *Front Pharmacol* 2022;13:867490.
 
-### Checklist verify (กลุ่ม Anticonvulsant)
-- [ ] เห็นชอบรายการ 🚫 aromatic AEDs (รวม lamotrigine อยู่ในกลุ่มเลี่ยง)
-- [ ] เห็นชอบรายการ ✅ non-aromatic (valproate/levetiracetam/gabapentinoid/topiramate/BZD/lacosamide)
-- [ ] เห็นชอบ zonisamide = "ระวัง" (sulfonamide-derivative)
-- [ ] เห็นชอบ HLA callout (B*15:02 + A*31:01) แสดงเด่น
-- [ ] ยืนยันตัวเลข: แพ้ข้าม 40-58% · MPE 8% / SJS 29% / overlap 50% · Thai B*15:02 ~8-27%
-- [ ] ตัดสิน: phenytoin + HLA-B*15:02 → คงเป็น "เลี่ยงถ้ามีทางเลือก" หรือ "ห้าม"
+### Checklist verify (กลุ่ม Anticonvulsant) — ✅ ครบ 2026-06-18
+- [x] เห็นชอบรายการ 🚫 aromatic AEDs (รวม lamotrigine อยู่ในกลุ่มเลี่ยง)
+- [x] เห็นชอบรายการ ✅ non-aromatic (valproate/levetiracetam/gabapentinoid/topiramate/BZD/lacosamide)
+- [x] เห็นชอบ zonisamide = "ระวัง" (sulfonamide-derivative)
+- [x] เห็นชอบ HLA callout (B*15:02 + A*31:01) แสดงเด่น
+- [x] ยืนยันตัวเลข: แพ้ข้าม 40-58% · MPE 8% / SJS 29% / overlap 50% · Thai B*15:02 ~8-27%
+- [x] ตัดสิน: phenytoin + HLA-B*15:02 → **"เลี่ยงถ้ามีทางเลือก" (ตาม CPIC)**
+- [x] engine: เพิ่ม `keepSafeOnScar` → non-aromatic AED คงเป็น "ปลอดภัย" แม้ SCAR
 
 ---
 

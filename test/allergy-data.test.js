@@ -270,6 +270,52 @@ test('NBL: sulfonamide group has NO callout (backward-compat)', () => {
   assert.equal(r.calloutNote, '');
 });
 
+// ───────────────────────── non-beta-lactam: Anticonvulsants ───────────────
+test('NBL: anticonvulsant group exists with allergens indexed', () => {
+  const g = A.NBL_GROUPS.find((x) => x.id === 'anticonvulsant');
+  assert.ok(g, 'anticonvulsant group present');
+  assert.ok(A.NBL_INDEX.carbamazepine, 'carbamazepine indexed as an allergen');
+  assert.equal(g.keepSafeOnScar, true);
+});
+
+test('NBL: carbamazepine/IgE -> avoid aromatic AEDs, safe non-aromatic, caution zonisamide', () => {
+  const r = A.buildReport('carbamazepine', 'ige');
+  assert.equal(r.isNbl, true);
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  const saferG = r.safer.map((x) => x.drug.generic);
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Oxcarbazepine'));        // aromatic
+  assert.ok(avoidG.includes('Phenytoin'));
+  assert.ok(avoidG.includes('Lamotrigine'));          // lamotrigine = avoid
+  assert.ok(saferG.includes('Levetiracetam'));        // non-aromatic
+  assert.ok(saferG.some((g) => /Valproic/.test(g)));
+  assert.ok(cautionG.includes('Zonisamide'));         // sulfonamide-derivative
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+});
+
+test('NBL: anticonvulsant carries HLA callout', () => {
+  const r = A.buildReport('carbamazepine', 'ige');
+  assert.match(r.calloutNote, /HLA-B\*15:02/);
+});
+
+test('NBL: anticonvulsant SCAR -> non-aromatic AEDs STAY safe (keepSafeOnScar)', () => {
+  const r = A.buildReport('carbamazepine', 'scar');
+  assert.equal(r.blocked, false);
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(saferG.includes('Levetiracetam'), 'non-aromatic must remain in safer at SCAR');
+  assert.ok(r.safer.every((x) => x.tier === 'negligible'));
+  // zonisamide stays caution; safe items are NOT downgraded into caution
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  assert.ok(cautionG.includes('Zonisamide'));
+  assert.ok(!cautionG.includes('Levetiracetam'));
+});
+
+test('NBL: sulfonamide SCAR still downgrades safe (no keepSafeOnScar regression)', () => {
+  const r = A.buildReport('cotrimoxazole', 'scar');
+  assert.equal(r.safer.length, 0);
+  assert.ok(r.caution.some((x) => x.drug.generic === 'Celecoxib'));
+});
+
 // ───────────────────────── overrides precedence ──────────────────────────
 test('override beats structural rule (cefazolin target wins over low default)', () => {
   // cefazolin is a cephalosporin; without override a penicillin->ceph default

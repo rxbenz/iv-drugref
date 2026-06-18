@@ -32,7 +32,11 @@
     ccjm2025:   'Can my patient with a “sulfa allergy” receive celecoxib or other nonantimicrobial sulfonamides? Cleve Clin J Med 2025;92(3):147.',
     kowalski2013: 'Kowalski ML, et al. Classification and practical approach to the diagnosis and management of hypersensitivity to NSAIDs. Allergy 2013;68(10):1219-32.',
     dona2020:   'Doña I, et al. Progress in understanding hypersensitivity reactions to nonsteroidal anti-inflammatory drugs. Allergy 2020;75(3):561-575.',
-    nsaidReview2026: 'Cross-Reactivity and Cross-Intolerance Among NSAIDs: COX-1-Mediated Mechanisms, COX-2 Inhibitors and Paracetamol. Int J Mol Sci 2026;27:3727.'
+    nsaidReview2026: 'Cross-Reactivity and Cross-Intolerance Among NSAIDs: COX-1-Mediated Mechanisms, COX-2 Inhibitors and Paracetamol. Int J Mol Sci 2026;27:3727.',
+    cpic2017cbz: 'Phillips EJ, et al. CPIC Guideline for HLA Genotype and Use of Carbamazepine and Oxcarbazepine: 2017 Update. Clin Pharmacol Ther 2018;103(4):574-581.',
+    cpic2020phenytoin: 'Karnes JH, et al. CPIC Guideline for CYP2C9 and HLA-B Genotypes and Phenytoin Dosing: 2020 Update. Clin Pharmacol Ther 2021;109(2):302-309.',
+    aedCrossReview: 'Rashes and other hypersensitivity reactions associated with antiepileptic drugs: a review of current literature. Seizure 2019.',
+    thaiHLA2022: 'Implementation of HLA-B*15:02 Genotyping as Standard-of-Care for Reducing Carbamazepine/Oxcarbazepine Induced Cutaneous ADR in Thailand. Front Pharmacol 2022;13:867490.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -280,6 +284,56 @@
       // prominent callout: the single-drug (selective) scenario flips the whole logic.
       // buildNblReport appends the culprit's same-chemical-group siblings.
       singleDrugCallout: '⚠️ ถ้าแพ้ NSAID “ตัวเดียว” (เคยใช้ NSAID ตัวอื่นได้ปกติ หรือ anaphylaxis ต่อตัวเดียว) = single-drug (selective) ไม่ใช่ cross-reactive → เลี่ยงเฉพาะตัวที่แพ้ + กลุ่มเคมีเดียวกัน ส่วน NSAID กลุ่มเคมีอื่นใช้ได้ แม้เป็น COX-1 แรง'
+    },
+    {
+      id: 'anticonvulsant',
+      label: 'Anticonvulsants (aromatic)',
+      refs: ['cpic2017cbz', 'cpic2020phenytoin', 'aedCrossReview', 'thaiHLA2022'],
+      // Non-aromatic AEDs are the recommended switch after an aromatic-AED SCAR,
+      // so they must STAY "safe" even at SCAR severity (unlike sulfa/NSAID).
+      keepSafeOnScar: true,
+      // selectable allergens (the aromatic AED the patient reacted to)
+      allergens: [
+        { id: 'carbamazepine', generic: 'Carbamazepine', th: 'คาร์บามาเซพีน',   trade: ['Tegretol'] },
+        { id: 'oxcarbazepine', generic: 'Oxcarbazepine', th: 'ออกซ์คาร์บาเซพีน', trade: ['Trileptal'] },
+        { id: 'phenytoin',     generic: 'Phenytoin',     th: 'เฟนิโทอิน',        trade: ['Dilantin'] },
+        { id: 'phenobarbital', generic: 'Phenobarbital', th: 'ฟีโนบาร์บิทาล',    trade: [] },
+        { id: 'lamotrigine',   generic: 'Lamotrigine',   th: 'ลาโมไทรจีน',       trade: ['Lamictal'] }
+      ],
+      // cross-reactive (avoid) — other aromatic AEDs (40-58%, higher in SCAR)
+      crossReason: 'aromatic AED เหมือนกัน → แพ้ข้ามสูง (~40-58%, ยิ่งสูงใน SCAR)',
+      crossReactive: [
+        { id: 'carbamazepine', generic: 'Carbamazepine', th: 'คาร์บามาเซพีน',   sub: 'Aromatic AED · HLA-B*15:02' },
+        { id: 'oxcarbazepine', generic: 'Oxcarbazepine', th: 'ออกซ์คาร์บาเซพีน', sub: 'Aromatic AED · HLA-B*15:02' },
+        { id: 'phenytoin',     generic: 'Phenytoin',     th: 'เฟนิโทอิน',        sub: 'Aromatic AED' },
+        { generic: 'Fosphenytoin', th: 'ฟอสเฟนิโทอิน', sub: 'Aromatic AED (prodrug ของ phenytoin)' },
+        { id: 'phenobarbital', generic: 'Phenobarbital', th: 'ฟีโนบาร์บิทาล',    sub: 'Aromatic AED (barbiturate)' },
+        { generic: 'Primidone', th: 'ไพรมิโดน', sub: 'Aromatic AED (เปลี่ยนเป็น phenobarbital)' },
+        { id: 'lamotrigine',   generic: 'Lamotrigine',   th: 'ลาโมไทรจีน',       sub: 'Aromatic AED · เสี่ยง SJS เอง' }
+      ],
+      // safe — non-aromatic AEDs (no cross-reactivity; the recommended switch)
+      safeReason: 'non-aromatic AED ไม่แพ้ข้ามกับ aromatic → เป็นยาที่แนะนำให้เปลี่ยนไปใช้',
+      safe: [
+        { generic: 'Valproic acid (Valproate)', th: 'กรดวาลโพรอิก', sub: 'Non-aromatic AED' },
+        { generic: 'Levetiracetam', th: 'เลเวทิราเซแทม', sub: 'Non-aromatic AED' },
+        { generic: 'Gabapentin',    th: 'กาบาเพนติน',   sub: 'Gabapentinoid' },
+        { generic: 'Pregabalin',    th: 'พรีกาบาลิน',   sub: 'Gabapentinoid' },
+        { generic: 'Topiramate',    th: 'โทพิราเมต',    sub: 'Non-aromatic AED' },
+        { generic: 'Clonazepam',    th: 'โคลนาเซแพม',   sub: 'Benzodiazepine' },
+        { generic: 'Lacosamide',    th: 'ลาโคซาไมด์',   sub: 'Non-aromatic AED' }
+      ],
+      // caution — zonisamide: sulfonamide-derivative (separate SJS mechanism)
+      caution: [
+        { generic: 'Zonisamide', th: 'โซนิซาไมด์', sub: 'Sulfonamide-derivative', pct: 'ระวัง',
+          reason: 'sulfonamide-derivative (เสี่ยง SJS คนละกลไก) — ไม่ใช่ aromatic แต่ไม่ปลอดภัยสนิท',
+          advice: 'พิจารณาเลี่ยงถ้ามี non-aromatic ตัวอื่น' }
+      ],
+      noteMild: 'ผื่น MPE: แพ้ข้าม aromatic ~8% — แนะนำเปลี่ยนเป็น non-aromatic AED เพื่อความปลอดภัย',
+      noteIge:  'เปลี่ยนเป็น non-aromatic AED · เลี่ยง aromatic AED ทั้งกลุ่ม (ปฏิกิริยาเป็น T-cell delayed ไม่ใช่ IgE)',
+      noteScar: 'SCAR จาก aromatic AED: เลี่ยง aromatic AED ทั้งหมดเด็ดขาด · ห้าม challenge · ใช้ non-aromatic เท่านั้น',
+      scarCautionNote: 'กรณี SCAR: พิจารณาเลี่ยงถ้าไม่จำเป็น',
+      // prominent HLA pharmacogenomic callout (highly relevant for Thai patients)
+      singleDrugCallout: '🧬 HLA: ผู้ที่มี HLA-B*15:02 (พบในคนไทย ~8-27%) — CPIC: ห้ามใช้ carbamazepine + oxcarbazepine และเลี่ยง phenytoin/fosphenytoin ถ้ามีทางเลือก · HLA-A*31:01 → เลี่ยง carbamazepine · แนะนำตรวจ HLA-B*15:02 ก่อนเริ่ม carbamazepine/oxcarbazepine ในคนไทย'
     }
   ];
 
@@ -353,16 +407,19 @@
       };
     });
 
-    // safe alternatives -> "safer" normally; downgraded to "caution" if SCAR.
+    // safe alternatives -> "safer" normally; downgraded to "caution" if SCAR —
+    // UNLESS the group opts out (keepSafeOnScar: e.g. non-aromatic AEDs are the
+    // recommended switch after an aromatic-AED SCAR, so they stay safe).
     // Items may carry their own pct/reason/advice; otherwise fall back to group.
+    const scarDowngradesSafe = isScar && !g.keepSafeOnScar;
     const safeItems = g.safe.map(function (d) {
       return {
         drug: { generic: d.generic, th: d.th, class: d.sub },
-        decision: isScar ? 'caution' : 'safer',
-        tier: isScar ? 'moderate' : 'negligible',
-        pct: isScar ? 'ระวัง' : (d.pct || 'ไม่แพ้ข้าม'),
+        decision: scarDowngradesSafe ? 'caution' : 'safer',
+        tier: scarDowngradesSafe ? 'moderate' : 'negligible',
+        pct: scarDowngradesSafe ? 'ระวัง' : (d.pct || 'ไม่แพ้ข้าม'),
         reason: d.reason || g.safeReason, refs: g.refs,
-        advice: isScar ? g.scarCautionNote : (d.advice || '')
+        advice: scarDowngradesSafe ? g.scarCautionNote : (d.advice || '')
       };
     });
 
@@ -407,8 +464,8 @@
       severityNote: note,
       calloutNote: callout,
       avoid: avoid,
-      caution: isScar ? cautionItems.concat(safeItems) : cautionItems,
-      safer: isScar ? [] : safeItems,
+      caution: scarDowngradesSafe ? cautionItems.concat(safeItems) : cautionItems,
+      safer: scarDowngradesSafe ? [] : safeItems,
       nonBetaLactam: null,   // for NBL the "safe" list already names the alternatives
       blocked: false,
       isNbl: true

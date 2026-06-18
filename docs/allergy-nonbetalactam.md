@@ -307,3 +307,55 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 > Encoded ใน `js/allergy-data.js` (`NBL_GROUPS` + `buildNblReport`), wired ใน
 > `js/allergy.js` (dropdown + กลุ่ม "ใช้ด้วยความระมัดระวัง"), locked โดย 7 tests
 > ใน `test/allergy-data.test.js` (รวม 104 tests ผ่าน).
+
+---
+
+## กลุ่มที่ 5 — Local Anesthetics (ยาชาเฉพาะที่) — ✅ verify + encode แล้ว 2026-06-18
+
+### หลักการ: แพ้ข้ามขึ้นกับ "linkage" (ester vs amide) ไม่ใช่ "เป็นยาชา"
+- **Ester** (procaine, benzocaine, tetracaine, chloroprocaine): ถูกย่อยเป็น
+  **PABA** (para-aminobenzoic acid) ซึ่งเป็นตัวก่อแพ้ → **ester แพ้ข้ามกันเอง (สูง)**
+- **Amide** (lidocaine, bupivacaine, mepivacaine, ropivacaine, prilocaine,
+  articaine): แพ้จริงพบ **<1%** · แพ้ข้าม amide↔amide **ต่ำ/ไม่แน่นอน**
+- **ester ↔ amide ไม่แพ้ข้ามกัน** → ถ้าแพ้กลุ่มหนึ่ง ใช้ another class ได้
+- ⚠️ แพ้ LA จริงพบน้อยมาก — ส่วนใหญ่เป็นปฏิกิริยา**ไม่ใช่ภูมิแพ้** (vasovagal,
+  ใจสั่น/มือสั่นจาก epinephrine, วิตกกังวล, พิษจากยา) → ซักประวัติให้ดีก่อน
+
+### Preservative / additive (สารก่อแพ้คนละตัว)
+- **Methylparaben** (สารกันเสียใน multidose vial) โครงสร้างใกล้ PABA → อาจแพ้ข้าม
+  ในคนแพ้ **ester** → เลือกชนิด single-dose / preservative-free
+- **Sodium metabisulfite** (สารกันหืนในสูตรผสม **epinephrine**) → ถ้าสงสัยให้ใช้
+  สูตร plain (ไม่ผสม adrenaline)
+
+### โมเดลข้อมูล: แยกเป็น 2 NBL groups
+แทนที่จะทำ cross-list ราย allergen (engine ไม่รองรับ) → แยก linkage เป็นคนละกลุ่ม
+ทำให้ engine เดิมแสดง "อีก class = ปลอดภัย" ได้เลย:
+
+| Group | crossReactive (ในกลุ่ม) | safe (ทางเลือก) | flag |
+|---|---|---|---|
+| `la-ester` | ester อื่น = 🔴 สูง (PABA) | amide ทั้งหมด | `keepSafeOnScar` |
+| `la-amide` | amide อื่น = 🟡 ต่ำ → 🔴 เมื่อ SCAR | ester + amide ที่ skin-test ผ่าน | `crossClassCaution`, `keepSafeOnScar` |
+
+- `la-ester` ใช้ default (crossReactive = avoid/high)
+- `la-amide` ใช้ `crossClassCaution: true` (amide แพ้ข้ามต่ำ → caution; escalate avoid เมื่อ SCAR)
+- ทั้งสองกลุ่ม `keepSafeOnScar: true` เพราะอีก class คนละโครงสร้าง → ปลอดภัยแม้ SCAR
+
+### Severity
+- mild/IgE → เลี่ยงทั้ง class ที่แพ้, ใช้อีก class ได้ (preservative-free)
+- SCAR (พบยากมาก) → เลี่ยงทั้ง class · ห้าม challenge · อีก class ใช้ภายใต้การดูแล
+
+### Checklist verify (กลุ่ม Local Anesthetic) — ✅ ครบ 2026-06-18
+- [x] เห็นชอบแยก ester/amide เป็น 2 กลุ่ม (linkage-based)
+- [x] เห็นชอบ ester↔ester สูง (PABA) · amide↔amide ต่ำ · ester↔amide = ไม่แพ้ข้าม
+- [x] เห็นชอบเตือน methylparaben (ester) + metabisulfite (สูตรผสม epi)
+- [x] เห็นชอบเน้น "แพ้ LA จริง <1% ส่วนใหญ่ไม่ใช่ภูมิแพ้"
+
+### อ้างอิงกลุ่ม Local Anesthetic
+- **bhole2012** — Bhole MV, et al. IgE-mediated allergy to local anaesthetics:
+  separating fact from perception. *Br J Anaesth* 2012;108(6):903-11.
+- **harboe2010** — Harboe T, et al. Suspected allergy to local anaesthetics:
+  follow-up in 135 cases. *Acta Anaesthesiol Scand* 2010;54(5):536-42.
+- **khan2022** — Drug allergy: 2022 practice parameter update. *JACI* 2022.
+
+> Encoded ใน `js/allergy-data.js` (groups `la-ester` + `la-amide`), locked โดย
+> 4 tests ใน `test/allergy-data.test.js` (รวม 125 tests ผ่าน).

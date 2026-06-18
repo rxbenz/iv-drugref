@@ -356,6 +356,49 @@ test('NBL: moxifloxacin flagged highest cross-reactivity (~5.3%)', () => {
   assert.ok(moxi && /5\.3/.test(moxi.pct));
 });
 
+// ──────────────── non-beta-lactam: Local anesthetics (ester/amide) ─────────
+test('NBL: two LA groups exist with correct flags', () => {
+  const e = A.NBL_GROUPS.find((x) => x.id === 'la-ester');
+  const m = A.NBL_GROUPS.find((x) => x.id === 'la-amide');
+  assert.ok(e && m, 'both LA groups present');
+  assert.equal(e.crossClassCaution, undefined, 'esters cross-react (not caution)');
+  assert.equal(e.keepSafeOnScar, true);
+  assert.equal(m.crossClassCaution, true, 'amides = low cross (caution)');
+  assert.equal(m.keepSafeOnScar, true);
+  assert.ok(A.NBL_INDEX.procaine && A.NBL_INDEX.lidocaine);
+});
+
+test('NBL: ester allergy -> other esters AVOID (high), amides safe', () => {
+  const r = A.buildReport('procaine', 'ige');
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Tetracaine') && avoidG.includes('Benzocaine'));
+  assert.ok(!avoidG.includes('Procaine'), 'culprit excluded');
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(saferG.includes('Lidocaine') && saferG.includes('Bupivacaine'));
+  // methylparaben preservative caveat surfaces as caution
+  assert.ok(r.caution.some((x) => /methylparaben/i.test(x.drug.generic)));
+});
+
+test('NBL: amide allergy/IgE -> other amides CAUTION (low), esters safe', () => {
+  const r = A.buildReport('lidocaine', 'ige');
+  assert.equal(r.avoid.length, 0, 'no hard-avoid for non-SCAR amide');
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  assert.ok(cautionG.includes('Bupivacaine') && cautionG.includes('Articaine'));
+  assert.ok(!cautionG.includes('Lidocaine'), 'culprit excluded');
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(saferG.includes('Procaine') && saferG.includes('Tetracaine'));
+});
+
+test('NBL: amide SCAR -> other amides escalate to avoid, esters stay safe', () => {
+  const r = A.buildReport('lidocaine', 'scar');
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Bupivacaine'));
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  assert.ok(r.safer.some((x) => x.drug.generic === 'Procaine'),
+    'esters remain safe at SCAR (keepSafeOnScar, cross-class)');
+});
+
 // ───────────────────────── overrides precedence ──────────────────────────
 test('override beats structural rule (cefazolin target wins over low default)', () => {
   // cefazolin is a cephalosporin; without override a penicillin->ceph default

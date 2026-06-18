@@ -39,7 +39,9 @@
     thaiHLA2022: 'Implementation of HLA-B*15:02 Genotyping as Standard-of-Care for Reducing Carbamazepine/Oxcarbazepine Induced Cutaneous ADR in Thailand. Front Pharmacol 2022;13:867490.',
     fqCohort2022: 'Immediate Hypersensitivity to Fluoroquinolones: A Cohort Assessing Cross-Reactivity. Open Forum Infect Dis 2022;9(4):ofac106.',
     fqInClass2023: 'In-Class Cross-Reactivity among Hospitalized Patients with Hypersensitivity Reactions to Fluoroquinolones. Antimicrob Agents Chemother 2023.',
-    eaaci2025fq: 'Gelincik A, et al. Diagnosis of Quinolone Hypersensitivity: An EAACI Position Paper. Allergy 2025.'
+    eaaci2025fq: 'Gelincik A, et al. Diagnosis of Quinolone Hypersensitivity: An EAACI Position Paper. Allergy 2025.',
+    bhole2012: 'Bhole MV, et al. IgE-mediated allergy to local anaesthetics: separating fact from perception — a UK perspective. Br J Anaesth 2012;108(6):903-11.',
+    harboe2010: 'Harboe T, et al. Suspected allergy to local anaesthetics: follow-up in 135 cases. Acta Anaesthesiol Scand 2010;54(5):536-42.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -381,6 +383,103 @@
       scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม',
       // prominent callout: the modern low-cross-reactivity nuance
       singleDrugCallout: '💡 หลักฐานใหม่ (2022-2025): แพ้ข้ามใน FQ ต่ำ (~2-5%) การเลี่ยงทั้งกลุ่มอาจไม่จำเป็น — แต่ oral challenge เป็นวิธีเดียวที่ยืนยัน tolerance ของ FQ ตัวอื่นได้ (skin test บอกได้แค่ว่าแพ้กลุ่ม) → ค่าเริ่มต้นที่ปลอดภัยสุดคือใช้ยานอกกลุ่ม FQ · SCAR = เลี่ยงทั้งกลุ่มเด็ดขาด'
+    },
+    // ── Local anesthetics — split into TWO groups by linkage chemistry ────────
+    // Cross-reactivity is driven by the ester/amide linkage, not by "LA" as a
+    // whole: ESTERS share a PABA metabolite (cross-react with each other); AMIDES
+    // rarely cross-react and NEVER cross-react with esters. Modelling each linkage
+    // as its own NBL group lets the existing engine express "other class is safe"
+    // without per-allergen cross lists. True IgE LA allergy is rare (<1%) — most
+    // reactions are non-allergic (vasovagal / epinephrine / anxiety / toxicity).
+    {
+      id: 'la-ester',
+      label: 'Local Anesthetic — Ester (เอสเทอร์)',
+      refs: ['bhole2012', 'harboe2010', 'khan2022'],
+      keepSafeOnScar: true,   // amides are a different class → safe even at SCAR
+      // selectable allergens (ester-type LAs)
+      allergens: [
+        { id: 'procaine',      generic: 'Procaine',      th: 'โพรเคน',     trade: ['Novocaine'] },
+        { id: 'benzocaine',    generic: 'Benzocaine',    th: 'เบนโซเคน',   trade: ['ยาชาเฉพาะที่/อมแก้เจ็บคอ'] },
+        { id: 'tetracaine',    generic: 'Tetracaine',    th: 'เตตราเคน',   trade: ['Amethocaine'] },
+        { id: 'chloroprocaine', generic: 'Chloroprocaine', th: 'คลอโรโพรเคน', trade: ['Nesacaine'] }
+      ],
+      // in-class (other esters) — share the PABA metabolite → cross-react
+      crossReason: 'ester เหมือนกัน → เมแทบอลิซึมเป็น PABA ร่วมกัน → แพ้ข้ามได้',
+      crossReactive: [
+        { id: 'procaine',      generic: 'Procaine',      th: 'โพรเคน',     sub: 'Ester LA (→ PABA)' },
+        { id: 'benzocaine',    generic: 'Benzocaine',    th: 'เบนโซเคน',   sub: 'Ester LA (→ PABA)' },
+        { id: 'tetracaine',    generic: 'Tetracaine',    th: 'เตตราเคน',   sub: 'Ester LA (→ PABA)' },
+        { id: 'chloroprocaine', generic: 'Chloroprocaine', th: 'คลอโรโพรเคน', sub: 'Ester LA (→ PABA)' }
+      ],
+      // safe — amide LAs (no PABA, structurally unrelated → no cross-reactivity)
+      safeReason: 'amide LA ไม่มี PABA และคนละโครงสร้าง → ไม่แพ้ข้ามกับ ester (เลือกชนิด preservative-free)',
+      safe: [
+        { generic: 'Lidocaine',    th: 'ลิโดเคน',     sub: 'Amide LA' },
+        { generic: 'Mepivacaine',  th: 'เมพิวาเคน',   sub: 'Amide LA' },
+        { generic: 'Bupivacaine',  th: 'บูพิวาเคน',   sub: 'Amide LA' },
+        { generic: 'Ropivacaine',  th: 'โรพิวาเคน',   sub: 'Amide LA' },
+        { generic: 'Prilocaine',   th: 'ไพรโลเคน',    sub: 'Amide LA' },
+        { generic: 'Articaine',    th: 'อาร์ติเคน',   sub: 'Amide LA' }
+      ],
+      // preservative caveat: methylparaben ≈ PABA → may cross-react in ester allergy
+      caution: [
+        { generic: 'ยาที่ผสม methylparaben (multidose vial)', th: 'สูตรผสมสารกันเสีย methylparaben',
+          sub: 'preservative ใกล้เคียง PABA', pct: 'ระวัง',
+          reason: 'methylparaben มีโครงสร้างใกล้เคียง PABA → อาจกระตุ้นการแพ้ในคนที่แพ้ ester',
+          advice: 'เลือกชนิด single-dose / preservative-free' }
+      ],
+      noteMild: 'แพ้ผื่นจาก ester LA: เลี่ยง ester ทั้งกลุ่ม (แพ้ข้ามผ่าน PABA) → ใช้ amide LA (เช่น lidocaine) ชนิด preservative-free',
+      noteIge:  'IgE ต่อ ester LA: เลี่ยง ester ทั้งกลุ่ม → ใช้ amide LA ได้ (ไม่แพ้ข้าม) เลือกชนิด preservative-free',
+      noteScar: 'SCAR จาก ester LA (พบยาก): เลี่ยง ester ทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ amide LA ภายใต้การดูแล',
+      scarCautionNote: 'กรณี SCAR: ใช้ amide ภายใต้การดูแลผู้เชี่ยวชาญ',
+      singleDrugCallout: '💡 ester LA แพ้ข้ามกันผ่านสาร PABA → ถ้าแพ้ ester ตัวหนึ่งให้ถือว่าเสี่ยงทั้งกลุ่ม แต่ใช้ amide LA (lidocaine ฯลฯ) ได้เพราะไม่แพ้ข้าม · ระวัง preservative methylparaben (ใกล้ PABA) → เลือก preservative-free · หมายเหตุ: แพ้ LA จริงพบ <1% ส่วนใหญ่เป็นปฏิกิริยาไม่ใช่ภูมิแพ้ (vasovagal/epinephrine)'
+    },
+    {
+      id: 'la-amide',
+      label: 'Local Anesthetic — Amide (เอไมด์)',
+      refs: ['bhole2012', 'harboe2010', 'khan2022'],
+      crossClassCaution: true, // amide↔amide cross-reactivity low/inconsistent
+      keepSafeOnScar: true,    // esters are a different class → safe even at SCAR
+      // selectable allergens (amide-type LAs)
+      allergens: [
+        { id: 'lidocaine',   generic: 'Lidocaine',   th: 'ลิโดเคน',   trade: ['Xylocaine'] },
+        { id: 'bupivacaine', generic: 'Bupivacaine', th: 'บูพิวาเคน', trade: ['Marcaine'] },
+        { id: 'mepivacaine', generic: 'Mepivacaine', th: 'เมพิวาเคน', trade: ['Scandonest'] },
+        { id: 'ropivacaine', generic: 'Ropivacaine', th: 'โรพิวาเคน', trade: ['Naropin'] },
+        { id: 'prilocaine',  generic: 'Prilocaine',  th: 'ไพรโลเคน',  trade: ['Citanest', 'EMLA (w/ lidocaine)'] },
+        { id: 'articaine',   generic: 'Articaine',   th: 'อาร์ติเคน', trade: ['Septanest', 'Ubistesin'] }
+      ],
+      // in-class (other amides) — cross-reactivity low/inconsistent
+      crossReason: 'amide เหมือนกัน — แพ้ข้ามไม่บ่อยและไม่แน่นอน',
+      crossReactive: [
+        { id: 'lidocaine',   generic: 'Lidocaine',   th: 'ลิโดเคน',   sub: 'Amide LA', pct: 'แพ้ข้ามต่ำ' },
+        { id: 'bupivacaine', generic: 'Bupivacaine', th: 'บูพิวาเคน', sub: 'Amide LA', pct: 'แพ้ข้ามต่ำ' },
+        { id: 'mepivacaine', generic: 'Mepivacaine', th: 'เมพิวาเคน', sub: 'Amide LA', pct: 'แพ้ข้ามต่ำ' },
+        { id: 'ropivacaine', generic: 'Ropivacaine', th: 'โรพิวาเคน', sub: 'Amide LA', pct: 'แพ้ข้ามต่ำ' },
+        { id: 'prilocaine',  generic: 'Prilocaine',  th: 'ไพรโลเคน',  sub: 'Amide LA', pct: 'แพ้ข้ามต่ำ' },
+        { id: 'articaine',   generic: 'Articaine',   th: 'อาร์ติเคน', sub: 'Amide LA', pct: 'แพ้ข้ามต่ำ' }
+      ],
+      // safe — ester LAs (different class, no cross-reactivity)
+      safeReason: 'ester LA คนละโครงสร้าง → ไม่แพ้ข้ามกับ amide (หรือใช้ amide ตัวอื่นที่ skin test + graded challenge ผ่าน)',
+      safe: [
+        { generic: 'Procaine',   th: 'โพรเคน',   sub: 'Ester LA' },
+        { generic: 'Tetracaine', th: 'เตตราเคน', sub: 'Ester LA' },
+        { generic: 'Benzocaine', th: 'เบนโซเคน', sub: 'Ester LA (เฉพาะที่)' },
+        { generic: 'Amide LA ตัวอื่นที่ผ่าน skin test + graded challenge', th: 'amide ที่ทดสอบแล้วว่าใช้ได้',
+          sub: 'ยืนยันโดยผู้เชี่ยวชาญ' }
+      ],
+      // additive caveat: metabisulfite in epinephrine-containing LA
+      caution: [
+        { generic: 'สูตรผสม epinephrine (มี metabisulfite)', th: 'ยาชาผสม adrenaline',
+          sub: 'sodium metabisulfite = สารกันหืน', pct: 'ระวัง',
+          reason: 'metabisulfite (ในสูตรผสม epi) เป็นสารก่อแพ้คนละตัว → ถ้าสงสัยให้ใช้สูตรไม่ผสม epi',
+          advice: 'เลือกสูตร plain (ไม่ผสม adrenaline) ถ้าสงสัย metabisulfite' }
+      ],
+      noteMild: 'แพ้ผื่นจาก amide LA (พบน้อยมาก): แพ้ข้ามในกลุ่ม amide ต่ำ → ยืนยันด้วย skin test; ใช้ ester LA ได้ (ไม่แพ้ข้าม)',
+      noteIge:  'IgE ต่อ amide LA: แพ้ข้ามในกลุ่ม amide ต่ำ/ไม่แน่นอน → ใช้ ester LA (ไม่แพ้ข้าม) หรือ amide ตัวอื่นที่ skin test ผ่าน',
+      noteScar: 'SCAR จาก amide LA (พบยากมาก): เลี่ยง amide ทั้งกลุ่ม · ห้าม challenge · ใช้ ester LA ภายใต้การดูแล',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม amide',
+      singleDrugCallout: '💡 การแพ้ amide LA จริงพบ <1% — ส่วนใหญ่เป็นปฏิกิริยาไม่ใช่ภูมิแพ้ (vasovagal / ใจสั่นจาก epinephrine / วิตกกังวล / พิษจากยา) ควรซักประวัติให้แน่ใจก่อน · แพ้ข้าม amide↔amide ต่ำ/ไม่แน่นอน → ใช้ ester LA ได้ หรือยืนยัน amide ตัวอื่นด้วย skin test + graded challenge · ระวัง metabisulfite ในสูตรผสม epinephrine'
     }
   ];
 

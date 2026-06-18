@@ -54,22 +54,57 @@
     return CLASS_LABEL[d.class] || d.class;
   }
 
+  // R1 side-chain description for the expand panel
+  function clusterText(d) {
+    if (d.unique) return 'side chain ไม่ซ้ำกับ beta-lactam อื่น (จึงแพ้ข้ามต่ำมาก)';
+    if (d.cluster && A.CLUSTERS[d.cluster]) return A.CLUSTERS[d.cluster].label;
+    return 'ไม่อยู่ในกลุ่ม R1 ที่ใช้จับคู่';
+  }
+
+  // one "label: value" line for the detail panel
+  function dl(label, value) {
+    if (!value) return '';
+    return '<div class="ar-dl"><span class="ar-dl-k">' + esc(label) + '</span>' +
+      '<span class="ar-dl-v">' + value + '</span></div>';
+  }
+
+  // expandable detail (hidden until the card is opened)
+  function detailHtml(item) {
+    var d = item.drug;
+    var trade = (d.trade && d.trade.length) ? esc(d.trade.join(', ')) : '—';
+    var pctLine = esc(item.pct || '');
+    if (item.pctCI) pctLine += ' <span class="ar-muted">(95% CI ~' + esc(item.pctCI) + '%)</span>';
+    var refLis = (item.refs || [])
+      .filter(function (k) { return A.REFS[k]; })
+      .map(function (k) { return '<li>' + esc(A.REFS[k]) + '</li>'; }).join('');
+    var refBlock = refLis ? '<ol class="ar-dl-refs">' + refLis + '</ol>' : '';
+    return '<div class="ar-detail">' +
+      dl('ชื่อการค้า', trade) +
+      dl('กลุ่มยา', esc(classLabel(d))) +
+      dl('R1 side chain', esc(clusterText(d))) +
+      dl('โอกาสแพ้ข้าม', pctLine) +
+      dl('เหตุผล', esc(item.reason)) +
+      (item.advice ? dl('คำแนะนำ', '💡 ' + esc(item.advice)) : '') +
+      (refBlock ? dl('อ้างอิง', refBlock) : '') +
+    '</div>';
+  }
+
+  // collapsed card = drug name + risk badge + caret; click to expand
   function rowHtml(item) {
     var d = item.drug;
     var tierLabel = A.TIERS[item.tier] ? A.TIERS[item.tier].label : item.tier;
     var pct = item.pct ? (' · ' + item.pct) : '';
-    var advice = item.advice
-      ? '<div class="ar-advice">💡 ' + esc(item.advice) + '</div>'
-      : '';
     return '' +
       '<div class="ar-row tier-' + esc(item.tier) + '">' +
-        '<div class="ar-row-head">' +
+        '<div class="ar-row-head" role="button" tabindex="0" aria-expanded="false">' +
           '<div class="ar-drug">' + esc(d.generic) +
             ' <span class="ar-generic">' + esc(d.th) + ' · ' + esc(classLabel(d)) + '</span></div>' +
-          '<span class="ar-badge tier-' + esc(item.tier) + '">' + esc(tierLabel) + esc(pct) + '</span>' +
+          '<div class="ar-head-right">' +
+            '<span class="ar-badge tier-' + esc(item.tier) + '">' + esc(tierLabel) + esc(pct) + '</span>' +
+            '<span class="ar-caret" aria-hidden="true">▾</span>' +
+          '</div>' +
         '</div>' +
-        '<div class="ar-reason">' + esc(item.reason) + '</div>' +
-        advice +
+        detailHtml(item) +
       '</div>';
   }
 
@@ -101,24 +136,30 @@
     return '<details class="ar-refs"><summary>📚 แหล่งอ้างอิงที่ใช้ในผลนี้</summary><ol>' + li + '</ol></details>';
   }
 
-  // ---- tier filter state (all on by default) ----
-  var TIER_KEYS = ['high', 'moderate', 'low', 'negligible'];
+  // ---- tier filter state ----
+  // filter === null  => show all (default); otherwise an array of tiers to show
   var TIER_TH = { high: 'แพ้ข้ามสูง', moderate: 'ปานกลาง', low: 'ต่ำ', negligible: 'น้อยมาก' };
-  var activeTiers = { high: true, moderate: true, low: true, negligible: true };
+  var RISK_RANK = { negligible: 0, low: 1, moderate: 2, high: 3 };   // safest -> riskiest
+  var CHIP_ORDER = ['negligible', 'low', 'moderate', 'high'];        // safest first
+  var filter = null;
+
+  function isShown(tier) { return filter === null || filter.indexOf(tier) >= 0; }
 
   function controlsHtml() {
-    var chips = TIER_KEYS.map(function (t) {
+    var chips = CHIP_ORDER.map(function (t) {
+      var on = (filter !== null && filter.indexOf(t) >= 0);
       return '<button type="button" class="ar-legend-chip" data-tier="' + t + '" aria-pressed="' +
-        (activeTiers[t] ? 'true' : 'false') + '">' +
+        (on ? 'true' : 'false') + '">' +
         '<i class="ar-dot dot-' + t + '"></i>' + esc(TIER_TH[t]) + '</button>';
     }).join('');
     return '<div class="ar-filter">' +
       '<div class="ar-legend">' + chips + '</div>' +
       '<div class="ar-quick">' +
         '<button type="button" class="ar-quick-btn" data-quick="safe">🟢 เฉพาะปลอดภัย</button>' +
-        '<button type="button" class="ar-quick-btn" data-quick="all">แสดงทั้งหมด</button>' +
+        '<button type="button" class="ar-quick-btn" data-quick="all"' +
+          (filter === null ? ' disabled' : '') + '>แสดงทั้งหมด</button>' +
       '</div>' +
-      '<div class="ar-filter-hint">แตะระดับความเสี่ยงเพื่อกรองรายการ (เลือกได้หลายระดับ)</div>' +
+      '<div class="ar-filter-hint">แตะระดับความเสี่ยงเพื่อแสดงเฉพาะระดับนั้น (แตะซ้ำ = แสดงทั้งหมด)</div>' +
     '</div>';
   }
 
@@ -126,8 +167,10 @@
 
   // build one group, applying the active-tier filter; '' when nothing shown
   function groupHtml(titleClass, icon, title, items) {
-    var shown = items.filter(function (it) { return activeTiers[it.tier]; });
+    var shown = items.filter(function (it) { return isShown(it.tier); });
     if (!shown.length) return '';
+    // safest -> riskiest within the group
+    shown.sort(function (x, y) { return RISK_RANK[x.tier] - RISK_RANK[y.tier]; });
     var countTxt = shown.length + (shown.length !== items.length ? ' จาก ' + items.length : '') + ' รายการ';
     return '<div class="ar-group"><div class="ar-group-title ' + titleClass + '">' +
       icon + ' ' + title + ' <span class="ar-count">(' + countTxt + ')</span></div>' +
@@ -159,12 +202,13 @@
         'ให้เลือกยานอกกลุ่ม beta-lactam เท่านั้น</div>';
       html += groupHtml('ar-avoid-title', '🚫', 'หลีกเลี่ยงทั้งหมด', report.avoid);
     } else {
-      html += groupHtml('ar-avoid-title', '🚫', 'ควรหลีกเลี่ยง', report.avoid);
+      // safest first: show the "safer" group before the "avoid" group
       html += groupHtml('ar-safer-title', '✅', 'ปลอดภัยกว่า / พิจารณาใช้ได้', report.safer);
+      html += groupHtml('ar-avoid-title', '🚫', 'ควรหลีกเลี่ยง', report.avoid);
     }
 
     // nothing matches the current filter
-    var anyShown = report.avoid.concat(report.safer).some(function (it) { return activeTiers[it.tier]; });
+    var anyShown = report.avoid.concat(report.safer).some(function (it) { return isShown(it.tier); });
     if (!anyShown) {
       html += '<div class="info-box amber">ไม่มีรายการตรงกับตัวกรอง — แตะ “แสดงทั้งหมด” ด้านบน</div>';
     }
@@ -191,26 +235,40 @@
     allergenSel.addEventListener('change', render);
     severitySel.addEventListener('change', render);
 
-    // tier filter: toggle individual chips, or quick "safe"/"all" presets
+    // tier filter (show-only), quick presets, and expand/collapse of a card
     resultEl.addEventListener('click', function (e) {
       var chip = e.target.closest && e.target.closest('.ar-legend-chip');
       if (chip) {
         var t = chip.getAttribute('data-tier');
-        activeTiers[t] = !activeTiers[t];
+        // clicking the sole active tier again clears the filter (show all)
+        filter = (filter && filter.length === 1 && filter[0] === t) ? null : [t];
         paint();
         return;
       }
       var q = e.target.closest && e.target.closest('.ar-quick-btn');
       if (q) {
-        var mode = q.getAttribute('data-quick');
-        TIER_KEYS.forEach(function (k) { activeTiers[k] = (mode === 'all'); });
-        if (mode === 'safe') { activeTiers.low = true; activeTiers.negligible = true; }
+        filter = (q.getAttribute('data-quick') === 'safe') ? ['low', 'negligible'] : null;
         paint();
         return;
       }
+      var head = e.target.closest && e.target.closest('.ar-row-head');
+      if (head) { toggleCard(head); }
+    });
+
+    // keyboard: Enter/Space expands the focused card header
+    resultEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var head = e.target.closest && e.target.closest('.ar-row-head');
+      if (head) { e.preventDefault(); toggleCard(head); }
     });
 
     render();
+  }
+
+  function toggleCard(head) {
+    var row = head.parentNode;
+    var open = row.classList.toggle('open');
+    head.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
 
   if (document.readyState === 'loading') {

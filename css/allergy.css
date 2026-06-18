@@ -93,11 +93,14 @@
   color: var(--text-secondary, #64748b); transition: opacity .15s, background .15s;
 }
 .ar-legend-chip:hover { background: #eef2f7; }
-.ar-legend-chip[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
+.ar-legend-chip[aria-pressed="true"] {
+  background: #0ea5e9; border-color: #0ea5e9; color: #fff;
+}
 [data-theme="dark"] .ar-legend-chip {
   background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text2, #94a3b8);
 }
 [data-theme="dark"] .ar-legend-chip:hover { background: #223049; }
+[data-theme="dark"] .ar-legend-chip[aria-pressed="true"] { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
 
 .ar-quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .ar-quick-btn {
@@ -106,8 +109,37 @@
   padding: 5px 14px; cursor: pointer; color: var(--text-secondary, #64748b);
 }
 .ar-quick-btn:hover { border-color: #0ea5e9; color: #0ea5e9; }
+.ar-quick-btn[disabled] { opacity: .4; cursor: default; }
+.ar-quick-btn[disabled]:hover { border-color: #e2e8f0; color: var(--text-secondary, #64748b); }
 [data-theme="dark"] .ar-quick-btn { border-color: var(--card-border, #1e3050); color: var(--text2, #94a3b8); }
 
 .ar-filter-hint { font-size: 10px; color: var(--text-muted, #94a3b8); margin-top: 6px; }
+
+/* ---- expandable card ---- */
+.ar-row-head { cursor: pointer; }
+.ar-head-right { display: flex; align-items: center; gap: 8px; flex: none; }
+.ar-caret {
+  font-size: 12px; color: var(--text-muted, #94a3b8);
+  transition: transform .18s; flex: none;
+}
+.ar-row.open .ar-caret { transform: rotate(180deg); }
+
+.ar-detail {
+  display: none;
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px dashed #e2e8f0;
+}
+[data-theme="dark"] .ar-detail { border-top-color: var(--card-border, #1e3050); }
+.ar-row.open .ar-detail { display: block; }
+
+.ar-dl { display: flex; gap: 8px; font-size: 12px; line-height: 1.55; margin-bottom: 5px; }
+.ar-dl-k {
+  flex: none; width: 96px; color: var(--text-muted, #94a3b8); font-weight: 600;
+}
+.ar-dl-v { flex: 1; color: var(--text-secondary, #475569); }
+[data-theme="dark"] .ar-dl-v { color: var(--text2, #cbd5e1); }
+.ar-muted { color: var(--text-muted, #94a3b8); font-weight: 400; }
+.ar-dl-refs { margin: 0; padding-left: 18px; }
+.ar-dl-refs li { margin-bottom: 3px; }
 .dot-high { background:#dc2626; } .dot-moderate { background:#f97316; }
 .dot-low { background:#eab308; } .dot-negligible { background:#16a34a; }

@@ -176,7 +176,7 @@ COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
 - [x] เห็นชอบรายการ 🚫 COX-1 แรง / ✅ COX-2 selective + paracetamol / ⚠️ meloxicam-nimesulide
 - [x] เห็นชอบวิธีนำเสนอ single-drug เป็น "คำเตือนเด่น" (ไม่แยกเป็น severity ใหม่)
 - [x] เพิ่ม chemical class (`chem`) ทุกตัว + callout ระบุยากลุ่มเคมีเดียวกัน dynamic
-- [ ] ตัดสิน: paracetamol ขนาดสูง → คงเป็น ✅ หรือย้ายเป็น ⚠️ (รอ confirm)
+- [x] ตัดสิน: paracetamol ขนาดสูง → **คงเป็น ✅ ปลอดภัย** (weak COX-1; ส่วนใหญ่ใช้ได้)
 
 ---
 

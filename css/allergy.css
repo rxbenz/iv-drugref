@@ -1,0 +1,92 @@
+/* allergy.css — Cross-reactivity page (Phase 3)
+   Reuses shared.css (.header/.section/.field/.container/.bottom-nav/.disclaimer).
+   Only the result-specific pieces live here. Theme-aware via [data-theme]. */
+
+/* ---- result group blocks ---- */
+.ar-group { margin-bottom: 16px; }
+.ar-group-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 700; margin: 0 2px 8px;
+}
+.ar-group-title .ar-count {
+  font-size: 11px; font-weight: 600; color: var(--text-muted, #94a3b8);
+}
+.ar-avoid-title { color: #b91c1c; }
+.ar-safer-title { color: #047857; }
+[data-theme="dark"] .ar-avoid-title { color: #fca5a5; }
+[data-theme="dark"] .ar-safer-title { color: #6ee7b7; }
+
+/* ---- a single drug row ---- */
+.ar-row {
+  background: #fff; border: 1px solid #e2e8f0; border-left-width: 4px;
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+}
+[data-theme="dark"] .ar-row {
+  background: var(--card, #0f1a2e); border-color: var(--card-border, #1e3050);
+}
+.ar-row-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+.ar-drug { font-size: 15px; font-weight: 700; color: var(--text, #1e293b); }
+[data-theme="dark"] .ar-drug { color: var(--text, #f1f5f9); }
+.ar-generic { font-size: 12px; font-weight: 500; color: var(--text-muted, #94a3b8); }
+.ar-class { font-size: 11px; color: var(--text-muted, #94a3b8); }
+.ar-reason { font-size: 12px; color: var(--text-secondary, #64748b); margin-top: 5px; line-height: 1.5; }
+[data-theme="dark"] .ar-reason { color: var(--text2, #94a3b8); }
+.ar-advice { font-size: 12px; margin-top: 4px; line-height: 1.5; opacity: .92; }
+
+/* ---- risk badge ---- */
+.ar-badge {
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+  padding: 3px 10px; border-radius: 14px;
+}
+
+/* ---- tier colors (border + badge) ---- */
+.tier-high       { border-left-color: #dc2626; }
+.tier-moderate   { border-left-color: #f97316; }
+.tier-low        { border-left-color: #eab308; }
+.tier-negligible { border-left-color: #16a34a; }
+
+.ar-badge.tier-high       { background:#fee2e2; color:#991b1b; }
+.ar-badge.tier-moderate   { background:#ffedd5; color:#9a3412; }
+.ar-badge.tier-low        { background:#fef9c3; color:#854d0e; }
+.ar-badge.tier-negligible { background:#dcfce7; color:#166534; }
+[data-theme="dark"] .ar-badge.tier-high       { background:rgba(220,38,38,.18); color:#fca5a5; }
+[data-theme="dark"] .ar-badge.tier-moderate   { background:rgba(249,115,22,.18); color:#fdba74; }
+[data-theme="dark"] .ar-badge.tier-low        { background:rgba(234,179,8,.18);  color:#fde047; }
+[data-theme="dark"] .ar-badge.tier-negligible { background:rgba(22,163,74,.18);  color:#86efac; }
+
+/* ---- SCAR / block banner uses shared .info-box.red (no extra css) ---- */
+
+/* ---- non-beta-lactam alternatives ---- */
+.ar-alt {
+  margin-top: 4px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 8px;
+  padding: 12px 16px;
+}
+.ar-alt-item {
+  background: var(--bg2, #f8fafc); border: 1px solid #e2e8f0;
+  border-radius: 8px; padding: 8px 10px; font-size: 12px;
+}
+[data-theme="dark"] .ar-alt-item { background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); }
+.ar-alt-class { font-weight: 700; color: #0ea5e9; display: block; margin-bottom: 2px; }
+.ar-alt-drugs { color: var(--text-secondary, #64748b); }
+[data-theme="dark"] .ar-alt-drugs { color: var(--text2, #94a3b8); }
+
+/* ---- references (collapsible) ---- */
+.ar-refs { margin: 4px 2px 0; font-size: 11px; color: var(--text-muted, #94a3b8); }
+.ar-refs summary { cursor: pointer; font-weight: 600; }
+.ar-refs ol { margin: 6px 0 0; padding-left: 20px; line-height: 1.5; }
+.ar-refs li { margin-bottom: 4px; }
+
+/* ---- legend ---- */
+.ar-legend {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-size: 11px; color: var(--text-muted, #94a3b8);
+  padding: 0 2px 10px;
+}
+.ar-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.ar-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot-high { background:#dc2626; } .dot-moderate { background:#f97316; }
+.dot-low { background:#eab308; } .dot-negligible { background:#16a34a; }

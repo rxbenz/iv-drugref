@@ -61,6 +61,7 @@ const ASSETS_TO_CACHE = [
   './tdm.html',
   './renal-dosing.html',
   './compatibility.html',
+  './allergy.html',
   './dashboard.html',
   './admin.html',
 

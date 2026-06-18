@@ -458,7 +458,7 @@
 
 .tools-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
   gap: 8px;
 }
 
@@ -571,6 +571,22 @@
 .tool-compat:hover {
   border-color: rgba(168, 85, 247, 0.5);
   box-shadow: 0 4px 16px rgba(168, 85, 247, 0.18);
+}
+
+.tool-allergy {
+  background: linear-gradient(135deg, #2e0f0f, #3a1a1a);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #f87171;
+  box-shadow: 0 2px 8px rgba(248, 113, 113, 0.1);
+}
+
+.tool-allergy::before {
+  background: #f87171;
+}
+
+.tool-allergy:hover {
+  border-color: rgba(248, 113, 113, 0.5);
+  box-shadow: 0 4px 16px rgba(248, 113, 113, 0.18);
 }
 
 /* Content area */

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cross-Reactivity — แพ้ข้ามยา | IV DrugRef</title>
+  <meta name="description" content="ตัวช่วยประเมินการแพ้ข้ามกลุ่ม beta-lactam (penicillin / cephalosporin / carbapenem / monobactam)">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <!-- Google Fonts (async, non-render-blocking) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap"></noscript>
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/allergy.css">
+</head>
+<body>
+<a href="#allergyResult" class="skip-to-content">Skip to results</a>
+
+<div class="header">
+  <a href="index.html" class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> กลับ</a>
+  <h1>🛡️ แพ้ข้ามยา</h1>
+  <a href="compatibility.html" class="cross-link tdm-link">🔗 Compat</a>
+</div>
+
+<div class="container">
+
+  <!-- input -->
+  <div class="section">
+    <div class="section-header">🧪 เลือกข้อมูลผู้ป่วย</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="allergenSelect">ยาที่ผู้ป่วยแพ้</label>
+        <select id="allergenSelect"></select>
+      </div>
+      <div class="field">
+        <label for="severitySelect">ลักษณะ/ความรุนแรงของอาการแพ้</label>
+        <select id="severitySelect"></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- results (rendered by allergy.js) -->
+  <div id="allergyResult" aria-live="polite"></div>
+
+  <div class="disclaimer">
+    ⚠ เครื่องมือช่วยประเมิน<strong>เบื้องต้น</strong>เท่านั้น — ขอบเขตเฉพาะ beta-lactam · อิงโครงสร้าง R1 side chain + อุบัติการณ์แพ้ข้ามจากงานวิจัย ต้องใช้ clinical judgment + ซักประวัติการแพ้อย่างละเอียดประกอบเสมอ<br>
+    อ้างอิงหลัก: Khan DA et al. Drug Allergy 2022 Practice Parameter · Picard M et al. 2019 (meta-analysis) · ดูรายการอ้างอิงเต็มในผลลัพธ์
+  </div>
+</div>
+
+<div class="app-footer">IV DrugRef v5.15.3 — ภก. ฐาปนัท นาคครุฑ (Benz) กลุ่มงานเภสัชกรรม<br>สถาบันประสาทวิทยา | Neurological Institute of Thailand</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" class="nav-home">
+      <span class="nav-icon">💊</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="calculator.html" class="nav-calc">
+      <span class="nav-icon">🧮</span>
+      <span class="nav-label">Calc</span>
+    </a>
+    <a href="tdm.html" class="nav-tdm">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">TDM</span>
+    </a>
+    <a href="renal-dosing.html" class="nav-renal">
+      <span class="nav-icon">🧬</span>
+      <span class="nav-label">Renal</span>
+    </a>
+    <a href="compatibility.html" class="nav-compat">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Compat</span>
+    </a>
+    <a href="allergy.html" class="nav-allergy nav-active">
+      <span class="nav-icon">🛡️</span>
+      <span class="nav-label">Allergy</span>
+    </a>
+  </div>
+</nav>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/allergy-data.js"></script>
+<script src="js/allergy.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+</body>
+</html>

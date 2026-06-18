@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mockup A — ที่คั่นหนังสือแนวตั้ง (Bookmark Rail)</title>
+<title>Mockup A — แถบไอคอนซ้าย ตรึงขอบ (Fixed Left Rail)</title>
 <style>
   :root{
     --bg:#f5f7fa; --surface:#ffffff; --border:#e5e7eb;
     --text-primary:#1f2937; --text-secondary:#4b5563; --text-muted:#9ca3af;
     --accent:#3b82f6; --accent-soft:#eff6ff; --shadow:0 2px 10px rgba(0,0,0,.10);
+    --rail:60px; --topbar:52px;
   }
   [data-theme="dark"]{
     --bg:#0f172a; --surface:#1e293b; --border:#334155;
@@ -16,18 +17,36 @@
     --accent:#60a5fa; --accent-soft:#1e3a5f; --shadow:0 2px 10px rgba(0,0,0,.5);
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
+  html,body{margin:0}
   body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans Thai',sans-serif;
-    background:var(--bg);color:var(--text-primary);display:flex;flex-direction:column;height:100vh}
-  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 18px;
+    background:var(--bg);color:var(--text-primary);
+    padding-left:var(--rail);min-height:100vh}
+
+  /* topbar fixed on top, sits to the right of the rail */
+  .topbar{position:fixed;top:0;left:var(--rail);right:0;height:var(--topbar);z-index:15;
+    background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;
     display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
-  .topbar .logo{font-size:18px;font-weight:800}
+  .topbar .logo{font-size:17px;font-weight:800}
   .topbar .grow{flex:1}
   .ghost{font:inherit;font-size:12px;background:0 0;border:1px solid var(--border);
     border-radius:18px;padding:5px 12px;cursor:pointer;color:var(--text-secondary)}
+  .vchip{font-size:10px;background:var(--accent-soft);color:var(--accent);padding:2px 9px;border-radius:12px;font-weight:700}
 
-  .stage{flex:1;position:relative;overflow:auto}
-  .content{padding:20px;max-width:680px;margin:0 auto}
+  /* ===== Fixed left icon rail (always visible, never overlaps content) ===== */
+  .rail{position:fixed;top:0;left:0;bottom:0;width:var(--rail);z-index:20;
+    background:var(--surface);border-right:1px solid var(--border);box-shadow:var(--shadow);
+    display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;overflow-y:auto}
+  .rail .brand{font-size:20px;padding:6px 0 10px;flex:none}
+  .bm{width:52px;display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:7px 0;border-radius:12px;cursor:pointer;color:var(--text-secondary);
+    text-decoration:none;flex:none;transition:background .14s,color .14s}
+  .bm .ic{font-size:21px;line-height:1}
+  .bm .lb{font-size:9px;font-weight:600;text-align:center;line-height:1.1}
+  .bm:hover{background:var(--accent-soft);color:var(--accent)}
+  .bm.active{background:var(--accent);color:#fff}
+
+  /* content scrolls under the fixed topbar */
+  .content{padding:16px;max-width:680px;margin:0 auto;padding-top:calc(var(--topbar) + 16px)}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
     padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
   .search{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;
@@ -36,28 +55,10 @@
     background:var(--accent-soft);color:var(--accent);font-weight:700;margin:2px}
   h2{margin:.2em 0}
 
-  /* ===== Bookmark rail (right edge) ===== */
-  .rail{position:fixed;top:50%;right:0;transform:translateY(-50%);
-    display:flex;flex-direction:column;gap:7px;z-index:20}
-  .bm{display:flex;align-items:center;gap:8px;justify-content:flex-end;
-    background:var(--surface);border:1px solid var(--border);border-right:none;
-    border-radius:12px 0 0 12px;padding:9px 12px;cursor:pointer;box-shadow:var(--shadow);
-    color:var(--text-secondary);width:48px;overflow:hidden;white-space:nowrap;transition:width .16s,background .16s}
-  .bm .ic{font-size:19px;flex:none}
-  .bm .lb{font-size:13px;font-weight:600;opacity:0;width:0;transition:opacity .16s}
-  .rail:hover .bm{width:148px}
-  .rail:hover .bm .lb{opacity:1;width:auto}
-  .bm:hover{background:var(--accent-soft);color:var(--accent)}
-  .bm.active{background:var(--accent);color:#fff;border-color:var(--accent);width:158px;padding-left:16px}
-  .bm.active .lb{opacity:1;width:auto}
-  .hint{position:fixed;right:60px;top:14px;font-size:11px;color:var(--text-muted)}
-
-  /* ===== compact footer ===== */
-  .foot{background:var(--surface);border-top:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
-    font-size:11px;color:var(--text-muted);padding:8px 12px}
+  /* compact footer (scrolls at end of content) */
+  .foot{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+    font-size:11px;color:var(--text-muted);padding:14px 12px}
   .foot b{color:var(--text-secondary)}
-  .vchip{font-size:10px;background:var(--accent-soft);color:var(--accent);padding:2px 9px;border-radius:12px;font-weight:700}
   .foot button{font:inherit;font-size:11px;background:0 0;border:1px solid var(--border);
     border-radius:16px;padding:3px 12px;cursor:pointer;color:var(--text-muted)}
 
@@ -75,45 +76,44 @@
 </style>
 </head>
 <body data-theme="light">
+  <!-- fixed left rail: 7 user pages, always icon+label, never overlaps -->
+  <nav class="rail">
+    <span class="brand">💉</span>
+    <a class="bm active"><span class="ic">💉</span><span class="lb">ค้นหายา</span></a>
+    <a class="bm"><span class="ic">🧮</span><span class="lb">คำนวณ</span></a>
+    <a class="bm"><span class="ic">🎯</span><span class="lb">TDM</span></a>
+    <a class="bm"><span class="ic">🧪</span><span class="lb">Vanco</span></a>
+    <a class="bm"><span class="ic">🧬</span><span class="lb">Renal</span></a>
+    <a class="bm"><span class="ic">🔗</span><span class="lb">เข้ากัน</span></a>
+    <a class="bm"><span class="ic">🛡️</span><span class="lb">แพ้ยา</span></a>
+  </nav>
+
   <div class="topbar">
-    <span class="logo">💉 IV DrugRef</span>
+    <span class="logo">IV DrugRef</span>
     <span class="vchip">v5.15.3</span>
     <span class="grow"></span>
     <button class="ghost" onclick="t()">🌓 โหมด</button>
   </div>
 
-  <div class="stage">
-    <span class="hint">← เอาเมาส์ชี้/แตะ ที่คั่นด้านขวา</span>
-    <div class="content">
-      <h2>แบบ A — ที่คั่นหนังสือแนวตั้ง</h2>
-      <p style="color:var(--text-muted);font-size:13px">หน้าปัจจุบัน (ค้นหายา) = แท็บสีน้ำเงินสติ๊กออกมา. หน้าอื่นพับเป็นไอคอน — ชี้/แตะเพื่อกางชื่อ. <b>7 หน้าผู้ใช้</b> (dashboard/admin ไม่อยู่ในแถบ — admin เท่านั้น).</p>
-      <div class="card">
-        <input class="search" placeholder="🔍 ค้นหายา เช่น vancomycin, KCl ...">
-        <div style="margin-top:10px"><span class="pill">⭐ ยาที่ใช้บ่อย</span><span class="pill">🕐 ดูล่าสุด</span></div>
-      </div>
-      <div class="card"><b>💉 Vancomycin</b><br><span style="color:var(--text-muted);font-size:13px">Antibiotic · ดูข้อมูลการบริหารยา IV</span></div>
-      <div class="card"><b>💧 Potassium chloride (KCl)</b><br><span style="color:var(--text-muted);font-size:13px">Electrolyte · ห้าม IV push</span></div>
-      <div class="card" style="text-align:center;color:var(--text-muted);font-size:13px">... เลื่อนดูเนื้อหาได้ ที่คั่นอยู่กับที่เสมอ ...</div>
-      <div class="card"><b>🧪 Meropenem</b><br><span style="color:var(--text-muted);font-size:13px">Carbapenem</span></div>
+  <div class="content">
+    <h2>แบบ A — แถบไอคอนซ้าย ตรึงขอบ</h2>
+    <p style="color:var(--text-muted);font-size:13px">แถบไอคอน <b>ตรึงขอบซ้ายถาวร</b> (ไอคอน + ชื่อย่อ) เนื้อหาเว้นที่ให้ — <b>ไม่ทับกัน</b>. topbar ตรึงด้านบน เลื่อนเฉพาะเนื้อหา. <b>7 หน้าผู้ใช้</b> (dashboard/admin ไม่อยู่ในแถบ).</p>
+    <div class="card">
+      <input class="search" placeholder="🔍 ค้นหายา เช่น vancomycin, KCl ...">
+      <div style="margin-top:10px"><span class="pill">⭐ ยาที่ใช้บ่อย</span><span class="pill">🕐 ดูล่าสุด</span></div>
     </div>
-  </div>
+    <div class="card"><b>💉 Vancomycin</b><br><span style="color:var(--text-muted);font-size:13px">Antibiotic · ดูข้อมูลการบริหารยา IV</span></div>
+    <div class="card"><b>💧 Potassium chloride (KCl)</b><br><span style="color:var(--text-muted);font-size:13px">Electrolyte · ห้าม IV push</span></div>
+    <div class="card" style="text-align:center;color:var(--text-muted);font-size:13px">... เลื่อนดูเนื้อหาได้ แถบซ้าย + บน อยู่กับที่เสมอ ...</div>
+    <div class="card"><b>🧪 Meropenem</b><br><span style="color:var(--text-muted);font-size:13px">Carbapenem</span></div>
+    <div class="card"><b>🧪 Piperacillin/Tazobactam</b><br><span style="color:var(--text-muted);font-size:13px">Penicillin</span></div>
 
-  <!-- rail: 7 user pages -->
-  <div class="rail">
-    <div class="bm active"><span class="lb">ค้นหายา</span><span class="ic">💉</span></div>
-    <div class="bm"><span class="lb">คำนวณ</span><span class="ic">🧮</span></div>
-    <div class="bm"><span class="lb">TDM Hub</span><span class="ic">🎯</span></div>
-    <div class="bm"><span class="lb">Vanco TDM</span><span class="ic">🧪</span></div>
-    <div class="bm"><span class="lb">Renal</span><span class="ic">🧬</span></div>
-    <div class="bm"><span class="lb">เข้ากันได้</span><span class="ic">🔗</span></div>
-    <div class="bm"><span class="lb">แพ้ข้ามยา</span><span class="ic">🛡️</span></div>
-  </div>
-
-  <!-- compact footer -->
-  <div class="foot">
-    <span>💉 <b>IV DrugRef</b></span><span class="vchip">v5.15.3</span>
-    <span>· ภก.ฐาปนัท นาคครุฑ · สถาบันประสาทวิทยา</span>
-    <button onclick="document.getElementById('m').classList.add('open')">ℹ️ เกี่ยวกับ / Disclaimer / License</button>
+    <!-- compact footer -->
+    <div class="foot">
+      <span>💉 <b>IV DrugRef</b></span><span class="vchip">v5.15.3</span>
+      <span>· ภก.ฐาปนัท นาคครุฑ · สถาบันประสาทวิทยา</span>
+      <button onclick="document.getElementById('m').classList.add('open')">ℹ️ เกี่ยวกับ / Disclaimer / License</button>
+    </div>
   </div>
 
   <div class="modal" id="m" onclick="if(event.target===this)this.classList.remove('open')">

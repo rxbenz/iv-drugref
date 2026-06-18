@@ -2,6 +2,54 @@
    Reuses shared.css (.header/.section/.field/.container/.bottom-nav/.disclaimer).
    Only the result-specific pieces live here. Theme-aware via [data-theme]. */
 
+/* ---- allergen picker (search + group chips + list) ---- */
+.ap-search { position: relative; }
+.ap-search input {
+  width: 100%; padding: 10px 36px 10px 36px; border: 1px solid #e2e8f0; border-radius: 8px;
+  font: inherit; font-size: 15px; background: #fff; color: #1e293b;
+}
+.ap-search input:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.12); }
+[data-theme="dark"] .ap-search input { background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text, #f1f5f9); }
+.ap-ic { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted, #94a3b8); }
+.ap-clr { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: 0; cursor: pointer; color: var(--text-muted, #94a3b8); font-size: 17px; display: none; }
+
+.ap-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.ap-chip {
+  font: inherit; font-size: 12px; font-weight: 600; white-space: nowrap;
+  border: 1px solid #e2e8f0; background: #fff; color: var(--text-secondary, #64748b);
+  border-radius: 16px; padding: 4px 11px; cursor: pointer;
+}
+.ap-chip:hover { border-color: #0ea5e9; color: #0ea5e9; }
+.ap-chip[aria-pressed="true"] { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+.ap-chip .ap-n { opacity: .7; font-weight: 400; font-size: 11px; }
+[data-theme="dark"] .ap-chip { background: var(--bg2, #1a2332); border-color: var(--card-border, #1e3050); color: var(--text2, #94a3b8); }
+[data-theme="dark"] .ap-chip[aria-pressed="true"] { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+
+.ap-list {
+  display: none; margin-top: 8px; border: 1px solid #e2e8f0; border-radius: 8px;
+  overflow: hidden; max-height: 320px; overflow-y: auto;
+}
+[data-theme="dark"] .ap-list { border-color: var(--card-border, #1e3050); }
+.ap-grp {
+  position: sticky; top: 0; background: #f1f5f9; color: var(--text-muted, #94a3b8);
+  font-size: 11px; font-weight: 700; padding: 6px 13px;
+}
+[data-theme="dark"] .ap-grp { background: #16223a; }
+.ap-opt {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 13px; cursor: pointer; border-top: 1px solid #eef2f7;
+}
+[data-theme="dark"] .ap-opt { border-top-color: var(--card-border, #1e3050); }
+.ap-opt:hover, .ap-opt.kbd { background: #e6f1fb; }
+[data-theme="dark"] .ap-opt:hover, [data-theme="dark"] .ap-opt.kbd { background: #1e3a5f; }
+.ap-opt.on { box-shadow: inset 3px 0 0 #0ea5e9; }
+.ap-nm { font-size: 14px; font-weight: 600; color: var(--text, #1e293b); }
+[data-theme="dark"] .ap-nm { color: var(--text, #f1f5f9); }
+.ap-en { font-size: 12px; font-weight: 400; color: var(--text-muted, #94a3b8); }
+.ap-tag { font-size: 10px; color: var(--text-muted, #94a3b8); flex: none; }
+.ap-opt mark { background: rgba(14,165,233,.25); color: inherit; border-radius: 3px; padding: 0 1px; }
+.ap-empty { padding: 16px; text-align: center; color: var(--text-muted, #94a3b8); font-size: 13px; }
+
 /* ---- result group blocks ---- */
 .ar-group { margin-bottom: 16px; }
 .ar-group-title {

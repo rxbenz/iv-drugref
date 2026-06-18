@@ -14,7 +14,11 @@
     ? window.IVDrugRef.escHtml
     : function (s) { return String(s == null ? '' : s); };
 
-  var allergenSel, severitySel, resultEl;
+  var severitySel, resultEl;
+  // allergen picker (hybrid: search + group chips + list)
+  var pickerEl, searchEl, chipsEl, listEl, clearEl;
+  var ALLERGENS = [], GROUPS = [], pkList = [];
+  var selectedId = 'amoxicillin', pq = '', pg = 'all', pkbd = -1, pickerOpen = false;
 
   // class -> Thai group label for the <optgroup>s
   var CLASS_LABEL = {
@@ -25,37 +29,104 @@
   };
   var CLASS_ORDER = ['penicillin', 'cephalosporin', 'carbapenem', 'monobactam'];
 
-  function populate() {
-    // allergen select, grouped by class
-    var html = '';
-    CLASS_ORDER.forEach(function (cls) {
-      var members = A.DRUGS.filter(function (d) { return d.class === cls; });
-      if (!members.length) return;
-      html += '<optgroup label="' + esc(CLASS_LABEL[cls] || cls) + '">';
-      members.forEach(function (d) {
-        var label = d.th + ' (' + d.generic + ')';
-        html += '<option value="' + esc(d.id) + '">' + esc(label) + '</option>';
-      });
-      html += '</optgroup>';
-    });
-    // non-beta-lactam groups (Phase 4.1) — one optgroup per group
-    (A.NBL_GROUPS || []).forEach(function (g) {
-      html += '<optgroup label="' + esc(g.label) + '">';
-      g.allergens.forEach(function (a) {
-        html += '<option value="' + esc(a.id) + '">' + esc(a.th + ' (' + a.generic + ')') + '</option>';
-      });
-      html += '</optgroup>';
-    });
-    allergenSel.innerHTML = html;
-
-    // severity select
+  function populateSeverity() {
     severitySel.innerHTML = A.SEVERITY.map(function (s) {
       return '<option value="' + esc(s.id) + '">' + esc(s.label) + '</option>';
     }).join('');
-
-    // sensible defaults
-    allergenSel.value = 'amoxicillin';
     severitySel.value = 'ige';
+  }
+
+  // ---- allergen picker ----------------------------------------------------
+  // Flatten beta-lactam (by class) + non-beta-lactam groups into one searchable
+  // list, plus the group chips (with counts).
+  function buildPickerData() {
+    ALLERGENS = [];
+    GROUPS = [{ id: 'all', label: 'ทั้งหมด' }];
+    CLASS_ORDER.forEach(function (cls) {
+      var m = A.DRUGS.filter(function (d) { return d.class === cls; });
+      if (!m.length) return;
+      GROUPS.push({ id: cls, label: CLASS_LABEL[cls] || cls });
+      m.forEach(function (d) {
+        ALLERGENS.push({ id: d.id, generic: d.generic, th: d.th, gid: cls, glabel: CLASS_LABEL[cls] || cls });
+      });
+    });
+    (A.NBL_GROUPS || []).forEach(function (g) {
+      GROUPS.push({ id: g.id, label: g.label });
+      g.allergens.forEach(function (a) {
+        ALLERGENS.push({ id: a.id, generic: a.generic, th: a.th, gid: g.id, glabel: g.label });
+      });
+    });
+  }
+
+  function itemById(id) {
+    for (var i = 0; i < ALLERGENS.length; i++) if (ALLERGENS[i].id === id) return ALLERGENS[i];
+    return null;
+  }
+  function displayText(id) { var it = itemById(id); return it ? (it.th + ' (' + it.generic + ')') : ''; }
+
+  function hi(text) {
+    if (!pq) return esc(text);
+    var i = text.toLowerCase().indexOf(pq.toLowerCase());
+    if (i < 0) return esc(text);
+    return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + pq.length)) + '</mark>' + esc(text.slice(i + pq.length));
+  }
+
+  function filteredAllergens() {
+    var q = pq.trim().toLowerCase();
+    var qth = pq.trim();
+    return ALLERGENS.filter(function (x) {
+      if (pg !== 'all' && x.gid !== pg) return false;
+      if (!q) return true;
+      return x.generic.toLowerCase().indexOf(q) >= 0 || x.th.indexOf(qth) >= 0;
+    });
+  }
+
+  function renderChips() {
+    chipsEl.innerHTML = GROUPS.map(function (g) {
+      var n = (g.id === 'all') ? ALLERGENS.length
+        : ALLERGENS.filter(function (x) { return x.gid === g.id; }).length;
+      return '<button type="button" class="ap-chip" data-g="' + esc(g.id) + '" aria-pressed="' +
+        (pg === g.id ? 'true' : 'false') + '">' + esc(g.label) +
+        ' <span class="ap-n">' + n + '</span></button>';
+    }).join('');
+  }
+
+  function renderList() {
+    if (searchEl) searchEl.setAttribute('aria-expanded', pickerOpen ? 'true' : 'false');
+    if (!pickerOpen) { listEl.style.display = 'none'; return; }
+    listEl.style.display = 'block';
+    pkList = filteredAllergens();
+    if (!pkList.length) {
+      listEl.innerHTML = '<div class="ap-empty">ไม่พบยา — ลองพิมพ์อย่างอื่น หรือแตะ “ทั้งหมด”</div>';
+      return;
+    }
+    var html = '', lastG = null;
+    pkList.forEach(function (x, idx) {
+      if (x.gid !== lastG) { html += '<div class="ap-grp">' + esc(x.glabel) + '</div>'; lastG = x.gid; }
+      html += '<div class="ap-opt' + (idx === pkbd ? ' kbd' : '') + (x.id === selectedId ? ' on' : '') +
+        '" data-id="' + esc(x.id) + '" role="option">' +
+        '<span class="ap-nm">' + hi(x.th) + ' <span class="ap-en">' + hi(x.generic) + '</span></span>' +
+        '<span class="ap-tag">' + esc(x.glabel) + '</span></div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  function scrollKbd() {
+    var el = listEl.querySelector('.kbd');
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+  }
+
+  function openPicker() { pickerOpen = true; pq = ''; pkbd = -1; searchEl.value = ''; clearEl.style.display = 'none'; renderChips(); renderList(); }
+  function closePicker() { pickerOpen = false; searchEl.value = displayText(selectedId); clearEl.style.display = 'none'; renderList(); }
+
+  function pickId(id) {
+    if (!id) return;
+    selectedId = id;
+    pickerOpen = false; pq = '';
+    searchEl.value = displayText(id);
+    clearEl.style.display = 'none';
+    renderList();
+    render();   // recompute report
   }
 
   function classLabel(d) {
@@ -233,19 +304,59 @@
   }
 
   function render() {
-    lastReport = A.buildReport(allergenSel.value, severitySel.value);
+    lastReport = A.buildReport(selectedId, severitySel.value);
     paint();
   }
 
   function init() {
-    allergenSel = document.getElementById('allergenSelect');
     severitySel = document.getElementById('severitySelect');
     resultEl = document.getElementById('allergyResult');
-    if (!allergenSel || !severitySel || !resultEl || !A) return;
+    pickerEl = document.getElementById('allergenPicker');
+    searchEl = document.getElementById('allergenSearch');
+    chipsEl = document.getElementById('allergenChips');
+    listEl = document.getElementById('allergenList');
+    clearEl = document.getElementById('allergenClear');
+    if (!severitySel || !resultEl || !pickerEl || !searchEl || !A) return;
 
-    populate();
-    allergenSel.addEventListener('change', render);
+    populateSeverity();
+    buildPickerData();
+    renderChips();
+    searchEl.value = displayText(selectedId);   // default amoxicillin
+    renderList();                               // hidden until opened
+
     severitySel.addEventListener('change', render);
+
+    // --- allergen picker events ---
+    searchEl.addEventListener('focus', openPicker);
+    searchEl.addEventListener('input', function () {
+      pq = searchEl.value; pkbd = -1; pickerOpen = true;
+      clearEl.style.display = pq ? 'block' : 'none';
+      renderList();
+    });
+    searchEl.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (!pickerOpen) openPicker(); pkbd = Math.min(pkbd + 1, pkList.length - 1); renderList(); scrollKbd(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); pkbd = Math.max(pkbd - 1, 0); renderList(); scrollKbd(); }
+      else if (e.key === 'Enter') { e.preventDefault(); var it = pkList[pkbd < 0 ? 0 : pkbd]; if (it) pickId(it.id); }
+      else if (e.key === 'Escape') { closePicker(); searchEl.blur(); }
+    });
+    chipsEl.addEventListener('click', function (e) {
+      var c = e.target.closest && e.target.closest('.ap-chip');
+      if (!c) return;
+      pg = c.getAttribute('data-g'); pkbd = -1; pickerOpen = true;
+      renderChips(); renderList(); searchEl.focus();
+    });
+    // mousedown (not click) so selection happens before input blur
+    listEl.addEventListener('mousedown', function (e) {
+      var o = e.target.closest && e.target.closest('.ap-opt');
+      if (o) { e.preventDefault(); pickId(o.getAttribute('data-id')); }
+    });
+    clearEl.addEventListener('click', function () {
+      pq = ''; searchEl.value = ''; clearEl.style.display = 'none'; pickerOpen = true;
+      renderList(); searchEl.focus();
+    });
+    document.addEventListener('click', function (e) {
+      if (pickerOpen && !pickerEl.contains(e.target)) closePicker();
+    });
 
     // tier filter (show-only), quick presets, and expand/collapse of a card
     resultEl.addEventListener('click', function (e) {

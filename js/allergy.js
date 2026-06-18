@@ -271,6 +271,12 @@
       '<strong>อาการ:</strong> ' + esc(sev.label) +
       '<div style="font-size:12px;margin-top:6px;opacity:.9">' + esc(report.severityNote || sev.note) + '</div></div>';
 
+    // prominent callout (e.g. NSAID single-drug vs cross-reactive distinction)
+    if (report.calloutNote) {
+      html += '<div class="info-box amber" style="margin-bottom:14px">' +
+        esc(report.calloutNote) + '</div>';
+    }
+
     html += controlsHtml();
 
     if (report.blocked) {

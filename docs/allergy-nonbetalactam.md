@@ -152,11 +152,31 @@ COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
   mechanisms, COX-2 inhibitors & paracetamol. *Int J Mol Sci* 2026;27:3727.
 - **khan2022** — Khan DA, et al. Drug allergy: 2022 practice parameter update. *JACI* 2022.
 
-### Checklist verify (กลุ่ม NSAID)
-- [ ] เห็นชอบกรอบ cross-reactive vs single-drug + การตั้งค่าเริ่มเป็น cross-reactive
-- [ ] เห็นชอบรายการ 🚫 COX-1 แรง / ✅ COX-2 selective + paracetamol / ⚠️ meloxicam-nimesulide
-- [ ] เห็นชอบวิธีนำเสนอ single-drug เป็น "คำเตือนเด่น" (ไม่แยกเป็น severity ใหม่)
-- [ ] ตัดสิน: paracetamol ขนาดสูง → คงเป็น ✅ หรือย้ายเป็น ⚠️
+### กลุ่มโครงสร้างเคมี (chemical class) — สำคัญเฉพาะ single-drug
+ใน **single-drug (selective)** การแพ้ข้ามเดินตาม **กลุ่มเคมี** ไม่ใช่ความแรง COX-1
+แต่ละตัวจึง tag `chem`:
+| กลุ่มเคมี | ยา |
+|---|---|
+| Salicylate | Aspirin |
+| Propionic acid (profen) | Ibuprofen, Naproxen, Ketoprofen |
+| Acetic acid | Diclofenac, Indomethacin, Ketorolac |
+| Oxicam (enolic acid) | Piroxicam, **Meloxicam** |
+| Fenamate | Mefenamic acid |
+| Coxib | Celecoxib, Etoricoxib |
+| Sulfonanilide | Nimesulide |
+| Para-aminophenol | Paracetamol |
+
+> ⚠️ จุดสำคัญทางคลินิก: **Meloxicam = Oxicam กลุ่มเดียวกับ Piroxicam** → ถ้าแพ้
+> piroxicam แบบ single-drug ต้องเตือน meloxicam ด้วย (แม้ในโหมด cross-reactive
+> มันเป็นแค่ "ระวัง" เพราะ preferential COX-2). callout จะ **ระบุชื่อยากลุ่ม
+> เคมีเดียวกันแบบ dynamic** ตามตัวที่เลือก
+
+### Checklist verify (กลุ่ม NSAID) — ✅ ครบ 2026-06-18
+- [x] เห็นชอบกรอบ cross-reactive vs single-drug + การตั้งค่าเริ่มเป็น cross-reactive
+- [x] เห็นชอบรายการ 🚫 COX-1 แรง / ✅ COX-2 selective + paracetamol / ⚠️ meloxicam-nimesulide
+- [x] เห็นชอบวิธีนำเสนอ single-drug เป็น "คำเตือนเด่น" (ไม่แยกเป็น severity ใหม่)
+- [x] เพิ่ม chemical class (`chem`) ทุกตัว + callout ระบุยากลุ่มเคมีเดียวกัน dynamic
+- [ ] ตัดสิน: paracetamol ขนาดสูง → คงเป็น ✅ หรือย้ายเป็น ⚠️ (รอ confirm)
 
 ---
 

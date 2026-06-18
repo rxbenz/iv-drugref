@@ -29,7 +29,10 @@
     trubiano2022: 'Trubiano JA, et al. The assessment of severe cutaneous adverse drug reactions. Aust Prescr 2022.',
     strom2003:  'Strom BL, et al. Absence of cross-reactivity between sulfonamide antibiotics and sulfonamide nonantibiotics. N Engl J Med 2003;349(17):1628-35.',
     brackett2004: 'Brackett CC, et al. Likelihood and mechanisms of cross-allergenicity between sulfonamide antibiotics and other drugs containing a sulfonamide functional group. Pharmacotherapy 2004;24(7):856-70.',
-    ccjm2025:   'Can my patient with a “sulfa allergy” receive celecoxib or other nonantimicrobial sulfonamides? Cleve Clin J Med 2025;92(3):147.'
+    ccjm2025:   'Can my patient with a “sulfa allergy” receive celecoxib or other nonantimicrobial sulfonamides? Cleve Clin J Med 2025;92(3):147.',
+    kowalski2013: 'Kowalski ML, et al. Classification and practical approach to the diagnosis and management of hypersensitivity to NSAIDs. Allergy 2013;68(10):1219-32.',
+    dona2020:   'Doña I, et al. Progress in understanding hypersensitivity reactions to nonsteroidal anti-inflammatory drugs. Allergy 2020;75(3):561-575.',
+    nsaidReview2026: 'Cross-Reactivity and Cross-Intolerance Among NSAIDs: COX-1-Mediated Mechanisms, COX-2 Inhibitors and Paracetamol. Int J Mol Sci 2026;27:3727.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -207,6 +210,76 @@
       noteScar: 'อาการรุนแรง (SCAR): หลีกเลี่ยง sulfonamide antibiotic ทั้งหมด · ห้าม challenge',
       // SCAR: non-antibiotic sulfonamides become "caution" (per pharmacist decision)
       scarCautionNote: 'กรณี SCAR: พิจารณาหลีกเลี่ยงถ้าไม่จำเป็น (แม้ทางทฤษฎีไม่แพ้ข้าม)'
+    },
+    {
+      id: 'nsaid',
+      label: 'NSAIDs',
+      refs: ['kowalski2013', 'dona2020', 'khan2022', 'nsaidReview2026'],
+      // chemical-class awareness: in the SINGLE-DRUG (selective) phenotype,
+      // cross-reactivity follows CHEMICAL GROUP, not COX-1 potency. Each entry
+      // carries `chem`; buildNblReport names the culprit's same-group siblings.
+      chemGroupAware: true,
+      chemLabels: {
+        salicylate:    'Salicylate',
+        propionic:     'Propionic acid (profen)',
+        acetic:        'Acetic acid',
+        oxicam:        'Oxicam (enolic acid)',
+        fenamate:      'Fenamate (anthranilic acid)',
+        coxib:         'Coxib (diaryl-substituted)',
+        sulfonanilide: 'Sulfonanilide',
+        aminophenol:   'Para-aminophenol'
+      },
+      // selectable allergens (the NSAID the patient reacted to)
+      allergens: [
+        { id: 'aspirin',      generic: 'Aspirin',        th: 'แอสไพริน',       trade: [], chem: 'salicylate' },
+        { id: 'ibuprofen',    generic: 'Ibuprofen',      th: 'ไอบูโพรเฟน',     trade: ['Brufen'], chem: 'propionic' },
+        { id: 'naproxen',     generic: 'Naproxen',       th: 'นาพรอกเซน',      trade: [], chem: 'propionic' },
+        { id: 'diclofenac',   generic: 'Diclofenac',     th: 'ไดโคลฟีแนค',     trade: ['Voltaren'], chem: 'acetic' },
+        { id: 'mefenamic',    generic: 'Mefenamic acid', th: 'กรดเมเฟนามิก',   trade: ['Ponstan'], chem: 'fenamate' },
+        { id: 'ketorolac',    generic: 'Ketorolac',      th: 'คีโตโรแลค',      trade: [], chem: 'acetic' },
+        { id: 'indomethacin', generic: 'Indomethacin',   th: 'อินโดเมทาซิน',   trade: [], chem: 'acetic' },
+        { id: 'piroxicam',    generic: 'Piroxicam',      th: 'พิร็อกซิแคม',    trade: [], chem: 'oxicam' }
+      ],
+      // cross-reactive (avoid) — strong COX-1 inhibitors (pharmacologic, not structural)
+      crossReason: 'ยับยั้ง COX-1 แรงเหมือนกัน → แพ้ข้ามเชิงเภสัชวิทยา (cross-reactive type)',
+      crossReactive: [
+        { id: 'aspirin',      generic: 'Aspirin (ขนาดยาแก้ปวด/ต้านอักเสบ)', th: 'แอสไพริน',     sub: 'Salicylate · COX-1 แรง', chem: 'salicylate' },
+        { id: 'ibuprofen',    generic: 'Ibuprofen',    th: 'ไอบูโพรเฟน',  sub: 'Propionic acid · COX-1 แรง', chem: 'propionic' },
+        { id: 'naproxen',     generic: 'Naproxen',     th: 'นาพรอกเซน',   sub: 'Propionic acid · COX-1 แรง', chem: 'propionic' },
+        { generic: 'Ketoprofen', th: 'คีโตโพรเฟน',     sub: 'Propionic acid · COX-1 แรง', chem: 'propionic' },
+        { id: 'diclofenac',   generic: 'Diclofenac',   th: 'ไดโคลฟีแนค',  sub: 'Acetic acid · COX-1 แรง', chem: 'acetic' },
+        { id: 'indomethacin', generic: 'Indomethacin', th: 'อินโดเมทาซิน', sub: 'Acetic acid · COX-1 แรง', chem: 'acetic' },
+        { id: 'ketorolac',    generic: 'Ketorolac',    th: 'คีโตโรแลค',   sub: 'Acetic acid · COX-1 แรง', chem: 'acetic' },
+        { id: 'piroxicam',    generic: 'Piroxicam',    th: 'พิร็อกซิแคม', sub: 'Oxicam · COX-1 แรง', chem: 'oxicam' },
+        { id: 'mefenamic',    generic: 'Mefenamic acid', th: 'กรดเมเฟนามิก', sub: 'Fenamate · COX-1 แรง', chem: 'fenamate' }
+      ],
+      // safe — COX-2 selective + weak COX-1 (tolerated by most cross-reactive patients)
+      safeReason: 'COX-2 selective / weak COX-1 → ผู้ป่วย cross-reactive ส่วนใหญ่ใช้ได้',
+      safe: [
+        { generic: 'Celecoxib',  th: 'ซีลีค็อกซิบ',  sub: 'COX-2 selective', pct: 'แพ้ข้าม ~2%', chem: 'coxib',
+          reason: 'COX-2 selective; oral challenge พบแพ้ข้ามเพียง ~2%' },
+        { generic: 'Etoricoxib', th: 'อีโทริค็อกซิบ', sub: 'COX-2 selective', pct: 'แพ้ข้ามต่ำมาก', chem: 'coxib',
+          reason: 'COX-2 selective; ทนได้ดีในผู้ป่วย cross-reactive' },
+        { generic: 'Paracetamol (Acetaminophen)', th: 'พาราเซตามอล', sub: 'weak COX-1', pct: 'ส่วนใหญ่ใช้ได้', chem: 'aminophenol',
+          reason: 'weak COX-1; ขนาดสูง (>1 g) อาจกระตุ้นอาการในผู้ป่วยส่วนน้อย' }
+      ],
+      // caution — preferential COX-2 (group-level, shown for all non-SCAR severities)
+      caution: [
+        { generic: 'Meloxicam',  th: 'เมล็อกซิแคม', sub: 'preferential COX-2', pct: 'แพ้ข้าม ~4%', chem: 'oxicam',
+          reason: 'preferential COX-2; oral challenge พบแพ้ข้าม ~4% · เป็น Oxicam กลุ่มเดียวกับ piroxicam',
+          advice: 'พิจารณาเริ่มขนาดต่ำ / graded challenge ตามดุลพินิจ' },
+        { generic: 'Nimesulide', th: 'ไนเมซูไลด์',  sub: 'preferential COX-2', pct: 'แพ้ข้ามต่ำ', chem: 'sulfonanilide',
+          reason: 'preferential COX-2; ส่วนใหญ่ใช้ได้แต่ควรระวัง',
+          advice: 'พิจารณาเริ่มขนาดต่ำ / graded challenge ตามดุลพินิจ' }
+      ],
+      noteMild: 'ส่วนใหญ่เป็น cross-reactive (COX-1): เลี่ยง COX-1 แรงทั้งหมด · COX-2 selective/paracetamol มักใช้ได้',
+      noteIge:  'ส่วนใหญ่เป็น cross-reactive (COX-1): เลี่ยง COX-1 แรงทั้งหมด · COX-2 selective/paracetamol มักใช้ได้',
+      noteScar: 'SCAR จาก NSAID: มักเป็น single-drug (SNIDHR) → เลี่ยงตัวที่แพ้ + กลุ่มเคมีเดียวกันเด็ดขาด · ห้าม challenge · ปรึกษาผู้เชี่ยวชาญ',
+      // SCAR: COX-2 selective / paracetamol become "caution" (conservative, like sulfa)
+      scarCautionNote: 'กรณี SCAR: พิจารณาเลี่ยงถ้าไม่จำเป็น · ปรึกษาผู้เชี่ยวชาญก่อนใช้',
+      // prominent callout: the single-drug (selective) scenario flips the whole logic.
+      // buildNblReport appends the culprit's same-chemical-group siblings.
+      singleDrugCallout: '⚠️ ถ้าแพ้ NSAID “ตัวเดียว” (เคยใช้ NSAID ตัวอื่นได้ปกติ หรือ anaphylaxis ต่อตัวเดียว) = single-drug (selective) ไม่ใช่ cross-reactive → เลี่ยงเฉพาะตัวที่แพ้ + กลุ่มเคมีเดียวกัน ส่วน NSAID กลุ่มเคมีอื่นใช้ได้ แม้เป็น COX-1 แรง'
     }
   ];
 
@@ -280,15 +353,27 @@
       };
     });
 
-    // non-antibiotic sulfonamides -> safe normally; "caution" if SCAR
+    // safe alternatives -> "safer" normally; downgraded to "caution" if SCAR.
+    // Items may carry their own pct/reason/advice; otherwise fall back to group.
     const safeItems = g.safe.map(function (d) {
       return {
         drug: { generic: d.generic, th: d.th, class: d.sub },
         decision: isScar ? 'caution' : 'safer',
         tier: isScar ? 'moderate' : 'negligible',
-        pct: isScar ? 'ระวัง' : 'ไม่แพ้ข้าม',
-        reason: g.safeReason, refs: g.refs,
-        advice: isScar ? g.scarCautionNote : ''
+        pct: isScar ? 'ระวัง' : (d.pct || 'ไม่แพ้ข้าม'),
+        reason: d.reason || g.safeReason, refs: g.refs,
+        advice: isScar ? g.scarCautionNote : (d.advice || '')
+      };
+    });
+
+    // group-level caution items (e.g. NSAID preferential COX-2) — always caution
+    // (independent of severity); SCAR keeps them in caution too.
+    const cautionItems = (g.caution || []).map(function (d) {
+      return {
+        drug: { generic: d.generic, th: d.th, class: d.sub },
+        decision: 'caution', tier: 'low', pct: d.pct || 'ระวัง',
+        reason: d.reason || g.cautionReason || '', refs: g.refs,
+        advice: d.advice || ''
       };
     });
 
@@ -296,12 +381,33 @@
     if (isScar) note = g.noteScar;
     else if (sev.id === 'mild' || sev.id === 'unknown') note = g.noteMild;
 
+    // chemical-group-aware callout: in the single-drug (selective) phenotype,
+    // cross-reactivity follows chemical class -> name the culprit's same-group
+    // siblings present in the lists so the pharmacist sees what else to avoid.
+    let callout = g.singleDrugCallout || '';
+    if (callout && g.chemGroupAware && a.chem) {
+      const lbl = (g.chemLabels && g.chemLabels[a.chem]) || a.chem;
+      const sibs = [];
+      ['crossReactive', 'caution', 'safe'].forEach(function (k) {
+        (g[k] || []).forEach(function (d) {
+          if (d.chem !== a.chem) return;
+          if (d.id && d.id === allergenId) return;     // skip the culprit itself
+          if (d.generic === a.generic) return;
+          if (sibs.indexOf(d.th) < 0) sibs.push(d.th);
+        });
+      });
+      callout += sibs.length
+        ? ' — กลุ่มเคมีเดียวกัน (' + lbl + ') ที่ควรเลี่ยงด้วยถ้าเป็น single-drug: ' + sibs.join(', ')
+        : ' — ยานี้อยู่กลุ่มเคมี ' + lbl + ' (ไม่มีตัวอื่นในรายการกลุ่มเดียวกัน)';
+    }
+
     return {
       allergen: { generic: a.generic, th: a.th, class: g.label, trade: a.trade },
       severity: sev,
       severityNote: note,
+      calloutNote: callout,
       avoid: avoid,
-      caution: isScar ? safeItems : [],
+      caution: isScar ? cautionItems.concat(safeItems) : cautionItems,
       safer: isScar ? [] : safeItems,
       nonBetaLactam: null,   // for NBL the "safe" list already names the alternatives
       blocked: false,

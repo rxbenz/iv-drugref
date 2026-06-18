@@ -200,6 +200,76 @@ test('beta-lactam report shape unchanged (has caution:[] + isNbl:false)', () => 
   assert.ok(r.nonBetaLactam && r.nonBetaLactam.length > 0);
 });
 
+// ───────────────────────── non-beta-lactam: NSAIDs (Phase 4.x) ────────────
+test('NBL: nsaid group exists with allergens indexed', () => {
+  const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');
+  assert.ok(g, 'nsaid group present');
+  assert.ok(A.NBL_INDEX.ibuprofen, 'ibuprofen indexed as an allergen');
+  assert.ok(g.singleDrugCallout, 'nsaid group carries a single-drug callout');
+});
+
+test('NBL: ibuprofen/IgE -> avoid strong COX-1, safe COX-2/paracetamol, caution preferential COX-2', () => {
+  const r = A.buildReport('ibuprofen', 'ige');
+  assert.equal(r.isNbl, true);
+  assert.equal(r.blocked, false);
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  const saferG = r.safer.map((x) => x.drug.generic);
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Naproxen'));            // strong COX-1
+  assert.ok(avoidG.includes('Diclofenac'));
+  assert.ok(saferG.includes('Celecoxib'));           // COX-2 selective
+  assert.ok(saferG.some((g) => /Paracetamol/.test(g)));
+  assert.ok(cautionG.includes('Meloxicam'));         // preferential COX-2
+  assert.ok(cautionG.includes('Nimesulide'));
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  assert.ok(r.safer.every((x) => x.tier === 'negligible'));
+  assert.ok(r.caution.every((x) => x.tier === 'low'));
+});
+
+test('NBL: nsaid report carries calloutNote (single-drug scenario)', () => {
+  const r = A.buildReport('ibuprofen', 'ige');
+  assert.ok(r.calloutNote && /single-drug/.test(r.calloutNote));
+});
+
+test('NBL: ibuprofen excluded from its own avoid list', () => {
+  const r = A.buildReport('ibuprofen', 'ige');
+  assert.ok(!r.avoid.some((x) => /^Ibuprofen$/.test(x.drug.generic)),
+    'culprit should not be listed against itself');
+});
+
+test('NBL: nsaid SCAR -> COX-2/paracetamol downgraded to caution, callout still present', () => {
+  const r = A.buildReport('ibuprofen', 'scar');
+  assert.equal(r.blocked, false);
+  assert.equal(r.safer.length, 0);
+  // caution now contains both the preferential-COX-2 items AND the downgraded safe ones
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  assert.ok(cautionG.includes('Celecoxib'));
+  assert.ok(cautionG.includes('Meloxicam'));
+  assert.ok(r.calloutNote);
+});
+
+test('NBL: nsaid callout names same-chemical-group siblings (piroxicam -> meloxicam)', () => {
+  // selective piroxicam allergy: meloxicam is the same Oxicam chemical group,
+  // so it must be flagged even though it sits in "caution" (preferential COX-2)
+  const r = A.buildReport('piroxicam', 'ige');
+  assert.match(r.calloutNote, /Oxicam/);
+  assert.match(r.calloutNote, /เมล็อกซิแคม/);   // meloxicam (Thai)
+});
+
+test('NBL: nsaid callout groups propionic acids together (ibuprofen -> naproxen/ketoprofen)', () => {
+  const r = A.buildReport('ibuprofen', 'ige');
+  assert.match(r.calloutNote, /Propionic/);
+  assert.match(r.calloutNote, /นาพรอกเซน/);     // naproxen
+  assert.match(r.calloutNote, /คีโตโพรเฟน/);    // ketoprofen
+  // ibuprofen itself must not appear in its own sibling list
+  assert.ok(!/ไอบูโพรเฟน/.test(r.calloutNote));
+});
+
+test('NBL: sulfonamide group has NO callout (backward-compat)', () => {
+  const r = A.buildReport('cotrimoxazole', 'ige');
+  assert.equal(r.calloutNote, '');
+});
+
 // ───────────────────────── overrides precedence ──────────────────────────
 test('override beats structural rule (cefazolin target wins over low default)', () => {
   // cefazolin is a cephalosporin; without override a penicillin->ceph default

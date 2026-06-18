@@ -4,7 +4,7 @@
   "description": "IV Drug Quick Reference PWA - Modular Architecture",
   "main": "build.js",
   "scripts": {
-    "test": "node --test test/clinical-formulas.test.js",
+    "test": "node --test test/*.test.js",
     "build": "node build.js",
     "build:dev": "node build.js --dev",
     "build:prod": "node build.js --prod"

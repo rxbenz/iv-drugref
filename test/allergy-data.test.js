@@ -316,6 +316,46 @@ test('NBL: sulfonamide SCAR still downgrades safe (no keepSafeOnScar regression)
   assert.ok(r.caution.some((x) => x.drug.generic === 'Celecoxib'));
 });
 
+// ───────────────────────── non-beta-lactam: Fluoroquinolones ──────────────
+test('NBL: fluoroquinolone group exists with flags', () => {
+  const g = A.NBL_GROUPS.find((x) => x.id === 'fluoroquinolone');
+  assert.ok(g, 'fluoroquinolone group present');
+  assert.equal(g.crossClassCaution, true);
+  assert.equal(g.keepSafeOnScar, true);
+  assert.ok(A.NBL_INDEX.ciprofloxacin, 'ciprofloxacin indexed');
+});
+
+test('NBL: cipro/IgE -> other FQs are CAUTION (not avoid), non-FQ safe', () => {
+  const r = A.buildReport('ciprofloxacin', 'ige');
+  assert.equal(r.avoid.length, 0, 'no hard-avoid for non-SCAR FQ');
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  assert.ok(cautionG.includes('Levofloxacin'));
+  assert.ok(cautionG.includes('Moxifloxacin'));
+  assert.ok(r.caution.every((x) => x.tier === 'low'));
+  // culprit excluded from its own list
+  assert.ok(!cautionG.includes('Ciprofloxacin'));
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(saferG.some((g) => /Macrolide|Azithromycin/.test(g)));
+});
+
+test('NBL: cipro/SCAR -> ALL other FQs escalate to avoid (high), non-FQ stay safe', () => {
+  const r = A.buildReport('ciprofloxacin', 'scar');
+  assert.equal(r.blocked, false);
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Levofloxacin'));
+  assert.ok(avoidG.includes('Moxifloxacin'));
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  // non-FQ alternatives still safe at SCAR (keepSafeOnScar)
+  assert.ok(r.safer.length > 0);
+  assert.ok(r.safer.every((x) => x.tier === 'negligible'));
+});
+
+test('NBL: moxifloxacin flagged highest cross-reactivity (~5.3%)', () => {
+  const r = A.buildReport('ciprofloxacin', 'ige');
+  const moxi = r.caution.find((x) => x.drug.generic === 'Moxifloxacin');
+  assert.ok(moxi && /5\.3/.test(moxi.pct));
+});
+
 // ───────────────────────── overrides precedence ──────────────────────────
 test('override beats structural rule (cefazolin target wins over low default)', () => {
   // cefazolin is a cephalosporin; without override a penicillin->ceph default

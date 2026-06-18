@@ -36,7 +36,10 @@
     cpic2017cbz: 'Phillips EJ, et al. CPIC Guideline for HLA Genotype and Use of Carbamazepine and Oxcarbazepine: 2017 Update. Clin Pharmacol Ther 2018;103(4):574-581.',
     cpic2020phenytoin: 'Karnes JH, et al. CPIC Guideline for CYP2C9 and HLA-B Genotypes and Phenytoin Dosing: 2020 Update. Clin Pharmacol Ther 2021;109(2):302-309.',
     aedCrossReview: 'Rashes and other hypersensitivity reactions associated with antiepileptic drugs: a review of current literature. Seizure 2019.',
-    thaiHLA2022: 'Implementation of HLA-B*15:02 Genotyping as Standard-of-Care for Reducing Carbamazepine/Oxcarbazepine Induced Cutaneous ADR in Thailand. Front Pharmacol 2022;13:867490.'
+    thaiHLA2022: 'Implementation of HLA-B*15:02 Genotyping as Standard-of-Care for Reducing Carbamazepine/Oxcarbazepine Induced Cutaneous ADR in Thailand. Front Pharmacol 2022;13:867490.',
+    fqCohort2022: 'Immediate Hypersensitivity to Fluoroquinolones: A Cohort Assessing Cross-Reactivity. Open Forum Infect Dis 2022;9(4):ofac106.',
+    fqInClass2023: 'In-Class Cross-Reactivity among Hospitalized Patients with Hypersensitivity Reactions to Fluoroquinolones. Antimicrob Agents Chemother 2023.',
+    eaaci2025fq: 'Gelincik A, et al. Diagnosis of Quinolone Hypersensitivity: An EAACI Position Paper. Allergy 2025.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -334,6 +337,50 @@
       scarCautionNote: 'กรณี SCAR: พิจารณาเลี่ยงถ้าไม่จำเป็น',
       // prominent HLA pharmacogenomic callout (highly relevant for Thai patients)
       singleDrugCallout: '🧬 HLA: ผู้ที่มี HLA-B*15:02 (พบในคนไทย ~8-27%) — CPIC: ห้ามใช้ carbamazepine + oxcarbazepine และเลี่ยง phenytoin/fosphenytoin ถ้ามีทางเลือก · HLA-A*31:01 → เลี่ยง carbamazepine · แนะนำตรวจ HLA-B*15:02 ก่อนเริ่ม carbamazepine/oxcarbazepine ในคนไทย'
+    },
+    {
+      id: 'fluoroquinolone',
+      label: 'Fluoroquinolones',
+      refs: ['fqCohort2022', 'fqInClass2023', 'eaaci2025fq'],
+      // modern evidence: low in-class cross-reactivity (~2-5%) -> other FQs are
+      // "caution" (non-SCAR) and escalate to "avoid" only at SCAR.
+      crossClassCaution: true,
+      keepSafeOnScar: true,   // non-FQ antibiotics stay safe even at SCAR
+      // selectable allergens (the fluoroquinolone the patient reacted to)
+      allergens: [
+        { id: 'ciprofloxacin', generic: 'Ciprofloxacin', th: 'ไซโพรฟล็อกซาซิน', trade: ['Cipro'] },
+        { id: 'levofloxacin',  generic: 'Levofloxacin',  th: 'ลีโวฟล็อกซาซิน',  trade: ['Cravit'] },
+        { id: 'moxifloxacin',  generic: 'Moxifloxacin',  th: 'ม็อกซิฟล็อกซาซิน', trade: ['Avelox'] },
+        { id: 'ofloxacin',     generic: 'Ofloxacin',     th: 'ออฟล็อกซาซิน',    trade: [] },
+        { id: 'norfloxacin',   generic: 'Norfloxacin',   th: 'นอร์ฟล็อกซาซิน',  trade: [] }
+      ],
+      // in-class (other FQs) — low cross-reactivity per modern cohorts
+      crossReason: 'fluoroquinolone กลุ่มเดียวกัน — แพ้ข้ามต่ำ (~2-5%) ตามหลักฐานใหม่',
+      crossReactive: [
+        { id: 'ciprofloxacin', generic: 'Ciprofloxacin', th: 'ไซโพรฟล็อกซาซิน', sub: 'Fluoroquinolone', pct: '~2.5%' },
+        { id: 'levofloxacin',  generic: 'Levofloxacin',  th: 'ลีโวฟล็อกซาซิน',  sub: 'Fluoroquinolone', pct: '~2.0%' },
+        { id: 'moxifloxacin',  generic: 'Moxifloxacin',  th: 'ม็อกซิฟล็อกซาซิน', sub: 'Fluoroquinolone (เสี่ยงสูงสุด)', pct: '~5.3%',
+          reason: 'moxifloxacin มีอัตราแพ้ข้ามสูงสุดในกลุ่ม (~5.3%) + โครงสร้างต่างจากตัวอื่น' },
+        { id: 'ofloxacin',     generic: 'Ofloxacin',     th: 'ออฟล็อกซาซิน',    sub: 'Fluoroquinolone', pct: 'ข้อมูลจำกัด' },
+        { id: 'norfloxacin',   generic: 'Norfloxacin',   th: 'นอร์ฟล็อกซาซิน',  sub: 'Fluoroquinolone', pct: 'ข้อมูลจำกัด' }
+      ],
+      // safe — non-FQ antibiotic classes (choose by infection type)
+      safeReason: 'ยาต่างกลุ่ม (ไม่ใช่ FQ) → ไม่มีปัญหาแพ้ข้าม — เลือกตามชนิดการติดเชื้อ',
+      safe: [
+        { generic: 'Beta-lactam (ถ้าไม่แพ้)', th: 'กลุ่มเบต้าแลคแทม', sub: 'เช่น amoxicillin / cephalexin' },
+        { generic: 'Azithromycin / Clarithromycin', th: 'กลุ่มแมโครไลด์', sub: 'Macrolide' },
+        { generic: 'TMP-SMX (Cotrimoxazole)', th: 'โคไตรม็อกซาโซล', sub: 'Sulfonamide antibiotic' },
+        { generic: 'Doxycycline', th: 'ด็อกซีไซคลิน', sub: 'Tetracycline' },
+        { generic: 'Gentamicin / Amikacin', th: 'กลุ่มอะมิโนไกลโคไซด์', sub: 'Aminoglycoside' },
+        { generic: 'Clindamycin', th: 'คลินดามัยซิน', sub: 'Lincosamide' },
+        { generic: 'Metronidazole', th: 'เมโทรนิดาโซล', sub: 'Nitroimidazole' }
+      ],
+      noteMild: 'แพ้ข้ามในกลุ่มต่ำ (~2-5%) — ใช้ยานอกกลุ่ม FQ ก่อน; ถ้าจำเป็นต้องใช้ FQ ตัวอื่นยืนยันด้วย oral challenge',
+      noteIge:  'แพ้ข้ามในกลุ่มต่ำ (~2-5%) — ใช้ยานอกกลุ่ม FQ ก่อน; ถ้าจำเป็นต้องใช้ FQ ตัวอื่นยืนยันด้วย oral challenge',
+      noteScar: 'SCAR จาก FQ: เลี่ยง fluoroquinolone ทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม',
+      // prominent callout: the modern low-cross-reactivity nuance
+      singleDrugCallout: '💡 หลักฐานใหม่ (2022-2025): แพ้ข้ามใน FQ ต่ำ (~2-5%) การเลี่ยงทั้งกลุ่มอาจไม่จำเป็น — แต่ oral challenge เป็นวิธีเดียวที่ยืนยัน tolerance ของ FQ ตัวอื่นได้ (skin test บอกได้แค่ว่าแพ้กลุ่ม) → ค่าเริ่มต้นที่ปลอดภัยสุดคือใช้ยานอกกลุ่ม FQ · SCAR = เลี่ยงทั้งกลุ่มเด็ดขาด'
     }
   ];
 

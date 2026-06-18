@@ -247,7 +247,7 @@ COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
 
 ---
 
-## กลุ่มที่ 4 — Fluoroquinolone (DRAFT 🟡 รอ verify)
+## กลุ่มที่ 4 — Fluoroquinolone (✅ verify + encode แล้ว 2026-06-18)
 
 ### 🔑 ใจความ: หลักฐานใหม่ — แพ้ข้ามในกลุ่ม "ต่ำ" (ไม่ใช่สูงอย่างที่เคยเชื่อ)
 เดิมเชื่อว่า FQ แพ้ข้ามกันสูง → เลี่ยงทั้งกลุ่ม. **หลักฐานใหม่ (2022-2025)** พบว่า
@@ -287,13 +287,13 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 - **eaaci2025fq** — Gelincik A, et al. Diagnosis of Quinolone Hypersensitivity: An
   EAACI Position Paper. *Allergy* 2025.
 
-### Checklist verify (กลุ่ม Fluoroquinolone)
-- [ ] เห็นชอบแนวคิดใหม่: แพ้ข้ามในกลุ่ม **ต่ำ** → FQ ตัวอื่น = "ระวัง" (ไม่ใช่ avoid) ใน non-SCAR
-- [ ] เห็นชอบ SCAR → escalate เป็น avoid ทั้งกลุ่ม
-- [ ] เห็นชอบ moxifloxacin = เสี่ยงสูงสุด (~5.3%)
-- [ ] เห็นชอบรายการ ✅ ยานอกกลุ่ม (เลือกตามการติดเชื้อ)
-- [ ] เห็นชอบ callout: oral challenge = วิธีเดียวยืนยัน tolerance; ใช้ยานอกกลุ่มก่อน
-- [ ] ตัดสิน: ค่าตั้งต้นเป็น "caution" เหมาะ หรืออยากให้เป็น "avoid" แบบ conservative
+### Checklist verify (กลุ่ม Fluoroquinolone) — ✅ ครบ 2026-06-18
+- [x] เห็นชอบแนวคิดใหม่: แพ้ข้ามในกลุ่ม **ต่ำ** → FQ ตัวอื่น = "ระวัง" (ไม่ใช่ avoid) ใน non-SCAR
+- [x] เห็นชอบ SCAR → escalate เป็น avoid ทั้งกลุ่ม
+- [x] เห็นชอบ moxifloxacin = เสี่ยงสูงสุด (~5.3%)
+- [x] เห็นชอบรายการ ✅ ยานอกกลุ่ม (เลือกตามการติดเชื้อ)
+- [x] เห็นชอบ callout: oral challenge = วิธีเดียวยืนยัน tolerance; ใช้ยานอกกลุ่มก่อน
+- [x] ตัดสิน: **ค่าตั้งต้น = "caution"** (ตามหลักฐานใหม่) · engine flag `crossClassCaution`
 
 ---
 

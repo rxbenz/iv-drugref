@@ -97,6 +97,69 @@ avoid/safer แบบเดียวกัน (UI/หน้าตาเหมื
 
 ---
 
+## กลุ่มที่ 2 — NSAID (DRAFT 🟡 รอ verify)
+
+### 🔑 ใจความสำคัญ: แพ้ข้ามขึ้นกับ "ชนิดปฏิกิริยา (phenotype)" ไม่ใช่โครงสร้าง
+แพ้ข้าม NSAID ส่วนใหญ่เป็น **เภสัชวิทยา (ยับยั้ง COX-1)** ไม่ใช่ภูมิคุ้มกัน/โครงสร้าง
+→ แบ่งเป็น 2 สถานการณ์ใหญ่ (EAACI/Kowalski 2013):
+
+**A) Cross-reactive (พบบ่อยสุด, COX-1)** — NERD (หืด/ไซนัส), NECD (ลมพิษเรื้อรัง),
+NIUA (ลมพิษ/angioedema ในคนทั่วไป): ปฏิกิริยาต่อ **COX-1 inhibitor แรงทุกตัว**
+→ ต้องเลี่ยง COX-1 แรงทั้งหมด, ใช้ COX-2 selective / weak COX-1 แทน
+
+**B) Selective / single-drug (ภูมิคุ้มกัน)** — SNIUAA (IgE) / SNIDHR (T-cell, รวม SCAR):
+แพ้ **NSAID ตัวเดียว (หรือกลุ่มเคมีเดียวกัน)** → NSAID กลุ่มเคมีอื่น **ใช้ได้** แม้เป็น
+COX-1 แรง (ไม่ขึ้นกับความแรง COX-1)
+
+### 🚫 ควรหลีกเลี่ยง — กรณี cross-reactive (COX-1 แรง)
+| ยา | กลุ่มเคมี | ระดับ |
+|---|---|---|
+| Aspirin (ขนาดยาแก้ปวด/ต้านอักเสบ) | Salicylate | 🔴 สูง |
+| Ibuprofen, Naproxen, Ketoprofen | Propionic acid | 🔴 สูง |
+| Diclofenac, Indomethacin, Ketorolac | Acetic acid | 🔴 สูง |
+| Piroxicam | Oxicam | 🔴 สูง |
+| Mefenamic acid | Fenamate | 🔴 สูง |
+
+### ✅ ปลอดภัยกว่า (cross-reactive type)
+| ยา | เหตุผล | ระดับ |
+|---|---|---|
+| Celecoxib | COX-2 selective (แพ้ข้าม ~2% เท่านั้น) | 🟢 น้อยมาก |
+| Etoricoxib | COX-2 selective | 🟢 น้อยมาก |
+| Paracetamol (acetaminophen) | weak COX-1; ส่วนใหญ่ใช้ได้ (ขนาดสูงอาจแพ้ข้ามส่วนน้อย) | 🟢 น้อยมาก |
+
+### ⚠️ ใช้ด้วยความระมัดระวัง
+| ยา | เหตุผล |
+|---|---|
+| Meloxicam, Nimesulide | preferential COX-2 — ส่วนใหญ่ใช้ได้ แต่แพ้ข้าม ~2-4% → เริ่มขนาดต่ำ/challenge |
+
+### หมายเหตุสำคัญต่อการใช้ในเครื่องมือ (design)
+> เครื่องมือจะ **ตั้งสมมุติฐานเป็น cross-reactive (กรณีพบบ่อย)** เป็นค่าตั้งต้น
+> แล้วแสดง **คำเตือนเด่น** ว่า: ถ้าเป็น **single-drug** (เคยใช้ NSAID ตัวอื่นได้ /
+> แพ้ตัวเดียว / anaphylaxis ต่อตัวเดียว) → เลี่ยงเฉพาะตัวที่แพ้ + กลุ่มเคมีเดียวกัน,
+> NSAID กลุ่มอื่นใช้ได้ — *(ขอ verify วิธีนำเสนอนี้)*
+
+### กฎ severity (NSAID)
+- cross-reactive (mild/IgE) → เลี่ยง COX-1 แรงทั้งหมด; COX-2 selective/paracetamol ใช้ได้
+- **SCAR (SJS/TEN/DRESS)** จาก NSAID → มักเป็น **single-drug (SNIDHR)**: เลี่ยงตัวที่แพ้
+  (+ กลุ่มเคมีเดียวกัน) เด็ดขาด, ห้าม challenge, ปรึกษาผู้เชี่ยวชาญ
+
+### อ้างอิงกลุ่ม NSAID
+- **kowalski2013** — Kowalski ML, et al. Classification and practical approach to the
+  diagnosis and management of hypersensitivity to NSAIDs. *Allergy* 2013;68:1219-32.
+- **dona2020** — Doña I, et al. Progress in understanding hypersensitivity reactions to
+  NSAIDs. *Allergy* 2020;75:561-575.
+- **nsaidReview2026** — Cross-Reactivity and Cross-Intolerance Among NSAIDs: COX-1
+  mechanisms, COX-2 inhibitors & paracetamol. *Int J Mol Sci* 2026;27:3727.
+- **khan2022** — Khan DA, et al. Drug allergy: 2022 practice parameter update. *JACI* 2022.
+
+### Checklist verify (กลุ่ม NSAID)
+- [ ] เห็นชอบกรอบ cross-reactive vs single-drug + การตั้งค่าเริ่มเป็น cross-reactive
+- [ ] เห็นชอบรายการ 🚫 COX-1 แรง / ✅ COX-2 selective + paracetamol / ⚠️ meloxicam-nimesulide
+- [ ] เห็นชอบวิธีนำเสนอ single-drug เป็น "คำเตือนเด่น" (ไม่แยกเป็น severity ใหม่)
+- [ ] ตัดสิน: paracetamol ขนาดสูง → คงเป็น ✅ หรือย้ายเป็น ⚠️
+
+---
+
 ## Checklist verify (กลุ่ม Sulfonamide) — ✅ ครบ 2026-06-18
 - [x] เห็นชอบ "myth-buster": non-antibiotic sulfonamide = ปลอดภัย (ไม่มี N4 arylamine)
 - [x] เห็นชอบรายการ 🚫 ควรเลี่ยง (sulfonamide antibiotics)

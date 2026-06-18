@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — เลือก "ยาที่ผู้ป่วยแพ้" (scale ได้)</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --surface:#fff; --border:#e5e7eb; --text:#1f2937;
+    --text2:#4b5563; --muted:#9ca3af; --accent:#0ea5e9; --accent-soft:#e6f1fb;
+    --shadow:0 2px 10px rgba(0,0,0,.08);
+  }
+  [data-theme="dark"]{
+    --bg:#0f172a; --surface:#1e293b; --border:#334155; --text:#f1f5f9;
+    --text2:#cbd5e1; --muted:#94a3b8; --accent:#38bdf8; --accent-soft:#1e3a5f;
+    --shadow:0 2px 10px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans Thai',sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.5;padding:16px}
+  .wrap{max-width:560px;margin:0 auto}
+  .pin{position:fixed;top:10px;right:10px;background:var(--surface);border:1px solid var(--border);
+    border-radius:18px;padding:6px 12px;font:inherit;font-size:12px;cursor:pointer;color:var(--text);box-shadow:var(--shadow)}
+  h1{font-size:18px;margin:.2em 0}
+  .note{font-size:12px;color:var(--muted);margin-bottom:14px}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:16px;box-shadow:var(--shadow)}
+  .card-h{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px}
+  label{font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:6px}
+
+  /* search box */
+  .search{position:relative;margin-bottom:10px}
+  .search input{width:100%;padding:12px 38px 12px 38px;border:1px solid var(--border);
+    border-radius:10px;font:inherit;font-size:15px;background:var(--bg);color:var(--text)}
+  .search input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,233,.12)}
+  .search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+  .search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:0;
+    color:var(--muted);font-size:18px;cursor:pointer;display:none}
+
+  /* group chips */
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+  .chip{font:inherit;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);
+    color:var(--text2);border-radius:16px;padding:5px 12px;cursor:pointer;white-space:nowrap}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chip .n{opacity:.7;font-weight:400;font-size:11px}
+
+  /* result list */
+  .list{margin-top:10px;border:1px solid var(--border);border-radius:10px;overflow:hidden;max-height:360px;overflow-y:auto}
+  .grp{font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:7px 14px;position:sticky;top:0}
+  .opt{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;cursor:pointer;
+    border-top:1px solid var(--border)}
+  .opt:hover,.opt.kbd{background:var(--accent-soft)}
+  .opt .nm{font-size:14px;font-weight:600}
+  .opt .en{font-size:12px;color:var(--muted);font-weight:400}
+  .opt .tag{font-size:10px;color:var(--muted);flex:none}
+  .opt mark{background:rgba(14,165,233,.25);color:inherit;border-radius:3px;padding:0 1px}
+  .empty{padding:18px;text-align:center;color:var(--muted);font-size:13px}
+
+  /* selected confirmation */
+  .sel{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);
+    color:var(--text);font-size:13px;display:none}
+  .sel b{color:var(--accent)}
+</style>
+</head>
+<body data-theme="light">
+<button class="pin" onclick="document.body.dataset.theme=document.body.dataset.theme==='dark'?'light':'dark'">🌓 โหมด</button>
+<div class="wrap">
+  <h1>🛡️ เลือก "ยาที่ผู้ป่วยแพ้" — แบบ scale ได้</h1>
+  <p class="note">แนวคิด Hybrid: <b>พิมพ์ค้นหา</b> (ไทย/อังกฤษ) + <b>ชิปเลือกกลุ่ม</b> + รายการที่กรองแล้ว — แก้ปัญหา dropdown ยาว ลองพิมพ์ "sulfa", "เซฟ", "carba" หรือแตะชิปกลุ่มดู · <i>(ยาบางกลุ่มเป็นตัวอย่างการขยายในอนาคต)</i></p>
+
+  <div class="card">
+    <div class="card-h">🧪 เลือกข้อมูลผู้ป่วย</div>
+    <label>ยาที่ผู้ป่วยแพ้</label>
+    <div class="search">
+      <span class="ic">🔍</span>
+      <input id="q" type="text" placeholder="พิมพ์ชื่อยา เช่น amoxicillin, ซัลฟา, cefa..." autocomplete="off">
+      <button class="clr" id="clr" aria-label="clear">✕</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="list" id="list"></div>
+    <div class="sel" id="sel"></div>
+  </div>
+</div>
+
+<script>
+// ---- demo dataset (จริง: beta-lactam + sulfonamide; ตัวอย่างขยาย: NSAID/FQ/anticonv) ----
+const GROUPS = [
+  {id:'pen',  label:'Penicillins'},
+  {id:'ceph', label:'Cephalosporins'},
+  {id:'carba',label:'Carbapenems'},
+  {id:'mono', label:'Monobactam'},
+  {id:'sulfa',label:'Sulfonamides'},
+  {id:'nsaid',label:'NSAID *'},
+  {id:'fq',   label:'Fluoroquinolone *'},
+  {id:'anti', label:'Anticonvulsant *'},
+];
+const DRUGS = [
+  ['pen','Amoxicillin','อะม็อกซิซิลลิน'],['pen','Ampicillin','แอมพิซิลลิน'],['pen','Penicillin G','เพนิซิลลิน จี'],['pen','Piperacillin','ไพเพอราซิลลิน'],['pen','Cloxacillin','คล็อกซาซิลลิน'],
+  ['ceph','Cefazolin','เซฟาโซลิน'],['ceph','Cephalexin','เซฟาเล็กซิน'],['ceph','Cefuroxime','เซฟูร็อกซิม'],['ceph','Ceftriaxone','เซฟไตรอะโซน'],['ceph','Ceftazidime','เซฟตาซิดีม'],['ceph','Cefepime','เซเฟพีม'],['ceph','Cefixime','เซฟิกซิม'],
+  ['carba','Meropenem','เมอโรพีเนม'],['carba','Imipenem','ไอมิพีเนม'],['carba','Ertapenem','เออร์ตาพีเนม'],
+  ['mono','Aztreonam','อะซทรีโอแนม'],
+  ['sulfa','Trimethoprim-Sulfamethoxazole','โคไตรม็อกซาโซล'],['sulfa','Sulfadiazine','ซัลฟาไดอะซีน'],['sulfa','Sulfasalazine','ซัลฟาซาลาซีน'],
+  ['nsaid','Aspirin','แอสไพริน'],['nsaid','Ibuprofen','ไอบูโพรเฟน'],['nsaid','Celecoxib','ซีลีค็อกซิบ'],
+  ['fq','Ciprofloxacin','ไซโปรฟลอกซาซิน'],['fq','Levofloxacin','ลีโวฟลอกซาซิน'],
+  ['anti','Carbamazepine','คาร์บามาเซพีน'],['anti','Phenytoin','เฟนิโทอิน'],['anti','Lamotrigine','ลาโมไทรจีน'],
+];
+const GMAP = Object.fromEntries(GROUPS.map(g=>[g.id,g.label]));
+let activeGroup='all', query='', kbdIdx=-1, shown=[];
+
+const qEl=document.getElementById('q'), listEl=document.getElementById('list'),
+      chipsEl=document.getElementById('chips'), selEl=document.getElementById('sel'), clrEl=document.getElementById('clr');
+
+function renderChips(){
+  let html='<button class="chip" data-g="all" aria-pressed="'+(activeGroup==='all')+'">ทั้งหมด <span class="n">'+DRUGS.length+'</span></button>';
+  GROUPS.forEach(g=>{
+    const n=DRUGS.filter(d=>d[0]===g.id).length;
+    html+='<button class="chip" data-g="'+g.id+'" aria-pressed="'+(activeGroup===g.id)+'">'+g.label+' <span class="n">'+n+'</span></button>';
+  });
+  chipsEl.innerHTML=html;
+}
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function hi(text,q){ if(!q) return esc(text); const i=text.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0) return esc(text); return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length)); }
+
+function render(){
+  const q=query.trim().toLowerCase();
+  shown=DRUGS.filter(d=>{
+    if(activeGroup!=='all' && d[0]!==activeGroup) return false;
+    if(!q) return true;
+    return d[1].toLowerCase().includes(q) || d[2].includes(query.trim());
+  });
+  clrEl.style.display=query?'block':'none';
+  if(!shown.length){ listEl.innerHTML='<div class="empty">ไม่พบยา "'+esc(query)+'" — ลองพิมพ์อย่างอื่น หรือแตะ "ทั้งหมด"</div>'; return; }
+  let html='', lastG=null;
+  shown.forEach((d,idx)=>{
+    if(d[0]!==lastG){ html+='<div class="grp">'+GMAP[d[0]]+'</div>'; lastG=d[0]; }
+    html+='<div class="opt'+(idx===kbdIdx?' kbd':'')+'" data-i="'+idx+'">'+
+      '<span><span class="nm">'+hi(d[2],query)+'</span> <span class="en">'+hi(d[1],query)+'</span></span>'+
+      '<span class="tag">'+GMAP[d[0]]+'</span></div>';
+  });
+  listEl.innerHTML=html;
+}
+function pick(i){ const d=shown[i]; if(!d) return;
+  qEl.value=d[2]+' ('+d[1]+')'; query=''; selEl.style.display='block';
+  selEl.innerHTML='✅ เลือกแล้ว: <b>'+esc(d[1])+'</b> ('+esc(d[2])+') · กลุ่ม '+GMAP[d[0]]+'<br><span style="color:var(--muted)">→ ของจริงจะแสดงผลแพ้ข้ามตรงนี้</span>';
+  render();
+}
+chipsEl.addEventListener('click',e=>{const c=e.target.closest('.chip'); if(!c)return; activeGroup=c.dataset.g; kbdIdx=-1; renderChips(); render();});
+listEl.addEventListener('click',e=>{const o=e.target.closest('.opt'); if(o) pick(+o.dataset.i);});
+qEl.addEventListener('input',e=>{query=e.target.value; kbdIdx=-1; selEl.style.display='none'; render();});
+qEl.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){e.preventDefault(); kbdIdx=Math.min(kbdIdx+1,shown.length-1); render(); listEl.querySelector('.kbd')?.scrollIntoView({block:'nearest'});}
+  else if(e.key==='ArrowUp'){e.preventDefault(); kbdIdx=Math.max(kbdIdx-1,0); render(); listEl.querySelector('.kbd')?.scrollIntoView({block:'nearest'});}
+  else if(e.key==='Enter'){e.preventDefault(); pick(kbdIdx<0?0:kbdIdx);}
+});
+clrEl.addEventListener('click',()=>{query='';qEl.value='';qEl.focus();render();});
+renderChips(); render();
+</script>
+</body>
+</html>

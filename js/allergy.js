@@ -101,16 +101,41 @@
     return '<details class="ar-refs"><summary>📚 แหล่งอ้างอิงที่ใช้ในผลนี้</summary><ol>' + li + '</ol></details>';
   }
 
-  var LEGEND =
-    '<div class="ar-legend">' +
-      '<span><i class="ar-dot dot-high"></i>แพ้ข้ามสูง</span>' +
-      '<span><i class="ar-dot dot-moderate"></i>ปานกลาง</span>' +
-      '<span><i class="ar-dot dot-low"></i>ต่ำ</span>' +
-      '<span><i class="ar-dot dot-negligible"></i>น้อยมาก</span>' +
-    '</div>';
+  // ---- tier filter state (all on by default) ----
+  var TIER_KEYS = ['high', 'moderate', 'low', 'negligible'];
+  var TIER_TH = { high: 'แพ้ข้ามสูง', moderate: 'ปานกลาง', low: 'ต่ำ', negligible: 'น้อยมาก' };
+  var activeTiers = { high: true, moderate: true, low: true, negligible: true };
 
-  function render() {
-    var report = A.buildReport(allergenSel.value, severitySel.value);
+  function controlsHtml() {
+    var chips = TIER_KEYS.map(function (t) {
+      return '<button type="button" class="ar-legend-chip" data-tier="' + t + '" aria-pressed="' +
+        (activeTiers[t] ? 'true' : 'false') + '">' +
+        '<i class="ar-dot dot-' + t + '"></i>' + esc(TIER_TH[t]) + '</button>';
+    }).join('');
+    return '<div class="ar-filter">' +
+      '<div class="ar-legend">' + chips + '</div>' +
+      '<div class="ar-quick">' +
+        '<button type="button" class="ar-quick-btn" data-quick="safe">🟢 เฉพาะปลอดภัย</button>' +
+        '<button type="button" class="ar-quick-btn" data-quick="all">แสดงทั้งหมด</button>' +
+      '</div>' +
+      '<div class="ar-filter-hint">แตะระดับความเสี่ยงเพื่อกรองรายการ (เลือกได้หลายระดับ)</div>' +
+    '</div>';
+  }
+
+  var lastReport = null;
+
+  // build one group, applying the active-tier filter; '' when nothing shown
+  function groupHtml(titleClass, icon, title, items) {
+    var shown = items.filter(function (it) { return activeTiers[it.tier]; });
+    if (!shown.length) return '';
+    var countTxt = shown.length + (shown.length !== items.length ? ' จาก ' + items.length : '') + ' รายการ';
+    return '<div class="ar-group"><div class="ar-group-title ' + titleClass + '">' +
+      icon + ' ' + title + ' <span class="ar-count">(' + countTxt + ')</span></div>' +
+      shown.map(rowHtml).join('') + '</div>';
+  }
+
+  function paint() {
+    var report = lastReport;
     if (!report) { resultEl.innerHTML = ''; return; }
 
     var a = report.allergen;
@@ -123,7 +148,7 @@
       '<strong>อาการ:</strong> ' + esc(sev.label) +
       '<div style="font-size:12px;margin-top:6px;opacity:.9">' + esc(sev.note) + '</div></div>';
 
-    html += LEGEND;
+    html += controlsHtml();
 
     if (report.blocked) {
       // SCAR — block all beta-lactams
@@ -132,20 +157,16 @@
         '<strong>ทุกชนิด</strong> และยาที่โครงสร้างใกล้เคียง · ' +
         '<strong>ห้าม</strong> challenge / desensitization · ' +
         'ให้เลือกยานอกกลุ่ม beta-lactam เท่านั้น</div>';
-      html += '<div class="ar-group"><div class="ar-group-title ar-avoid-title">' +
-        '🚫 หลีกเลี่ยงทั้งหมด <span class="ar-count">(' + report.avoid.length + ' รายการ)</span></div>' +
-        report.avoid.map(rowHtml).join('') + '</div>';
+      html += groupHtml('ar-avoid-title', '🚫', 'หลีกเลี่ยงทั้งหมด', report.avoid);
     } else {
-      if (report.avoid.length) {
-        html += '<div class="ar-group"><div class="ar-group-title ar-avoid-title">' +
-          '🚫 ควรหลีกเลี่ยง <span class="ar-count">(' + report.avoid.length + ' รายการ)</span></div>' +
-          report.avoid.map(rowHtml).join('') + '</div>';
-      }
-      if (report.safer.length) {
-        html += '<div class="ar-group"><div class="ar-group-title ar-safer-title">' +
-          '✅ ปลอดภัยกว่า / พิจารณาใช้ได้ <span class="ar-count">(' + report.safer.length + ' รายการ)</span></div>' +
-          report.safer.map(rowHtml).join('') + '</div>';
-      }
+      html += groupHtml('ar-avoid-title', '🚫', 'ควรหลีกเลี่ยง', report.avoid);
+      html += groupHtml('ar-safer-title', '✅', 'ปลอดภัยกว่า / พิจารณาใช้ได้', report.safer);
+    }
+
+    // nothing matches the current filter
+    var anyShown = report.avoid.concat(report.safer).some(function (it) { return activeTiers[it.tier]; });
+    if (!anyShown) {
+      html += '<div class="info-box amber">ไม่มีรายการตรงกับตัวกรอง — แตะ “แสดงทั้งหมด” ด้านบน</div>';
     }
 
     // always show non-beta-lactam alternatives + references
@@ -153,6 +174,11 @@
     html += refsHtml(report);
 
     resultEl.innerHTML = html;
+  }
+
+  function render() {
+    lastReport = A.buildReport(allergenSel.value, severitySel.value);
+    paint();
   }
 
   function init() {
@@ -164,6 +190,26 @@
     populate();
     allergenSel.addEventListener('change', render);
     severitySel.addEventListener('change', render);
+
+    // tier filter: toggle individual chips, or quick "safe"/"all" presets
+    resultEl.addEventListener('click', function (e) {
+      var chip = e.target.closest && e.target.closest('.ar-legend-chip');
+      if (chip) {
+        var t = chip.getAttribute('data-tier');
+        activeTiers[t] = !activeTiers[t];
+        paint();
+        return;
+      }
+      var q = e.target.closest && e.target.closest('.ar-quick-btn');
+      if (q) {
+        var mode = q.getAttribute('data-quick');
+        TIER_KEYS.forEach(function (k) { activeTiers[k] = (mode === 'all'); });
+        if (mode === 'safe') { activeTiers.low = true; activeTiers.negligible = true; }
+        paint();
+        return;
+      }
+    });
+
     render();
   }
 

@@ -1,9 +1,9 @@
 # Allergy Cross-Reactivity Reference — Beta-Lactam (Phase 1)
 
-> 🟢 **สถานะ: ตัวเลข/คำแนะนำ beta-lactam ยืนยันกับ full-text แล้ว (2026-06-18)**
-> — ตรวจกับ PDF แหล่งปฐมภูมิ 12 ไฟล์ (Picard 2019, Khan 2022, Zagursky 2018,
-> Romano 2015/2016, pharmacy/clinician reviews, Trubiano 2022). เหลือเภสัชกร
-> สอบทานเชิงคลินิกขั้นสุดท้าย + เห็นชอบ threshold/tier ก่อน lock เข้า Phase 2
+> 🟢 **สถานะ: อนุมัติแล้ว (Phase 1 ปิด) — 2026-06-18**
+> — ตัวเลข/คำแนะนำ beta-lactam (ตาราง 4.1–4.3 + severity gating + R1 clusters)
+> ยืนยันกับ full-text PDF แหล่งปฐมภูมิ 12 ไฟล์ **และเภสัชกร (เจ้าของโปรเจกต์)
+> สอบทานเชิงคลินิกเห็นชอบครบทุกหัวข้อแล้ว** → พร้อม lock เป็น input ของ Phase 2
 >
 > ขอบเขต Phase 1 = **beta-lactam เท่านั้น** (penicillins, cephalosporins,
 > carbapenems, monobactam). กลุ่มอื่น (sulfa, NSAID, anticonvulsant + HLA)
@@ -213,6 +213,7 @@
 **เหลือเภสัชกรสอบทาน/เห็นชอบ (clinical sign-off):**
 - [x] เห็นชอบ tier/threshold (16 / 5.6 / 2.1 / <1%) — เจ้าของโปรเจกต์เห็นชอบ 2026-06-18
 - [x] เติมตาราง 4.2 (แพ้ Pen G/V) + 4.3 (แพ้ cephalosporin) ครบแล้ว
-- [ ] เภสัชกรสอบทานตาราง 4.2/4.3 เชิงคลินิกครั้งสุดท้าย
-- [ ] เห็นชอบรายการ non-beta-lactam alternatives + วิธี gating ตาม severity
-- [ ] HLA (ข้อ 6, Phase 5) — ยังรอ verify จากไฟล์ CPIC/Sukasem ที่ส่งมา (ทำตอนถึง Phase 5)
+- [x] เภสัชกรสอบทานตาราง 4.2/4.3 เชิงคลินิก — เห็นชอบ 2026-06-18
+- [x] เห็นชอบรายการ non-beta-lactam alternatives + วิธี gating ตาม severity — 2026-06-18
+- [x] เห็นชอบเนื้อหา HLA (ข้อ 6) สำหรับ Phase 5 — 2026-06-18
+  *(ยังต้อง verify ตัวเลข OR/allele freq กับ full-text CPIC/Sukasem ตอนลงมือ Phase 5)*

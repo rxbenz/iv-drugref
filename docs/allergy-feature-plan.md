@@ -18,8 +18,8 @@
 | Phase | ชื่อ | สถานะ |
 |---|---|---|
 | 0 | Mockup + scope | ✅ เสร็จ |
-| 1 | Data research (beta-lactam) | 🔬 กำลังทำ |
-| 2 | Data model + schema | รอ |
+| 1 | Data research (beta-lactam) | ✅ เสร็จ (verify full-text + เภสัชกรอนุมัติ 2026-06-18) |
+| 2 | Data model + schema | ⬅️ ขั้นถัดไป |
 | 3 | สร้างหน้า UI (static) | รอ |
 | 4 | Logic เชื่อมข้อมูล | รอ |
 | 5 | ขยายกลุ่มยาอื่น | รอ |

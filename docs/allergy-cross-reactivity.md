@@ -108,14 +108,52 @@
 > หมายเหตุ severity: ตารางนี้ใช้กับประวัติ IgE/ผื่นทั่วไป — **ถ้าเคยเป็น SCAR
 > ให้เลี่ยง beta-lactam ทั้งหมดและห้าม challenge** (ดูข้อ 2)
 
-### 4.2 แพ้ Penicillin G/V
-- หลักการเดียวกับ 4.1 แต่ R1 ของ penicillin G ไม่ตรงกับ cephalosporin กลุ่ม amino → cephalosporin ส่วนใหญ่ tier 🟡 ต่ำ; cefazolin/carbapenem/aztreonam 🟢
-- *(รอเติมตารางเต็มหลัง verify 4.1)* ✅ ☐
+### 4.2 แพ้ Penicillin G / Penicillin V (benzyl / phenoxymethyl-penicillin)
 
-### 4.3 แพ้ Cephalosporin (เช่น ceftriaxone)
-- cephalosporin → cephalosporin: **R1 เหมือน = เสี่ยง; R1 ต่าง = ต่ำ** [1]
-- ช่วงที่รายงานใน T-cell-mediated penicillin hypersensitivity → cephalosporins = **2.8–31.2%** (สะท้อนว่า side chain กำหนดมาก) [5]
-- *(รอเติมตารางเต็มหลัง verify)* ✅ ☐
+> หลักสำคัญ: R1 ของ Pen G/V **ไม่ตรงกับ aminocephalosporin cluster** (cluster นั้น
+> ผูกกับ amoxicillin/ampicillin) → สำหรับผู้ที่แพ้ **Pen G/V โดยเฉพาะ** cephalosporin
+> เกือบทั้งหมดจึงอยู่ tier 🟡 ต่ำ (~2%) ไม่ใช่ 16% (ต่างจาก 4.1) [1][3]
+
+#### 🚫 ควรหลีกเลี่ยง
+| ยาเป้าหมาย | % แพ้ข้าม | tier | เหตุผล | ref | ✅ |
+|---|---|---|---|---|---|
+| Penicillins อื่น (Amoxicillin, Ampicillin, Piperacillin, Cloxacillin, Pen G↔V…) | ถือว่าแพ้ทั้งกลุ่ม | 🔴 | แกน penicillin เดียวกัน | [1] | ✅ |
+
+#### ✅ ทางเลือกที่ปลอดภัยกว่า
+| ยาเป้าหมาย | % แพ้ข้าม | tier | เหตุผล / เงื่อนไข | ref | ✅ |
+|---|---|---|---|---|---|
+| **Cefazolin** | ~0.7% | 🟢 | R1 ไม่ซ้ำใคร — ให้ได้แม้มีประวัติ anaphylaxis (ยกเว้น SCAR) | [1][8] | ✅ |
+| Carbapenem (meropenem, imipenem, ertapenem) | 0.87% (CI 0.32–2.32) | 🟢 | Khan: ให้ได้ทุกกรณีไม่ต้องทดสอบ (ยกเว้น SCAR) | [1][3] | ✅ |
+| Aztreonam | <1% | 🟢 | ไม่แพ้ข้ามกับ penicillin — **ยกเว้นแพ้ Ceftazidime** | [1] | ✅ |
+| Cephalosporins โดยทั่วไป (รวม cefdroxil/cephalexin/ceftriaxone/cefepime ฯลฯ) | 2.11% (CI 0.98–4.46) | 🟡 | R1 ไม่ตรงกับ benzyl/phenoxymethyl; Khan: nonanaphylactic → ให้ได้ไม่ต้องทดสอบ | [1][3] | ✅ |
+| Non-beta-lactam (ดูข้อ 5) | N/A | 🟢 | ต่างกลุ่มสิ้นเชิง — เลือกตาม indication | [2] | ✅ |
+
+> severity: ถ้าประวัติเป็น **SCAR** → เลี่ยง beta-lactam ทั้งหมด + ห้าม challenge (ข้อ 2)
+
+### 4.3 แพ้ Cephalosporin
+
+> หลักสำคัญ: cephalosporin → cross-reactivity ขึ้นกับ **R1 ของ cephalosporin ตัวที่แพ้**
+> (ดู cluster ข้อ 3) — **R1 เหมือน = เสี่ยง, R1 ต่าง = ต่ำ** ช่วงที่รายงานใน T-cell
+> mediated = **2.8–31.2%** สะท้อนว่า side chain กำหนดมาก [1][5]
+
+**กฎจัดการจาก Khan 2022 [1] (verified):**
+- nonanaphylactic cephalosporin allergy → **ให้ penicillin ได้ไม่ต้องทดสอบ**
+  (เช่น เคยลมพิษจาก cephalexin รับ amoxicillin ได้) — *แต่ถ้า cephalosporin ที่แพ้
+  อยู่ cluster เดียวกับ aminopenicillin (เช่นแพ้ cephalexin → ระวัง ampicillin) ให้ดู cluster*
+- anaphylaxis ต่อ cephalosporin → **skin test + challenge ก่อนให้ penicillin**
+
+#### ตารางตาม cephalosporin ที่แพ้ (ตัวอย่างที่พบบ่อย)
+| แพ้ cephalosporin | 🚫 หลีกเลี่ยง (R1 เหมือน, 🔴) | ✅ ปลอดภัยกว่า (🟢/🟡) | ref | ✅ |
+|---|---|---|---|---|
+| **Ceftriaxone / Cefotaxime** | กันเองเป๊ะ; + Cefepime, Cefpodoxime, Cefuroxime (methoxyimino-aminothiazole) | Cefazolin 🟢 · Carbapenem 🟢 · Aztreonam 🟢 · Ceftazidime 🟡 · Penicillins 🟡 | [1][5][7] | ✅ |
+| **Ceftazidime** | **Aztreonam** (R1 เหมือนเป๊ะ) 🔴 | Cefazolin 🟢 · Carbapenem 🟢 · Penicillins 🟡 · methoxyimino-ceph (ceftriaxone ฯลฯ) 🟡 | [1][7] | ✅ |
+| **Cephalexin / Cefaclor** | Ampicillin (R1 เหมือน) + cluster ampicillin | Cefazolin 🟢 · Carbapenem 🟢 · Aztreonam 🟢 · Amoxicillin/Pen-G 🟡* | [1][4][7] | ✅ |
+| **Cefazolin** | (unique — ไม่มีคู่ R1) | beta-lactam อื่นโดยทั่วไป 🟡 | [1][8] | ✅ |
+
+> *Cephalexin R1 = aminobenzyl (เหมือน ampicillin) → ระวัง ampicillin โดยเฉพาะ;
+> amoxicillin (hydroxy-aminobenzyl) ต่าง cluster เล็กน้อย ดูข้อ 3
+>
+> severity: ทุกกรณีถ้าเคยเป็น **SCAR** → เลี่ยง beta-lactam ทั้งหมด + ห้าม challenge
 
 ---
 
@@ -173,7 +211,8 @@
 - [x] carbapenem/aztreonam management ของ Khan [1]; Romano range 2.8–31.2% [5]
 
 **เหลือเภสัชกรสอบทาน/เห็นชอบ (clinical sign-off):**
-- [ ] เห็นชอบ tier/threshold ที่ใช้ (16 / 5.6 / 2.1 / <1%) เหมาะกับ UI ไหม
+- [x] เห็นชอบ tier/threshold (16 / 5.6 / 2.1 / <1%) — เจ้าของโปรเจกต์เห็นชอบ 2026-06-18
+- [x] เติมตาราง 4.2 (แพ้ Pen G/V) + 4.3 (แพ้ cephalosporin) ครบแล้ว
+- [ ] เภสัชกรสอบทานตาราง 4.2/4.3 เชิงคลินิกครั้งสุดท้าย
 - [ ] เห็นชอบรายการ non-beta-lactam alternatives + วิธี gating ตาม severity
-- [ ] ตัดสินใจ: ต้องเติมตาราง 4.2 (แพ้ Pen G/V) และ 4.3 (แพ้ cephalosporin) ให้เต็มก่อน Phase 2 หรือไม่
 - [ ] HLA (ข้อ 6, Phase 5) — ยังรอ verify จากไฟล์ CPIC/Sukasem ที่ส่งมา (ทำตอนถึง Phase 5)

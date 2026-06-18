@@ -415,3 +415,41 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 
 > Encoded ใน `js/allergy-data.js` (group `icm` + `clusterAware` engine flag),
 > locked โดย 4 tests ใน `test/allergy-data.test.js` (รวม 129 tests ผ่าน).
+
+---
+
+## กลุ่มที่ 7 — Heparins (เฮพาริน / LMWH) — ✅ verify + encode แล้ว 2026-06-18
+
+### แยก 2 ภาวะภูมิคุ้มกัน (สำคัญมาก — กลไกต่างกัน)
+| | HIT | Delayed-type hypersensitivity (DTH) |
+|---|---|---|
+| กลไก | Ab ต่อ PF4/heparin complex | T-cell delayed (type IV) |
+| อาการ | เกล็ดเลือดต่ำ + ลิ่มเลือดอุดตัน (อันตรายถึงชีวิต — **ไม่ใช่ผื่นแพ้**) | ผื่น eczema/plaque ที่จุดฉีด SC |
+| แพ้ข้าม UFH↔LMWH | ~50% in vivo | กว้าง (ไม่ขึ้นกับ MW) |
+| Onset | 5-10 วัน (เคยได้มาก่อน 1-2 วัน) | 14-35 วัน (re-exposure 2-10 วัน) |
+
+### หลักการแพ้ข้าม + ทางเลือก
+- **เลี่ยง heparin ทุกตัว** (UFH + LMWH ทุกชนิด) ในทั้ง HIT และ DTH
+- **ห้ามใช้ LMWH แทน UFH ใน HIT** (แพ้ข้าม ~50%)
+- **ทางเลือก (ASH 2018):** argatroban, bivalirudin (DTI — ไม่แพ้ข้าม, ครึ่งชีวิตสั้น เหมาะกรณีวิกฤต) · fondaparinux (HIT: เสี่ยงต่ำ; DTH: ทนได้ดี ~6% cross) · danaparoid (cross ใน vitro, in vivo น้อย → caution) · DOAC (ผู้ป่วยอาการคงที่)
+- **เกร็ด DTH:** IV UFH มักใช้ได้แม้แพ้ SC heparin (ปรึกษาผู้เชี่ยวชาญ)
+
+### โมเดลข้อมูล
+- cross-reactivity เป็นแบบ **ทั้ง class** (เหมือน sulfonamide) → NBL group ปกติ ไม่ใช้ clusterAware
+- crossReactive (avoid สูง) = heparin ทุกตัว · caution = danaparoid · safe = DTI/fondaparinux/DOAC
+- `keepSafeOnScar: true` — ยา non-heparin คือตัวที่แนะนำให้เปลี่ยนไปใช้แม้กรณีรุนแรง → ยังคงสถานะ safe
+
+### Checklist verify (กลุ่ม Heparin) — ✅ ครบ 2026-06-18
+- [x] เห็นชอบแยก HIT (immune, PF4) vs DTH (ผื่น)
+- [x] เห็นชอบ UFH↔LMWH แพ้ข้าม → เลี่ยงทุกตัว / ห้าม LMWH แทน UFH ใน HIT
+- [x] เห็นชอบทางเลือก DTI/fondaparinux/danaparoid/DOAC (ASH 2018)
+- [x] เห็นชอบ fondaparinux ทนได้ดีใน DTH (~6% cross)
+
+### อ้างอิงกลุ่ม Heparin
+- **ash2018hit** — Cuker A, et al. ASH 2018 guidelines for management of VTE:
+  heparin-induced thrombocytopenia. *Blood Adv* 2018;2(22):3360-92.
+- **dthHeparin** — Schindewolf M, et al. Delayed-type hypersensitivity to
+  heparins/heparinoids; tolerance of fondaparinux. (PMID 17573880 / 15025697)
+
+> Encoded ใน `js/allergy-data.js` (group `heparin`), locked โดย 3 tests ใน
+> `test/allergy-data.test.js` (รวม 132 tests ผ่าน).

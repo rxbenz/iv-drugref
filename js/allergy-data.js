@@ -44,7 +44,9 @@
     harboe2010: 'Harboe T, et al. Suspected allergy to local anaesthetics: follow-up in 135 cases. Acta Anaesthesiol Scand 2010;54(5):536-42.',
     esur2025cm: 'ESUR Contrast Media Safety Committee. Hypersensitivity reactions to contrast media: Part 1 & 2 (updated guidelines). Eur Radiol 2025.',
     icmClass2024: 'Cross-reactivity in hypersensitivity reactions to contrast agents: new classification and guide for clinical practice. Eur Radiol 2024;34. (carbamoyl side-chain grouping)',
-    icmSkinTest2024: 'Skin Test Reactivity Patterns in Patients Allergic to Iodinated Contrast Media: A Refined View. J Allergy Clin Immunol Pract 2024;12(11). (PMID 39056227)'
+    icmSkinTest2024: 'Skin Test Reactivity Patterns in Patients Allergic to Iodinated Contrast Media: A Refined View. J Allergy Clin Immunol Pract 2024;12(11). (PMID 39056227)',
+    ash2018hit: 'Cuker A, et al. American Society of Hematology 2018 guidelines for management of venous thromboembolism: heparin-induced thrombocytopenia. Blood Adv 2018;2(22):3360-92.',
+    dthHeparin: 'Schindewolf M, et al. Delayed-type hypersensitivity to heparins/heparinoids — patterns of cross-reactivity; tolerance of fondaparinux. (Allergy 2007;62; PMID 17573880 / PMID 15025697)'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -536,6 +538,57 @@
       noteScar: 'SCAR จาก ICM (พบยาก): เลี่ยง ICM ทั้งหมดเด็ดขาด · ห้าม challenge · พิจารณา GBCA/การตรวจอื่น',
       scarCautionNote: 'กรณี SCAR: เลี่ยง ICM ทั้งหมด',
       singleDrugCallout: '⚠️ ความเชื่อผิด: การแพ้ ICM "ไม่ใช่" การแพ้ไอโอดีน และ "ไม่เกี่ยวกับการแพ้อาหารทะเล/กุ้งหอยปูปลา" — ห้ามใช้ประวัติแพ้อาหารทะเลมาห้ามให้ ICM · 💡 การแพ้ข้ามขึ้นกับ side chain (carbamoyl): ตัว side chain เดียวกันแพ้ข้ามสูง (~60-77%) → เลือกตัว side chain ต่างกลุ่ม + ยืนยันด้วย skin test (วิธีเดียวที่เชื่อถือได้) · premedication ด้วย steroid/antihistamine ไม่แนะนำให้ใช้ routinely แล้ว (ESUR 2025 — หลักฐานไม่ดีพอ การเปลี่ยนตัวยาสำคัญกว่า) · Gadolinium (MRI) ไม่แพ้ข้ามกับ ICM'
+    },
+    // ── Heparins ─────────────────────────────────────────────────────────────
+    // TWO distinct immune reactions, both with broad UFH<->LMWH cross-reactivity:
+    //   (1) HIT (heparin-induced thrombocytopenia): anti-PF4/heparin antibodies →
+    //       thrombocytopenia + thrombosis (life-threatening, NOT a rash). UFH↔LMWH
+    //       cross-react ~50% in vivo → avoid ALL heparins. Switch to a non-heparin
+    //       anticoagulant: argatroban/bivalirudin (DTIs, non-cross-reacting),
+    //       fondaparinux, danaparoid, or a DOAC (ASH 2018).
+    //   (2) Delayed-type hypersensitivity (DTH): eczematous plaques at SC injection
+    //       site; broad UFH↔LMWH cross-reactivity (independent of MW); fondaparinux
+    //       tolerated (~6% cross); IV UFH often tolerated despite SC DTH.
+    // Whole-class cross-reactivity (like sulfonamide) → default avoid, not cluster-
+    // aware. Alternatives stay safe even at SCAR (they ARE the recommended switch).
+    {
+      id: 'heparin',
+      label: 'Heparins (เฮพาริน / LMWH)',
+      refs: ['ash2018hit', 'dthHeparin'],
+      keepSafeOnScar: true,   // non-heparin anticoagulants are the recommended switch
+      allergens: [
+        { id: 'heparin-ufh', generic: 'Heparin (UFH)', th: 'เฮพารินไม่แยกส่วน', trade: ['Heparin sodium'] },
+        { id: 'enoxaparin',  generic: 'Enoxaparin',    th: 'อีน็อกซาพาริน',    trade: ['Clexane', 'Lovenox'] },
+        { id: 'dalteparin',  generic: 'Dalteparin',    th: 'ดัลทีพาริน',       trade: ['Fragmin'] },
+        { id: 'nadroparin',  generic: 'Nadroparin',    th: 'นาโดรพาริน',       trade: ['Fraxiparine'] },
+        { id: 'tinzaparin',  generic: 'Tinzaparin',    th: 'ทินซาพาริน',       trade: ['Innohep'] }
+      ],
+      crossReason: 'แพ้ข้ามทั้งกลุ่ม heparin — HIT: UFH↔LMWH ~50% in vivo · DTH: แพ้ข้ามกว้าง (ไม่ขึ้นกับ MW)',
+      crossReactive: [
+        { id: 'heparin-ufh', generic: 'Heparin (UFH)', th: 'เฮพารินไม่แยกส่วน', sub: 'Unfractionated heparin' },
+        { id: 'enoxaparin',  generic: 'Enoxaparin',    th: 'อีน็อกซาพาริน',    sub: 'LMWH' },
+        { id: 'dalteparin',  generic: 'Dalteparin',    th: 'ดัลทีพาริน',       sub: 'LMWH' },
+        { id: 'nadroparin',  generic: 'Nadroparin',    th: 'นาโดรพาริน',       sub: 'LMWH' },
+        { id: 'tinzaparin',  generic: 'Tinzaparin',    th: 'ทินซาพาริน',       sub: 'LMWH' }
+      ],
+      // danaparoid: heparinoid with in-vitro cross-reactivity (rarely clinically
+      // relevant in HIT) → caution, not a clean alternative.
+      cautionReason: 'Danaparoid มี cross-reactivity ใน vitro (พบในร่างกายน้อย) — ใช้ใน HIT ได้แต่ต้องระวัง',
+      caution: [
+        { generic: 'Danaparoid', th: 'ดานาพารอยด์', sub: 'Heparinoid', pct: 'cross ใน vitro (in vivo น้อย)' }
+      ],
+      safeReason: 'ยาต้านการแข็งตัวที่ไม่ใช่ heparin — ไม่แพ้ข้ามกับ heparin (ทางเลือกที่แนะนำ)',
+      safe: [
+        { generic: 'Argatroban',  th: 'อาร์กาโทรแบน', sub: 'Direct thrombin inhibitor (DTI)', reason: 'ไม่แพ้ข้าม · ครึ่งชีวิตสั้น — เหมาะกรณีวิกฤต/ตับปกติ (ASH 2018)' },
+        { generic: 'Bivalirudin', th: 'ไบวาลิรูดิน',  sub: 'Direct thrombin inhibitor (DTI)', reason: 'ไม่แพ้ข้าม · ครึ่งชีวิตสั้น — เหมาะกรณีวิกฤต/หัตถการ (ASH 2018)' },
+        { generic: 'Fondaparinux', th: 'ฟอนดาพารินุกซ์', sub: 'Synthetic factor Xa inhibitor', reason: 'HIT: ตัวเลือกที่แนะนำ (ความเสี่ยงต่ำ) · DTH: ทนได้ดี (~6% cross)' },
+        { generic: 'DOAC (Apixaban / Rivaroxaban / Dabigatran)', th: 'ยาต้านการแข็งตัวชนิดรับประทาน', sub: 'DOAC', reason: 'ทางเลือกในผู้ป่วยที่อาการคงที่ (ASH 2018)' }
+      ],
+      noteMild: 'แพ้ heparin (ผื่น/DTH): เลี่ยง heparin ทุกตัว (UFH+LMWH แพ้ข้ามกว้าง) → fondaparinux ทนได้ดี · IV UFH มักใช้ได้แม้แพ้ SC heparin (ปรึกษาผู้เชี่ยวชาญ)',
+      noteIge:  'แพ้ heparin: เลี่ยง heparin ทุกตัว → ใช้ DTI (argatroban/bivalirudin), fondaparinux หรือ DOAC',
+      noteScar: 'ปฏิกิริยารุนแรง/HIT with thrombosis: เลี่ยง heparin ทุกตัวเด็ดขาด → DTI (argatroban/bivalirudin) เป็นหลัก · ห้าม challenge',
+      scarCautionNote: 'กรณีรุนแรง: ใช้ DTI เป็นหลัก',
+      singleDrugCallout: '⚠️ แยก 2 ภาวะให้ชัด — (1) HIT (heparin-induced thrombocytopenia): ภูมิคุ้มกันต่อ PF4/heparin complex → เกล็ดเลือดต่ำ + ลิ่มเลือดอุดตัน (อันตรายถึงชีวิต ไม่ใช่ผื่นแพ้) · UFH↔LMWH แพ้ข้าม ~50% in vivo → เลี่ยง heparin ทุกตัว · ใช้ argatroban/bivalirudin (DTI), fondaparinux, danaparoid หรือ DOAC (ASH 2018) · ห้ามใช้ LMWH แทน UFH ใน HIT · (2) Delayed-type hypersensitivity: ผื่น eczema ที่จุดฉีด SC, UFH↔LMWH แพ้ข้ามกว้าง (ไม่ขึ้นกับ MW), fondaparinux ทนได้ดี (~6% cross) และ IV UFH มักใช้ได้แม้แพ้ SC heparin'
     }
   ];
 

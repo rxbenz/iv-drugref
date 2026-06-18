@@ -444,6 +444,37 @@ test('NBL: clusterAware refactor leaves non-cluster groups unchanged', () => {
   assert.ok(f.caution.some((x) => x.drug.generic === 'Levofloxacin'));
 });
 
+// ──────────────────────────── non-beta-lactam: Heparins ───────────────────
+test('NBL: heparin group present, whole-class cross-reactivity (not clusterAware)', () => {
+  const g = A.NBL_GROUPS.find((x) => x.id === 'heparin');
+  assert.ok(g, 'heparin group present');
+  assert.ok(!g.clusterAware, 'heparin is whole-class avoid, not clusterAware');
+  assert.equal(g.keepSafeOnScar, true);
+});
+
+test('NBL: enoxaparin/IgE -> all other heparins avoid, DTI+fondaparinux safe, danaparoid caution', () => {
+  const r = A.buildReport('enoxaparin', 'ige');
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Heparin (UFH)') && avoidG.includes('Dalteparin') && avoidG.includes('Tinzaparin'));
+  assert.ok(!avoidG.includes('Enoxaparin'), 'culprit excluded');
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  // safe alternatives
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(saferG.includes('Argatroban') && saferG.includes('Bivalirudin') && saferG.includes('Fondaparinux'));
+  assert.ok(saferG.some((x) => /DOAC/.test(x)));
+  // danaparoid is caution, not safe
+  assert.ok(r.caution.some((x) => x.drug.generic === 'Danaparoid'));
+  assert.ok(!saferG.includes('Danaparoid'));
+});
+
+test('NBL: heparin SCAR keeps non-heparin alternatives safe (keepSafeOnScar)', () => {
+  const r = A.buildReport('heparin-ufh', 'scar');
+  assert.ok(r.avoid.every((x) => x.tier === 'high'));
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(saferG.includes('Argatroban') && saferG.includes('Bivalirudin'),
+    'DTIs stay safe at SCAR — they are the recommended switch');
+});
+
 // ───────────────────────── overrides precedence ──────────────────────────
 test('override beats structural rule (cefazolin target wins over low default)', () => {
   // cefazolin is a cephalosporin; without override a penicillin->ceph default

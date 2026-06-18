@@ -264,6 +264,37 @@
   แก้โน้ต CLAUDE.md ให้ตรง
 - **Effort**: S
 
+### P3.4 Redesign nav + footer แบบรวมศูนย์ (version จุดเดียว) — 🔵 PLANNED
+- **ปัญหาเดิม**:
+  - footer ยาว (~120px: disclaimer + ผู้จัดทำ + license + version) ถูก **copy
+    ซ้ำทุกหน้า** → เลข version ฝังมือ **7 จุดใน HTML** (calculator/compatibility×2/
+    index/renal-dosing/tdm/vanco-tdm) ต้องไล่แก้ทีละไฟล์ทุกครั้งที่ release
+  - `bottom-nav` ปัจจุบันมีแค่ 5 เมนู ไม่ครบ 7 หน้าผู้ใช้ (ตก vanco-tdm,
+    หน้า allergy ใหม่)
+- **เป้าหมาย**:
+  1. **Nav แบบที่คั่นหนังสือ** — ติดขอบจอ ไม่กินพื้นที่เนื้อหา เข้าได้ทุกหน้า
+  2. **Footer เดียวกระชับ** (~36px) ใช้ทุกหน้า — disclaimer/license/แหล่งอ้างอิง
+     ย้ายเข้า popup (ปุ่ม ℹ️)
+  3. **version จุดเดียว** — ค่าเดียว `APP_VERSION` (หรืออ่านจาก `version.json`),
+     เลิกฝังมือใน HTML
+- **ขอบเขตหน้า**: ใส่ใน nav **เฉพาะ 7 หน้าผู้ใช้** (index/calculator/tdm/
+  vanco-tdm/renal-dosing/compatibility/**allergy**) — **`dashboard` + `admin`
+  ห้ามให้ user เข้าถึง** เก็บเป็น admin-only (ไม่ลิงก์ใน nav สาธารณะ)
+- **แนวทางทำให้ "จุดเดียว" จริง**: สร้าง `js/site-chrome.js` ฉีด nav + footer
+  เข้าทุกหน้า — แต่ละ HTML เหลือ placeholder (`<div id="siteFooter">`); ลบ
+  footer ยาวที่ซ้ำออกจาก 8 หน้า; wire ใน `build.js` PAGES (inline ตอน deploy)
+- **mockup เพื่อตัดสินใจ** (เสร็จแล้ว, ยังไม่ wire เข้าแอป):
+  `docs/mockups/nav-footer-mockup.html` (ภาพรวม before/after) +
+  `docs/mockups/nav-variant-A.html` (ที่คั่นแนวตั้งขอบขวา) +
+  `docs/mockups/nav-variant-B.html` (แถบล่างกระชับ + เพิ่มเติม)
+- **ค้างตัดสินใจ**: เลือกรูปแบบ nav A / B / responsive (A บน desktop, B บน
+  มือถือ) ก่อนลงมือ
+- **Effort**: M (แตะ 8 HTML + 1 ไฟล์ JS ใหม่ + build.js + CSS) — ทำใน branch
+  แยก ทดสอบทุกหน้าก่อน merge
+- **หมายเหตุ release**: ถ้าย้าย version มา single-source ต้องอัปเดต release
+  checklist ใน `CLAUDE.md` (footer ไม่ต้องไล่แก้ 7 จุดอีก เหลือ package.json/
+  version.json/sw.js + `APP_VERSION`)
+
 ---
 
 ## ลำดับการลงมือที่แนะนำ (critical path)

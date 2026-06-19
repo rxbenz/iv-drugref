@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.17.1
+// IV Drug Reference PWA — Service Worker v5.17.2
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -55,9 +55,13 @@
 //          (sessionStorage; no more "disappears, press back"); content is pushed
 //          right (no overlap); removed auto-hide-on-scroll + scrim (hide only via
 //          ‹‹ / swipe-left / Esc). Forces SW cache refresh app-wide.
+// v5.17.2: Allergy picker — live typeahead results list (shows matches as you
+//          type, Enter picks the top, arrows navigate) + group chips that
+//          filter & show the list. Replaces the native <select> that only
+//          revealed results once opened.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.17.1';
+const CACHE_NAME = 'iv-drugref-v5.17.2';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

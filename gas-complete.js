@@ -62,7 +62,9 @@ var SHEETS = {
   DRUG_RATINGS: 'DrugRatings',
   NPS_RESPONSES: 'NPSResponses',
   COMPAT_PAIRS: 'CompatPairs',
-  ALLERGY_LOOKUPS: 'AllergyLookups'
+  ALLERGY_LOOKUPS: 'AllergyLookups',
+  ALLERGY_GROUPS: 'AllergyGroups',
+  ALLERGY_REFS: 'AllergyRefs'
 };
 
 // ──────────────────────────────────────────────
@@ -261,6 +263,22 @@ function doGet(e) {
         return handleDeleteRenalDrug(user, data);
       case 'bulkcreaterenaldrugs':
         return handleBulkCreateRenalDrugs(user, data);
+
+      // ── Allergy cross-reactivity data ──
+      case 'allergydata':
+        return handleGetAllergyDataPublic();
+      case 'getallergygroups':
+        return handleGetAllergyGroups(user);
+      case 'createallergygroup':
+        return handleCreateAllergyGroup(user, data);
+      case 'updateallergygroup':
+        return handleUpdateAllergyGroup(user, data);
+      case 'deleteallergygroup':
+        return handleDeleteAllergyGroup(user, data);
+      case 'bulkcreateallergygroups':
+        return handleBulkCreateAllergyGroups(user, data);
+      case 'bulkcreateallergyrefs':
+        return handleBulkCreateAllergyRefs(user, data);
 
       // ── Urgent Alerts ──
       case 'checkurgentalerts':
@@ -1061,6 +1079,181 @@ function handleBulkCreateRenalDrugs(user, data) {
 
   addAuditLog(user, 'bulkImportRenalDrugs', '', '', 'Imported ' + created + ', skipped ' + skipped);
   return jsonResponse({ success: true, created: created, skipped: skipped });
+}
+
+
+// ════════════════════════════════════════════════
+// ALLERGY CROSS-REACTIVITY DATA CRUD
+// ════════════════════════════════════════════════
+// One row per group (beta_lactam | nbl). Nested arrays/objects (allergens,
+// crossReactive, safe, caution, refs, chemLabels) are stored as JSON strings;
+// the frontend parses them back. Boolean flags are stored as TRUE/FALSE.
+// Citations live in a separate AllergyRefs sheet (key -> citation).
+
+var ALLERGY_GROUP_HEADERS = ['id', 'type', 'label', 'allergens', 'crossReactive', 'safe', 'caution',
+  'refs', 'crossReason', 'cautionReason', 'safeReason', 'noteMild', 'noteIge', 'noteScar',
+  'scarCautionNote', 'singleDrugCallout', 'keepSafeOnScar', 'clusterAware', 'crossClassCaution',
+  'chemGroupAware', 'chemLabels', 'sortOrder', 'createdBy', 'createdAt', 'updatedAt'];
+
+var ALLERGY_REF_HEADERS = ['key', 'citation', 'createdBy', 'createdAt', 'updatedAt'];
+
+// JSON-encode objects/arrays, pass scalars through (null -> '')
+function allergyJ(v) {
+  return (typeof v === 'object' && v !== null) ? JSON.stringify(v) : (v == null ? '' : v);
+}
+function allergyBool(v) { return v === true || v === 'true'; }
+
+function allergyGroupRow(id, d, createdBy, createdAt, updatedAt) {
+  return [
+    id, d.type || 'nbl', d.label || '',
+    allergyJ(d.allergens || []), allergyJ(d.crossReactive || []), allergyJ(d.safe || []),
+    allergyJ(d.caution || []), allergyJ(d.refs || []),
+    d.crossReason || '', d.cautionReason || '', d.safeReason || '',
+    d.noteMild || '', d.noteIge || '', d.noteScar || '', d.scarCautionNote || '', d.singleDrugCallout || '',
+    allergyBool(d.keepSafeOnScar), allergyBool(d.clusterAware), allergyBool(d.crossClassCaution),
+    allergyBool(d.chemGroupAware), allergyJ(d.chemLabels || ''),
+    (d.sortOrder != null ? d.sortOrder : ''),
+    createdBy, createdAt, updatedAt
+  ];
+}
+
+// Public read — app sync (no permission). Returns raw rows; frontend parses JSON.
+function handleGetAllergyDataPublic() {
+  return jsonResponse({
+    groups: getSheetData(SHEETS.ALLERGY_GROUPS),
+    refs: getSheetData(SHEETS.ALLERGY_REFS)
+  });
+}
+
+function handleGetAllergyGroups(user) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  return jsonResponse({
+    groups: getSheetData(SHEETS.ALLERGY_GROUPS),
+    refs: getSheetData(SHEETS.ALLERGY_REFS),
+    myRole: perm.role
+  });
+}
+
+function handleCreateAllergyGroup(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  var sheet = getOrCreateSheet(SHEETS.ALLERGY_GROUPS, ALLERGY_GROUP_HEADERS);
+  var now = new Date().toISOString();
+  var id = data.id || ('agrp_' + Date.now());
+  sheet.appendRow(allergyGroupRow(id, data, user, now, now));
+  addAuditLog(user, 'createAllergyGroup', id, data.label || '', 'Created');
+  return jsonResponse({ success: true, id: id });
+}
+
+function handleUpdateAllergyGroup(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+
+  var sheet = getSS().getSheetByName(SHEETS.ALLERGY_GROUPS);
+  if (!sheet) return errorResponse('AllergyGroups sheet not found');
+  var all = sheet.getDataRange().getValues();
+  var headers = all[0];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) return errorResponse('ID column not found');
+
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      for (var key in data) {
+        if (key === 'id') continue;
+        var col = headers.indexOf(key);
+        if (col >= 0) sheet.getRange(i + 1, col + 1).setValue(allergyJ(data[key]));
+      }
+      var updCol = headers.indexOf('updatedAt');
+      if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
+      addAuditLog(user, 'updateAllergyGroup', data.id, data.label || '', 'Updated');
+      return jsonResponse({ success: true, id: data.id });
+    }
+  }
+  return errorResponse('Allergy group not found: ' + data.id);
+}
+
+function handleDeleteAllergyGroup(user, data) {
+  var perm = checkPermission(user, 'admin');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ต้องเป็น admin' });
+
+  var sheet = getSS().getSheetByName(SHEETS.ALLERGY_GROUPS);
+  if (!sheet) return errorResponse('AllergyGroups sheet not found');
+  var all = sheet.getDataRange().getValues();
+  var idCol = all[0].indexOf('id');
+  var labelCol = all[0].indexOf('label');
+
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      var label = all[i][labelCol] || '';
+      sheet.deleteRow(i + 1);
+      addAuditLog(user, 'deleteAllergyGroup', data.id, label, 'Deleted');
+      return jsonResponse({ success: true, message: 'Deleted: ' + label });
+    }
+  }
+  return errorResponse('Allergy group not found: ' + data.id);
+}
+
+// Bulk import (upsert by id) — used to seed the Sheet from the hardcoded groups
+function handleBulkCreateAllergyGroups(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+
+  var groups = data.groups || [];
+  if (groups.length === 0) return errorResponse('No groups provided');
+
+  var sheet = getOrCreateSheet(SHEETS.ALLERGY_GROUPS, ALLERGY_GROUP_HEADERS);
+  var existing = getSheetData(SHEETS.ALLERGY_GROUPS);
+  var rowById = {};
+  existing.forEach(function(g, idx) { rowById[String(g.id)] = idx + 2; }); // +2 header+0-index
+
+  var now = new Date().toISOString();
+  var created = 0, updated = 0;
+  groups.forEach(function(g) {
+    var id = g.id || ('agrp_' + Date.now() + created);
+    var row = allergyGroupRow(id, g, user, now, now);
+    if (rowById[String(id)]) {
+      sheet.getRange(rowById[String(id)], 1, 1, row.length).setValues([row]);
+      updated++;
+    } else {
+      sheet.appendRow(row);
+      rowById[String(id)] = sheet.getLastRow();
+      created++;
+    }
+  });
+  addAuditLog(user, 'bulkImportAllergyGroups', '', '', 'Imported ' + created + ' new, updated ' + updated);
+  return jsonResponse({ success: true, created: created, updated: updated });
+}
+
+// Bulk import refs (upsert by key)
+function handleBulkCreateAllergyRefs(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+
+  var refs = data.refs || [];
+  if (refs.length === 0) return errorResponse('No refs provided');
+
+  var sheet = getOrCreateSheet(SHEETS.ALLERGY_REFS, ALLERGY_REF_HEADERS);
+  var existing = getSheetData(SHEETS.ALLERGY_REFS);
+  var rowByKey = {};
+  existing.forEach(function(r, idx) { rowByKey[String(r.key)] = idx + 2; });
+
+  var now = new Date().toISOString();
+  var created = 0, updated = 0;
+  refs.forEach(function(r) {
+    if (!r.key) return;
+    var row = [r.key, r.citation || '', user, now, now];
+    if (rowByKey[String(r.key)]) {
+      sheet.getRange(rowByKey[String(r.key)], 1, 1, row.length).setValues([row]);
+      updated++;
+    } else {
+      sheet.appendRow(row);
+      rowByKey[String(r.key)] = sheet.getLastRow();
+      created++;
+    }
+  });
+  addAuditLog(user, 'bulkImportAllergyRefs', '', '', 'Imported ' + created + ' new, updated ' + updated);
+  return jsonResponse({ success: true, created: created, updated: updated });
 }
 
 

@@ -63,6 +63,18 @@
 
 ---
 
+## ส่วนที่ 3 — แก้ analytics หน้าอื่น (case mismatch) ✅
+
+พบ bug เก่า: หน้า calculator/tdm/vanco/renal/compat ส่งชื่อ event เป็น**ตัวพิมพ์เล็ก**
+(`dose_calc`, `tdm_usage`, `renal_dosing`, `compat_usage`, `calc_visit`) แต่ GAS
+รอ**ตัวพิมพ์ใหญ่** → event ตกไป generic log ไม่เข้า sheet เฉพาะ → dashboard แท็บ
+TDM / Renal / Compat / Drug Calc ได้ข้อมูลไม่ครบมานาน
+
+**แก้แล้วใน `gas-complete.js`** (normalize ชื่อ event + เพิ่ม case `CALC_VISIT`) →
+แค่ **redeploy GAS ตัว Analytics** (ส่วนที่ 1) ก็ครอบคลุมข้อนี้ด้วย ไม่ต้องแก้หน้าเว็บ
+
+---
+
 ## หมายเหตุสำคัญ
 - ฟีเจอร์อื่น (drug/compat/renal) **ไม่กระทบ** — เพิ่มเฉพาะ event/handler ใหม่
 - ถ้ายังไม่ deploy GAS: event `ALLERGY_LOOKUP` จะตกไปที่ generic log ชั่วคราว

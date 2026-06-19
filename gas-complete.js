@@ -323,6 +323,16 @@ function doPost(e) {
 
     var eventType = data.type || data.event || data.action || '';
 
+    // Normalize analytics event names: index.js sends UPPER_CASE, but
+    // calculator/tdm/vanco/renal/compat send lower_case (dose_calc, tdm_usage,
+    // renal_dosing, compat_usage, calc_visit). Without this they all fell through
+    // to the generic SESSIONS log and never reached their dashboard sheets.
+    var ET_MAP = {
+      dose_calc: 'DOSE_CALC', compat_usage: 'COMPAT_CHECK', renal_dosing: 'RENAL_DOSING',
+      tdm_usage: 'TDM_RESULT', calc_visit: 'CALC_VISIT'
+    };
+    if (ET_MAP[eventType]) eventType = ET_MAP[eventType];
+
     // ── Analytics Events ──
     switch (eventType) {
       case 'page_view':
@@ -345,6 +355,8 @@ function doPost(e) {
         return logRenalDosing(data);
       case 'COMPAT_CHECK':
         return logCompatUsage(data);
+      case 'CALC_VISIT':
+        return logAnalyticsGeneric(data, SHEETS.CALC_VISITS);
       case 'ALLERGY_LOOKUP':
         return logAllergyLookup(data);
       case 'DRUG_RATING':

@@ -1,0 +1,61 @@
+/* ============================================================
+   Site Chrome — shared collapsible left-rail navigation (P3.4)
+   One source for the nav across all user pages (no per-page drift).
+   Off-canvas drawer: open via edge toggle (‹‹/››), swipe, or tap;
+   auto-hides on scroll. Colors mirror the old .bottom-nav (sky #0ea5e9).
+   ============================================================ */
+:root { --sc-rail: 64px; }
+
+.sc-rail {
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 1000;
+  width: calc(var(--sc-rail) + env(safe-area-inset-left, 0px));
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid #e2e8f0;
+  box-shadow: 2px 0 14px rgba(0,0,0,0.08);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom,0px)) env(safe-area-inset-left,0px);
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  transform: translateX(-102%); transition: transform .22s ease;
+}
+body.sc-open .sc-rail { transform: none; }
+
+.sc-brand { font-size: 22px; padding: 2px 0 10px; flex: none; text-decoration: none; }
+.sc-item {
+  width: 54px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 7px 0; border-radius: 12px; color: #64748b; text-decoration: none; flex: none;
+  transition: background .14s, color .14s;
+}
+.sc-item .sc-ic { font-size: 21px; line-height: 1; }
+.sc-item .sc-lb { font-size: 9px; font-weight: 600; text-align: center; line-height: 1.1; }
+.sc-item:hover { background: #e0f2fe; color: #0ea5e9; }
+.sc-item.sc-active { background: #0ea5e9; color: #fff; }
+
+.sc-scrim {
+  position: fixed; inset: 0; z-index: 999; background: rgba(15,23,42,.36);
+  opacity: 0; pointer-events: none; transition: opacity .22s;
+}
+body.sc-open .sc-scrim { opacity: 1; pointer-events: auto; }
+
+.sc-toggle {
+  position: fixed; left: 0; top: 50%; z-index: 1001; transform: translateY(-50%);
+  width: 26px; height: 58px; border: 1px solid #e2e8f0; border-left: none;
+  background: rgba(255,255,255,0.97); color: #0ea5e9;
+  box-shadow: 2px 0 10px rgba(0,0,0,.10); border-radius: 0 14px 14px 0;
+  cursor: pointer; font-size: 15px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  transition: left .22s ease, opacity .3s; opacity: .92;
+}
+.sc-toggle:hover { opacity: 1; }
+body.sc-open .sc-toggle { left: calc(var(--sc-rail) + env(safe-area-inset-left,0px)); }
+body.sc-scrolling .sc-toggle { opacity: .3; }
+
+/* Dark theme (mirrors .bottom-nav dark overrides) */
+[data-theme="dark"] .sc-rail { background: rgba(11,17,32,0.97); border-right-color: #1e3050; }
+[data-theme="dark"] .sc-item { color: #64748b; }
+[data-theme="dark"] .sc-item:hover { background: #16273f; color: #7dd3fc; }
+[data-theme="dark"] .sc-item.sc-active { background: #0ea5e9; color: #fff; }
+[data-theme="dark"] .sc-toggle { background: rgba(11,17,32,0.97); border-color: #1e3050; color: #7dd3fc; }
+
+@media print { .sc-rail, .sc-scrim, .sc-toggle { display: none !important; } }

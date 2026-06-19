@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.16.0
+// IV Drug Reference PWA — Service Worker v5.17.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -44,9 +44,16 @@
 //          analytics event names (dose_calc/tdm_usage/... now reach their
 //          sheets); renal page reads from Sheet; admin Settings zero-config
 //          (built-in Client ID + Apps Script URL defaults).
+// v5.17.0: Navigation/footer redesign (P3.4). One shared collapsible left-rail
+//          drawer (site-chrome.js/.css) across all 7 user pages — replaces the
+//          per-page bottom-nav (open by default, swipe/scroll/tap to hide).
+//          Removed index's redundant header tool-cards; compact footer + info
+//          modal (disclaimer/license/refs) injected on sub-pages with version
+//          single-sourced from IVDrugRef.VERSION. Allergen search starts empty
+//          with a guide prompt.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.16.0';
+const CACHE_NAME = 'iv-drugref-v5.17.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

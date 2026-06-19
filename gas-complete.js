@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.1.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
+var GAS_VERSION = '5.17.4'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -410,8 +410,11 @@ function logPageView(data) {
 
 function logDoseCalc(data) {
   data.timestamp = new Date().toISOString();
+  // fallback headers match the fields calculator.js actually sends (only used
+  // when the sheet is first auto-created; existing sheets keep their headers)
   smartLog(SHEETS.DOSE_CALCS, data,
-    ['timestamp', 'session_id', 'user_id', 'drug_name', 'dose', 'weight_kg', 'crcl', 'result']);
+    ['timestamp', 'session_id', 'user_id', 'drug_name', 'weight_kg', 'height_cm',
+     'age', 'sex', 'scr', 'crcl', 'dose_recommended', 'details']);
   return jsonResponse({ success: true });
 }
 
@@ -433,15 +436,19 @@ function logTDMUsage(data) {
 
 function logRenalDosing(data) {
   data.timestamp = new Date().toISOString();
+  // match renal-dosing.js fields (was drug/crcl/formula — never populated)
   smartLog(SHEETS.RENAL_DOSING, data,
-    ['timestamp', 'session_id', 'user_id', 'drug', 'crcl', 'formula', 'weight_kg', 'age', 'sex', 'scr']);
+    ['timestamp', 'session_id', 'user_id', 'drug_name', 'drug_class', 'formula_used',
+     'gfr_value', 'ckd_stage', 'recommended_dose', 'weight_kg', 'age', 'sex', 'scr']);
   return jsonResponse({ success: true });
 }
 
 function logCompatUsage(data) {
   data.timestamp = new Date().toISOString();
+  // match compatibility.js fields (was 'result' — dashboard reads result_status)
   smartLog(SHEETS.COMPAT_USAGE, data,
-    ['timestamp', 'session_id', 'user_id', 'drug_a', 'drug_b', 'result', 'mode']);
+    ['timestamp', 'session_id', 'user_id', 'mode', 'drug_a', 'drug_b', 'result_status',
+     'result_source', 'drugs_count', 'pairs_total', 'pairs_compatible', 'pairs_incompatible']);
   return jsonResponse({ success: true });
 }
 
@@ -525,7 +532,9 @@ function handleRaw() {
     calcVisits: getSheetData(SHEETS.CALC_VISITS),
     drugRatings: getSheetData(SHEETS.DRUG_RATINGS),
     npsResponses: getSheetData(SHEETS.NPS_RESPONSES),
-    allergyLookups: getSheetData(SHEETS.ALLERGY_LOOKUPS)
+    allergyLookups: getSheetData(SHEETS.ALLERGY_LOOKUPS),
+    gasVersion: GAS_VERSION,
+    serverTime: new Date().toISOString()
   });
 }
 

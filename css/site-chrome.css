@@ -21,6 +21,12 @@
 }
 body.sc-open .sc-rail { transform: none; }
 
+/* Push page content right when the rail is open so it never overlaps. Headers
+   are position:sticky (in normal flow) so they shift too; the FAB is on the
+   right. body has overflow-x:hidden + no left padding, so this is collision-free. */
+body { transition: padding-left .22s ease; }
+body.sc-open { padding-left: calc(var(--sc-rail) + env(safe-area-inset-left, 0px)); }
+
 .sc-brand { font-size: 22px; padding: 2px 0 10px; flex: none; text-decoration: none; }
 .sc-item {
   width: 54px; display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -31,12 +37,6 @@ body.sc-open .sc-rail { transform: none; }
 .sc-item .sc-lb { font-size: 9px; font-weight: 600; text-align: center; line-height: 1.1; }
 .sc-item:hover { background: #e0f2fe; color: #0ea5e9; }
 .sc-item.sc-active { background: #0ea5e9; color: #fff; }
-
-.sc-scrim {
-  position: fixed; inset: 0; z-index: 999; background: rgba(15,23,42,.36);
-  opacity: 0; pointer-events: none; transition: opacity .22s;
-}
-body.sc-open .sc-scrim { opacity: 1; pointer-events: auto; }
 
 .sc-toggle {
   position: fixed; left: 0; top: 50%; z-index: 1001; transform: translateY(-50%);
@@ -49,7 +49,6 @@ body.sc-open .sc-scrim { opacity: 1; pointer-events: auto; }
 }
 .sc-toggle:hover { opacity: 1; }
 body.sc-open .sc-toggle { left: calc(var(--sc-rail) + env(safe-area-inset-left,0px)); }
-body.sc-scrolling .sc-toggle { opacity: .3; }
 
 /* Dark theme (mirrors .bottom-nav dark overrides) */
 [data-theme="dark"] .sc-rail { background: rgba(11,17,32,0.97); border-right-color: #1e3050; }

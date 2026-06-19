@@ -16,7 +16,7 @@
 
   var severitySel, resultEl;
   // allergen picker (hybrid: search + group chips + list)
-  var selectEl, chipsEl;
+  var selectEl, chipsEl, searchEl, clearEl;
   var ALLERGENS = [], GROUPS = [], pkList = [];
   var selectedId = '', pq = '', pg = 'all', pkbd = -1, pickerOpen = false;
 
@@ -74,25 +74,41 @@
     }).join('');
   }
 
-  // Build the drug dropdown, filtered by the active group chip (pg). When the
-  // group is "ทั้งหมด" the options are grouped with <optgroup> so all drugs stay
-  // navigable; otherwise only the chosen group's drugs are listed.
+  // search text match (Thai or English substring)
+  function matchPq(x) {
+    var q = pq.trim();
+    if (!q) return true;
+    return x.generic.toLowerCase().indexOf(q.toLowerCase()) >= 0 || x.th.indexOf(q) >= 0;
+  }
+
+  // Build the drug dropdown, filtered by the active group chip (pg) AND the
+  // search box (pq). When the group is "ทั้งหมด" the options are grouped with
+  // <optgroup> so all drugs stay navigable; otherwise only the chosen group's
+  // drugs are listed. The search box narrows the list further.
   function renderSelect() {
     function optFor(x) {
       return '<option value="' + esc(x.id) + '">' + esc(x.th + ' (' + x.generic + ')') + '</option>';
     }
-    var opts = '<option value="">— เลือกยาที่ผู้ป่วยแพ้ —</option>';
+    var opts = '<option value="">— เลือกยาที่ผู้ป่วยแพ้ —</option>', any = false;
     if (pg === 'all') {
       GROUPS.forEach(function (g) {
         if (g.id === 'all') return;
-        var items = ALLERGENS.filter(function (x) { return x.gid === g.id; });
-        if (items.length) opts += '<optgroup label="' + esc(g.label) + '">' + items.map(optFor).join('') + '</optgroup>';
+        var items = ALLERGENS.filter(function (x) { return x.gid === g.id && matchPq(x); });
+        if (items.length) { opts += '<optgroup label="' + esc(g.label) + '">' + items.map(optFor).join('') + '</optgroup>'; any = true; }
       });
     } else {
-      opts += ALLERGENS.filter(function (x) { return x.gid === pg; }).map(optFor).join('');
+      var its = ALLERGENS.filter(function (x) { return x.gid === pg && matchPq(x); });
+      if (its.length) { opts += its.map(optFor).join(''); any = true; }
     }
+    if (!any) opts += '<option value="" disabled>— ไม่พบยา —</option>';
     selectEl.innerHTML = opts;
     selectEl.value = itemById(selectedId) ? selectedId : '';
+  }
+
+  // Open the native dropdown programmatically (modern browsers). Must be called
+  // from a user gesture (e.g. a chip click) — silently ignored where unsupported.
+  function openDropdown() {
+    try { if (selectEl.showPicker) selectEl.showPicker(); } catch (e) { /* unsupported */ }
   }
 
   function pickId(id) {
@@ -450,6 +466,8 @@
     resultEl = document.getElementById('allergyResult');
     chipsEl = document.getElementById('allergenChips');
     selectEl = document.getElementById('allergenSelect');
+    searchEl = document.getElementById('allergenSearch');
+    clearEl = document.getElementById('allergenClear');
     if (!severitySel || !resultEl || !chipsEl || !selectEl || !A) return;
 
     // page-view analytics (enter/leave with duration) — same as other pages
@@ -464,14 +482,27 @@
 
     severitySel.addEventListener('change', function () { render(true); });
 
-    // --- allergen picker events: group chips filter the dropdown ---
+    // --- allergen picker: search box + group chips both filter the dropdown ---
+    if (searchEl) {
+      searchEl.addEventListener('input', function () {
+        pq = searchEl.value;
+        if (clearEl) clearEl.style.display = pq ? 'block' : 'none';
+        renderSelect();
+      });
+    }
+    if (clearEl) {
+      clearEl.addEventListener('click', function () {
+        pq = ''; searchEl.value = ''; clearEl.style.display = 'none';
+        renderSelect(); searchEl.focus();
+      });
+    }
     chipsEl.addEventListener('click', function (e) {
       var c = e.target.closest && e.target.closest('.ap-chip');
       if (!c) return;
       pg = c.getAttribute('data-g');
       renderChips();
       renderSelect();   // re-filter the dropdown to the chosen group
-      try { selectEl.focus(); } catch (err) {}
+      openDropdown();    // auto-open the dropdown so the drugs show immediately
     });
     selectEl.addEventListener('change', function () { pickId(selectEl.value); });
 

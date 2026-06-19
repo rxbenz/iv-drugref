@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.17.4
+// IV Drug Reference PWA — Service Worker v5.17.5
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -68,9 +68,12 @@
 //          (from IVDrugRefI18n) + marked data-i18n-done so the global i18n engine
 //          no longer half-translates them; fixed the duplicated "Neurological
 //          Institute of Thailand" in the About box.
+// v5.17.5: Dashboard analytics fetch is now cache-busted (?_=ts + no-store) so
+//          new Sheet rows show on Refresh instead of a stale cached response;
+//          load toast shows backend GAS version + server time for diagnosis.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.17.4';
+const CACHE_NAME = 'iv-drugref-v5.17.5';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

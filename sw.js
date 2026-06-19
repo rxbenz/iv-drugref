@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.17.2
+// IV Drug Reference PWA — Service Worker v5.17.3
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -59,9 +59,14 @@
 //          type, Enter picks the top, arrows navigate) + group chips that
 //          filter & show the list. Replaces the native <select> that only
 //          revealed results once opened.
+// v5.17.3: Fix allergy group-chip flicker (chip rebuild detached the click
+//          target so the outside-click handler closed the list) — now updates
+//          chip state in place + stops propagation; the list stays open.
+//          Sub-page headers decluttered: removed the back/cross-link buttons
+//          that duplicated the left rail.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.17.2';
+const CACHE_NAME = 'iv-drugref-v5.17.3';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

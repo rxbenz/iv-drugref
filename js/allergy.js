@@ -74,6 +74,16 @@
     }).join('');
   }
 
+  // Update the active chip in place (NO innerHTML rebuild). Rebuilding on click
+  // detached the clicked button from the DOM, so the document outside-click
+  // handler then saw it as "outside" and closed the list (the flicker bug).
+  function setChipActive() {
+    var btns = chipsEl.querySelectorAll('.ap-chip');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-g') === pg ? 'true' : 'false');
+    }
+  }
+
   function hi(text) {
     if (!pq) return esc(text);
     var i = text.toLowerCase().indexOf(pq.toLowerCase());
@@ -515,8 +525,9 @@
     chipsEl.addEventListener('click', function (e) {
       var c = e.target.closest && e.target.closest('.ap-chip');
       if (!c) return;
+      e.stopPropagation();   // don't let the outside-click handler close the list
       pg = c.getAttribute('data-g'); pkbd = -1; pickerOpen = true;
-      renderChips(); renderList(); searchEl.focus();   // chip filters + shows the list
+      setChipActive(); renderList(); searchEl.focus();   // in-place chip update → no flicker
     });
     // mousedown (not click) so selection happens before the input blurs
     listEl.addEventListener('mousedown', function (e) {

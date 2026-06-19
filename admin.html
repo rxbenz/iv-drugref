@@ -72,6 +72,7 @@
     <button class="tab-btn" data-tab="quality" data-action="switchTab">📊 Data Quality</button>
     <button class="tab-btn" data-tab="compat" data-action="switchTab">🔗 Compatibility</button>
     <button class="tab-btn" data-tab="renal" data-action="switchTab">💊 Renal Dosing</button>
+    <button class="tab-btn" data-tab="allergy" data-action="switchTab">🛡️ Allergy</button>
     <button class="tab-btn" data-tab="analytics" data-action="switchTab">📈 Analytics</button>
     <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
   </div>
@@ -400,6 +401,34 @@
         </table>
       </div>
       <div class="pagination" id="renal-pagination"></div>
+    </div>
+
+<!-- ═══════ PANEL: ALLERGY CROSS-REACTIVITY ═══════ -->
+    <div class="panel" id="allergy-panel">
+      <h2 style="margin-bottom:4px">🛡️ Allergy Cross-Reactivity Database</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        จัดการกลุ่มการแพ้ข้ามยา — <span id="allergy-total-count">0</span> กลุ่ม ·
+        ครั้งแรกให้กด <strong>“Seed จากโค้ด”</strong> เพื่อนำข้อมูลตั้งต้นเข้า Google Sheet
+      </p>
+      <div class="stats-row" id="allergy-stats"></div>
+      <div class="toolbar" style="margin-top:16px">
+        <input type="text" class="search-box" id="search-allergy" placeholder="ค้นหากลุ่ม/ID..." data-action="filterAllergy">
+        <select class="filter-select" id="filter-allergy-type" data-action="filterAllergy">
+          <option value="">ทุกชนิด</option>
+          <option value="nbl">Non-beta-lactam</option>
+          <option value="beta_lactam">Beta-lactam</option>
+        </select>
+        <button class="btn btn-primary" data-action="openAllergyModal">＋ เพิ่มกลุ่ม</button>
+        <button class="btn btn-outline" data-action="seedAllergyFromCode" id="btn-seed-allergy">📦 Seed จากโค้ด</button>
+        <button class="btn btn-success" data-action="exportAllergyCSV">📥 Export CSV</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead><tr><th>#</th><th>Group ID</th><th>Label</th><th>ชนิด</th><th>Allergen</th><th>Cross / Safe / Caution</th><th>จัดการ</th></tr></thead>
+          <tbody id="allergy-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="allergy-pagination"></div>
     </div>
 
 <!-- ═══════ PANEL: ANALYTICS SUMMARY ═══════ -->
@@ -769,6 +798,7 @@
 <script src="translations-en.js"></script>
 <script src="js/error-tracker.js"></script>
 <script src="js/core.js"></script>
+<script src="js/allergy-data.js"></script>
 <script src="js/admin.js"></script>
 
 </body>

@@ -154,7 +154,7 @@ async function apiCall(action, data = {}) {
     throw new Error('No script URL');
   }
 
-  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers', 'getCompatPairs', 'getRenalDrugs'].includes(action);
+  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers', 'getCompatPairs', 'getRenalDrugs', 'getAllergyGroups'].includes(action);
   const url = new URL(cfg.scriptUrl);
   url.searchParams.set('action', action);
   url.searchParams.set('user', state.user?.email || 'unknown');
@@ -2909,6 +2909,7 @@ function switchTab(tab) {
   if (tab === 'quality') renderQualityDashboard();
   if (tab === 'compat') loadCompatPairs();
   if (tab === 'renal') loadRenalDrugs();
+  if (tab === 'allergy') loadAllergyData();
   if (tab === 'analytics') loadAnalyticsSummary();
 }
 
@@ -2955,6 +2956,192 @@ document.addEventListener('DOMContentLoaded', () => {
   if (drugForm) {
     drugForm.addEventListener('submit', function(e) { e.preventDefault(); saveDrug('pending'); });
   }
+
+  // ═══════════════════════════════════════════
+  //  ALLERGY CROSS-REACTIVITY CRUD (A2)
+  // ═══════════════════════════════════════════
+  const ALLERGY_PER_PAGE = 20;
+  const ALLERGY_TYPE_LABELS = { nbl: 'Non-beta-lactam', beta_lactam: 'Beta-lactam' };
+
+  // parse a value that may be a JSON string (from Sheet) or already an array/object
+  function allergyParse(v, fallback) {
+    if (Array.isArray(v) || (v && typeof v === 'object')) return v;
+    if (typeof v === 'string' && v.trim()) {
+      try { return JSON.parse(v); } catch (e) { return fallback; }
+    }
+    return fallback;
+  }
+  function allergyTruthy(v) { return v === true || v === 'true' || v === 'TRUE'; }
+
+  async function loadAllergyData() {
+    showLoading('กำลังโหลดข้อมูล allergy...');
+    try {
+      const result = await apiCall('getAllergyGroups');
+      state.allergyGroups = (result.groups || []).map(g => ({
+        ...g,
+        allergens: allergyParse(g.allergens, []),
+        crossReactive: allergyParse(g.crossReactive, []),
+        safe: allergyParse(g.safe, []),
+        caution: allergyParse(g.caution, []),
+        refs: allergyParse(g.refs, []),
+        chemLabels: allergyParse(g.chemLabels, '')
+      }));
+      state.allergyRefs = result.refs || [];
+      if (!state.allergyPage) state.allergyPage = 1;
+      renderAllergyStats();
+      renderAllergyTable();
+    } catch (e) {
+      console.error('loadAllergyData error:', e);
+      toast('โหลดข้อมูล allergy ล้มเหลว', 'error');
+    }
+    hideLoading();
+  }
+
+  function getFilteredAllergyGroups() {
+    let groups = state.allergyGroups || [];
+    const q = (document.getElementById('search-allergy')?.value || '').toLowerCase().trim();
+    const type = document.getElementById('filter-allergy-type')?.value || '';
+    if (q) groups = groups.filter(g => (g.label || '').toLowerCase().includes(q) || (g.id || '').toLowerCase().includes(q));
+    if (type) groups = groups.filter(g => (g.type || 'nbl') === type);
+    return groups;
+  }
+
+  function renderAllergyStats() {
+    const groups = state.allergyGroups || [];
+    const nbl = groups.filter(g => (g.type || 'nbl') === 'nbl').length;
+    const bl = groups.filter(g => g.type === 'beta_lactam').length;
+    const refs = (state.allergyRefs || []).length;
+    const el = document.getElementById('allergy-stats');
+    if (el) el.innerHTML = `
+      <div class="stat-card"><div class="stat-label">กลุ่มทั้งหมด</div><div class="stat-value primary">${groups.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Non-beta-lactam</div><div class="stat-value">${nbl}</div></div>
+      <div class="stat-card"><div class="stat-label">Beta-lactam</div><div class="stat-value">${bl}</div></div>
+      <div class="stat-card"><div class="stat-label">Citations (refs)</div><div class="stat-value">${refs}</div></div>`;
+    const countEl = document.getElementById('allergy-total-count');
+    if (countEl) countEl.textContent = groups.length;
+  }
+
+  function renderAllergyTable() {
+    const filtered = getFilteredAllergyGroups();
+    const total = filtered.length;
+    const pages = Math.ceil(total / ALLERGY_PER_PAGE) || 1;
+    if (state.allergyPage > pages) state.allergyPage = pages;
+    const start = (state.allergyPage - 1) * ALLERGY_PER_PAGE;
+    const slice = filtered.slice(start, start + ALLERGY_PER_PAGE);
+    const tbody = document.getElementById('allergy-table-body');
+    if (!tbody) return;
+    if (slice.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">ยังไม่มีข้อมูล — กด “📦 Seed จากโค้ด” เพื่อนำเข้าครั้งแรก</td></tr>';
+    } else {
+      tbody.innerHTML = slice.map((g, idx) => `
+        <tr>
+          <td style="color:var(--text-muted);font-size:12px">${start + idx + 1}</td>
+          <td><span style="font-size:12px;font-family:monospace">${escHtml(g.id || '')}</span></td>
+          <td><strong>${escHtml(g.label || '')}</strong></td>
+          <td><span class="badge">${ALLERGY_TYPE_LABELS[g.type || 'nbl'] || escHtml(g.type || '')}</span></td>
+          <td style="font-size:12px">${(g.allergens || []).length}</td>
+          <td style="font-size:12px">${(g.crossReactive || []).length} / ${(g.safe || []).length} / ${(g.caution || []).length}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-sm btn-outline" data-action="editAllergyGroup" data-id="${escHtml(String(g.id))}" title="แก้ไข">✏️</button>
+              ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteAllergyGroup" data-id="${escHtml(String(g.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+    const pag = document.getElementById('allergy-pagination');
+    if (!pag) return;
+    if (pages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<span style="color:var(--text-muted);font-size:12px">${total} กลุ่ม</span>`;
+    html += `<button class="page-btn" data-action="allergyGoPage" data-page="${state.allergyPage - 1}" ${state.allergyPage <= 1 ? 'disabled' : ''}>‹</button>`;
+    for (let i = 1; i <= pages; i++) {
+      html += `<button class="page-btn ${i === state.allergyPage ? 'active' : ''}" data-action="allergyGoPage" data-page="${i}">${i}</button>`;
+    }
+    html += `<button class="page-btn" data-action="allergyGoPage" data-page="${state.allergyPage + 1}" ${state.allergyPage >= pages ? 'disabled' : ''}>›</button>`;
+    pag.innerHTML = html;
+  }
+
+  function allergyGoPage(p) {
+    const pages = Math.ceil(getFilteredAllergyGroups().length / ALLERGY_PER_PAGE);
+    if (p < 1 || p > pages) return;
+    state.allergyPage = p;
+    renderAllergyTable();
+  }
+
+  function filterAllergy() { state.allergyPage = 1; renderAllergyTable(); }
+
+  async function deleteAllergyGroup(id) {
+    if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
+    const g = (state.allergyGroups || []).find(x => String(x.id) === String(id));
+    if (!g) return;
+    if (!confirm(`ลบกลุ่ม "${g.label}" ?`)) return;
+    showLoading('กำลังลบ...');
+    try {
+      await apiCall('deleteAllergyGroup', { id });
+      toast('🗑 ลบกลุ่มแล้ว', 'success');
+      await loadAllergyData();
+    } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+    hideLoading();
+  }
+
+  // Seed the Sheet from the hardcoded window.AllergyData (NBL groups + refs).
+  // Sends groups one-at-a-time (upsert) so payloads stay small and readable.
+  async function seedAllergyFromCode() {
+    const AD = window.AllergyData;
+    if (!AD || !AD.NBL_GROUPS) { toast('ไม่พบข้อมูลตั้งต้นในโค้ด', 'error'); return; }
+    if (!confirm('นำเข้าข้อมูล allergy ตั้งต้นจากโค้ดเข้า Google Sheet?\n(กลุ่ม/refs ที่ id ซ้ำจะถูกอัปเดตทับ)')) return;
+
+    const groups = (AD.NBL_GROUPS || []).map((g, i) => ({
+      id: g.id, type: 'nbl', label: g.label || '',
+      allergens: g.allergens || [], crossReactive: g.crossReactive || [],
+      safe: g.safe || [], caution: g.caution || [], refs: g.refs || [],
+      crossReason: g.crossReason || '', cautionReason: g.cautionReason || '', safeReason: g.safeReason || '',
+      noteMild: g.noteMild || '', noteIge: g.noteIge || '', noteScar: g.noteScar || '',
+      scarCautionNote: g.scarCautionNote || '', singleDrugCallout: g.singleDrugCallout || '',
+      keepSafeOnScar: !!g.keepSafeOnScar, clusterAware: !!g.clusterAware,
+      crossClassCaution: !!g.crossClassCaution, chemGroupAware: !!g.chemGroupAware,
+      chemLabels: g.chemLabels || '', sortOrder: i
+    }));
+    const refs = Object.keys(AD.REFS || {}).map(k => ({ key: k, citation: AD.REFS[k] }));
+
+    showLoading('กำลัง seed refs...');
+    try {
+      // refs in chunks of 8 to keep each request small
+      for (let i = 0; i < refs.length; i += 8) {
+        await apiCall('bulkCreateAllergyRefs', { refs: refs.slice(i, i + 8) });
+      }
+      for (let i = 0; i < groups.length; i++) {
+        showLoading(`กำลัง seed กลุ่ม ${i + 1}/${groups.length}...`);
+        await apiCall('bulkCreateAllergyGroups', { groups: [groups[i]] });
+      }
+      toast(`✅ Seed สำเร็จ: ${groups.length} กลุ่ม, ${refs.length} refs`, 'success');
+      await loadAllergyData();
+    } catch (e) { toast('Seed ล้มเหลว: ' + e.message, 'error'); }
+    hideLoading();
+  }
+
+  function exportAllergyCSV() {
+    const groups = state.allergyGroups || [];
+    if (groups.length === 0) { toast('ไม่มีข้อมูล', 'info'); return; }
+    const rows = [['ID', 'Type', 'Label', 'Allergens', 'CrossReactive', 'Safe', 'Caution', 'Refs', 'Flags']];
+    groups.forEach(g => {
+      const flags = [g.keepSafeOnScar && 'keepSafeOnScar', g.clusterAware && 'clusterAware',
+        g.crossClassCaution && 'crossClassCaution', g.chemGroupAware && 'chemGroupAware'].filter(Boolean).join(' ');
+      rows.push([g.id, g.type || 'nbl', g.label, JSON.stringify(g.allergens), JSON.stringify(g.crossReactive),
+        JSON.stringify(g.safe), JSON.stringify(g.caution), JSON.stringify(g.refs), flags]);
+    });
+    const csv = rows.map(r => r.map(c => `"${String(c == null ? '' : c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `allergy-groups-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    toast('📥 Export CSV สำเร็จ', 'success');
+  }
+
+  // edit/create modal — implemented in A2b
+  function editAllergyGroup(id) { openAllergyModal((state.allergyGroups || []).find(x => String(x.id) === String(id)) || null); }
+  function openAllergyModal() { toast('ฟอร์มแก้ไขกลุ่ม allergy กำลังพัฒนา (A2b)', 'info'); }
 
   // ═══ Event delegation — replaces all inline onclick/onchange/oninput ═══
   IVDrugRef.delegate(document, 'click', {
@@ -3006,19 +3193,28 @@ document.addEventListener('DOMContentLoaded', () => {
     importCuratedRenal: function() { importCuratedRenal(); },
     addRenalDosingRow: function() { addRenalDosingRow('', '', '', ''); },
     removeRenalDosingRow: function(e, t) { t.closest('.renal-dosing-row').remove(); },
-    toggleRenalPreview: function(e, t) { toggleRenalPreview(t.dataset.preview === 'true'); }
+    toggleRenalPreview: function(e, t) { toggleRenalPreview(t.dataset.preview === 'true'); },
+    // Allergy cross-reactivity
+    openAllergyModal: function() { openAllergyModal(); },
+    editAllergyGroup: function(e, t) { editAllergyGroup(t.dataset.id); },
+    deleteAllergyGroup: function(e, t) { deleteAllergyGroup(t.dataset.id); },
+    allergyGoPage: function(e, t) { allergyGoPage(+t.dataset.page); },
+    seedAllergyFromCode: function() { seedAllergyFromCode(); },
+    exportAllergyCSV: function() { exportAllergyCSV(); }
   });
   IVDrugRef.delegate(document, 'input', {
     filterDrugs: function() { filterDrugs(); },
     filterCompat: function() { filterCompat(); },
-    filterRenal: function() { filterRenal(); }
+    filterRenal: function() { filterRenal(); },
+    filterAllergy: function() { filterAllergy(); }
   });
   IVDrugRef.delegate(document, 'change', {
     filterDrugs: function() { filterDrugs(); },
     handleImportFile: function(e) { handleImportFile(e); },
     renderAuditLog: function() { renderAuditLog(); },
     filterCompat: function() { filterCompat(); },
-    filterRenal: function() { filterRenal(); }
+    filterRenal: function() { filterRenal(); },
+    filterAllergy: function() { filterAllergy(); }
   });
 
   // Init Google Auth after GIS library loads

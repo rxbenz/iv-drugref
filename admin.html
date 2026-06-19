@@ -611,6 +611,94 @@
   </div>
 </div>
 
+<!-- ═══════ ALLERGY MODAL ═══════ -->
+<div class="modal-overlay" id="allergy-modal">
+  <div class="modal" style="max-width:880px">
+    <div class="modal-header">
+      <h2 id="allergy-modal-title">เพิ่มกลุ่ม Allergy</h2>
+      <button class="modal-close" data-action="closeAllergyModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="allergy-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Group ID *</label>
+            <input type="text" class="form-input" id="af-id" required placeholder="เช่น sulfonamide">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ชนิด *</label>
+            <select class="form-select" id="af-type">
+              <option value="nbl">Non-beta-lactam</option>
+              <option value="beta_lactam">Beta-lactam</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Label (ชื่อกลุ่ม) *</label>
+            <input type="text" class="form-input" id="af-label" required placeholder="เช่น Sulfonamides (ซัลโฟนาไมด์)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ลำดับแสดง (sortOrder)</label>
+            <input type="number" class="form-input" id="af-sortOrder" placeholder="0">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin:8px 0">
+          <label class="form-label">Flags</label>
+          <div style="display:flex;flex-wrap:wrap;gap:12px">
+            <label style="font-size:12px"><input type="checkbox" id="af-keepSafeOnScar"> keepSafeOnScar</label>
+            <label style="font-size:12px"><input type="checkbox" id="af-clusterAware"> clusterAware</label>
+            <label style="font-size:12px"><input type="checkbox" id="af-crossClassCaution"> crossClassCaution</label>
+            <label style="font-size:12px"><input type="checkbox" id="af-chemGroupAware"> chemGroupAware</label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:8px">
+          <label class="form-label">Refs (คั่นด้วย , — ใช้ key ที่มีในตาราง Citations)</label>
+          <input type="text" class="form-input" id="af-refs" placeholder="เช่น khan2022, esur2025cm">
+        </div>
+
+        <p style="font-size:11px;color:var(--text-muted);margin:12px 0 4px">
+          แต่ละรายการยา: <strong>generic · ไทย · sub/class · id · cluster · chem · pct · reason</strong>
+          (เว้นว่างได้ถ้าไม่ใช้ — cluster ใช้กับ clusterAware, chem ใช้กับ chemGroupAware)
+        </p>
+
+        <div class="form-section" style="margin:12px 0 6px">🧪 Allergens (ตัวยาที่ผู้ใช้เลือกว่าแพ้)</div>
+        <div id="af-rows-allergens"></div>
+        <button type="button" class="btn btn-outline btn-sm" data-action="addAllergyDrugRow" data-list="allergens">＋ เพิ่ม allergen</button>
+
+        <div class="form-section" style="margin:16px 0 6px">🚫 Cross-reactive (แพ้ข้าม)</div>
+        <div id="af-rows-crossReactive"></div>
+        <button type="button" class="btn btn-outline btn-sm" data-action="addAllergyDrugRow" data-list="crossReactive">＋ เพิ่ม cross-reactive</button>
+
+        <div class="form-section" style="margin:16px 0 6px">✅ Safe (ทางเลือกปลอดภัย)</div>
+        <div id="af-rows-safe"></div>
+        <button type="button" class="btn btn-outline btn-sm" data-action="addAllergyDrugRow" data-list="safe">＋ เพิ่ม safe</button>
+
+        <div class="form-section" style="margin:16px 0 6px">⚠️ Caution (ใช้ด้วยความระวัง)</div>
+        <div id="af-rows-caution"></div>
+        <button type="button" class="btn btn-outline btn-sm" data-action="addAllergyDrugRow" data-list="caution">＋ เพิ่ม caution</button>
+
+        <div class="form-section" style="margin:18px 0 6px">📝 ข้อความ / โน้ต</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">crossReason</label><input type="text" class="form-input" id="af-crossReason"></div>
+          <div class="form-group"><label class="form-label">cautionReason</label><input type="text" class="form-input" id="af-cautionReason"></div>
+          <div class="form-group"><label class="form-label">safeReason</label><input type="text" class="form-input" id="af-safeReason"></div>
+        </div>
+        <div class="form-group" style="margin-top:8px"><label class="form-label">noteMild (ผื่นไม่รุนแรง)</label><textarea class="form-textarea" id="af-noteMild" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">noteIge (IgE/anaphylaxis)</label><textarea class="form-textarea" id="af-noteIge" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">noteScar (SCAR)</label><textarea class="form-textarea" id="af-noteScar" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">scarCautionNote</label><input type="text" class="form-input" id="af-scarCautionNote"></div>
+        <div class="form-group"><label class="form-label">singleDrugCallout (กล่องคำเตือนพิเศษ)</label><textarea class="form-textarea" id="af-singleDrugCallout" rows="3"></textarea></div>
+        <div class="form-group"><label class="form-label">chemLabels (JSON — ใช้กับ chemGroupAware เท่านั้น)</label><textarea class="form-textarea" id="af-chemLabels" rows="2" placeholder='{"cox2":"COX-2 selective"}'></textarea></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeAllergyModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveAllergyGroup">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════ DRUG MODAL ═══════ -->
 <div class="modal-overlay" id="drug-modal">
   <div class="modal">

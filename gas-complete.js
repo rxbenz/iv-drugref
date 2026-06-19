@@ -308,6 +308,19 @@ function doPost(e) {
       return handleBulkCreateRenalDrugs(data.user || '', data);
     }
 
+    // ── Allergy admin ops via POST (large payloads) ──
+    // apiCall sends the action in the BODY for small writes and in the URL query
+    // for large no-cors POSTs, so accept either source here.
+    var postAction = data.action || (e && e.parameter && e.parameter.action) || '';
+    var postUser = data.user || (e && e.parameter && e.parameter.user) || '';
+    switch (postAction) {
+      case 'createAllergyGroup':      return handleCreateAllergyGroup(postUser, data);
+      case 'updateAllergyGroup':      return handleUpdateAllergyGroup(postUser, data);
+      case 'deleteAllergyGroup':      return handleDeleteAllergyGroup(postUser, data);
+      case 'bulkCreateAllergyGroups': return handleBulkCreateAllergyGroups(postUser, data);
+      case 'bulkCreateAllergyRefs':   return handleBulkCreateAllergyRefs(postUser, data);
+    }
+
     var eventType = data.type || data.event || data.action || '';
 
     // ── Analytics Events ──

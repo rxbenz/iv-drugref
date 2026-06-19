@@ -32,9 +32,32 @@
 
 ---
 
-## ส่วนที่ 2 — Admin CRUD (แก้/เพิ่ม/ลบ ข้อมูล allergy) 🔜 (กำลังทำต่อ)
+## ส่วนที่ 2 — Admin CRUD (แก้/เพิ่ม/ลบ ข้อมูล allergy) ✅ (NBL — ทำแล้ว)
 
-> จะอัปเดตคู่มือส่วนนี้เมื่อโค้ด admin + GAS handler เสร็จ
+### โค้ดที่เพิ่ม
+- **GAS** (`gas-complete.js`): sheets `AllergyGroups` + `AllergyRefs` (สร้างเอง) +
+  endpoints `allergydata` (public), `getAllergyGroups`, create/update/delete,
+  `bulkCreateAllergyGroups`, `bulkCreateAllergyRefs` (รองรับทั้ง GET เล็ก / POST ใหญ่)
+- **Admin** (`admin.html` + `js/admin.js`): แท็บ **🛡️ Allergy** — ตาราง + ปุ่ม
+  **Seed จากโค้ด** + ฟอร์มแก้/เพิ่มกลุ่ม (4 lists: allergens/cross/safe/caution +
+  notes + flags + refs) + ลบ (admin) + export CSV
+
+### ขั้นตอน deploy (คุณทำ) — ต้อง deploy **ทั้ง 2 editor**
+> ข้อมูล allergy (CRUD) อยู่ใน spreadsheet ของ **Admin GAS** · การเก็บสถิติ
+> (ALLERGY_LOOKUP) อยู่ที่ **Analytics GAS** → โค้ดเดียวกัน แต่ deploy 2 ที่
+
+1. copy `gas-complete.js` → วางใน **Admin GAS** editor → Deploy → New version
+2. copy `gas-complete.js` → วางใน **Analytics GAS** editor → Deploy → New version
+   (อันนี้เพื่อ analytics ส่วนที่ 1 ด้วย)
+
+### วิธีใช้ (หลัง deploy)
+1. เข้า admin → แท็บ **🛡️ Allergy** → กด **📦 Seed จากโค้ด** (ครั้งแรกครั้งเดียว)
+   → ข้อมูล 7 กลุ่ม NBL + refs จะถูกเขียนลง Google Sheet
+2. จากนั้นแก้/เพิ่ม/ลบ กลุ่มได้เลยผ่านฟอร์ม (กด ✏️ เพื่อแก้, ＋ เพิ่มกลุ่ม)
+3. **หมายเหตุ**: หน้า allergy จริงจะอ่านจาก Sheet ได้ใน **ขั้น A3** (กำลังทำต่อ) —
+   ตอนนี้แก้ใน admin เข้า Sheet แล้ว แต่หน้าผู้ใช้ยังอ่าน hardcode จนกว่า A3 เสร็จ
+4. Beta-lactam (type `beta_lactam`) — โครงรองรับแล้ว แต่ seed/engine ของ
+   beta-lactam จะทำใน **ขั้น B**
 
 ---
 

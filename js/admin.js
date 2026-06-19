@@ -3139,9 +3139,131 @@ document.addEventListener('DOMContentLoaded', () => {
     toast('📥 Export CSV สำเร็จ', 'success');
   }
 
-  // edit/create modal — implemented in A2b
-  function editAllergyGroup(id) { openAllergyModal((state.allergyGroups || []).find(x => String(x.id) === String(id)) || null); }
-  function openAllergyModal() { toast('ฟอร์มแก้ไขกลุ่ม allergy กำลังพัฒนา (A2b)', 'info'); }
+  // ── edit/create modal (A2b) ──
+  function editAllergyGroup(id) {
+    openAllergyModal((state.allergyGroups || []).find(x => String(x.id) === String(id)) || null);
+  }
+
+  function openAllergyModal(group) {
+    group = group || null;
+    state.editingAllergyId = group ? group.id : null;
+    document.getElementById('allergy-modal-title').textContent = group ? 'แก้ไขกลุ่ม Allergy' : 'เพิ่มกลุ่ม Allergy';
+    const afSet = (id, v) => { const el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
+    const afChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+    afSet('af-id', group ? group.id : '');
+    document.getElementById('af-id').readOnly = !!group;
+    afSet('af-type', group ? (group.type || 'nbl') : 'nbl');
+    afSet('af-label', group ? group.label : '');
+    afSet('af-sortOrder', group && group.sortOrder != null ? group.sortOrder : '');
+    afChk('af-keepSafeOnScar', group && allergyTruthy(group.keepSafeOnScar));
+    afChk('af-clusterAware', group && allergyTruthy(group.clusterAware));
+    afChk('af-crossClassCaution', group && allergyTruthy(group.crossClassCaution));
+    afChk('af-chemGroupAware', group && allergyTruthy(group.chemGroupAware));
+    afSet('af-refs', group ? (Array.isArray(group.refs) ? group.refs.join(', ') : (group.refs || '')) : '');
+    afSet('af-crossReason', group ? group.crossReason : '');
+    afSet('af-cautionReason', group ? group.cautionReason : '');
+    afSet('af-safeReason', group ? group.safeReason : '');
+    afSet('af-noteMild', group ? group.noteMild : '');
+    afSet('af-noteIge', group ? group.noteIge : '');
+    afSet('af-noteScar', group ? group.noteScar : '');
+    afSet('af-scarCautionNote', group ? group.scarCautionNote : '');
+    afSet('af-singleDrugCallout', group ? group.singleDrugCallout : '');
+    const cl = group ? group.chemLabels : '';
+    afSet('af-chemLabels', cl && typeof cl === 'object' ? JSON.stringify(cl) : (cl || ''));
+    ['allergens', 'crossReactive', 'safe', 'caution'].forEach(list => {
+      const c = document.getElementById('af-rows-' + list);
+      if (c) c.innerHTML = '';
+      (group ? (group[list] || []) : []).forEach(d => addAllergyDrugRow(list, d));
+    });
+    document.getElementById('allergy-modal').classList.add('open');
+  }
+
+  function closeAllergyModal() {
+    document.getElementById('allergy-modal').classList.remove('open');
+    state.editingAllergyId = null;
+  }
+
+  function addAllergyDrugRow(listKey, d) {
+    const c = document.getElementById('af-rows-' + listKey);
+    if (!c) return;
+    d = d || {};
+    const row = document.createElement('div');
+    row.className = 'af-row';
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px dashed var(--border)';
+    const inp = (cls, ph, val, w) => `<input class="form-input ${cls}" placeholder="${ph}" value="${escHtml(val == null ? '' : String(val))}" style="font-size:12px;padding:6px 8px;width:${w}">`;
+    row.innerHTML =
+      inp('afr-generic', 'generic', d.generic, '140px') +
+      inp('afr-th', 'ไทย', d.th, '120px') +
+      inp('afr-sub', 'sub/class', d.sub, '120px') +
+      inp('afr-id', 'id', d.id, '110px') +
+      inp('afr-cluster', 'cluster', d.cluster, '100px') +
+      inp('afr-chem', 'chem', d.chem, '90px') +
+      inp('afr-pct', 'pct', d.pct, '80px') +
+      `<input class="form-input afr-reason" placeholder="reason" value="${escHtml(d.reason == null ? '' : String(d.reason))}" style="font-size:12px;padding:6px 8px;flex:1;min-width:160px">` +
+      `<button type="button" class="btn btn-sm" data-action="removeAllergyDrugRow" style="color:var(--danger);padding:4px">✕</button>`;
+    c.appendChild(row);
+  }
+
+  function readAllergyRows(listKey) {
+    const out = [];
+    document.querySelectorAll('#af-rows-' + listKey + ' .af-row').forEach(row => {
+      const g = cls => (row.querySelector('.' + cls)?.value || '').trim();
+      const generic = g('afr-generic'), th = g('afr-th');
+      if (!generic && !th) return;
+      const o = { generic: generic };
+      if (th) o.th = th;
+      const sub = g('afr-sub'); if (sub) o.sub = sub;
+      const id = g('afr-id'); if (id) o.id = id;
+      const cluster = g('afr-cluster'); if (cluster) o.cluster = cluster;
+      const chem = g('afr-chem'); if (chem) o.chem = chem;
+      const pct = g('afr-pct'); if (pct) o.pct = pct;
+      const reason = g('afr-reason'); if (reason) o.reason = reason;
+      out.push(o);
+    });
+    return out;
+  }
+
+  function collectAllergyFormData() {
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    const chk = id => !!document.getElementById(id)?.checked;
+    let chemLabels = '';
+    const clRaw = v('af-chemLabels');
+    if (clRaw) { try { chemLabels = JSON.parse(clRaw); } catch (e) { chemLabels = clRaw; } }
+    const sortOrder = v('af-sortOrder');
+    return {
+      id: v('af-id'), type: v('af-type') || 'nbl', label: v('af-label'),
+      sortOrder: sortOrder === '' ? '' : Number(sortOrder),
+      allergens: readAllergyRows('allergens'),
+      crossReactive: readAllergyRows('crossReactive'),
+      safe: readAllergyRows('safe'),
+      caution: readAllergyRows('caution'),
+      refs: v('af-refs').split(',').map(s => s.trim()).filter(Boolean),
+      crossReason: v('af-crossReason'), cautionReason: v('af-cautionReason'), safeReason: v('af-safeReason'),
+      noteMild: v('af-noteMild'), noteIge: v('af-noteIge'), noteScar: v('af-noteScar'),
+      scarCautionNote: v('af-scarCautionNote'), singleDrugCallout: v('af-singleDrugCallout'),
+      keepSafeOnScar: chk('af-keepSafeOnScar'), clusterAware: chk('af-clusterAware'),
+      crossClassCaution: chk('af-crossClassCaution'), chemGroupAware: chk('af-chemGroupAware'),
+      chemLabels: chemLabels
+    };
+  }
+
+  async function saveAllergyGroup() {
+    const data = collectAllergyFormData();
+    if (!data.id || !data.label) { toast('กรุณากรอก Group ID และ Label', 'error'); return; }
+    showLoading('กำลังบันทึก...');
+    try {
+      if (state.editingAllergyId) {
+        await apiCall('updateAllergyGroup', data);
+        toast('✅ อัปเดตกลุ่มแล้ว', 'success');
+      } else {
+        await apiCall('createAllergyGroup', data);
+        toast('✅ เพิ่มกลุ่มแล้ว', 'success');
+      }
+      closeAllergyModal();
+      await loadAllergyData();
+    } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+    hideLoading();
+  }
 
   // ═══ Event delegation — replaces all inline onclick/onchange/oninput ═══
   IVDrugRef.delegate(document, 'click', {
@@ -3196,11 +3318,15 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleRenalPreview: function(e, t) { toggleRenalPreview(t.dataset.preview === 'true'); },
     // Allergy cross-reactivity
     openAllergyModal: function() { openAllergyModal(); },
+    closeAllergyModal: function() { closeAllergyModal(); },
+    saveAllergyGroup: function() { saveAllergyGroup(); },
     editAllergyGroup: function(e, t) { editAllergyGroup(t.dataset.id); },
     deleteAllergyGroup: function(e, t) { deleteAllergyGroup(t.dataset.id); },
     allergyGoPage: function(e, t) { allergyGoPage(+t.dataset.page); },
     seedAllergyFromCode: function() { seedAllergyFromCode(); },
-    exportAllergyCSV: function() { exportAllergyCSV(); }
+    exportAllergyCSV: function() { exportAllergyCSV(); },
+    addAllergyDrugRow: function(e, t) { addAllergyDrugRow(t.dataset.list, {}); },
+    removeAllergyDrugRow: function(e, t) { t.closest('.af-row').remove(); }
   });
   IVDrugRef.delegate(document, 'input', {
     filterDrugs: function() { filterDrugs(); },

@@ -18,7 +18,7 @@
   // allergen picker (hybrid: search + group chips + list)
   var pickerEl, searchEl, chipsEl, listEl, clearEl;
   var ALLERGENS = [], GROUPS = [], pkList = [];
-  var selectedId = 'amoxicillin', pq = '', pg = 'all', pkbd = -1, pickerOpen = false;
+  var selectedId = '', pq = '', pg = 'all', pkbd = -1, pickerOpen = false;
 
   // class -> Thai group label for the <optgroup>s
   var CLASS_LABEL = {
@@ -352,7 +352,12 @@
 
   function paint() {
     var report = lastReport;
-    if (!report) { resultEl.innerHTML = ''; return; }
+    if (!report) {
+      resultEl.innerHTML = '<div class="info-box blue" style="text-align:center">' +
+        '🔍 พิมพ์ชื่อยาที่ผู้ป่วยแพ้ในช่องด้านบน แล้วเลือกจากรายการ ' +
+        'เพื่อดูคำแนะนำการแพ้ข้ามยาและทางเลือกที่ปลอดภัย</div>';
+      return;
+    }
 
     var a = report.allergen;
     var sev = report.severity;
@@ -441,7 +446,7 @@
   function applyAndRerender(d) {
     if (!A.applyRemoteData || !A.applyRemoteData(d)) return false;
     buildPickerData();
-    if (!itemById(selectedId)) selectedId = 'amoxicillin';
+    if (selectedId && !itemById(selectedId)) selectedId = '';   // dropped by a remote edit
     renderChips();
     searchEl.value = displayText(selectedId);
     renderList();
@@ -487,7 +492,7 @@
     populateSeverity();
     buildPickerData();
     renderChips();
-    searchEl.value = displayText(selectedId);   // default amoxicillin
+    searchEl.value = displayText(selectedId);   // empty until the user picks an allergen
     renderList();                               // hidden until opened
 
     severitySel.addEventListener('change', function () { render(true); });

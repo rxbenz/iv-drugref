@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.15.3
+// IV Drug Reference PWA — Service Worker v5.16.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -38,9 +38,15 @@
 //          before defaulting; wired vanco-tdm). UX: answer-first drug cards
 //          (diluent+rate line), "ตรวจ IV Compatibility" cross-link, and ?search=
 //          /?drug= deep-link support (fixes the FAB quick-search link).
+// v5.16.0: Allergy cross-reactivity feature + backend. Allergy page reads
+//          admin-edited data from Google Sheet (cache+fallback); admin Allergy
+//          tab (seed/CRUD); analytics→dashboard 🛡️ tab; fixed lowercase
+//          analytics event names (dose_calc/tdm_usage/... now reach their
+//          sheets); renal page reads from Sheet; admin Settings zero-config
+//          (built-in Client ID + Apps Script URL defaults).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.15.3';
+const CACHE_NAME = 'iv-drugref-v5.16.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

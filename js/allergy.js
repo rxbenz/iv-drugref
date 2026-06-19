@@ -126,7 +126,7 @@
     searchEl.value = displayText(id);
     clearEl.style.display = 'none';
     renderList();
-    render();   // recompute report
+    render(true);   // recompute report (user-initiated → logged)
   }
 
   function classLabel(d) {
@@ -404,9 +404,33 @@
     resultEl.innerHTML = html;
   }
 
-  function render() {
+  function render(userInitiated) {
     lastReport = A.buildReport(selectedId, severitySel.value);
     paint();
+    if (userInitiated) logLookup();
+  }
+
+  // Analytics: log a cross-reactivity lookup (allergen + severity chosen by the
+  // user). Fires only on explicit actions (pick allergen / change severity), not
+  // on the initial auto-render, so the dashboard counts real usage. Mirrors the
+  // canonical IVDrugRef.sendAnalytics({type, ...}) convention used by other pages.
+  function logLookup() {
+    try {
+      var r = lastReport;
+      var IV = window.IVDrugRef;
+      if (!r || !IV || !IV.sendAnalytics) return;
+      IV.sendAnalytics({
+        type: 'ALLERGY_LOOKUP',
+        allergen_id: selectedId,
+        allergen_name: (r.allergen && r.allergen.generic) || selectedId,
+        group: (r.allergen && r.allergen.class) || '',
+        severity: severitySel ? severitySel.value : '',
+        avoid_count: (r.avoid || []).length,
+        caution_count: (r.caution || []).length,
+        safer_count: (r.safer || []).length,
+        blocked: !!r.blocked
+      });
+    } catch (e) { /* analytics must never break the page */ }
   }
 
   function init() {
@@ -419,13 +443,18 @@
     clearEl = document.getElementById('allergenClear');
     if (!severitySel || !resultEl || !pickerEl || !searchEl || !A) return;
 
+    // page-view analytics (enter/leave with duration) — same as other pages
+    if (window.IVDrugRef && window.IVDrugRef.trackPageView) {
+      window.IVDrugRef.trackPageView('allergy');
+    }
+
     populateSeverity();
     buildPickerData();
     renderChips();
     searchEl.value = displayText(selectedId);   // default amoxicillin
     renderList();                               // hidden until opened
 
-    severitySel.addEventListener('change', render);
+    severitySel.addEventListener('change', function () { render(true); });
 
     // --- allergen picker events ---
     searchEl.addEventListener('focus', openPicker);

@@ -95,7 +95,9 @@
       }
     }, { passive: true });
 
-    // swipe: right-from-left-edge opens; left closes (when open, swipe anywhere)
+    // swipe: right opens; left closes (when open, swipe anywhere; when closed,
+    // only a swipe starting near the left edge opens — so normal swipes elsewhere
+    // don't trigger it)
     var sx = 0, sy = 0, tracking = false;
     document.addEventListener('touchstart', function (e) {
       var t = e.touches[0]; sx = t.clientX; sy = t.clientY;
@@ -107,6 +109,10 @@
       if (Math.abs(dx) < 45 || Math.abs(dy) > Math.abs(dx)) return;
       setOpen(dx > 0);
     }, { passive: true });
+
+    // Default: OPEN on entry so the menu is discoverable; the user then
+    // swipes left / scrolls / taps to hide it.
+    setOpen(true);
   }
 
   if (document.readyState === 'loading') {

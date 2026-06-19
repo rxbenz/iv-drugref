@@ -1117,6 +1117,55 @@
   // ============================
 
   /**
+   * P2.1: pull admin-edited renal-dosing data from the Sheet (via GAS public
+   * endpoint), with a localStorage cache for offline and a silent fallback to
+   * the hardcoded RENAL_DRUGS when offline / GAS not deployed / empty sheet.
+   */
+  var RENAL_CACHE_KEY = 'renalDrugs_v1';
+
+  function rdParse(v, fb) {
+    if (Array.isArray(v) || (v && typeof v === 'object')) return v;
+    if (typeof v === 'string' && v.trim()) { try { return JSON.parse(v); } catch (e) { return fb; } }
+    return fb;
+  }
+
+  function applyRenalRemote(d) {
+    var drugs = (d && d.drugs) || [];
+    if (!drugs.length) return false;
+    var built = drugs.map(function (x) {
+      return {
+        id: x.id, name: x.name, 'class': x['class'] || '', sub: x.sub || '',
+        badges: rdParse(x.badges, []), recommended: x.recommended || '',
+        dosingTable: rdParse(x.dosingTable, []), info: x.info || '',
+        infoType: x.infoType || 'blue', ref: x.ref || ''
+      };
+    }).filter(function (x) { return x.id && x.name; });
+    if (!built.length) return false;
+    RENAL_DRUGS.length = 0;
+    built.forEach(function (x) { RENAL_DRUGS.push(x); });
+    return true;
+  }
+
+  function loadRemoteRenalDrugs() {
+    try {
+      var c = localStorage.getItem(RENAL_CACHE_KEY);
+      if (c && applyRenalRemote(JSON.parse(c))) renderDrugList();
+    } catch (e) { /* ignore bad cache */ }
+    var IV = window.IVDrugRef;
+    var base = IV && IV.getAdminGasUrl && IV.getAdminGasUrl();
+    if (!base) return;
+    fetch(base + '?action=renaldrugs')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.drugs && applyRenalRemote(d)) {
+          renderDrugList();
+          try { localStorage.setItem(RENAL_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
+        }
+      })
+      .catch(function () { /* offline / not deployed -> keep hardcoded */ });
+  }
+
+  /**
    * Initialize page on DOMContentLoaded
    * Set up event listeners and initial state
    */
@@ -1130,6 +1179,7 @@
     // Initial render
     recalc();
     renderDrugList();
+    loadRemoteRenalDrugs();   // P2.1: override with Sheet-authored data if available
 
     // Set up input listeners for patient parameters
     document.getElementById('ptAge').addEventListener('input', recalc);

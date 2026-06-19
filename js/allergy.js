@@ -433,6 +433,42 @@
     } catch (e) { /* analytics must never break the page */ }
   }
 
+  // A3: pull admin-edited allergy data from the Sheet (via GAS), with a
+  // localStorage cache for offline and a silent fallback to the hardcoded
+  // defaults when offline / GAS not deployed / empty sheet.
+  var ALLERGY_CACHE_KEY = 'allergyData_v1';
+
+  function applyAndRerender(d) {
+    if (!A.applyRemoteData || !A.applyRemoteData(d)) return false;
+    buildPickerData();
+    if (!itemById(selectedId)) selectedId = 'amoxicillin';
+    renderChips();
+    searchEl.value = displayText(selectedId);
+    renderList();
+    render();   // re-render report (not user-initiated -> not logged)
+    return true;
+  }
+
+  function loadRemoteAllergyData() {
+    // 1) apply cached copy immediately (works offline)
+    try {
+      var cached = localStorage.getItem(ALLERGY_CACHE_KEY);
+      if (cached) applyAndRerender(JSON.parse(cached));
+    } catch (e) { /* ignore bad cache */ }
+    // 2) refresh from network
+    var IV = window.IVDrugRef;
+    var base = IV && IV.getAdminGasUrl && IV.getAdminGasUrl();
+    if (!base) return;
+    fetch(base + '?action=allergydata')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && (d.groups || d.refs) && applyAndRerender(d)) {
+          try { localStorage.setItem(ALLERGY_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
+        }
+      })
+      .catch(function () { /* offline / not deployed -> keep hardcoded defaults */ });
+  }
+
   function init() {
     severitySel = document.getElementById('severitySelect');
     resultEl = document.getElementById('allergyResult');
@@ -518,6 +554,7 @@
     });
 
     render();
+    loadRemoteAllergyData();   // A3: override with Sheet-authored data if available
   }
 
   function toggleCard(head) {

@@ -481,3 +481,35 @@ test('override beats structural rule (cefazolin target wins over low default)', 
   // would be "low". The override must force "negligible".
   assert.equal(tierOf('penicillinV', 'cefazolin'), 'negligible');
 });
+
+// ───────────── applyRemoteData (A3 Sheet override) — KEEP LAST ─────────────
+// These MUST be the final tests: applyRemoteData mutates the shared NBL_GROUPS/
+// NBL_INDEX/REFS singleton, so the override test below replaces the hardcoded
+// NBL groups for any test that runs after it.
+test('NBL: applyRemoteData ignores null/empty/beta_lactam (keeps hardcoded)', () => {
+  assert.equal(A.applyRemoteData(null), false);
+  assert.equal(A.applyRemoteData({ groups: [] }), false);
+  assert.equal(A.applyRemoteData({ groups: [{ id: 'x', type: 'beta_lactam', allergens: '[]' }] }), false);
+  assert.ok(A.buildReport('cotrimoxazole', 'ige'), 'hardcoded sulfonamide still resolvable');
+});
+
+test('NBL: applyRemoteData overrides NBL groups from Sheet rows — LAST TEST', () => {
+  const ok = A.applyRemoteData({
+    refs: [{ key: 'remoteRef', citation: 'Remote 2026' }],
+    groups: [{
+      id: 'demo', type: 'nbl', label: 'Demo Group', sortOrder: 0,
+      allergens: JSON.stringify([{ id: 'demodrug', generic: 'DemoDrug', th: 'เดโม' }]),
+      crossReactive: JSON.stringify([{ generic: 'DemoCross', th: 'ครอส', sub: 'x' }]),
+      safe: JSON.stringify([{ generic: 'DemoSafe', th: 'เซฟ' }]),
+      caution: '[]', refs: JSON.stringify(['remoteRef']), keepSafeOnScar: 'TRUE'
+    }]
+  });
+  assert.equal(ok, true);
+  const r = A.buildReport('demodrug', 'ige');
+  assert.ok(r && r.allergen.generic === 'DemoDrug');
+  assert.ok(r.avoid.some((x) => x.drug.generic === 'DemoCross'));
+  assert.ok(r.safer.some((x) => x.drug.generic === 'DemoSafe'));
+  assert.equal(A.REFS.remoteRef, 'Remote 2026');
+  assert.equal(A.buildReport('cotrimoxazole', 'ige'), null, 'old hardcoded NBL replaced');
+  assert.ok(A.buildReport('amoxicillin', 'ige'), 'beta-lactam engine unaffected');
+});

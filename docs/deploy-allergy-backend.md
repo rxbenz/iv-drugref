@@ -54,10 +54,12 @@
 1. เข้า admin → แท็บ **🛡️ Allergy** → กด **📦 Seed จากโค้ด** (ครั้งแรกครั้งเดียว)
    → ข้อมูล 7 กลุ่ม NBL + refs จะถูกเขียนลง Google Sheet
 2. จากนั้นแก้/เพิ่ม/ลบ กลุ่มได้เลยผ่านฟอร์ม (กด ✏️ เพื่อแก้, ＋ เพิ่มกลุ่ม)
-3. **หมายเหตุ**: หน้า allergy จริงจะอ่านจาก Sheet ได้ใน **ขั้น A3** (กำลังทำต่อ) —
-   ตอนนี้แก้ใน admin เข้า Sheet แล้ว แต่หน้าผู้ใช้ยังอ่าน hardcode จนกว่า A3 เสร็จ
+3. ✅ **A3 เสร็จแล้ว** — หน้า allergy จริง**อ่านจาก Sheet แล้ว**: ตอนเปิดหน้า
+   จะ fetch ข้อมูลจาก GAS (`?action=allergydata`) มาทับ hardcode + cache ลง
+   localStorage (เปิดออฟไลน์ได้) → **แก้ใน admin แล้วผู้ใช้เห็นจริง**
+   (ถ้า GAS ยังไม่ deploy / ออฟไลน์ → ใช้ hardcode เดิมอัตโนมัติ ไม่ error)
 4. Beta-lactam (type `beta_lactam`) — โครงรองรับแล้ว แต่ seed/engine ของ
-   beta-lactam จะทำใน **ขั้น B**
+   beta-lactam จะทำใน **ขั้น B** (ตอนนี้ A3 ข้าม beta_lactam ใช้ hardcode)
 
 ---
 

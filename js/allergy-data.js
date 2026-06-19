@@ -754,8 +754,60 @@
     };
   }
 
+  // --- 11. Apply remote (Sheet-authored) data over the hardcoded defaults -----
+  // Mutates REFS + NBL_GROUPS in place and rebuilds NBL_INDEX so buildReport()
+  // uses the admin-edited content. Beta-lactam (DRUGS/OVERRIDES) is not yet
+  // Sheet-backed, so beta_lactam rows are ignored here (Stage B). Returns true
+  // if usable NBL data was applied; false -> keep hardcoded defaults (offline /
+  // not deployed / empty sheet).
+  function _alParse(v, fb) {
+    if (Array.isArray(v) || (v && typeof v === 'object')) return v;
+    if (typeof v === 'string' && v.trim()) { try { return JSON.parse(v); } catch (e) { return fb; } }
+    return fb;
+  }
+  function _alBool(v) { return v === true || v === 'true' || v === 'TRUE'; }
+
+  function applyRemoteData(remote) {
+    if (!remote) return false;
+    // refs: merge remote citations over the hardcoded map (remote wins)
+    (remote.refs || []).forEach(function (r) { if (r && r.key) REFS[r.key] = r.citation; });
+
+    var rows = (remote.groups || []).filter(function (g) { return (g.type || 'nbl') !== 'beta_lactam'; });
+    if (!rows.length) return false;   // nothing usable -> keep hardcoded NBL groups
+
+    var built = rows.map(function (g) {
+      return {
+        id: g.id, label: g.label,
+        refs: _alParse(g.refs, []),
+        allergens: _alParse(g.allergens, []),
+        crossReactive: _alParse(g.crossReactive, []),
+        safe: _alParse(g.safe, []),
+        caution: _alParse(g.caution, []),
+        crossReason: g.crossReason || '', cautionReason: g.cautionReason || '', safeReason: g.safeReason || '',
+        noteMild: g.noteMild || '', noteIge: g.noteIge || '', noteScar: g.noteScar || '',
+        scarCautionNote: g.scarCautionNote || '', singleDrugCallout: g.singleDrugCallout || '',
+        keepSafeOnScar: _alBool(g.keepSafeOnScar), clusterAware: _alBool(g.clusterAware),
+        crossClassCaution: _alBool(g.crossClassCaution), chemGroupAware: _alBool(g.chemGroupAware),
+        chemLabels: _alParse(g.chemLabels, ''),
+        sortOrder: (g.sortOrder === '' || g.sortOrder == null) ? 999 : Number(g.sortOrder)
+      };
+    }).filter(function (g) { return g.id && (g.allergens || []).length; })
+      .sort(function (a, b) { return a.sortOrder - b.sortOrder; });
+
+    if (!built.length) return false;
+
+    NBL_GROUPS.length = 0;
+    built.forEach(function (g) { NBL_GROUPS.push(g); });
+    Object.keys(NBL_INDEX).forEach(function (k) { delete NBL_INDEX[k]; });
+    NBL_GROUPS.forEach(function (g) {
+      (g.allergens || []).forEach(function (a) { NBL_INDEX[a.id] = { group: g, allergen: a }; });
+    });
+    return true;
+  }
+
   root.AllergyData = {
     REFS: REFS, TIERS: TIERS, CLUSTERS: CLUSTERS, DRUGS: DRUGS, DRUG_BY_ID: DRUG_BY_ID,
+    applyRemoteData: applyRemoteData,
     OVERRIDES: OVERRIDES, SEVERITY: SEVERITY, NON_BETA_LACTAM: NON_BETA_LACTAM,
     NBL_GROUPS: NBL_GROUPS, NBL_INDEX: NBL_INDEX,
     computeRelation: computeRelation, buildReport: buildReport

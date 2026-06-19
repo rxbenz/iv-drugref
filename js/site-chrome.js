@@ -113,6 +113,52 @@
     // Default: OPEN on entry so the menu is discoverable; the user then
     // swipes left / scrolls / taps to hide it.
     setOpen(true);
+
+    injectFooter();
+  }
+
+  // Compact footer + info modal (disclaimer/license/refs). Skipped if the page
+  // already ships its own footer (index keeps its rich footer, which is also
+  // coupled to index.js via #footerDrugCount). Version is single-sourced from
+  // IVDrugRef.VERSION so there's nothing per-page to bump.
+  function injectFooter() {
+    if (document.querySelector('footer, .app-footer')) return;
+    var ver = (window.IVDrugRef && window.IVDrugRef.VERSION) ? window.IVDrugRef.VERSION : '';
+
+    var f = document.createElement('footer');
+    f.className = 'sc-footer';
+    f.innerHTML =
+      '<span>💊 <b>IV DrugRef</b> <span class="sc-ver">v' + esc(ver) + '</span> · ' +
+      'ภก.ฐาปนัท นาคครุฑ (Benz) · สถาบันประสาทวิทยา</span>' +
+      '<button type="button" class="sc-info-btn">ℹ️ เกี่ยวกับ / Disclaimer / License</button>';
+
+    var m = document.createElement('div');
+    m.className = 'sc-modal';
+    m.innerHTML =
+      '<div class="sc-sheet">' +
+        '<h3>ℹ️ เกี่ยวกับแอปนี้</h3>' +
+        '<div class="sc-box sc-red"><b>⚠️ Disclaimer</b> — เครื่องมือสนับสนุนการตัดสินใจทางคลินิกเท่านั้น ' +
+        'ไม่ทดแทนดุลยพินิจวิชาชีพ ตรวจสอบกับแหล่งอ้างอิงปฐมภูมิเสมอ</div>' +
+        '<div class="sc-cred">จัดทำโดย ภก.ฐาปนัท นาคครุฑ (Benz)<br>' +
+        'กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา · Neurological Institute of Thailand</div>' +
+        '<div class="sc-box sc-blue"><b>📜 License</b> — CC BY-NC-SA 4.0 · ใช้/แชร์/ดัดแปลงได้ ต้องให้เครดิต · ' +
+        'ห้ามเชิงพาณิชย์ · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.th" target="_blank" rel="noopener">รายละเอียด</a></div>' +
+        '<div class="sc-refs">แหล่งอ้างอิง: Lexicomp, Trissel\'s Handbook on Injectable Drugs, AHFS, ISMP, ' +
+        'Package Inserts, Clinical Practice Guidelines · <b>เวอร์ชัน ' + esc(ver) + '</b></div>' +
+        '<div class="sc-close-wrap"><button type="button" class="sc-close-btn">ปิด</button></div>' +
+      '</div>';
+
+    document.body.appendChild(f);
+    document.body.appendChild(m);
+
+    function openM() { m.classList.add('sc-modal-open'); }
+    function closeM() { m.classList.remove('sc-modal-open'); }
+    f.querySelector('.sc-info-btn').addEventListener('click', openM);
+    m.querySelector('.sc-close-btn').addEventListener('click', closeM);
+    m.addEventListener('click', function (e) { if (e.target === m) closeM(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && m.classList.contains('sc-modal-open')) closeM();
+    });
   }
 
   if (document.readyState === 'loading') {

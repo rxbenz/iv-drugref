@@ -261,7 +261,9 @@
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
     try {
-      const res = await fetch(SCRIPT_URL + '?action=raw', { signal: controller.signal });
+      // cache-bust (&_=ts) + no-store: GAS /exec GET responses can be served
+      // stale from the browser cache, so new Sheet rows never appear on Refresh
+      const res = await fetch(SCRIPT_URL + '?action=raw&_=' + Date.now(), { signal: controller.signal, cache: 'no-store' });
       clearTimeout(timeout);
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -276,7 +278,10 @@
       buildSessionMap(RAW.sessions);
       document.getElementById('statusMsg').style.display = 'none';
       reRender();
-      toast('✅ โหลดข้อมูลสำเร็จ (' + totalRows() + ' rows)');
+      // surface backend version + fetch time so stale-deploy / stale-cache is obvious
+      var ver = d.gasVersion ? ' · GAS ' + d.gasVersion : '';
+      var t = d.serverTime ? ' · ' + new Date(d.serverTime).toLocaleTimeString('th-TH') : '';
+      toast('✅ โหลดข้อมูลสำเร็จ (' + totalRows() + ' rows)' + ver + t);
     } catch (err) {
       clearTimeout(timeout);
       const msg = document.getElementById('statusMsg');
@@ -977,7 +982,7 @@
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
     try {
-      const res = await fetch(SCRIPT_URL + '?action=export&sheet=' + encodeURIComponent(sheet), { signal: controller.signal });
+      const res = await fetch(SCRIPT_URL + '?action=export&sheet=' + encodeURIComponent(sheet) + '&_=' + Date.now(), { signal: controller.signal, cache: 'no-store' });
       clearTimeout(timeout);
 
       const data = await res.json();

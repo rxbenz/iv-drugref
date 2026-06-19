@@ -36,10 +36,20 @@ let state = {
   analyticsData: null,
 };
 
+// Built-in defaults so admin works on any machine/browser with NO Settings
+// entry. Neither value is secret: the Apps Script URL is already public in
+// core.js, and a Google OAuth Client ID is designed to be embedded in the page.
+// localStorage still overrides these if an admin wants a different endpoint.
+// (The GitHub token is a real secret and is intentionally NOT defaulted.)
+const DEFAULT_CLIENT_ID = '666120341779-qusaccvj5tj7o6onfb9nn5vod3o9rrv9.apps.googleusercontent.com';
+function defaultScriptUrl() {
+  return (window.IVDrugRef && window.IVDrugRef.getAdminGasUrl && window.IVDrugRef.getAdminGasUrl()) || '';
+}
+
 function getConfig() {
   return {
-    scriptUrl: localStorage.getItem(LS_PREFIX + 'scriptUrl') || '',
-    clientId: localStorage.getItem(LS_PREFIX + 'clientId') || '',
+    scriptUrl: localStorage.getItem(LS_PREFIX + 'scriptUrl') || defaultScriptUrl(),
+    clientId: localStorage.getItem(LS_PREFIX + 'clientId') || DEFAULT_CLIENT_ID,
     allowedEmails: (localStorage.getItem(LS_PREFIX + 'allowedEmails') || '').split(',').map(e => e.trim()).filter(Boolean),
     ghToken: localStorage.getItem(LS_PREFIX + 'ghToken') || '',
     ghRepo: localStorage.getItem(LS_PREFIX + 'ghRepo') || 'rxbenz/iv-drugref',

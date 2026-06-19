@@ -39,17 +39,12 @@
     <div class="section-header">🧪 เลือกข้อมูลผู้ป่วย</div>
     <div class="field-grid">
       <div class="field">
-        <label for="allergenSearch">ยาที่ผู้ป่วยแพ้</label>
-        <div class="ap" id="allergenPicker">
-          <div class="ap-search">
-            <span class="ap-ic" aria-hidden="true">🔍</span>
-            <input type="text" id="allergenSearch" autocomplete="off" autocorrect="off"
-              spellcheck="false" role="combobox" aria-expanded="false" aria-controls="allergenList"
-              placeholder="พิมพ์เพื่อค้นหา (ไทย/อังกฤษ) เช่น amoxicillin, ซัลฟา...">
-            <button type="button" class="ap-clr" id="allergenClear" aria-label="ล้าง">✕</button>
-          </div>
+        <label for="allergenSelect">ยาที่ผู้ป่วยแพ้</label>
+        <div id="allergenPicker">
           <div class="ap-chips" id="allergenChips"></div>
-          <div class="ap-list" id="allergenList" role="listbox"></div>
+          <select id="allergenSelect" class="ap-select">
+            <option value="">— เลือกยาที่ผู้ป่วยแพ้ —</option>
+          </select>
         </div>
       </div>
       <div class="field">

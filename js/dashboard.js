@@ -317,6 +317,7 @@
     const compatUsage = applyFilters(RAW.compatUsage || []);
     const drugRatings = applyFilters(RAW.drugRatings || []);
     const npsResponses = applyFilters(RAW.npsResponses || []);
+    const allergyLookups = applyFilters(RAW.allergyLookups || []);
 
     // Always render overview + active tab
     renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage);
@@ -326,6 +327,7 @@
     if (tab === 'tdm' || tab === 'overview') renderTDM(tdmUsage);
     if (tab === 'renal' || tab === 'overview') renderRenal(renalDosing);
     if (tab === 'compat' || tab === 'overview') renderCompat(compatUsage);
+    if (tab === 'allergy' || tab === 'overview') renderAllergy(allergyLookups);
     if (tab === 'dosecalc' || tab === 'overview') renderDoseCalc(doseCalcs);
     if (tab === 'ratings' || tab === 'overview') renderRatingsNPS(drugRatings, npsResponses);
     if (tab === 'survey' || tab === 'overview') renderSurvey(surveys);
@@ -624,6 +626,34 @@
     const daily = dailyCount(compat);
     const days = Object.keys(daily).sort();
     mc('compatDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Compat Checks', data:days.map(d => daily[d]), borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.1)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
+  }
+
+  // ============================================================
+  // RENDER: ALLERGY (cross-reactivity lookups)
+  // ============================================================
+  function renderAllergy(allergy) {
+    const users = uniqueSet(allergy, 'user_id');
+    const blocked = allergy.filter(r => r.blocked === true || String(r.blocked).toLowerCase() === 'true');
+    const allergenCount = countBy(allergy, 'allergen_name');
+    const topEntry = Object.entries(allergenCount).sort((a, b) => b[1] - a[1])[0];
+    const topAllergen = topEntry ? topEntry[0] : '—';
+
+    document.getElementById('allergyStats').innerHTML = [
+      statBox('🛡️', allergy.length.toLocaleString(), 'Total Lookups', 'purple'),
+      statBox('👤', users.size.toLocaleString(), 'Unique Users', 'blue'),
+      statBox('💊', topAllergen.length > 14 ? topAllergen.substring(0, 14) + '…' : topAllergen, 'Top Allergen', 'cyan'),
+      statBox('🚫', blocked.length.toLocaleString(), 'SCAR Blocked', 'red')
+    ].join('');
+
+    const topAllergens = Object.entries(allergenCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    mc('allergyDrugChart', {type:'bar', data:{labels:topAllergens.map(p => p[0].length > 22 ? p[0].substring(0, 22) + '…' : p[0]), datasets:[{label:'Lookups', data:topAllergens.map(p => p[1]), backgroundColor:'#7c3aed', borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
+
+    const sevCount = countBy(allergy, 'severity');
+    mc('allergySevChart', {type:'doughnut', data:{labels:Object.keys(sevCount), datasets:[{data:Object.values(sevCount), backgroundColor:['#0ea5e9','#d97706','#dc2626','#64748b','#059669']}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
+
+    const daily = dailyCount(allergy);
+    const days = Object.keys(daily).sort();
+    mc('allergyDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Allergy Lookups', data:days.map(d => daily[d]), borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.1)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
   }
 
   // ============================================================

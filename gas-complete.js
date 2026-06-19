@@ -61,7 +61,8 @@ var SHEETS = {
   CALC_VISITS: 'CalcVisits',
   DRUG_RATINGS: 'DrugRatings',
   NPS_RESPONSES: 'NPSResponses',
-  COMPAT_PAIRS: 'CompatPairs'
+  COMPAT_PAIRS: 'CompatPairs',
+  ALLERGY_LOOKUPS: 'AllergyLookups'
 };
 
 // ──────────────────────────────────────────────
@@ -313,6 +314,8 @@ function doPost(e) {
         return logRenalDosing(data);
       case 'COMPAT_CHECK':
         return logCompatUsage(data);
+      case 'ALLERGY_LOOKUP':
+        return logAllergyLookup(data);
       case 'DRUG_RATING':
         return logDrugRating(data);
       case 'NPS_SUBMIT':
@@ -399,6 +402,14 @@ function logCompatUsage(data) {
   return jsonResponse({ success: true });
 }
 
+function logAllergyLookup(data) {
+  data.timestamp = new Date().toISOString();
+  smartLog(SHEETS.ALLERGY_LOOKUPS, data,
+    ['timestamp', 'session_id', 'user_id', 'allergen_id', 'allergen_name', 'group',
+     'severity', 'avoid_count', 'caution_count', 'safer_count', 'blocked']);
+  return jsonResponse({ success: true });
+}
+
 function logErrors(data) {
   var errors = data.errors || [data];
   errors.forEach(function(err) {
@@ -470,7 +481,8 @@ function handleRaw() {
     surveys: getSheetData(SHEETS.SURVEYS),
     calcVisits: getSheetData(SHEETS.CALC_VISITS),
     drugRatings: getSheetData(SHEETS.DRUG_RATINGS),
-    npsResponses: getSheetData(SHEETS.NPS_RESPONSES)
+    npsResponses: getSheetData(SHEETS.NPS_RESPONSES),
+    allergyLookups: getSheetData(SHEETS.ALLERGY_LOOKUPS)
   });
 }
 

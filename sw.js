@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.18.2
+// IV Drug Reference PWA — Service Worker v5.18.3
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -86,9 +86,14 @@
 //          Errors now show on blur / on Calculate; mid-typing only updates CrCl
 //          silently. Decimal fields get inputmode="decimal" for a usable mobile
 //          keypad.
+// v5.18.3: Calculator caret fix — the getPatientFromForm unit-conversion shim
+//          wrote every patient field's value back on each read; on a type=number
+//          field "0." reads as "0", so typing a decimal got rewritten and the
+//          caret jumped. Now it only touches fields that actually need unit
+//          conversion (none in default kg/cm/mg-dL units).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.18.2';
+const CACHE_NAME = 'iv-drugref-v5.18.3';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.20.0
+// IV Drug Reference PWA — Service Worker v5.21.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -113,9 +113,15 @@
 //          true immune allergy → the engine short-circuits with a "not an
 //          allergy, drug usually still usable" advisory instead of running the
 //          cross-reactivity avoidance lists. Default (allergy) unchanged.
+// v5.21.0: Allergy pseudoallergy — Phase 3: make the non-immune path ACTIONABLE.
+//          Groups can carry a `pseudo` management block; selecting non-immune for
+//          ICM now shows actionable guidance (iodine/seafood myth, switch agent +
+//          skin test, low/iso-osmolar) and a premedication protocol (ACR regimens)
+//          with the ESUR-2025 "not routine" caveat — instead of a generic note.
+//          Rendered in result + copy/LINE/PDF. Locked by tests.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.20.0';
+const CACHE_NAME = 'iv-drugref-v5.21.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

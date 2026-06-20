@@ -614,9 +614,51 @@
   // Both return { allergen, severity, severityNote, avoid:[], caution:[],
   //   safer:[], nonBetaLactam|null, blocked, isNbl }
   function buildReport(allergenId, severityId, opts) {
+    opts = opts || {};
+    // Phase 2 — reaction-nature gate: an intolerance / side-effect (nausea, GI
+    // upset, headache…) is NOT an immune allergy, so the cross-reactivity
+    // avoidance logic does not apply — short-circuit with an advisory instead.
+    if (opts.nature === 'intolerance') return buildIntoleranceReport(allergenId);
     if (DRUG_BY_ID[allergenId]) return buildBetaLactamReport(allergenId, severityId);
     if (NBL_INDEX[allergenId])  return buildNblReport(allergenId, severityId, opts);
     return null;
+  }
+
+  // Resolve an allergen's display meta from either source (beta-lactam or NBL).
+  function allergenMeta(allergenId) {
+    const d = DRUG_BY_ID[allergenId];
+    if (d) {
+      const clsLabel = ({ penicillin: 'Penicillin', cephalosporin: 'Cephalosporin',
+        carbapenem: 'Carbapenem', monobactam: 'Monobactam' })[d.class] || (d.class || '');
+      return { generic: d.generic, th: d.th || '', class: clsLabel, trade: d.trade || [] };
+    }
+    const ref = NBL_INDEX[allergenId];
+    if (ref) return { generic: ref.allergen.generic, th: ref.allergen.th || '',
+      class: ref.group.label, trade: ref.allergen.trade || [] };
+    return null;
+  }
+
+  // Intolerance / non-immune adverse reaction → not a true allergy. Returns a
+  // report flagged notAllergy with an advisory; no avoid/caution/safer lists.
+  function buildIntoleranceReport(allergenId) {
+    const meta = allergenMeta(allergenId);
+    if (!meta) return null;
+    return {
+      allergen: meta,
+      severity: { id: 'intolerance', label: 'ผลข้างเคียง / ไม่ทนยา (ไม่ใช่การแพ้)', note: '' },
+      severityNote: '',
+      notAllergy: true,
+      advisory: 'อาการที่ระบุเป็น “ผลข้างเคียง/ไม่ทนยา” (เช่น คลื่นไส้ อาเจียน ปวดท้อง ท้องเสีย ' +
+        'ปวดศีรษะ ใจสั่น) ซึ่งไม่ใช่การแพ้ทางภูมิคุ้มกัน → โดยทั่วไป “ยังใช้ยาเดิมได้” ' +
+        'ไม่จำเป็นต้องหลีกเลี่ยงยากลุ่มเดียวกัน พิจารณาจัดการอาการ (ปรับขนาด/อัตราการให้/' +
+        'ให้พร้อมอาหาร/ยาบรรเทาอาการ) หรือเปลี่ยนยาตามความเหมาะสมทางคลินิก',
+      caveat: '⚠️ ถ้าจริง ๆ มีผื่น ลมพิษ หน้า/ปากบวม หายใจลำบาก ความดันตก หรือผิวหนังลอก/' +
+        'ตุ่มน้ำ (SCAR) — แสดงว่าอาจเป็น “การแพ้จริง” ให้เปลี่ยนตัวเลือกเป็น “แพ้จริง/สงสัยแพ้” ' +
+        'เพื่อประเมินการแพ้ข้ามยา',
+      avoid: [], caution: [], safer: [],
+      nonBetaLactam: null, blocked: false,
+      isNbl: !!NBL_INDEX[allergenId]
+    };
   }
 
   function buildBetaLactamReport(allergenId, severityId) {

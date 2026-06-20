@@ -15,6 +15,7 @@
     : function (s) { return String(s == null ? '' : s); };
 
   var severitySel, resultEl, phenotypeField, phenotypeSel, phenotypeLabelEl;
+  var natureSel, severityField;
   // allergen picker (hybrid: search + group chips + list)
   var pickerEl, searchEl, chipsEl, listEl, clearEl;
   var ALLERGENS = [], GROUPS = [], pkList = [];
@@ -45,7 +46,8 @@
 
   function refreshPhenotype() {
     if (!phenotypeField) return;
-    var g = phenotypeGroupFor(selectedId);
+    var intol = natureSel && natureSel.value === 'intolerance';
+    var g = intol ? null : phenotypeGroupFor(selectedId);
     if (!g) { phenotypeField.style.display = 'none'; phenotypeSel.innerHTML = ''; return; }
     var prev = phenotypeSel.value;
     if (phenotypeLabelEl) phenotypeLabelEl.textContent = g.phenotypeLabel || 'ลักษณะการแพ้';
@@ -58,11 +60,22 @@
   }
 
   // Phenotype only applies to its group; pass it through only when visible.
+  // Nature ('intolerance') short-circuits the engine (Phase 2).
   function currentOpts() {
+    var o = {};
+    if (natureSel && natureSel.value === 'intolerance') o.nature = 'intolerance';
     if (phenotypeField && phenotypeField.style.display !== 'none' && phenotypeSel.value) {
-      return { phenotype: phenotypeSel.value };
+      o.phenotype = phenotypeSel.value;
     }
-    return {};
+    return o;
+  }
+
+  // Intolerance hides the immune-phenotype controls (severity / NSAID phenotype);
+  // true-allergy shows them.
+  function syncNatureUI() {
+    var intol = natureSel && natureSel.value === 'intolerance';
+    if (severityField) severityField.style.display = intol ? 'none' : '';
+    if (intol && phenotypeField) phenotypeField.style.display = 'none';
   }
 
   // ---- allergen picker ----------------------------------------------------
@@ -304,6 +317,12 @@
     var L = ['🛡️ ผลตรวจแพ้ข้ามยา — IV DrugRef',
       'แพ้: ' + a.generic + ' (' + a.th + ')',
       'อาการ: ' + sev.label];
+    if (report.notAllergy) {
+      L.push('', report.advisory);
+      if (report.caveat) L.push('', report.caveat);
+      L.push('', '⚠️ เครื่องมือช่วยประเมินเบื้องต้น — ใช้ clinical judgment ประกอบ', SITE_URL);
+      return L.join('\n');
+    }
     if (report.calloutNote) L.push('', report.calloutNote);
     function block(title, items) {
       if (!items || !items.length) return;
@@ -346,6 +365,15 @@
     var patientHtml = '<div style="font-size:13px"><strong>แพ้:</strong> ' +
       esc(a.generic) + ' (' + esc(a.th) + ')<br><strong>อาการ:</strong> ' + esc(sev.label) + '</div>';
     var results = '';
+    if (report.notAllergy) {
+      results += '<div style="background:#ecfdf5;border:1px solid #86efac;border-radius:6px;' +
+        'padding:8px;font-size:12px;margin-bottom:10px">✅ ' + esc(report.advisory) + '</div>';
+      if (report.caveat) results += '<div style="background:#fef3c7;border:1px solid #fcd34d;' +
+        'border-radius:6px;padding:8px;font-size:12px">' + esc(report.caveat) + '</div>';
+      SE.printReport({ title: '🛡️ ผลตรวจแพ้ข้ามยา', patientHtml: patientHtml,
+        resultsHtml: results, analytics: { page: 'allergy', drug: a.generic } });
+      return;
+    }
     if (report.calloutNote) {
       results += '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;' +
         'padding:8px;font-size:12px;margin-bottom:10px">' + esc(report.calloutNote) + '</div>';
@@ -402,6 +430,19 @@
     var sev = report.severity;
     var html = '';
 
+    // Phase 2 — intolerance / non-immune: not a true allergy → advisory only,
+    // no cross-reactivity lists.
+    if (report.notAllergy) {
+      html += '<div class="info-box blue" style="margin-bottom:14px">' +
+        '<strong>กรณี:</strong> ' + esc(a.generic) + ' (' + esc(a.th) + ') · ' +
+        '<strong>ลักษณะ:</strong> ' + esc(sev.label) + '</div>';
+      html += actionsHtml();
+      html += '<div class="info-box green" style="margin-bottom:14px">✅ ' + esc(report.advisory) + '</div>';
+      if (report.caveat) html += '<div class="info-box amber">' + esc(report.caveat) + '</div>';
+      resultEl.innerHTML = html;
+      return;
+    }
+
     // header summary
     html += '<div class="info-box blue" style="margin-bottom:14px">' +
       '<strong>กรณี:</strong> แพ้ ' + esc(a.generic) + ' (' + esc(a.th) + ') · ' +
@@ -449,6 +490,7 @@
   }
 
   function render(userInitiated) {
+    syncNatureUI();
     refreshPhenotype();
     lastReport = A.buildReport(selectedId, severitySel.value, currentOpts());
     paint();
@@ -470,6 +512,7 @@
         allergen_name: (r.allergen && r.allergen.generic) || selectedId,
         group: (r.allergen && r.allergen.class) || '',
         severity: severitySel ? severitySel.value : '',
+        nature: (natureSel && natureSel.value) || 'allergy',
         phenotype: (currentOpts().phenotype) || '',
         avoid_count: (r.avoid || []).length,
         caution_count: (r.caution || []).length,
@@ -516,6 +559,8 @@
 
   function init() {
     severitySel = document.getElementById('severitySelect');
+    natureSel = document.getElementById('natureSelect');
+    severityField = document.getElementById('severityField');
     phenotypeField = document.getElementById('phenotypeField');
     phenotypeSel = document.getElementById('phenotypeSelect');
     phenotypeLabelEl = document.getElementById('phenotypeLabel');
@@ -539,6 +584,7 @@
 
     severitySel.addEventListener('change', function () { render(true); });
     if (phenotypeSel) phenotypeSel.addEventListener('change', function () { render(true); });
+    if (natureSel) natureSel.addEventListener('change', function () { render(true); });
 
     // --- allergen picker: live search list + group chips ---
     searchEl.addEventListener('focus', function () { pickerOpen = true; renderList(); });

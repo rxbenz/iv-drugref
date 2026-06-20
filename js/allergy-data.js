@@ -45,6 +45,7 @@
     esur2025cm: 'ESUR Contrast Media Safety Committee. Hypersensitivity reactions to contrast media: Part 1 & 2 (updated guidelines). Eur Radiol 2025.',
     icmClass2024: 'Cross-reactivity in hypersensitivity reactions to contrast agents: new classification and guide for clinical practice. Eur Radiol 2024;34. (carbamoyl side-chain grouping)',
     icmSkinTest2024: 'Skin Test Reactivity Patterns in Patients Allergic to Iodinated Contrast Media: A Refined View. J Allergy Clin Immunol Pract 2024;12(11). (PMID 39056227)',
+    acr2023cm: 'ACR Committee on Drugs and Contrast Media. ACR Manual on Contrast Media (2023) — premedication regimens & "no iodine allergy"/seafood myth.',
     ash2018hit: 'Cuker A, et al. American Society of Hematology 2018 guidelines for management of venous thromboembolism: heparin-induced thrombocytopenia. Blood Adv 2018;2(22):3360-92.',
     dthHeparin: 'Schindewolf M, et al. Delayed-type hypersensitivity to heparins/heparinoids — patterns of cross-reactivity; tolerance of fondaparinux. (Allergy 2007;62; PMID 17573880 / PMID 15025697)'
   };
@@ -549,7 +550,27 @@
       noteIge:  'แพ้ ICM (immediate): เลี่ยงตัวเดิม + ตัว side chain เดียวกัน → เลือก side chain ต่างกลุ่มที่ skin test ผ่าน · premedication ไม่ใช่ทางออกที่เชื่อถือได้ (ESUR 2025)',
       noteScar: 'SCAR จาก ICM (พบยาก): เลี่ยง ICM ทั้งหมดเด็ดขาด · ห้าม challenge · พิจารณา GBCA/การตรวจอื่น',
       scarCautionNote: 'กรณี SCAR: เลี่ยง ICM ทั้งหมด',
-      singleDrugCallout: '⚠️ ความเชื่อผิด: การแพ้ ICM "ไม่ใช่" การแพ้ไอโอดีน และ "ไม่เกี่ยวกับการแพ้อาหารทะเล/กุ้งหอยปูปลา" — ห้ามใช้ประวัติแพ้อาหารทะเลมาห้ามให้ ICM · 💡 การแพ้ข้ามขึ้นกับ side chain (carbamoyl): ตัว side chain เดียวกันแพ้ข้ามสูง (~60-77%) → เลือกตัว side chain ต่างกลุ่ม + ยืนยันด้วย skin test (วิธีเดียวที่เชื่อถือได้) · premedication ด้วย steroid/antihistamine ไม่แนะนำให้ใช้ routinely แล้ว (ESUR 2025 — หลักฐานไม่ดีพอ การเปลี่ยนตัวยาสำคัญกว่า) · Gadolinium (MRI) ไม่แพ้ข้ามกับ ICM'
+      singleDrugCallout: '⚠️ ความเชื่อผิด: การแพ้ ICM "ไม่ใช่" การแพ้ไอโอดีน และ "ไม่เกี่ยวกับการแพ้อาหารทะเล/กุ้งหอยปูปลา" — ห้ามใช้ประวัติแพ้อาหารทะเลมาห้ามให้ ICM · 💡 การแพ้ข้ามขึ้นกับ side chain (carbamoyl): ตัว side chain เดียวกันแพ้ข้ามสูง (~60-77%) → เลือกตัว side chain ต่างกลุ่ม + ยืนยันด้วย skin test (วิธีเดียวที่เชื่อถือได้) · premedication ด้วย steroid/antihistamine ไม่แนะนำให้ใช้ routinely แล้ว (ESUR 2025 — หลักฐานไม่ดีพอ การเปลี่ยนตัวยาสำคัญกว่า) · Gadolinium (MRI) ไม่แพ้ข้ามกับ ICM',
+      // Non-immune / pseudoallergy ACTIONABLE management (shown when the user
+      // marks the reaction as non-immune). Most immediate ICM reactions are
+      // non-IgE (direct mast-cell) — the priorities are myth-busting, switching
+      // the agent (different side-chain cluster) + skin test, and using premed
+      // only per institutional protocol (ESUR 2025 de-emphasises routine premed).
+      pseudo: {
+        title: 'การจัดการปฏิกิริยาต่อสารทึบรังสี (ส่วนใหญ่เป็น non-immune / pseudoallergy)',
+        points: [
+          '⚠️ "ไม่ใช่การแพ้ไอโอดีน" และ "ไม่เกี่ยวกับการแพ้อาหารทะเล" — ห้ามใช้ประวัติแพ้อาหารทะเลมาห้ามให้ ICM',
+          'ปฏิกิริยา immediate ส่วนใหญ่เป็น non-IgE (direct mast-cell activation) แต่ที่รุนแรง (anaphylaxis แท้) ก็พบได้',
+          '🎯 จัดการสำคัญสุด: เปลี่ยนเป็น ICM ตัว side chain (carbamoyl) ต่างกลุ่ม + ยืนยันด้วย skin test · ใช้ low-/iso-osmolar non-ionic',
+          'Gadolinium (MRI) ไม่แพ้ข้ามกับ ICM — เป็นทางเลือกถ้าเหมาะกับการตรวจ'
+        ],
+        premedNote: 'Premedication: ESUR 2025 ไม่แนะนำใช้ routinely (หลักฐานไม่ดีพอ ไม่กันปฏิกิริยารุนแรงได้จริง — การเปลี่ยน agent สำคัญกว่า) ใช้เฉพาะรายที่จำเป็นตาม institutional protocol',
+        premed: [
+          { when: 'Elective (ACR)', what: 'Prednisolone 50 mg PO ที่ 13, 7 และ 1 ชม. ก่อนฉีด + Diphenhydramine 50 mg (PO/IV) ที่ 1 ชม. ก่อน' },
+          { when: 'Urgent (ACR)', what: 'Hydrocortisone 200 mg IV q4h จนถึงเวลาฉีด + Diphenhydramine 50 mg IV 1 ชม. ก่อน' }
+        ],
+        refs: ['esur2025cm', 'acr2023cm', 'icmClass2024']
+      }
     },
     // ── Heparins ─────────────────────────────────────────────────────────────
     // TWO distinct immune reactions, both with broad UFH<->LMWH cross-reactivity:
@@ -643,11 +664,16 @@
   function buildIntoleranceReport(allergenId) {
     const meta = allergenMeta(allergenId);
     if (!meta) return null;
+    // Actionable pseudoallergy management for groups that define it (e.g. ICM):
+    // shown instead of the generic "not an allergy" advisory.
+    const ref = NBL_INDEX[allergenId];
+    const pseudo = (ref && ref.group && ref.group.pseudo) || null;
     return {
       allergen: meta,
-      severity: { id: 'intolerance', label: 'ผลข้างเคียง / ไม่ทนยา (ไม่ใช่การแพ้)', note: '' },
+      severity: { id: 'intolerance', label: 'ไม่ใช่แพ้ภูมิคุ้มกัน (ผลข้างเคียง / pseudoallergy)', note: '' },
       severityNote: '',
       notAllergy: true,
+      pseudo: pseudo,
       advisory: 'อาการที่ระบุเป็น “ผลข้างเคียง/ไม่ทนยา” (เช่น คลื่นไส้ อาเจียน ปวดท้อง ท้องเสีย ' +
         'ปวดศีรษะ ใจสั่น) ซึ่งไม่ใช่การแพ้ทางภูมิคุ้มกัน → โดยทั่วไป “ยังใช้ยาเดิมได้” ' +
         'ไม่จำเป็นต้องหลีกเลี่ยงยากลุ่มเดียวกัน พิจารณาจัดการอาการ (ปรับขนาด/อัตราการให้/' +

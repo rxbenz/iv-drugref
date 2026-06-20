@@ -250,6 +250,29 @@
   }
 
   // collect the unique reference keys appearing in a report, render <details>
+  // Actionable pseudoallergy management box (non-immune path, e.g. ICM)
+  function pseudoHtml(p) {
+    var h = '<div class="info-box green" style="margin-bottom:14px">' +
+      '<strong>🛠️ ' + esc(p.title || 'การจัดการ (non-immune)') + '</strong>';
+    if (p.points && p.points.length) {
+      h += '<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.7">' +
+        p.points.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+    }
+    h += '</div>';
+    if (p.premed && p.premed.length) {
+      h += '<div class="info-box amber" style="margin-bottom:14px"><strong>💉 Premedication</strong>';
+      if (p.premedNote) h += '<div style="font-size:12px;margin:6px 0 8px;opacity:.9">' + esc(p.premedNote) + '</div>';
+      h += '<ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7">' +
+        p.premed.map(function (r) {
+          return '<li><strong>' + esc(r.when) + ':</strong> ' + esc(r.what) + '</li>';
+        }).join('') + '</ul></div>';
+    }
+    var refLi = (p.refs || []).filter(function (k) { return A.REFS[k]; })
+      .map(function (k) { return '<li>' + esc(A.REFS[k]) + '</li>'; }).join('');
+    if (refLi) h += '<details class="ar-refs"><summary>📚 แหล่งอ้างอิง</summary><ol>' + refLi + '</ol></details>';
+    return h;
+  }
+
   function refsHtml(report) {
     var keys = {};
     function collect(list) {
@@ -318,7 +341,17 @@
       'แพ้: ' + a.generic + ' (' + a.th + ')',
       'อาการ: ' + sev.label];
     if (report.notAllergy) {
-      L.push('', report.advisory);
+      if (report.pseudo) {
+        L.push('', '🛠️ ' + report.pseudo.title);
+        (report.pseudo.points || []).forEach(function (t) { L.push('• ' + t); });
+        if (report.pseudo.premed && report.pseudo.premed.length) {
+          L.push('', '💉 Premedication');
+          if (report.pseudo.premedNote) L.push(report.pseudo.premedNote);
+          report.pseudo.premed.forEach(function (r) { L.push('• ' + r.when + ': ' + r.what); });
+        }
+      } else {
+        L.push('', report.advisory);
+      }
       if (report.caveat) L.push('', report.caveat);
       L.push('', '⚠️ เครื่องมือช่วยประเมินเบื้องต้น — ใช้ clinical judgment ประกอบ', SITE_URL);
       return L.join('\n');
@@ -366,8 +399,23 @@
       esc(a.generic) + ' (' + esc(a.th) + ')<br><strong>อาการ:</strong> ' + esc(sev.label) + '</div>';
     var results = '';
     if (report.notAllergy) {
-      results += '<div style="background:#ecfdf5;border:1px solid #86efac;border-radius:6px;' +
-        'padding:8px;font-size:12px;margin-bottom:10px">✅ ' + esc(report.advisory) + '</div>';
+      if (report.pseudo) {
+        var pts = (report.pseudo.points || []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+        results += '<div style="background:#ecfdf5;border:1px solid #86efac;border-radius:6px;' +
+          'padding:8px;font-size:12px;margin-bottom:10px"><strong>🛠️ ' + esc(report.pseudo.title) +
+          '</strong><ul style="margin:6px 0 0;padding-left:18px">' + pts + '</ul></div>';
+        if (report.pseudo.premed && report.pseudo.premed.length) {
+          var pm = (report.pseudo.premed).map(function (r) {
+            return '<li><strong>' + esc(r.when) + ':</strong> ' + esc(r.what) + '</li>'; }).join('');
+          results += '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;' +
+            'padding:8px;font-size:12px;margin-bottom:10px"><strong>💉 Premedication</strong>' +
+            (report.pseudo.premedNote ? '<div style="margin:4px 0">' + esc(report.pseudo.premedNote) + '</div>' : '') +
+            '<ul style="margin:4px 0 0;padding-left:18px">' + pm + '</ul></div>';
+        }
+      } else {
+        results += '<div style="background:#ecfdf5;border:1px solid #86efac;border-radius:6px;' +
+          'padding:8px;font-size:12px;margin-bottom:10px">✅ ' + esc(report.advisory) + '</div>';
+      }
       if (report.caveat) results += '<div style="background:#fef3c7;border:1px solid #fcd34d;' +
         'border-radius:6px;padding:8px;font-size:12px">' + esc(report.caveat) + '</div>';
       SE.printReport({ title: '🛡️ ผลตรวจแพ้ข้ามยา', patientHtml: patientHtml,
@@ -430,14 +478,16 @@
     var sev = report.severity;
     var html = '';
 
-    // Phase 2 — intolerance / non-immune: not a true allergy → advisory only,
-    // no cross-reactivity lists.
+    // Phase 2/3 — non-immune: not a true allergy. Show actionable pseudoallergy
+    // management when the group provides it (e.g. ICM); otherwise a generic
+    // "not an allergy" advisory.
     if (report.notAllergy) {
       html += '<div class="info-box blue" style="margin-bottom:14px">' +
         '<strong>กรณี:</strong> ' + esc(a.generic) + ' (' + esc(a.th) + ') · ' +
         '<strong>ลักษณะ:</strong> ' + esc(sev.label) + '</div>';
       html += actionsHtml();
-      html += '<div class="info-box green" style="margin-bottom:14px">✅ ' + esc(report.advisory) + '</div>';
+      if (report.pseudo) html += pseudoHtml(report.pseudo);
+      else html += '<div class="info-box green" style="margin-bottom:14px">✅ ' + esc(report.advisory) + '</div>';
       if (report.caveat) html += '<div class="info-box amber">' + esc(report.caveat) + '</div>';
       resultEl.innerHTML = html;
       return;

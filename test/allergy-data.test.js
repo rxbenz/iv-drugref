@@ -263,6 +263,24 @@ test('default nature (allergy) is unchanged by Phase 2 gate', () => {
   assert.ok(r.avoid.length > 0);
 });
 
+// ── Pseudoallergy actionable management (Phase 3): ICM non-immune ──
+test('ICM non-immune -> notAllergy with actionable pseudo management (premed + myth)', () => {
+  const r = A.buildReport('iohexol', 'ige', { nature: 'intolerance' });
+  assert.equal(r.notAllergy, true);
+  assert.ok(r.pseudo, 'ICM carries pseudo management');
+  assert.ok(r.pseudo.points.some((t) => /อาหารทะเล|ไอโอดีน/.test(t)), 'iodine/seafood myth busted');
+  assert.ok(r.pseudo.premed && r.pseudo.premed.length >= 1, 'premed protocol present');
+  assert.ok(/ESUR/.test(r.pseudo.premedNote), 'premed note cites ESUR stance');
+  assert.equal(r.avoid.length, 0);
+});
+
+test('non-immune for a group without pseudo -> generic advisory (no pseudo)', () => {
+  const r = A.buildReport('amoxicillin', 'ige', { nature: 'intolerance' });
+  assert.equal(r.notAllergy, true);
+  assert.ok(!r.pseudo, 'beta-lactam has no pseudo block');
+  assert.ok(r.advisory && r.advisory.length > 0, 'falls back to generic advisory');
+});
+
 // ── NSAID phenotype: single-drug (selective) routing (Phase 1) ──
 test('NBL: nsaid group exposes phenotypes (cross / single)', () => {
   const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');

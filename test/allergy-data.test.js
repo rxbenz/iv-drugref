@@ -237,6 +237,48 @@ test('NBL: ibuprofen excluded from its own avoid list', () => {
     'culprit should not be listed against itself');
 });
 
+// ── NSAID phenotype: single-drug (selective) routing (Phase 1) ──
+test('NBL: nsaid group exposes phenotypes (cross / single)', () => {
+  const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');
+  assert.ok(Array.isArray(g.phenotypes) && g.phenotypes.length >= 2);
+  const ids = g.phenotypes.map((p) => p.id);
+  assert.ok(ids.includes('cross') && ids.includes('single'));
+});
+
+test('NBL: ibuprofen single-drug -> avoid same chem (propionic), SAFE other chem incl strong COX-1', () => {
+  const r = A.buildReport('ibuprofen', 'ige', { phenotype: 'single' });
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  const saferG = r.safer.map((x) => x.drug.generic);
+  // same chemical group (propionic) -> avoid
+  assert.ok(avoidG.includes('Naproxen'));
+  assert.ok(avoidG.some((g) => /Ketoprofen/.test(g)));
+  // different chemical group -> SAFE even though strong COX-1 (the key flip)
+  assert.ok(saferG.includes('Diclofenac'), 'acetic-acid NSAID tolerated in single-drug');
+  assert.ok(saferG.some((g) => /Aspirin/.test(g)));
+  assert.ok(saferG.includes('Celecoxib'));
+  // a different chemical group must never be in avoid
+  assert.ok(!r.avoid.some((x) => /Diclofenac/.test(x.drug.generic)));
+  // culprit excluded
+  assert.ok(!avoidG.includes('Ibuprofen'));
+  assert.ok(r.calloutNote && /Single-drug/.test(r.calloutNote));
+});
+
+test('NBL: diclofenac single-drug -> avoid acetic siblings, propionic stays safe', () => {
+  const r = A.buildReport('diclofenac', 'ige', { phenotype: 'single' });
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Ketorolac'));
+  assert.ok(avoidG.includes('Indomethacin'));
+  assert.ok(saferG.includes('Ibuprofen'));
+  assert.ok(saferG.includes('Naproxen'));
+});
+
+test('NBL: ibuprofen default (no phenotype) still cross-reactive (back-compat)', () => {
+  const r = A.buildReport('ibuprofen', 'ige');
+  const avoidG = r.avoid.map((x) => x.drug.generic);
+  assert.ok(avoidG.includes('Diclofenac'), 'cross-reactive avoids all strong COX-1');
+});
+
 test('NBL: nsaid SCAR -> COX-2/paracetamol downgraded to caution, callout still present', () => {
   const r = A.buildReport('ibuprofen', 'scar');
   assert.equal(r.blocked, false);

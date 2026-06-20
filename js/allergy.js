@@ -14,7 +14,7 @@
     ? window.IVDrugRef.escHtml
     : function (s) { return String(s == null ? '' : s); };
 
-  var severitySel, resultEl;
+  var severitySel, resultEl, phenotypeField, phenotypeSel, phenotypeLabelEl;
   // allergen picker (hybrid: search + group chips + list)
   var pickerEl, searchEl, chipsEl, listEl, clearEl;
   var ALLERGENS = [], GROUPS = [], pkList = [];
@@ -34,6 +34,35 @@
       return '<option value="' + esc(s.id) + '">' + esc(s.label) + '</option>';
     }).join('');
     severitySel.value = 'ige';
+  }
+
+  // The NSAID group (chemGroupAware) defines `phenotypes`; show an extra selector
+  // so the user picks cross-reactive vs single-drug (it flips the recommendation).
+  function phenotypeGroupFor(id) {
+    var ref = A.NBL_INDEX && A.NBL_INDEX[id];
+    return (ref && ref.group && ref.group.phenotypes) ? ref.group : null;
+  }
+
+  function refreshPhenotype() {
+    if (!phenotypeField) return;
+    var g = phenotypeGroupFor(selectedId);
+    if (!g) { phenotypeField.style.display = 'none'; phenotypeSel.innerHTML = ''; return; }
+    var prev = phenotypeSel.value;
+    if (phenotypeLabelEl) phenotypeLabelEl.textContent = g.phenotypeLabel || 'ลักษณะการแพ้';
+    phenotypeSel.innerHTML = g.phenotypes.map(function (p) {
+      return '<option value="' + esc(p.id) + '">' + esc(p.label) + '</option>';
+    }).join('');
+    var valid = g.phenotypes.some(function (p) { return p.id === prev; });
+    phenotypeSel.value = valid ? prev : (g.phenotypeDefault || g.phenotypes[0].id);
+    phenotypeField.style.display = '';
+  }
+
+  // Phenotype only applies to its group; pass it through only when visible.
+  function currentOpts() {
+    if (phenotypeField && phenotypeField.style.display !== 'none' && phenotypeSel.value) {
+      return { phenotype: phenotypeSel.value };
+    }
+    return {};
   }
 
   // ---- allergen picker ----------------------------------------------------
@@ -420,7 +449,8 @@
   }
 
   function render(userInitiated) {
-    lastReport = A.buildReport(selectedId, severitySel.value);
+    refreshPhenotype();
+    lastReport = A.buildReport(selectedId, severitySel.value, currentOpts());
     paint();
     if (userInitiated) logLookup();
   }
@@ -440,6 +470,7 @@
         allergen_name: (r.allergen && r.allergen.generic) || selectedId,
         group: (r.allergen && r.allergen.class) || '',
         severity: severitySel ? severitySel.value : '',
+        phenotype: (currentOpts().phenotype) || '',
         avoid_count: (r.avoid || []).length,
         caution_count: (r.caution || []).length,
         safer_count: (r.safer || []).length,
@@ -485,6 +516,9 @@
 
   function init() {
     severitySel = document.getElementById('severitySelect');
+    phenotypeField = document.getElementById('phenotypeField');
+    phenotypeSel = document.getElementById('phenotypeSelect');
+    phenotypeLabelEl = document.getElementById('phenotypeLabel');
     resultEl = document.getElementById('allergyResult');
     pickerEl = document.getElementById('allergenPicker');
     chipsEl = document.getElementById('allergenChips');
@@ -504,6 +538,7 @@
     renderList();   // live results list (hidden until focus/typing/chip)
 
     severitySel.addEventListener('change', function () { render(true); });
+    if (phenotypeSel) phenotypeSel.addEventListener('change', function () { render(true); });
 
     // --- allergen picker: live search list + group chips ---
     searchEl.addEventListener('focus', function () { pickerOpen = true; renderList(); });

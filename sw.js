@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.18.4
+// IV Drug Reference PWA — Service Worker v5.19.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -96,9 +96,15 @@
 //          "getDosing is not a function" (error toast, no recommended dose).
 //          applyRenalRemote now wraps the Sheet's recommended/dosingTable in a
 //          getDosing() shim (GFR-row highlight via best-effort range parsing).
+// v5.19.0: Allergy pseudoallergy screening — Phase 1: NSAID phenotype selector
+//          (EAACI/ENDA). Cross-reactive (NERD/NECD-NIUA, COX-1 pseudoallergy)
+//          vs single-drug (selective, immunologic) now an explicit input that
+//          re-routes the engine: single-drug avoids only the culprit's chemical
+//          group, so other groups (even strong COX-1) become safe. SCAR routes
+//          single-drug too. Locked by tests.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.18.4';
+const CACHE_NAME = 'iv-drugref-v5.19.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

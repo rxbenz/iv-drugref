@@ -293,7 +293,19 @@
       scarCautionNote: 'กรณี SCAR: พิจารณาเลี่ยงถ้าไม่จำเป็น · ปรึกษาผู้เชี่ยวชาญก่อนใช้',
       // prominent callout: the single-drug (selective) scenario flips the whole logic.
       // buildNblReport appends the culprit's same-chemical-group siblings.
-      singleDrugCallout: '⚠️ ถ้าแพ้ NSAID “ตัวเดียว” (เคยใช้ NSAID ตัวอื่นได้ปกติ หรือ anaphylaxis ต่อตัวเดียว) = single-drug (selective) ไม่ใช่ cross-reactive → เลี่ยงเฉพาะตัวที่แพ้ + กลุ่มเคมีเดียวกัน ส่วน NSAID กลุ่มเคมีอื่นใช้ได้ แม้เป็น COX-1 แรง'
+      singleDrugCallout: '⚠️ ถ้าแพ้ NSAID “ตัวเดียว” (เคยใช้ NSAID ตัวอื่นได้ปกติ หรือ anaphylaxis ต่อตัวเดียว) = single-drug (selective) ไม่ใช่ cross-reactive → เลี่ยงเฉพาะตัวที่แพ้ + กลุ่มเคมีเดียวกัน ส่วน NSAID กลุ่มเคมีอื่นใช้ได้ แม้เป็น COX-1 แรง',
+      // PHENOTYPE selector (EAACI/ENDA — Kowalski 2013, Doña 2020): NSAID
+      // hypersensitivity splits into a cross-reactive (pharmacologic, COX-1) arm
+      // and a single-drug (immunologic, chemical-group) arm — the two give
+      // OPPOSITE recommendations, so make it an explicit input, not just a note.
+      phenotypeLabel: 'ลักษณะการแพ้ NSAID',
+      phenotypeDefault: 'cross',
+      phenotypes: [
+        { id: 'cross',  label: 'Cross-reactive: แพ้ NSAID หลายตัว / หืด-ริดสีดวงจมูก (NERD) / ลมพิษ (NECD-NIUA)',
+          note: 'Cross-reactive (COX-1, pseudoallergy): เลี่ยง COX-1 แรงทั้งหมด · COX-2 selective/paracetamol มักใช้ได้' },
+        { id: 'single', label: 'Single-drug: แพ้ NSAID ตัวเดียว (เคยใช้ตัวอื่นได้ / anaphylaxis ต่อตัวเดียว)',
+          note: 'Single-drug (selective, immunologic): เลี่ยงเฉพาะตัวที่แพ้ + NSAID กลุ่มเคมีเดียวกัน · กลุ่มเคมีอื่นใช้ได้แม้เป็น COX-1 แรง' }
+      ]
     },
     {
       id: 'anticonvulsant',
@@ -601,9 +613,9 @@
   // Dispatch: beta-lactam allergen -> R1 engine; non-beta-lactam -> curated group.
   // Both return { allergen, severity, severityNote, avoid:[], caution:[],
   //   safer:[], nonBetaLactam|null, blocked, isNbl }
-  function buildReport(allergenId, severityId) {
+  function buildReport(allergenId, severityId, opts) {
     if (DRUG_BY_ID[allergenId]) return buildBetaLactamReport(allergenId, severityId);
-    if (NBL_INDEX[allergenId])  return buildNblReport(allergenId, severityId);
+    if (NBL_INDEX[allergenId])  return buildNblReport(allergenId, severityId, opts);
     return null;
   }
 
@@ -644,12 +656,80 @@
     };
   }
 
-  function buildNblReport(allergenId, severityId) {
+  // Single-drug (selective) report for a chemical-group-aware group (NSAID):
+  // partition every other NSAID in the group by whether it shares the culprit's
+  // chemical group. Same group → avoid (immunologic cross-reactivity within the
+  // chemical class); different group → tolerated (even strong COX-1 inhibitors).
+  function buildNblSingleDrug(g, a, sev, isScar) {
+    const lbl = (g.chemLabels && g.chemLabels[a.chem]) || a.chem || '';
+    const seen = {};
+    const pool = [];
+    ['crossReactive', 'caution', 'safe'].forEach(function (k) {
+      (g[k] || []).forEach(function (d) {
+        if (d.id && d.id === a.id) return;
+        if (d.generic === a.generic) return;
+        const key = d.id || d.generic;
+        if (seen[key]) return;
+        seen[key] = true;
+        pool.push(d);
+      });
+    });
+
+    const avoid = [], safer = [], caution = [];
+    pool.forEach(function (d) {
+      const sameChem = !!d.chem && !!a.chem && d.chem === a.chem;
+      if (sameChem) {
+        avoid.push({
+          drug: { generic: d.generic, th: d.th, class: d.sub },
+          decision: 'avoid', tier: 'high', pct: 'กลุ่มเคมีเดียวกัน',
+          reason: 'กลุ่มเคมีเดียวกับตัวที่แพ้ (' + lbl + ') → single-drug แพ้ข้ามภายในกลุ่มเคมี',
+          refs: g.refs, advice: isScar ? 'หลีกเลี่ยงเด็ดขาด · ห้าม challenge' : 'หลีกเลี่ยง'
+        });
+      } else {
+        (isScar ? caution : safer).push({
+          drug: { generic: d.generic, th: d.th, class: d.sub },
+          decision: isScar ? 'caution' : 'safer',
+          tier: isScar ? 'moderate' : 'negligible',
+          pct: isScar ? 'ระวัง' : 'กลุ่มเคมีอื่น',
+          reason: 'single-drug: กลุ่มเคมีต่างจากตัวที่แพ้ → มักใช้ได้แม้เป็น COX-1 แรง',
+          refs: g.refs,
+          advice: isScar ? 'SCAR: พิจารณาเลี่ยงถ้าไม่จำเป็น / graded challenge ตามดุลพินิจผู้เชี่ยวชาญ' : ''
+        });
+      }
+    });
+
+    const note = isScar ? g.noteScar
+      : 'Single-drug (selective): เลี่ยงเฉพาะตัวที่แพ้ + NSAID กลุ่มเคมีเดียวกัน (' + lbl + ') · NSAID กลุ่มเคมีอื่นมักใช้ได้';
+    const sameSibs = avoid.map(function (x) { return x.drug.th; });
+    const callout = '✅ Single-drug phenotype: ' + (sameSibs.length
+      ? 'กลุ่มเคมีเดียวกัน (' + lbl + ') ที่ต้องเลี่ยงด้วย: ' + sameSibs.join(', ')
+      : 'ไม่มี NSAID ตัวอื่นในกลุ่มเคมี ' + lbl + ' ในรายการ → เลี่ยงเฉพาะตัวที่แพ้');
+
+    return {
+      allergen: { generic: a.generic, th: a.th, class: g.label, trade: a.trade },
+      severity: sev, severityNote: note, calloutNote: callout,
+      avoid: avoid, caution: caution, safer: safer,
+      nonBetaLactam: null, blocked: false, isNbl: true
+    };
+  }
+
+  function buildNblReport(allergenId, severityId, opts) {
+    opts = opts || {};
     const ref = NBL_INDEX[allergenId];
     const g = ref.group;
     const a = ref.allergen;
     const sev = SEVERITY_BY_ID[severityId] || SEVERITY_BY_ID.unknown;
     const isScar = !!sev.blockAllBetaLactam;   // the SCAR severity flag
+
+    // SINGLE-DRUG (selective) phenotype — only for chemical-group-aware groups
+    // (NSAID). Here cross-reactivity follows the CHEMICAL GROUP, not COX-1
+    // potency, so the recommendation flips: avoid only the culprit + its
+    // same-chemical-group siblings; every other chemical group is tolerated
+    // (even strong COX-1 inhibitors). SCAR from an NSAID is also single-drug
+    // (SNIDR) → route it here too, but keep the no-challenge guidance.
+    if (g.chemGroupAware && (opts.phenotype === 'single' || isScar)) {
+      return buildNblSingleDrug(g, a, sev, isScar);
+    }
 
     // in-class cross-reactive drugs — each carries its own decision/tier so the
     // partition below is decision-driven (handles every group shape uniformly):

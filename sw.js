@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.18.1
+// IV Drug Reference PWA — Service Worker v5.18.2
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -81,9 +81,14 @@
 //          looking) on light theme (shared.css specificity); patient fields now
 //          use placeholders instead of pre-filled values, and validation no
 //          longer flashes errors while all fields are still blank.
+// v5.18.2: Calculator input fix — validation no longer fires on every keystroke
+//          (typing "0" before "0.8" instantly flagged the field + shook it).
+//          Errors now show on blur / on Calculate; mid-typing only updates CrCl
+//          silently. Decimal fields get inputmode="decimal" for a usable mobile
+//          keypad.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.18.1';
+const CACHE_NAME = 'iv-drugref-v5.18.2';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

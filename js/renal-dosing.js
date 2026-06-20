@@ -1102,13 +1102,18 @@
       <div class="ref-box"><strong>📚 Ref:</strong> ${data.ref}</div>
     `;
 
+    // Modal popup: open in place (no page scroll → no vertigo). Lock the
+    // background scroll and reset the sheet to the top.
     sec.classList.add('visible');
-    sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.body.classList.add('recom-modal-open');
+    var sheet = sec.querySelector('.recom-sheet');
+    if (sheet) sheet.scrollTop = 0;
   }
 
   function closeDrugRecom() {
     selectedDrug = null;
     document.getElementById('recomSection').classList.remove('visible');
+    document.body.classList.remove('recom-modal-open');
     renderDrugList(document.getElementById('drugSearch').value.toLowerCase().trim());
   }
 
@@ -1226,6 +1231,15 @@
     });
     IVDrugRef.delegate(document, 'change', {
       recalc: function() { recalc(); }
+    });
+
+    // Modal: close on backdrop click (tap outside the sheet) + Esc
+    var recomSec = document.getElementById('recomSection');
+    if (recomSec) {
+      recomSec.addEventListener('click', function (e) { if (e.target === recomSec) closeDrugRecom(); });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && recomSec && recomSec.classList.contains('visible')) closeDrugRecom();
     });
   }
 

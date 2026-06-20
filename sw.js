@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.24.0
+// IV Drug Reference PWA — Service Worker v5.25.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -137,9 +137,13 @@
 //          iOS Safari + desktop get platform-specific manual steps. Entry points:
 //          a "📲 ติดตั้ง" left-rail item + a one-time dismissible discovery banner.
 //          Hidden when already installed (display-mode: standalone). TH/EN.
+// v5.25.0: Renal page — the dosing recommendation now opens as a centered MODAL
+//          popup on drug tap (backdrop + sticky header, close via ✕ / backdrop /
+//          Esc, background scroll locked) instead of a bottom section that
+//          auto-scrolled the page down (which felt disorienting). No page jump.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.24.0';
+const CACHE_NAME = 'iv-drugref-v5.25.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

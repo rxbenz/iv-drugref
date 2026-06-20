@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.19.0
+// IV Drug Reference PWA — Service Worker v5.19.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -102,9 +102,14 @@
 //          re-routes the engine: single-drug avoids only the culprit's chemical
 //          group, so other groups (even strong COX-1) become safe. SCAR routes
 //          single-drug too. Locked by tests.
+// v5.19.1: Fix — the NSAID phenotype selector never appeared once Sheet-authored
+//          allergy data loaded: applyRemoteData rebuilt groups without the
+//          code-defined `phenotypes` (and chemLabels/clusters). It now merges
+//          Sheet CONTENT over the hardcoded group so clinical-logic fields
+//          survive. Locked by test.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.19.0';
+const CACHE_NAME = 'iv-drugref-v5.19.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

@@ -111,7 +111,7 @@ const TDMHub = (function() {
   function updateGuardForActiveTab(pt) {
     if (!window.PediatricGuard) return;
     pt = pt || getPatient();
-    var drug = window.TDMHub && window.TDMHub.getActiveDrug ? window.TDMHub.getActiveDrug() : (typeof activeDrug !== 'undefined' ? activeDrug : 'vancomycin');
+    var drug = window.TDMHub && window.TDMHub.getActiveDrug ? window.TDMHub.getActiveDrug() : (typeof activeDrug !== 'undefined' ? activeDrug : 'phenytoin');
     var ctx = _guardContextForDrug(drug);
     if (!ctx) {
       window.PediatricGuard.hideBanner(document.getElementById('tdmGuardBanner'));
@@ -141,9 +141,11 @@ const TDMHub = (function() {
   // DRUG TAB SWITCHING
   // ============================================================
 
-  let activeDrug = 'vancomycin';
+  let activeDrug = 'phenytoin';
 
   function switchDrug(drug) {
+    // Vancomycin has its own dedicated page (de-duplicated, v5.26.0) → redirect.
+    if (drug === 'vancomycin') { window.location.href = 'vanco-tdm.html'; return; }
     activeDrug = drug;
     document.querySelectorAll('.drug-tab').forEach(t => {
       t.classList.remove('active');
@@ -1508,7 +1510,6 @@ const TDMHub = (function() {
     function onReady() {
       IVDrugRef.patientCtx.init();
       updateCrCl();
-      VancoTDM.init();
       AminoglycosideTDM.updateUI();
 
       // Patient field listeners
@@ -1517,7 +1518,6 @@ const TDMHub = (function() {
         if (el) el.addEventListener('input', () => {
           updateCrCl();
           updatePhenyCorrection();
-          VancoTDM.renderModelSelect();
         });
       });
 
@@ -1526,7 +1526,6 @@ const TDMHub = (function() {
         if (el) el.addEventListener('change', () => {
           updateCrCl();
           updatePhenyCorrection();
-          VancoTDM.renderModelSelect();
         });
       });
 
@@ -1534,17 +1533,6 @@ const TDMHub = (function() {
       ['phenyLevel', 'phenyFree'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', updatePhenyCorrection);
-      });
-
-      // Vancomycin optimizer listeners
-      ['vancoOptDose', 'vancoOptInterval', 'vancoOptInfusion'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', () => { VancoTDM.updateOpt(); });
-      });
-
-      // Window resize for responsive graphs
-      window.addEventListener('resize', () => {
-        if (activeDrug === 'vancomycin') VancoTDM.updateOpt();
       });
 
       // Initial phenytoin correction display

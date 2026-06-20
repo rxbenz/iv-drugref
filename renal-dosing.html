@@ -132,13 +132,15 @@
   <div class="drug-list" id="drugList"></div>
 </div>
 
-<!-- Recommendation Output -->
-<div class="section recom-section" id="recomSection">
-  <div class="recom-header-bar">
-    <span class="recom-drug-name" id="recomDrugName"></span>
-    <span class="recom-close" data-action="closeDrugRecom">&times;</span>
+<!-- Recommendation Output (modal popup — opens on drug tap, no page scroll) -->
+<div class="recom-section" id="recomSection" role="dialog" aria-modal="true">
+  <div class="recom-sheet">
+    <div class="recom-header-bar">
+      <span class="recom-drug-name" id="recomDrugName"></span>
+      <span class="recom-close" data-action="closeDrugRecom" role="button" aria-label="ปิด">&times;</span>
+    </div>
+    <div id="recomBody"></div>
   </div>
-  <div id="recomBody"></div>
 </div>
 
 <div class="disclaimer">

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.18.0
+// IV Drug Reference PWA — Service Worker v5.18.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -77,9 +77,13 @@
 //          auto-calculating on every keystroke. Editing a value/drug keeps the
 //          old result, shows a "ค่าเปลี่ยน — กดคำนวณใหม่" hint, and pulses the
 //          button; CrCl still updates live. Result scrolls into view on press.
+// v5.18.1: Calculator polish — fix primary button rendering grey ("disabled"-
+//          looking) on light theme (shared.css specificity); patient fields now
+//          use placeholders instead of pre-filled values, and validation no
+//          longer flashes errors while all fields are still blank.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.18.0';
+const CACHE_NAME = 'iv-drugref-v5.18.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

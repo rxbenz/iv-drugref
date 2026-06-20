@@ -447,8 +447,11 @@
         </div>
       </div>
     `;
+    // Only scroll when the result first appears (e.g. drug just selected);
+    // don't yank the view down on every parameter edit while it's already shown.
+    const wasHidden = sec.style.display === 'none' || !sec.style.display;
     sec.style.display = 'block';
-    sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (wasHidden) sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     if (typeof trackCalcUsage === 'function') {
       trackCalcUsage(drug.name, pt, result);

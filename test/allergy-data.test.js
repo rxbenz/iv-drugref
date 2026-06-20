@@ -237,6 +237,32 @@ test('NBL: ibuprofen excluded from its own avoid list', () => {
     'culprit should not be listed against itself');
 });
 
+// ── Reaction nature: intolerance gate (Phase 2) ──
+test('intolerance nature -> notAllergy advisory, no avoid lists (beta-lactam)', () => {
+  const r = A.buildReport('amoxicillin', 'ige', { nature: 'intolerance' });
+  assert.equal(r.notAllergy, true);
+  assert.equal(r.avoid.length, 0);
+  assert.equal(r.caution.length, 0);
+  assert.equal(r.safer.length, 0);
+  assert.ok(/ผลข้างเคียง|ไม่ทนยา/.test(r.severity.label));
+  assert.ok(r.advisory && r.advisory.length > 0);
+  assert.ok(r.caveat && /แพ้จริง/.test(r.caveat));
+  assert.ok(r.allergen.generic === 'Amoxicillin');
+});
+
+test('intolerance nature works for NBL allergens too (ibuprofen)', () => {
+  const r = A.buildReport('ibuprofen', 'ige', { nature: 'intolerance' });
+  assert.equal(r.notAllergy, true);
+  assert.equal(r.avoid.length, 0);
+  assert.ok(r.allergen.generic === 'Ibuprofen');
+});
+
+test('default nature (allergy) is unchanged by Phase 2 gate', () => {
+  const r = A.buildReport('amoxicillin', 'ige');
+  assert.ok(!r.notAllergy);
+  assert.ok(r.avoid.length > 0);
+});
+
 // ── NSAID phenotype: single-drug (selective) routing (Phase 1) ──
 test('NBL: nsaid group exposes phenotypes (cross / single)', () => {
   const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.19.1
+// IV Drug Reference PWA — Service Worker v5.20.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -107,9 +107,15 @@
 //          code-defined `phenotypes` (and chemLabels/clusters). It now merges
 //          Sheet CONTENT over the hardcoded group so clinical-logic fields
 //          survive. Locked by test.
+// v5.20.0: Allergy pseudoallergy — Phase 2: reaction-nature gate. A new
+//          "ลักษณะปฏิกิริยา" selector lets the user mark the event as an
+//          intolerance / side-effect (nausea, GI upset, headache…) rather than a
+//          true immune allergy → the engine short-circuits with a "not an
+//          allergy, drug usually still usable" advisory instead of running the
+//          cross-reactivity avoidance lists. Default (allergy) unchanged.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.19.1';
+const CACHE_NAME = 'iv-drugref-v5.20.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

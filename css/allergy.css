@@ -208,3 +208,37 @@
 .ar-dl-refs li { margin-bottom: 3px; }
 .dot-high { background:#dc2626; } .dot-moderate { background:#f97316; }
 .dot-low { background:#eab308; } .dot-negligible { background:#16a34a; }
+
+/* ====== Selected allergen pill (v5.23.0) — show the chosen drug clearly ====== */
+.ap-selected {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  font-size: 14px;
+}
+.ap-selected .aps-check { font-size: 16px; }
+.ap-selected .aps-label { color: #047857; font-weight: 600; flex-shrink: 0; }
+.ap-selected .aps-name { color: #065f46; font-weight: 700; }
+.ap-selected .aps-name small { font-weight: 400; opacity: .8; }
+.ap-selected .aps-change {
+  margin-left: auto;
+  flex-shrink: 0;
+  border: 1px solid #6ee7b7;
+  background: #fff;
+  color: #047857;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ap-selected .aps-change:hover { background: #d1fae5; }
+[data-theme="dark"] .ap-selected { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); }
+[data-theme="dark"] .ap-selected .aps-label { color: #6ee7b7; }
+[data-theme="dark"] .ap-selected .aps-name { color: #a7f3d0; }
+[data-theme="dark"] .ap-selected .aps-change { background: transparent; color: #6ee7b7; border-color: rgba(16,185,129,0.4); }

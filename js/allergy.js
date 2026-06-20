@@ -15,7 +15,7 @@
     : function (s) { return String(s == null ? '' : s); };
 
   var severitySel, resultEl, phenotypeField, phenotypeSel, phenotypeLabelEl;
-  var natureSel, severityField;
+  var natureSel, severityField, selectedPill;
   // allergen picker (hybrid: search + group chips + list)
   var pickerEl, searchEl, chipsEl, listEl, clearEl;
   var ALLERGENS = [], GROUPS = [], pkList = [];
@@ -179,6 +179,29 @@
     if (clearEl) clearEl.style.display = 'none';
     renderList();
     render(true);   // recompute report (user-initiated → logged)
+  }
+
+  // Prominent "selected drug" pill so the chosen allergen is obvious after picking.
+  function renderSelectedPill() {
+    if (!selectedPill) return;
+    var it = selectedId ? itemById(selectedId) : null;
+    if (!it) { selectedPill.style.display = 'none'; selectedPill.innerHTML = ''; return; }
+    var th = it.th ? ' <small>(' + esc(it.th) + ')</small>' : '';
+    selectedPill.innerHTML =
+      '<span class="aps-check" aria-hidden="true">✅</span>' +
+      '<span class="aps-label">ยาที่เลือก:</span>' +
+      '<span class="aps-name">' + esc(it.generic) + th + '</span>' +
+      '<button type="button" class="aps-change" data-act="change-allergen">เปลี่ยน</button>';
+    selectedPill.style.display = 'flex';
+  }
+
+  function clearSelection() {
+    selectedId = ''; pq = ''; pkbd = -1; pickerOpen = true;
+    if (searchEl) { searchEl.value = ''; searchEl.focus(); }
+    if (clearEl) clearEl.style.display = 'none';
+    renderSelectedPill();
+    renderList();
+    render(false);
   }
 
   function classLabel(d) {
@@ -542,6 +565,7 @@
   function render(userInitiated) {
     syncNatureUI();
     refreshPhenotype();
+    renderSelectedPill();
     lastReport = A.buildReport(selectedId, severitySel.value, currentOpts());
     paint();
     if (userInitiated) logLookup();
@@ -611,6 +635,7 @@
     severitySel = document.getElementById('severitySelect');
     natureSel = document.getElementById('natureSelect');
     severityField = document.getElementById('severityField');
+    selectedPill = document.getElementById('allergenSelected');
     phenotypeField = document.getElementById('phenotypeField');
     phenotypeSel = document.getElementById('phenotypeSelect');
     phenotypeLabelEl = document.getElementById('phenotypeLabel');
@@ -664,6 +689,11 @@
     listEl.addEventListener('mousedown', function (e) {
       var o = e.target.closest && e.target.closest('.ap-opt');
       if (o) { e.preventDefault(); pickId(o.getAttribute('data-id')); }
+    });
+    // "เปลี่ยน" on the selected-drug pill → clear + reopen the picker
+    if (selectedPill) selectedPill.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-act="change-allergen"]');
+      if (b) { e.stopPropagation(); clearSelection(); }
     });
     document.addEventListener('click', function (e) {
       if (pickerOpen && pickerEl && !pickerEl.contains(e.target)) { pickerOpen = false; renderList(); }

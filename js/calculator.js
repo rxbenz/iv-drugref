@@ -256,7 +256,7 @@
   // ====== CrCl Calculator ======
   // Patient data, CrCl, IBW/ABW consolidated into IVDrugRef.getPatientFromForm()
 
-  function updateCrCl() {
+  function updateCrCl(silent) {
     // Initial / cleared state: when every patient field is still blank, don't
     // flash red validation errors (the fields use placeholders now, not values).
     var blankIds = ['ptWt', 'ptAge', 'ptScr', 'ptHt'];
@@ -266,6 +266,7 @@
     });
     if (allBlank) {
       IVDrugRef.renderValidationMessages('validationMessages', { errors: [], warnings: [] });
+      blankIds.forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.remove('input-error', 'input-warn'); });
       var cv0 = document.getElementById('crclValue'); if (cv0) cv0.textContent = '—';
       var bi0 = document.getElementById('bodyCompInfo'); if (bi0) bi0.style.display = 'none';
       var cw0 = document.getElementById('crclWarning'); if (cw0) cw0.style.display = 'none';
@@ -275,21 +276,32 @@
 
     // Use core.js patient object — consolidates validation, CrCl, IBW/ABW/BMI
     const pt = IVDrugRef.getPatientFromForm();
-    IVDrugRef.renderValidationMessages('validationMessages', pt.validation);
 
-    // Pediatric safety guard (warn-level; never blocks)
-    if (window.PediatricGuard) {
-      window.PediatricGuard.enforce(pt, window.PediatricGuard.CONTEXTS.CALCULATOR_DOSING, {
-        banner: 'calcGuardBanner'
-      });
-    }
+    if (silent) {
+      // Mid-typing (input event): don't nag. validatePatientInput() (called
+      // inside getPatientFromForm) just added input-error/input-warn classes —
+      // strip them synchronously (before paint, so no red flash / shake) and
+      // skip the message box + guard banner. Full validation happens on blur
+      // (change) and when the user presses Calculate.
+      blankIds.forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.remove('input-error', 'input-warn'); });
+      if (!pt.validation.allValid) return; // leave the previous CrCl display as-is
+    } else {
+      IVDrugRef.renderValidationMessages('validationMessages', pt.validation);
 
-    // Block calculation on hard errors
-    if (!pt.validation.allValid) {
-      var cv = document.getElementById('crclValue'); if (cv) cv.textContent = '—';
-      var bi = document.getElementById('bodyCompInfo'); if (bi) bi.style.display = 'none';
-      var cw = document.getElementById('crclWarning'); if (cw) cw.style.display = 'none';
-      return;
+      // Pediatric safety guard (warn-level; never blocks)
+      if (window.PediatricGuard) {
+        window.PediatricGuard.enforce(pt, window.PediatricGuard.CONTEXTS.CALCULATOR_DOSING, {
+          banner: 'calcGuardBanner'
+        });
+      }
+
+      // Block calculation on hard errors
+      if (!pt.validation.allValid) {
+        var cv = document.getElementById('crclValue'); if (cv) cv.textContent = '—';
+        var bi = document.getElementById('bodyCompInfo'); if (bi) bi.style.display = 'none';
+        var cw = document.getElementById('crclWarning'); if (cw) cw.style.display = 'none';
+        return;
+      }
     }
 
     const crcl = pt.crcl;
@@ -687,10 +699,10 @@
     toggleScrUnit: toggleScrUnit
   });
   IVDrugRef.delegate(document, 'input', {
-    patientInput: function() { updateCrCl(); markStale(); }
+    patientInput: function() { updateCrCl(true); markStale(); }
   });
   IVDrugRef.delegate(document, 'change', {
-    patientInput: function() { updateCrCl(); markStale(); }
+    patientInput: function() { updateCrCl(false); markStale(); }
   });
 
   // ====== Init ======

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.23.0
+// IV Drug Reference PWA — Service Worker v5.24.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -132,9 +132,14 @@
 // v5.23.0: Allergy UX — after picking the culprit drug, show a prominent green
 //          "selected drug" pill (✅ ยาที่เลือก: <name>) with a "เปลี่ยน" button to
 //          clear + reopen the picker, so the chosen allergen is unmistakable.
+// v5.24.0: PWA install guide (site-chrome, all user pages). Captures
+//          beforeinstallprompt → "Install now" button (Android/Chrome/Edge);
+//          iOS Safari + desktop get platform-specific manual steps. Entry points:
+//          a "📲 ติดตั้ง" left-rail item + a one-time dismissible discovery banner.
+//          Hidden when already installed (display-mode: standalone). TH/EN.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.23.0';
+const CACHE_NAME = 'iv-drugref-v5.24.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

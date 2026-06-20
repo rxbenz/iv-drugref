@@ -257,6 +257,22 @@
   // Patient data, CrCl, IBW/ABW consolidated into IVDrugRef.getPatientFromForm()
 
   function updateCrCl() {
+    // Initial / cleared state: when every patient field is still blank, don't
+    // flash red validation errors (the fields use placeholders now, not values).
+    var blankIds = ['ptWt', 'ptAge', 'ptScr', 'ptHt'];
+    var allBlank = blankIds.every(function(id) {
+      var el = document.getElementById(id);
+      return !el || String(el.value).trim() === '';
+    });
+    if (allBlank) {
+      IVDrugRef.renderValidationMessages('validationMessages', { errors: [], warnings: [] });
+      var cv0 = document.getElementById('crclValue'); if (cv0) cv0.textContent = '—';
+      var bi0 = document.getElementById('bodyCompInfo'); if (bi0) bi0.style.display = 'none';
+      var cw0 = document.getElementById('crclWarning'); if (cw0) cw0.style.display = 'none';
+      var gb0 = document.getElementById('calcGuardBanner'); if (gb0) gb0.style.display = 'none';
+      return;
+    }
+
     // Use core.js patient object — consolidates validation, CrCl, IBW/ABW/BMI
     const pt = IVDrugRef.getPatientFromForm();
     IVDrugRef.renderValidationMessages('validationMessages', pt.validation);

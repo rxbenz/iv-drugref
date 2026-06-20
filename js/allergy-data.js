@@ -855,22 +855,43 @@
     var rows = (remote.groups || []).filter(function (g) { return (g.type || 'nbl') !== 'beta_lactam'; });
     if (!rows.length) return false;   // nothing usable -> keep hardcoded NBL groups
 
+    // Index the hardcoded groups so the Sheet can edit CONTENT (labels, notes,
+    // drug lists, refs) while code-defined CLINICAL LOGIC (phenotypes selector,
+    // chem-group / cluster awareness, chemLabels) is preserved. Without this,
+    // Sheet data wiped fields like `phenotypes` (the NSAID selector vanished).
+    var hardById = {};
+    NBL_GROUPS.forEach(function (g) { hardById[g.id] = g; });
+    function logicFlag(hcVal, sheetVal) { return hcVal != null ? hcVal : _alBool(sheetVal); }
+
     var built = rows.map(function (g) {
-      return {
-        id: g.id, label: g.label,
-        refs: _alParse(g.refs, []),
-        allergens: _alParse(g.allergens, []),
-        crossReactive: _alParse(g.crossReactive, []),
-        safe: _alParse(g.safe, []),
-        caution: _alParse(g.caution, []),
-        crossReason: g.crossReason || '', cautionReason: g.cautionReason || '', safeReason: g.safeReason || '',
-        noteMild: g.noteMild || '', noteIge: g.noteIge || '', noteScar: g.noteScar || '',
-        scarCautionNote: g.scarCautionNote || '', singleDrugCallout: g.singleDrugCallout || '',
-        keepSafeOnScar: _alBool(g.keepSafeOnScar), clusterAware: _alBool(g.clusterAware),
-        crossClassCaution: _alBool(g.crossClassCaution), chemGroupAware: _alBool(g.chemGroupAware),
-        chemLabels: _alParse(g.chemLabels, ''),
-        sortOrder: (g.sortOrder === '' || g.sortOrder == null) ? 999 : Number(g.sortOrder)
-      };
+      var hc = hardById[g.id] || {};
+      return Object.assign({}, hc, {   // start from code so logic fields survive
+        id: g.id, label: g.label || hc.label || '',
+        refs: _alParse(g.refs, hc.refs || []),
+        allergens: _alParse(g.allergens, hc.allergens || []),
+        crossReactive: _alParse(g.crossReactive, hc.crossReactive || []),
+        safe: _alParse(g.safe, hc.safe || []),
+        caution: _alParse(g.caution, hc.caution || []),
+        crossReason: g.crossReason || hc.crossReason || '',
+        cautionReason: g.cautionReason || hc.cautionReason || '',
+        safeReason: g.safeReason || hc.safeReason || '',
+        noteMild: g.noteMild || hc.noteMild || '',
+        noteIge: g.noteIge || hc.noteIge || '',
+        noteScar: g.noteScar || hc.noteScar || '',
+        scarCautionNote: g.scarCautionNote || hc.scarCautionNote || '',
+        singleDrugCallout: g.singleDrugCallout || hc.singleDrugCallout || '',
+        // clinical-logic flags: prefer code; only take the Sheet's value when
+        // code doesn't define one (e.g. a brand-new Sheet-only group).
+        keepSafeOnScar: logicFlag(hc.keepSafeOnScar, g.keepSafeOnScar),
+        clusterAware: logicFlag(hc.clusterAware, g.clusterAware),
+        crossClassCaution: logicFlag(hc.crossClassCaution, g.crossClassCaution),
+        chemGroupAware: logicFlag(hc.chemGroupAware, g.chemGroupAware),
+        chemLabels: (hc.chemLabels != null ? hc.chemLabels : _alParse(g.chemLabels, '')),
+        sortOrder: (g.sortOrder === '' || g.sortOrder == null)
+          ? (hc.sortOrder != null ? hc.sortOrder : 999) : Number(g.sortOrder)
+        // NOTE: phenotypes / phenotypeLabel / phenotypeDefault / clusters are
+        // carried over automatically by the Object.assign(hc) base above.
+      });
     }).filter(function (g) { return g.id && (g.allergens || []).length; })
       .sort(function (a, b) { return a.sortOrder - b.sortOrder; });
 

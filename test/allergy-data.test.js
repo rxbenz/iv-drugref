@@ -535,6 +535,33 @@ test('NBL: applyRemoteData ignores null/empty/beta_lactam (keeps hardcoded)', ()
   assert.ok(A.buildReport('cotrimoxazole', 'ige'), 'hardcoded sulfonamide still resolvable');
 });
 
+test('NBL: applyRemoteData preserves code-defined NSAID phenotypes (Sheet has none)', () => {
+  // Sheet re-supplies the nsaid group WITHOUT phenotypes/chemGroupAware/chemLabels
+  const ok = A.applyRemoteData({
+    groups: [{
+      id: 'nsaid', type: 'nbl', label: 'NSAIDs', sortOrder: 0,
+      allergens: JSON.stringify([
+        { id: 'ibuprofen', generic: 'Ibuprofen', th: 'ไอบูโพรเฟน', chem: 'propionic' },
+        { id: 'naproxen', generic: 'Naproxen', th: 'นาพรอกเซน', chem: 'propionic' },
+        { id: 'diclofenac', generic: 'Diclofenac', th: 'ไดโคลฟีแนค', chem: 'acetic' }
+      ]),
+      crossReactive: JSON.stringify([
+        { id: 'naproxen', generic: 'Naproxen', th: 'นาพรอกเซน', chem: 'propionic' },
+        { id: 'diclofenac', generic: 'Diclofenac', th: 'ไดโคลฟีแนค', chem: 'acetic' }
+      ]),
+      safe: '[]', caution: '[]'
+    }]
+  });
+  assert.equal(ok, true);
+  const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');
+  assert.ok(g.phenotypes && g.phenotypes.length >= 2, 'phenotypes carried over from code');
+  assert.equal(g.chemGroupAware, true, 'chemGroupAware carried over from code');
+  // single-drug routing still works on the merged group
+  const r = A.buildReport('ibuprofen', 'ige', { phenotype: 'single' });
+  assert.ok(r.avoid.some((x) => /Naproxen/.test(x.drug.generic)), 'same chem -> avoid');
+  assert.ok(r.safer.some((x) => /Diclofenac/.test(x.drug.generic)), 'different chem -> safe');
+});
+
 test('NBL: applyRemoteData overrides NBL groups from Sheet rows — LAST TEST', () => {
   const ok = A.applyRemoteData({
     refs: [{ key: 'remoteRef', citation: 'Remote 2026' }],

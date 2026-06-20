@@ -47,7 +47,10 @@
     icmSkinTest2024: 'Skin Test Reactivity Patterns in Patients Allergic to Iodinated Contrast Media: A Refined View. J Allergy Clin Immunol Pract 2024;12(11). (PMID 39056227)',
     acr2023cm: 'ACR Committee on Drugs and Contrast Media. ACR Manual on Contrast Media (2023) — premedication regimens & "no iodine allergy"/seafood myth.',
     ash2018hit: 'Cuker A, et al. American Society of Hematology 2018 guidelines for management of venous thromboembolism: heparin-induced thrombocytopenia. Blood Adv 2018;2(22):3360-92.',
-    dthHeparin: 'Schindewolf M, et al. Delayed-type hypersensitivity to heparins/heparinoids — patterns of cross-reactivity; tolerance of fondaparinux. (Allergy 2007;62; PMID 17573880 / PMID 15025697)'
+    dthHeparin: 'Schindewolf M, et al. Delayed-type hypersensitivity to heparins/heparinoids — patterns of cross-reactivity; tolerance of fondaparinux. (Allergy 2007;62; PMID 17573880 / PMID 15025697)',
+    vfr2021: 'Alvarez-Arango S, et al. Vancomycin Infusion Reaction — Moving Beyond "Red Man Syndrome". N Engl J Med 2021;384(14):1283-1286. (rate-related, non-IgE; rename)',
+    vfrMgmt: 'Sivagnanam S, Deleu D. Red man syndrome. Crit Care 2003;7(2):119-120. + Martin/ASHP-IDSA vancomycin guidance — slow infusion ≥60 min/g (≤10 mg/min) ± antihistamine.',
+    vancoHsr: 'Glycopeptide hypersensitivity — DRESS, linear IgA bullous dermatosis, anaphylaxis; vancomycin↔teicoplanin cross-reactivity variable (~10-15%). (Minhas 2016; An 2011; Hwang 2021)'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -190,6 +193,19 @@
   // --- 9. Non-beta-lactam groups (Phase 4.1; verified 2026-06-18) -----------
   // Different mechanism than R1 side chains -> curated per group, NOT via
   // computeRelation. See docs/allergy-nonbetalactam.md.
+
+  // Shared non-immune management for local anesthetics (true IgE allergy <1%).
+  const LA_PSEUDO = {
+    title: 'ปฏิกิริยาต่อยาชาเฉพาะที่ (true allergy <1% — ส่วนใหญ่ไม่ใช่ภูมิแพ้)',
+    points: [
+      'การแพ้ LA แบบ IgE จริงพบ <1% — ส่วนใหญ่เป็น vasovagal (หน้ามืด/เป็นลม), ใจสั่นจาก epinephrine, วิตกกังวล หรือพิษจากยา (toxicity)',
+      'สารก่อปฏิกิริยาที่แท้จริงมักเป็น "สารกันเสีย/กันหืน": methylparaben (ในขวด multidose) และ metabisulfite (ในสูตรผสม adrenaline)',
+      '🎯 จัดการ: เลือก LA ชนิด preservative-free / single-dose และสูตร plain (ไม่ผสม adrenaline) ถ้าสงสัย metabisulfite',
+      'ester↔amide ไม่แพ้ข้ามกัน — เปลี่ยนข้ามกลุ่มได้ · ถ้าสงสัยแพ้จริง → ส่ง skin test + graded challenge ยืนยัน'
+    ],
+    refs: ['bhole2012', 'harboe2010']
+  };
+
   const NBL_GROUPS = [
     {
       id: 'sulfonamide',
@@ -450,7 +466,8 @@
       noteIge:  'IgE ต่อ ester LA: เลี่ยง ester ทั้งกลุ่ม → ใช้ amide LA ได้ (ไม่แพ้ข้าม) เลือกชนิด preservative-free',
       noteScar: 'SCAR จาก ester LA (พบยาก): เลี่ยง ester ทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ amide LA ภายใต้การดูแล',
       scarCautionNote: 'กรณี SCAR: ใช้ amide ภายใต้การดูแลผู้เชี่ยวชาญ',
-      singleDrugCallout: '💡 ester LA แพ้ข้ามกันผ่านสาร PABA → ถ้าแพ้ ester ตัวหนึ่งให้ถือว่าเสี่ยงทั้งกลุ่ม แต่ใช้ amide LA (lidocaine ฯลฯ) ได้เพราะไม่แพ้ข้าม · ระวัง preservative methylparaben (ใกล้ PABA) → เลือก preservative-free · หมายเหตุ: แพ้ LA จริงพบ <1% ส่วนใหญ่เป็นปฏิกิริยาไม่ใช่ภูมิแพ้ (vasovagal/epinephrine)'
+      singleDrugCallout: '💡 ester LA แพ้ข้ามกันผ่านสาร PABA → ถ้าแพ้ ester ตัวหนึ่งให้ถือว่าเสี่ยงทั้งกลุ่ม แต่ใช้ amide LA (lidocaine ฯลฯ) ได้เพราะไม่แพ้ข้าม · ระวัง preservative methylparaben (ใกล้ PABA) → เลือก preservative-free · หมายเหตุ: แพ้ LA จริงพบ <1% ส่วนใหญ่เป็นปฏิกิริยาไม่ใช่ภูมิแพ้ (vasovagal/epinephrine)',
+      pseudo: LA_PSEUDO
     },
     {
       id: 'la-amide',
@@ -497,7 +514,8 @@
       noteIge:  'IgE ต่อ amide LA: แพ้ข้ามในกลุ่ม amide ต่ำ/ไม่แน่นอน → ใช้ ester LA (ไม่แพ้ข้าม) หรือ amide ตัวอื่นที่ skin test ผ่าน',
       noteScar: 'SCAR จาก amide LA (พบยากมาก): เลี่ยง amide ทั้งกลุ่ม · ห้าม challenge · ใช้ ester LA ภายใต้การดูแล',
       scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม amide',
-      singleDrugCallout: '💡 การแพ้ amide LA จริงพบ <1% — ส่วนใหญ่เป็นปฏิกิริยาไม่ใช่ภูมิแพ้ (vasovagal / ใจสั่นจาก epinephrine / วิตกกังวล / พิษจากยา) ควรซักประวัติให้แน่ใจก่อน · แพ้ข้าม amide↔amide ต่ำ/ไม่แน่นอน → ใช้ ester LA ได้ หรือยืนยัน amide ตัวอื่นด้วย skin test + graded challenge · ระวัง metabisulfite ในสูตรผสม epinephrine'
+      singleDrugCallout: '💡 การแพ้ amide LA จริงพบ <1% — ส่วนใหญ่เป็นปฏิกิริยาไม่ใช่ภูมิแพ้ (vasovagal / ใจสั่นจาก epinephrine / วิตกกังวล / พิษจากยา) ควรซักประวัติให้แน่ใจก่อน · แพ้ข้าม amide↔amide ต่ำ/ไม่แน่นอน → ใช้ ester LA ได้ หรือยืนยัน amide ตัวอื่นด้วย skin test + graded challenge · ระวัง metabisulfite ในสูตรผสม epinephrine',
+      pseudo: LA_PSEUDO
     },
     // ── Iodinated contrast media (ICM) ───────────────────────────────────────
     // Cross-reactivity tracks the CARBAMOYL SIDE CHAIN, not "iodine": agents that
@@ -622,6 +640,54 @@
       noteScar: 'ปฏิกิริยารุนแรง/HIT with thrombosis: เลี่ยง heparin ทุกตัวเด็ดขาด → DTI (argatroban/bivalirudin) เป็นหลัก · ห้าม challenge',
       scarCautionNote: 'กรณีรุนแรง: ใช้ DTI เป็นหลัก',
       singleDrugCallout: '⚠️ แยก 2 ภาวะให้ชัด — (1) HIT (heparin-induced thrombocytopenia): ภูมิคุ้มกันต่อ PF4/heparin complex → เกล็ดเลือดต่ำ + ลิ่มเลือดอุดตัน (อันตรายถึงชีวิต ไม่ใช่ผื่นแพ้) · UFH↔LMWH แพ้ข้าม ~50% in vivo → เลี่ยง heparin ทุกตัว · ใช้ argatroban/bivalirudin (DTI), fondaparinux, danaparoid หรือ DOAC (ASH 2018) · ห้ามใช้ LMWH แทน UFH ใน HIT · (2) Delayed-type hypersensitivity: ผื่น eczema ที่จุดฉีด SC, UFH↔LMWH แพ้ข้ามกว้าง (ไม่ขึ้นกับ MW), fondaparinux ทนได้ดี (~6% cross) และ IV UFH มักใช้ได้แม้แพ้ SC heparin'
+    },
+    // ── Glycopeptides (Vancomycin / Teicoplanin) ─────────────────────────────
+    // The classic teaching case for "not an allergy": vancomycin flushing
+    // reaction (formerly red man syndrome) is a rate-related, non-IgE histamine
+    // release — managed by SLOWING the infusion, NOT by abandoning the drug.
+    // True glycopeptide hypersensitivity (DRESS, linear IgA, anaphylaxis) is
+    // uncommon; vanco↔teicoplanin cross-reactivity is variable (~10-15%) →
+    // caution, confirm an alternative by skin test. linezolid/daptomycin = clean
+    // gram-positive alternatives (no cross-reactivity).
+    {
+      id: 'glycopeptide',
+      label: 'Glycopeptides (Vancomycin / Teicoplanin)',
+      refs: ['vfr2021', 'vfrMgmt', 'vancoHsr'],
+      crossClassCaution: true,   // vanco<->teicoplanin cross variable -> caution
+      keepSafeOnScar: true,      // linezolid/daptomycin are the recommended switch
+      allergens: [
+        { id: 'vancomycin',  generic: 'Vancomycin',  th: 'แวนโคไมซิน', trade: ['Vancocin'] },
+        { id: 'teicoplanin', generic: 'Teicoplanin', th: 'ไทโคพลานิน', trade: ['Targocid'] }
+      ],
+      crossReason: 'Glycopeptide ด้วยกัน — แพ้ข้าม vanco↔teicoplanin แปรปรวน (~10-15%) → ระวัง/ยืนยันด้วย skin test',
+      crossReactive: [
+        { id: 'vancomycin',  generic: 'Vancomycin',  th: 'แวนโคไมซิน', sub: 'Glycopeptide' },
+        { id: 'teicoplanin', generic: 'Teicoplanin', th: 'ไทโคพลานิน', sub: 'Glycopeptide' }
+      ],
+      safeReason: 'คนละ class กับ glycopeptide → ไม่แพ้ข้าม (ทางเลือกสำหรับเชื้อ gram-positive)',
+      safe: [
+        { generic: 'Linezolid',  th: 'ไลนีโซลิด',  sub: 'Oxazolidinone', reason: 'คนละ class — ไม่แพ้ข้าม' },
+        { generic: 'Daptomycin', th: 'แดปโตไมซิน', sub: 'Lipopeptide',    reason: 'คนละ class — ไม่แพ้ข้าม (ห้ามใช้รักษาปอดอักเสบ)' }
+      ],
+      noteMild: 'แพ้ glycopeptide (ผื่นไม่รุนแรง): เลี่ยงตัวที่แพ้ · teicoplanin แพ้ข้ามแปรปรวน (~10-15%) → ยืนยันด้วย skin test ก่อนใช้ · ทางเลือกที่ไม่แพ้ข้าม: linezolid / daptomycin',
+      noteIge:  'IgE/anaphylaxis ต่อ glycopeptide: เลี่ยงตัวที่แพ้ · teicoplanin เสี่ยงแพ้ข้าม → ใช้ linezolid / daptomycin · ถ้าจำเป็นต้องใช้ vancomycin จริง ๆ พิจารณา desensitization โดยผู้เชี่ยวชาญ',
+      noteScar: 'SCAR จาก glycopeptide (เช่น DRESS, linear IgA bullous dermatosis): เลี่ยง glycopeptide ทั้งกลุ่มเด็ดขาด · ห้าม challenge/desensitization · ใช้ linezolid / daptomycin',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม glycopeptide',
+      singleDrugCallout: '💡 อาการ "หน้าแดง/คันระหว่างหยดยา (red man)" ที่พบบ่อยที่สุด = vancomycin flushing reaction ซึ่ง "ไม่ใช่การแพ้" แต่เป็นผลจากการให้เร็วเกินไป → เลือก "ไม่ใช่แพ้ภูมิคุ้มกัน" เพื่อดูวิธีจัดการ (ชะลออัตราการให้)',
+      pseudo: {
+        title: 'Vancomycin flushing reaction (เดิมเรียก "Red man syndrome") — ไม่ใช่การแพ้',
+        points: [
+          'เกิดจาก "อัตราการให้เร็วเกินไป" → histamine release โดยตรง (non-IgE) ไม่ใช่ภูมิแพ้',
+          'อาการ: หน้า/คอ/ลำตัวส่วนบนแดง คัน ร้อนวูบ บางรายความดันตก — มักเกิดระหว่าง/ใกล้จบการ infuse',
+          '🎯 ไม่ใช่ข้อห้ามใช้ vancomycin — ให้ "ช้าลง" ก็ใช้ต่อได้ ไม่ต้องเปลี่ยนยา'
+        ],
+        premedNote: 'แนวทางจัดการ (vancomycin flushing reaction):',
+        premed: [
+          { when: 'ชะลออัตราการให้', what: 'infuse ≥60 นาที/1 g (≤10 mg/min) · ถ้าเคยเกิด ยืดเป็น ≥90–120 นาที และเจือจางให้เหมาะสม' },
+          { when: 'Premedication', what: 'Diphenhydramine 25–50 mg (PO/IV) 30–60 นาทีก่อนให้ ± H2 blocker · ถ้ากำลังเกิดให้หยุดชั่วคราว ให้ antihistamine แล้วเริ่มใหม่ในอัตราที่ช้าลง' }
+        ],
+        refs: ['vfr2021', 'vfrMgmt']
+      }
     }
   ];
 
@@ -965,8 +1031,22 @@
 
     if (!built.length) return false;
 
+    // UNION-merge: Sheet rows override/extend, but hardcoded groups NOT present in
+    // the Sheet are KEPT (so a code-only group — e.g. a newly added Glycopeptide
+    // group, or LA pseudo content — never disappears just because the Sheet hasn't
+    // been re-seeded). Admin can edit any group's content + add new groups; the
+    // only thing the Sheet can't do is delete a code-defined group.
+    var builtIds = {};
+    built.forEach(function (g) { builtIds[g.id] = true; });
+    var merged = built.slice();
+    NBL_GROUPS.forEach(function (hc) { if (!builtIds[hc.id]) merged.push(hc); });
+    merged.sort(function (a, b) {
+      var ao = a.sortOrder == null ? 999 : a.sortOrder, bo = b.sortOrder == null ? 999 : b.sortOrder;
+      return ao - bo;
+    });
+
     NBL_GROUPS.length = 0;
-    built.forEach(function (g) { NBL_GROUPS.push(g); });
+    merged.forEach(function (g) { NBL_GROUPS.push(g); });
     Object.keys(NBL_INDEX).forEach(function (k) { delete NBL_INDEX[k]; });
     NBL_GROUPS.forEach(function (g) {
       (g.allergens || []).forEach(function (a) { NBL_INDEX[a.id] = { group: g, allergen: a }; });

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.25.0
+// IV Drug Reference PWA — Service Worker v5.26.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -141,9 +141,16 @@
 //          popup on drug tap (backdrop + sticky header, close via ✕ / backdrop /
 //          Esc, background scroll locked) instead of a bottom section that
 //          auto-scrolled the page down (which felt disorienting). No page jump.
+// v5.26.0: De-duplicate Vancomycin — it had a full implementation in BOTH the TDM
+//          Hub (tdm.html) and the standalone Vanco page. The Hub's inline vanco
+//          panel is removed and its "Vancomycin ↗" tab now redirects to
+//          vanco-tdm.html (the single canonical vanco tool); the Hub defaults to
+//          Phenytoin. Shared PK models/engine (pk-models.js) were already common;
+//          the duplicated VancoTDM UI code in tdm.js is now unreachable (frozen,
+//          to be deleted in a later cleanup). Other 6 TDM drugs untouched.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.25.0';
+const CACHE_NAME = 'iv-drugref-v5.26.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

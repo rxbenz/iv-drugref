@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.17.5
+// IV Drug Reference PWA — Service Worker v5.17.6
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -71,9 +71,11 @@
 // v5.17.5: Dashboard analytics fetch is now cache-busted (?_=ts + no-store) so
 //          new Sheet rows show on Refresh instead of a stale cached response;
 //          load toast shows backend GAS version + server time for diagnosis.
+// v5.17.6: Dose Calculator no longer auto-scrolls to the result on every
+//          parameter edit — it scrolls only when the result first appears.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.17.5';
+const CACHE_NAME = 'iv-drugref-v5.17.6';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

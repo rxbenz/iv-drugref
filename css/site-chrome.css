@@ -104,3 +104,44 @@ body.sc-open .sc-toggle { left: calc(var(--sc-rail) + env(safe-area-inset-left,0
 [data-theme="dark"] .sc-cred { color: #cbd5e1; }
 
 @media print { .sc-rail, .sc-scrim, .sc-toggle, .sc-footer, .sc-modal { display: none !important; } }
+
+/* ====== PWA install guide (v5.24.0) ====== */
+/* the install rail entry is a <button> styled like the <a> nav items */
+button.sc-install-item { background: none; border: 0; cursor: pointer; font-family: inherit; }
+.sc-item.sc-install-item { color: #0ea5e9; }
+.sc-item.sc-install-item:hover { background: #e0f2fe; }
+[data-theme="dark"] .sc-item.sc-install-item { color: #7dd3fc; }
+
+/* install modal extras (reuses .sc-modal / .sc-sheet) */
+.sci-now {
+  display: block; width: 100%; margin: 4px 0 14px; padding: 12px;
+  border: 0; border-radius: 10px; cursor: pointer;
+  background: linear-gradient(135deg, #22d3ee, #38bdf8); color: #0f172a;
+  font-family: inherit; font-size: 15px; font-weight: 700;
+}
+.sci-now:hover { box-shadow: 0 2px 12px rgba(56,189,248,.35); }
+.sci-steps-head { font-weight: 600; font-size: 13px; margin: 4px 0 6px; }
+.sci-steps { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.75; }
+.sci-steps li { margin-bottom: 6px; }
+
+/* discovery banner — fixed bottom, above content, slides up when shown */
+.sc-install-banner {
+  position: fixed; left: 50%; bottom: 14px; transform: translate(-50%, 200%);
+  z-index: 1090; display: flex; align-items: center; gap: 10px;
+  max-width: 92vw; padding: 10px 12px;
+  background: #0f172a; color: #f1f5f9; border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35); transition: transform .35s ease;
+  font-size: 13px;
+}
+.sc-install-banner.scib-show { transform: translate(-50%, 0); }
+.scib-text { flex: 1 1 auto; min-width: 0; }
+.scib-go {
+  flex: none; border: 0; cursor: pointer; font-family: inherit; font-weight: 700;
+  background: #22d3ee; color: #0f172a; border-radius: 8px; padding: 7px 12px; font-size: 13px;
+}
+.scib-x {
+  flex: none; border: 0; cursor: pointer; background: transparent; color: #94a3b8;
+  font-size: 16px; padding: 4px 6px; line-height: 1;
+}
+body.sc-open .sc-install-banner { left: calc(50% + (var(--sc-rail) + env(safe-area-inset-left,0px)) / 2); }
+@media print { .sc-install-banner, .sc-install-modal { display: none !important; } }

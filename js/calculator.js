@@ -382,10 +382,43 @@
     selectedDrug = id;
     lastSelectedDrugForTracking = CALC_DRUGS.find(d => d.id === id)?.name || null;
     renderDrugGrid();
-    calculate();
+    // Explicit-trigger model: selecting a drug no longer auto-calculates —
+    // prompt the user to press the Calculate button instead.
+    markStale();
   }
 
   let lastCalcResult = null;
+
+  // ====== Explicit calculate trigger ======
+  // Inputs/drug selection mark the result "stale" (keep the old result, show a
+  // hint, pulse the button); the dose is recomputed only when the user presses
+  // 🧮 คำนวณ. CrCl still updates live (handled in updateCrCl).
+  function markStale() {
+    const btn = document.getElementById('calcRunBtn');
+    const hint = document.getElementById('calcStaleHint');
+    const sec = document.getElementById('outputSection');
+    const resultShown = sec && sec.style.display !== 'none';
+    if (btn) btn.classList.toggle('calc-attention', !!selectedDrug);
+    if (hint) {
+      if (!selectedDrug) {
+        hint.style.display = 'none';
+      } else {
+        hint.textContent = resultShown
+          ? '⚠ ค่าเปลี่ยนแล้ว — กด 🧮 คำนวณ เพื่ออัปเดตผล'
+          : 'กด 🧮 คำนวณ เพื่อดูผลขนาดยา';
+        hint.style.display = 'block';
+      }
+    }
+  }
+
+  function runCalc() {
+    const btn = document.getElementById('calcRunBtn');
+    const hint = document.getElementById('calcStaleHint');
+    updateCrCl();
+    calculate();
+    if (btn) btn.classList.remove('calc-attention');
+    if (hint) hint.style.display = 'none';
+  }
 
   function buildCalcShareText(drug, pt, result) {
     var dt = IVDrugRef.ShareExport ? IVDrugRef.ShareExport.thaiDateTime() : '';
@@ -447,11 +480,10 @@
         </div>
       </div>
     `;
-    // Only scroll when the result first appears (e.g. drug just selected);
-    // don't yank the view down on every parameter edit while it's already shown.
-    const wasHidden = sec.style.display === 'none' || !sec.style.display;
+    // calculate() now runs only on the explicit Calculate button press, so
+    // scrolling the result into view is the expected, user-initiated behavior.
     sec.style.display = 'block';
-    if (wasHidden) sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     if (typeof trackCalcUsage === 'function') {
       trackCalcUsage(drug.name, pt, result);
@@ -561,7 +593,7 @@
       inp.step = '0.1'; inp.min = '3'; inp.max = '400';
       label.textContent = 'kg'; togText.textContent = 'lbs';
     }
-    updateCrCl(); calculate();
+    updateCrCl(); markStale();
   }
 
   function toggleHtUnit() {
@@ -580,7 +612,7 @@
       inp.step = '0.1'; inp.min = '40'; inp.max = '250';
       label.textContent = 'cm'; togText.textContent = 'in';
     }
-    updateCrCl(); calculate();
+    updateCrCl(); markStale();
   }
 
   function toggleScrUnit() {
@@ -599,7 +631,7 @@
       inp.step = '0.1'; inp.min = '0.1'; inp.max = '20';
       label.textContent = 'mg/dL'; togText.textContent = 'µmol/L';
     }
-    updateCrCl(); calculate();
+    updateCrCl(); markStale();
   }
 
   // Intercept getPatientFromForm to convert non-standard units back to kg/cm/mg/dL
@@ -628,6 +660,7 @@
   // ====== Event Delegation ======
   IVDrugRef.delegate(document, 'click', {
     selectDrug: function(e, t) { if (e.target.closest('a[href]')) return; selectDrug(t.dataset.id); },
+    runCalc: runCalc,
     copyCalcResult: function() {
       if (!lastCalcResult || !IVDrugRef.ShareExport) return;
       var text = buildCalcShareText(lastCalcResult.drug, lastCalcResult.pt, lastCalcResult.result);
@@ -638,10 +671,10 @@
     toggleScrUnit: toggleScrUnit
   });
   IVDrugRef.delegate(document, 'input', {
-    patientInput: function() { updateCrCl(); calculate(); }
+    patientInput: function() { updateCrCl(); markStale(); }
   });
   IVDrugRef.delegate(document, 'change', {
-    patientInput: function() { updateCrCl(); calculate(); }
+    patientInput: function() { updateCrCl(); markStale(); }
   });
 
   // ====== Init ======

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.17.6
+// IV Drug Reference PWA — Service Worker v5.18.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -73,9 +73,13 @@
 //          load toast shows backend GAS version + server time for diagnosis.
 // v5.17.6: Dose Calculator no longer auto-scrolls to the result on every
 //          parameter edit — it scrolls only when the result first appears.
+// v5.18.0: Dose Calculator now uses an explicit "🧮 คำนวณ" button instead of
+//          auto-calculating on every keystroke. Editing a value/drug keeps the
+//          old result, shows a "ค่าเปลี่ยน — กดคำนวณใหม่" hint, and pulses the
+//          button; CrCl still updates live. Result scrolls into view on press.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.17.6';
+const CACHE_NAME = 'iv-drugref-v5.18.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

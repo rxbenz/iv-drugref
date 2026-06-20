@@ -1129,15 +1129,40 @@
     return fb;
   }
 
+  // Best-effort: does an active GFR fall inside a free-text range label
+  // ("≥80", ">50", "26–50", "<10 / HD")? Used to highlight the matching row.
+  function rdRangeHit(range, gfr) {
+    var s = String(range == null ? '' : range).replace(/[–—]/g, '-').replace(/\s+/g, '');
+    var m;
+    if ((m = s.match(/^[<≤]=?(\d+(?:\.\d+)?)/))) return gfr < parseFloat(m[1]);
+    if ((m = s.match(/^[>≥]=?(\d+(?:\.\d+)?)/))) return gfr > parseFloat(m[1]);
+    if ((m = s.match(/(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/))) return gfr >= parseFloat(m[1]) && gfr <= parseFloat(m[2]);
+    return false;
+  }
+
   function applyRenalRemote(d) {
     var drugs = (d && d.drugs) || [];
     if (!drugs.length) return false;
     var built = drugs.map(function (x) {
+      // Capture the Sheet's static fields, then expose the SAME interface the
+      // renderer uses for hardcoded drugs (a getDosing() returning
+      // {recommended, table, info, infoType, ref}) so remote data doesn't crash
+      // showDrugRecom()/trackRenalDrugSelection() with "getDosing is not a function".
+      var recommended = x.recommended || '';
+      var dosingTable = rdParse(x.dosingTable, []);
+      var info = x.info || '';
+      var infoType = x.infoType || 'blue';
+      var ref = x.ref || '';
       return {
         id: x.id, name: x.name, 'class': x['class'] || '', sub: x.sub || '',
-        badges: rdParse(x.badges, []), recommended: x.recommended || '',
-        dosingTable: rdParse(x.dosingTable, []), info: x.info || '',
-        infoType: x.infoType || 'blue', ref: x.ref || ''
+        badges: rdParse(x.badges, []),
+        recommended: recommended, // kept top-level for the search filter
+        getDosing: function (gfr) {
+          var table = (dosingTable || []).map(function (r) {
+            return { range: r.range, dose: r.dose, freq: r.freq, note: r.note || '', hl: rdRangeHit(r.range, gfr) };
+          });
+          return { recommended: recommended, table: table, info: info, infoType: infoType, ref: ref };
+        }
       };
     }).filter(function (x) { return x.id && x.name; });
     if (!built.length) return false;

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.18.3
+// IV Drug Reference PWA — Service Worker v5.18.4
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -91,9 +91,14 @@
 //          field "0." reads as "0", so typing a decimal got rewritten and the
 //          caret jumped. Now it only touches fields that actually need unit
 //          conversion (none in default kg/cm/mg-dL units).
+// v5.18.4: Renal page crash fix — once Sheet-authored renal data loaded, drugs
+//          became static objects without getDosing(), so selecting any drug threw
+//          "getDosing is not a function" (error toast, no recommended dose).
+//          applyRenalRemote now wraps the Sheet's recommended/dosingTable in a
+//          getDosing() shim (GFR-row highlight via best-effort range parsing).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.18.3';
+const CACHE_NAME = 'iv-drugref-v5.18.4';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

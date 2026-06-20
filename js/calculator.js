@@ -662,25 +662,31 @@
     updateCrCl(); markStale();
   }
 
-  // Intercept getPatientFromForm to convert non-standard units back to kg/cm/mg/dL
+  // Intercept getPatientFromForm to convert non-standard units back to kg/cm/mg/dL.
+  // IMPORTANT: only touch a field's .value when it actually needs converting, and
+  // restore only those. Writing inp.value back unconditionally corrupts mid-typing
+  // input on type=number: while typing "0." the .value getter returns "0", so the
+  // restore wrote "0" back, dropping the "." and jumping the caret.
   var _origGetPt = IVDrugRef.getPatientFromForm;
   IVDrugRef.getPatientFromForm = function() {
-    // Temporarily convert inputs to standard units for calculation
-    var wtInp = document.getElementById('ptWt');
-    var htInp = document.getElementById('ptHt');
-    var scrInp = document.getElementById('ptScr');
-    var wtOrig = wtInp.value, htOrig = htInp.value, scrOrig = scrInp.value;
-
-    if (unitState.wt === 'lbs') wtInp.value = (parseFloat(wtOrig) / 2.205).toFixed(1);
-    if (unitState.ht === 'in') htInp.value = (parseFloat(htOrig) * 2.54).toFixed(1);
-    if (unitState.scr === 'umol') scrInp.value = (parseFloat(scrOrig) / 88.4).toFixed(2);
+    var touched = [];
+    function convert(id, needsConvert, fn) {
+      if (!needsConvert) return;
+      var el = document.getElementById(id);
+      if (!el) return;
+      var orig = el.value;
+      var v = parseFloat(orig);
+      if (!isNaN(v)) el.value = fn(v);
+      touched.push([el, orig]);
+    }
+    convert('ptWt', unitState.wt === 'lbs', function(v){ return (v / 2.205).toFixed(1); });
+    convert('ptHt', unitState.ht === 'in', function(v){ return (v * 2.54).toFixed(1); });
+    convert('ptScr', unitState.scr === 'umol', function(v){ return (v / 88.4).toFixed(2); });
 
     var pt = _origGetPt.call(IVDrugRef);
 
-    // Restore displayed values
-    wtInp.value = wtOrig;
-    htInp.value = htOrig;
-    scrInp.value = scrOrig;
+    // Restore only the fields we changed (default units → nothing touched).
+    for (var i = 0; i < touched.length; i++) touched[i][0].value = touched[i][1];
 
     return pt;
   };

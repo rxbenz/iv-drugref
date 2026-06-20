@@ -281,6 +281,38 @@ test('non-immune for a group without pseudo -> generic advisory (no pseudo)', ()
   assert.ok(r.advisory && r.advisory.length > 0, 'falls back to generic advisory');
 });
 
+// ── Pseudoallergy actionable (Phase 4): LA + Vancomycin flushing ──
+test('LA non-immune -> pseudo note (preservative/sulfite, true allergy <1%)', () => {
+  const r = A.buildReport('lidocaine', 'ige', { nature: 'intolerance' });
+  assert.equal(r.notAllergy, true);
+  assert.ok(r.pseudo, 'LA carries pseudo note');
+  assert.ok(r.pseudo.points.some((t) => /methylparaben|metabisulfite|preservative-free/i.test(t)));
+});
+
+test('Vancomycin is a selectable allergen (glycopeptide group)', () => {
+  assert.ok(A.NBL_INDEX.vancomycin, 'vancomycin indexed');
+  const g = A.NBL_GROUPS.find((x) => x.id === 'glycopeptide');
+  assert.ok(g, 'glycopeptide group present');
+});
+
+test('Vancomycin immune -> teicoplanin caution, linezolid/daptomycin safe', () => {
+  const r = A.buildReport('vancomycin', 'ige');
+  const cautionG = r.caution.map((x) => x.drug.generic);
+  const saferG = r.safer.map((x) => x.drug.generic);
+  assert.ok(cautionG.includes('Teicoplanin'), 'teicoplanin = variable cross -> caution');
+  assert.ok(saferG.includes('Linezolid'));
+  assert.ok(saferG.includes('Daptomycin'));
+  assert.ok(!r.avoid.some((x) => /Vancomycin/.test(x.drug.generic)), 'culprit not listed against itself');
+});
+
+test('Vancomycin non-immune -> flushing reaction pseudo (slow infusion, not a contraindication)', () => {
+  const r = A.buildReport('vancomycin', 'ige', { nature: 'intolerance' });
+  assert.equal(r.notAllergy, true);
+  assert.ok(r.pseudo, 'vanco carries flushing pseudo');
+  assert.ok(/flushing|Red man|red man/i.test(r.pseudo.title));
+  assert.ok(r.pseudo.premed.some((p) => /≥60|mg\/min|ช้าลง|ชะลอ/.test(p.what)), 'rate management present');
+});
+
 // ── NSAID phenotype: single-drug (selective) routing (Phase 1) ──
 test('NBL: nsaid group exposes phenotypes (cross / single)', () => {
   const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');
@@ -606,7 +638,7 @@ test('NBL: applyRemoteData preserves code-defined NSAID phenotypes (Sheet has no
   assert.ok(r.safer.some((x) => /Diclofenac/.test(x.drug.generic)), 'different chem -> safe');
 });
 
-test('NBL: applyRemoteData overrides NBL groups from Sheet rows — LAST TEST', () => {
+test('NBL: applyRemoteData adds Sheet groups + UNION-keeps code groups — LAST TEST', () => {
   const ok = A.applyRemoteData({
     refs: [{ key: 'remoteRef', citation: 'Remote 2026' }],
     groups: [{
@@ -623,6 +655,8 @@ test('NBL: applyRemoteData overrides NBL groups from Sheet rows — LAST TEST', 
   assert.ok(r.avoid.some((x) => x.drug.generic === 'DemoCross'));
   assert.ok(r.safer.some((x) => x.drug.generic === 'DemoSafe'));
   assert.equal(A.REFS.remoteRef, 'Remote 2026');
-  assert.equal(A.buildReport('cotrimoxazole', 'ige'), null, 'old hardcoded NBL replaced');
+  // union-merge: a code-only group NOT in the Sheet is preserved (not wiped)
+  assert.ok(A.buildReport('cotrimoxazole', 'ige'), 'hardcoded NBL group preserved (union)');
+  assert.ok(A.buildReport('vancomycin', 'ige'), 'code-only glycopeptide group preserved (union)');
   assert.ok(A.buildReport('amoxicillin', 'ige'), 'beta-lactam engine unaffected');
 });

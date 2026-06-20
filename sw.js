@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.21.0
+// IV Drug Reference PWA — Service Worker v5.22.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -119,9 +119,19 @@
 //          skin test, low/iso-osmolar) and a premedication protocol (ACR regimens)
 //          with the ESUR-2025 "not routine" caveat — instead of a generic note.
 //          Rendered in result + copy/LINE/PDF. Locked by tests.
+// v5.22.0: Allergy pseudoallergy — Phase 4. (a) Vancomycin/Teicoplanin added as a
+//          selectable Glycopeptide group: immune path = teicoplanin caution
+//          (variable cross), linezolid/daptomycin safe; non-immune path = the
+//          vancomycin flushing reaction ("red man") with rate management (≥60
+//          min/g, ≤10 mg/min ± antihistamine) — NOT a contraindication. (b) Local
+//          anesthetic groups gain a non-immune note (true allergy <1%;
+//          preservative/sulfite; preservative-free + ester↔amide swap). (c)
+//          applyRemoteData now UNION-merges so code-only groups (e.g. the new
+//          glycopeptide group) survive a Sheet override that hasn't been
+//          re-seeded. Locked by tests (148).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.21.0';
+const CACHE_NAME = 'iv-drugref-v5.22.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

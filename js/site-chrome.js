@@ -62,6 +62,7 @@
       cred: 'จัดทำโดย ภก.ฐาปนัท นาคครุฑ (Benz)<br>กลุ่มงานเภสัชกรรม สถาบันประสาทวิทยา',
       license: '<b>📜 License</b> — CC BY-NC-SA 4.0 · ใช้/แชร์/ดัดแปลงได้ ต้องให้เครดิต · ห้ามเชิงพาณิชย์ · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.th" target="_blank" rel="noopener">รายละเอียด</a>',
       refsLabel: 'แหล่งอ้างอิง', verLabel: 'เวอร์ชัน', close: 'ปิด',
+      feedback: '💬 มีเวลาสัก 2 นาที? <a href="#" class="sc-fb-link">ทำแบบประเมินการใช้งาน</a> เพื่อช่วยพัฒนาแอปและงานวิจัย',
       install: 'ติดตั้ง',
       instTitle: '📲 ติดตั้งแอปลงเครื่อง',
       instIntro: 'ติดตั้ง IV DrugRef ไว้บนเครื่อง — เปิดเร็วจากไอคอนหน้าจอ ใช้งานออฟไลน์ได้ เต็มจอเหมือนแอปจริง ไม่ต้องเปิดเบราว์เซอร์',
@@ -80,6 +81,7 @@
       cred: 'Created by Thapanat Nakkrut (Benz)<br>Pharmacy Dept., Neurological Institute of Thailand',
       license: '<b>📜 License</b> — CC BY-NC-SA 4.0 · use / share / adapt with credit · non-commercial · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener">details</a>',
       refsLabel: 'References', verLabel: 'Version', close: 'Close',
+      feedback: '💬 Got 2 minutes? <a href="#" class="sc-fb-link">Take the usability survey</a> to help improve the app & our research',
       install: 'Install',
       instTitle: '📲 Install this app',
       instIntro: 'Install IV DrugRef on your device — launch instantly from a home-screen icon, works offline, full-screen like a native app, no browser bar.',
@@ -176,6 +178,7 @@
           '<div class="sc-box sc-red sc-m-disc"></div>' +
           '<div class="sc-cred sc-m-cred"></div>' +
           '<div class="sc-box sc-blue sc-m-lic"></div>' +
+          '<div class="sc-box sc-m-fb" style="background:#ecfeff;border:1px solid #a5f3fc;color:#0e7490;display:none"></div>' +
           '<div class="sc-refs sc-m-refs"></div>' +
           '<div class="sc-close-wrap"><button type="button" class="sc-close-btn"></button></div>' +
         '</div>';
@@ -250,6 +253,14 @@
         modal.querySelector('.sc-m-disc').innerHTML = t.disclaimer;
         modal.querySelector('.sc-m-cred').innerHTML = t.cred;
         modal.querySelector('.sc-m-lic').innerHTML = t.license;
+        // Optional full-survey entry point — only when the survey module is present
+        var fbBox = modal.querySelector('.sc-m-fb');
+        if (fbBox && window.IVSurvey && typeof window.IVSurvey.show === 'function') {
+          fbBox.innerHTML = t.feedback;
+          fbBox.style.display = '';
+        } else if (fbBox) {
+          fbBox.style.display = 'none';
+        }
         modal.querySelector('.sc-m-refs').innerHTML = esc(t.refsLabel) + ': ' + esc(REFS) +
           ' · <b>' + esc(t.verLabel) + ' ' + esc(ver()) + '</b>';
         modal.querySelector('.sc-close-btn').textContent = t.close;
@@ -288,6 +299,14 @@
       footer.querySelector('.sc-info-btn').addEventListener('click', function () { modal.classList.add('sc-modal-open'); });
       modal.querySelector('.sc-close-btn').addEventListener('click', function () { modal.classList.remove('sc-modal-open'); });
       modal.addEventListener('click', function (e) { if (e.target === modal) modal.classList.remove('sc-modal-open'); });
+      // Full-survey link inside About → open the survey overlay
+      modal.addEventListener('click', function (e) {
+        if (e.target.closest('.sc-fb-link')) {
+          e.preventDefault();
+          modal.classList.remove('sc-modal-open');
+          if (window.IVSurvey && window.IVSurvey.show) window.IVSurvey.show();
+        }
+      });
     }
 
     // ----- install guide: open/close, native prompt, banner -----

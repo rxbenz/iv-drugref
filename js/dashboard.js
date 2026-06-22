@@ -1070,7 +1070,8 @@
     doseCalcs: 'DoseCalcs', drugExpands: 'DrugExpands', tdmUsage: 'TDMUsage',
     renalDosing: 'RenalDosing', compatUsage: 'CompatUsage', surveys: 'Surveys',
     drugRatings: 'DrugRatings', npsResponses: 'NPSResponses',
-    allergyLookups: 'AllergyLookups', featureUse: 'FeatureUse'
+    allergyLookups: 'AllergyLookups', featureUse: 'FeatureUse',
+    microFeedback: 'MicroFeedback', susItems: 'SusItems'
   };
 
   function escCSVcell(val) {

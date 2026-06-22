@@ -850,6 +850,12 @@ function _migPostBatch(rows) {
   }
 }
 
+// Resumable per-sheet migration. Progress is persisted per sheet in Script
+// Properties (mig_off_<sheet> = how many real rows already inserted), so if GAS
+// throws its transient "unknown error" mid-run you just RUN AGAIN — it skips
+// the rows already sent and continues, with NO duplicates. The set of rows to
+// migrate is stable (cutoff excludes all the post-deploy rows the live
+// dual-write keeps appending), so the offset stays exact across runs.
 function migrateSheetToSupabase(name, commit) {
   var type = SHEET_TO_TYPE[name];
   if (!type) return name + ': no type mapping — SKIPPED';
@@ -865,12 +871,17 @@ function migrateSheetToSupabase(name, commit) {
       avCol = headers.indexOf('app_version');
   var core = { timestamp: 1, session_id: 1, user_id: 1, app_version: 1 };
 
-  var batch = [], real = 0, sent = 0;
+  var props = PropertiesService.getScriptProperties();
+  var pkey = 'mig_off_' + name;
+  var alreadyDone = commit === true ? (parseInt(props.getProperty(pkey) || '0', 10) || 0) : 0;
+
+  var batch = [], realIdx = 0, sent = 0;
   for (var r = 1; r < values.length; r++) {
     var ts = String(values[r][tsCol] == null ? '' : values[r][tsCol]).trim();
     if (!ts || ts.charAt(ts.length - 1) !== 'Z') continue;   // skip seed (+07:00) / blank
     if (ts >= MIG_CUTOFF) continue;                           // already in Supabase via live dual-write
-    real++;
+    realIdx++;
+    if (commit === true && realIdx <= alreadyDone) continue;  // sent in a prior run → skip (no dup)
     var data = { _src: 'sheets' };
     for (var c = 0; c < headers.length; c++) {
       var h = headers[c]; if (!h || core[h]) continue;
@@ -885,32 +896,49 @@ function migrateSheetToSupabase(name, commit) {
       app_version: avCol >= 0 ? (values[r][avCol] || null) : null,
       data: data
     });
-    if (commit === true && batch.length >= SUPA_BATCH) { _migPostBatch(batch); sent += batch.length; batch = []; }
+    if (commit === true && batch.length >= SUPA_BATCH) {
+      _migPostBatch(batch); sent += batch.length;
+      props.setProperty(pkey, String(alreadyDone + sent));   // persist progress after each batch
+      batch = [];
+    }
   }
-  if (commit === true && batch.length) { _migPostBatch(batch); sent += batch.length; }
-  return name + ' → ' + type + ': ' +
-    (commit === true ? (sent + ' inserted') : (real + ' real (preview)')) + ' / ' + (last - 1) + ' rows';
+  if (commit === true && batch.length) {
+    _migPostBatch(batch); sent += batch.length;
+    props.setProperty(pkey, String(alreadyDone + sent));
+  }
+  if (commit !== true) return name + ' → ' + type + ': ' + realIdx + ' real (preview) / ' + (last - 1) + ' rows';
+  return name + ' → ' + type + ': ' + sent + ' inserted (was ' + alreadyDone + ', total real ' + realIdx + ')';
 }
 
 function migrateToSupabase(commit) {
   var report = [];
   Object.keys(SHEET_TO_TYPE).forEach(function (name) {
     try { report.push(migrateSheetToSupabase(name, commit)); }
-    catch (e) { report.push(name + ': ⚠️ ERROR (' + e.message + ') — clear _src rows then re-run'); }
+    catch (e) { report.push(name + ': ⚠️ ERROR (' + e.message + ') — just RUN AGAIN to resume'); }
   });
   var msg = (commit === true
-    ? '✅ migrateToSupabase DONE — historical Z-rows backfilled\n'
+    ? '✅ migrateToSupabase pass DONE — re-run until every sheet shows "0 inserted"\n'
     : '👀 PREVIEW — run migrateToSupabaseNow() to insert\n') + report.join('\n');
   Logger.log(msg);
   return msg;
 }
 function migrateToSupabaseNow() { return migrateToSupabase(true); }
 
-// Per-sheet runners (use if the all-sheets run nears the 6-min limit).
+// Per-sheet runners (resumable too) — handy for isolating the big sheets.
 function migrate_Sessions()  { return _migLog('Sessions'); }
 function migrate_Searches()  { return _migLog('Searches'); }
 function migrate_PageViews() { return _migLog('PageViews'); }
+function migrate_DrugRatings() { return _migLog('DrugRatings'); }   // tiny — connectivity test
 function _migLog(name) { var r = migrateSheetToSupabase(name, true); Logger.log(r); return r; }
+
+// Clear all migration progress (use ONLY together with a full Supabase wipe:
+//   delete from public.events where data->>'_src' = 'sheets';
+// then this, so a fresh migrateToSupabaseNow re-inserts everything from 0).
+function resetMigrationFlags() {
+  var props = PropertiesService.getScriptProperties();
+  Object.keys(SHEET_TO_TYPE).forEach(function (n) { props.deleteProperty('mig_off_' + n); });
+  Logger.log('migration offsets reset — next migrate starts from row 0');
+}
 
 
 // ════════════════════════════════════════════════

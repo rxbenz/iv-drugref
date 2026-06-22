@@ -1064,6 +1064,88 @@
     }
   }
 
+  // ─── Research CSV export (client-side, respects current date/filters) ───
+  const DATASET_LABELS = {
+    sessions: 'Sessions', searches: 'Searches', pageViews: 'PageViews',
+    doseCalcs: 'DoseCalcs', drugExpands: 'DrugExpands', tdmUsage: 'TDMUsage',
+    renalDosing: 'RenalDosing', compatUsage: 'CompatUsage', surveys: 'Surveys',
+    drugRatings: 'DrugRatings', npsResponses: 'NPSResponses',
+    allergyLookups: 'AllergyLookups', featureUse: 'FeatureUse'
+  };
+
+  function escCSVcell(val) {
+    const s = (val === null || val === undefined) ? '' : String(val);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  // Union of all keys across rows → CSV (rows may have ragged columns)
+  function rowsToCSV(rows) {
+    if (!rows || !rows.length) return '';
+    const cols = [], seen = {};
+    rows.forEach(r => Object.keys(r).forEach(k => { if (!seen[k]) { seen[k] = 1; cols.push(k); } }));
+    const out = [cols.map(escCSVcell).join(',')];
+    rows.forEach(r => out.push(cols.map(c => escCSVcell(r[c])).join(',')));
+    return out.join('\r\n');
+  }
+  function downloadCSV(name, csv) {
+    const b = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(b);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+  function exportDatasetCSV(key) {
+    if (!RAW) { toast('⚠️ โหลดข้อมูลก่อน'); return; }
+    const rows = applyFilters(RAW[key] || []);
+    if (!rows.length) { toast('📭 ไม่มีข้อมูล (' + key + ')'); return; }
+    const date = new Date().toISOString().substring(0, 10);
+    downloadCSV('IVDrugRef_' + (DATASET_LABELS[key] || key) + '_' + date + '.csv', rowsToCSV(rows));
+    toast('📥 ' + (DATASET_LABELS[key] || key) + ' (' + rows.length + ' rows)');
+  }
+  function exportAllCSV() {
+    if (!RAW) { toast('⚠️ โหลดข้อมูลก่อน'); return; }
+    const date = new Date().toISOString().substring(0, 10);
+    let i = 0;
+    Object.keys(DATASET_LABELS).forEach(key => {
+      const rows = applyFilters(RAW[key] || []);
+      if (rows.length) {
+        setTimeout(() => downloadCSV('IVDrugRef_' + DATASET_LABELS[key] + '_' + date + '.csv', rowsToCSV(rows)), i * 400);
+        i++;
+      }
+    });
+    toast(i ? ('📥 กำลังดาวน์โหลด ' + i + ' ไฟล์ (อนุญาต multiple downloads)') : '📭 ไม่มีข้อมูล');
+  }
+  function toggleCsvMenu() {
+    const existing = document.getElementById('csvMenu');
+    if (existing) { existing.remove(); return; }
+    const btn = document.getElementById('btnExportAll');
+    if (!btn) return;
+    const m = document.createElement('div');
+    m.id = 'csvMenu';
+    m.style.cssText = 'position:absolute;z-index:9999;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:6px;max-height:60vh;overflow:auto;min-width:230px;font-family:inherit';
+    const rect = btn.getBoundingClientRect();
+    m.style.top = (window.scrollY + rect.bottom + 4) + 'px';
+    m.style.left = (window.scrollX + rect.left) + 'px';
+    const item = (label, fn, bold) => {
+      const d = document.createElement('div');
+      d.textContent = label;
+      d.setAttribute('role', 'button'); d.setAttribute('tabindex', '0');
+      d.style.cssText = 'padding:8px 10px;cursor:pointer;font-size:13px;border-radius:6px;color:#0f172a' + (bold ? ';font-weight:700;border-bottom:1px solid #e2e8f0;margin-bottom:4px' : '');
+      d.addEventListener('mouseenter', () => d.style.background = '#f1f5f9');
+      d.addEventListener('mouseleave', () => d.style.background = '');
+      d.addEventListener('click', () => { fn(); m.remove(); });
+      return d;
+    };
+    m.appendChild(item('⬇ ทั้งหมด (ตามฟิลเตอร์)', exportAllCSV, true));
+    Object.keys(DATASET_LABELS).forEach(key => {
+      const n = RAW && RAW[key] ? applyFilters(RAW[key]).length : 0;
+      m.appendChild(item(DATASET_LABELS[key] + '  (' + n + ')', () => exportDatasetCSV(key)));
+    });
+    document.body.appendChild(m);
+    setTimeout(() => document.addEventListener('click', function h(e) {
+      if (!m.contains(e.target) && e.target.id !== 'btnExportAll') { m.remove(); document.removeEventListener('click', h); }
+    }), 0);
+  }
+
   // ─── Auto-refresh ──────────────────────────────────────────
   function toggleAR() {
     _arOn = !_arOn;
@@ -1116,6 +1198,8 @@
   if (btnSetup) btnSetup.addEventListener('click', toggleSetup);
   var btnRefresh = document.getElementById('btnRefresh');
   if (btnRefresh) btnRefresh.addEventListener('click', fetchRaw);
+  var btnExportAll = document.getElementById('btnExportAll');
+  if (btnExportAll) btnExportAll.addEventListener('click', toggleCsvMenu);
   var btnSaveUrl = document.getElementById('btnSaveUrl');
   if (btnSaveUrl) btnSaveUrl.addEventListener('click', saveUrl);
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.27.0
+// IV Drug Reference PWA — Service Worker v5.27.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -164,9 +164,14 @@
 //          → SURVEY. GAS gains FeatureUse sheet + filter_used/dose_unit/source/
 //          drug_clicked fallback columns (existing sheets need columns added +
 //          GAS redeploy).
+// v5.27.1: Dashboard research CSV export ("⬇ CSV วิจัย") — client-side export of
+//          any/all datasets respecting the current date/cross-filter (so seed
+//          rows can be excluded by date before export). GAS gains cleanSeedData()
+//          + purgeAllAnalytics() manual cleanup utilities and GAS_VERSION 5.27.1
+//          (so the dashboard load toast confirms the redeploy).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.27.0';
+const CACHE_NAME = 'iv-drugref-v5.27.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

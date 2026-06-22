@@ -263,6 +263,7 @@
     ONBOARDING: 'featureUse', MICRO_FEEDBACK: 'microFeedback', SUS_ITEM: 'susItems',
     FILTER: 'filters', error_report: 'errors'
   };
+  let _sb = null;   // Supabase client (created in initAuthGate; carries the admin session token)
 
   async function fetchRaw() {
     document.getElementById('statusMsg').textContent = '⏳ กำลังโหลดจาก Supabase...';
@@ -277,20 +278,14 @@
       };
       let offset = 0, got = 0;
       do {
-        // Per-page timeout so the loop scales as the table grows.
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-        const url = SB_EVENTS +
-          '?select=ts,type,session_id,user_id,data&order=ts.asc&limit=1000&offset=' + offset;
-        let rows;
-        try {
-          const res = await fetch(url, {
-            signal: controller.signal, cache: 'no-store',
-            headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
-          });
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          rows = await res.json();
-        } finally { clearTimeout(timeout); }
+        // Paginate via the authenticated supabase-js client (uses the admin's
+        // session token, so reads work under the admin-only SELECT RLS policy).
+        const { data: rows, error } = await _sb
+          .from('events')
+          .select('ts,type,session_id,user_id,data')
+          .order('ts', { ascending: true })
+          .range(offset, offset + 999);
+        if (error) throw new Error(error.message);
 
         got = rows.length;
         for (let i = 0; i < rows.length; i++) {
@@ -306,8 +301,8 @@
           row.user_id = ev.user_id;
           raw[key].push(row);
         }
-        offset += got;                       // advance by actual count (server cap-safe)
-      } while (got > 0 && offset < 200000);  // 200k-row safety guard
+        offset += 1000;                      // next page window
+      } while (got === 1000 && offset < 200000);  // full page ⇒ more rows; 200k guard
 
       RAW = raw;
       _filterCache = null;
@@ -330,6 +325,50 @@
   function totalRows() {
     if (!RAW) return 0;
     return Object.values(RAW).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0);
+  }
+
+  // ── Auth gate (Supabase) ───────────────────────────────────────────
+  // Dashboard is admin-only: require a Google sign-in, verify is_admin() via
+  // RLS, then load. Analytics INSERT stays anon (the public app keeps logging).
+  async function initAuthGate() {
+    const gate = document.getElementById('authGate');
+    const msg = document.getElementById('authMsg');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    if (!window.supabase || !window.supabase.createClient) {
+      gate.style.display = 'flex';
+      msg.textContent = 'โหลดไลบรารี Supabase ไม่สำเร็จ — ลองรีเฟรช';
+      btnLogin.style.display = 'none';
+      return;
+    }
+    _sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+    btnLogin.addEventListener('click', function () {
+      _sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: location.href.split('#')[0] }
+      });
+    });
+    btnLogout.addEventListener('click', async function () {
+      await _sb.auth.signOut();
+      location.reload();
+    });
+
+    const { data: { session } } = await _sb.auth.getSession();
+    if (!session) { gate.style.display = 'flex'; return; }   // not signed in
+
+    // Signed in → verify admin via the SECURITY DEFINER RPC.
+    const { data: isAdmin, error } = await _sb.rpc('is_admin');
+    if (error || !isAdmin) {
+      msg.textContent = 'บัญชี ' + (session.user && session.user.email || '') +
+        ' ไม่มีสิทธิ์เข้าถึง Dashboard นี้';
+      btnLogin.style.display = 'none';
+      btnLogout.style.display = 'inline-block';
+      gate.style.display = 'flex';
+      return;
+    }
+    gate.style.display = 'none';   // admin → reveal dashboard + load
+    fetchRaw();
   }
 
   // ============================================================
@@ -1352,5 +1391,5 @@
   // i18n: listen for language change events
   document.addEventListener('languageChanged', function() { debouncedReRender(); });
 
-  fetchRaw();   // Supabase — no SCRIPT_URL needed
+  initAuthGate();   // require admin sign-in, then fetchRaw()
 })();

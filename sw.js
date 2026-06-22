@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.30.0
+// IV Drug Reference PWA — Service Worker v5.31.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -193,9 +193,12 @@
 //          `events` table (paginated) and reshapes it into the existing per-type
 //          RAW arrays, so all charts work unchanged. anon SELECT RLS added.
 //          GAS is now write-only (dual-write) pending shutdown.
+// v5.31.0: Phase 2 step 1 — Dashboard is now admin-only (Supabase Auth / Google
+//          sign-in + is_admin() RPC gate). Reads use the authenticated session;
+//          events SELECT RLS will be locked to admins (anon keeps INSERT).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.30.0';
+const CACHE_NAME = 'iv-drugref-v5.31.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

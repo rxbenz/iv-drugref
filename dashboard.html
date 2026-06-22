@@ -26,6 +26,14 @@
 </head>
 <body>
 
+<!-- Auth gate (Supabase) — covers the page until an admin signs in. -->
+<div id="authGate" style="position:fixed;inset:0;z-index:99999;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:'IBM Plex Sans Thai',sans-serif;text-align:center;padding:24px;">
+  <div style="font-size:22px;font-weight:700;">📊 IV DrugRef Analytics</div>
+  <div id="authMsg" style="font-size:14px;opacity:0.85;max-width:380px;line-height:1.6;">Dashboard นี้สำหรับผู้ดูแลระบบ — กรุณาเข้าสู่ระบบด้วย Google</div>
+  <button id="btnLogin" style="background:#0ea5e9;color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">🔐 เข้าสู่ระบบด้วย Google</button>
+  <button id="btnLogout" style="display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;">ออกจากระบบ</button>
+</div>
+
 <div class="header"><div class="header-inner">
   <h1>📊 IV DrugRef Analytics <span class="ver">v6 CROSS-FILTER</span></h1>
   <div class="header-actions">
@@ -236,6 +244,7 @@
 <!-- BUILD:JS -->
 <script src="js/error-tracker.js"></script>
 <script src="js/core.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/dashboard.js"></script>
 <script src="translations-en.js"></script>
 <script src="i18n.js"></script>

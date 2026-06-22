@@ -669,29 +669,49 @@ function _cleanSeedTsOne(ss, name, commit) {
   var headers = values[0];
   var tsCol = headers.indexOf('timestamp');
   if (tsCol < 0) { return name + ': no timestamp column — SKIPPED'; }
-  var keep = [], removed = 0, emptyTs = 0;
+  // Collect the 1-based sheet rows that are SEED (timestamp present, not 'Z').
+  var seedRows = [], emptyTs = 0;
   for (var r = 1; r < values.length; r++) {
     var ts = String(values[r][tsCol] == null ? '' : values[r][tsCol]).trim();
-    if (ts === '') { keep.push(values[r]); emptyTs++; continue; } // keep blanks
-    if (ts.charAt(ts.length - 1) === 'Z') { keep.push(values[r]); } // real → keep
-    else { removed++; }                                            // seed → drop
+    if (ts === '') { emptyTs++; continue; }                  // keep blanks
+    if (ts.charAt(ts.length - 1) !== 'Z') { seedRows.push(r + 1); } // seed → delete
   }
+  var removed = seedRows.length;
   if (commit !== true || removed === 0) {
     return name + ': ' + removed + (commit === true ? ' (already clean)' : ' seed (preview)') +
       ' / ' + (last - 1) + ' rows' + (emptyTs ? ' [' + emptyTs + ' blank-ts kept]' : '');
   }
+  // Delete in contiguous blocks from the BOTTOM up (so earlier indices stay
+  // valid). Seed was bulk-inserted so blocks are usually few. Each block delete
+  // is retried a few times to ride out GAS's transient "try again later".
+  var blocks = 0, deleted = 0, i = seedRows.length - 1;
   try {
-    var width = sh.getMaxColumns();
-    var nData = sh.getLastRow() - 1;
-    sh.getRange(2, 1, nData, width).clearContent();        // wipe old data rows
-    if (keep.length > 0) {                                  // write survivors back
-      sh.getRange(2, 1, keep.length, headers.length).setValues(keep);
+    while (i >= 0) {
+      var end = seedRows[i], start = end;
+      while (i - 1 >= 0 && seedRows[i - 1] === start - 1) { start = seedRows[i - 1]; i--; }
+      var count = end - start + 1;
+      _deleteRowsRetry(sh, start, count);
+      blocks++; deleted += count; i--;
+      SpreadsheetApp.flush();
     }
-    SpreadsheetApp.flush();                                 // persist before next sheet
-    return name + ': ' + removed + ' DELETED / ' + (last - 1) + ' rows' +
-      (emptyTs ? ' [' + emptyTs + ' blank-ts kept]' : '');
+    return name + ': ' + deleted + ' DELETED in ' + blocks + ' block(s) / ' + (last - 1) +
+      ' rows' + (emptyTs ? ' [' + emptyTs + ' blank-ts kept]' : '');
   } catch (e) {
-    return name + ': ⚠️ ERROR during write (' + e.message + ') — re-run to retry';
+    return name + ': ⚠️ ERROR after ' + deleted + ' deleted (' + e.message + ') — re-run to finish';
+  }
+}
+
+// deleteRows with up to 4 attempts (2s/4s/8s backoff) to survive transient
+// GAS Sheets backend errors ("An unknown error has occurred, try again later").
+function _deleteRowsRetry(sh, start, count) {
+  var delay = 2000;
+  for (var attempt = 1; ; attempt++) {
+    try { sh.deleteRows(start, count); return; }
+    catch (e) {
+      if (attempt >= 4) throw e;
+      Utilities.sleep(delay);
+      delay *= 2;
+    }
   }
 }
 

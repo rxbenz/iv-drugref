@@ -739,3 +739,17 @@ renderDrugCard=function(drug){
     if(document.visibilityState === 'hidden') flushPending();
   });
 })();
+
+// Monkey-patch the "About" dialog (original lives in the minified line-7 blob
+// with a hardcoded version). Pull the version from the single source
+// IVDrugRef.VERSION so it auto-tracks releases — no per-release edits needed.
+window.showAbout = function () {
+  var v = (window.IVDrugRef && IVDrugRef.VERSION) ? ' v' + IVDrugRef.VERSION : '';
+  alert('IV Drug Quick Reference' + v + '\n\n' +
+    'จัดทำโดย ภก. ฐาปนัท นาคครุฑ (Benz)\n' +
+    'กลุ่มงานเภสัชกรรม\n' +
+    'สถาบันประสาทวิทยา\n\n' +
+    'แหล่งอ้างอิง:\n' +
+    'Lexicomp, Trissel\'s Handbook,\n' +
+    'AHFS, ISMP, AHA/ACLS, Package Inserts');
+};

@@ -646,6 +646,53 @@ function purgeAllAnalytics(commit) {
   return msg;
 }
 
+// Delete rows whose `timestamp` does NOT end with 'Z'.
+// ── Signature: the live app always writes timestamps via server-side
+//    `new Date().toISOString()` → UTC, ALWAYS ends in 'Z'. The synthetic seed
+//    rows were generated externally with a local offset ('+07:00'), so any
+//    non-'Z' timestamp is seed. Rows with an EMPTY timestamp are KEPT (never
+//    auto-deleted — inspect them by hand).
+// Uses a keep-and-rewrite strategy (one clear + one write per sheet) instead of
+// per-row deleteRow(), so it stays fast on the big sheets (Sessions ~6.7k rows)
+// and won't hit the 6-minute execution limit.
+// PREVIEW (no delete): cleanSeedByTimestamp()  →  DELETE: cleanSeedByTimestamp(true)
+function cleanSeedByTimestamp(commit) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var report = [];
+  ANALYTICS_SHEETS_FOR_CLEAN.forEach(function (name) {
+    var sh = ss.getSheetByName(name);
+    if (!sh) { return; }
+    var last = sh.getLastRow();
+    if (last < 2) { report.push(name + ': 0 data rows'); return; }
+    var values = sh.getDataRange().getValues();
+    var headers = values[0];
+    var tsCol = headers.indexOf('timestamp');
+    if (tsCol < 0) { report.push(name + ': no timestamp column — SKIPPED'); return; }
+    var keep = [headers], removed = 0, emptyTs = 0;
+    for (var r = 1; r < values.length; r++) {
+      var ts = String(values[r][tsCol] == null ? '' : values[r][tsCol]).trim();
+      if (ts === '') { keep.push(values[r]); emptyTs++; continue; } // keep blanks
+      if (ts.charAt(ts.length - 1) === 'Z') { keep.push(values[r]); } // real → keep
+      else { removed++; }                                            // seed → drop
+    }
+    if (commit === true && removed > 0) {
+      var width = sh.getMaxColumns();
+      var nData = sh.getLastRow() - 1;
+      sh.getRange(2, 1, nData, width).clearContent();      // wipe old data rows
+      if (keep.length > 1) {                                // write survivors back
+        sh.getRange(2, 1, keep.length - 1, headers.length).setValues(keep.slice(1));
+      }
+    }
+    report.push(name + ': ' + removed + (commit === true ? ' DELETED' : ' seed (preview)') +
+      ' / ' + (last - 1) + ' rows' + (emptyTs ? ' [' + emptyTs + ' blank-ts kept]' : ''));
+  });
+  var msg = (commit === true
+    ? '✅ cleanSeedByTimestamp DONE — non-Z (seed) rows removed\n'
+    : '👀 PREVIEW only — run cleanSeedByTimestamp(true) to delete\n') + report.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
 // One-click commit wrappers for the Apps Script editor (the Run button can't
 // pass arguments, so a no-arg function is needed to actually delete).
 // ⚠️ DESTRUCTIVE — back up the spreadsheet first. Select this in the function
@@ -655,6 +702,9 @@ function purgeAllAnalyticsNow() {
 }
 function cleanSeedDataNow() {
   return cleanSeedData(true);
+}
+function cleanSeedByTimestampNow() {
+  return cleanSeedByTimestamp(true);
 }
 
 // READ-ONLY diagnostic — profiles every analytics sheet so the seed-vs-real

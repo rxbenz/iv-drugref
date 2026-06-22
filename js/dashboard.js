@@ -247,49 +247,80 @@
   // ============================================================
   // FETCH RAW (with timeout & safe error display)
   // ============================================================
+  // ── Supabase data source (Phase 1 step 5) ─────────────────────────
+  // Dashboard reads the unified `events` table from Supabase and reshapes it
+  // back into the per-type RAW arrays the render code already expects
+  // (ev.ts → row.timestamp; ev.data fields spread back to the top level).
+  const SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+  const SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+  const SB_EVENTS = SB_URL + '/rest/v1/events';
+  const TYPE_TO_KEY = {
+    SESSION_START: 'sessions', SEARCH: 'searches', page_view: 'pageViews',
+    VIEW_DRUG: 'drugExpands', DOSE_CALC: 'doseCalcs', TDM_RESULT: 'tdmUsage',
+    RENAL_DOSING: 'renalDosing', COMPAT_CHECK: 'compatUsage', CALC_VISIT: 'calcVisits',
+    ALLERGY_LOOKUP: 'allergyLookups', DRUG_RATING: 'drugRatings', NPS_SUBMIT: 'npsResponses',
+    SURVEY: 'surveys', FEATURE_USE: 'featureUse', QUICK_ACTION: 'featureUse',
+    ONBOARDING: 'featureUse', MICRO_FEEDBACK: 'microFeedback', SUS_ITEM: 'susItems',
+    FILTER: 'filters', error_report: 'errors'
+  };
+
   async function fetchRaw() {
-    if (!SCRIPT_URL) {
-      document.getElementById('statusMsg').textContent = 'กดปุ่ม ⚙ URL เพื่อเชื่อมต่อ';
-      document.getElementById('statusMsg').style.display = 'block';
-      return;
-    }
-    document.getElementById('statusMsg').textContent = '⏳ กำลังโหลด raw data...';
+    document.getElementById('statusMsg').textContent = '⏳ กำลังโหลดจาก Supabase...';
     document.getElementById('statusMsg').style.display = 'block';
 
-    // AbortController for timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
     try {
-      // cache-bust (&_=ts) + no-store: GAS /exec GET responses can be served
-      // stale from the browser cache, so new Sheet rows never appear on Refresh
-      const res = await fetch(SCRIPT_URL + '?action=raw&_=' + Date.now(), { signal: controller.signal, cache: 'no-store' });
-      clearTimeout(timeout);
+      const raw = {
+        sessions: [], searches: [], surveys: [], doseCalcs: [], drugExpands: [],
+        tdmUsage: [], pageViews: [], renalDosing: [], compatUsage: [], drugRatings: [],
+        npsResponses: [], allergyLookups: [], featureUse: [], microFeedback: [],
+        susItems: [], calcVisits: [], filters: [], errors: []
+      };
+      let offset = 0, got = 0;
+      do {
+        // Per-page timeout so the loop scales as the table grows.
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        const url = SB_EVENTS +
+          '?select=ts,type,session_id,user_id,data&order=ts.asc&limit=1000&offset=' + offset;
+        let rows;
+        try {
+          const res = await fetch(url, {
+            signal: controller.signal, cache: 'no-store',
+            headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          rows = await res.json();
+        } finally { clearTimeout(timeout); }
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const d = await res.json();
-      if (d.error) throw new Error(d.error);
+        got = rows.length;
+        for (let i = 0; i < rows.length; i++) {
+          const ev = rows[i];
+          const key = TYPE_TO_KEY[ev.type];
+          if (!key) continue;
+          const row = {};
+          if (ev.data && typeof ev.data === 'object') {
+            for (const k in ev.data) if (k !== '_src') row[k] = ev.data[k];
+          }
+          row.timestamp = ev.ts;
+          row.session_id = ev.session_id;
+          row.user_id = ev.user_id;
+          raw[key].push(row);
+        }
+        offset += got;                       // advance by actual count (server cap-safe)
+      } while (got > 0 && offset < 200000);  // 200k-row safety guard
 
-      // Validate response structure
-      if (!d || typeof d !== 'object') throw new Error('Invalid response format');
-
-      RAW = d;
+      RAW = raw;
       _filterCache = null;
       buildSessionMap(RAW.sessions);
       document.getElementById('statusMsg').style.display = 'none';
       reRender();
-      // surface backend version + fetch time so stale-deploy / stale-cache is obvious
-      var ver = d.gasVersion ? ' · GAS ' + d.gasVersion : '';
-      var t = d.serverTime ? ' · ' + new Date(d.serverTime).toLocaleTimeString('th-TH') : '';
-      toast('✅ โหลดข้อมูลสำเร็จ (' + totalRows() + ' rows)' + ver + t);
+      toast('✅ โหลดข้อมูลสำเร็จ (' + totalRows() + ' rows) · Supabase');
     } catch (err) {
-      clearTimeout(timeout);
       const msg = document.getElementById('statusMsg');
       msg.className = 'error';
-      // SAFE: Use textContent instead of innerHTML to prevent XSS
+      // SAFE: textContent (not innerHTML) to prevent XSS
       msg.textContent = '❌ ' + (err.name === 'AbortError' ? 'Timeout — ลองอีกครั้ง' : err.message);
       msg.style.display = 'block';
-      // Report to error tracker if available
       if (window.IVErrorTracker) {
         window.IVErrorTracker.report('Dashboard fetch failed: ' + err.message, 'high');
       }
@@ -1321,5 +1352,5 @@
   // i18n: listen for language change events
   document.addEventListener('languageChanged', function() { debouncedReRender(); });
 
-  if (SCRIPT_URL) fetchRaw();
+  fetchRaw();   // Supabase — no SCRIPT_URL needed
 })();

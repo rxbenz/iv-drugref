@@ -2,7 +2,7 @@
   'use strict';
 
   // ============================================================
-  // IV DrugRef Dashboard v6.1 — Cross-Filter Engine (Hardened)
+  // IV DrugRef Dashboard v6.2 — Cross-Filter Engine (Hardened) + Micro/Progressive-SUS views
   // Fixes: XSS, performance, memory, error handling, accessibility
   // ============================================================
 
@@ -324,6 +324,8 @@
     const npsResponses = applyFilters(RAW.npsResponses || []);
     const allergyLookups = applyFilters(RAW.allergyLookups || []);
     const featureUse = applyFilters(RAW.featureUse || []);
+    const microFeedback = applyFilters(RAW.microFeedback || []);
+    const susItems = applyFilters(RAW.susItems || []);
 
     // Always render overview + active tab
     renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage);
@@ -336,10 +338,10 @@
     if (tab === 'allergy' || tab === 'overview') renderAllergy(allergyLookups);
     if (tab === 'dosecalc' || tab === 'overview') renderDoseCalc(doseCalcs);
     if (tab === 'ratings' || tab === 'overview') renderRatingsNPS(drugRatings, npsResponses);
-    if (tab === 'survey' || tab === 'overview') renderSurvey(surveys);
+    if (tab === 'survey' || tab === 'overview') renderSurvey(surveys, microFeedback, susItems);
     if (tab === 'journey' || tab === 'overview') renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage, featureUse);
 
-    document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length + searches.length + tdmUsage.length + renalDosing.length + compatUsage.length} rows | Dashboard v6.1`;
+    document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length + searches.length + tdmUsage.length + renalDosing.length + compatUsage.length} rows | Dashboard v6.2`;
   }
 
   // Debounced version for filter changes
@@ -841,7 +843,9 @@
   // ============================================================
   // RENDER: SURVEY
   // ============================================================
-  function renderSurvey(surveys) {
+  function renderSurvey(surveys, microFeedback, susItems) {
+    microFeedback = microFeedback || [];
+    susItems = susItems || [];
     const satRows = surveys.filter(r => r.sat_5_overall && r.sat_5_overall !== '');
     const susRows = surveys.filter(r => r.sus_score !== undefined && r.sus_score !== '');
     const avgSat = satRows.length > 0 ? fmtNum(satRows.reduce((s, r) => s + parseFloat(r.sat_5_overall), 0) / satRows.length) : '—';
@@ -850,14 +854,50 @@
     const byDept = countBy(surveys, 'department');
     const bothPhases = surveys.filter(r => r.sat_5_overall && r.sat_5_overall !== '' && r.sus_score !== undefined && r.sus_score !== '').length;
 
+    // ── Micro feedback (👍/👎) ──
+    const microUp = microFeedback.filter(r => String(r.rating).toLowerCase() === 'up').length;
+    const microDown = microFeedback.filter(r => String(r.rating).toLowerCase() === 'down').length;
+    const microTotal = microUp + microDown;
+    const helpfulRate = microTotal ? fmtNum(microUp / microTotal * 100) + '%' : '—';
+
+    // ── Progressive SUS → estimated cohort score ──
+    // Per-item average, converted to 0-4 contribution (odd items positive, even
+    // items negative — 0-based: i%2===0 → score-1, else 5-score), then mean
+    // contribution extrapolated to 10 items × 2.5 (handles partial per-user data).
+    const itemSums = {}, itemCounts = {};
+    susItems.forEach(r => {
+      const i = parseInt(r.item_index, 10), sc = parseFloat(r.score);
+      if (isNaN(i) || isNaN(sc) || i < 0 || i > 9) return;
+      itemSums[i] = (itemSums[i] || 0) + sc;
+      itemCounts[i] = (itemCounts[i] || 0) + 1;
+    });
+    const itemContribs = [];
+    let contribSum = 0, itemsWithData = 0;
+    for (let i = 0; i < 10; i++) {
+      if (itemCounts[i]) {
+        const avg = itemSums[i] / itemCounts[i];
+        const contrib = (i % 2 === 0) ? (avg - 1) : (5 - avg);
+        itemContribs.push(contrib);
+        contribSum += contrib; itemsWithData++;
+      } else {
+        itemContribs.push(null);
+      }
+    }
+    const cohortSus = itemsWithData ? fmtNum((contribSum / itemsWithData) * 10 * 2.5) : '—';
+
     document.getElementById('surveyStats').innerHTML = [
       statBox('📋', surveys.length.toLocaleString(), 'Surveys', 'purple'),
       statBox('⭐', avgSat, 'Avg Satisfaction', 'amber'),
-      statBox('📊', avgSus, 'Avg SUS', 'green'),
+      statBox('📊', avgSus, 'Avg SUS (full)', 'green'),
+      statBox('👍', helpfulRate, 'Helpful rate', 'teal'),
+      statBox('💬', microTotal.toLocaleString(), 'Micro responses', 'cyan'),
+      statBox('📈', cohortSus, 'SUS (progressive est.)', 'pink'),
       statBox('✅', satRows.length.toLocaleString(), 'Satisfaction Done', 'blue'),
-      statBox('📋', susRows.length.toLocaleString(), 'SUS Done', 'cyan'),
-      statBox('🔁', bothPhases.toLocaleString(), 'Both Phases', 'pink'),
+      statBox('🔁', bothPhases.toLocaleString(), 'Both Phases', 'slate'),
     ].join('');
+
+    renderMicroFeedback(microFeedback, microUp, microDown, microTotal);
+    renderSusItems(itemContribs, itemCounts);
 
     const satKeys = ['sat_1_easy_to_find','sat_2_accurate','sat_3_faster','sat_4_recommend','sat_5_overall'];
     const satLabels = ['ค้นหาง่าย','ถูกต้อง','เร็วขึ้น','แนะนำ','โดยรวม'];
@@ -889,6 +929,60 @@
       dc('susChart'); // properly destroy chart if it exists
       if (susCanvas) susCanvas.style.display = 'none';
       if (susEmptyMsg) susEmptyMsg.style.display = '';
+    }
+  }
+
+  // Micro 👍/👎 doughnut + 👎-reason breakdown
+  const MICRO_REASON_LABELS = {
+    notfound: 'หาข้อมูลไม่เจอ', incomplete: 'ข้อมูลไม่ครบ',
+    hard: 'ใช้งานยาก', slow: 'ช้า/มีปัญหา'
+  };
+  function renderMicroFeedback(microFeedback, up, down, total) {
+    const emptyMsg = document.getElementById('microEmptyMsg');
+    const canvas = document.getElementById('microChart');
+    if (total > 0) {
+      if (emptyMsg) emptyMsg.style.display = 'none';
+      if (canvas) canvas.style.display = '';
+      mc('microChart', {type:'doughnut', data:{labels:['👍 มีประโยชน์','👎 ไม่ช่วย'], datasets:[{data:[up, down], backgroundColor:[C.green, C.red]}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:11}}}}}});
+    } else {
+      dc('microChart');
+      if (canvas) canvas.style.display = 'none';
+      if (emptyMsg) emptyMsg.style.display = '';
+    }
+
+    // 👎 reasons
+    const byReason = countBy(microFeedback.filter(r => String(r.rating).toLowerCase() === 'down' && r.reason), 'reason');
+    const rEmpty = document.getElementById('microReasonEmptyMsg');
+    const rCanvas = document.getElementById('microReasonChart');
+    const keys = Object.keys(byReason);
+    if (keys.length > 0) {
+      if (rEmpty) rEmpty.style.display = 'none';
+      if (rCanvas) rCanvas.style.display = '';
+      const labels = keys.map(k => MICRO_REASON_LABELS[k] || k);
+      mc('microReasonChart', {type:'bar', data:{labels:labels, datasets:[{data:keys.map(k => byReason[k]), backgroundColor:C.amber, borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
+    } else {
+      dc('microReasonChart');
+      if (rCanvas) rCanvas.style.display = 'none';
+      if (rEmpty) rEmpty.style.display = '';
+    }
+  }
+
+  // Progressive SUS per-item: 0-4 contribution bar (red→green by score)
+  const SUS_ITEM_LABELS = ['1. ใช้บ่อย','2. ซับซ้อน*','3. ใช้ง่าย','4. ต้องมีคนช่วย*','5. สอดคล้องดี','6. ไม่สอดคล้อง*','7. เรียนรู้เร็ว','8. ยุ่งยาก*','9. มั่นใจ','10. ต้องเรียนเยอะ*'];
+  function renderSusItems(itemContribs, itemCounts) {
+    const emptyMsg = document.getElementById('susItemEmptyMsg');
+    const canvas = document.getElementById('susItemChart');
+    const hasData = itemContribs.some(v => v !== null);
+    if (hasData) {
+      if (emptyMsg) emptyMsg.style.display = 'none';
+      if (canvas) canvas.style.display = '';
+      const data = itemContribs.map(v => v === null ? 0 : v);
+      const colors = itemContribs.map(v => v === null ? C.slate : (v >= 3 ? C.green : v >= 2 ? C.amber : C.red));
+      mc('susItemChart', {type:'bar', data:{labels:SUS_ITEM_LABELS, datasets:[{data:data, backgroundColor:colors, borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx => 'คะแนน ' + fmtNum(ctx.parsed.y) + '/4 (n=' + (itemCounts[ctx.dataIndex] || 0) + ')'}}}, scales:{...CD.scales, y:{...CD.scales.y, max:4}}}});
+    } else {
+      dc('susItemChart');
+      if (canvas) canvas.style.display = 'none';
+      if (emptyMsg) emptyMsg.style.display = '';
     }
   }
 

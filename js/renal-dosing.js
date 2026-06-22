@@ -1181,18 +1181,24 @@
       var c = localStorage.getItem(RENAL_CACHE_KEY);
       if (c && applyRenalRemote(JSON.parse(c))) renderDrugList();
     } catch (e) { /* ignore bad cache */ }
-    var IV = window.IVDrugRef;
-    var base = IV && IV.getAdminGasUrl && IV.getAdminGasUrl();
-    if (!base) return;
-    fetch(base + '?action=renaldrugs')
+    // Read from Supabase (public read). Each row's `data` is the full drug
+    // object; reshape to { drugs: [...] } for applyRenalRemote. Falls back to
+    // the hardcoded RENAL_DRUGS if offline / table empty.
+    var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+    var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+    fetch(SB_URL + '/rest/v1/renal_drugs?select=data', {
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store'
+    })
       .then(function (r) { return r.json(); })
-      .then(function (d) {
-        if (d && d.drugs && applyRenalRemote(d)) {
+      .then(function (rows) {
+        if (!Array.isArray(rows)) return;
+        var d = { drugs: rows.map(function (x) { return x.data; }).filter(Boolean) };
+        if (d.drugs.length && applyRenalRemote(d)) {
           renderDrugList();
           try { localStorage.setItem(RENAL_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
         }
       })
-      .catch(function () { /* offline / not deployed -> keep hardcoded */ });
+      .catch(function () { /* offline -> keep hardcoded */ });
   }
 
   /**

@@ -44,9 +44,13 @@ v5.0-modular/          ← ONLY working directory (this repo)
 └── dist/              ← Built output (gitignored)
 ```
 
-> **Current version: 5.11.1** (see `package.json` / `version.json`). When
+> **Current version: 5.30.0** (see `package.json` / `version.json`). When
 > shipping a release, bump the version string in `package.json`, `version.json`,
 > `sw.js`, and the per-page footers so the force-update path fires.
+> **App version is single-sourced**: `core.js` `VERSION` fills every
+> `[data-app-version]` element (footers, header badges, the index `#versionInfo`
+> footer, and the `showAbout` dialog) — don't hardcode version numbers in HTML/JS
+> display strings, add `data-app-version` instead.
 
 **Deploy flow**: `git push main` → GitHub Actions → `node build.js --prod` → inline CSS/JS → deploy to GitHub Pages
 
@@ -100,6 +104,59 @@ Both use `gas-complete.js` but bound to different Google Sheets:
 | **Analytics** | Analytics + drug data (ID: `1WWXRocEfhLSZRvuWPbDZ7uKlW60wGB3HIGF_4vjkIeE`) | `https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec` |
 
 **IMPORTANT**: When updating `gas-complete.js`, you must manually copy to BOTH GAS editors and create new deployments.
+
+> **GAS editor: Run ≠ Deploy.** The maintenance functions in `gas-complete.js`
+> (`inspectAnalytics`, `cleanSeed*`, `migrateToSupabase*`, `resetMigrationFlags`)
+> run from the editor's **Run** button using the latest **saved (Ctrl+S)** code —
+> no Deploy needed. **Deploy** only republishes the Web App (doGet/doPost) for the
+> live site. Run the analytics maintenance/migration helpers from the **Analytics**
+> GAS project (it's bound to the analytics spreadsheet).
+
+### Analytics backend → Supabase (migrated v5.29.0–v5.30.0)
+**Analytics now lives in Supabase Postgres, not Google Sheets.** GAS/Sheets was
+the wrong tool for high-volume append-only analytics (write quotas, 6-min limit,
+recurring "An unknown error has occurred" on bulk writes). Phase 1 migrated it:
+
+- **Supabase project**: `iv-drugref` (ref `bzwbagojjpiazbeaahmg`, region Singapore).
+  URL `https://bzwbagojjpiazbeaahmg.supabase.co`. The **publishable** key
+  (`sb_publishable_…`, = anon role) is safe in the browser and is hardcoded in
+  `core.js` + `dashboard.js`; the `sb_secret_…` key must NEVER ship to the client.
+- **Schema** (`supabase/schema.sql`): one append-only table `public.events`
+  `{id, ts (server now(), authoritative UTC), client_ts, type, session_id,
+  user_id, app_version, data jsonb}` + indexes. **RLS**: anon may **INSERT** and
+  **SELECT** only (no update/delete). Server-set `ts` permanently kills the old
+  seed/timezone ambiguity (clients can't forge time).
+- **Single events table** replaces the 17 Sheets tabs. `data` jsonb holds the
+  event-specific fields; `type` is the canonical event name (UPPER_CASE like
+  `SEARCH`, `VIEW_DRUG`, `SESSION_START`, plus lowercase `page_view`). The doPost
+  router in `gas-complete.js` is the source of truth for the sheet↔type mapping;
+  `SHEET_TO_TYPE` (migration) and `TYPE_TO_KEY` (dashboard) mirror it.
+- **Write path** (`core.js` `sendToSupabase` inside `sendAnalytics`): reshapes each
+  flat event into the table row (top-level columns + everything else under `data`)
+  and POSTs via `fetch(..., {keepalive:true})` — `sendBeacon` can't set the
+  `apikey`/`Authorization` headers. **Currently DUAL-WRITES** to both Supabase and
+  GAS (legacy). **Phase 1 step 6 (pending, deferred as a safety net): remove the
+  GAS write from `sendAnalytics` and route the offline IndexedDB queue to
+  Supabase too** — then GAS is no longer in the analytics path.
+- **Read path** (`dashboard.js` `fetchRaw`): pages the `events` table
+  (`?select=…&order=ts.asc&limit=1000&offset=`), reshapes back into the per-type
+  `RAW` arrays (`ev.ts → row.timestamp`, `data` fields spread to top level) so all
+  existing charts/cross-filter work unchanged. No GAS URL needed.
+- **CSP**: every page's `connect-src` includes the Supabase host (needed or the
+  browser blocks the POST/GET). Add it when introducing new pages.
+- **Historical backfill** (`gas-complete.js` `migrateToSupabase*`, run once from
+  the Analytics GAS editor): copied **18,971** real rows (timestamp ends in `Z`;
+  the `+07:00` seed rows dropped automatically) into `events`, tagged
+  `data._src='sheets'`. Resumable via Script Properties offsets (`mig_off_<sheet>`)
+  — re-run after a transient error and it skips what's sent (no dupes).
+  `MIG_CUTOFF` (2026-06-22T05:00:00Z) excludes post-deploy rows already captured
+  by the live dual-write. Full redo = wipe `data->>'_src'='sheets'` in SQL +
+  `resetMigrationFlags()`.
+
+**GAS is still used** for admin CRUD (compat pairs / drug data / renal / allergy),
+urgent alerts, and drug-data sync — those are a future **Phase 2** (admin data →
+Supabase). The Two-GAS-Deployments note above still applies to that non-analytics
+backend.
 
 ### GitHub
 - **Repo**: `https://github.com/rxbenz/iv-drugref.git`
@@ -157,7 +214,7 @@ alert background sync). It caches everything **except** `version.json`, which
 is always fetched network-only. `version.json` = `{version, forceUpdate}`:
 when `forceUpdate` is true (or the version changes), the client busts the SW
 cache and reloads. The SW header carries its own version string (currently
-`v5.11.1`), and its top-of-file changelog is a useful release log.
+`v5.30.0`), and its top-of-file changelog is a useful release log.
 
 **Release checklist when bumping version**: update `package.json`,
 `version.json`, the `sw.js` version constant + changelog, and the per-page

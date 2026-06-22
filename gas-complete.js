@@ -630,7 +630,15 @@ function purgeAllAnalytics(commit) {
     var sh = ss.getSheetByName(name);
     if (!sh) { return; }
     var n = Math.max(0, sh.getLastRow() - 1);
-    if (commit === true && n > 0) sh.deleteRows(2, n);
+    if (commit === true && n > 0) {
+      // Clear all data rows (keep the header). Avoids the Sheets limitation
+      // "it is not possible to delete all non-frozen rows" that deleteRows hits
+      // when removing every data row at once.
+      sh.getRange(2, 1, n, sh.getMaxColumns()).clearContent();
+      // Shrink the sheet back down, always leaving header + 1 spare blank row.
+      var blanks = sh.getMaxRows() - 2;
+      if (blanks > 0) sh.deleteRows(3, blanks);
+    }
     report.push(name + ': ' + n + (commit === true ? ' DELETED' : ' (preview)'));
   });
   var msg = (commit === true ? '✅ purgeAllAnalytics DONE — clean slate\n' : '👀 PREVIEW only — run purgeAllAnalytics(true) to delete ALL\n') + report.join('\n');

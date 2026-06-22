@@ -19,6 +19,9 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap"></noscript>
   <!-- Chart.js v4.4.8 — pinned version, SRI hash must be updated if version changes -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" integrity="sha384-T/4KgSWuZEPozpPz7rnnp/5lDSnpY1VPJCojf1S81uTHS1E38qgLfMgVsAeRCWc4" crossorigin="anonymous"></script>
+  <!-- Supabase JS (auth + data). In <head> so it loads before the inlined
+       dashboard.js (the prod build moves inlined scripts ahead of body CDN tags). -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- BUILD:CSS -->
   <link rel="stylesheet" href="css/shared.css">
   <link rel="stylesheet" href="css/theme.css">
@@ -244,7 +247,6 @@
 <!-- BUILD:JS -->
 <script src="js/error-tracker.js"></script>
 <script src="js/core.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/dashboard.js"></script>
 <script src="translations-en.js"></script>
 <script src="i18n.js"></script>

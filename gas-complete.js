@@ -1391,6 +1391,69 @@ function handleBulkCreateCompatPairs(user, data) {
 
 var RENAL_DRUG_HEADERS = ['id', 'name', 'class', 'sub', 'badges', 'recommended', 'dosingTable', 'info', 'infoType', 'ref', 'createdBy', 'createdAt', 'updatedAt'];
 
+// ════════════════════════════════════════════════
+// SUPABASE REFERENCE-DATA SYNC (Phase 2 step 2)
+// ── GAS dual-writes admin reference data to Supabase using the SERVICE key
+//    (server-side, bypasses RLS). The key is read from Script Properties —
+//    NEVER hardcode it here (this file is in a public repo).
+//    Set it once: ADMIN GAS editor → Project Settings → Script Properties →
+//    SUPABASE_SERVICE_KEY = sb_secret_…
+// ════════════════════════════════════════════════
+var SUPA_REF_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+
+function _supaServiceKey() {
+  var k = PropertiesService.getScriptProperties().getProperty('SUPABASE_SERVICE_KEY');
+  if (!k) throw new Error('SUPABASE_SERVICE_KEY not set in Script Properties');
+  return k;
+}
+
+function _supaUpsert(table, rows) {
+  if (!rows || !rows.length) return;
+  var key = _supaServiceKey();
+  var resp = UrlFetchApp.fetch(SUPA_REF_URL + '/rest/v1/' + table, {
+    method: 'post', contentType: 'application/json',
+    headers: { apikey: key, Authorization: 'Bearer ' + key, Prefer: 'resolution=merge-duplicates,return=minimal' },
+    payload: JSON.stringify(rows), muteHttpExceptions: true
+  });
+  var c = resp.getResponseCode();
+  if (c < 200 || c >= 300) throw new Error('Supabase upsert ' + table + ' ' + c + ': ' + resp.getContentText().slice(0, 200));
+}
+
+function _supaDelete(table, col, val) {
+  var key = _supaServiceKey();
+  var url = SUPA_REF_URL + '/rest/v1/' + table + '?' + col + '=eq.' + encodeURIComponent(val);
+  var resp = UrlFetchApp.fetch(url, {
+    method: 'delete',
+    headers: { apikey: key, Authorization: 'Bearer ' + key, Prefer: 'return=minimal' },
+    muteHttpExceptions: true
+  });
+  var c = resp.getResponseCode();
+  if (c < 200 || c >= 300) throw new Error('Supabase delete ' + table + ' ' + c);
+}
+
+// Upsert ALL current renal drugs (cheap — 26 rows). Used by the one-time
+// migration and as the post-write sync. data jsonb holds the full drug object.
+function _syncRenalToSupabase() {
+  var drugs = getSheetData(SHEETS.RENAL_DRUGS_DATA);
+  var rows = drugs.filter(function (d) { return d.id; }).map(function (d) {
+    return { id: String(d.id), name: d.name || '', data: d };
+  });
+  _supaUpsert('renal_drugs', rows);
+  return rows.length;
+}
+// Best-effort wrapper — a Supabase hiccup must never break the GAS admin write.
+function _syncRenalSafe() {
+  try { _syncRenalToSupabase(); } catch (e) { Logger.log('renal->supabase sync failed: ' + e.message); }
+}
+
+// One-time migration — run from the ADMIN GAS editor after setting the key.
+function migrateRenalToSupabaseNow() {
+  var n = _syncRenalToSupabase();
+  Logger.log('renal_drugs upserted to Supabase: ' + n);
+  return n;
+}
+
+
 function handleGetRenalDrugsPublic() {
   var drugs = getSheetData(SHEETS.RENAL_DRUGS_DATA);
   var slim = drugs.map(function(d) {
@@ -1421,6 +1484,7 @@ function handleCreateRenalDrug(user, data) {
     user, now, now
   ]);
   addAuditLog(user, 'createRenalDrug', id, data.name, 'Created');
+  _syncRenalSafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, id: id });
 }
 
@@ -1449,6 +1513,7 @@ function handleUpdateRenalDrug(user, data) {
       var updCol = headers.indexOf('updatedAt');
       if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
       addAuditLog(user, 'updateRenalDrug', data.id, data.name || all[i][headers.indexOf('name')], 'Updated');
+      _syncRenalSafe();   // dual-write to Supabase (best-effort)
       return jsonResponse({ success: true, id: data.id });
     }
   }
@@ -1471,6 +1536,7 @@ function handleDeleteRenalDrug(user, data) {
       var name = all[i][nameCol] || '';
       sheet.deleteRow(i + 1);
       addAuditLog(user, 'deleteRenalDrug', data.id, name, 'Deleted');
+      try { _supaDelete('renal_drugs', 'id', String(data.id)); } catch (e) { Logger.log('renal del supabase: ' + e.message); }
       return jsonResponse({ success: true, message: 'Deleted: ' + name });
     }
   }
@@ -1508,6 +1574,7 @@ function handleBulkCreateRenalDrugs(user, data) {
   });
 
   addAuditLog(user, 'bulkImportRenalDrugs', '', '', 'Imported ' + created + ', skipped ' + skipped);
+  _syncRenalSafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, created: created, skipped: skipped });
 }
 

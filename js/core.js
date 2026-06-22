@@ -676,6 +676,11 @@ var IVDrugRef = (function() {
   // ============================================================
   const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec';
   const ADMIN_GAS_URL = 'https://script.google.com/macros/s/AKfycbwJhLwY34rKpVVBE4aFRMOee6-lldazO64uOk0EXEA0Yvwgz6SA3kjeWt7-R6BSsNZT/exec';
+  // Supabase analytics (Phase 1 migration). Publishable key is safe in the
+  // browser — security comes from RLS (events table is anon insert-only).
+  const SUPABASE_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+  const SUPABASE_EVENTS_URL = SUPABASE_URL + '/rest/v1/events';
   let _reqCount = 0;
   let _reqWindowStart = Date.now();
 
@@ -720,12 +725,48 @@ var IVDrugRef = (function() {
   }
 
   /**
+   * Reshape a flat analytics event into the Supabase `events` table row, then
+   * insert it via the Data API (PostgREST). Top-level columns are pulled out;
+   * everything else is nested under `data` (jsonb). Fire-and-forget — failures
+   * are swallowed so analytics never affects the user. sendBeacon can't set the
+   * apikey/Authorization headers, so we use fetch with keepalive (survives
+   * page unload the same way).
+   * @param {Object} enriched - Event data already enriched with session/user id
+   */
+  function sendToSupabase(enriched) {
+    if (!SUPABASE_URL || !SUPABASE_KEY) return;
+    try {
+      var row = {
+        type: enriched.type || 'unknown',
+        session_id: enriched.session_id || null,
+        user_id: enriched.user_id || null,
+        app_version: enriched.app_version || null,
+        client_ts: enriched.queued_at || new Date().toISOString(),
+        data: {}
+      };
+      var skip = { type: 1, session_id: 1, user_id: 1, app_version: 1, queued_at: 1 };
+      Object.keys(enriched).forEach(function(k) { if (!skip[k]) row.data[k] = enriched[k]; });
+      fetch(SUPABASE_EVENTS_URL, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(row),
+        keepalive: true
+      }).catch(function() {});
+    } catch (e) { /* silent fail */ }
+  }
+
+  /**
    * Send analytics event via sendBeacon or fetch
    * Rate limited to 20 requests per minute (rolling window)
    * @param {Object} data - Event data to send
    */
   function sendAnalytics(data) {
-    if (!ANALYTICS_URL || !hasAnalyticsConsent()) return;
+    if (!hasAnalyticsConsent()) return;
     const now = Date.now();
     if (now - _reqWindowStart > 60000) { _reqCount = 0; _reqWindowStart = now; }
     if (_reqCount >= 20) return;
@@ -741,7 +782,11 @@ var IVDrugRef = (function() {
       queueAnalyticsEvent(enriched);
       return;
     }
+    // Primary sink: Supabase (Phase 1). Dual-write to GAS keeps the legacy
+    // dashboard working until it migrates (Phase 1 step 5).
+    sendToSupabase(enriched);
     try {
+      if (!ANALYTICS_URL) return;
       var payload = JSON.stringify(enriched);
       if (navigator.sendBeacon) {
         navigator.sendBeacon(ANALYTICS_URL, payload);

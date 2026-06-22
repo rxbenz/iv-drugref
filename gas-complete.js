@@ -64,7 +64,8 @@ var SHEETS = {
   COMPAT_PAIRS: 'CompatPairs',
   ALLERGY_LOOKUPS: 'AllergyLookups',
   ALLERGY_GROUPS: 'AllergyGroups',
-  ALLERGY_REFS: 'AllergyRefs'
+  ALLERGY_REFS: 'AllergyRefs',
+  FEATURE_USE: 'FeatureUse'
 };
 
 // ──────────────────────────────────────────────
@@ -365,6 +366,9 @@ function doPost(e) {
         return logNPSResponse(data);
       case 'SURVEY':
         return logSurvey(data);
+      case 'QUICK_ACTION':
+      case 'ONBOARDING':
+        return logFeatureUse(data);
       default:
         // Generic log — catch all unknown events
         return logAnalyticsGeneric(data, SHEETS.SESSIONS);
@@ -422,6 +426,14 @@ function logDrugExpand(data) {
   data.timestamp = new Date().toISOString();
   smartLog(SHEETS.DRUG_EXPANDS, data,
     ['timestamp', 'session_id', 'user_id', 'drug_id', 'drug_name', 'source']);
+  return jsonResponse({ success: true });
+}
+
+// Feature-adoption tracking — FAB quick-actions + onboarding tutorial.
+function logFeatureUse(data) {
+  data.timestamp = new Date().toISOString();
+  smartLog(SHEETS.FEATURE_USE, data,
+    ['timestamp', 'session_id', 'user_id', 'feature', 'action', 'page', 'detail']);
   return jsonResponse({ success: true });
 }
 
@@ -533,6 +545,7 @@ function handleRaw() {
     drugRatings: getSheetData(SHEETS.DRUG_RATINGS),
     npsResponses: getSheetData(SHEETS.NPS_RESPONSES),
     allergyLookups: getSheetData(SHEETS.ALLERGY_LOOKUPS),
+    featureUse: getSheetData(SHEETS.FEATURE_USE),
     gasVersion: GAS_VERSION,
     serverTime: new Date().toISOString()
   });

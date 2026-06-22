@@ -323,6 +323,7 @@
     const drugRatings = applyFilters(RAW.drugRatings || []);
     const npsResponses = applyFilters(RAW.npsResponses || []);
     const allergyLookups = applyFilters(RAW.allergyLookups || []);
+    const featureUse = applyFilters(RAW.featureUse || []);
 
     // Always render overview + active tab
     renderOverview(sessions, searches, surveys, doseCalcs, tdmUsage, compatUsage);
@@ -336,7 +337,7 @@
     if (tab === 'dosecalc' || tab === 'overview') renderDoseCalc(doseCalcs);
     if (tab === 'ratings' || tab === 'overview') renderRatingsNPS(drugRatings, npsResponses);
     if (tab === 'survey' || tab === 'overview') renderSurvey(surveys);
-    if (tab === 'journey' || tab === 'overview') renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage);
+    if (tab === 'journey' || tab === 'overview') renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage, featureUse);
 
     document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length + searches.length + tdmUsage.length + renalDosing.length + compatUsage.length} rows | Dashboard v6.1`;
   }
@@ -894,8 +895,17 @@
   // ============================================================
   // RENDER: JOURNEY (XSS-safe)
   // ============================================================
-  function renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage) {
+  function renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage, featureUse) {
     const users = uniqueSet(pageViews, 'user_id');
+
+    // Feature adoption: FAB quick-actions + onboarding (feature:action composite)
+    const feat = {};
+    (featureUse || []).forEach(r => {
+      const label = (String(r.feature || '?') + ':' + String(r.action || '?')).trim();
+      if (label && label !== ':') feat[label] = (feat[label] || 0) + 1;
+    });
+    const featKeys = Object.keys(feat).sort((a, b) => feat[b] - feat[a]);
+    mc('featureChart', {type:'bar', data:{labels:featKeys.length ? featKeys : ['—'], datasets:[{data:featKeys.length ? featKeys.map(k => feat[k]) : [0], backgroundColor:C.teal, borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
 
     document.getElementById('journeyStats').innerHTML = [
       statBox('📄', pageViews.length.toLocaleString(), 'Page Views', 'cyan'),

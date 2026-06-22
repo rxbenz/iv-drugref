@@ -391,6 +391,11 @@
       var action = btn.getAttribute('data-qa');
       toggleMenu(false);
       openPanel(action);
+      // Analytics: track FAB quick-action usage (feature adoption research)
+      if (window.IVDrugRef && IVDrugRef.sendAnalytics) {
+        IVDrugRef.sendAnalytics({ type: 'QUICK_ACTION', feature: 'fab', action: action,
+          page: (IVDrugRef.currentPage && IVDrugRef.currentPage()) || location.pathname.split('/').pop() || '' });
+      }
     });
 
     // Panel close buttons

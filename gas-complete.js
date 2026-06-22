@@ -1446,6 +1446,21 @@ function _syncRenalSafe() {
   try { _syncRenalToSupabase(); } catch (e) { Logger.log('renal->supabase sync failed: ' + e.message); }
 }
 
+// Diagnostic — what spreadsheet/tabs does this GAS project actually see?
+function diagAdminSheets() {
+  try {
+    var a = SpreadsheetApp.getActiveSpreadsheet();
+    Logger.log('active SS: ' + (a ? (a.getName() + ' / ' + a.getId()) : 'null (standalone?)'));
+    if (a) Logger.log('active tabs: ' + a.getSheets().map(function (s) { return s.getName(); }).join(', '));
+  } catch (e) { Logger.log('active err: ' + e.message); }
+  Logger.log('SPREADSHEET_ID const = "' + SPREADSHEET_ID + '"');
+  try {
+    var g = getSS();
+    Logger.log('getSS(): ' + g.getName() + ' / ' + g.getId());
+    Logger.log('getSS tabs: ' + g.getSheets().map(function (s) { return s.getName(); }).join(', '));
+  } catch (e) { Logger.log('getSS err: ' + e.message); }
+}
+
 // One-time migration — run from the ADMIN GAS editor after setting the key.
 function migrateRenalToSupabaseNow() {
   var n = _syncRenalToSupabase();

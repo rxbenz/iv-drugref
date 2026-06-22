@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.27.1'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
+var GAS_VERSION = '5.28.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -65,7 +65,9 @@ var SHEETS = {
   ALLERGY_LOOKUPS: 'AllergyLookups',
   ALLERGY_GROUPS: 'AllergyGroups',
   ALLERGY_REFS: 'AllergyRefs',
-  FEATURE_USE: 'FeatureUse'
+  FEATURE_USE: 'FeatureUse',
+  MICRO_FEEDBACK: 'MicroFeedback',
+  SUS_ITEMS: 'SusItems'
 };
 
 // ──────────────────────────────────────────────
@@ -369,6 +371,10 @@ function doPost(e) {
       case 'QUICK_ACTION':
       case 'ONBOARDING':
         return logFeatureUse(data);
+      case 'MICRO_FEEDBACK':
+        return logMicroFeedback(data);
+      case 'SUS_ITEM':
+        return logSusItem(data);
       default:
         // Generic log — catch all unknown events
         return logAnalyticsGeneric(data, SHEETS.SESSIONS);
@@ -434,6 +440,22 @@ function logFeatureUse(data) {
   data.timestamp = new Date().toISOString();
   smartLog(SHEETS.FEATURE_USE, data,
     ['timestamp', 'session_id', 'user_id', 'feature', 'action', 'page', 'detail']);
+  return jsonResponse({ success: true });
+}
+
+// Micro 👍/👎 feedback (one-tap after value delivered).
+function logMicroFeedback(data) {
+  data.timestamp = new Date().toISOString();
+  smartLog(SHEETS.MICRO_FEEDBACK, data,
+    ['timestamp', 'session_id', 'user_id', 'rating', 'reason', 'page', 'context']);
+  return jsonResponse({ success: true });
+}
+
+// Progressive SUS — one item at a time; aggregate per user_id for cohort SUS.
+function logSusItem(data) {
+  data.timestamp = new Date().toISOString();
+  smartLog(SHEETS.SUS_ITEMS, data,
+    ['timestamp', 'session_id', 'user_id', 'item_index', 'score', 'page']);
   return jsonResponse({ success: true });
 }
 
@@ -546,6 +568,8 @@ function handleRaw() {
     npsResponses: getSheetData(SHEETS.NPS_RESPONSES),
     allergyLookups: getSheetData(SHEETS.ALLERGY_LOOKUPS),
     featureUse: getSheetData(SHEETS.FEATURE_USE),
+    microFeedback: getSheetData(SHEETS.MICRO_FEEDBACK),
+    susItems: getSheetData(SHEETS.SUS_ITEMS),
     gasVersion: GAS_VERSION,
     serverTime: new Date().toISOString()
   });
@@ -566,7 +590,8 @@ var ANALYTICS_SHEETS_FOR_CLEAN = [
   SHEETS.SESSIONS, SHEETS.SEARCHES, SHEETS.PAGE_VIEWS, SHEETS.DOSE_CALCS,
   SHEETS.DRUG_EXPANDS, SHEETS.TDM_USAGE, SHEETS.RENAL_DOSING, SHEETS.COMPAT_USAGE,
   SHEETS.SURVEYS, SHEETS.CALC_VISITS, SHEETS.DRUG_RATINGS, SHEETS.NPS_RESPONSES,
-  SHEETS.ALLERGY_LOOKUPS, SHEETS.FEATURE_USE, SHEETS.ERRORS, 'Filters'
+  SHEETS.ALLERGY_LOOKUPS, SHEETS.FEATURE_USE, SHEETS.MICRO_FEEDBACK,
+  SHEETS.SUS_ITEMS, SHEETS.ERRORS, 'Filters'
 ];
 
 // Delete rows whose any cell matches obvious seed/test markers.

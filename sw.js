@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.27.1
+// IV Drug Reference PWA — Service Worker v5.28.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -169,9 +169,18 @@
 //          rows can be excluded by date before export). GAS gains cleanSeedData()
 //          + purgeAllAnalytics() manual cleanup utilities and GAS_VERSION 5.27.1
 //          (so the dashboard load toast confirms the redeploy).
+// v5.28.0: Respectful feedback engine (survey.js rewrite, loaded on all 7 user
+//          pages). Replaces the always-on survey button with: (1) micro 👍/👎
+//          after a dwell + interaction (optional 1-tap reason) → MICRO_FEEDBACK;
+//          (2) progressive SUS — one item per returning-user session, answers
+//          accumulate per user → cohort SUS → SUS_ITEM; (3) full survey kept but
+//          NEVER pushed (only via IVSurvey.show / data-action="showSurvey").
+//          Respect rules: never first visit, ≤1 prompt/session, 3-day cooldown,
+//          skip already-answered, and OPT OUT FOREVER after 2 dismissals. GAS:
+//          MicroFeedback + SusItems sheets (+ raw + CSV export + cleanup).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.27.1';
+const CACHE_NAME = 'iv-drugref-v5.28.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

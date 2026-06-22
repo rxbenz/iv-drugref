@@ -45,13 +45,13 @@ const PROD_MODE = process.argv.includes('--prod');
 // Pages and their CSS/JS dependencies (order matters)
 const PAGES = {
   'index.html':        { css: ['shared.css','theme.css','index.css','quick-actions.css','onboarding.css','site-chrome.css'],       js: ['error-tracker.js','core.js','index.js','quick-actions.js','onboarding.js','survey.js','site-chrome.js'] },
-  'calculator.html':   { css: ['shared.css','theme.css','calculator.css','quick-actions.css','onboarding.css','site-chrome.css'],  js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','calculator.js','quick-actions.js','onboarding.js','site-chrome.js'] },
-  'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css','quick-actions.css','onboarding.css','site-chrome.css'],js: ['error-tracker.js','core.js','pediatric-guard.js','renal-dosing.js','quick-actions.js','onboarding.js','site-chrome.js'] },
-  'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css','quick-actions.css','onboarding.css','site-chrome.css'],js: ['error-tracker.js','core.js','compatibility.js','quick-actions.js','onboarding.js','site-chrome.js'] },
-  'allergy.html':      { css: ['shared.css','theme.css','allergy.css','site-chrome.css'],     js: ['error-tracker.js','core.js','allergy-data.js','share-export.js','allergy.js','site-chrome.js'] },
+  'calculator.html':   { css: ['shared.css','theme.css','calculator.css','quick-actions.css','onboarding.css','site-chrome.css'],  js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','calculator.js','quick-actions.js','onboarding.js','survey.js','site-chrome.js'] },
+  'renal-dosing.html': { css: ['shared.css','theme.css','renal-dosing.css','quick-actions.css','onboarding.css','site-chrome.css'],js: ['error-tracker.js','core.js','pediatric-guard.js','renal-dosing.js','quick-actions.js','onboarding.js','survey.js','site-chrome.js'] },
+  'compatibility.html':{ css: ['shared.css','theme.css','compatibility.css','quick-actions.css','onboarding.css','site-chrome.css'],js: ['error-tracker.js','core.js','compatibility.js','quick-actions.js','onboarding.js','survey.js','site-chrome.js'] },
+  'allergy.html':      { css: ['shared.css','theme.css','allergy.css','site-chrome.css'],     js: ['error-tracker.js','core.js','allergy-data.js','share-export.js','allergy.js','survey.js','site-chrome.js'] },
   'admin.html':        { css: ['shared.css','theme.css','admin.css'],       js: ['error-tracker.js','core.js','allergy-data.js','admin.js'] },
-  'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css','onboarding.css','site-chrome.css'],          js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','tdm.js','quick-actions.js','onboarding.js','site-chrome.js'] },
-  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css','site-chrome.css'],    js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','vanco-tdm.js','quick-actions.js','site-chrome.js'] },
+  'tdm.html':          { css: ['shared.css','theme.css','tdm.css','quick-actions.css','onboarding.css','site-chrome.css'],          js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','tdm.js','quick-actions.js','onboarding.js','survey.js','site-chrome.js'] },
+  'vanco-tdm.html':    { css: ['shared.css','theme.css','vanco-tdm.css','quick-actions.css','site-chrome.css'],    js: ['error-tracker.js','core.js','pediatric-guard.js','share-export.js','pk-models.js','vanco-tdm.js','quick-actions.js','survey.js','site-chrome.js'] },
   'dashboard.html':    { css: ['shared.css','theme.css','dashboard.css'],    js: ['error-tracker.js','core.js','dashboard.js'] },
 };
 

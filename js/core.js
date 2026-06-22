@@ -1082,7 +1082,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.27.1';
+  const VERSION = '5.28.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

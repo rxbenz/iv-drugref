@@ -815,6 +815,11 @@ var SUPA_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
 var SUPA_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
 var SUPA_EVENTS = SUPA_URL + '/rest/v1/events';
 var SUPA_BATCH = 500;
+// Only migrate rows from BEFORE the dual-write went live (deploy ~05:02Z on
+// 2026-06-22; first live Supabase row 05:05Z). Rows at/after this are already
+// in Supabase via the live dual-write, so skipping them avoids duplicates.
+// ISO-UTC ('...Z') strings compare lexicographically = chronologically.
+var MIG_CUTOFF = '2026-06-22T05:00:00Z';
 
 // Reverse of the doPost analytics router: sheet → canonical event type, so
 // migrated history uses the same type strings the live app sends.
@@ -864,6 +869,7 @@ function migrateSheetToSupabase(name, commit) {
   for (var r = 1; r < values.length; r++) {
     var ts = String(values[r][tsCol] == null ? '' : values[r][tsCol]).trim();
     if (!ts || ts.charAt(ts.length - 1) !== 'Z') continue;   // skip seed (+07:00) / blank
+    if (ts >= MIG_CUTOFF) continue;                           // already in Supabase via live dual-write
     real++;
     var data = { _src: 'sheets' };
     for (var c = 0; c < headers.length; c++) {

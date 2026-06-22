@@ -656,41 +656,69 @@ function purgeAllAnalytics(commit) {
 // per-row deleteRow(), so it stays fast on the big sheets (Sessions ~6.7k rows)
 // and won't hit the 6-minute execution limit.
 // PREVIEW (no delete): cleanSeedByTimestamp()  →  DELETE: cleanSeedByTimestamp(true)
+// Process ONE sheet (so a single-sheet run can isolate a failure). Returns a
+// report line. On commit it flushes immediately, so partial progress survives
+// even if a later sheet throws — and re-running just skips already-clean sheets
+// (idempotent: a cleaned sheet has only Z rows → 0 to remove).
+function _cleanSeedTsOne(ss, name, commit) {
+  var sh = ss.getSheetByName(name);
+  if (!sh) { return name + ': (missing)'; }
+  var last = sh.getLastRow();
+  if (last < 2) { return name + ': 0 data rows'; }
+  var values = sh.getDataRange().getValues();
+  var headers = values[0];
+  var tsCol = headers.indexOf('timestamp');
+  if (tsCol < 0) { return name + ': no timestamp column — SKIPPED'; }
+  var keep = [], removed = 0, emptyTs = 0;
+  for (var r = 1; r < values.length; r++) {
+    var ts = String(values[r][tsCol] == null ? '' : values[r][tsCol]).trim();
+    if (ts === '') { keep.push(values[r]); emptyTs++; continue; } // keep blanks
+    if (ts.charAt(ts.length - 1) === 'Z') { keep.push(values[r]); } // real → keep
+    else { removed++; }                                            // seed → drop
+  }
+  if (commit !== true || removed === 0) {
+    return name + ': ' + removed + (commit === true ? ' (already clean)' : ' seed (preview)') +
+      ' / ' + (last - 1) + ' rows' + (emptyTs ? ' [' + emptyTs + ' blank-ts kept]' : '');
+  }
+  try {
+    var width = sh.getMaxColumns();
+    var nData = sh.getLastRow() - 1;
+    sh.getRange(2, 1, nData, width).clearContent();        // wipe old data rows
+    if (keep.length > 0) {                                  // write survivors back
+      sh.getRange(2, 1, keep.length, headers.length).setValues(keep);
+    }
+    SpreadsheetApp.flush();                                 // persist before next sheet
+    return name + ': ' + removed + ' DELETED / ' + (last - 1) + ' rows' +
+      (emptyTs ? ' [' + emptyTs + ' blank-ts kept]' : '');
+  } catch (e) {
+    return name + ': ⚠️ ERROR during write (' + e.message + ') — re-run to retry';
+  }
+}
+
 function cleanSeedByTimestamp(commit) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var report = [];
   ANALYTICS_SHEETS_FOR_CLEAN.forEach(function (name) {
-    var sh = ss.getSheetByName(name);
-    if (!sh) { return; }
-    var last = sh.getLastRow();
-    if (last < 2) { report.push(name + ': 0 data rows'); return; }
-    var values = sh.getDataRange().getValues();
-    var headers = values[0];
-    var tsCol = headers.indexOf('timestamp');
-    if (tsCol < 0) { report.push(name + ': no timestamp column — SKIPPED'); return; }
-    var keep = [headers], removed = 0, emptyTs = 0;
-    for (var r = 1; r < values.length; r++) {
-      var ts = String(values[r][tsCol] == null ? '' : values[r][tsCol]).trim();
-      if (ts === '') { keep.push(values[r]); emptyTs++; continue; } // keep blanks
-      if (ts.charAt(ts.length - 1) === 'Z') { keep.push(values[r]); } // real → keep
-      else { removed++; }                                            // seed → drop
-    }
-    if (commit === true && removed > 0) {
-      var width = sh.getMaxColumns();
-      var nData = sh.getLastRow() - 1;
-      sh.getRange(2, 1, nData, width).clearContent();      // wipe old data rows
-      if (keep.length > 1) {                                // write survivors back
-        sh.getRange(2, 1, keep.length - 1, headers.length).setValues(keep.slice(1));
-      }
-    }
-    report.push(name + ': ' + removed + (commit === true ? ' DELETED' : ' seed (preview)') +
-      ' / ' + (last - 1) + ' rows' + (emptyTs ? ' [' + emptyTs + ' blank-ts kept]' : ''));
+    report.push(_cleanSeedTsOne(ss, name, commit));
   });
   var msg = (commit === true
     ? '✅ cleanSeedByTimestamp DONE — non-Z (seed) rows removed\n'
     : '👀 PREVIEW only — run cleanSeedByTimestamp(true) to delete\n') + report.join('\n');
   Logger.log(msg);
   return msg;
+}
+
+// Per-sheet commit helpers — if the all-sheets run trips GAS's "unknown error"
+// (transient / too-large write), clean the heavy sheets one at a time.
+function cleanSeedTs_Sessions()   { return _logOne('Sessions'); }
+function cleanSeedTs_Searches()   { return _logOne('Searches'); }
+function cleanSeedTs_PageViews()  { return _logOne('PageViews'); }
+function cleanSeedTs_DoseCalcs()  { return _logOne('DoseCalcs'); }
+function cleanSeedTs_ErrorLog()   { return _logOne('ErrorLog'); }
+function _logOne(name) {
+  var r = _cleanSeedTsOne(SpreadsheetApp.getActiveSpreadsheet(), name, true);
+  Logger.log(r);
+  return r;
 }
 
 // One-click commit wrappers for the Apps Script editor (the Run button can't

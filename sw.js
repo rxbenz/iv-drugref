@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.28.1
+// IV Drug Reference PWA — Service Worker v5.29.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -182,9 +182,12 @@
 //          Micro 👍/👎 (helpful rate + 👎 reasons), an estimated cohort SUS from
 //          progressive items, and a per-item 0-4 SUS bar. About modal (all 7
 //          pages) gains an optional "take the full survey" link → IVSurvey.show.
+// v5.29.0: Analytics migration Phase 1 — core.js dual-writes events to Supabase
+//          (events table, anon insert-only RLS) alongside GAS; CSP connect-src
+//          gains the Supabase project host. Legacy GAS dashboard untouched.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.28.1';
+const CACHE_NAME = 'iv-drugref-v5.29.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

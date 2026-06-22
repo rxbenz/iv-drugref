@@ -397,7 +397,7 @@ function logSession(data) {
 function logSearch(data) {
   data.timestamp = new Date().toISOString();
   smartLog(SHEETS.SEARCHES, data,
-    ['timestamp', 'session_id', 'user_id', 'query', 'results', 'time_to_click_ms', 'drug_clicked']);
+    ['timestamp', 'session_id', 'user_id', 'query', 'results', 'time_to_click_ms', 'drug_clicked', 'filter_used']);
   return jsonResponse({ success: true });
 }
 
@@ -413,7 +413,7 @@ function logDoseCalc(data) {
   // fallback headers match the fields calculator.js actually sends (only used
   // when the sheet is first auto-created; existing sheets keep their headers)
   smartLog(SHEETS.DOSE_CALCS, data,
-    ['timestamp', 'session_id', 'user_id', 'drug_name', 'weight_kg', 'height_cm',
+    ['timestamp', 'session_id', 'user_id', 'drug_name', 'dose_unit', 'weight_kg', 'height_cm',
      'age', 'sex', 'scr', 'crcl', 'dose_recommended', 'details']);
   return jsonResponse({ success: true });
 }
@@ -421,7 +421,7 @@ function logDoseCalc(data) {
 function logDrugExpand(data) {
   data.timestamp = new Date().toISOString();
   smartLog(SHEETS.DRUG_EXPANDS, data,
-    ['timestamp', 'session_id', 'user_id', 'drug_id', 'drug_name']);
+    ['timestamp', 'session_id', 'user_id', 'drug_id', 'drug_name', 'source']);
   return jsonResponse({ success: true });
 }
 

@@ -399,6 +399,15 @@
     return out;
   }
 
+  // Thailand-local (UTC+7) hour + day-of-week from an ISO timestamp, so the
+  // usage charts reflect real clinical shifts regardless of the viewer's TZ.
+  function thParts(ts) {
+    const t = Date.parse(ts);
+    if (isNaN(t)) return null;
+    const d = new Date(t + 7 * 3600000);
+    return { hour: d.getUTCHours(), dow: d.getUTCDay() }; // dow: 0=Sun
+  }
+
   function statBox(icon, val, label, color) {
     return `<div class="stat ${esc(color)}"><div class="stat-icon">${icon}</div><div class="stat-val">${esc(String(val))}</div><div class="stat-lbl">${esc(label)}</div></div>`;
   }
@@ -515,6 +524,22 @@
       }
     });
     mc('timeChart', {type:'bar', data:{labels:TIME_BUCKETS.map(b => b.label), datasets:[{data:bk, backgroundColor:C.cyan, borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}}}});
+
+    // ── Research: usage by hour-of-day + day-of-week (UTC+7), across all activity ──
+    const allEvents = [].concat(sessions, searches, doseCalcs, tdmUsage, compatUsage);
+    const hours = new Array(24).fill(0);
+    const dows = new Array(7).fill(0);
+    allEvents.forEach(r => { const p = thParts(r.timestamp); if (p) { hours[p.hour]++; dows[p.dow]++; } });
+    mc('hourChart', {type:'bar', data:{labels:hours.map((_, i) => i), datasets:[{data:hours, backgroundColor:C.blue, borderRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
+    const dowLabels = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+    mc('dowChart', {type:'bar', data:{labels:dowLabels, datasets:[{data:dows, backgroundColor:C.purple, borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}}}});
+
+    // ── Research: searches per session distribution ──
+    const perSession = {};
+    searches.forEach(r => { const s = String(r.session_id || '').trim(); if (s) perSession[s] = (perSession[s] || 0) + 1; });
+    const sps = [0, 0, 0, 0, 0]; // 1, 2, 3, 4-5, 6+
+    Object.values(perSession).forEach(n => { if (n <= 1) sps[0]++; else if (n === 2) sps[1]++; else if (n === 3) sps[2]++; else if (n <= 5) sps[3]++; else sps[4]++; });
+    mc('spsChart', {type:'bar', data:{labels:['1','2','3','4-5','6+'], datasets:[{data:sps, backgroundColor:C.cyan, borderRadius:4}]}, options:{...CD, plugins:{legend:{display:false}}}});
   }
 
   // ============================================================
@@ -530,7 +555,18 @@
     mc('filterChart', {type:'bar', data:{labels:Object.keys(filters), datasets:[{data:Object.values(filters), backgroundColor:C.blue, borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
 
     const src = countBy(drugExpands, 'source');
-    mc('srcChart', {type:'doughnut', data:{labels:Object.keys(src), datasets:[{data:Object.values(src), backgroundColor:[C.blue, C.green, C.amber]}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
+    mc('srcChart', {type:'doughnut', data:{labels:Object.keys(src), datasets:[{data:Object.values(src), backgroundColor:[C.blue, C.green, C.amber, C.purple, C.red]}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
+
+    // ── Research: no-result searches (results == 0) — finds drugs users want but the DB lacks ──
+    const noRes = {};
+    searches.forEach(r => {
+      const n = parseInt(r.results);
+      if (!isNaN(n) && n === 0) {
+        const q = String(r.query || '').trim().toLowerCase();
+        if (q) noRes[q] = (noRes[q] || 0) + 1;
+      }
+    });
+    buildClickTable('noResultTable', topN(noRes, 20), C.red, 'query');
   }
 
   // ============================================================

@@ -19,12 +19,18 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 14px 20px;
+  /* Override theme.css's flex .header-inner: on index the inner wraps
+     .header-top (row of logo/badges/toggles) + .search-wrap, which must
+     STACK, not sit side-by-side (the flex rule pushed search to the right
+     and made it overlap the toggles). */
+  display: block;
 }
 
 .header-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 12px;
 }
 
@@ -32,6 +38,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  /* Push the help/drug-count/lang/theme controls together on the right
+     instead of spreading them across the full width (space-between). */
+  margin-right: auto;
 }
 
 .logo-icon {

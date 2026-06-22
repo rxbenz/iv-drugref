@@ -800,6 +800,114 @@ function inspectAnalytics() {
 
 
 // ════════════════════════════════════════════════
+// SUPABASE MIGRATION (Phase 1 step 4) — one-time historical backfill
+// ── Reads each analytics sheet, keeps only REAL rows (timestamp ends in 'Z';
+//    the +07:00 seed rows are dropped automatically), reshapes them into the
+//    Supabase `events` table, and bulk-inserts via the Data API (UrlFetchApp —
+//    outbound works fine even though Sheets *writes* were flaky). Each migrated
+//    row is tagged data._src='sheets' so a re-run is easy to make idempotent:
+//    to redo from scratch, run this in the Supabase SQL editor first —
+//        delete from public.events where data->>'_src' = 'sheets';
+//    then migrate again.
+// PREVIEW (no insert): migrateToSupabase()  →  INSERT: migrateToSupabaseNow()
+// ════════════════════════════════════════════════
+var SUPA_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+var SUPA_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+var SUPA_EVENTS = SUPA_URL + '/rest/v1/events';
+var SUPA_BATCH = 500;
+
+// Reverse of the doPost analytics router: sheet → canonical event type, so
+// migrated history uses the same type strings the live app sends.
+var SHEET_TO_TYPE = {
+  'Sessions': 'SESSION_START', 'Searches': 'SEARCH', 'PageViews': 'page_view',
+  'DrugExpands': 'VIEW_DRUG', 'DoseCalcs': 'DOSE_CALC', 'TDMUsage': 'TDM_RESULT',
+  'RenalDosing': 'RENAL_DOSING', 'CompatUsage': 'COMPAT_CHECK', 'CalcVisits': 'CALC_VISIT',
+  'AllergyLookups': 'ALLERGY_LOOKUP', 'DrugRatings': 'DRUG_RATING', 'NPSResponses': 'NPS_SUBMIT',
+  'Surveys': 'SURVEY', 'FeatureUse': 'FEATURE_USE', 'MicroFeedback': 'MICRO_FEEDBACK',
+  'SusItems': 'SUS_ITEM', 'Filters': 'FILTER', 'ErrorLog': 'error_report'
+};
+
+// POST an array of event rows to Supabase; 4 attempts with 2/4/8s backoff.
+function _migPostBatch(rows) {
+  var delay = 2000;
+  for (var attempt = 1; ; attempt++) {
+    try {
+      var resp = UrlFetchApp.fetch(SUPA_EVENTS, {
+        method: 'post', contentType: 'application/json',
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'return=minimal' },
+        payload: JSON.stringify(rows), muteHttpExceptions: true
+      });
+      var code = resp.getResponseCode();
+      if (code >= 200 && code < 300) return;
+      if (attempt >= 4) throw new Error('HTTP ' + code + ': ' + resp.getContentText().slice(0, 160));
+    } catch (e) { if (attempt >= 4) throw e; }
+    Utilities.sleep(delay); delay *= 2;
+  }
+}
+
+function migrateSheetToSupabase(name, commit) {
+  var type = SHEET_TO_TYPE[name];
+  if (!type) return name + ': no type mapping — SKIPPED';
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  if (!sh) return name + ': (missing)';
+  var last = sh.getLastRow();
+  if (last < 2) return name + ': 0 data rows';
+  var values = sh.getDataRange().getValues();
+  var headers = values[0];
+  var tsCol = headers.indexOf('timestamp');
+  if (tsCol < 0) return name + ': no timestamp column — SKIPPED';
+  var sidCol = headers.indexOf('session_id'), uidCol = headers.indexOf('user_id'),
+      avCol = headers.indexOf('app_version');
+  var core = { timestamp: 1, session_id: 1, user_id: 1, app_version: 1 };
+
+  var batch = [], real = 0, sent = 0;
+  for (var r = 1; r < values.length; r++) {
+    var ts = String(values[r][tsCol] == null ? '' : values[r][tsCol]).trim();
+    if (!ts || ts.charAt(ts.length - 1) !== 'Z') continue;   // skip seed (+07:00) / blank
+    real++;
+    var data = { _src: 'sheets' };
+    for (var c = 0; c < headers.length; c++) {
+      var h = headers[c]; if (!h || core[h]) continue;
+      var v = values[r][c];
+      if (v === '' || v === null || v === undefined) continue;
+      data[h] = v;
+    }
+    batch.push({
+      type: type, ts: ts, client_ts: ts,
+      session_id: sidCol >= 0 ? (values[r][sidCol] || null) : null,
+      user_id: uidCol >= 0 ? (values[r][uidCol] || null) : null,
+      app_version: avCol >= 0 ? (values[r][avCol] || null) : null,
+      data: data
+    });
+    if (commit === true && batch.length >= SUPA_BATCH) { _migPostBatch(batch); sent += batch.length; batch = []; }
+  }
+  if (commit === true && batch.length) { _migPostBatch(batch); sent += batch.length; }
+  return name + ' → ' + type + ': ' +
+    (commit === true ? (sent + ' inserted') : (real + ' real (preview)')) + ' / ' + (last - 1) + ' rows';
+}
+
+function migrateToSupabase(commit) {
+  var report = [];
+  Object.keys(SHEET_TO_TYPE).forEach(function (name) {
+    try { report.push(migrateSheetToSupabase(name, commit)); }
+    catch (e) { report.push(name + ': ⚠️ ERROR (' + e.message + ') — clear _src rows then re-run'); }
+  });
+  var msg = (commit === true
+    ? '✅ migrateToSupabase DONE — historical Z-rows backfilled\n'
+    : '👀 PREVIEW — run migrateToSupabaseNow() to insert\n') + report.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+function migrateToSupabaseNow() { return migrateToSupabase(true); }
+
+// Per-sheet runners (use if the all-sheets run nears the 6-min limit).
+function migrate_Sessions()  { return _migLog('Sessions'); }
+function migrate_Searches()  { return _migLog('Searches'); }
+function migrate_PageViews() { return _migLog('PageViews'); }
+function _migLog(name) { var r = migrateSheetToSupabase(name, true); Logger.log(r); return r; }
+
+
+// ════════════════════════════════════════════════
 // DRUG DATA (APP SYNC)
 // ════════════════════════════════════════════════
 

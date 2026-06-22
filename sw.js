@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.26.1
+// IV Drug Reference PWA — Service Worker v5.27.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -148,9 +148,25 @@
 //          Phenytoin. Shared PK models/engine (pk-models.js) were already common;
 //          the duplicated VancoTDM UI code in tdm.js is now unreachable (frozen,
 //          to be deleted in a later cleanup). Other 6 TDM drugs untouched.
+// v5.27.0: Dashboard analytics audit — fix every silently-broken chart + add
+//          research instrumentation. Several charts only ever showed SEED data
+//          because the client never sent the field they read:
+//          • time_to_click_ms + drug_clicked (search→click; deferred SEARCH row)
+//          • platform/standalone/screen on SESSION_START (Platform chart)
+//          • filter_used on SEARCH (Filter chart)
+//          • source on VIEW_DRUG: search/filter/browse/quick-access (Expand Source)
+//          • dose_unit on dose_calc (calculator + inline drip widget) (Dose Unit)
+//          New research views (existing data): usage by hour-of-day (UTC+7) +
+//          day-of-week + searches/session (Overview); no-result searches (Drug
+//          Usage). New tracking: FAB quick-actions + onboarding → FeatureUse
+//          sheet + Journey "Feature Use" chart. New in-app survey (js/survey.js):
+//          role/department + 5 satisfaction Likerts + 10-item SUS (auto-scored)
+//          → SURVEY. GAS gains FeatureUse sheet + filter_used/dose_unit/source/
+//          drug_clicked fallback columns (existing sheets need columns added +
+//          GAS redeploy).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.26.1';
+const CACHE_NAME = 'iv-drugref-v5.27.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

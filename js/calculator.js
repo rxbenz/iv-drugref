@@ -514,7 +514,7 @@
     sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     if (typeof trackCalcUsage === 'function') {
-      trackCalcUsage(drug.name, pt, result);
+      trackCalcUsage(drug.name, pt, result, drug.maxDose && drug.maxDose.unit);
     }
   }
 
@@ -581,7 +581,7 @@
   let lastSelectedDrugForTracking = null;
   const calcTracked = {};
 
-  function trackCalcUsage(drugName, pt, result) {
+  function trackCalcUsage(drugName, pt, result, unit) {
     if (drugName !== lastSelectedDrugForTracking) return;
     lastSelectedDrugForTracking = null;
 
@@ -591,6 +591,7 @@
     IVDrugRef.sendAnalytics({
       type: 'dose_calc',
       drug_name: drugName,
+      dose_unit: unit || '',
       weight_kg: pt.wt,
       height_cm: pt.ht || '',
       age: pt.age,

@@ -607,3 +607,135 @@ renderDrugCard=function(drug){
     }
   };
 })();
+
+// ============================================================
+// Search → click timing (analytics)  — populates time_to_click_ms
+// ------------------------------------------------------------
+// The dashboard "Search Time" chart + "Avg Search" stat read the
+// `time_to_click_ms` column of the Searches sheet, but the app never
+// measured it (every search row had it blank → chart effectively dead).
+// Fix: defer the SEARCH analytics row until the user either
+//   (a) opens a drug card  → log it WITH time_to_click_ms + drug_clicked, or
+//   (b) abandons it (new query / leaves page) → log it without a click time.
+// Still exactly one row per search, so total-search counts stay accurate.
+// Pure monkey-patch (onSearch/toggleCard live in the minified line-7 blob).
+// ============================================================
+(function(){
+  var pending = null;          // { query, results, ts }
+  var _send = sendAnalytics;   // original (immediate) sender
+  var _lastSource = '';        // where the last drug-open came from (for VIEW_DRUG.source)
+
+  function curFilter(){ return (typeof currentFilter !== 'undefined') ? currentFilter : 'all'; }
+
+  function flushPending(){
+    if(!pending) return;
+    _send('SEARCH', { query: pending.query, results: pending.results, filter_used: curFilter() });
+    pending = null;
+  }
+
+  // Platform detection for the Overview "Platform" chart (client never sent it).
+  function detectPlatform(){
+    var ua = navigator.userAgent || '';
+    if(/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+    if(/Android/i.test(ua)) return 'Android';
+    if(/Windows|Macintosh|Mac OS|Linux|CrOS/i.test(ua)) return 'Desktop';
+    return 'Other';
+  }
+  function isStandalone(){
+    return !!((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true);
+  }
+
+  // Intercept analytics to enrich SEARCH / SESSION_START / VIEW_DRUG.
+  sendAnalytics = function(type, data){
+    if(type === 'SEARCH'){
+      flushPending();          // a previous search with no click → record it now
+      data = data || {};
+      pending = { query: data.query || '', results: data.results || 0, ts: Date.now() };
+      return;
+    }
+    if(type === 'SESSION_START'){
+      data = data || {};
+      data.platform = detectPlatform();
+      data.standalone = isStandalone();
+      data.online = navigator.onLine;
+      data.screen_w = (window.screen && screen.width) || 0;
+      data.screen_h = (window.screen && screen.height) || 0;
+      return _send(type, data);
+    }
+    if(type === 'VIEW_DRUG'){
+      data = data || {};
+      if(!data.source) data.source = _lastSource || (curFilter() !== 'all' ? 'filter' : 'browse');
+      return _send(type, data);
+    }
+    return _send(type, data || {});
+  };
+
+  // On the first card-expand after a search, send the SEARCH row enriched
+  // with how long it took and which drug was opened; also tag the click source.
+  var _origToggle = toggleCard;
+  toggleCard = function(id){
+    var card = document.querySelector('[data-drug-id="' + id + '"]');
+    var willExpand = card && !card.classList.contains('expanded');
+    if(willExpand){
+      // classify where this drug-open came from (feeds VIEW_DRUG.source)
+      if(card.closest && card.closest('#quickAccessZone')) _lastSource = 'quick-access';
+      else if(pending || (typeof searchQuery !== 'undefined' && searchQuery)) _lastSource = 'search';
+      else if(curFilter() !== 'all') _lastSource = 'filter';
+      else _lastSource = 'browse';
+
+      if(pending){
+        var dt = Date.now() - pending.ts;
+        if(dt > 0 && dt < 300000){   // ignore <0 / >5min (matches dashboard cap)
+          var drug = (typeof DRUGS !== 'undefined') ? DRUGS.find(function(d){ return d.id === id; }) : null;
+          _send('SEARCH', {
+            query: pending.query,
+            results: pending.results,
+            time_to_click_ms: dt,
+            drug_clicked: drug ? drug.generic : '',
+            filter_used: curFilter()
+          });
+          pending = null;
+        }
+      }
+    }
+    return _origToggle(id);
+  };
+
+  // Inline infusion-drip calculator (drug cards, DOSE_CALC widget) never logged
+  // anything → the dashboard "Dose Unit Distribution" had no real data. Capture
+  // it (debounced 1.5s so slider drags don't spam) as a dose_calc row carrying
+  // the drip unit (mcg/kg/min etc.).
+  if(typeof updateDoseCalc === 'function'){
+    var _origUDC = updateDoseCalc;
+    var _udcTimers = {};
+    updateDoseCalc = function(drugKey){
+      var r = _origUDC(drugKey);
+      try{
+        if(drugKey && typeof DOSE_CALC !== 'undefined' && DOSE_CALC[drugKey]){
+          clearTimeout(_udcTimers[drugKey]);
+          _udcTimers[drugKey] = setTimeout(function(){
+            var sfx = drugKey.replace(/[^a-z0-9]/gi,'');
+            var box = document.getElementById('calcResult_' + sfx);
+            if(!box || box.style.display === 'none') return;   // only when a result is shown
+            var val = (document.getElementById('calcValue_' + sfx) || {}).textContent || '';
+            var wtEl = document.getElementById('wt_' + sfx);
+            _send('dose_calc', {
+              drug_name: drugKey,
+              dose_unit: DOSE_CALC[drugKey].unit || '',
+              dose_recommended: val ? (val + ' mL/hr') : '',
+              weight_kg: wtEl ? (parseFloat(wtEl.value) || '') : '',
+              details: 'inline drip calc'
+            });
+          }, 1500);
+        }
+      }catch(e){ /* analytics must never break the calculator */ }
+      return r;
+    };
+  }
+
+  // Record abandoned searches when the user navigates away / hides the tab.
+  window.addEventListener('pagehide', flushPending);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') flushPending();
+  });
+})();

@@ -173,8 +173,15 @@
     }
   }
 
+  function trackOnboarding(action, detail) {
+    if (window.IVDrugRef && IVDrugRef.sendAnalytics) {
+      IVDrugRef.sendAnalytics({ type: 'ONBOARDING', feature: 'onboarding',
+        action: action, page: detectPage(), detail: (detail == null ? '' : String(detail)) });
+    }
+  }
+
   function showStep(idx) {
-    if (idx < 0 || idx >= STEPS.length) return endTutorial();
+    if (idx < 0 || idx >= STEPS.length) return endTutorial('complete');
 
     currentStep = idx;
     var step = STEPS[idx];
@@ -192,7 +199,9 @@
     }, 150);
   }
 
-  function endTutorial() {
+  var _ended = false;
+  function endTutorial(reason) {
+    if (!_ended) { _ended = true; trackOnboarding(reason || 'close', currentStep); }
     localStorage.setItem(LS_KEY, 'true');
 
     if (prevHighlight) {
@@ -213,6 +222,8 @@
 
   function startTutorial() {
     currentStep = 0;
+    _ended = false;
+    trackOnboarding('start', 0);
     createOverlay();
     backdropEl.classList.add('active');
     showStep(0);
@@ -225,7 +236,7 @@
         showStep(currentStep + 1);
       },
       skipTutorial: function () {
-        endTutorial();
+        endTutorial('skip');
       },
       showTutorial: function () {
         startTutorial();

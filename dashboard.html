@@ -83,6 +83,13 @@
     <div class="card"><div class="card-hd"><span class="em">📱</span> Platform</div><div class="card-act"><button class="btn sm" data-xprt="platformChart">📷</button></div><canvas id="platformChart" height="190"></canvas></div>
     <div class="card"><div class="card-hd"><span class="em">⏱</span> Search Time</div><div class="card-act"><button class="btn sm" data-xprt="timeChart">📷</button></div><canvas id="timeChart" height="190"></canvas></div>
   </div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">🕐</span> การใช้งานรายชั่วโมง (UTC+7)</div><div class="card-act"><button class="btn sm" data-xprt="hourChart">📷</button></div><canvas id="hourChart" height="70"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hd"><span class="em">📅</span> รายวันในสัปดาห์</div><div class="card-act"><button class="btn sm" data-xprt="dowChart">📷</button></div><canvas id="dowChart" height="190"></canvas></div>
+    <div class="card"><div class="card-hd"><span class="em">🔎</span> จำนวนค้นหาต่อ Session</div><div class="card-act"><button class="btn sm" data-xprt="spsChart">📷</button></div><canvas id="spsChart" height="190"></canvas></div>
+  </div>
 </div>
 
 <!-- DRUGS -->
@@ -94,6 +101,9 @@
   <div class="g2">
     <div class="card"><div class="card-hd"><span class="em">🏷</span> Filter ใช้บ่อย</div><div class="card-act"><button class="btn sm" data-xprt="filterChart">📷</button></div><canvas id="filterChart" height="190"></canvas></div>
     <div class="card"><div class="card-hd"><span class="em">📂</span> Expand Source</div><div class="card-act"><button class="btn sm" data-xprt="srcChart">📷</button></div><canvas id="srcChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">🚫</span> ค้นแล้วไม่เจอ (No Results) — ยาที่ผู้ใช้หาแต่ไม่มีใน DB</div><div class="tw" id="noResultTable"></div></div>
   </div>
 </div>
 
@@ -197,6 +207,9 @@
   <div class="g2">
     <div class="card"><div class="card-hd"><span class="em">📄</span> Page Visits</div><div class="card-act"><button class="btn sm" data-xprt="pvChart">📷</button></div><canvas id="pvChart" height="190"></canvas></div>
     <div class="card"><div class="card-hd"><span class="em">🔀</span> Nav Flow (top 15)</div><div class="card-act"><button class="btn sm" data-xprt="flowChart">📷</button></div><canvas id="flowChart" height="190"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card full"><div class="card-hd"><span class="em">🧩</span> การใช้ฟีเจอร์ (FAB / Onboarding)</div><div class="card-act"><button class="btn sm" data-xprt="featureChart">📷</button></div><canvas id="featureChart" height="80"></canvas></div>
   </div>
   <div class="card full" style="margin-top:8px">
     <div class="card-hd"><span class="em">🗺</span> User Timeline</div>

@@ -657,6 +657,49 @@ function cleanSeedDataNow() {
   return cleanSeedData(true);
 }
 
+// READ-ONLY diagnostic — profiles every analytics sheet so the seed-vs-real
+// signature can be identified before deleting anything. Deletes NOTHING.
+// Select in the function dropdown, Run, then read the Execution log.
+function inspectAnalytics() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var out = [];
+  ANALYTICS_SHEETS_FOR_CLEAN.forEach(function (name) {
+    var sh = ss.getSheetByName(name);
+    if (!sh) { return; }
+    var last = sh.getLastRow();
+    if (last < 2) { out.push('── ' + name + ': (empty)'); return; }
+    var values = sh.getDataRange().getValues();
+    var headers = values[0];
+    var tsCol = headers.indexOf('timestamp');
+    var uidCol = headers.indexOf('user_id');
+    var sidCol = headers.indexOf('session_id');
+    var minTs = null, maxTs = null, uids = {}, sids = {}, byDate = {};
+    for (var r = 1; r < values.length; r++) {
+      if (tsCol >= 0) {
+        var ts = String(values[r][tsCol]).slice(0, 10);
+        if (ts) {
+          if (!minTs || ts < minTs) minTs = ts;
+          if (!maxTs || ts > maxTs) maxTs = ts;
+          byDate[ts] = (byDate[ts] || 0) + 1;
+        }
+      }
+      if (uidCol >= 0) { var u = String(values[r][uidCol]); uids[u] = (uids[u] || 0) + 1; }
+      if (sidCol >= 0) { var s = String(values[r][sidCol]); sids[s] = (sids[s] || 0) + 1; }
+    }
+    var uidKeys = Object.keys(uids);
+    var dateKeys = Object.keys(byDate).sort();
+    out.push('────────── ' + name + ' (' + (last - 1) + ' rows)');
+    out.push('  dates: ' + minTs + ' → ' + maxTs + ' (' + dateKeys.length + ' distinct days)');
+    out.push('  distinct user_id: ' + uidKeys.length + ' | distinct session_id: ' + Object.keys(sids).length);
+    out.push('  sample user_id: ' + uidKeys.slice(0, 6).join(' , '));
+    out.push('  first row: ' + values[1].join(' | ').slice(0, 180));
+    out.push('  last  row: ' + values[values.length - 1].join(' | ').slice(0, 180));
+  });
+  var msg = '🔍 ANALYTICS INSPECT (read-only, nothing deleted)\n' + out.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
 
 // ════════════════════════════════════════════════
 // DRUG DATA (APP SYNC)

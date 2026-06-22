@@ -607,3 +607,67 @@ renderDrugCard=function(drug){
     }
   };
 })();
+
+// ============================================================
+// Search → click timing (analytics)  — populates time_to_click_ms
+// ------------------------------------------------------------
+// The dashboard "Search Time" chart + "Avg Search" stat read the
+// `time_to_click_ms` column of the Searches sheet, but the app never
+// measured it (every search row had it blank → chart effectively dead).
+// Fix: defer the SEARCH analytics row until the user either
+//   (a) opens a drug card  → log it WITH time_to_click_ms + drug_clicked, or
+//   (b) abandons it (new query / leaves page) → log it without a click time.
+// Still exactly one row per search, so total-search counts stay accurate.
+// Pure monkey-patch (onSearch/toggleCard live in the minified line-7 blob).
+// ============================================================
+(function(){
+  var pending = null;          // { query, results, ts }
+  var _send = sendAnalytics;   // original (immediate) sender
+
+  function flushPending(){
+    if(!pending) return;
+    _send('SEARCH', { query: pending.query, results: pending.results });
+    pending = null;
+  }
+
+  // Intercept SEARCH events: stash instead of sending right away.
+  sendAnalytics = function(type, data){
+    if(type === 'SEARCH'){
+      flushPending();          // a previous search with no click → record it now
+      data = data || {};
+      pending = { query: data.query || '', results: data.results || 0, ts: Date.now() };
+      return;
+    }
+    return _send(type, data || {});
+  };
+
+  // On the first card-expand after a search, send the SEARCH row enriched
+  // with how long it took and which drug was opened.
+  var _origToggle = toggleCard;
+  toggleCard = function(id){
+    if(pending){
+      var card = document.querySelector('[data-drug-id="' + id + '"]');
+      var willExpand = card && !card.classList.contains('expanded');
+      if(willExpand){
+        var dt = Date.now() - pending.ts;
+        if(dt > 0 && dt < 300000){   // ignore <0 / >5min (matches dashboard cap)
+          var drug = (typeof DRUGS !== 'undefined') ? DRUGS.find(function(d){ return d.id === id; }) : null;
+          _send('SEARCH', {
+            query: pending.query,
+            results: pending.results,
+            time_to_click_ms: dt,
+            drug_clicked: drug ? drug.generic : ''
+          });
+          pending = null;
+        }
+      }
+    }
+    return _origToggle(id);
+  };
+
+  // Record abandoned searches when the user navigates away / hides the tab.
+  window.addEventListener('pagehide', flushPending);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') flushPending();
+  });
+})();

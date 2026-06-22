@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.26.1
+// IV Drug Reference PWA — Service Worker v5.27.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -148,9 +148,17 @@
 //          Phenytoin. Shared PK models/engine (pk-models.js) were already common;
 //          the duplicated VancoTDM UI code in tdm.js is now unreachable (frozen,
 //          to be deleted in a later cleanup). Other 6 TDM drugs untouched.
+// v5.27.0: Analytics — actually measure search→click time. The dashboard
+//          "Search Time" / "Avg Search" read `time_to_click_ms` but the app
+//          never recorded it (chart was effectively dead, showing only seed
+//          rows). index.js now defers the SEARCH event until the user opens a
+//          drug (logs time_to_click_ms + drug_clicked) or abandons it (logged
+//          without a time) — one row per search, counts stay accurate. GAS
+//          Searches fallback header gains drug_clicked. (Part of a wider
+//          dashboard analytics audit — more field fixes to follow.)
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.26.1';
+const CACHE_NAME = 'iv-drugref-v5.27.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

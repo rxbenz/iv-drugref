@@ -397,7 +397,7 @@ function logSession(data) {
 function logSearch(data) {
   data.timestamp = new Date().toISOString();
   smartLog(SHEETS.SEARCHES, data,
-    ['timestamp', 'session_id', 'user_id', 'query', 'results', 'time_to_click_ms']);
+    ['timestamp', 'session_id', 'user_id', 'query', 'results', 'time_to_click_ms', 'drug_clicked']);
   return jsonResponse({ success: true });
 }
 

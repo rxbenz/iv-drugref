@@ -148,14 +148,22 @@
 //          Phenytoin. Shared PK models/engine (pk-models.js) were already common;
 //          the duplicated VancoTDM UI code in tdm.js is now unreachable (frozen,
 //          to be deleted in a later cleanup). Other 6 TDM drugs untouched.
-// v5.27.0: Analytics — actually measure search→click time. The dashboard
-//          "Search Time" / "Avg Search" read `time_to_click_ms` but the app
-//          never recorded it (chart was effectively dead, showing only seed
-//          rows). index.js now defers the SEARCH event until the user opens a
-//          drug (logs time_to_click_ms + drug_clicked) or abandons it (logged
-//          without a time) — one row per search, counts stay accurate. GAS
-//          Searches fallback header gains drug_clicked. (Part of a wider
-//          dashboard analytics audit — more field fixes to follow.)
+// v5.27.0: Dashboard analytics audit — fix every silently-broken chart + add
+//          research instrumentation. Several charts only ever showed SEED data
+//          because the client never sent the field they read:
+//          • time_to_click_ms + drug_clicked (search→click; deferred SEARCH row)
+//          • platform/standalone/screen on SESSION_START (Platform chart)
+//          • filter_used on SEARCH (Filter chart)
+//          • source on VIEW_DRUG: search/filter/browse/quick-access (Expand Source)
+//          • dose_unit on dose_calc (calculator + inline drip widget) (Dose Unit)
+//          New research views (existing data): usage by hour-of-day (UTC+7) +
+//          day-of-week + searches/session (Overview); no-result searches (Drug
+//          Usage). New tracking: FAB quick-actions + onboarding → FeatureUse
+//          sheet + Journey "Feature Use" chart. New in-app survey (js/survey.js):
+//          role/department + 5 satisfaction Likerts + 10-item SUS (auto-scored)
+//          → SURVEY. GAS gains FeatureUse sheet + filter_used/dose_unit/source/
+//          drug_clicked fallback columns (existing sheets need columns added +
+//          GAS redeploy).
 // ============================================================================
 
 const CACHE_NAME = 'iv-drugref-v5.27.0';

@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.17.4'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
+var GAS_VERSION = '5.27.1'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -555,6 +555,62 @@ function handleExport(sheetName) {
   if (!sheetName) return errorResponse('Missing sheet parameter');
   var data = getSheetData(sheetName);
   return jsonResponse(data);
+}
+
+// ════════════════════════════════════════════════
+// SEED / TEST DATA CLEANUP  (run manually from the GAS editor)
+// ── IMPORTANT: run these from the ANALYTICS GAS project (the one bound to the
+//    analytics spreadsheet). Back up first: File → Make a copy.
+// ════════════════════════════════════════════════
+var ANALYTICS_SHEETS_FOR_CLEAN = [
+  SHEETS.SESSIONS, SHEETS.SEARCHES, SHEETS.PAGE_VIEWS, SHEETS.DOSE_CALCS,
+  SHEETS.DRUG_EXPANDS, SHEETS.TDM_USAGE, SHEETS.RENAL_DOSING, SHEETS.COMPAT_USAGE,
+  SHEETS.SURVEYS, SHEETS.CALC_VISITS, SHEETS.DRUG_RATINGS, SHEETS.NPS_RESPONSES,
+  SHEETS.ALLERGY_LOOKUPS, SHEETS.FEATURE_USE, SHEETS.ERRORS, 'Filters'
+];
+
+// Delete rows whose any cell matches obvious seed/test markers.
+// PREVIEW (no delete): cleanSeedData()  →  DELETE: cleanSeedData(true)
+function cleanSeedData(commit) {
+  var markers = /\b(test|audit|seed|demo|dummy|curl|sample|fake)\b/i;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var report = [];
+  ANALYTICS_SHEETS_FOR_CLEAN.forEach(function (name) {
+    var sh = ss.getSheetByName(name);
+    if (!sh) { return; }
+    var last = sh.getLastRow();
+    if (last < 2) { report.push(name + ': 0 data rows'); return; }
+    var values = sh.getDataRange().getValues();
+    var toDelete = [];
+    for (var r = 1; r < values.length; r++) {        // r=0 is the header
+      if (markers.test(values[r].join(' '))) toDelete.push(r + 1); // 1-based row
+    }
+    if (commit === true) {
+      for (var i = toDelete.length - 1; i >= 0; i--) sh.deleteRow(toDelete[i]);
+    }
+    report.push(name + ': ' + toDelete.length + (commit === true ? ' DELETED' : ' matched (preview)') + ' / ' + (last - 1) + ' rows');
+  });
+  var msg = (commit === true ? '✅ cleanSeedData DONE\n' : '👀 PREVIEW only — run cleanSeedData(true) to delete\n') + report.join('\n');
+  Logger.log(msg);
+  return msg;
+}
+
+// Full reset: delete ALL data rows (keep headers) from every analytics sheet.
+// Use when all current data is demo/seed and you want a clean slate.
+// PREVIEW: purgeAllAnalytics()  →  DELETE: purgeAllAnalytics(true)
+function purgeAllAnalytics(commit) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var report = [];
+  ANALYTICS_SHEETS_FOR_CLEAN.forEach(function (name) {
+    var sh = ss.getSheetByName(name);
+    if (!sh) { return; }
+    var n = Math.max(0, sh.getLastRow() - 1);
+    if (commit === true && n > 0) sh.deleteRows(2, n);
+    report.push(name + ': ' + n + (commit === true ? ' DELETED' : ' (preview)'));
+  });
+  var msg = (commit === true ? '✅ purgeAllAnalytics DONE — clean slate\n' : '👀 PREVIEW only — run purgeAllAnalytics(true) to delete ALL\n') + report.join('\n');
+  Logger.log(msg);
+  return msg;
 }
 
 

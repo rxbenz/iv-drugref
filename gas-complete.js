@@ -638,6 +638,17 @@ function purgeAllAnalytics(commit) {
   return msg;
 }
 
+// One-click commit wrappers for the Apps Script editor (the Run button can't
+// pass arguments, so a no-arg function is needed to actually delete).
+// ⚠️ DESTRUCTIVE — back up the spreadsheet first. Select this in the function
+//    dropdown, then click Run.
+function purgeAllAnalyticsNow() {
+  return purgeAllAnalytics(true);
+}
+function cleanSeedDataNow() {
+  return cleanSeedData(true);
+}
+
 
 // ════════════════════════════════════════════════
 // DRUG DATA (APP SYNC)

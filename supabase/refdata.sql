@@ -18,7 +18,7 @@ create table if not exists public.drugs (
 );
 
 create table if not exists public.compat_pairs (
-  id         bigint generated always as identity primary key,
+  id         text primary key,           -- the sheet's id (stringified) for upsert
   drug_a     text,
   drug_b     text,
   data       jsonb not null,

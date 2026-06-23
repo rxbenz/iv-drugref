@@ -1279,6 +1279,7 @@ function handleCreateCompatPair(user, data) {
     user, now, now
   ]);
   addAuditLog(user, 'createCompatPair', id, data.drugA + ' + ' + data.drugB, 'Result: ' + data.result);
+  _syncCompatSafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, id: id, message: 'Compat pair created' });
 }
 
@@ -1307,6 +1308,7 @@ function handleUpdateCompatPair(user, data) {
       if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
 
       addAuditLog(user, 'updateCompatPair', data.id, (data.drugA || all[i][headers.indexOf('drugA')]) + ' + ' + (data.drugB || all[i][headers.indexOf('drugB')]), 'Updated');
+      _syncCompatSafe();   // dual-write to Supabase (best-effort)
       return jsonResponse({ success: true, id: data.id, message: 'Compat pair updated' });
     }
   }
@@ -1330,6 +1332,7 @@ function handleDeleteCompatPair(user, data) {
       var name = (all[i][drugACol] || '') + ' + ' + (all[i][drugBCol] || '');
       sheet.deleteRow(i + 1);
       addAuditLog(user, 'deleteCompatPair', data.id, name, 'Deleted');
+      try { _supaDelete('compat_pairs', 'id', String(data.id)); } catch (e) { Logger.log('compat del supabase: ' + e.message); }
       return jsonResponse({ success: true, message: 'Deleted: ' + name });
     }
   }
@@ -1381,6 +1384,7 @@ function handleBulkCreateCompatPairs(user, data) {
   });
 
   addAuditLog(user, 'bulkImportCompat', '', '', 'Imported ' + created + ' new, updated ' + updated + ', skipped ' + skipped + ' unchanged');
+  _syncCompatSafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, created: created, updated: updated, skipped: skipped });
 }
 
@@ -1465,6 +1469,26 @@ function diagAdminSheets() {
 function migrateRenalToSupabaseNow() {
   var n = _syncRenalToSupabase();
   Logger.log('renal_drugs upserted to Supabase: ' + n);
+  return n;
+}
+
+// ── Compat pairs sync ───────────────────────────────────────────────
+// Upsert ALL compat pairs (cheap — ~257 rows). data jsonb holds the full
+// pair object; drug_a/drug_b mirrored to columns for convenience.
+function _syncCompatToSupabase() {
+  var pairs = getSheetData(SHEETS.COMPAT_PAIRS);
+  var rows = pairs.filter(function (p) { return p.id; }).map(function (p) {
+    return { id: String(p.id), drug_a: p.drugA || '', drug_b: p.drugB || '', data: p };
+  });
+  _supaUpsert('compat_pairs', rows);
+  return rows.length;
+}
+function _syncCompatSafe() {
+  try { _syncCompatToSupabase(); } catch (e) { Logger.log('compat->supabase sync failed: ' + e.message); }
+}
+function migrateCompatToSupabaseNow() {
+  var n = _syncCompatToSupabase();
+  Logger.log('compat_pairs upserted to Supabase: ' + n);
   return n;
 }
 

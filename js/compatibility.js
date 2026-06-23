@@ -333,20 +333,24 @@ function loadCompatPairsFromSheet() {
     }
   } catch (e) { /* ignore cache errors */ }
 
-  // Fetch fresh data from admin GAS (where CompatPairs sheet lives)
-  var gasUrl = (typeof IVDrugRef !== 'undefined' && IVDrugRef.getAdminGasUrl)
-    ? IVDrugRef.getAdminGasUrl() : '';
-  if (!gasUrl) return;
-
-  fetch(gasUrl + '?action=compatpairs')
+  // Fetch fresh data from Supabase compat_pairs (public read). Each row's
+  // `data` is the full pair object; reshape to [[drugA, drugB, result], ...]
+  // for rebuildCuratedMap. CURATED fallback stays if offline / empty.
+  var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+  var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+  fetch(SB_URL + '/rest/v1/compat_pairs?select=data', {
+    headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store'
+  })
     .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var pairs = data.pairs;
-      if (Array.isArray(pairs) && pairs.length > 0) {
+    .then(function(rows) {
+      if (!Array.isArray(rows)) return;
+      var pairs = rows.map(function(x) { return x.data; }).filter(Boolean)
+        .map(function(d) { return [d.drugA || '', d.drugB || '', d.result || 'c']; });
+      if (pairs.length > 0) {
         rebuildCuratedMap(pairs);
         localStorage.setItem(COMPAT_LS_KEY, JSON.stringify(pairs));
         localStorage.setItem(COMPAT_LS_TS, String(Date.now()));
-        console.log('[Compat] Synced ' + pairs.length + ' pairs from sheet');
+        console.log('[Compat] Synced ' + pairs.length + ' pairs from Supabase');
       }
     })
     .catch(function() { /* silent — CURATED fallback is already loaded */ });

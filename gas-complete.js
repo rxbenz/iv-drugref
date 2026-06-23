@@ -1535,6 +1535,29 @@ function migrateDrugsToSupabaseNow() {
   return n;
 }
 
+// ── Allergy sync (groups + refs) ────────────────────────────────────
+// Store raw sheet rows in `data` jsonb (JSON-string fields kept as-is — the
+// app's applyRemoteData already parses them, same as it did from GAS).
+function _syncAllergyToSupabase() {
+  var groups = getSheetData(SHEETS.ALLERGY_GROUPS);
+  var grows = groups.filter(function (g) { return g.id; })
+    .map(function (g) { return { id: String(g.id), data: g }; });
+  _supaUpsert('allergy_groups', grows);
+  var refs = getSheetData(SHEETS.ALLERGY_REFS);
+  var rrows = refs.filter(function (r) { return r.key; })
+    .map(function (r) { return { key: String(r.key), data: r }; });
+  _supaUpsert('allergy_refs', rrows);
+  return grows.length + ' groups, ' + rrows.length + ' refs';
+}
+function _syncAllergySafe() {
+  try { _syncAllergyToSupabase(); } catch (e) { Logger.log('allergy->supabase sync failed: ' + e.message); }
+}
+function migrateAllergyToSupabaseNow() {
+  var r = _syncAllergyToSupabase();
+  Logger.log('allergy upserted to Supabase: ' + r);
+  return r;
+}
+
 
 function handleGetRenalDrugsPublic() {
   var drugs = getSheetData(SHEETS.RENAL_DRUGS_DATA);
@@ -1722,6 +1745,7 @@ function handleCreateAllergyGroup(user, data) {
   var id = data.id || ('agrp_' + Date.now());
   sheet.appendRow(allergyGroupRow(id, data, user, now, now));
   addAuditLog(user, 'createAllergyGroup', id, data.label || '', 'Created');
+  _syncAllergySafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, id: id });
 }
 
@@ -1746,6 +1770,7 @@ function handleUpdateAllergyGroup(user, data) {
       var updCol = headers.indexOf('updatedAt');
       if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
       addAuditLog(user, 'updateAllergyGroup', data.id, data.label || '', 'Updated');
+      _syncAllergySafe();   // dual-write to Supabase (best-effort)
       return jsonResponse({ success: true, id: data.id });
     }
   }
@@ -1767,6 +1792,7 @@ function handleDeleteAllergyGroup(user, data) {
       var label = all[i][labelCol] || '';
       sheet.deleteRow(i + 1);
       addAuditLog(user, 'deleteAllergyGroup', data.id, label, 'Deleted');
+      try { _supaDelete('allergy_groups', 'id', String(data.id)); } catch (e) { Logger.log('allergy del supabase: ' + e.message); }
       return jsonResponse({ success: true, message: 'Deleted: ' + label });
     }
   }
@@ -1801,6 +1827,7 @@ function handleBulkCreateAllergyGroups(user, data) {
     }
   });
   addAuditLog(user, 'bulkImportAllergyGroups', '', '', 'Imported ' + created + ' new, updated ' + updated);
+  _syncAllergySafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, created: created, updated: updated });
 }
 
@@ -1832,6 +1859,7 @@ function handleBulkCreateAllergyRefs(user, data) {
     }
   });
   addAuditLog(user, 'bulkImportAllergyRefs', '', '', 'Imported ' + created + ' new, updated ' + updated);
+  _syncAllergySafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, created: created, updated: updated });
 }
 

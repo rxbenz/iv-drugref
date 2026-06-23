@@ -55,3 +55,28 @@ end $$;
 
 -- NOTE: a one-time data backfill (GAS → these tables) follows, using the
 -- Phase-1 pattern (temporary anon INSERT during migration, then removed).
+
+
+-- ── Allergy tables (Phase 2, added later) ───────────────────────────
+create table if not exists public.allergy_groups (
+  id         text primary key,
+  data       jsonb not null,
+  updated_at timestamptz not null default now()
+);
+create table if not exists public.allergy_refs (
+  key        text primary key,
+  data       jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+do $$
+declare t text;
+begin
+  foreach t in array array['allergy_groups','allergy_refs'] loop
+    execute format('alter table public.%I enable row level security;', t);
+    execute format('drop policy if exists "public read %1$s" on public.%1$I;', t);
+    execute format('create policy "public read %1$s" on public.%1$I for select to anon, authenticated using (true);', t);
+    execute format('drop policy if exists "admin write %1$s" on public.%1$I;', t);
+    execute format('create policy "admin write %1$s" on public.%1$I for all to authenticated using (public.is_admin()) with check (public.is_admin());', t);
+  end loop;
+end $$;

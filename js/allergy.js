@@ -617,18 +617,24 @@
       var cached = localStorage.getItem(ALLERGY_CACHE_KEY);
       if (cached) applyAndRerender(JSON.parse(cached));
     } catch (e) { /* ignore bad cache */ }
-    // 2) refresh from network
-    var IV = window.IVDrugRef;
-    var base = IV && IV.getAdminGasUrl && IV.getAdminGasUrl();
-    if (!base) return;
-    fetch(base + '?action=allergydata')
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        if (d && (d.groups || d.refs) && applyAndRerender(d)) {
+    // 2) refresh from Supabase (public read) — groups + refs tables; each row's
+    //    `data` is the raw record. applyRemoteData parses it (same as from GAS).
+    var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+    var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+    var H = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
+    Promise.all([
+      fetch(SB_URL + '/rest/v1/allergy_groups?select=data', { headers: H, cache: 'no-store' }).then(function (r) { return r.json(); }),
+      fetch(SB_URL + '/rest/v1/allergy_refs?select=data', { headers: H, cache: 'no-store' }).then(function (r) { return r.json(); })
+    ])
+      .then(function (res) {
+        var groups = Array.isArray(res[0]) ? res[0].map(function (x) { return x.data; }).filter(Boolean) : [];
+        var refs = Array.isArray(res[1]) ? res[1].map(function (x) { return x.data; }).filter(Boolean) : [];
+        var d = { groups: groups, refs: refs };
+        if ((groups.length || refs.length) && applyAndRerender(d)) {
           try { localStorage.setItem(ALLERGY_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
         }
       })
-      .catch(function () { /* offline / not deployed -> keep hardcoded defaults */ });
+      .catch(function () { /* offline -> keep hardcoded defaults */ });
   }
 
   function init() {

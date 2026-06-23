@@ -158,6 +158,40 @@ urgent alerts, and drug-data sync — those are a future **Phase 2** (admin data
 Supabase). The Two-GAS-Deployments note above still applies to that non-analytics
 backend.
 
+### Reference data → Supabase (Phase 2 step 2, v5.32.0–v5.35.0)
+**Admin-maintained reference data now READS from Supabase**, while the admin
+panel keeps writing through GAS (unchanged) and GAS **dual-writes** each change
+to Supabase — so reads/writes stay consistent with **no split-brain** and **no
+admin-login rework**. Tables (all `id|key + data jsonb`, public-read /
+admin-write RLS via `is_admin()`): `drugs`, `compat_pairs`, `renal_drugs`,
+`allergy_groups`, `allergy_refs` (`supabase/refdata.sql`).
+
+- **Read paths** now hit Supabase (public-read, anon key), each reshaping rows'
+  `data` back to the app's existing shape; the hardcoded/`drugs-data.json`/cache
+  fallbacks stay if offline/empty:
+  - `index.js` — `window.fetchDrugsFromServer` override → `drugs?status=eq.approved`
+  - `compatibility.js` `loadCompatPairsFromSheet` → `compat_pairs` → `[[a,b,result],…]`
+  - `renal-dosing.js` `loadRemoteRenalDrugs` → `renal_drugs`
+  - `allergy.js` `loadRemoteAllergyData` → `allergy_groups` + `allergy_refs`
+- **Write path = GAS dual-write** (`gas-complete.js`, ADMIN GAS): each
+  create/update/delete/bulk handler calls a best-effort `_sync*Safe()` that
+  upserts the whole (small) table to Supabase via the **service key**, and delete
+  also `_supaDelete`s the row. The service key is read from **Script Properties**
+  (`SUPABASE_SERVICE_KEY`) — NEVER hardcoded (the repo is public). Uses the
+  **legacy `service_role` JWT** (the new `sb_secret_…` key is blocked by
+  Supabase's "no secret key in browser" guard even from UrlFetchApp).
+- **One-time backfills** (run from the **ADMIN GAS** editor; drug data is reached
+  via `getDrugSS()` openById, so it works from Admin too):
+  `migrateRenalToSupabaseNow` / `migrateCompatToSupabaseNow` /
+  `migrateDrugsToSupabaseNow` / `migrateAllergyToSupabaseNow`. Drug rows go
+  through `normalizeDrugRow` (DrugData sheet uses human-readable headers).
+- **After editing any `_sync*`/handler in `gas-complete.js` you must Deploy the
+  ADMIN GAS** (Run only affects the editor; the live dual-write runs in the
+  deployed web app). CSP `connect-src` already includes the Supabase host.
+- **Still pending Phase 2**: the dashboard already requires Supabase Auth (admin
+  is the `is_admin()` allowlist in `admins`); admin-panel writes still go through
+  GAS (the dual-write bridge) rather than writing Supabase directly.
+
 ### GitHub
 - **Repo**: `https://github.com/rxbenz/iv-drugref.git`
 - **Branch**: `main`

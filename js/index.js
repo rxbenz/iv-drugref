@@ -753,3 +753,24 @@ window.showAbout = function () {
     'Lexicomp, Trissel\'s Handbook,\n' +
     'AHFS, ISMP, AHA/ACLS, Package Inserts');
 };
+
+// Monkey-patch drug sync source: read approved drugs from Supabase instead of
+// GAS (Phase 2). Original fetchDrugsFromServer lives in the minified line-7
+// blob; overriding the global makes initDrugs()/manualSync() use Supabase.
+// Returns the drug array (clean objects) or null → cache/static fallback stays.
+window.fetchDrugsFromServer = async function () {
+  if (!navigator.onLine) return null;
+  var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+  var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+  try {
+    var res = await fetch(SB_URL + '/rest/v1/drugs?select=data&status=eq.approved', {
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store'
+    });
+    if (!res.ok) return null;
+    var rows = await res.json();
+    if (!Array.isArray(rows)) return null;
+    var drugs = rows.map(function (r) { return r.data; })
+      .filter(function (d) { return d && d.generic; });
+    return drugs.length ? drugs : null;
+  } catch (e) { return null; }
+};

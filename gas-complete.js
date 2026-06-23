@@ -1097,6 +1097,7 @@ function handleCreateDrug(user, data) {
   ]);
 
   addAuditLog(user, 'createDrug', id, data.generic, 'Status: ' + (data.status || 'draft'));
+  _syncDrugsSafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, id: id, message: 'Drug created' });
 }
 
@@ -1141,6 +1142,7 @@ function handleUpdateDrug(user, data) {
       if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
 
       addAuditLog(user, 'updateDrug', data.id, data.generic || all[i][headers.indexOf('generic')], 'Updated fields: ' + Object.keys(data).join(', '));
+      _syncDrugsSafe();   // dual-write to Supabase (covers approve/reject too)
       return jsonResponse({ success: true, id: data.id, message: 'Drug updated' });
     }
   }
@@ -1163,6 +1165,7 @@ function handleDeleteDrug(user, data) {
       var name = all[i][nameCol] || '';
       sheet.deleteRow(i + 1);
       addAuditLog(user, 'deleteDrug', data.id, name, 'Permanently deleted');
+      try { _supaDelete('drugs', 'id', String(data.id)); } catch (e) { Logger.log('drug del supabase: ' + e.message); }
       return jsonResponse({ success: true, message: 'Drug deleted: ' + name });
     }
   }
@@ -1489,6 +1492,51 @@ function _syncCompatSafe() {
 function migrateCompatToSupabaseNow() {
   var n = _syncCompatToSupabase();
   Logger.log('compat_pairs upserted to Supabase: ' + n);
+  return n;
+}
+
+// ── Drugs sync ──────────────────────────────────────────────────────
+// Drug data lives in the drug spreadsheet (getDrugSS, openById) — reachable
+// from any GAS project. Parse the sheet's JSON-string fields into real objects
+// so Supabase `data` matches the clean drugs-data.json shape the app expects.
+function _drugForSupa(d) {
+  function obj(v) { return (typeof v === 'string') ? (tryParseJSON(v) || {}) : (v || {}); }
+  function arr(v) {
+    if (Array.isArray(v)) return v;
+    if (typeof v === 'string') {
+      var p = tryParseJSON(v);
+      if (Array.isArray(p)) return p;
+      return v.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+    }
+    return [];
+  }
+  return {
+    id: d.id, generic: d.generic || '', trade: d.trade || '', strength: d.strength || '',
+    ed: d.ed || 'N', had: (d.had === true || d.had === 'TRUE' || d.had === 'true'),
+    categories: arr(d.categories), status: d.status || 'approved',
+    reconst: obj(d.reconst), dilution: obj(d.dilution), admin: obj(d.admin),
+    stability: obj(d.stability), compat: obj(d.compat),
+    precautions: d.precautions || '', monitoring: arr(d.monitoring), ref: d.ref || ''
+  };
+}
+function _syncDrugsToSupabase() {
+  var raw = getSheetData(SHEETS.DRUGS, getDrugSS());
+  var rows = [];
+  raw.forEach(function (d) {
+    var o = _drugForSupa(d);
+    var idNum = parseInt(o.id, 10);
+    if (isNaN(idNum)) { Logger.log('skip drug (non-numeric id): ' + o.generic); return; }
+    rows.push({ id: idNum, generic: o.generic, status: o.status || 'approved', data: o });
+  });
+  for (var i = 0; i < rows.length; i += 100) _supaUpsert('drugs', rows.slice(i, i + 100)); // chunk big payload
+  return rows.length;
+}
+function _syncDrugsSafe() {
+  try { _syncDrugsToSupabase(); } catch (e) { Logger.log('drugs->supabase sync failed: ' + e.message); }
+}
+function migrateDrugsToSupabaseNow() {
+  var n = _syncDrugsToSupabase();
+  Logger.log('drugs upserted to Supabase: ' + n);
   return n;
 }
 

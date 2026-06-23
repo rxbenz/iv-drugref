@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.33.0
+// IV Drug Reference PWA — Service Worker v5.34.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -202,9 +202,12 @@
 // v5.33.0: Phase 2 step 2 (compat) — compatibility.js reads compat pairs from
 //          Supabase compat_pairs (public read); GAS admin handlers dual-write
 //          compat changes to Supabase. Same pattern as renal.
+// v5.34.0: Phase 2 step 2 (drugs) — index.js reads approved drugs from Supabase
+//          drugs table (status=approved); GAS admin drug create/update/delete
+//          (+approve/reject) dual-write to Supabase. Reference data fully on Supabase.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.33.0';
+const CACHE_NAME = 'iv-drugref-v5.34.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

@@ -1497,9 +1497,11 @@ function migrateCompatToSupabaseNow() {
 
 // ── Drugs sync ──────────────────────────────────────────────────────
 // Drug data lives in the drug spreadsheet (getDrugSS, openById) — reachable
-// from any GAS project. Parse the sheet's JSON-string fields into real objects
-// so Supabase `data` matches the clean drugs-data.json shape the app expects.
-function _drugForSupa(d) {
+// from any GAS project. The DrugData sheet uses HUMAN-READABLE headers
+// ("Generic Name", "Reconst: Solvent", …), so map via normalizeDrugRow first,
+// then coerce nested fields to objects/arrays → clean drugs-data.json shape.
+function _syncDrugsToSupabase() {
+  var raw = getSheetData(SHEETS.DRUGS, getDrugSS());
   function obj(v) { return (typeof v === 'string') ? (tryParseJSON(v) || {}) : (v || {}); }
   function arr(v) {
     if (Array.isArray(v)) return v;
@@ -1510,23 +1512,16 @@ function _drugForSupa(d) {
     }
     return [];
   }
-  return {
-    id: d.id, generic: d.generic || '', trade: d.trade || '', strength: d.strength || '',
-    ed: d.ed || 'N', had: (d.had === true || d.had === 'TRUE' || d.had === 'true'),
-    categories: arr(d.categories), status: d.status || 'approved',
-    reconst: obj(d.reconst), dilution: obj(d.dilution), admin: obj(d.admin),
-    stability: obj(d.stability), compat: obj(d.compat),
-    precautions: d.precautions || '', monitoring: arr(d.monitoring), ref: d.ref || ''
-  };
-}
-function _syncDrugsToSupabase() {
-  var raw = getSheetData(SHEETS.DRUGS, getDrugSS());
   var rows = [];
   raw.forEach(function (d) {
-    var o = _drugForSupa(d);
+    var o = normalizeDrugRow(d);                 // human-readable headers → object
     var idNum = parseInt(o.id, 10);
-    if (isNaN(idNum)) { Logger.log('skip drug (non-numeric id): ' + o.generic); return; }
-    rows.push({ id: idNum, generic: o.generic, status: o.status || 'approved', data: o });
+    if (isNaN(idNum)) { Logger.log('skip drug (non-numeric id): ' + (o.generic || '')); return; }
+    o.id = idNum;
+    o.reconst = obj(o.reconst); o.dilution = obj(o.dilution); o.admin = obj(o.admin);
+    o.stability = obj(o.stability); o.compat = obj(o.compat);
+    o.categories = arr(o.categories); o.monitoring = arr(o.monitoring);
+    rows.push({ id: idNum, generic: o.generic || '', status: o.status || 'approved', data: o });
   });
   for (var i = 0; i < rows.length; i += 100) _supaUpsert('drugs', rows.slice(i, i + 100)); // chunk big payload
   return rows.length;

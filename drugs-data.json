@@ -127,7 +127,8 @@
       "Chest pain"
     ],
     "had": true,
-    "ref": "Lexicomp; ACLS guidelines"
+    "ref": "Lexicomp; ACLS guidelines",
+    "dosing": "PSVT: 6 mg IV push เร็ว (1–2 วินาที) ทาง peripheral + NS flush\nไม่หายใน 1–2 นาที → 12 mg, ซ้ำ 12 mg ได้ (max 3 doses)\nCentral line: เริ่ม 3 mg | Heart transplant: เริ่ม 1 mg"
   },
   {
     "id": 4,
@@ -174,7 +175,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; ACLS 2020",
-    "dosing": "Cardiac arrest: 1 mg IV/IO q3–5 นาที\nAnaphylaxis: 0.5 mg IM\nInfusion: 0.05–0.5 mcg/kg/min"
+    "dosing": "Cardiac arrest: 1 mg IV/IO q3–5min\nAnaphylaxis: 0.3–0.5 mg IM (1 mg/mL) q5–15min; refractory → infusion 0.05–0.2 mcg/kg/min\nShock (septic/cardiogenic/post-arrest): infusion 0.01–0.5 mcg/kg/min, titrate (refractory up to 2)"
   },
   {
     "id": 5,
@@ -311,7 +312,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; Trissel's; AHA/ACLS",
-    "dosing": "VF/pVT: 300 mg IV push (ซ้ำ 150 mg)\nStable: 150 mg ใน 10 นาที → 1 mg/min ×6h → 0.5 mg/min"
+    "dosing": "VF/pVT: 300 mg IV/IO push, ซ้ำ 150 mg; ROSC → 1 mg/min ×6h → 0.5 mg/min ×18h\nStable VT/AF: 150 mg ใน 10 นาที → 1 mg/min ×6h → 0.5 mg/min ×18h"
   },
   {
     "id": 8,
@@ -530,7 +531,8 @@
       "Sedation adequacy"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Intubation: 0.5–0.6 mg/kg IV\nICU NMB: load 0.4–0.6 mg/kg → infusion 4–12 mcg/kg/min (usual 2–20)\nMaintenance: 0.08–0.1 mg/kg q15–25min"
   },
   {
     "id": 13,
@@ -574,7 +576,8 @@
       "Mental status"
     ],
     "had": false,
-    "ref": "Lexicomp; ACLS 2020"
+    "ref": "Lexicomp; ACLS 2020",
+    "dosing": "Bradycardia / AV block: 1 mg IV q3–5min (max 3 mg)\nAntisialagogue (preop): 0.5–1 mg IM/IV 30–60 min ก่อน (max 3 mg)\nOrganophosphate/nerve agent: 1–5 mg IV, double q3–5min จน secretion ลด → infusion 10–20% cumulative/h"
   },
   {
     "id": 14,
@@ -1135,7 +1138,8 @@
       "Sedation adequacy"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Intubation: 0.15–0.2 mg/kg IV (RSI 0.4)\nICU NMB: load 0.1–0.2 mg/kg → infusion 1–3 mcg/kg/min (usual 0.5–10)\nMaintenance: 0.01–0.03 mg/kg q ~20min"
   },
   {
     "id": 27,
@@ -1441,7 +1445,8 @@
       "Pain assessment"
     ],
     "had": true,
-    "ref": "Lexicomp; ICU sedation guidelines"
+    "ref": "Lexicomp; ICU sedation guidelines",
+    "dosing": "ICU sedation: infusion 0.2–1.5 mcg/kg/h (loading 1 mcg/kg/10min optional — เสี่ยง hypotension/bradycardia)\nProcedural/MAC: load 0.5–1 mcg/kg/10min → 0.2–1 mcg/kg/h\nไม่หลับลึกเมื่อใช้เดี่ยว; ใช้นานหยุดค่อยๆ (withdrawal)"
   },
   {
     "id": 34,
@@ -1578,7 +1583,8 @@
       "Toxicity signs"
     ],
     "had": true,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's",
+    "dosing": "AF rate control: IV/Oral 0.25–0.5 mg once, ซ้ำ 0.25 mg q6h (max 1.5 mg/24h)\nหรือ 8–12 mcg/kg (LBW) — ให้ 50% ก่อน แล้ว 25% q4–8h ×2\nMaintenance: Oral 0.0625–0.25 mg OD (HFrEF target 0.5–<0.9 ng/mL)\nเปลี่ยน Oral→IV: ลด 20–25%"
   },
   {
     "id": 37,
@@ -1664,7 +1670,8 @@
       "K⁺"
     ],
     "had": true,
-    "ref": "Lexicomp; SSC guidelines"
+    "ref": "Lexicomp; SSC guidelines",
+    "dosing": "Inotrope: 2–10 mcg/kg/min IV infusion (max 20)"
   },
   {
     "id": 39,
@@ -1709,7 +1716,8 @@
       "Extravasation signs"
     ],
     "had": true,
-    "ref": "Lexicomp; SSC 2021"
+    "ref": "Lexicomp; SSC 2021",
+    "dosing": "Shock: 2–20 mcg/kg/min IV infusion\n<5 = renal · 5–10 = inotrope (β) · >10 = vasopressor (α)"
   },
   {
     "id": 40,
@@ -1969,7 +1977,8 @@
       "IV site"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "SVT / AF rate control: Loading 500 mcg/kg over 1 นาที → 25–50 mcg/kg/min, titrate (max 300)"
   },
   {
     "id": 46,
@@ -2058,7 +2067,8 @@
       "Bowel fn"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "ICU analgesia/sedation: load 25–100 mcg (1–2 mcg/kg) → infusion 50–300 mcg/h (0.7–10 mcg/kg/h)\nProcedural sedation: 0.5–1 mcg/kg IV q2min (max ~250 mcg)\nRSI / induction: 1–3 mcg/kg (50–200 mcg) IV\nPostop pain: 25–50 mcg IV q5min (รุนแรง 50–100 q2–5min)"
   },
   {
     "id": 48,
@@ -2365,7 +2375,8 @@
       "MetHb (prolonged)"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "ADHF / hypertensive emergency: เริ่ม 5 mcg/min IV, +5 q3–5min, max ~200\nAngina: up to 400 mcg/min"
   },
   {
     "id": 55,
@@ -2407,7 +2418,8 @@
       "UO"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Antisialagogue (preop): 4 mcg/kg IM 30–60 min ก่อนดมยา\nBradycardia/vagal (intraop): 0.1 mg IV, ซ้ำ q2–3min\nคู่ neostigmine reversal: 0.2 mg ต่อ neostigmine 1 mg"
   },
   {
     "id": 56,
@@ -2762,7 +2774,8 @@
       "Seizure activity"
     ],
     "had": true,
-    "ref": "Lexicomp; AES refractory SE"
+    "ref": "Lexicomp; AES refractory SE",
+    "dosing": "Induction/RSI: 1–2 mg/kg IV over 1 นาที (shock 0.5–1)\nAnalgesia (subanesthetic): 0.1–0.5 mg/kg IV → infusion 0.05–0.5 mg/kg/h\nAgitation: 1–2 mg/kg IV / 4–6 mg/kg IM (max 400 mg)\nRefractory SE: 0.5–3 mg/kg load → infusion 0.1–4 mg/kg/h"
   },
   {
     "id": 64,
@@ -2808,7 +2821,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; AHA stroke guidelines",
-    "dosing": "Acute BP: 10–20 mg IV ใน 1–2 นาที, ซ้ำ/เพิ่มเท่าตัว q10 นาที (max 300 mg)\nหรือหยด 0.5–2 mg/min"
+    "dosing": "HTN emergency: 10–20 mg IV over 1–2 นาที, then 20–80 mg q10min (max single 80; cumulative ~300 mg)\nหรือ infusion 0.5–2 mg/min (max 10)"
   },
   {
     "id": 65,
@@ -2982,7 +2995,8 @@
       "Seizure activity"
     ],
     "had": true,
-    "ref": "Lexicomp; ACLS"
+    "ref": "Lexicomp; ACLS",
+    "dosing": "VF / pulseless VT: 1–1.5 mg/kg IV/IO, ซ้ำ 0.5–0.75 mg/kg q5–10min (max รวม 3 mg/kg หรือ 300 mg/ชม.)\nInfusion: 1–4 mg/min (max รวม 300 mg/ชม.)"
   },
   {
     "id": 69,
@@ -3380,7 +3394,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; SE guidelines",
-    "dosing": "Status epilepticus: 0.2 mg/kg IV; refractory: หยด 0.05–0.4 mg/kg/h (prehospital 10 mg IM)"
+    "dosing": "Status epilepticus (refractory): Loading 0.2 mg/kg IV ช้าๆ, ซ้ำ q3–5min (max 2 mg/kg) → infusion 0.05–2 mg/kg/h\nICU sedation: Loading 0.5–5 mg → 1–8 mg/h (0.01–0.1 mg/kg/h)\nAcute agitation: 2.5–5 mg IV q3–5min"
   },
   {
     "id": 78,
@@ -3426,7 +3440,8 @@
       "Urine retention"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Acute pain: 1–4 mg IV q1–4h (รุนแรง ≤10 mg q4h)\nPACU/titration: 1–3 mg IV q5min\nICU pain/sedation: load 2–10 mg → 2–4 mg q1–2h หรือ 4–8 mg q3–4h\nPCA: demand 0.5–2 mg, lockout 6–10 min"
   },
   {
     "id": 79,
@@ -3514,7 +3529,8 @@
       "Secretions"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "NMB reversal (post-op): 0.02–0.07 mg/kg IV (max 0.07 mg/kg หรือ 5 mg) ตาม TOF — ให้ atropine/glycopyrrolate ร่วม\nOgilvie syndrome: 2 mg IV over 3–5 min (monitor ECG, atropine พร้อม)\nMyasthenia gravis: PO 15 mg TID (15–375 mg/วัน)"
   },
   {
     "id": 81,
@@ -3604,7 +3620,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; AHA SAH guidelines 2023",
-    "dosing": "aSAH vasospasm: เริ่ม 1 mg/h IV (~15 mcg/kg/h) ×2 ชม. → ถ้า BP ทนได้ เพิ่มเป็น 2 mg/h\nน้ำหนัก <70 kg / BP ไม่นิ่ง: เริ่ม 0.5 mg/h — หยดต่อเนื่องทาง central line ร่วมกับสารน้ำ\nIV 5–14 วัน → PO 60 mg q4h จนครบ 21 วัน"
+    "dosing": "aSAH vasospasm: เริ่ม 1 mg/h IV (~15 mcg/kg/h) ×2 ชม. → ถ้า BP ทนได้ เพิ่มเป็น 2 mg/h\nน้ำหนัก <70 kg / BP ไม่นิ่ง: เริ่ม 0.5 mg/h — หยดต่อเนื่องทาง central line ร่วมกับสารน้ำ\nIV 5–14 วัน → PO 60 mg q4h จนครบ 21 วัน (เริ่มภายใน 96 ชม. หลัง SAH)"
   },
   {
     "id": 83,
@@ -3650,7 +3666,8 @@
       "Extravasation"
     ],
     "had": true,
-    "ref": "Lexicomp; SSC 2021"
+    "ref": "Lexicomp; SSC 2021",
+    "dosing": "Shock (septic/vasodilatory): เริ่ม 0.05–0.15 mcg/kg/min IV infusion, ปรับตาม MAP ≥65\nusual 0.025–1; refractory up to 1–3 mcg/kg/min"
   },
   {
     "id": 84,
@@ -3946,7 +3963,8 @@
       "Sedation"
     ],
     "had": true,
-    "ref": "Lexicomp; ISMP"
+    "ref": "Lexicomp; ISMP",
+    "dosing": "⚠️ ไม่ใช่ first-line (normeperidine → neurotoxicity; เลี่ยงใน renal/ผู้สูงอายุ)\nAcute pain: 50–150 mg IM/IV q3–4h (max 600 mg/วัน, ≤48 ชม.; IV ต้องเจือจาง + ฉีดช้า)\nPostop shivering: 12.5–50 mg IV once\nAmphotericin B rigors: 25–50 mg IV once"
   },
   {
     "id": 91,
@@ -3993,7 +4011,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; AES SE guidelines",
-    "dosing": "Status epilepticus: 15–20 mg/kg IV (≤50–100 mg/min), monitor การหายใจ/BP"
+    "dosing": "Status epilepticus: 15–20 mg/kg IV (≤50–100 mg/min), ซ้ำได้ 5–10 mg/kg หลัง 10 นาที, monitor การหายใจ/BP"
   },
   {
     "id": 92,
@@ -4037,7 +4055,8 @@
       "UO"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Septic shock: 0.5–2 mcg/kg/min infusion (usual 0.25–5)\nดมยาแล้ว hypotension: bolus 40–100 mcg q1–2min (max 200) หรือหยด 10–35 mcg/min (max 200)"
   },
   {
     "id": 93,
@@ -4085,7 +4104,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; AES SE guidelines",
-    "dosing": "Status epilepticus: Loading 20 mg/kg IV (≤50 mg/min; ผู้สูงอายุ/โรคหัวใจ ≤25 mg/min), monitor ECG/BP\nMaintenance 4–6 mg/kg/day"
+    "dosing": "Status epilepticus: Loading 20 mg/kg IV (≤50 mg/min; ผู้สูงอายุ/โรคหัวใจ ≤25 mg/min), เพิ่มได้อีก 5–10 mg/kg (max รวม 30 mg/kg), monitor ECG/BP\nMaintenance 4–7 mg/kg/day"
   },
   {
     "id": 94,
@@ -4262,7 +4281,8 @@
       "Calorie from lipid"
     ],
     "had": true,
-    "ref": "Lexicomp; ICU sedation guidelines"
+    "ref": "Lexicomp; ICU sedation guidelines",
+    "dosing": "GA induction: 1–2.5 mg/kg IV (ASA 3-4 / unstable 0.5–1.5)\nICU sedation: infusion 5–50 mcg/kg/min (เริ่ม 5, +5–10 q5–10min; max 60–80)\nRefractory SE: 1–2 mg/kg load → infusion 30–60 mcg/kg/min ⚠️ ระวัง >80 mcg/kg/min >48h (PRIS)"
   },
   {
     "id": 98,
@@ -4394,7 +4414,8 @@
       "Muscle rigidity"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "GA induction: infusion 0.5–1 mcg/kg/min\nGA maintenance: 0.25 mcg/kg/min (range 0.05–2) ปรับตาม anesthetic ร่วม\nICU analgesia/sedation: 0.5–15 mcg/kg/h (0.008–0.25 mcg/kg/min)"
   },
   {
     "id": 101,
@@ -4483,7 +4504,8 @@
       "NM recovery"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Intubation: 0.6–1 mg/kg IV | RSI 1–1.2 mg/kg\nICU NMB: load 0.6–1 mg/kg → infusion 3–8 mcg/kg/min (usual 3–16)\nMaintenance: 0.1–0.2 mg/kg prn"
   },
   {
     "id": 103,
@@ -4573,7 +4595,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; AES guidelines",
-    "dosing": "Status epilepticus: Loading 40 mg/kg IV (max 3 g) ใน 10 นาที"
+    "dosing": "Status epilepticus: Loading 20–40 mg/kg IV (max 3 g) ที่ ≤10 mg/min (non-convulsive ≤5 mg/min)"
   },
   {
     "id": 105,
@@ -4659,7 +4681,8 @@
       "TOF"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "RSI/intubation: 1–1.5 mg/kg IV (range 0.3–1.1; IM 3–4 mg/kg max 150)\nECT: 0.5–1.5 mg/kg IV\n⚠️ พิจารณา atropine ก่อน (bradycardia); เลี่ยงใน hyperK / เสี่ยง MH"
   },
   {
     "id": 107,
@@ -4703,7 +4726,8 @@
       "HR"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Reversal ของ rocuronium/vecuronium (actual BW):\nModerate block (≥2nd twitch TOF): 2 mg/kg IV\nDeep block (1–2 PTC): 4 mg/kg IV\nImmediate (หลัง roc 1.2 mg/kg): 16 mg/kg IV"
   },
   {
     "id": 108,
@@ -6280,7 +6304,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; AAN; Sterns RH. NEJM 2015",
-    "dosing": "↑ICP: 3–5 mL/kg (หรือ 250 mL) IV ใน 10–20 นาที ทาง central line\nSevere hyponatremia: 100–150 mL bolus ซ้ำได้"
+    "dosing": "↑ICP: 3–5 mL/kg (หรือ 250 mL) IV ใน 10–20 นาที ทาง central line\nSymptomatic hyponatremia: 100 mL over 10 นาที, ซ้ำ ≤3 doses ใน 30 นาที (monitor Na q1h; แก้ ≤4–6 mEq/L/24h)\nเลี่ยง overcorrection → osmotic demyelination"
   },
   {
     "id": 144,
@@ -6328,7 +6352,7 @@
     ],
     "had": true,
     "ref": "Lexicomp; AHA/ASA SAH 2023; BTF TBI",
-    "dosing": "↑ICP: 0.25–1 g/kg IV ใน 10–20 นาที, ซ้ำได้ q4–6h — monitor serum osm <320, electrolytes"
+    "dosing": "↑ICP: 0.5–2 g/kg IV once, ซ้ำ 0.25–1 g/kg q4–6h — monitor serum osm <320, electrolytes"
   },
   {
     "id": 145,
@@ -6642,7 +6666,8 @@
       "UO"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA hypertensive emergency"
+    "ref": "Lexicomp; AHA hypertensive emergency",
+    "dosing": "Hypertensive emergency: เริ่ม 0.25–0.5 mcg/kg/min, +0.5 q5min\nเลี่ยงพิษ ≤2; max 10 mcg/kg/min (≤10 นาที)\nADHF: 0.1–0.3 → usual 1–3 (max 5) | Renal: <3 · anuric ≤1 mcg/kg/min"
   },
   {
     "id": 152,

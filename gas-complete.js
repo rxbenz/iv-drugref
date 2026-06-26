@@ -1611,7 +1611,9 @@ function importDosingFromTab() {
   for (var i = start; i < rows.length; i++) {
     var id = parseInt(rows[i][0], 10);
     var dose = rows[i][1];
-    if (!isNaN(id) && dose !== '' && dose != null) map[id] = String(dose);
+    // Allow single-line paste: convert the literal token \n (backslash-n) into a real
+    // line break so multi-line dosing pastes into ONE cell without CSV quoting/import.
+    if (!isNaN(id) && dose !== '' && dose != null) map[id] = String(dose).replace(/\\n/g, '\n');
   }
   var sheet = getDrugSS().getSheetByName(SHEETS.DRUGS);
   if (!sheet) throw new Error('Drugs sheet not found');

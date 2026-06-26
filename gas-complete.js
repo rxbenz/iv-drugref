@@ -1597,6 +1597,40 @@ function importDosingBatch1() {
   return n;
 }
 
+// Generic dosing importer (the ongoing path — no GAS re-paste per batch).
+// 1) In the ADMIN spreadsheet create a tab "DosingImport" with 2 columns:
+//    id | dosing   (header row optional). Paste the approved id+dosing rows.
+// 2) Run this. It writes the "Usual Dose" column in DrugData by id, then
+//    dual-writes all drugs to Supabase. Rows with blank dosing are skipped.
+function importDosingFromTab() {
+  var imp = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('DosingImport');
+  if (!imp) throw new Error('Create a tab "DosingImport" with columns: id | dosing');
+  var rows = imp.getDataRange().getValues();
+  var start = (rows.length && String(rows[0][0]).toLowerCase() === 'id') ? 1 : 0;
+  var map = {};
+  for (var i = start; i < rows.length; i++) {
+    var id = parseInt(rows[i][0], 10);
+    var dose = rows[i][1];
+    if (!isNaN(id) && dose !== '' && dose != null) map[id] = String(dose);
+  }
+  var sheet = getDrugSS().getSheetByName(SHEETS.DRUGS);
+  if (!sheet) throw new Error('Drugs sheet not found');
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var idCol = headers.indexOf('ID'); if (idCol < 0) idCol = headers.indexOf('id');
+  if (idCol < 0) throw new Error('ID column not found');
+  var doseCol = headers.indexOf('Usual Dose');
+  if (doseCol < 0) { doseCol = headers.length; sheet.getRange(1, doseCol + 1).setValue('Usual Dose'); }
+  var n = 0;
+  for (var r = 1; r < values.length; r++) {
+    var rid = parseInt(values[r][idCol], 10);
+    if (map[rid] != null) { sheet.getRange(r + 1, doseCol + 1).setValue(map[rid]); n++; }
+  }
+  _syncDrugsSafe();
+  Logger.log('imported dosing for ' + n + ' drugs from DosingImport tab + synced to Supabase');
+  return n;
+}
+
 
 function handleGetRenalDrugsPublic() {
   var drugs = getSheetData(SHEETS.RENAL_DRUGS_DATA);

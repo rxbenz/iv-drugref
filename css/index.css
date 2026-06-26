@@ -851,6 +851,71 @@
   font-size: 12.5px;
 }
 
+/* ── Usual Dose: structured, scannable layout (v5.37.0) ───────────── */
+.dose-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.dose-row {
+  padding: 9px 12px 9px 13px;
+  border-left: 3px solid var(--accent-blue);
+  border-bottom: 1px solid var(--border);
+}
+
+.dose-row:last-child { border-bottom: none; }
+.dose-row:nth-child(even) { background: var(--bg-card-hover); }
+
+.dose-ind {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  line-height: 1.4;
+  margin-bottom: 3px;
+}
+
+.dose-detail {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.dose-sep {
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 0 3px;
+}
+
+/* warning row (lines starting with ⚠️) */
+.dose-row.warn {
+  border-left-color: var(--accent-amber);
+  background: rgba(217, 119, 6, 0.07);
+}
+
+.dose-row.warn .dose-detail {
+  color: var(--accent-amber);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+/* note box (lines starting with "หมายเหตุ") shown above the list */
+.dose-note {
+  display: flex;
+  gap: 6px;
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
 .compat-ok {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;

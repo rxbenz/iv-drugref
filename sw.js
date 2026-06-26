@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.36.1
+// IV Drug Reference PWA — Service Worker v5.37.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -211,9 +211,12 @@
 // v5.36.0: Drug cards gain a top "ขนาดยา (Usual Dose)" section (new `dosing`
 //          field, Supabase + drugs-data.json). Batch 1 (neuro-critical/emergency,
 //          12 drugs) seeded via importDosingBatch1; EBM drafts, pharmacist-reviewed.
+// v5.37.0: Usual Dose readability redesign — the dense pre-line block is now
+//          parsed into a scannable list (bold indication header + dose detail
+//          per row, alternating rows, amber ⚠️ rows, 📌 note box); light+dark.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.36.1';
+const CACHE_NAME = 'iv-drugref-v5.37.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

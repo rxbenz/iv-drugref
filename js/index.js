@@ -779,21 +779,65 @@ window.fetchDrugsFromServer = async function () {
 // renderDrugCard wrapper; dosing text is escaped (raw drug reaches this wrapper).
 (function () {
   if (typeof renderDrugCard !== 'function') return;
+
+  function esc(s) {
+    return (window.IVDrugRef && IVDrugRef.escHtml) ? IVDrugRef.escHtml(s) : String(s == null ? '' : s);
+  }
+  // Escape the dose detail, then lighten the " | " alternative-separators and
+  // soften step-down arrows so a dense value reads as discrete chunks.
+  function fmtDetail(v) {
+    return esc(v)
+      .replace(/ \| /g, ' <span class="dose-sep">|</span> ')
+      .replace(/→/g, '<span class="dose-sep">→</span>');
+  }
+  // Parse the raw multi-line dosing string into a scannable layout:
+  //   "หมายเหตุ: …"  → note box above the list
+  //   "⚠️ …"          → amber warning row
+  //   "Label: value"  → indication (bold) + dose detail
+  //   (no label)      → plain detail row
+  function renderDose(raw) {
+    var notes = [], rows = [];
+    String(raw).split('\n').forEach(function (ln) {
+      ln = ln.trim();
+      if (!ln) return;
+      if (/^⚠/.test(ln)) {
+        rows.push('<div class="dose-row warn"><div class="dose-detail">' + fmtDetail(ln) + '</div></div>');
+        return;
+      }
+      if (/^หมายเหตุ/.test(ln)) {
+        var nv = ln.replace(/^หมายเหตุ\s*[:：]?\s*/, '');
+        notes.push('<div class="dose-note"><span>📌</span><span>' + fmtDetail(nv) + '</span></div>');
+        return;
+      }
+      // Split on the first colon FOLLOWED BY whitespace so ratios like "1:1"
+      // inside a label don't get mistaken for the label/value separator.
+      var m = /[:：]\s/.exec(ln);
+      if (m && m.index > 0 && m.index <= 70) {
+        var label = ln.slice(0, m.index).trim();
+        var val = ln.slice(m.index + m[0].length).trim();
+        rows.push('<div class="dose-row"><div class="dose-ind">' + esc(label)
+          + '</div><div class="dose-detail">' + fmtDetail(val) + '</div></div>');
+      } else {
+        rows.push('<div class="dose-row"><div class="dose-detail">' + fmtDetail(ln) + '</div></div>');
+      }
+    });
+    return notes.join('') + '<div class="dose-list">' + rows.join('') + '</div>';
+  }
+
   var _doseOrig = renderDrugCard;
   renderDrugCard = function (drug) {
     var html = _doseOrig(drug);
     var d = drug && drug.dosing;
     if (d) {
-      var safe = (window.IVDrugRef && IVDrugRef.escHtml) ? IVDrugRef.escHtml(d) : d;
       // Per-drug verify link → UpToDate search (institution login). Lets the
       // pharmacist confirm the dose at source (anti-hallucination safeguard).
       var utdUrl = 'https://www.uptodate.com/contents/search?search='
         + encodeURIComponent(drug.generic || '');
       var sec = '<div class="info-section">'
         + '<div class="section-title"><span class="icon">💊</span> ขนาดยา (Usual Dose)</div>'
-        + '<div class="info-value" style="white-space:pre-line">' + safe + '</div>'
+        + renderDose(d)
         + '<a href="' + utdUrl + '" target="_blank" rel="noopener" '
-        + 'style="font-size:11px;color:#2563eb;display:inline-block;margin-top:6px;text-decoration:none">'
+        + 'style="font-size:11px;color:#2563eb;display:inline-block;margin-top:8px;text-decoration:none">'
         + '🔗 ตรวจสอบขนาดยา (UpToDate)</a>'
         + '</div>';
       html = html.replace('<div class="card-body">', '<div class="card-body">' + sec);

@@ -626,7 +626,8 @@
       "RPR/VDRL (syphilis)"
     ],
     "had": true,
-    "ref": "Lexicomp; CDC STI guidelines"
+    "ref": "Lexicomp; CDC STI guidelines; UpToDate",
+    "dosing": "⚠️ IM เท่านั้น (ห้าม IV — fatal emboli) | Usual range: IM 1.2–2.4 ล้านยูนิต single dose\nSyphilis ระยะแรก (primary/secondary/early latent <1 ปี): IM 2.4 MU single (ตั้งครรภ์ — บางผู้เชี่ยวชาญให้ซ้ำอีก dose หลัง 1 สัปดาห์)\nSyphilis ระยะหลัง (late latent >1 ปี/tertiary, CSF ปกติ): IM 2.4 MU q สัปดาห์ ×3 dose\nNeurosyphilis: ตามหลัง IV penicillin G aqueous/IM procaine — IM 2.4 MU q สัปดาห์ ×1–3 dose\nGAS pharyngitis: IM 1.2 MU single\nRheumatic fever secondary prophylaxis: IM 1.2 MU q21–28 วัน\nCellulitis (recurrent suppression): IM 1.2–2.4 MU q2–4 สัปดาห์\nDiphtheria PEP / Yaws/bejel/pinta: IM 1.2 MU single\n⚠️ Aspirate ก่อนฉีด, สังเกตอาการ 30 นาทีหลังฉีด"
   },
   {
     "id": 15,

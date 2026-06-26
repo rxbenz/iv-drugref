@@ -824,10 +824,42 @@ window.fetchDrugsFromServer = async function () {
     return notes.join('') + '<div class="dose-list">' + rows.join('') + '</div>';
   }
 
+  // Dosing overlay: the live app reads drugs from Supabase (fetchDrugsFromServer
+  // override), whose rows may lack the curated `dosing` field — dosing is
+  // maintained in drugs-data.json (version-controlled, pharmacist-reviewed),
+  // NOT via the admin panel/GAS. Build an id+generic → dosing map from the
+  // static dataset and use it as a fallback so the Usual Dose section shows
+  // regardless of which source populated DRUGS. A live Supabase `dosing` (if
+  // ever added) still wins. The map loads async, then forces one re-render.
+  var _DOSING_MAP = null;
+  function _doseLookup(drug) {
+    if (!drug || !_DOSING_MAP) return null;
+    if (drug.id != null && _DOSING_MAP['#' + drug.id]) return _DOSING_MAP['#' + drug.id];
+    var g = (drug.generic || '').trim().toLowerCase();
+    return (g && _DOSING_MAP[g]) || null;
+  }
+  (function loadDosingMap() {
+    fetch('./drugs-data.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (arr) {
+        if (!Array.isArray(arr)) return;
+        var m = {};
+        arr.forEach(function (d) {
+          if (!d || !(d.dosing && String(d.dosing).trim())) return;
+          if (d.id != null) m['#' + d.id] = d.dosing;
+          if (d.generic) m[d.generic.trim().toLowerCase()] = d.dosing;
+        });
+        _DOSING_MAP = m;
+        // Re-paint already-rendered cards so they pick up the overlaid dosing.
+        if (typeof updateList === 'function') { try { updateList(); } catch (e) {} }
+      })
+      .catch(function () {});
+  })();
+
   var _doseOrig = renderDrugCard;
   renderDrugCard = function (drug) {
     var html = _doseOrig(drug);
-    var d = drug && drug.dosing;
+    var d = (drug && drug.dosing) || _doseLookup(drug);
     if (d) {
       // Per-drug verify link → UpToDate search (institution login). Lets the
       // pharmacist confirm the dose at source (anti-hallucination safeguard).

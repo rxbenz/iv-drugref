@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.37.0
+// IV Drug Reference PWA — Service Worker v5.37.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -214,9 +214,14 @@
 // v5.37.0: Usual Dose readability redesign — the dense pre-line block is now
 //          parsed into a scannable list (bold indication header + dose detail
 //          per row, alternating rows, amber ⚠️ rows, 📌 note box); light+dark.
+// v5.37.1: Fix — Usual Dose vanished once the app synced drugs from Supabase
+//          (those rows lack the curated `dosing` field, maintained in
+//          drugs-data.json not the admin panel). renderDrugCard now overlays
+//          dosing from the static dataset (id+generic map) as a fallback, so it
+//          shows regardless of data source. Loads async + forces one re-render.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.37.0';
+const CACHE_NAME = 'iv-drugref-v5.37.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

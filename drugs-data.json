@@ -450,7 +450,8 @@
       "Diarrhea"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "Usual: IV 2 g q4–6h (ปรับตาม indication); total daily dose ให้เป็น continuous infusion 24 ชม.ได้\nEnterococcal bacteremia / Listeria: IV 2 g q4h (Listeria + gentamicin)\nEndocarditis (E. faecalis): IV 2 g q4h ×6 สัปดาห์ + ceftriaxone หรือ gentamicin\nMeningitis: IV 2 g q4h ×7–21 วัน (empiric/Listeria → combination)\nOsteomyelitis/Prosthetic joint: IV 2 g q4h หรือ 12 g continuous infusion/24 ชม. ×4–6 สัปดาห์\nUTI complicated/pyelonephritis (Enterococcus): IV 1–2 g q4–6h\nChorioamnionitis/postpartum: IV 2 g q6h + gentamicin\nGBS maternal prophylaxis (alt): IV 2 g load → 1 g q4h จนคลอด\nEndocarditis prophylaxis (alt): IM/IV 2 g single 30–60 นาทีก่อนหัตถการ\n⚠️ Oral step-down นิยมใช้ amoxicillin (bioavailability ดีกว่า) | ปรับตาม CrCl"
   },
   {
     "id": 11,
@@ -493,7 +494,8 @@
       "Allergy signs"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: ขนาดคิดเป็นกรัมรวม amp/sulbactam (สัดส่วน 2:1)\nUsual: IM/IV 1.5–3 g q6h (max 12 g/วัน)\nMDR Acinetobacter baumannii: IV 9 g q8h (infuse 4 ชม.) หรือ 27 g/วัน continuous; ทางเลือก 3 g q4h — เป็น combination\nCAP (inpatient): IV 3 g q6h (combination) ขั้นต่ำ 5 วัน\nHAP/VAP: IV 3 g q6h ~7 วัน\nDiabetic foot (mod–severe): IV 3 g q6h ×2–4 สัปดาห์\nBite wound / odontogenic / pelvic (PID, TOA + doxycycline): IV 3 g q6h\nEndocarditis (Enterococcus, BL-producing): IV 3 g q6h + gentamicin ×6 สัปดาห์\nSurgical prophylaxis: IV 3 g ภายใน 60 นาทีก่อน incision; ซ้ำที่ 2 ชม.ถ้าผ่าตัดนาน/เสียเลือดมาก\n⚠️ ปรับตาม CrCl | cross-allergy กับ Penicillin"
   },
   {
     "id": 12,

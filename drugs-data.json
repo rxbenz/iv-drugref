@@ -844,8 +844,8 @@
       "Surgical site infection"
     ],
     "had": false,
-    "ref": "Lexicomp; ASHP surgical prophylaxis guidelines; UpToDate",
-    "dosing": "Surgical prophylaxis: IV 2 g (<120 kg) / 3 g (≥120 kg) ภายใน 60 นาทีก่อน incision; redose ที่ 4 ชม. (max 12 g/วัน); +metronidazole ถ้าต้อง anaerobic cover\nMSSA bacteremia / Enterobacteriaceae: IV 2 g q8h (uncomplicated SAB ≥14 วันจาก hemoculture แรกที่ลบ)\nEndocarditis (MSSA, non-IgE pen allergy): native 2 g q8h ×6 สัปดาห์ | prosthetic 2 g q8h ≥6 สัปดาห์ + rifampin + gentamicin 2 สัปดาห์\nEndocarditis prophylaxis: IM/IV 1 g single ก่อนหัตถการ\nPneumonia/Osteomyelitis/Septic arthritis/PJI (MSSA): IV 2 g q8h\nIntra-abdominal/cholecystitis: IV 1–2 g q8h (+metronidazole)\nSSTI/cellulitis: IV 1–2 g q8h\nTSS: IV 2 g q8h + clindamycin\nUTI complicated: IV 1 g q8h\nGBS maternal prophylaxis (low anaphylaxis risk): IV 2 g load → 1 g q8h จนคลอด\n⚠️ Total daily dose ให้เป็น continuous infusion 24 ชม.ได้ | ปรับตาม CrCl"
+    "ref": "Lexicomp; ASHP surgical prophylaxis guidelines; UpToDate; Micromedex",
+    "dosing": "หมายเหตุ: ขนาดด้านล่างอิง guideline ปัจจุบัน (2 g q8h เป็นหลัก) — FDA label เดิมแบ่งตามความรุนแรง q6–8h (severe ถึง 1.5 g q6h, max 12 g/วัน), Micromedex จึงแสดง q6h ด้วย; ตัวเลขบรรจบที่ ~6 g/วันสำหรับ infection รุนแรง\nSurgical prophylaxis: IV 2 g (<120 kg) / 3 g (≥120 kg) ภายใน 60 นาทีก่อน incision; redose ที่ 4 ชม. (max 12 g/วัน); +metronidazole ถ้าต้อง anaerobic cover\nMSSA bacteremia / Enterobacteriaceae: IV 2 g q8h (uncomplicated SAB ≥14 วันจาก hemoculture แรกที่ลบ)\nEndocarditis (MSSA, non-IgE pen allergy): native 2 g q8h ×6 สัปดาห์ | prosthetic 2 g q8h ≥6 สัปดาห์ + rifampin + gentamicin 2 สัปดาห์\nEndocarditis prophylaxis: IM/IV 1 g single ก่อนหัตถการ\nPneumonia/Osteomyelitis/Septic arthritis/PJI (MSSA): IV 2 g q8h\nIntra-abdominal/cholecystitis: IV 1–2 g q8h (+metronidazole)\nSSTI/cellulitis: IV 1–2 g q8h\nTSS: IV 2 g q8h + clindamycin\nUTI complicated: IV 1 g q8h\nGBS maternal prophylaxis (low anaphylaxis risk): IV 2 g load → 1 g q8h จนคลอด\n⚠️ Total daily dose ให้เป็น continuous infusion 24 ชม.ได้ | ปรับตาม CrCl"
   },
   {
     "id": 20,

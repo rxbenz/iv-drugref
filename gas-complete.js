@@ -1068,6 +1068,7 @@ function normalizeDrugRow(d) {
     precautions: d['Precautions'] || d['precautions'] || '',
     monitoring: d['Monitoring'] || d['monitoring'] || '',
     ref: d['Reference'] || d['ref'] || '',
+    dosing: d['Usual Dose'] || d['dosing'] || '',
     previousData: d['previousData'] ? tryParseJSON(d['previousData']) : null
   };
 }
@@ -1556,6 +1557,44 @@ function migrateAllergyToSupabaseNow() {
   var r = _syncAllergyToSupabase();
   Logger.log('allergy upserted to Supabase: ' + r);
   return r;
+}
+
+// ── Usual Dose import (Batch 1: neuro-critical + emergency) ──────────
+// Writes the "Usual Dose" column (created if missing) in the DrugData sheet by
+// drug ID, then dual-writes all drugs to Supabase. Run from the ADMIN GAS
+// editor (getDrugSS openById reaches the drug spreadsheet). EBM drafts,
+// pharmacist-reviewed.
+function importDosingBatch1() {
+  var DOSE = {
+    5:  'AIS: 0.9 mg/kg (max 90 mg) — bolus 10% ใน 1 นาที, ที่เหลือหยดใน 60 นาที',
+    93: 'Status epilepticus: Loading 20 mg/kg IV (≤50 mg/min; ผู้สูงอายุ/โรคหัวใจ ≤25 mg/min), monitor ECG/BP\nMaintenance 4–6 mg/kg/day',
+    104:'Status epilepticus: Loading 40 mg/kg IV (max 3 g) ใน 10 นาที',
+    91: 'Status epilepticus: 15–20 mg/kg IV (≤50–100 mg/min), monitor การหายใจ/BP',
+    77: 'Status epilepticus: 0.2 mg/kg IV; refractory: หยด 0.05–0.4 mg/kg/h (prehospital 10 mg IM)',
+    144:'↑ICP: 0.25–1 g/kg IV ใน 10–20 นาที, ซ้ำได้ q4–6h — monitor serum osm <320, electrolytes',
+    143:'↑ICP: 3–5 mL/kg (หรือ 250 mL) IV ใน 10–20 นาที ทาง central line\nSevere hyponatremia: 100–150 mL bolus ซ้ำได้',
+    82: 'aSAH vasospasm: เริ่ม 1 mg/h IV (~15 mcg/kg/h) ×2 ชม. → ถ้า BP ทนได้ เพิ่มเป็น 2 mg/h\nน้ำหนัก <70 kg / BP ไม่นิ่ง: เริ่ม 0.5 mg/h — หยดต่อเนื่องทาง central line ร่วมกับสารน้ำ\nIV 5–14 วัน → PO 60 mg q4h จนครบ 21 วัน',
+    81: 'Acute BP (stroke/HTN emergency): หยด 5 mg/h, เพิ่ม 2.5 mg/h q5–15 นาที, max 15 mg/h',
+    64: 'Acute BP: 10–20 mg IV ใน 1–2 นาที, ซ้ำ/เพิ่มเท่าตัว q10 นาที (max 300 mg)\nหรือหยด 0.5–2 mg/min',
+    4:  'Cardiac arrest: 1 mg IV/IO q3–5 นาที\nAnaphylaxis: 0.5 mg IM\nInfusion: 0.05–0.5 mcg/kg/min',
+    7:  'VF/pVT: 300 mg IV push (ซ้ำ 150 mg)\nStable: 150 mg ใน 10 นาที → 1 mg/min ×6h → 0.5 mg/min'
+  };
+  var sheet = getDrugSS().getSheetByName(SHEETS.DRUGS);
+  if (!sheet) throw new Error('Drugs sheet not found');
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var idCol = headers.indexOf('ID'); if (idCol < 0) idCol = headers.indexOf('id');
+  if (idCol < 0) throw new Error('ID column not found');
+  var doseCol = headers.indexOf('Usual Dose');
+  if (doseCol < 0) { doseCol = headers.length; sheet.getRange(1, doseCol + 1).setValue('Usual Dose'); }
+  var n = 0;
+  for (var i = 1; i < values.length; i++) {
+    var id = parseInt(values[i][idCol], 10);
+    if (DOSE[id]) { sheet.getRange(i + 1, doseCol + 1).setValue(DOSE[id]); n++; }
+  }
+  _syncDrugsSafe();   // dual-write to Supabase
+  Logger.log('Usual Dose set for ' + n + ' drugs (Batch 1) + synced to Supabase');
+  return n;
 }
 
 

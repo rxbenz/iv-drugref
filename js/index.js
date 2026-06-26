@@ -774,3 +774,23 @@ window.fetchDrugsFromServer = async function () {
     return drugs.length ? drugs : null;
   } catch (e) { return null; }
 };
+
+// Inject "ขนาดยา (Usual Dose)" as the first section of the card body. Outermost
+// renderDrugCard wrapper; dosing text is escaped (raw drug reaches this wrapper).
+(function () {
+  if (typeof renderDrugCard !== 'function') return;
+  var _doseOrig = renderDrugCard;
+  renderDrugCard = function (drug) {
+    var html = _doseOrig(drug);
+    var d = drug && drug.dosing;
+    if (d) {
+      var safe = (window.IVDrugRef && IVDrugRef.escHtml) ? IVDrugRef.escHtml(d) : d;
+      var sec = '<div class="info-section">'
+        + '<div class="section-title"><span class="icon">💊</span> ขนาดยา (Usual Dose)</div>'
+        + '<div class="info-value" style="white-space:pre-line">' + safe + '</div>'
+        + '</div>';
+      html = html.replace('<div class="card-body">', '<div class="card-body">' + sec);
+    }
+    return html;
+  };
+})();

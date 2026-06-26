@@ -173,7 +173,8 @@
       "Extravasation"
     ],
     "had": true,
-    "ref": "Lexicomp; ACLS 2020"
+    "ref": "Lexicomp; ACLS 2020",
+    "dosing": "Cardiac arrest: 1 mg IV/IO q3–5 นาที\nAnaphylaxis: 0.5 mg IM\nInfusion: 0.05–0.5 mcg/kg/min"
   },
   {
     "id": 5,
@@ -217,7 +218,8 @@
       "Angioedema"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA/ASA 2019"
+    "ref": "Lexicomp; AHA/ASA 2019",
+    "dosing": "AIS: 0.9 mg/kg (max 90 mg) — bolus 10% ใน 1 นาที, ที่เหลือหยดใน 60 นาที"
   },
   {
     "id": 6,
@@ -308,7 +310,8 @@
       "Phlebitis"
     ],
     "had": true,
-    "ref": "Lexicomp; Trissel's; AHA/ACLS"
+    "ref": "Lexicomp; Trissel's; AHA/ACLS",
+    "dosing": "VF/pVT: 300 mg IV push (ซ้ำ 150 mg)\nStable: 150 mg ใน 10 นาที → 1 mg/min ×6h → 0.5 mg/min"
   },
   {
     "id": 8,
@@ -2804,7 +2807,8 @@
       "UO"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA stroke guidelines"
+    "ref": "Lexicomp; AHA stroke guidelines",
+    "dosing": "Acute BP: 10–20 mg IV ใน 1–2 นาที, ซ้ำ/เพิ่มเท่าตัว q10 นาที (max 300 mg)\nหรือหยด 0.5–2 mg/min"
   },
   {
     "id": 65,
@@ -3375,7 +3379,8 @@
       "Seizure activity"
     ],
     "had": true,
-    "ref": "Lexicomp; SE guidelines"
+    "ref": "Lexicomp; SE guidelines",
+    "dosing": "Status epilepticus: 0.2 mg/kg IV; refractory: หยด 0.05–0.4 mg/kg/h (prehospital 10 mg IM)"
   },
   {
     "id": 78,
@@ -3554,7 +3559,8 @@
       "UO"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA stroke guidelines"
+    "ref": "Lexicomp; AHA stroke guidelines",
+    "dosing": "Acute BP (stroke/HTN emergency): หยด 5 mg/h, เพิ่ม 2.5 mg/h q5–15 นาที, max 15 mg/h"
   },
   {
     "id": 82,
@@ -3597,7 +3603,8 @@
       "Vasospasm signs"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA SAH guidelines 2023"
+    "ref": "Lexicomp; AHA SAH guidelines 2023",
+    "dosing": "aSAH vasospasm: เริ่ม 1 mg/h IV (~15 mcg/kg/h) ×2 ชม. → ถ้า BP ทนได้ เพิ่มเป็น 2 mg/h\nน้ำหนัก <70 kg / BP ไม่นิ่ง: เริ่ม 0.5 mg/h — หยดต่อเนื่องทาง central line ร่วมกับสารน้ำ\nIV 5–14 วัน → PO 60 mg q4h จนครบ 21 วัน"
   },
   {
     "id": 83,
@@ -3985,7 +3992,8 @@
       "Seizure activity"
     ],
     "had": true,
-    "ref": "Lexicomp; AES SE guidelines"
+    "ref": "Lexicomp; AES SE guidelines",
+    "dosing": "Status epilepticus: 15–20 mg/kg IV (≤50–100 mg/min), monitor การหายใจ/BP"
   },
   {
     "id": 92,
@@ -4076,7 +4084,8 @@
       "CBC"
     ],
     "had": true,
-    "ref": "Lexicomp; AES SE guidelines"
+    "ref": "Lexicomp; AES SE guidelines",
+    "dosing": "Status epilepticus: Loading 20 mg/kg IV (≤50 mg/min; ผู้สูงอายุ/โรคหัวใจ ≤25 mg/min), monitor ECG/BP\nMaintenance 4–6 mg/kg/day"
   },
   {
     "id": 94,
@@ -4563,7 +4572,8 @@
       "Seizure freq"
     ],
     "had": true,
-    "ref": "Lexicomp; AES guidelines"
+    "ref": "Lexicomp; AES guidelines",
+    "dosing": "Status epilepticus: Loading 40 mg/kg IV (max 3 g) ใน 10 นาที"
   },
   {
     "id": 105,
@@ -6269,7 +6279,8 @@
       "UO"
     ],
     "had": true,
-    "ref": "Lexicomp; AAN; Sterns RH. NEJM 2015"
+    "ref": "Lexicomp; AAN; Sterns RH. NEJM 2015",
+    "dosing": "↑ICP: 3–5 mL/kg (หรือ 250 mL) IV ใน 10–20 นาที ทาง central line\nSevere hyponatremia: 100–150 mL bolus ซ้ำได้"
   },
   {
     "id": 144,
@@ -6316,7 +6327,8 @@
       "ICP/Neuro"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA/ASA SAH 2023; BTF TBI"
+    "ref": "Lexicomp; AHA/ASA SAH 2023; BTF TBI",
+    "dosing": "↑ICP: 0.25–1 g/kg IV ใน 10–20 นาที, ซ้ำได้ q4–6h — monitor serum osm <320, electrolytes"
   },
   {
     "id": 145,

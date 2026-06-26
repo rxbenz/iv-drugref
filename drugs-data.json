@@ -40,7 +40,8 @@
       "Bleeding signs"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "⚠️ ยกเลิกการผลิตแล้ว — ไม่มีจำหน่ายทั่วโลก (ตั้งแต่ ~2019)"
   },
   {
     "id": 2,
@@ -1845,7 +1846,8 @@
       "ECG"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp",
+    "dosing": "Anesthesia-induced hypotension: 5–10 mg IV, ซ้ำตาม BP (max cumulative ~50 mg)\nPONV prevention: 0.5 mg/kg IM ตอนจบผ่าตัด"
   },
   {
     "id": 43,
@@ -1889,7 +1891,8 @@
       "SCr"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA/ACC guidelines"
+    "ref": "Lexicomp; AHA/ACC guidelines",
+    "dosing": "ACS / PCI: bolus 180 mcg/kg IV (max 22.6 mg) → infusion 2 mcg/kg/min (max 15 mg/h)\nbolus ที่ 2: 180 mcg/kg 10 นาทีหลัง bolus แรก; ต่อ ≤18–24 ชม. หลัง PCI\nRenal CrCl<50: infusion 1 mcg/kg/min (max 7.5); ESRD/dialysis: ห้ามใช้"
   },
   {
     "id": 44,
@@ -2202,7 +2205,8 @@
       "Hearing (high dose)"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's",
+    "dosing": "Edema/volume overload: 20–40 mg IV once, ปรับขึ้น (double dose ถ้าไม่ตอบสนอง)\nRefractory (ใช้ oral loop อยู่): bolus 1–2.5× ขนาด oral/วัน (max single 80–200 mg)\nInfusion: 5 mg/h → up to 40 mg/h (renal <30: เริ่ม 20)\nIV : PO ~ 1:2 (PO bioavailability ~50%)"
   },
   {
     "id": 51,
@@ -2507,7 +2511,8 @@
       "Bleeding signs"
     ],
     "had": true,
-    "ref": "Lexicomp; CHEST guidelines"
+    "ref": "Lexicomp; CHEST guidelines",
+    "dosing": "VTE treatment: bolus 80 units/kg IV (max 10,000) → infusion 18 units/kg/h (max 2000), ปรับตาม aPTT/anti-Xa 0.3–0.7\nACS/STEMI: bolus 60 units/kg (max 4000–5000) → 12 units/kg/h (max 1000)\nAF: bolus 60–80 units/kg → 12–18 units/kg/h\nใช้ actual BW; monitor aPTT q6h หลังปรับขนาด"
   },
   {
     "id": 58,
@@ -5078,7 +5083,8 @@
       "Coagulation studies"
     ],
     "had": false,
-    "ref": "Lexicomp; CRASH-2"
+    "ref": "Lexicomp; CRASH-2",
+    "dosing": "Trauma / TBI hemorrhage: 1 g IV over 10 นาที (ภายใน 3 ชม.) → 1 g infusion ใน 8 ชม.\naSAH (ป้องกัน rebleed): 1 g over 10 นาที → 1 g q6h ≤72 ชม.\nPerioperative / PPH: 1 g IV (≤100 mg/min)\nAUB acute: 10 mg/kg (max 600 mg) IV q8h ≤5 วัน"
   },
   {
     "id": 116,
@@ -6487,7 +6493,8 @@
       "Signs of HF"
     ],
     "had": false,
-    "ref": "Lexicomp; AHA/ACC AF guidelines 2023"
+    "ref": "Lexicomp; AHA/ACC AF guidelines 2023",
+    "dosing": "AF/flutter rate control / SVT: bolus 0.25 mg/kg IV over 2 นาที (~20 mg)\nไม่พอใน 15 นาที → 0.35 mg/kg (~25 mg)\nต่อด้วย infusion 5–10 mg/h, +5 prn (max 15 mg/h)"
   },
   {
     "id": 148,
@@ -6532,7 +6539,8 @@
       "K⁺"
     ],
     "had": false,
-    "ref": "Lexicomp; AHA HF guidelines 2022"
+    "ref": "Lexicomp; AHA HF guidelines 2022",
+    "dosing": "ADHF / inotropic support: infusion 0.125–0.25 mcg/kg/min (usual up to 0.75) — ไม่ให้ bolus (เสี่ยง hypotension)\nRenal impair: เริ่ม 0.0625–0.125 mcg/kg/min"
   },
   {
     "id": 149,
@@ -6576,7 +6584,8 @@
       "Chest pain"
     ],
     "had": false,
-    "ref": "Lexicomp; ACLS 2020"
+    "ref": "Lexicomp; ACLS 2020",
+    "dosing": "Bradycardia / AV block (bridge to pacing): infusion 1–20 mcg/min (เริ่มต่ำ titrate)\nTorsade de pointes (brady-mediated): 2–10 mcg/min"
   },
   {
     "id": 150,
@@ -6619,7 +6628,8 @@
       "Fetal monitoring (pregnancy)"
     ],
     "had": false,
-    "ref": "Lexicomp; ACOG preeclampsia 2020"
+    "ref": "Lexicomp; ACOG preeclampsia 2020",
+    "dosing": "Hypertensive emergency: 10–20 mg IM/IV q4–6h (max 40 mg/dose; cumulative 200 mg/24h)\nPreeclampsia/pregnancy: 5–10 mg IV, ซ้ำ q20–40min (max ~20–30 mg)\n⚠️ reflex tachycardia (พิจารณาให้ร่วม β-blocker)"
   },
   {
     "id": 151,

@@ -266,7 +266,8 @@
       "Vestibular fn"
     ],
     "had": false,
-    "ref": "Lexicomp; AHFS"
+    "ref": "Lexicomp; AHFS; UpToDate",
+    "dosing": "Weight: TBW<IBW→ใช้ TBW | 1–1.2×IBW→TBW หรือ IBW | >1.2×IBW→AdjBW = 0.4×(TBW–IBW)+IBW (ใช้กับ CG CrCl ด้วย)\nConventional: IV/IM 5 mg/kg q8h หรือ 7.5 mg/kg q12h (loading 7.5–10) → peak 20–40, trough <8 (ideal 1–4)\nExtended-interval (HD-EI): IV 15–20 mg/kg OD; critically ill ถึง 30 → peak ~40 (60 ถ้า critical, 80–120 ใน CF), trough <1–2; ระวังถ้า CrCl<40\nSepsis/septic shock: IV 15–30 mg/kg OD (adjunct, ไม่ใช้เดี่ยว)\nHAP/VAP: IV 15–20 mg/kg OD (adjunct)\nUTI: IV 15 mg/kg single (complicated → ปรับตาม PK, รวม 5–7 วัน)\nCNS infection: IV 5 mg/kg q8h | intraventricular (preservative-free) 5–50 mg/วัน (ปกติ 30)\nCystic fibrosis exacerbation: IV 30–35 mg/kg OD ×10–14 วัน\nMycobacterial/Nocardia: IV 10–15 mg/kg OD (CNS nocardia 20–30)\nTB ดื้อยา: IV/IM 15 mg/kg OD หรือ 25 mg/kg 3×/สัปดาห์\n⚠️ ไม่แนะนำสำหรับ Pseudomonas นอก urinary tract | TDM จำเป็น | ปรับตาม renal fn"
   },
   {
     "id": 7,

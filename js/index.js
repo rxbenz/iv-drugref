@@ -785,9 +785,16 @@ window.fetchDrugsFromServer = async function () {
     var d = drug && drug.dosing;
     if (d) {
       var safe = (window.IVDrugRef && IVDrugRef.escHtml) ? IVDrugRef.escHtml(d) : d;
+      // Per-drug verify link → UpToDate search (institution login). Lets the
+      // pharmacist confirm the dose at source (anti-hallucination safeguard).
+      var utdUrl = 'https://www.uptodate.com/contents/search?search='
+        + encodeURIComponent(drug.generic || '');
       var sec = '<div class="info-section">'
         + '<div class="section-title"><span class="icon">💊</span> ขนาดยา (Usual Dose)</div>'
         + '<div class="info-value" style="white-space:pre-line">' + safe + '</div>'
+        + '<a href="' + utdUrl + '" target="_blank" rel="noopener" '
+        + 'style="font-size:11px;color:#2563eb;display:inline-block;margin-top:6px;text-decoration:none">'
+        + '🔗 ตรวจสอบขนาดยา (UpToDate)</a>'
         + '</div>';
       html = html.replace('<div class="card-body">', '<div class="card-body">' + sec);
     }

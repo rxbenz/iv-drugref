@@ -359,7 +359,8 @@
       "Diarrhea (C.diff)"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "หมายเหตุ: ขนาดยาคิดตาม amoxicillin component (vial 1.2 g = amox 1 g + clav 0.2 g)\nIV: 1 g q8h หรือ 2 g q8–12h (= 1.2 g หรือ 2.2 g vial)\nSurgical prophylaxis: 1–2 g IV ตอน induction (หัตถการ <1 ชม.); >1 ชม. ให้เพิ่มได้ ≤2 dose, ห้ามเกิน 3 g/24 ชม.\nOral usual (IR): 500 mg q8–12h หรือ 875 mg q12h | ER: 2 g q12h\nCAP/aspiration: 875 mg bid (ER 2 g bid) เป็น combination\nDiabetic foot / bite wound / odontogenic: 875 mg q12h\nRhinosinusitis: 500 mg q8h หรือ 875 mg q12h ×5–7 วัน (high-risk → ER 2 g q12h)\nUTI (alternative): 500 mg q8–12h หรือ 875 mg q12h\nIntra-abdominal (mild, step-down): 875 mg q8–12h\n⚠️ ปรับตาม CrCl | cross-allergy กับ Penicillin | ระวัง cholestatic jaundice"
   },
   {
     "id": 9,

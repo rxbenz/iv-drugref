@@ -844,7 +844,8 @@
       "Surgical site infection"
     ],
     "had": false,
-    "ref": "Lexicomp; ASHP surgical prophylaxis guidelines"
+    "ref": "Lexicomp; ASHP surgical prophylaxis guidelines; UpToDate",
+    "dosing": "Surgical prophylaxis: IV 2 g (<120 kg) / 3 g (≥120 kg) ภายใน 60 นาทีก่อน incision; redose ที่ 4 ชม. (max 12 g/วัน); +metronidazole ถ้าต้อง anaerobic cover\nMSSA bacteremia / Enterobacteriaceae: IV 2 g q8h (uncomplicated SAB ≥14 วันจาก hemoculture แรกที่ลบ)\nEndocarditis (MSSA, non-IgE pen allergy): native 2 g q8h ×6 สัปดาห์ | prosthetic 2 g q8h ≥6 สัปดาห์ + rifampin + gentamicin 2 สัปดาห์\nEndocarditis prophylaxis: IM/IV 1 g single ก่อนหัตถการ\nPneumonia/Osteomyelitis/Septic arthritis/PJI (MSSA): IV 2 g q8h\nIntra-abdominal/cholecystitis: IV 1–2 g q8h (+metronidazole)\nSSTI/cellulitis: IV 1–2 g q8h\nTSS: IV 2 g q8h + clindamycin\nUTI complicated: IV 1 g q8h\nGBS maternal prophylaxis (low anaphylaxis risk): IV 2 g load → 1 g q8h จนคลอด\n⚠️ Total daily dose ให้เป็น continuous infusion 24 ชม.ได้ | ปรับตาม CrCl"
   },
   {
     "id": 20,
@@ -887,7 +888,8 @@
       "Bleeding signs"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: ขนาดคิดเป็นกรัมรวม cefoperazone/sulbactam | มีสูตร 1:1 และ 2:1\nสูตร 1:1 (cefo 500 + sulb 500 mg): IM/IV 2–4 g/วัน แบ่ง 2 dose (max 8 g/วัน)\nสูตร 2:1 (cefo 1 g + sulb 500 mg, = Sulperazon): IM/IV 3–6 g/วัน แบ่ง 2 dose (max 12 g/วัน)\n⚠️ Disulfiram-like reaction กับ alcohol (MTT side chain) | ตรวจ PT/INR ถ้าใช้นาน (hypoprothrombinemia) | excretion ทาง bile สูง → ไม่ต้องปรับมากใน renal impairment"
   },
   {
     "id": 21,
@@ -929,7 +931,8 @@
       "LFTs (prolonged)"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "Usual: IV 1–2 g q8h over 30 นาที (รุนแรง/immunocompromised → 2 g q8h)\nExtended infusion (off-label): IV 2 g q8h over 3–4 ชม. | Continuous: 6 g/24 ชม. (first dose 2 g over 30 นาทีถ้า sepsis)\nGram-negative bacteremia (รวม Pseudomonas): IV 2 g q8h (neutropenia/burn/sepsis → combination)\nHAP/VAP / CAP (เสี่ยง resistant GNB): IV 2 g q8h\nMeningitis / brain abscess: IV 2 g q8h (meningitis + vancomycin) ×10–21 วัน\nFebrile neutropenia (high-risk): IV 2 g q8h\nCystic fibrosis exacerbation: IV 2 g q6–8h (หรือ 150–200 mg/kg/วัน แบ่ง q6–8h, max 12 g/วัน)\nDiabetic foot / SSTI / septic arthritis / osteomyelitis / PJI: IV 2 g q8h\nMelioidosis (intensive): IV 2 g q6–8h ×14 วัน → oral eradication ≥12 สัปดาห์\nUTI complicated: IV 1–2 g q8h\n⚠️ Anti-pseudomonal | extended infusion เพิ่ม T>MIC | ปรับตาม CrCl"
   },
   {
     "id": 22,

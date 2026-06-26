@@ -85,7 +85,8 @@
       "Phlebitis signs"
     ],
     "had": false,
-    "ref": "Trissel's; Lexicomp"
+    "ref": "Trissel's; Lexicomp; UpToDate",
+    "dosing": "⚠️ ผู้ป่วยอ้วน: ใช้ IBW หรือ AdjBW คำนวณ dose (กัน overdose → acute renal failure)\nHSV encephalitis: IV 10 mg/kg q8h ×14–21 วัน | meningitis 10–14 วัน (อาจ step-down เป็น oral)\nHSV mucocutaneous รุนแรง (esophagitis/orolabial): IV 5 mg/kg q8h, ดีขึ้น → เปลี่ยน oral จนครบ 7–14 วัน\nGenital HSV รุนแรง: IV 5–10 mg/kg q8h → oral จนครบ >10 วัน\nHerpes zoster disseminated: IV 10 mg/kg q8h → oral จนครบ 10–14 วัน\nVaricella รุนแรง/มี complication: IV 10 mg/kg q8h ×7–10 วัน\nVZV encephalitis: IV 10 mg/kg q8h (บางราย ถึง 15) ×10–14 วัน\nVZV acute retinal necrosis: IV 10 mg/kg q8h ×10–14 วัน → valacyclovir ต่อ\nHSV/VZV prophylaxis (immunocompromised): IV 250 mg/m² q12h\nOral (เทียบ): HSV genital 400 mg tid ×7–10 วัน | zoster/varicella 800 mg 5×/วัน\nปรับขนาดตาม CrCl เสมอ"
   },
   {
     "id": 3,

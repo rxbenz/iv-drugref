@@ -4331,7 +4331,8 @@
       "Heparin rebound (6-8 hr)"
     ],
     "had": true,
-    "ref": "Lexicomp; STS guidelines"
+    "ref": "Lexicomp; STS guidelines; UpToDate",
+    "dosing": "Heparin IV reversal: 1 mg ต่อ heparin ~100 units; slow IV ≤5 mg/min; max single dose 50 mg\nปรับตามเวลา (heparin t½ 60–90 min): ผ่านไป ~2 ชม. → ให้ครึ่งหนึ่งของ dose ที่คำนวณ\nIV infusion: คิด dose จาก heparin ที่ได้ใน 2–3 ชม.ก่อน (เช่น 1,250 u/h → ~30 mg)\nCardiac surgery/CPB: อาจใช้ 0.5 mg/100 u; ซ้ำ 25–100 mg ถ้า ACT สูง/heparin rebound; max รวม 3 mg/kg\nHeparin SUBQ: 1 mg/100 u, slow IV ~10 min, max 50 mg; บางส่วนให้เป็น infusion 8–16 ชม.\nEnoxaparin ≤8h: 1 mg/1 mg enox (ซ้ำ 0.5 mg/1 mg) | >8–<12h: 0.5 mg/1 mg | ≥12h: มักไม่ต้องให้\nDalteparin/nadroparin/tinzaparin: 1 mg ต่อ 100 anti-Xa units (ภายใน 3–5 t½), max 50 mg\n⚠️ LMWH: neutralize anti-Xa ได้แค่ ~60–75%; ถ้าไม่ bleeding พิจารณาไม่ให้"
   },
   {
     "id": 99,

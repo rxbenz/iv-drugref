@@ -976,7 +976,8 @@
       "Seizure activity"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA MDR guidelines"
+    "ref": "Lexicomp; IDSA MDR guidelines; UpToDate",
+    "dosing": "หมายเหตุ: ขนาดคิดเป็นกรัมรวม ceftazidime/avibactam | สงวนไว้สำหรับ XDR gram-negative (CRE, DTR-P. aeruginosa) — ไม่ใช่ empiric ทั่วไป\nUsual: IV 2.5 g q8h over 2 ชม.\nBloodstream infection: IV 2.5 g q8h ×7–14 วัน\nHAP/VAP: IV 2.5 g q8h ~7 วัน\nIntra-abdominal: IV 2.5 g q8h + metronidazole\nUTI (cystitis/complicated): IV 2.5 g q8h ×5–7 วัน\nMetallo-β-lactamase (NDM/VIM) Enterobacterales หรือ S. maltophilia: IV 2.5 g q8h over 3 ชม. + aztreonam (ให้พร้อมกัน)\n⚠️ extended infusion 3 ชม.สำหรับ CRE/DTR-Pseudomonas/S. maltophilia | ปรับตาม CrCl: 31–50→1.25 g q8h | 16–30→0.94 g q12h | ≤15→0.94 g q24h | ไม่ cover MBL เดี่ยว ๆ"
   },
   {
     "id": 23,
@@ -1019,7 +1020,8 @@
       "Biliary sx (prolonged)"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "Usual: IV/IM 1–2 g once daily (รุนแรง → 2 g)\nBloodstream infection: IV 1–2 g q24h ×7–14 วัน\nCAP (inpatient, no Pseudomonas): IV 1–2 g q24h (combination); stable ส่วนใหญ่ 1 g พอ, critical 2 g\nMeningitis: IV 2 g q12h ×7–21 วัน (empiric + vancomycin)\nEndocarditis: E. faecalis 2 g q12h + ampicillin ×6 สัปดาห์ | VGS/HACEK 2 g q24h ×4 สัปดาห์ (native)/6 สัปดาห์ (prosthetic)\nIntra-abdominal/cholecystitis: IV 1–2 g q24h (+metronidazole)\nSBP: treatment 2 g q24h ×5–7 วัน | prophylaxis 1 g q24h\nLyme (carditis/neuro): IV 2 g q24h ×14–28 วัน\nTyphoid/Salmonella: IV 1–2 g q12–24h ×10–14 วัน\nGonorrhea (uncomplicated): IM 500 mg single (1 g ถ้า ≥150 kg) + รักษา chlamydia\nPID (severe): IV 1 g q24h + doxycycline + metronidazole\nMeningococcal prophylaxis: IM 250 mg single\nOsteomyelitis/PJI/septic arthritis: IV 2 g q24h\nSurgical prophylaxis (colorectal): IV 2 g ก่อน incision + metronidazole\nUTI complicated: IV/IM 1–2 g q24h (ตั้งครรภ์ 1 g q24h)\nSyphilis (alt, non-pregnant pen-allergy): IM/IV 1–2 g q24h ×10–14 วัน\n⚠️ ห้ามผสม Calcium ในทารก | ไม่ต้องปรับใน renal impairment"
   },
   {
     "id": 24,
@@ -1106,7 +1108,8 @@
       "UO"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: IV 400 mg ≈ PO 500–750 mg (bioavailability ดี → step-down oral ได้)\nPseudomonas pneumonia / severe: IV 400 mg q8h\nGeneral GNB infection: IV 400 mg q12h\nDiabetic foot: IV 400 mg q12h (q8h ถ้าสงสัย Pseudomonas) ×2–4 สัปดาห์\nIntra-abdominal: IV 400 mg q12h + metronidazole\nOsteomyelitis/PJI: IV 400 mg q12h (Pseudomonas → q8h) ≥6 สัปดาห์\nSeptic arthritis: IV 400 mg q8–12h\nPlague/Tularemia/Anthrax (systemic): IV 400 mg q8h\nTyphoid/Salmonella/Shigella/Campylobacter: IV 400 mg q12h (ตรวจ susceptibility — ดื้อยาเพิ่มขึ้น)\nUTI complicated/pyelonephritis: IV 400 mg q12h (ESBL → q8h)\nMeningococcal prophylaxis: PO 500 mg single\nOral (เทียบ): cystitis 250–500 mg q12h | ทั่วไป 500–750 mg q12h\n⚠️ QT prolongation, tendon rupture, MG exacerbation, ห้ามกับ cation (Mg/Ca/Al/Fe) PO | ปรับตาม CrCl"
   },
   {
     "id": 26,
@@ -1193,7 +1196,8 @@
       "Stool C. diff toxin"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "Usual: IV/IM 600 mg–2.7 g/วัน แบ่ง 2–4 dose (life-threatening ถึง 4.8 g/วัน IV; IM max 600 mg/dose) | PO 600 mg–1.8 g/วัน\nSSTI/cellulitis (purulent/MRSA): IV 600–900 mg q8h | PO 300–450 mg q6–8h ×≥5 วัน\nNecrotizing soft tissue infection: IV 600–900 mg q8h (combination + surgical debridement)\nOsteomyelitis/PJI: IV 600–900 mg q8h ×6 สัปดาห์\nSeptic arthritis (S. aureus/MRSA): IV/PO 600 mg q8h ×3–4 สัปดาห์\nMRSA pneumonia: IV/PO 600 mg q8h ~7 วัน\nAspiration pneumonia: PO 300–450 mg q8h ×5–7 วัน\nGAS bloodstream / TSS (toxin suppression): IV 900 mg q8h (combination)\nPID severe / postpartum endometritis: IV 900 mg q8h + gentamicin\nGBS maternal prophylaxis (alt, susceptible): IV 900 mg q8h จนคลอด\nSurgical prophylaxis (MRSA/pen-allergy): IV 900 mg ก่อน incision\nPCP (severe): IV 600 mg q6h หรือ 900 mg q8h + primaquine ×21 วัน\nToxoplasma encephalitis: IV/PO 600 mg q6h + pyrimethamine + leucovorin\nBabesiosis (severe): IV 600 mg q6h + quinine\n⚠️ C. difficile risk สูง"
   },
   {
     "id": 28,
@@ -1236,7 +1240,8 @@
       "C&S"
     ],
     "had": true,
-    "ref": "Lexicomp; CMS consensus guidelines"
+    "ref": "Lexicomp; CMS consensus guidelines; UpToDate",
+    "dosing": "⚠️ ขนาดเป็น CBA (colistin base activity): 1 mg CBA = 30,000 u CMS ≈ 2.4 mg CMS | 150 mg CBA ≈ CMS 360 mg ≈ 4.5 MIU | 300 mg CBA ≈ 9 MIU\nสงวนไว้สำหรับ XDR gram-negative (CRE, A. baumannii, DTR-P. aeruginosa) — ใช้ combination\nXDR GNB IV: loading 300 mg CBA → อีก 12 ชม. ให้ 150–180 mg CBA q12h\nCystic fibrosis exacerbation: IV 2.5–5 mg/kg/วัน CBA แบ่ง 3 dose (max ~300 mg CBA/วัน) ×10–14 วัน\nInhaled (adjunct สำหรับ pneumonia / CF chronic Pseudomonas): NEB 75–150 mg CBA bid (CF: cycle 28 วัน on/off)\nIntrathecal/intraventricular (meningitis/ventriculitis): 4.2 mg CBA/วัน แบ่ง 1–2 dose + systemic\n⚠️ Nephrotoxic (hydrate well) + neurotoxic | colistimethate นิยมสำหรับ UTI, ส่วน polymyxin B นิยมกว่านอก urinary tract"
   },
   {
     "id": 29,
@@ -1280,7 +1285,8 @@
       "UO"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "หมายเหตุ: ขนาดคิดตาม trimethoprim (TMP) | DS tab = TMP 160/SMX 800 mg | IV = TMP 16 mg/mL\nGeneral: IV 8–20 mg/kg/วัน (TMP) แบ่ง q6–12h | PO 1–2 DS q12–24h\nPCP treatment (mod–severe): IV/PO 15–20 mg/kg/วัน (TMP) แบ่ง 3–4 dose ×21 วัน (+ steroid ถ้า PaO₂<70)\nPCP prophylaxis: PO 1 DS หรือ 1 SS once daily (หรือ 1 DS 3×/สัปดาห์)\nToxoplasma encephalitis: treatment PO/IV 10 mg/kg/วัน (TMP) แบ่ง 2 dose ≥6 สัปดาห์ | prophylaxis 1 DS/วัน\nNocardia (severe/CNS/disseminated): IV 15 mg/kg/วัน (TMP) แบ่ง 3–4 dose\nMeningitis/brain abscess (MRSA/GNB): IV 5 mg/kg/dose (TMP) q6–12h\nS. maltophilia (HAP/VAP/bacteremia): IV 8–15 mg/kg/วัน (TMP) แบ่ง 2–3 dose (max ~960 mg TMP/วัน)\nSSTI/MRSA (abscess/cellulitis): PO 1–2 DS bid ×≥5 วัน\nMelioidosis eradication (ตาม นน.): <40kg TMP 160 / 40–60kg 240 / >60kg 320 mg q12h\nUTI cystitis: 1 DS bid ×3 วัน(หญิง)/7(ชาย) | complicated/pyelonephritis: 1 DS bid ×5–7 วัน\nSalmonella/Shigella (alt): IV 160 mg (TMP) q12h\n⚠️ high-dose (>5 mg/kg/วัน TMP) → ตรวจ SCr + K⁺ | ปรับตาม CrCl"
   },
   {
     "id": 30,

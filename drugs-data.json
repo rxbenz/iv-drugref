@@ -1778,7 +1778,8 @@
       "VPA level (ห้ามใช้ร่วม!)"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; Micromedex",
+    "dosing": "หมายเหตุ: ขนาดมาตรฐาน 500 mg IV over 1 ชม. q8h | extended infusion 4 ชม.เพิ่ม T>MIC (Pseudomonas/MIC สูง)\nComplicated intra-abdominal infection (cIAI): IV 500 mg q8h ×5–14 วัน (IV ≥3 วัน → step-down oral)\nComplicated UTI / pyelonephritis: IV 500 mg q8h ×10 วัน (ถึง 14 ถ้ามี bacteremia)\nBacteremia (catheter-related, ESBL E. coli/Klebsiella): IV 500 mg q8h\nNative vertebral osteomyelitis (Pseudomonas): IV 500 mg q8h ×6 สัปดาห์ (± ciprofloxacin หรือ aminoglycoside)\n⚠️ ลด seizure threshold (ระวัง neuro) | ลด valproate level (เหมือน meropenem) | ปรับตาม CrCl | เลิกจำหน่ายใน US แล้ว"
   },
   {
     "id": 41,

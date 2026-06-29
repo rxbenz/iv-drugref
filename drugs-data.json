@@ -4210,7 +4210,8 @@
       "Bleeding signs"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA warfarin reversal guidelines"
+    "ref": "Lexicomp; AHA warfarin reversal guidelines; UpToDate",
+    "dosing": "⚠ IV ต้องช้า ≤1 mg/นาที (เสี่ยง anaphylaxis) — เจือจางใน 50 mL ให้ over ≥15–30 นาที; เลี่ยง SC (ดูดซึมไม่แน่นอน)/IM (เสี่ยง hematoma)\nWarfarin reversal (ขึ้นกับ INR + เลือดออก):\n  • INR 4.5–10 ไม่มีเลือดออก: ปกติไม่ต้องให้ vit K; ถ้าให้ กิน 1–2.5 mg\n  • INR >10 ไม่มีเลือดออก: กิน 2.5–5 mg, recheck INR 12–24 ชม.\n  • Minor bleeding: กิน 2.5–5 mg\n  • Major/life-threatening bleeding (รวม ICH): IV 10 mg over 10–20 นาที + 4-factor PCC (หรือ FFP); ซ้ำได้ถ้า INR ยังสูงหลัง 12–24 ชม.\n  • ผ่าตัดด่วน: IV 1–10 mg ± PCC; ลิ้นหัวใจเทียม → ขนาดต่ำ 1–2 mg + PCC\n⚠ vit K ขนาดสูง (>10–15 mg) ทำให้ดื้อ warfarin ≥1 สัปดาห์\nRodenticide (long-acting) reversal: กิน เริ่ม 10 mg/วัน (รุนแรง IV 10–300 mg/วัน + clotting factors) titrate ตาม INR; อาจต้องรักษานานหลายเดือน (สูงถึง 800 mg/วัน)\nVitamin K deficiency / coagulopathy: IV/กิน/SC 10 mg ครั้งเดียว ซ้ำได้ใน 48–72 ชม. (พิสัย 1–25 mg)\nLiver disease coagulopathy (off-label): major bleed IV 10 mg; nonbleeding กิน/IV 5–10 mg ครั้งเดียว\nหมายเหตุ onset: IV 1–2 ชม. | IM 4–6 ชม. | กิน 6–12 ชม. (full reversal ~24 ชม.)"
   },
   {
     "id": 95,

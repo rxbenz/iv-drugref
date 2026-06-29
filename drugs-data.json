@@ -6104,7 +6104,8 @@
       "UO"
     ],
     "had": true,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "⚠️⚠️ FATAL ถ้าให้ daily แทน weekly — โรคภูมิคุ้มกัน (RA/MG/vasculitis/psoriasis) = สัปดาห์ละครั้ง! ตรวจสอบ indication ก่อนเสมอ | ⚠️ ใช้ preservative-free เท่านั้นสำหรับ intrathecal และ high-dose\n— High-dose IV (oncology, ต้อง leucovorin rescue + hydration + urine alkalinization pH≥7 + วัด MTX level) —\nPrimary CNS lymphoma: IV 3.5–8 g/m² q2 สัปดาห์ + leucovorin\nOsteosarcoma: IV 12 g/m² (max 20 g) over 4 ชม. + leucovorin\nALL/Burkitt/lymphoma (HD): IV 1–3.5 g/m² (± Hyper-CVAD)\nระดับ ≥500 mg/m² ต้อง leucovorin rescue เสมอ | 100–<500 อาจต้อง\n— Intrathecal (CNS prophylaxis/meningeal) —\n12–15 mg/dose (max 15) — dose ตาม AGE ไม่ใช่ BSA | preservative-free\n— Low-dose weekly (autoimmune: RA/MG/vasculitis/sarcoid/psoriasis) —\nPO/SC/IM 7.5–25 mg สัปดาห์ละครั้ง + folic acid (max ~25–30 mg/สัปดาห์)\n— Ectopic pregnancy / medication abortion —\nIM 50 mg/m² single (multidose 1 mg/kg + leucovorin) — ห้ามให้ folic acid\n⚠️ Myelosuppression, mucositis, nephrotoxic (HD crystalluria), hepatotoxic, pneumonitis, neurotoxic (IT/HD) | ห้ามใน pregnancy | NSAID/PPI/penicillin ↑ level | third-spacing (ascites/effusion) → clearance ช้า | antidote = glucarpidase + leucovorin"
   },
   {
     "id": 138,

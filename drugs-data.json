@@ -2637,7 +2637,8 @@
       "HPA axis"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "Adrenal crisis: IV 100 mg bolus ทันที → 50 mg ทุก 6 ชม. หรือ 200 mg/24 ชม. continuous infusion (24 ชม.แรก); ดีขึ้นแล้ว taper (เช่น 50 mg q12h) → กลับ maintenance กิน\nSeptic shock (off-label, vasopressor-dependent): IV 200–300 mg/วัน continuous infusion หรือแบ่งให้ 5–7 วัน/จน ICU discharge\nSevere CAP (adjunct, off-label): IV 200 mg/วัน continuous infusion 4–7 วัน → taper รวม 8–14 วัน (หรือ 50 mg q6h)\nThyroid storm (off-label): IV loading 300 mg → 100 mg ทุก 8 ชม.\nCOVID-19 (ต้องการ O₂, ทางเลือกแทน dexamethasone): IV/กิน 50 mg ทุก 8 ชม. ≤10 วัน\nAnti-inflammatory/immunosuppressive: IM/IV 100–500 mg/dose ทุก 2/4/6 ชม.; กิน 20–240 mg/วัน\nStress dose ผ่าตัด: minor +25 mg วันผ่าตัด; moderate 50–75 mg/วัน ถึง POD1; major 100 mg ก่อนดมยา → 50 mg q6h หรือ 200 mg/24 ชม. ถึง POD2–3 แล้ว taper\nUlcerative colitis รุนแรง (off-label): IV 100 mg ทุก 6–8 ชม. (ไม่เกิน 300 mg/วัน)\nIodinated contrast allergy (เร่งด่วน): IV 200 mg ทันที → ทุก 4 ชม.จนฉีด contrast + diphenhydramine\nChronic AI maintenance (กิน): 15–25 mg/วัน แบ่ง 2–3 ครั้ง (โดสใหญ่ตอนเช้า)\n⚠ หยุดกะทันหันหลังใช้นาน → adrenal crisis (ค่อย ๆ ลด); ระวัง hyperglycemia, immunosuppression, GI bleeding"
   },
   {
     "id": 60,

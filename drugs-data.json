@@ -4985,7 +4985,8 @@
       "C&S"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "⚠️ เพิ่ม mortality risk → สงวนไว้เมื่อไม่มีทางเลือกอื่นที่เหมาะสม\nStandard: IV 100 mg loading → 50 mg q12h\ncSSTI: 100 mg → 50 mg q12h ×5–14 วัน\nCAP (alt, no Pseudomonas): 100 mg → 50 mg q12h ขั้นต่ำ 5 วัน\nIntra-abdominal: 100 mg → 50 mg q12h (resistant → 200 mg → 100 mg q12h)\nHigh-dose (MDR Acinetobacter / S. maltophilia): IV 200 mg loading → 100 mg q12h — combination\nNTM (rapidly growing): IV 25–50 mg OD–bid (± loading 100 mg)\n⚠️ ไม่ใช้ UTI (ความเข้มข้นในปัสสาวะต่ำ) | ไม่ครอบคลุม Pseudomonas/Proteus | nausea เด่น | ไม่ต้องปรับ renal (ปรับใน severe hepatic — Child-Pugh C)"
   },
   {
     "id": 113,

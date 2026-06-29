@@ -802,7 +802,8 @@
       "Renal fn"
     ],
     "had": true,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "หมายเหตุ: 10% solution = 100 mg/mL = 0.465 mEq (9.3 mg) elemental Ca/mL | 1 g calcium gluconate = 93 mg elemental Ca | ระคายเคืองน้อยกว่า CaCl₂ → ให้ peripheral ได้\nHypocalcemia (รุนแรง/มีอาการ): IV 1–2 g (10–20 mL 10%) ใน 50 mL D5W/NS over 10–20 นาที, ซ้ำได้ q10–60 นาที → ถ้าคาดว่าต่ำต่อเนื่อง: continuous infusion (11 g ใน 1 L → เริ่ม 50–100 mL/h)\nHyperkalemia (stabilize myocardium, ECG changes หรือ K>6.5): IV 1–2 g over 2–5 นาที, ซ้ำได้หลัง 5 นาทีถ้า ECG ยังผิด (ไม่ลด K — ต้องร่วม insulin/dextrose)\nCCB/BB toxicity: IV 3–6 g (หรือ 60 mg/kg) over 5–10 นาที, ซ้ำ q10–20 นาที ×3–4 หรือ infusion 60–120 mg/kg/h (รักษา iCa 1.5–2× ULN)\nHF acid exposure (systemic): IV 2 g ทันที + topical 2.5% gel / SC / IA ตามตำแหน่ง\nParenteral nutrition: 10–15 mEq elemental Ca/วัน\n⚠️ ⚠️ ห้ามผสม Ceftriaxone (ตกตะกอน fatal) + bicarbonate/phosphate | vesicant (extravasation → necrosis) | ให้เร็ว → bradycardia/arrest | ระวังในผู้ใช้ digoxin"
   },
   {
     "id": 19,
@@ -2357,7 +2358,8 @@
       "Electrolytes (prolonged infusion)"
     ],
     "had": true,
-    "ref": "Lexicomp; ADA hypoglycemia guidelines"
+    "ref": "Lexicomp; ADA hypoglycemia guidelines; UpToDate",
+    "dosing": "หมายเหตุ: D50W = 0.5 g/mL = 25 g/50 mL | hypertonic → prefer central line (peripheral → phlebitis/extravasation necrosis) | ระวัง Wernicke → ให้ thiamine ก่อนถ้า malnourished/alcohol\nHypoglycemia: IV 10–25 g (20–50 mL D50W), ซ้ำได้; ตรวจ BG ซ้ำใน 15 นาที (SCCM: 10–20 g, รักษาถ้า BG <70 หรือ <100 ในผู้ป่วย neuro injury) | Oral 15–20 g\nHyperkalemia (adjunct + insulin): IV 25–50 g over 5 นาที พร้อม regular insulin; omit dextrose ถ้า BG ≥250 → ± D10W infusion 50–100 mL/h ×5 ชม.\nCCB/BB toxicity (HDIT adjunct): bolus 25 g (50 mL D50W) → continuous 0.5 g/kg/h, titrate รักษา BG >100\nHypernatremia (ใช้ D5W ไม่ใช่ D50): chronic ~1.35 mL/kg/h | acute 3–6 mL/kg/h (free water replacement)\n⚠️ Vesicant (extravasation → necrosis) | hyperglycemia | rebound hypoglycemia (monitor BG) | hypokalemia/hypophosphatemia (refeeding)"
   },
   {
     "id": 54,
@@ -3117,7 +3119,8 @@
       "SpO₂"
     ],
     "had": true,
-    "ref": "Lexicomp; Eclampsia guidelines"
+    "ref": "Lexicomp; Eclampsia guidelines; UpToDate",
+    "dosing": "หมายเหตุ: 1 g MgSO₄ = 98.6 mg = 8.12 mEq = 4.06 mmol elemental Mg | serum Mg ไม่สะท้อน total body store ดีนัก\nEclampsia/preeclampsia (รุนแรง): IV loading 4–6 g over 15–30 นาที → 1–2 g/h infusion ≥24 ชม.หลังคลอด; ชักซ้ำ → bolus 2–4 g over ≥5 นาที (max infusion 3 g/h, max ~40 g/24 ชม.) | IM: 10 g (5 g แต่ละสะโพก) → 5 g q4h ถ้าไม่มี IV\nTorsades de pointes (มี pulse): IV 1–2 g ใน 50–100 mL D5W over 15 นาที, ซ้ำได้ถึง 4 g/ชม. → infusion 0.5–1 g/h | VF/pulseless TdP: 2 g bolus over 1–2 นาที (ซ้ำได้ถึงรวม 6 g)\nHypomagnesemia: mild (1.5–1.7) 1–2 g over 1–2 ชม. | moderate (1–1.4) 2–4 g over 2–12 ชม. | severe (<1) 4–8 g over 4–24 ชม. | unstable: bolus 1–2 g over 2–15 นาที\nSevere asthma/COPD exacerbation (adjunct): IV 2 g single over 20 นาที\nFetal neuroprotection (<32 wk): IV 4 g load → 1 g/h (max 24 ชม.)\nParenteral nutrition: 8–20 mEq elemental Mg/วัน\n⚠️ Toxicity: DTR หาย (patellar reflex) → respiratory depression → cardiac arrest | antidote = calcium gluconate 1 g IV | ติดตาม reflex/RR/UO | ลด dose ใน renal impairment | CI: myasthenia gravis, heart block"
   },
   {
     "id": 71,
@@ -3520,7 +3523,8 @@
       "Withdrawal signs"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: opioid antagonist | route IV (preferred), IM, SC, intranasal | ⚠️ T½ สั้นกว่า opioid (30–90 นาที) → อาจ re-sedate → เฝ้าระวัง/ซ้ำ; long-acting opioid → continuous infusion\nOpioid overdose (life-threatening): IV 0.04–2 mg → ซ้ำ escalating q2–3 นาที; ถ้าไม่ตอบสนองหลังรวม 10 mg → หาสาเหตุอื่น; fentanyl/high-potency อาจต้อง dose สูง\n  • Dose สูง (0.4–2 mg) ถ้า resp/cardiac arrest | dose ต่ำ (0.04–0.4 mg) ในผู้ติดยา (เลี่ยง withdrawal)\nIntranasal: 3–4 mg/spray (หรือ 8) q2–3 นาที สลับรูจมูก | IM/SC 0.4–2 mg | auto-injector 5–10 mg\nContinuous infusion (long-acting opioid): 2/3 ของ effective bolus/ชม. (usual 0.25–6.25 mg/h)\nAcute therapeutic (postop resp depression): IV 0.05–0.2 mg q2–3 นาที titrate (ให้ RR ดีขึ้นแต่ยังคุมปวดได้)\nChronic opioid (cancer pain): เจือจาง 0.04 mg/mL → 0.02–0.08 mg slow titrate q30–120 วินาที\nOpioid-induced pruritus: infusion 0.25 mcg/kg/h (ไม่เกิน 2 — กัน reverse analgesia)\n⚠️ Acute withdrawal (agitation/HTN/tachycardia) | re-narcotization | pulmonary edema (rare, dose สูง) — titrate ให้ RR ≥12 ไม่ใช่ตื่นเต็มที่"
   },
   {
     "id": 80,
@@ -4272,7 +4276,8 @@
       "UO"
     ],
     "had": true,
-    "ref": "Lexicomp; ISMP High Alert List"
+    "ref": "Lexicomp; ISMP High Alert List; UpToDate",
+    "dosing": "⚠️⚠️ ห้ามให้ undiluted/IV push — fatal cardiac arrest | 1 mEq = 1 mmol | แก้ hypomagnesemia ร่วมเสมอ\nHypokalemia — Mild/mod (K 3–3.4): PO 10–20 mEq 2–4×/วัน (max single 40 mEq) | IV 20–60 mEq, rate ≤10–20 mEq/h\nHypokalemia — Severe (K <3) / มีอาการ: PO 40 mEq 3–4×/วัน หรือ 20 mEq q2–3h | IV: K 2.5–3 → 10–20 mEq/h | K <2.5/life-threatening → 10–40 mEq/h (central + ECG; บางรายถึง 400 mEq/24 ชม.)\nrate: peripheral ≤10 mEq/h (ไม่ต้อง monitor) | >10–20 mEq/h ต้อง central line + continuous ECG\ndilution: peripheral ≤40 mEq/L (เจ็บ/phlebitis ถ้าสูงกว่า) | central ≤80–120 mEq/L\nDKA/HHS: K <3.5 → ชะลอ insulin จนกว่า >3.5, ให้ 10–20 mEq/h | K 3.5–5 → เติม 10–20 mEq/L IV fluid (target 4–5)\nParenteral nutrition: 1–2 mEq/kg/วัน\n⚠️ ต้องเจือจาง+ใช้ infusion pump เสมอ | ตรวจ K⁺ ก่อน dose ถัดไป | ระวังใน renal impairment/ACEi-ARB/K-sparing diuretic | extravasation → necrosis"
   },
   {
     "id": 97,
@@ -4589,7 +4594,8 @@
       "Fluid balance"
     ],
     "had": false,
-    "ref": "Lexicomp; ACLS"
+    "ref": "Lexicomp; ACLS; UpToDate",
+    "dosing": "หมายเหตุ: 8.4% = 1 mEq/mL (Na + HCO₃) | ⚠️ ห้าม IV push undiluted ระวัง extravasation (hypertonic → necrosis)\nTCA/sodium-channel-blocker overdose (QRS >100–120 msec): IV 1–2 mEq/kg (50–150 mEq) over 1–2 นาที, ซ้ำ q3–5 นาทีจน QRS แคบ → infusion 150 mEq/L D5W ~150–250 mL/h (รักษา pH 7.5–7.55)\nSevere metabolic acidosis: ให้เมื่อ pH <7.1 (หรือ ≤7.2 + AKI รุนแรง); IV ~89–100 mEq over 1–2 นาที → reassess q2h | deficit = 0.5 × wt × (goal − observed HCO₃)\nHyperkalemia (มี metabolic acidosis, adjunct): IV 150 mEq ใน 1 L D5W over 2–4 ชม. (cardiac arrest: 50 mEq over 5 นาที)\nUrine alkalinization (salicylate/HD-MTX): IV 1–2 mEq/kg bolus → 150 mEq/L D5W ~200–250 mL/h (urine pH 7.5–8.5) | Oral 1.3 g q4–6h\nCKD metabolic acidosis: Oral 15.4–23.1 mEq/วัน แบ่ง (650 mg tab 2–3×/วัน), target HCO₃ 23–29\n⚠️ ห้ามผสมกับ calcium (ตกตะกอน) | hypokalemia (K shift) | hypernatremia/fluid overload | paradoxical intracellular acidosis | hypocalcemia"
   },
   {
     "id": 104,
@@ -6327,7 +6333,8 @@
       "K⁺"
     ],
     "had": true,
-    "ref": "Lexicomp; ACLS 2020; AHA"
+    "ref": "Lexicomp; ACLS 2020; AHA; UpToDate",
+    "dosing": "หมายเหตุ: 10% = 100 mg/mL = 1.4 mEq (27 mg) elemental Ca/mL | 1 g CaCl₂ = 270 mg elemental Ca (≈3× ของ calcium gluconate) | ⚠️ VESICANT แรง → prefer central line (peripheral → necrosis รุนแรง)\nHyperkalemia (ECG changes หรือ K>6.5): IV/IO 0.5–1 g over 2–5 นาที, ซ้ำได้หลัง 5 นาที (ไม่ลด K — ต้องร่วม insulin/dextrose)\nCCB/BB toxicity: IV 1–2 g (10–20 mL 10%) หรือ 20 mg/kg over 5–10 นาที, ซ้ำ q10–20 นาที ×3–4 หรือ infusion 20–40 mg/kg/h (รักษา iCa 1.5–2× ULN)\nHypocalcemia acute (alt — gluconate นิยมกว่าถ้าไม่มี central line): IV 1 g ใน 100 mL D5W/NS over 10–20 นาที ทาง central/large vein → ถ้าต่อเนื่อง: infusion 4 g ใน 1 L → 50–100 mL/h\nHF acid systemic toxicity: IV bolus ถึง 4 g ตามอาการ (gluconate อาจ preferred — extravasation รุนแรงน้อยกว่า)\n⚠️ ห้ามผสม NaHCO₃/phosphate/Ceftriaxone (ตกตะกอน, fatal ในทารก) | ให้เร็ว → bradycardia/arrest | ECG monitoring | ห้ามให้ SC (ต่างจาก gluconate)"
   },
   {
     "id": 143,
@@ -6466,7 +6473,8 @@
       "Na⁺"
     ],
     "had": false,
-    "ref": "Lexicomp; AASLD/EASL SBP; Sort P. NEJM 1999"
+    "ref": "Lexicomp; AASLD/EASL SBP; Sort P. NEJM 1999; UpToDate",
+    "dosing": "หมายเหตุ: 25%/20% = hyperoncotic (ดึงน้ำเข้าหลอดเลือด) | 5% = iso-oncotic\nSpontaneous bacterial peritonitis (SBP): IV 1.5 g/kg ภายใน 6 ชม.จากวินิจฉัย → 1 g/kg วันที่ 3 (+ antibiotic); มัก cap ~100 g/dose\nLarge-volume paracentesis (>5 L): IV 6–8 g ต่อทุก 1 L ที่ดึงออก (หรือ ~50 g) ให้ระหว่าง/หลังเจาะ\nHepatorenal syndrome (HRS-AKI): IV 1 g/kg/วัน ×2 วัน (max 100 g/วัน) → 20–50 g/วัน + vasoconstrictor (terlipressin/norepi/midodrine+octreotide)\nOvarian hyperstimulation (รุนแรง): IV 50–100 g over 4 ชม., ซ้ำ q4–12 ชม.ตามต้องการ\nPlasma exchange: 5% albumin titrate ตาม plasma volume ที่ดึงออก\n⚠️ Fluid overload/pulmonary edema (HF) | ห้ามใช้เป็น nutritional supplement | hypersensitivity"
   },
   {
     "id": 146,
@@ -6511,7 +6519,8 @@
       "ECG (ถ้า K⁺ สูง)"
     ],
     "had": true,
-    "ref": "Lexicomp; ASPEN refeeding guidelines"
+    "ref": "Lexicomp; ASPEN refeeding guidelines; UpToDate",
+    "dosing": "หมายเหตุ: สั่งเป็น mmol ของ phosphate (1 mmol PO₄ = 31 mg P) | ⚠️ ทุก 1 mmol phosphate มาพร้อม ~1.5 mEq potassium → คิดรวม K ด้วย (30 mmol PO₄ = ~45 mEq K); ถ้า K >4 พิจารณาใช้ sodium phosphate แทน\nHypophosphatemia (IV, ตาม serum P):\n  • P 2.3–2.7 mg/dL: 0.08–0.16 mmol/kg over 4–6 ชม.\n  • P 1.5–2.2: 0.16–0.32 mmol/kg over 4–6 ชม.\n  • P <1.5 (รุนแรง): 0.32–0.64 mmol/kg over 4–6 ชม.\nCritically ill + nutrition: เพิ่มขึ้นได้ (P <1.5 → 0.64–1 mmol/kg over 8–12 ชม.); ไม่เกิน 15 mmol/L ใน PN\nrate: ≤7 mmol PO₄/ชม. (ส่วน K ≤10–20 mEq/h) | obesity → ใช้ adjusted BW\nParenteral nutrition: 10–15 mmol/1,000 kcal หรือ 20–40 mmol/วัน\n⚠️ ห้ามผสม calcium (ตกตะกอน) | hyperkalemia/hyperphosphatemia/hypocalcemia | ระวังใน renal impairment | ต้อง dilute + infusion pump"
   },
   {
     "id": 147,
@@ -6784,7 +6793,8 @@
       "Anaphylactoid signs"
     ],
     "had": false,
-    "ref": "Lexicomp; Bateman DN. BMJ 2014"
+    "ref": "Lexicomp; Bateman DN. BMJ 2014; UpToDate",
+    "dosing": "หมายเหตุ: paracetamol OD antidote — ได้ผลดีสุดถ้าเริ่ม <8–10 ชม.หลังกิน | plot serum paracetamol (4–24 ชม.) บน Rumack-Matthew nomogram | regimen ควรให้รวม ≥300 mg/kg ใน 20–24 ชม.แรก | obesity → cap ที่ 100 kg\nParacetamol OD (IV 3-bag, 21 ชม.): 150 mg/kg (max 15 g) over 1 ชม. → 50 mg/kg (max 5 g) over 4 ชม. → 100 mg/kg (max 10 g) over 16 ชม.\nParacetamol OD (IV 2-bag, 20 ชม., ≥41 kg): 200 mg/kg over 4 ชม. → 100 mg/kg over 16 ชม. (anaphylactoid น้อยกว่า)\nParacetamol OD (Oral 72 ชม.): loading 140 mg/kg → 70 mg/kg q4h ×17 dose\nหยุดเมื่อครบเกณฑ์: paracetamol <10 mcg/mL + INR <2 + transaminase ปกติ/ลดลง 25–50% จาก peak + อาการดี\nNon-acetaminophen acute liver failure: 150 mg/kg over 30 นาที → 50 mg/kg over 4 ชม. → 100 mg/kg over 16 ชม. → 100 mg/kg/วัน ต่อ\nRespiratory (mucolytic): NEB 3–5 mL 20% (หรือ 6–10 mL 10%) q3–4h\n⚠️ Anaphylactoid reaction 10–20% (มัก bag แรก) → ลดอัตรา + antihistamine, ไม่ต้องหยุด NAC | bronchospasm/flushing/N-V"
   },
   {
     "id": 153,

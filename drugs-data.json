@@ -7175,7 +7175,8 @@
       "N/V"
     ],
     "had": false,
-    "ref": "Lexicomp; WHO PPH 2018; Cochrane"
+    "ref": "Lexicomp; WHO PPH 2018; Cochrane; UpToDate",
+    "dosing": "PPH prevention (ป้องกันตกเลือดหลังคลอด) — single dose เท่านั้น:\n  • หลังคลอดทางช่องคลอด: IV (ช้า ๆ over 1 นาที) หรือ IM 100 mcg ครั้งเดียว\n  • หลังผ่าคลอด: IV 100 mcg ครั้งเดียว\n⚠ ให้หลังคลอดทารกแล้วเท่านั้น ห้ามใช้ก่อนคลอด/induction\nหมายเหตุ: ข้อดี = ฉีดครั้งเดียว ไม่ต้อง infusion + ออกฤทธิ์นานกว่า oxytocin; ห้ามผสมกับ oxytocin; ผลข้างเคียงเล็กน้อย (คลื่นไส้/หน้าแดง)"
   },
   {
     "id": 161,
@@ -7221,7 +7222,8 @@
       "Respiratory"
     ],
     "had": false,
-    "ref": "Lexicomp; ACOG tocolysis; FDA warning"
+    "ref": "Lexicomp; ACOG tocolysis; FDA warning; UpToDate",
+    "dosing": "Tocolysis (off-label, ใช้ระยะสั้น ≤48–72 ชม.เท่านั้น):\n  • SC 0.25 mg ทุก 20 นาที–3 ชม. (หยุดถ้าชีพจรแม่ >120) \n  • IV 2.5–5 mcg/นาที เพิ่มทีละ 2.5–5 mcg/นาที ทุก 20–30 นาที (max 25 mcg/นาที) → ลดเหลือขนาดต่ำสุดเมื่อคุมการหดรัดตัวได้\nAsthma refractory/severe exacerbation (ทางเลือก): SC 0.25 mg ครั้งเดียว ซ้ำได้ทุก 20 นาที รวม 3 โดส — ห้ามใช้ร่วม parenteral epinephrine\nSympathomimetic extravasation (off-label): SC infiltrate บริเวณที่รั่ว — large: terbutaline 1 mg เจือจางใน 10 mL NSS; small/distal: 0.5 mg เจือจางใน 1 mL NSS; ซ้ำได้หลัง 15 นาที\nAsthmaPO (ทางเลือก, ไม่แนะนำ routine): 5 mg วันละ 3 ครั้ง (max 15 mg/วัน)\n⚠ FDA black box: ห้ามใช้ tocolysis ระยะยาว (>48–72 ชม.) — มีรายงานเสียชีวิต; ระวัง pulmonary edema, tachycardia แม่/ทารก, hypokalemia, hyperglycemia; เจ็บหน้าอก → หยุดทันที"
   },
   {
     "id": 162,

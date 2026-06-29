@@ -253,14 +253,15 @@ div.header .cross-link.calc-link:hover {
   border-color: var(--border-focus, rgba(255,255,255,0.15));
 }
 
-.btn.primary {
+.btn.primary, .btn-primary {
   background: linear-gradient(135deg, var(--accent-cyan, #22d3ee), var(--accent-blue, #7dd3fc));
   color: #0f172a;
   border-color: transparent;
+  box-shadow: 0 2px 12px var(--blue-glow, rgba(125, 211, 252, 0.25));
 }
 
-.btn.primary:hover {
-  box-shadow: 0 2px 12px rgba(125, 211, 252, 0.25);
+.btn.primary:hover, .btn-primary:hover {
+  box-shadow: 0 4px 18px var(--blue-glow, rgba(125, 211, 252, 0.35));
   transform: translateY(-1px);
 }
 
@@ -282,15 +283,18 @@ div.header .cross-link.calc-link:hover {
 }
 
 /* Keep primary buttons coloured on light theme — the generic light .btn rule
-   above has the same specificity as .btn.primary but comes later, so without
-   this it would override the gradient and make primary buttons look greyed-out
-   (i.e. disabled). */
-:root:not([data-theme="dark"]) .btn.primary {
+   above has the same specificity as .btn.primary / .btn-primary but comes
+   earlier, so without this it would override the gradient and make primary
+   buttons look greyed-out (i.e. disabled). Covers BOTH naming conventions:
+   .btn.primary (shared) and .btn-primary (tdm/vanco action buttons). */
+:root:not([data-theme="dark"]) .btn.primary,
+:root:not([data-theme="dark"]) .btn-primary {
   background: linear-gradient(135deg, var(--accent-cyan, #22d3ee), var(--accent-blue, #38bdf8));
   color: #0f172a;
   border-color: transparent;
 }
-:root:not([data-theme="dark"]) .btn.primary:hover {
+:root:not([data-theme="dark"]) .btn.primary:hover,
+:root:not([data-theme="dark"]) .btn-primary:hover {
   color: #0f172a;
 }
 

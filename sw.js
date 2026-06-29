@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.38.0
+// IV Drug Reference PWA — Service Worker v5.38.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -224,9 +224,15 @@
 //          summaries (Thai) per UpToDate/Lexicomp/Micromedex/EMC SmPC + IDSA
 //          guidance; oncology & immunoglobulin kept protocol-specific for
 //          safety. Data-only release (no code/engine change).
+// v5.38.1: Fix — primary action buttons (TDM "Calculate Phenytoin PK", Vanco
+//          "Run Bayesian MAP + MCMC") rendered grey/disabled-looking on light
+//          theme. They use the .btn-primary class, but shared.css only colored
+//          .btn.primary (dot) — so the generic light .btn rule (higher
+//          specificity) overrode the gradient. shared.css now covers BOTH
+//          .btn.primary and .btn-primary (resting glow + light-theme guard).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.38.0';
+const CACHE_NAME = 'iv-drugref-v5.38.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

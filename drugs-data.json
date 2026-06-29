@@ -6147,7 +6147,8 @@
       "LFTs"
     ],
     "had": false,
-    "ref": "Lexicomp; NCCN; CPIC UGT1A1"
+    "ref": "Lexicomp; NCCN; CPIC UGT1A1; UpToDate",
+    "dosing": "⚠️ conventional ≠ liposomal (Onivyde) — dose ต่างกัน, verify product | UGT1A1*28/*6 homozygous → ลด starting dose ≥1 level | ลด dose ถ้าเคย pelvic/abdominal RT, PS 2, หรือ hepatic impairment (bilirubin สูง)\n⚠️ Diarrhea 2 แบบ: early/acute cholinergic (<24 ชม. — premedicate/รักษา atropine 0.25–1 mg IV/SC) + late-onset (>24 ชม. — loperamide aggressive 4 mg → 2 mg q2h; dose-limiting, อาจรุนแรงถึงชีวิต)\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nFOLFIRI (colorectal/gastric): 180 mg/m² over 90 นาที q2 สัปดาห์ + 5-FU/leucovorin (± bevacizumab/cetuximab)\nFOLFIRINOX/mFOLFIRINOX (pancreatic): 180 (หรือ 150) mg/m² q2 สัปดาห์\nSingle-agent: 125 mg/m² weekly ×4 (q6 สัปดาห์) หรือ 350 mg/m² q3 สัปดาห์\nRecurrent glioblastoma + bevacizumab: 125 mg/m² q2 สัปดาห์ (เพิ่ม dose ถ้าใช้ enzyme-inducing AED ร่วม)\n⚠️ Severe diarrhea + myelosuppression อาจ life-threatening | dehydration จาก diarrhea | alopecia | cholinergic syndrome"
   },
   {
     "id": 139,
@@ -6192,7 +6193,8 @@
       "LFTs"
     ],
     "had": true,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "⚠️ Safety: ต้องให้ mesna + hydration (≥2 L/วัน) เสมอ กัน hemorrhagic cystitis | แก้ urinary obstruction ก่อน | หลีกเลี่ยงถ้า WBC <2,000 / platelet <50,000 / active infection (รวม UTI)\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nSoft tissue sarcoma single-agent: 3,000 mg/m²/วัน ×3 วัน q3 สัปดาห์ + mesna\nTesticular (VIP/VeIP/TIP): 1,200–1,500 mg/m²/วัน ×4–5 วัน q3 สัปดาห์ + mesna + cisplatin\nLymphoma (ICE/RICE): 5,000 mg/m² over 24 ชม. หรือ fractionated 1,667 mg/m²/วัน ×3 + carboplatin/etoposide\nEwing sarcoma (VDC/IE): 1,800 mg/m²/วัน ×5 วัน + etoposide\nAIM/MAID (sarcoma): 1,500–2,500 mg/m²/วัน ×3–4 วัน + doxorubicin\nลด dose ถ้าเคยฉาย pelvic RT\n⚠️ Hemorrhagic cystitis (ต้อง mesna) | ⚠️ Encephalopathy/neurotoxicity (confusion/somnolence — antidote: methylene blue) | myelosuppression | nephrotoxic (Fanconi/tubular) | SIADH | ปรับตาม renal/hepatic"
   },
   {
     "id": 140,

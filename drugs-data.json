@@ -6012,7 +6012,8 @@
       "Allergic signs (>cycle 6)"
     ],
     "had": true,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "⚠️ Safety: แก้ hypokalemia/hypomagnesemia ก่อนและระหว่างให้ | หลีกเลี่ยงใน congenital long QT | ผสมใน D5W เท่านั้น (ห้าม NSS/chloride — สลายตัว)\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nFOLFOX (colorectal/gastric/esophageal): 85 mg/m² day 1 q2 สัปดาห์ + 5-FU/leucovorin\nCAPOX/XELOX (colorectal/gastric): 130 mg/m² day 1 q3 สัปดาห์ + capecitabine\nFOLFIRINOX/mFOLFIRINOX (pancreatic): 85 mg/m² q2 สัปดาห์ + 5-FU/leucovorin/irinotecan\nGEMOX (biliary): 100 mg/m² q2 สัปดาห์ (หรือ 80 mg/m² days 1,8 q3 สัปดาห์) + gemcitabine\nFLOT (gastric/GEJ): 85 mg/m² q2 สัปดาห์ + 5-FU/leucovorin/docetaxel\nผู้สูงอายุ/frail (palliative): พิจารณาลดเหลือ 60% ของ 130 mg/m² (toxicity น้อยกว่า ประสิทธิภาพไม่ด้อย)\n⚠️ Peripheral neuropathy 2 แบบ: acute cold-induced (หลีกเลี่ยงของเย็น 3–5 วัน) + chronic cumulative sensory (dose-limiting) | laryngopharyngeal dysesthesia | myelosuppression | delayed N/V | hypersensitivity (cumulative, cycle ≥6)"
   },
   {
     "id": 136,

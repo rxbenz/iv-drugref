@@ -5789,7 +5789,8 @@
       "Vitals during infusion"
     ],
     "had": true,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "หมายเหตุ: ANC >1,500 + platelet >100,000 ก่อนเริ่ม cycle ถัดไป | แก้ uric acid/dehydration กัน TLS\n⚠️ Premedication กัน fluid retention + HSR: dexamethasone 8 mg PO bid ×3 วัน เริ่ม 1 วันก่อน docetaxel | (prostate ที่ใช้ prednisone: dexa 8 mg ที่ 12, 3, 1 ชม.ก่อน | หรือ single 10–20 mg IV วันให้ยา)\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nq3 สัปดาห์: 60–100 mg/m² (breast/NSCLC/gastric/H&N ± platinum/fluorouracil)\nProstate (mCRPC/mHSPC): 75 mg/m² q3 สัปดาห์ + prednisone/ADT ×6 cycle\nBreast adjuvant (TAC/TC/TCH): 75 mg/m² q3 สัปดาห์\nWeekly: 35–40 mg/m²/สัปดาห์\n⚠️ Fluid retention/edema (cumulative ≥400 mg/m² — ต้อง premed steroid) | hypersensitivity (นาทีแรก ๆ) | neutropenia (รุนแรง, dose-limiting) | peripheral neuropathy | nail/skin changes | polysorbate 80 vehicle"
   },
   {
     "id": 131,

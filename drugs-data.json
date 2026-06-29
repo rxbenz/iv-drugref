@@ -5601,7 +5601,8 @@
       "Audiometry (prolonged)"
     ],
     "had": false,
-    "ref": "Lexicomp; EUCAST PK/PD breakpoints"
+    "ref": "Lexicomp; EUCAST PK/PD breakpoints; Micromedex; Targocid SmPC (EMC)",
+    "dosing": "ผู้ใหญ่ ไตปกติ — Loading แล้วตามด้วย maintenance วันละครั้ง:\ncSSTI / pneumonia / cUTI: loading 6 mg/kg IV/IM ทุก 12 ชม. ×3 โดส → maintenance 6 mg/kg IV/IM วันละครั้ง (target trough >15 mg/L)\nBone & joint infection: loading 12 mg/kg ทุก 12 ชม. ×3–5 โดส → 12 mg/kg วันละครั้ง (target trough >20 mg/L)\nInfective endocarditis: loading 12 mg/kg ทุก 12 ชม. ×3–5 โดส → 12 mg/kg วันละครั้ง (target trough 30–40 mg/L)\nClostridioides difficile (รูปกิน, ละลายผงแล้วกิน): 100–200 mg วันละ 2 ครั้ง 7–14 วัน\n⚠ ปรับขนาดเมื่อไตเสื่อม ตั้งแต่วันที่ 4: CrCl 30–80 → ลดเหลือครึ่งหนึ่ง (ให้ขนาดเดิมวันเว้นวัน หรือครึ่งโดสทุกวัน); CrCl <30 หรือฟอกไต → ลดเหลือ 1/3 (ขนาดเดิมทุก 3 วัน หรือ 1/3 โดสทุกวัน)\nวิธีให้: IV bolus over 3–5 นาที หรือ IV infusion over 30 นาที; IM (deep) ได้ที่ขนาดต่ำ\nหมายเหตุ: TDM ตรวจ trough ก่อนโดสที่ 4–5; ข้อดีเหนือ vancomycin = ฉีด IM ได้ + Red Man Syndrome น้อยกว่า"
   },
   {
     "id": 126,

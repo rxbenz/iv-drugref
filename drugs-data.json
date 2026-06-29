@@ -5834,7 +5834,8 @@
       "Cumulative dose"
     ],
     "had": true,
-    "ref": "Lexicomp; ASCO; NCCN"
+    "ref": "Lexicomp; ASCO; NCCN; UpToDate",
+    "dosing": "⚠️ ห้ามสับสน/แทนกับ doxorubicin liposomal — คนละผลิตภัณฑ์ (ความเข้มข้นเท่ากัน เสี่ยงหยิบผิด)\n⚠️ Cumulative cardiotoxicity: lifetime max ~450–550 mg/m² (ต่ำกว่าถ้ามี RT ทรวงอก/anthracycline อื่น/risk factor) — ติดตาม LVEF | ⚠️ VESICANT → extravasation → necrosis (antidote: dexrazoxane)\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nLymphoma (CHOP/R-CHOP/CHOEP): 50 mg/m² day 1 q3 สัปดาห์\nBreast (AC ± dose-dense): 60 mg/m² q2–3 สัปดาห์ | TAC 50 mg/m²\nHodgkin (ABVD/AVD): 25 mg/m² days 1,15 (q28 วัน)\nSarcoma single-agent: 60–75 mg/m² q3 สัปดาห์ (cumulative cap ~450–480)\nContinuous infusion (DA-EPOCH / sarcoma MAID): 10–20 mg/m²/วัน ×4 วัน\n⚠️ Myelosuppression | severe N/V | mucositis | alopecia | ปัสสาวะแดง (ไม่อันตราย, แจ้งผู้ป่วย) | radiation recall | ปรับใน hepatic impairment (bilirubin สูง)"
   },
   {
     "id": 132,

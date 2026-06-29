@@ -1330,7 +1330,8 @@
       "Infection signs"
     ],
     "had": true,
-    "ref": "Lexicomp; ACR lupus guidelines"
+    "ref": "Lexicomp; ACR lupus guidelines; UpToDate",
+    "dosing": "⚠️ Safety: hydrate + ปัสสาวะบ่อย (± mesna ใน dose สูง) กัน hemorrhagic cystitis | antiemetic (emetogenic ปานกลาง–สูง) | ตรวจ CBC, ปรับ/เลื่อน dose ถ้า ANC <1,500\n— กลุ่มโรคภูมิคุ้มกัน (autoimmune, dose ค่อนข้างมาตรฐาน) —\nVasculitis (GPA/MPA/EGPA/PAN, organ/life-threatening): IV 15 mg/kg (max 1,200 mg) q2สัปดาห์ ×3 dose → q3สัปดาห์ ×3–6 เดือน + glucocorticoid | หรือ Oral 1.5–2 mg/kg/วัน (max 200)\nLupus nephritis: IV low-dose (Euro-Lupus) 500 mg q2สัปดาห์ ×6 dose | high-dose 500–1,000 mg/m² monthly ×6\nDermatomyositis/Polymyositis: IV 500–1,000 mg/m² q4สัปดาห์\nCTD-associated ILD: IV 500–750 mg/m² q4สัปดาห์ (หรือ PO 1–2 mg/kg/วัน, max 100–200)\nAnti-GBM (Goodpasture): Oral 2 mg/kg/วัน (≤200) + steroid + plasmapheresis\nAIHA refractory: low-dose PO 1–2 mg/kg/วัน | high-dose IV 1,000 mg q4สัปดาห์ ×4\n— มะเร็ง / HCT —\n💊 Oncology = protocol-specific (เช่น CHOP/R-CHOP 750 mg/m² day1 q3สัปดาห์ | AC breast 600 mg/m² | hyper-CVAD 300 mg/m² q12h ×6) — ยึดตาม protocol/แผนการรักษา\nHCT conditioning: IV 50–60 mg/kg/วัน ×2–4 วัน (ตาม protocol)\n⚠️ Myelosuppression, hemorrhagic cystitis, SIADH (dose สูง), secondary malignancy/ภาวะมีบุตรยาก, cardiotoxic (dose สูง) | ปรับตาม renal/hepatic"
   },
   {
     "id": 31,
@@ -2708,7 +2709,8 @@
       "Infection signs"
     ],
     "had": true,
-    "ref": "Lexicomp; ACR guidelines"
+    "ref": "Lexicomp; ACR guidelines; UpToDate",
+    "dosing": "หมายเหตุ: anti-TNF biologic | premedicate (antihistamine ± paracetamol/steroid) กัน infusion reaction | infuse over ~2 ชม. | ขนาดตาม actual BW\nรูปแบบมาตรฐาน: induction IV ที่ week 0, 2, 6 → maintenance ทุก 8 สัปดาห์\nCrohn / Ulcerative colitis: 5 mg/kg (0,2,6) → 5 mg/kg q8สัปดาห์ (เริ่ม week 14); intensify ถึง 10 mg/kg q4–8สัปดาห์\nRheumatoid arthritis: 3 mg/kg (0,2,6) → q8สัปดาห์ (+ methotrexate); intensify ถึง 10 mg/kg หรือ q4สัปดาห์\nAnkylosing spondylitis: 5 mg/kg (0,2,6) → q6สัปดาห์ | Psoriatic arthritis: 5 mg/kg (0,2,6) → q8สัปดาห์\nPlaque/pustular psoriasis: 5 mg/kg (0,2,6) → q8สัปดาห์ (บางราย 10 mg/kg / q4สัปดาห์)\nSarcoidosis / Takayasu (off-label): 3–5 mg/kg (0,2,6) → q4–8สัปดาห์ + glucocorticoid\nICI-induced colitis (grade 2–4 refractory): 5 mg/kg week 0 (ซ้ำได้ week 2 ± 6) + corticosteroid\n⚠️ Screen latent TB + HBV ก่อนเริ่ม | เพิ่มความเสี่ยงติดเชื้อ/reactivation | ห้ามใน active infection, ห้าม dose >5 mg/kg ใน moderate–severe CHF"
   },
   {
     "id": 62,
@@ -3202,7 +3204,8 @@
       "N/V"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: ป้องกัน hemorrhagic cystitis จาก ifosfamide/cyclophosphamide | hydrate ให้พอ | ปรับ mesna ตามสัดส่วนเมื่อ dose oxazaphosphorine เปลี่ยน | ตรวจ urine hematuria ก่อนให้ยา\n— Standard-dose ifosfamide —\nIV: แต่ละ dose = 20% ของ ifosfamide/วัน × 3 ครั้ง (hour 0, +4, +8) → รวม 60%\nIV+Oral (ifosfamide ≤2 g/m²/วัน): IV 20% ที่ hour 0 → PO 40% ที่ hour 2 และ hour 6 → รวม 100% (ถ้าอาเจียนใน 2 ชม. ให้ซ้ำ/เปลี่ยนเป็น IV)\nContinuous infusion ifosfamide: bolus 20% → CI 40% ของ ifosfamide/วัน, ต่ออีก 12–24 ชม.หลัง ifosfamide จบ\nHigh-dose ifosfamide (>2.5 g/m²): อาจต้องให้บ่อย/นานขึ้น (ข้อมูลจำกัด)\n— Cyclophosphamide (rheumatic/autoimmune) —\nIV: แต่ละ dose = 20% × 3 ครั้ง (15–30 นาทีก่อน, +4, +8 ชม.)\nOral: แต่ละ dose = 40% × 3 ครั้ง (2 ชม.ก่อน, +4, +8 ชม.)\n⚠️ ทำซ้ำทุกวันที่ให้ ifosfamide/cyclophosphamide | ถ้า hematuria >50 RBC/HPF → ลด/หยุด oxazaphosphorine | ไม่ป้องกันได้ 100%"
   },
   {
     "id": 73,
@@ -4496,7 +4499,8 @@
       "CD19/CD20"
     ],
     "had": true,
-    "ref": "Lexicomp; MS/NMOSD guidelines"
+    "ref": "Lexicomp; MS/NMOSD guidelines; UpToDate",
+    "dosing": "หมายเหตุ: anti-CD20 | premedicate (paracetamol + antihistamine ± methylprednisolone 100 mg IV 30 นาทีก่อน) | screen TB/HBV ก่อน + ระวัง HBV reactivation/PML | infuse ช้า titrate (ปฏิกิริยาเด่นที่ dose แรก)\nรูปแบบ autoimmune มี 2 แบบ: (A) IV 1 g ที่ day 0 และ 15 | (B) IV 375 mg/m²/สัปดาห์ ×4\n— Neurology —\nMultiple sclerosis: 1 g ×2 (day 0,15) → ซ้ำ 0.5–1 g q6–12 เดือน\nNeuromyelitis optica (NMOSD, กัน relapse): 1 g ×2 หรือ 375 mg/m² ×4 → ซ้ำ 1 g q6 เดือน หรือเมื่อ CD19 กลับมา\nMyasthenia gravis (refractory/MuSK+): 1 g ×2 หรือ 375 mg/m² ×4; ซ้ำตามอาการ/lymphocyte recovery\nICI-related encephalitis/myositis/MG: 375 mg/m² ×4\n— Rheum / Heme —\nRheumatoid arthritis: 1 g ×2 q24สัปดาห์ (+ methotrexate)\nGPA/MPA vasculitis: induction 375 mg/m² ×4 หรือ 1 g ×2 + steroid → maintenance 500 mg q4–6 เดือน\nITP / AIHA / TTP / cryoglobulinemia: 375 mg/m² ×4 | Pemphigus vulgaris: 1 g ×2 → maintenance\nLupus nephritis (refractory) / membranous nephropathy: 1 g ×2 หรือ 375 mg/m² ×4\n— มะเร็ง —\n💊 Oncology (NHL/CLL) = protocol-specific: 375 mg/m² ตาม regimen (CLL: cycle 1 375 → 500 mg/m² cycles 2–6) — ยึดตาม protocol\n⚠️ Infusion reaction, HBV reactivation (screen + prophylaxis), PML, TLS (tumor burden สูง), late/prolonged neutropenia, hypogammaglobulinemia"
   },
   {
     "id": 102,

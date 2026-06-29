@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.37.1
+// IV Drug Reference PWA — Service Worker v5.38.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -219,9 +219,14 @@
 //          drugs-data.json not the admin panel). renderDrugCard now overlays
 //          dosing from the static dataset (id+generic map) as a fallback, so it
 //          shows regardless of data source. Loads async + forces one re-render.
+// v5.38.0: Usual Dose data complete — `dosing` field now populated for ALL 166
+//          drugs in drugs-data.json (was ~125). Adult IV/parenteral-focused
+//          summaries (Thai) per UpToDate/Lexicomp/Micromedex/EMC SmPC + IDSA
+//          guidance; oncology & immunoglobulin kept protocol-specific for
+//          safety. Data-only release (no code/engine change).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.37.1';
+const CACHE_NAME = 'iv-drugref-v5.38.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

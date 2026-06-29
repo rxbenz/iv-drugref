@@ -2901,7 +2901,8 @@
       "Mood/behavior"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "IV ↔ PO 1:1 (สลับได้ขนาดเท่ากัน)\nFocal/generalized tonic-clonic seizures (mono/adjunct): IV เริ่ม 50–100 mg วันละ 2 ครั้ง → เพิ่มทีละ 50 mg/ครั้ง ทุกสัปดาห์ จน maintenance 100–200 mg วันละ 2 ครั้ง (บางรายได้ถึง 600 mg/วัน)\nLoading ทางเลือก: 200 mg → อีก 12 ชม.ตามด้วย 100 mg วันละ 2 ครั้ง (ให้ภายใต้การดูแล เพราะ CNS adverse สูงขึ้น)\nStatus epilepticus (off-label): IV loading 200–400 mg ครั้งเดียว → maintenance 200–400 mg/วัน แบ่ง 2 ครั้ง (บางรายถึง 600 mg/วัน)\n⚠ อัตราให้ SE: NCS แนะนำ 200 mg over 15 นาที; ผู้เชี่ยวชาญบางรายให้ถึง 400 mg ที่ ≤80 mg/นาที (เช่น 400 mg over 5 นาที)\n⚠ PR prolongation — ห้ามใช้ใน 2nd/3rd degree AV block; monitor ECG\nหมายเหตุ: ปรับขนาดใน severe hepatic/renal impairment; ห้ามหยุดยาทันที (ค่อย ๆ ลด 200 mg/วัน ต่อสัปดาห์)"
   },
   {
     "id": 66,

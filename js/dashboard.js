@@ -254,11 +254,29 @@
   const SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
   const SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
   const SB_EVENTS = SB_URL + '/rest/v1/events';
+  // Map the canonical event `type` → the per-feature bucket the dashboard counts.
+  // IMPORTANT: the live app pages emit LOWERCASE feature types (dose_calc,
+  // tdm_usage, renal_dosing, compat_usage, calc_visit) via IVDrugRef.sendAnalytics,
+  // which sendToSupabase stores verbatim. Historical (Sheets-migrated) rows use the
+  // UPPER_CASE canonical names. Both casings are listed here so neither is dropped
+  // by the `if (!key) continue;` filter below — otherwise live sub-page usage is
+  // silently undercounted (only Allergy, which already emitted UPPER_CASE, matched).
   const TYPE_TO_KEY = {
     SESSION_START: 'sessions', SEARCH: 'searches', page_view: 'pageViews',
-    VIEW_DRUG: 'drugExpands', DOSE_CALC: 'doseCalcs', TDM_RESULT: 'tdmUsage',
-    RENAL_DOSING: 'renalDosing', COMPAT_CHECK: 'compatUsage', CALC_VISIT: 'calcVisits',
-    ALLERGY_LOOKUP: 'allergyLookups', DRUG_RATING: 'drugRatings', NPS_SUBMIT: 'npsResponses',
+    VIEW_DRUG: 'drugExpands',
+    // Dose calculator
+    DOSE_CALC: 'doseCalcs', dose_calc: 'doseCalcs', DOSE_CALCS: 'doseCalcs',
+    // TDM (tdm.js + vanco-tdm.js)
+    TDM_RESULT: 'tdmUsage', tdm_usage: 'tdmUsage', TDM_USAGE: 'tdmUsage',
+    // Renal dosing
+    RENAL_DOSING: 'renalDosing', renal_dosing: 'renalDosing',
+    // IV compatibility
+    COMPAT_CHECK: 'compatUsage', compat_usage: 'compatUsage', COMPAT_USAGE: 'compatUsage',
+    // Vanco-TDM "calc visit"
+    CALC_VISIT: 'calcVisits', calc_visit: 'calcVisits', CALC_VISITS: 'calcVisits',
+    // Allergy
+    ALLERGY_LOOKUP: 'allergyLookups', allergy_lookup: 'allergyLookups', ALLERGY_LOOKUPS: 'allergyLookups',
+    DRUG_RATING: 'drugRatings', NPS_SUBMIT: 'npsResponses',
     SURVEY: 'surveys', FEATURE_USE: 'featureUse', QUICK_ACTION: 'featureUse',
     ONBOARDING: 'featureUse', MICRO_FEEDBACK: 'microFeedback', SUS_ITEM: 'susItems',
     FILTER: 'filters', error_report: 'errors'

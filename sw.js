@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.38.1
+// IV Drug Reference PWA — Service Worker v5.38.2
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -230,9 +230,17 @@
 //          .btn.primary (dot) — so the generic light .btn rule (higher
 //          specificity) overrode the gradient. shared.css now covers BOTH
 //          .btn.primary and .btn-primary (resting glow + light-theme guard).
+// v5.38.2: Analytics fix — sub-page usage was undercounted on the dashboard.
+//          Live pages emit LOWERCASE feature types (dose_calc, tdm_usage,
+//          renal_dosing, compat_usage, calc_visit) which sendToSupabase stores
+//          verbatim, but dashboard TYPE_TO_KEY only listed the UPPER_CASE
+//          canonical names → `if (!key) continue;` dropped every live sub-page
+//          event (only Allergy, already UPPER_CASE, matched). TYPE_TO_KEY now
+//          maps both casings to the same buckets, so TDM/Calc/Renal/Compat/Vanco
+//          usage is counted again (historical + live). Dashboard-only change.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.38.1';
+const CACHE_NAME = 'iv-drugref-v5.38.2';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

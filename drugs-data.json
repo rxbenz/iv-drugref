@@ -3068,7 +3068,8 @@
       "C&S"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA MRSA guidelines"
+    "ref": "Lexicomp; IDSA MRSA guidelines; UpToDate",
+    "dosing": "หมายเหตุ: IV = Oral (bioavailability ~100%) | ไม่ต้องปรับตาม CrCl\nเกือบทุก indication: 600 mg q12h — MRSA/VRE bacteremia, pneumonia (HAP/CAP-MRSA), SSTI, diabetic foot, CNS/meningitis/brain-spinal abscess, osteomyelitis/PJI/septic arthritis, endocarditis, nocardia, UTI complicated (VRE), TSS, cystic fibrosis\nPneumonia (MRSA): 600 mg q12h ~7 วัน\nBacteremia: VRE/MRSA 600 mg q12h (uncomplicated SAB ≥14 วันจาก hemoculture แรกที่ลบ)\nCNS/brain abscess: 600 mg q12h ×4–8 สัปดาห์ (staph + rifampin ถ้ามี hardware)\nTB ดื้อยา: 600 mg OD (toxicity → 300 mg OD หรือ 600 mg 3–4×/สัปดาห์; <50 kg เริ่ม 450)\nNTM (rapidly growing): 600 mg OD–bid\n⚠️ Safety: ใช้นาน → heme toxicity (thrombocytopenia) หลัง >2 สัปดาห์, neuro (optic/peripheral neuropathy) หลัง >4 สัปดาห์ → ตรวจ CBC weekly\n⚠️ MAOI อ่อน → serotonin syndrome (ระวัง SSRI/ยา serotonergic) + ระวัง tyramine"
   },
   {
     "id": 70,
@@ -3159,7 +3160,8 @@
       "VPA level (ห้ามใช้ร่วม!)"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "Usual: IV 500 mg q6h หรือ 1–2 g q8h over 30 นาที (500 q6h ≈ 1 g q8h)\nExtended infusion (off-label): 1–2 g q8h over 3 ชม. (CRE/CR-Acinetobacter → 2 g q8h) | Continuous: 2 g q8h over 8 ชม. หรือ 3 g q12h over 12 ชม. (loading 1–2 g over 30 นาทีถ้า sepsis)\nSepsis/septic shock: IV 1–2 g q8h (combination; critical/MIC สูง → 2 g q8h + extended infusion)\nBloodstream (GNB รวม Pseudomonas): IV 1–2 g q8h ×7–14 วัน\nMeningitis / brain-spinal abscess: IV 2 g q8h ×7–21 วัน\nHAP/VAP / CAP (MDR GNB): IV 1 g q8h ~7 วัน\nIntra-abdominal/cholecystitis: IV 1 g q8h\nFebrile neutropenia (high-risk): IV 1–2 g q8h\nDiabetic foot / SSTI / osteomyelitis / PJI / SBP: IV 1 g q8h (necrotizing SSTI 500 mg q6h)\nCystic fibrosis exacerbation: IV 2 g q8h\nMelioidosis (intensive): IV 1 g q8h (neuro 2 g q8h) ×14 วัน → oral eradication ≥12 สัปดาห์\nUTI complicated: IV 1–2 g q8h (MDR → 2 g)\nAnthrax systemic/meningitis: IV 2 g q8h\n⚠️ ลด valproate level อย่างมาก (ห้ามให้ร่วม) | ลด seizure threshold | extended infusion เพิ่ม T>MIC | ปรับตาม CrCl"
   },
   {
     "id": 72,
@@ -3332,7 +3334,8 @@
       "C&S"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: IV = Oral (bioavailability ~100%) — เปลี่ยนเป็น oral dose เดิมได้\nIntra-abdominal/diabetic foot/SSI: IV/PO 500 mg q8–12h (combination) — anaerobic cover\nBrain abscess: IV 7.5 mg/kg (ปกติ 500 mg) q6–8h (max 4 g/วัน) ×6–8 สัปดาห์ (combination)\nNecrotizing soft tissue infection: IV 500 mg q6h (combination + debridement)\nC. difficile — fulminant (ileus/megacolon/shock): IV 500 mg q8h + vancomycin (PO/PR) ×10 วัน | nonsevere (ถ้าไม่มี vanco/fidaxomicin): PO 500 mg tid ×10–14 วัน\nPID: IV/PO 500 mg q12h ×14 วัน (combination)\nAspiration pneumonia: 500 mg tid + beta-lactam ×7 วัน\nBacterial vaginosis: PO 500 mg bid ×7 วัน\nTrichomoniasis: หญิง 500 mg bid ×7 วัน | ชาย 2 g single\nGiardiasis: 250 mg tid หรือ 500 mg bid ×5–7 วัน | Amebiasis: 500–750 mg tid ×7–10 วัน → luminal agent\nH. pylori (bismuth quadruple): 500 mg tid–qid ×14 วัน\nSurgical prophylaxis: IV 500 mg ก่อน incision (combination)\nTetanus: IV/PO 500 mg q6–8h ×7–10 วัน\n⚠️ Disulfiram-like reaction กับ alcohol (งด 48 ชม.) | peripheral neuropathy + CNS toxicity ถ้าใช้นาน"
   },
   {
     "id": 76,
@@ -3375,7 +3378,8 @@
       "Signs of hepatotoxicity"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA candidiasis guidelines"
+    "ref": "Lexicomp; IDSA candidiasis guidelines; UpToDate",
+    "dosing": "หมายเหตุ: ไม่ต้องปรับตาม renal/hepatic (mild–mod) | echinocandin → ไม่ผ่าน CNS/ตา/ปัสสาวะ\nCandidemia/invasive candidiasis: IV 100 mg OD; ต่อ ≥14 วันหลัง hemoculture แรกที่ลบ + อาการหาย\nIntra-abdominal candidiasis: IV 100 mg OD ≥14 วัน (จน source control)\nEmpiric (suspected invasive candidiasis, ICU): IV 100 mg OD\nEsophageal candidiasis (refractory/severe): IV 150 mg OD ×14–28 วัน\nEndocarditis / cardiac device / septic thrombophlebitis: IV 150 mg OD (step-down azole เมื่อ stable)\nOsteoarticular: IV 100 mg OD ≥2 สัปดาห์ → oral azole (osteo 6–12 เดือน, septic arthritis ≥6 สัปดาห์)\nInvasive aspergillosis (alt/combination): IV 100–150 mg OD\nFebrile neutropenia (empiric antifungal): IV 100 mg OD\nProphylaxis (heme malignancy/HCT): IV 50–100 mg OD\n⚠️ ให้ infuse ≥1 ชม. (เร็ว → histamine reaction) | hepatotoxicity (rare)"
   },
   {
     "id": 77,

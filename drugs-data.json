@@ -3951,7 +3951,8 @@
       "Seizure activity (high dose/renal)"
     ],
     "had": false,
-    "ref": "Lexicomp; CDC STI guidelines"
+    "ref": "Lexicomp; CDC STI guidelines; UpToDate",
+    "dosing": "หมายเหตุ: 1 ล้านยูนิต (MU) ≈ 600 mg | total daily dose ให้เป็น continuous infusion 24 ชม.ได้\nMeningitis (susceptible strep/Listeria/Neisseria): IV 4 MU q4h (= 24 MU/วัน) ×7–21 วัน\nNeurosyphilis (รวม ocular/oto): IV 18–24 MU/วัน (3–4 MU q4h หรือ continuous) ×10–14 วัน\nEndocarditis: Enterococcus 18–30 MU/วัน + gentamicin ×4–6 สัปดาห์ | VGS 12–24 MU/วัน (± gentamicin 2 สัปดาห์)\nBacteremia: Enterococcus 18–30 MU/วัน | Listeria 24 MU/วัน q4h + gentamicin | strep 18–24 MU/วัน\nNecrotizing SSTI / Strep TSS: IV 4 MU q4h + clindamycin\nErysipelas (strep): IV 2–4 MU q4–6h\nGBS maternal prophylaxis: IV 5 MU load → 2.5–3 MU q4h จนคลอด\nActinomycosis: 18–24 MU/วัน ×2–6 สัปดาห์ | Anthrax (susceptible): 4 MU q4h\nLyme (carditis/neuro): 18–24 MU/วัน ×14–28 วัน | Leptospirosis: 1.5 MU q6h ×7 วัน\nTetanus: 2–4 MU q4–6h ×7–10 วัน\n⚠️ High dose → ระวัง K⁺ load + seizure (โดยเฉพาะ renal impairment) | ปรับตาม CrCl"
   },
   {
     "id": 90,

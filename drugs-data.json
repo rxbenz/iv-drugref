@@ -2977,7 +2977,8 @@
       "C&S"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: IV = Oral (bioavailability ~99%)\nCAP: 750 mg q24h ขั้นต่ำ 5 วัน (severe/MRSA → combination)\nHAP/VAP: 750 mg q24h ~7 วัน\nCOPD exacerbation: 500 mg q24h ×5–7 วัน (750 ถ้าสงสัย Pseudomonas)\nIntra-abdominal/cholecystitis: 750 mg q24h (+metronidazole ถ้า non-biliary source)\nDiabetic foot: IV 750 mg q24h (PO 500–750)\nUTI complicated/pyelonephritis: 500–750 mg q24h ×5 วัน (ESBL → 750) | cystitis 250 mg q24h ×3 วัน(หญิง)\nProstatitis: 500–750 mg q24h (acute 2–4 สัปดาห์ | chronic 4–6 สัปดาห์)\nOsteomyelitis/PJI: 750 mg q24h ≥6 สัปดาห์ (PJI gram-neg 500–750)\nSSTI (cellulitis/SSI): 750 mg q24h\nAnthrax systemic/meningitis: IV 500 mg q12h (combination) ≥2 สัปดาห์\nPlague/Tularemia: 750 mg q24h ×7–14/10 วัน\nTB ดื้อยา: 750 mg–1 g q24h | S. maltophilia: 750 mg q24h\nH. pylori salvage: PO 500 mg q24h ×14 วัน + amoxicillin + PPI\n⚠️ QT prolongation, tendon rupture, MG exacerbation, CNS; ห้ามกับ cation (Mg/Ca/Al/Fe) PO | ปรับตาม CrCl"
   },
   {
     "id": 68,

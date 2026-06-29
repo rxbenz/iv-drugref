@@ -3316,7 +3316,8 @@
       "Bowel function"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "N/V (เฉียบพลัน/หลากหลายสาเหตุ): IV/IM/กิน 10 mg ครั้งเดียว (สูงสุด 20 mg ถ้าอาการรุนแรง) — ⚠ เลี่ยงให้ IV เร็วเมื่อ dose >10 mg\nGastroparesis (เบาหวาน/ไม่เบาหวาน): กิน(แนะนำ)/IM/IV/SC 5 mg วันละ 2–3 ครั้ง 30 นาทีก่อนอาหาร → เพิ่มได้ถึง 10 mg ก่อนอาหาร+ก่อนนอน (max กิน 40 mg/วัน; ฉีดไม่เกิน 30 mg/วัน)\nMigraine รุนแรง/status migrainosus (ER, off-label): IV 10 mg ครั้งเดียว (รุนแรงคลื่นไส้มากถึง 20 mg); premed diphenhydramine กัน akathisia/dystonia\nMedication-overuse/intractable migraine (ร่วม DHE): IV 10 mg ก่อน DHE ซ้ำได้ทุก 8 ชม.\nPONV ป้องกัน: IM/IV 10 mg ใกล้จบผ่าตัด\nMalignant bowel obstruction บางส่วน (off-label): กิน/IV/SC 10 mg ทุก 4–6 ชม. หรือ continuous infusion 1.25–1.75 mg/ชม. titrate ถึง 5 mg/ชม. — ⚠ ห้ามใช้ถ้าอุดตันสมบูรณ์/มี colic\nAspiration prophylaxis (off-label): IV 10 mg 30–60 นาทีก่อน induction\nPostpyloric feeding tube placement: IV 10–20 mg ครั้งเดียว 10–15 นาทีก่อนใส่สาย\nHiccups (off-label): IV 5–10 mg ทุก 8 ชม.\n⚠ ให้ IV ช้า ≥3 นาที ลดเสี่ยง dystonia; EPS/tardive dyskinesia → ห้ามใช้ต่อเนื่อง ≥12 สัปดาห์ (Canada จำกัด ≤0.5 mg/kg/วัน); antidote EPS = benztropine 1–2 mg IV; ห้ามใช้ใน bowel obstruction สมบูรณ์/pheochromocytoma"
   },
   {
     "id": 75,

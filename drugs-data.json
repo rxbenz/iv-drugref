@@ -5034,7 +5034,8 @@
       "GI perforation"
     ],
     "had": false,
-    "ref": "Lexicomp; NMOSD guidelines"
+    "ref": "Lexicomp; NMOSD guidelines; UpToDate",
+    "dosing": "หมายเหตุ: anti-IL-6R | screen TB/HBV ก่อน | ห้ามเริ่มถ้า ANC <2,000 / platelet <100,000 / ALT-AST >1.5×ULN (เกณฑ์ COVID/CRS ผ่อนกว่า: ANC <1,000, plt <50,000, AST/ALT >10×) | infuse over 60 นาที\n— Neurology / Rheum —\nNeuromyelitis optica (NMOSD, กัน relapse, alt): IV 8 mg/kg q4สัปดาห์ (max 800 mg)\nGiant cell arteritis: IV 6 mg/kg q4สัปดาห์ (max 600; บางราย 8 mg/kg) | SubQ 162 mg/สัปดาห์ + glucocorticoid\nRheumatoid arthritis: IV 4 mg/kg q4สัปดาห์ → เพิ่มเป็น 8 mg/kg (max 800) | SubQ 162 mg q1–2สัปดาห์ (≥100 kg → ทุกสัปดาห์)\nTakayasu arteritis (alt): IV 4–8 mg/kg q4สัปดาห์ | SubQ 162 mg q1–2สัปดาห์\nSSc-associated ILD: SubQ 162 mg/สัปดาห์\n— Acute —\nCOVID-19 (hospitalized, O2 สูง + systemic inflammation): IV 8 mg/kg single (max 800 mg) + combination; ซ้ำได้ ≥8 ชม.\nCytokine release syndrome (CAR-T/bispecific): IV 8 mg/kg single (max 800 mg); ซ้ำได้ถึง 3 dose (ห่าง ≥8 ชม.) ± glucocorticoid\n⚠️ ติดเชื้อรุนแรง (กลบ fever/CRP) | GI perforation (ระวังใน diverticulitis) | hepatotoxic | neutropenia | lipid เพิ่ม"
   },
   {
     "id": 114,
@@ -5656,7 +5657,8 @@
       "Neuro"
     ],
     "had": true,
-    "ref": "Lexicomp; ASCO; NCCN"
+    "ref": "Lexicomp; ASCO; NCCN; UpToDate",
+    "dosing": "⚠️ Safety: pre + post hydration NSS 1–2 L, รักษา UO ≥100 mL/h ×24 ชม. | Mg²⁺/K⁺ supplement | highly emetogenic → triple antiemetic (NK1 + 5-HT3 + dexamethasone) | dose >100 mg/m²/course หายาก ต้อง verify\n💊 Oncology = protocol-specific — ยึดตาม protocol/แผนการรักษา; รูปแบบที่พบบ่อย:\nSingle-agent/usual range: IV 50–100 mg/m² q3–4 สัปดาห์\nHigh-dose (H&N/NPC/cervix chemoradiation): 100 mg/m² q3 สัปดาห์ (cumulative ≥200 mg/m²)\nWeekly (concurrent chemoradiation): 40 mg/m²/สัปดาห์ (max ~70 mg) ×6–7 dose\nLow-dose daily (BEP/EP/VIP testicular, germ cell): 20 mg/m²/วัน ×5 วัน q3 สัปดาห์\nCombination (GC/gem, pemetrexed, etoposide ฯลฯ): 25–80 mg/m² ตาม regimen\nSplit-dose (renal borderline): 35 mg/m² days 1,8 (GC)\n⚠️ Nephrotoxic (dose-limiting), ototoxic (irreversible), peripheral neuropathy, severe N/V, Mg/K wasting, myelosuppression | ห้ามใช้ aluminum needles/sets | ปรับ/หลีกเลี่ยงถ้า CrCl ต่ำ"
   },
   {
     "id": 128,

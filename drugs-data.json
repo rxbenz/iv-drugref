@@ -2944,7 +2944,8 @@
       "CBC (rare leukopenia)"
     ],
     "had": false,
-    "ref": "Lexicomp; Epilepsy guidelines"
+    "ref": "Lexicomp; Epilepsy guidelines; UpToDate",
+    "dosing": "IV ↔ PO 1:1 (สลับได้ขนาดเท่ากัน)\nFocal/generalized seizures: IV เริ่ม 500 mg วันละ 2 ครั้ง → เพิ่มทุก 2 สัปดาห์ครั้งละ 500 mg/dose จน max 1.5 g วันละ 2 ครั้ง (>3 g/วันยังไม่มีหลักฐานเพิ่มประโยชน์)\nStatus epilepticus (off-label): IV 1–3 g ครั้งเดียว ที่อัตรา 2–5 mg/kg/นาที หรือ 40–60 mg/kg over 5–15 นาที ร่วมกับ benzodiazepine (max single dose 4.5 g)\nCraniotomy seizure prophylaxis (off-label): IV 500–2,000 mg ระหว่างผ่าตัด → maintenance 1 g/วัน แบ่ง 2 ครั้ง (พิสัย 500 mg–3 g/วัน)\nSAH / TBI seizure prophylaxis ระยะสั้น (off-label): IV loading 20 mg/kg ครั้งเดียว → 1 g ทุก 12 ชม. นานถึง 7 วัน (เพิ่มได้ถึง 1.5 g q12h)\nหมายเหตุ: ปรับขนาดตาม CrCl; ปลอดภัยใน hepatic impairment; ผลข้างเคียงด้านพฤติกรรม (หงุดหงิด/ก้าวร้าว); ห้ามหยุดยาทันที (ค่อย ๆ ลด)"
   },
   {
     "id": 67,

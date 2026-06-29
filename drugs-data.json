@@ -1424,7 +1424,8 @@
       "Adrenal fn"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "ขนาดทั่วไป (IV/IM/กิน): 4–20 mg/วัน ครั้งเดียวหรือแบ่ง 2–4 ครั้ง; high dose 0.4–0.8 mg/kg/วัน (มักไม่เกิน 40 mg/วัน) — ใช้ขนาดต่ำสุด ระยะสั้นที่สุด\nCerebral edema จาก brain tumor: IV loading 10 mg → maintenance 8–16 mg/วัน แบ่งให้ (impending herniation 16–40 mg/วัน); พิจารณา taper หลัง 7 วัน\nNeoplastic spinal cord compression: IV 10–16 mg → กิน 16 mg/วัน แล้ว taper 1–2 สัปดาห์\nBacterial meningitis (กันภาวะแทรกซ้อนทางประสาท): IV 10 mg (หรือ 0.15 mg/kg) ทุก 6 ชม. ×4 วัน; ให้พร้อม/ภายใน 1 ชม.ก่อนยาปฏิชีวนะโดสแรก\nTB เยื่อหุ้มสมอง: IV 0.3–0.4 mg/kg/วัน 2 สัปดาห์ → ค่อย ๆ ลด → กินต่อ รวม ~8 สัปดาห์ (HIV 12 สัปดาห์)\nCOVID-19 (ต้องการ O₂/ventilator): IV/กิน 6 mg วันละครั้ง ≤10 วัน\nAdrenal crisis: IV 4–6 mg วันละครั้ง (ให้ทันที); chronic AI maintenance กิน 0.25–0.75 mg/วัน\nARDS (off-label): IV 20 mg/วัน วันที่ 1–5 → 10 mg/วัน วันที่ 6–10\nImmune thrombocytopenia: IV/กิน 40 mg/วัน ×4 วันแล้วหยุด (ซ้ำได้ถึง 3 รอบ)\nCINV ป้องกัน: IV/กิน 8–12 mg วันให้คีโม (สูง 20 mg ถ้าไม่มี NK1 antagonist) → 8 mg/วัน วันถัด ๆ; PONV: IV 4–10 mg ครั้งเดียว\nFetal lung maturation: IM 6 mg ทุก 12 ชม. ×4 โดส\nAsthma exacerbation (off-label): กิน 12–16 mg/วัน 1–2 วัน\nIodinated contrast allergy (เร่งด่วน): IV 7.5 mg ทุก 4 ชม.จนถึงเวลาฉีด contrast + diphenhydramine\nCushing diagnosis: overnight 1 mg suppression test กิน 1 mg เวลา 23:00–24:00\n💊 Oncology (Multiple myeloma/Waldenström): เป็นส่วนของ protocol เฉพาะ — ทั่วไป 20–40 mg/สัปดาห์ (frail/>75 ปี ลดเหลือ 20 mg) ตาม regimen; ยึดตาม protocol\n⚠ ระวัง hyperglycemia, adrenal suppression (ใช้นาน → ค่อย ๆ ลด), GI bleeding; IV push เร็วทำให้แสบฝีเย็บ"
   },
   {
     "id": 33,

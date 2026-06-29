@@ -5967,7 +5967,8 @@
       "Mucositis"
     ],
     "had": true,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "หมายเหตุ: infuse ≥30–60 นาที (เร็ว → hypotension) | conc ≤0.4 mg/mL กันตกตะกอน | IV→Oral conversion: oral dose = 2× IV (bioavailability ~50%, ปัดใกล้ 50 mg)\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nSCLC / testicular & germ cell (EP/BEP/VIP): 100 mg/m² days 1–5 (หรือ 1,2,3) q3–4 สัปดาห์ + cisplatin/carboplatin\nLymphoma DA-EPOCH-R: 50 mg/m²/วัน CI ×4 วัน (96 ชม., รวม 200/cycle)\nICE / CHOEP / BEACOPP: 100 mg/m² days 1,2,3\nHLH (HLH-94): 150 mg/m² 2×/สัปดาห์ ×2 สัปดาห์ → 150 mg/m²/สัปดาห์ ×6 สัปดาห์ (+ dexamethasone)\nHCT conditioning (BEAM): 100–200 mg/m²/วัน ×4 วัน หรือ 60 mg/kg single\n⚠️ Myelosuppression (dose-limiting) | hypotension (infuse ช้า) | secondary AML (11q23/MLL, dose-related) | hypersensitivity/anaphylaxis | mucositis | alopecia | irritant (extravasation)"
   },
   {
     "id": 135,

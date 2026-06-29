@@ -5518,7 +5518,8 @@
       "Infusion reactions"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA aspergillosis guidelines"
+    "ref": "Lexicomp; IDSA aspergillosis guidelines; UpToDate",
+    "dosing": "⚠️ Liposomal (AmBisome) ≠ conventional/lipid complex (Abelcet) — dose คนละแบบ, เคยเกิด overdose จากจ่ายผิด\nPremedicate (NSAID/paracetamol ± diphenhydramine) + pre-hydrate NS 0.5–1 L ลด nephrotoxicity; rigors → meperidine\nInvasive aspergillosis: IV 3–5 mg/kg/วัน (CNS ถึง 7.5) ×6–12 สัปดาห์\nCandidemia/invasive candidiasis: IV 3–5 mg/kg/วัน ≥14 วันหลัง hemoculture ลบ (CNS 5)\nMucormycosis: IV 5–10 mg/kg/วัน (CNS/SOT 10) + surgical debridement\nCryptococcal meningitis induction: IV 3–4 mg/kg/วัน + flucytosine ≥2 สัปดาห์ (resource-limited: 10 mg/kg single dose)\nHistoplasmosis/Blastomycosis/Coccidio/Sporotrichosis/Talaromycosis/Fusariosis: IV 3–5 mg/kg/วัน (CNS 5) → step-down oral azole\nVisceral leishmaniasis: IV 3 mg/kg/วัน (immunocompetent วันที่ 1–5,14,21) — cumulative ~21 mg/kg (HIV สูงขึ้น)\nFebrile neutropenia (empiric antifungal): IV 3–5 mg/kg/วัน\n⚠️ Nephrotoxic (น้อยกว่า conventional) | ให้ K⁺/Mg²⁺ supplement | infusion reaction"
   },
   {
     "id": 125,
@@ -5603,7 +5604,8 @@
       "Neuromuscular function"
     ],
     "had": false,
-    "ref": "Lexicomp; Tsuji BT et al. Pharmacotherapy 2019"
+    "ref": "Lexicomp; Tsuji BT et al. Pharmacotherapy 2019; UpToDate",
+    "dosing": "หมายเหตุ: ขนาดเป็น units (10,000 units = 1 mg) | dose ตาม actual BW | ไม่ต้องปรับตาม renal (ต่างจาก colistin) | สงวนไว้สำหรับ XDR gram-negative (A. baumannii, DTR-P. aeruginosa)\nXDR GNB IV: loading 20,000–25,000 units/kg (2–2.5 mg/kg) → maintenance 12,500–15,000 units/kg (1.25–1.5 mg/kg) q12h — combination\nInhaled (adjunct HAP/VAP): NEB 500,000 units q12h + systemic (ให้ beta2-agonist ก่อน ~20 นาที)\nIntrathecal/intraventricular (meningitis/ventriculitis): 50,000 units OD + systemic (preservative-free)\nOcular (Pseudomonas): หยอด 0.1–0.25% (10,000–25,000 units/mL) q1h\n⚠️ Nephrotoxic (dose-limiting, ตรวจ SCr daily) + neurotoxic | colistimethate นิยมกว่าสำหรับ UTI/CNS/inhaled | infusion reaction ถ้า dose สูง"
   },
   {
     "id": 127,

@@ -7356,7 +7356,8 @@
       "Asthma control"
     ],
     "had": false,
-    "ref": "Lexicomp; GINA 2024"
+    "ref": "Lexicomp; GINA 2024; UpToDate",
+    "dosing": "หมายเหตุ: anti-IgE — ฉีด SUBQ | ⚠️ เริ่มในสถานพยาบาล (anaphylaxis risk, อาจล่าช้า) สังเกต 2 ชม. ช่วง dose แรก ๆ\nAllergic asthma / CRS with nasal polyps / food allergy: SUBQ ตามตาราง pretreatment IgE × actual BW → 75–600 mg q2 หรือ q4 สัปดาห์\n  • IgE 30–100 + นน. 30–90 kg → 150 mg q4 สัปดาห์ (เป็นจุดเริ่มทั่วไป)\n  • IgE สูง/นน.มาก → 225–600 mg q2 สัปดาห์\n  • ⚠️ ไม่ปรับ dose ตาม IgE ที่วัดระหว่างรักษา (IgE สูงขึ้นจากยา) — re-evaluate เฉพาะถ้าหยุด ≥1 ปี\nABPA (นอก nomogram / IgE >700): 375 mg q2 สัปดาห์\nChronic spontaneous urticaria: SUBQ 300 mg q4 สัปดาห์ (fixed — ไม่ขึ้นกับ IgE/น้ำหนัก); ตอบสนองไม่ครบ → escalate ถึง 600 mg q2–4 สัปดาห์\n⚠️ Anaphylaxis (พกพา epinephrine auto-injector) | injection site reaction | ไม่ใช้รักษา acute bronchospasm/status asthmaticus | ขั้นต่ำ 3–6 เดือนเพื่อประเมินผล"
   },
   {
     "id": 166,
@@ -7403,6 +7404,7 @@
       "irAE signs"
     ],
     "had": false,
-    "ref": "Lexicomp; NCCN; ASCO irAE guidelines"
+    "ref": "Lexicomp; NCCN; ASCO irAE guidelines; UpToDate",
+    "dosing": "หมายเหตุ: anti-PD-1 immune checkpoint inhibitor | IV เท่านั้น (≠ SUBQ pembrolizumab/berahyaluronidase — คนละผลิตภัณฑ์) | เลือกผู้ป่วยตาม PD-L1 (CPS/TPS) / MSI-H / dMMR / TMB-H ตาม indication\nFlat dose (เกือบทุก indication, ไม่ขึ้นกับน้ำหนัก): IV 200 mg q3 สัปดาห์ หรือ 400 mg q6 สัปดาห์\nDuration: จน progression/toxicity หรือ ≤24 เดือน (adjuvant ส่วนใหญ่ ≤12 เดือน)\nใช้เดี่ยว หรือ + chemo/targeted (เช่น lenvatinib/axitinib/trastuzumab/enfortumab) ตาม indication\nOff-label บางตัว: 2 mg/kg q3 สัปดาห์ (melanoma + ipilimumab; mycosis fungoides/Sézary)\n⚠️ immune-related adverse events (irAEs) — pneumonitis, colitis, hepatitis, endocrinopathy (thyroid/adrenal/hypophysitis/DM type 1), nephritis, dermatitis, myocarditis, neuro (myasthenia/GBS/encephalitis); grade ≥3 → hold + corticosteroid | ตรวจ TSH ทุก cycle | infusion reaction (rare)"
   }
 ]

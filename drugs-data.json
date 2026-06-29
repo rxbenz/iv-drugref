@@ -1067,7 +1067,8 @@
       "Allergic symptoms"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "รูปฉีด (10 mg/mL): IV push ช้า ๆ /IM/SC 10 mg/ครั้ง (เช่น premed ก่อนให้เลือด/Amphotericin B หรือ allergic reaction) — max 40 mg/วัน\nAllergic rhinitis / URI (รูปกิน IR): 4 mg ทุก 4–6 ชม. (ไม่เกิน 24 mg/วัน); รูป ER 12 mg ทุก 12 ชม. (ไม่เกิน 24 mg/วัน)\nUrticaria (ยาทางเลือก, off-label): กิน IR 4 mg ทุก 4–6 ชม. (ไม่เกิน 24 mg/วัน) — ใช้เสริม 2nd-gen antihistamine เมื่อต้องการฤทธิ์ง่วงช่วยนอน\nMotion sickness (off-label): กิน 4–12 mg ก่อนสัมผัสตัวกระตุ้น 3 ชม.\n⚠ ง่วงซึม/anticholinergic — เลี่ยงในงานเสี่ยง (นักบิน/คนขับรถ) และผู้สูงอายุ (สับสน); ระวังในผู้ป่วย neuro ที่ต้องเฝ้าระดับความรู้สึกตัว"
   },
   {
     "id": 25,

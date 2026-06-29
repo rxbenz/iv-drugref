@@ -2269,7 +2269,8 @@
       "Neutrophil count"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "⚠️ Safety: ห้ามเริ่มถ้า ANC <500, Hb <8 g/dL หรือ platelet <25,000 (พิจารณา G-CSF)\nCMV treatment (mild–mod / tissue-invasive non-retinitis: colitis/esophagitis/pneumonitis/neuro): IV 5 mg/kg q12h; tissue-invasive ≥14–21 วัน (neuro + foscarnet)\nCMV retinitis: induction IV 5 mg/kg q12h ×14–21 วัน → maintenance 5 mg/kg OD (7 วัน/สัปดาห์) หรือ 6 mg/kg OD (5 วัน/สัปดาห์); sight-threatening + intravitreal 2–2.5 mg/สัปดาห์\nCMV resistant (low-level UL97): IV 10 mg/kg q12h\nTransplant preemptive: IV 5 mg/kg q12h จน viral load undetectable (HCT → step-down 5 mg/kg OD หลัง 1–2 สัปดาห์)\nTransplant prophylaxis: IV 5 mg/kg q24h (allo-HCT: 5 mg/kg q12h ×7 วัน → 5 mg/kg OD ถึง ~day 100)\nVZV (PORN/ARN, adjunct): IV 5 mg/kg q12h + intravitreal ganciclovir/foscarnet\n⚠️ Myelosuppression (ตรวจ CBC) | ปรับตาม CrCl | ระวัง extravasation (pH สูง)"
   },
   {
     "id": 52,

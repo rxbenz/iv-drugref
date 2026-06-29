@@ -2048,7 +2048,8 @@
       "Cortisol (if sepsis)"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "General anesthesia (induction): IV 0.3 mg/kg over 30–60 วินาที (พิสัย 0.2–0.6 mg/kg)\nRapid sequence intubation (induction นอกห้องผ่าตัด): IV 0.3 mg/kg (พิสัย 0.2–0.3) — ⚠ ไม่มีฤทธิ์ระงับปวด\nProcedural sedation (off-label): IV 0.1–0.2 mg/kg → ตามด้วย 0.05 mg/kg ทุก 3–5 นาที PRN\nSupplement ยาดมสลบฤทธิ์อ่อน (เช่น N₂O): IV ให้ทีละน้อย (น้อยกว่าโดส induction) ปรับตามผู้ป่วย\nCushing syndrome (off-label, ICU เท่านั้น): IV loading 3–5 mg → drip 0.02–0.05 mg/kg/ชม. (~1.5–4 mg/ชม.) titrate ตาม serum cortisol; 'block & replace' ต้องให้ hydrocortisone ร่วม\n⚠ Adrenal suppression — ใช้ single-dose RSI เท่านั้น ห้ามให้ซ้ำ/หยดต่อเนื่อง (ยกเว้น protocol Cushing ใน ICU); ระวังใน septic shock\nหมายเหตุ: ข้อดีคือ hemodynamically stable; myoclonus พบบ่อย (ไม่ใช่ชัก); เจ็บตอนฉีด → pretreat lidocaine"
   },
   {
     "id": 47,

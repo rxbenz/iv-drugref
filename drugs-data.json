@@ -2772,7 +2772,8 @@
       "Fluid balance"
     ],
     "had": true,
-    "ref": "Lexicomp; EFNS/AAN guidelines"
+    "ref": "Lexicomp; EFNS/AAN guidelines; UpToDate",
+    "dosing": "หลักการ neuro/autoimmune: total course 2 g/kg แบ่งให้ 2–5 วัน (เช่น 400 mg/kg/วัน ×5 วัน) — max total/วัน 1 g/kg\nGuillain-Barré syndrome (off-label): IV 400 mg/kg/วัน ×5 วัน (ไม่แนะนำให้ซ้ำ)\nCIDP: initial 2 g/kg แบ่ง 2–5 วัน → maintenance 1 g/kg ทุก 3 สัปดาห์ (ปรับตามตอบสนอง)\nMyasthenia gravis exacerbation (off-label): 2 g/kg/course แบ่ง 2–5 วัน (เช่น 400 mg/kg/วัน ×5 หรือ 1 g/kg/วัน ×2)\nMultifocal motor neuropathy / Lambert-Eaton / dermatomyositis: initial 2 g/kg แบ่ง 2–5 วัน → maintenance ตามตอบสนอง\nAutoimmune encephalitis/ADEM (off-label): IV 400 mg/kg/วัน ×5 วัน\nImmune thrombocytopenia (ITP): IV 1 g/kg/วัน ×1–2 วัน (หยุดโดส 2 ถ้า plt >50,000); หรือ 400 mg/kg/วัน ×5 วัน\nPrimary humoral immunodeficiency: IV 400–600 mg/kg ทุก 3–4 สัปดาห์ (ปรับให้ IgG trough >500–700)\nHypogammaglobulinemia จากมะเร็ง: IV 200–400 mg/kg ทุก 3–4 สัปดาห์\nStreptococcal toxic shock (off-label): IV 1 g/kg วันที่ 1 → 500 mg/kg วันที่ 2–3\nWarm AIHA / measles/varicella PEP / transplant desensitization & AMR: 💊 ขนาด/ความถี่ตาม protocol เฉพาะ (เช่น measles PEP 400 mg/kg ครั้งเดียวภายใน 6 วัน)\n⚠ ให้ช้า เริ่ม 0.5–1 mL/kg/ชม. แล้วค่อยเพิ่ม (premed paracetamol + antihistamine ถ้าเคยมีปฏิกิริยา); ดื่มน้ำให้พอ\n⚠ เสี่ยง thromboembolism, ไตวาย (สูตร sucrose), aseptic meningitis, hemolysis (non-O blood)"
   },
   {
     "id": 63,

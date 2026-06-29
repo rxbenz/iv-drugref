@@ -4843,7 +4843,8 @@
       "LFTs"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA MDR guidelines"
+    "ref": "Lexicomp; IDSA AMR Guidance (CRAB)",
+    "dosing": "หมายเหตุ: ขนาด sulbactam เดี่ยวอ้างจาก IDSA AMR Guidance (ไม่มี monograph เดี่ยวใน FDA/EU — ปกติมาคู่ ampicillin/sulbactam); ขนาดด้านล่างคิดเป็น sulbactam component\nAcinetobacter ที่ไวต่อยา (ทั่วไป): IV 1 g ทุก 6–8 ชม. (รวม 3–4 g/วัน)\nCarbapenem-resistant A. baumannii (CRAB) — high-dose ตาม IDSA: sulbactam รวม 6–9 g/วัน แบ่งให้ทุก 8 ชม. (เช่น 3 g ทุก 8 ชม.) แบบ extended infusion over 4 ชม.; เคสดื้อมากใช้สูงถึง ~9–12 g/วัน\n⚠ ใช้เป็นส่วนหนึ่งของ combination เสมอใน CRAB (ร่วม high-dose meropenem / polymyxin / minocycline / cefiderocol) — ไม่ใช้เดี่ยว\n⚠ ปรับขนาดตาม CrCl; ขนาดสูงเสี่ยงชัก (โดยเฉพาะไตเสื่อม); ท้องเสีย/ผื่นพบบ่อย\nหมายเหตุ: sulbactam-durlobactam (Xacduro) เป็นยาคนละตัว (1 g/1 g ทุก 6 ชม. over 3 ชม.) — อย่าสับสน"
   },
   {
     "id": 109,

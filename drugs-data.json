@@ -4666,8 +4666,8 @@
       "Seizure freq"
     ],
     "had": true,
-    "ref": "Lexicomp; AES guidelines",
-    "dosing": "Status epilepticus: Loading 20–40 mg/kg IV (max 3 g) ที่ ≤10 mg/min (non-convulsive ≤5 mg/min)"
+    "ref": "Lexicomp; AES guidelines; UpToDate",
+    "dosing": "Focal/generalized seizures (ไม่ใช่ SE): IV/กิน เริ่ม 10–15 mg/kg/วัน (complex partial) หรือ 15 mg/kg/วัน (absence) แบ่งให้ (IV ให้ทุก 6 ชม.) → เพิ่มทีละ 5–10 mg/kg/วัน ทุกสัปดาห์ จนคุมอาการ/ถึงระดับยาเป้าหมาย (max 60 mg/kg/วัน)\nStatus epilepticus: Loading 20–40 mg/kg IV (max 3 g) ที่ ≤10 mg/min (non-convulsive ≤5 mg/min) → maintenance ~1–2 mg/kg/ชม.\nหมายเหตุ: IV ↔ กิน ขนาดเท่ากัน (1:1); ตรวจระดับยา ~1–2 สัปดาห์หลังเริ่ม/ปรับขนาด (target 50–100 mcg/mL)\n⚠ ห้ามใช้ร่วม carbapenem (meropenem ฯลฯ) — ลดระดับ VPA 60–100%"
   },
   {
     "id": 105,

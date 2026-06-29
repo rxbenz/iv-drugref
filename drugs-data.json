@@ -1833,7 +1833,8 @@
       "Stool OB"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: โดสตาม mg/kg มักปัดเป็น 10 mg ที่ใกล้สุด\nVTE treatment (DVT/PE): SC 1 mg/kg ทุก 12 ชม. (preferred) หรือ 1.5 mg/kg วันละครั้ง\nVTE prophylaxis (medical/surgical ทั่วไป): SC 40 mg วันละครั้ง (THA/TKA: 40 mg วันละครั้ง หรือ 30 mg ทุก 12 ชม.)\nNSTE-ACS: SC 1 mg/kg ทุก 12 ชม. ร่วม antiplatelet (≥48 ชม.–จนทำ PCI)\nSTEMI <75 ปี: IV bolus 30 mg + SC 1 mg/kg ทุก 12 ชม. (max 100 mg 2 โดสแรก); ≥75 ปี: ไม่ให้ IV bolus, SC 0.75 mg/kg ทุก 12 ชม. (max 75 mg 2 โดสแรก)\nBridging anticoagulation (high-risk): SC 1 mg/kg ทุก 12 ชม.; หยุด ~24 ชม.ก่อนหัตถการ\nSuperficial vein thrombosis (off-label): SC 40 mg วันละครั้ง 45 วัน\nVTE prophylaxis ตั้งครรภ์ (off-label, low dose): <100 kg → SC 40 mg วันละครั้ง; ≥100 kg → 60 mg วันละครั้ง (intermediate/therapeutic ปรับตาม anti-Xa)\nHemodialysis circuit (off-label): IV bolus 0.5–0.7 mg/kg ตอนเริ่มฟอก\n⚠ SC เท่านั้น (ยกเว้น IV bolus ใน ACS); ห้าม IM; ห้ามไล่ฟอง (air-lock); สลับซ้าย-ขวา ไม่ถูบริเวณฉีด\n⚠ ปรับขนาดเมื่อ CrCl <30 (treatment → 1 mg/kg วันละครั้ง); ระวัง HIT; monitor anti-Xa ใน renal impairment/อ้วน/ตั้งครรภ์\nหมายเหตุ: หยุดยา ≥12 ชม. (prophylactic) หรือ ≥24 ชม. (therapeutic) ก่อน neuraxial anesthesia"
   },
   {
     "id": 42,

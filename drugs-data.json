@@ -2132,7 +2132,8 @@
       "Drug interactions"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA candidiasis guidelines"
+    "ref": "Lexicomp; IDSA candidiasis guidelines; UpToDate",
+    "dosing": "หมายเหตุ: IV = Oral (bioavailability >90%) | พิจารณา weight-based ถ้า <50 หรือ >90 kg\nCandidemia/invasive: LD 800 mg (12 mg/kg) วันที่ 1 → 400 mg (6 mg/kg) OD; C. glabrata (S/SDD) → 800 mg (12 mg/kg) OD; ต่อ ≥14 วันหลัง hemoculture แรกที่ลบ\nIntra-abdominal candidiasis: LD 800 mg → 400 mg (6 mg/kg) OD ≥14 วัน\nEsophageal candidiasis: 400 mg (6 mg/kg) วันที่ 1 → 200–400 mg OD ×14–21 วัน\nOropharyngeal candidiasis: 200 mg วันที่ 1 → 100–200 mg OD ×7–14 วัน\nUTI: cystitis 200 mg (3 mg/kg) OD ×2 สัปดาห์ | pyelonephritis 200–400 mg OD ×2 สัปดาห์ | candiduria pre/post urologic 400 mg OD\nVulvovaginal: 150 mg single (รุนแรง/IC: 150 mg q72h ×2–3 dose; recurrent → 150 mg/สัปดาห์ ×6 เดือน)\nProphylaxis (high-risk ICU): LD 800 mg → 400 mg (6 mg/kg) OD | heme malignancy/HCT: 200–400 mg OD\nEndocarditis/device หรือ osteoarticular step-down: 400–800 mg (6–12 mg/kg) OD (osteo 6–12 เดือน, septic arthritis 6 สัปดาห์)\nCryptococcal meningitis: induction (ถ้าไม่มี ampho/flucytosine) 1,200 mg OD ≥2 สัปดาห์ → consolidation 800 mg OD ≥8 สัปดาห์ → maintenance 200 mg OD ≥12 เดือน\nCryptococcal pulmonary (mild–mod): 400 mg OD ×6–12 เดือน\nCoccidioidomycosis: 400–800 mg OD (meningitis 800–1,200 mg OD ตลอดชีวิต)\nBlastomycosis: 400–800 mg OD ×6–12 เดือน (CNS step-down 800 mg OD ≥12 เดือน)\n⚠️ Max ~1,600 mg/วัน | ปรับตาม CrCl | ระวัง drug interactions + QT"
   },
   {
     "id": 49,

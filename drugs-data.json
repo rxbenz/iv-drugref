@@ -5161,7 +5161,8 @@
       "Hearing"
     ],
     "had": false,
-    "ref": "Lexicomp; ASHP/IDSA 2020"
+    "ref": "Lexicomp; ASHP/IDSA 2020; UpToDate",
+    "dosing": "หมายเหตุ: IV = systemic เท่านั้น (ไม่ได้ผลกับ C. diff) | Oral = C. diff เท่านั้น (ไม่ดูดซึม) | คำนวณเริ่มจาก actual BW → ปรับตาม level | 💊 ใช้หน้า Vanco TDM สำหรับ Bayesian AUC dosing\nIV intermittent: 15–20 mg/kg/dose (ปัดใกล้ 250 mg) q8–12h\nLoading (serious MRSA/critically ill): 20–35 mg/kg (max 3 g) ครั้งเดียว → maintenance ที่ interval ถัดไป\nContinuous infusion: load 15–20 mg/kg → 30–40 mg/kg/วัน (ถึง 60) target SS 20–25 mg/L\nSerious MRSA (bacteremia/pneumonia/osteomyelitis/CNS/sepsis/septic arthritis/PJI): 15–20 mg/kg q8–12h → ปรับตาม AUC/MIC 400–600 (ไม่ใช้ trough-only แล้ว)\nEndocarditis: Staph 15–20 mg/kg q8–12h ×6 สัปดาห์ | Enterococcus 15 mg/kg q12h + gentamicin ×6 สัปดาห์ | VGS 15 mg/kg q12h ×4–6 สัปดาห์\nSSTI (uncomplicated, ไม่อ้วน/renal ปกติ): 15 mg/kg q12h (ไม่ต้อง monitor)\nGBS maternal prophylaxis: 20 mg/kg q8h (max 2 g/dose) จนคลอด\nSurgical prophylaxis: 15 mg/kg (max 2 g) เริ่ม 60–120 นาทีก่อน incision\nCNS intraventricular (adjunct): 5–20 mg/วัน (preservative-free)\nC. difficile (Oral): nonfulminant 125 mg qid ×10 วัน | fulminant 500 mg qid + IV metronidazole (± retention enema)\n⚠️ AKI risk เมื่อ trough >15–20 หรือ AUC >650–1,300 | RMS (infusion reaction) ถ้าให้เร็ว — infuse ≥60 นาที (≤10 mg/min) | ปรับตาม renal"
   },
   {
     "id": 117,
@@ -5206,7 +5207,8 @@
       "Drug interactions"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA aspergillosis guidelines"
+    "ref": "Lexicomp; IDSA aspergillosis guidelines; UpToDate",
+    "dosing": "หมายเหตุ: TDM แนะนำ (trough 1–5.5 mg/L) | IV vehicle (SBECD) สะสมถ้า CrCl<50 → prefer oral | IV=Oral bioavailability ดี\nLoading: IV 6 mg/kg q12h ×2 doses → maintenance IV 4 mg/kg q12h | Oral loading 400 mg q12h ×2 → 200–300 mg q12h (หรือ 3–4 mg/kg q12h)\nInvasive aspergillosis: IV 6 mg/kg q12h ×2 → 4 mg/kg q12h → step-down oral; ขั้นต่ำ 6–12 สัปดาห์\nCandidemia/invasive (alt): IV 400 mg (6 mg/kg) q12h ×2 → 200–300 mg q12h; step-down สำหรับ C. krusei/glabrata; ≥14 วันหลัง hemoculture ลบ\nEsophageal candidiasis (fluconazole-refractory): 200 mg (3 mg/kg) q12h ×14–28 วัน\nScedosporiosis/Fusariosis: IV 6 mg/kg q12h ×2 → 4 mg/kg q12h (CNS fusariosis 6 mg/kg q12h + TDM)\nBlastomycosis/Coccidio/Crypto/Histo/Talaromycosis (step-down/alt): Oral 200–400 mg q12h maintenance (cocci meningitis ตลอดชีวิต)\nFebrile neutropenia (empiric antifungal) / prophylaxis (heme/HCT): IV/PO ~200 mg (หรือ wt-based) q12h\n⚠️ Visual disturbance (~30%), hepatotoxic (LFTs weekly), QT, photosensitivity (skin ca ถ้าใช้นาน) | CYP2C19/3A4 → drug interactions มาก | oral ไม่ต้องปรับ renal, IV CrCl<50 → ใช้ oral"
   },
   {
     "id": 118,
@@ -5251,7 +5253,8 @@
       "Diarrhea"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "Usual: IV 1–2 g q8–12h | Pseudomonas รุนแรง: 2 g q8h\nExtended infusion (off-label): 2 g q8h over 3–4 ชม. (นิยมสำหรับ AmpC: Enterobacter/K. aerogenes/Citrobacter) | Continuous: 4–6 g/24 ชม. (loading 2 g ถ้า sepsis)\nSepsis/septic shock: IV 2 g q8h (combination)\nBloodstream: community (no sepsis) 2 g q12h | HAI/Pseudomonas/immunocompromised 2 g q8h\nFebrile neutropenia (high-risk): IV 2 g q8h\nHAP/VAP / CAP (เสี่ยง resistant GNB): IV 2 g q8h\nMeningitis / brain-spinal abscess: IV 2 g q8h ×10–21 วัน\nCystic fibrosis exacerbation: IV 2 g q8h\nIntra-abdominal/cholecystitis: IV 2 g q8–12h (+metronidazole; Pseudomonas → q8h)\nDiabetic foot / SSTI / osteomyelitis / septic arthritis / PJI: IV 2 g q8–12h (Pseudomonas → 2 g q8h)\nUTI complicated/pyelonephritis: IV 1–2 g q8–12h (ตั้งครรภ์ 1 g q12h)\n⚠️ Seizure/neurotoxicity (encephalopathy) สูงใน renal impairment → ปรับตาม CrCl เสมอ | extended infusion เพิ่ม T>MIC | cross-allergy Penicillin"
   },
   {
     "id": 119,

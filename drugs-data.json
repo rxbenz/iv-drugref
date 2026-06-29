@@ -1954,7 +1954,8 @@
       "VPA level (ห้ามใช้ร่วม!)"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA guidelines"
+    "ref": "Lexicomp; IDSA guidelines; UpToDate",
+    "dosing": "หมายเหตุ: สงวนไว้สำหรับเชื้อดื้อยา (เช่น ESBL) | ⚠️ ไม่ครอบคลุม Pseudomonas (ต่างจาก carbapenem อื่น)\nUsual: IV/IM 1 g once daily (เกือบทุก indication)\nIntra-abdominal/cholecystitis: IV 1 g q24h\nCAP (inpatient, no Pseudomonas): IV/IM 1 g q24h (combination) ขั้นต่ำ 5 วัน\nHAP/VAP (ESBL): IV 1 g q24h ~7 วัน\nDiabetic foot (mod–severe): IV/IM 1 g q24h ×2–4 สัปดาห์\nBloodstream infection (GNB): IV 1 g q24h ×7–14 วัน\nUTI complicated/pyelonephritis: IV/IM 1 g q24h ×5–7 วัน\nOsteomyelitis/PJI: IV 1 g q24h ×4–6 สัปดาห์\nSSTI (mod–severe)/pelvic/bite wound: IV/IM 1 g q24h\nSurgical prophylaxis (colorectal): IV 1 g ก่อน incision (บางผู้เชี่ยวชาญไม่แนะนำ — เสี่ยงเหนี่ยวนำการดื้อยา)\n⚠️ ระวังใน critically ill/hypoalbuminemia (clearance เพิ่ม → บางผู้เชี่ยวชาญใช้ meropenem/imipenem แทน) | ลด valproate level | ปรับตาม CrCl"
   },
   {
     "id": 45,

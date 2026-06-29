@@ -6057,7 +6057,8 @@
       "Extravasation signs"
     ],
     "had": true,
-    "ref": "Lexicomp; WHO/ISMP safety alert; NCCN"
+    "ref": "Lexicomp; WHO/ISMP safety alert; NCCN; UpToDate",
+    "dosing": "⚠️⚠️ FATAL ถ้าให้ทาง intrathecal — IV เท่านั้น | dispense ใน minibag (ห้าม syringe) + ฉลาก \"FOR IV USE ONLY\" | ⚠️ Vesicant | ให้ bowel regimen กัน constipation/ileus\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nLymphoma (CHOP/R-CHOP/CVP): 1.4 mg/m² (max 2 mg) day 1 q3 สัปดาห์\nALL induction: 1.4–2 mg (หรือ 1.5 mg/m², max 2 mg) weekly ×4\nDA-EPOCH / Burkitt: 0.4 mg/m²/วัน CI ×4 วัน (96 ชม., มัก uncapped)\nPCV (glioma/oligodendroglioma): 1.4 mg/m² (max 2 mg) days 8,29\nMyeloma VAD: 0.4 mg/วัน CI ×4 วัน\nหมายเหตุ: หลาย regimen cap single dose ที่ 2 mg (บาง regimen เช่น CODOX-M/EPOCH uncapped — ตาม protocol)\n⚠️ Peripheral neuropathy (dose-limiting: sensory + motor + autonomic) | constipation/paralytic ileus | SIADH | jaw pain | alopecia | ไม่ต้องปรับ renal (ปรับใน hepatic/bilirubin สูง)"
   },
   {
     "id": 137,

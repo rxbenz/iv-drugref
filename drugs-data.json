@@ -2593,7 +2593,8 @@
       "Signs of hypoglycemia"
     ],
     "had": true,
-    "ref": "Lexicomp; ADA DKA guidelines"
+    "ref": "Lexicomp; ADA DKA guidelines; UpToDate",
+    "dosing": "⚠ Regular insulin (U-100) เท่านั้นที่ให้ IV ได้; U-500 ใช้ SC เท่านั้น ห้ามสับสน\nDKA: IV infusion 0.1 unit/kg/ชม. (± bolus 0.1 unit/kg นำ); เพิ่มเป็น 2 เท่าถ้า BG ไม่ลด ~50–70 mg/dL ในชั่วโมงแรก; เมื่อ BG <250 ลดเหลือ 0.02–0.05 unit/kg/ชม. + ให้ dextrose; ⚠ ถ้า K⁺ <3.5 ชะลอ insulin จน K⁺ ≥3.5\nHHS: IV infusion 0.05 unit/kg/ชม. (0.1 ถ้ามี ketoacidosis ร่วม); เมื่อ BG <250 ลดเหลือ 0.02–0.04 + dextrose รักษา BG 250–300 จน HHS หาย\nHyperkalemia รุนแรง/emergent: IV bolus 10 units (ลดเหลือ 5 units ถ้าเสี่ยง hypoglycemia: BG<140/ไตเสื่อม/น้ำหนักน้อย) + dextrose (omit ถ้า BG ≥250); ซ้ำได้ q2–4 ชม., monitor BG รายชั่วโมง ≤6 ชม.\nHyperglycemia ผู้ป่วยวิกฤต (IV preferred): infusion เริ่ม 1–4 unit/ชม. titrate; transition เป็น basal-bolus ก่อนหยุด drip ~1–4 ชม.\nCCB/BB toxicity (HDIT, off-label): IV bolus 1 unit/kg → infusion 0.5–1 unit/kg/ชม. เพิ่มได้ถึง 1–10 unit/kg/ชม. (รักษา euglycemia+normokalemia)\nHypertriglyceridemic pancreatitis (off-label): IV infusion 0.1–0.4 unit/kg/ชม. titrate, หยุดเมื่อ TG <500\nDM type 1 (SC): TDD เริ่ม ~0.4–0.5 unit/kg/วัน (basal 40–50% + prandial); type 2 prandial เริ่ม 4–6 units/มื้อ\nNutritional (enteral/TPN): 1 unit ต่อ carbohydrate/dextrose 10–15 g\n⚠ Insulin ดูดติด PVC/แก้ว → prime tubing 20 mL ก่อน; ใช้ infusion pump เสมอ; monitor BG q1–2h + K⁺"
   },
   {
     "id": 59,

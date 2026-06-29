@@ -1514,7 +1514,8 @@
       "Extravasation"
     ],
     "had": true,
-    "ref": "Lexicomp; SE guidelines"
+    "ref": "Lexicomp; SE guidelines; UpToDate",
+    "dosing": "Status epilepticus / acute seizure: IV 5–10 mg (อัตรา ≤5 mg/นาที) → ซ้ำทุก 3–5 นาทีถ้ายังชัก (SE ต่อด้วยยากันชักที่ไม่ใช่ benzo เพื่อกันชักซ้ำ; non-SE รวมไม่เกิน 30 mg)\nProcedural anxiety (premed): IV 2–10 mg (หรือ 0.03–0.1 mg/kg, max 10 mg) 5–15 นาทีก่อนหัตถการ; ซ้ำได้ ~50% ของโดสแรก\nAnxiety เฉียบพลัน/รุนแรง: IM/IV 2–10 mg ทุก 3–6 ชม. PRN (max 40 mg/วัน)\nAlcohol withdrawal (symptom-triggered): IV 5–10 mg PRN ตาม CIWA-Ar จนสงบ; (fixed-dose) 10 mg q6h วันที่1 แล้วลดลงทุกวัน\nSympathomimetic intoxication (cocaine/meth, off-label): IV 2–10 mg ทุก 3–10 นาที PRN จนคุมอาการ (รุนแรงถึง 20 mg)\nNeuroleptic malignant syndrome (off-label): IV 10 mg q8h จนหาย\nSerotonin syndrome (off-label): IV 5–10 mg ทุก 8–10 นาทีจนหาย\nOrganophosphate poisoning (off-label): IV 10 mg ซ้ำได้ 1–2 ครั้งทุก 5–10 นาทีถ้ายังชัก\nHydroxychloroquine/chloroquine toxicity (off-label): IV 2 mg/kg over 30 นาที → 1–2 mg/kg/วัน นาน 2–4 วัน\nVertigo เฉียบพลัน (off-label): IV/กิน 1–5 mg ทุก 12 ชม. PRN (≤48–72 ชม.)\n⚠ IM ดูดซึมไม่แน่นอน — ถ้าไม่มี IV ให้ใช้ midazolam IM แทน; เฝ้าระวังกดการหายใจ (เตรียม flumazenil)\nหมายเหตุ: ใช้ ≥4 สัปดาห์ต้องค่อย ๆ ลดยา (taper) ป้องกันอาการถอนยา"
   },
   {
     "id": 35,

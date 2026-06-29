@@ -567,23 +567,18 @@ function _uxAnswerLine(drug){
   }).join('')+'</div>';
 }
 
-// M-3: cross-module link at the top of the expanded body (compat covers all drugs).
-function _uxCrossLinks(drug){
-  var g=(drug.generic||'').trim();
-  if(!g) return '';
-  return '<div class="card-crosslinks">'
-    +'<a class="xlink" href="compatibility.html?drug='+encodeURIComponent(g)+'">🔗 ตรวจ IV Compatibility</a>'
-    +'</div>';
-}
-
-// Wrap renderDrugCard (outermost): inject answer-line before the body + cross-link inside it.
+// Wrap renderDrugCard: inject the answer-line (diluent/rate) above the body.
+// The standalone "🔗 ตรวจ IV Compatibility" cross-link that used to be injected
+// here (M-3, v5.15.3) was SUPERSEDED by the unified "เครื่องมือสำหรับยานี้" chip
+// row (the related-tools wrapper further down, which includes an IV Compatibility
+// chip with the same ?drug= deep-link plus Renal/Calculator/TDM). Keeping both
+// rendered a duplicate IV Compatibility link on every card, so it was removed.
 var _uxOrigRenderCard=renderDrugCard;
 renderDrugCard=function(drug){
   var html=_uxOrigRenderCard(drug);
   var line=_uxAnswerLine(drug);
-  var links=_uxCrossLinks(drug);
-  if(line||links){
-    html=html.replace('<div class="card-body">', line+'<div class="card-body">'+links);
+  if(line){
+    html=html.replace('<div class="card-body">', line+'<div class="card-body">');
   }
   return html;
 };

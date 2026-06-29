@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.39.0
+// IV Drug Reference PWA — Service Worker v5.39.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -249,9 +249,14 @@
 //          overlay via a more prominent filled-sky edge toggle. (3) Fix PWA
 //          install banner wrapping ~1 char/line (fixed flex box had no width →
 //          shrink-to-fit collapsed the space-less Thai text); now width-capped.
+// v5.39.1: Fix — drug cards showed TWO IV Compatibility links: the new related-
+//          tools chip (v5.39.0) plus the older standalone "🔗 ตรวจ IV Compatibility"
+//          cross-link (_uxCrossLinks, v5.15.3). Both deep-linked the same
+//          ?drug=<generic>, so the legacy one was removed; the answer-line
+//          (diluent/rate) it shared a wrapper with is unchanged.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.39.0';
+const CACHE_NAME = 'iv-drugref-v5.39.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

@@ -3768,7 +3768,8 @@
       "Stool color"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: omeprazole ส่วนใหญ่ขนาดเป็นรูปกิน — รูป IV ใช้เมื่อกินไม่ได้ แล้วเปลี่ยนกลับเป็นกินโดยเร็ว\nUpper GI bleed / peptic ulcer hemorrhage (off-label, IV): bolus 80 mg → continuous infusion 8 mg/ชม. ×72 ชม. (high-risk stigmata หลังส่องกล้อง) หรือ intermittent 80 mg → 40 mg q12h\nGERD (กิน): mild 10 mg วันละครั้ง; รุนแรง/erosive 20–40 mg วันละครั้ง ≥8 สัปดาห์ → maintenance 20 mg วันละครั้ง\nPeptic ulcer: กิน 20–40 mg วันละครั้ง 4–8 สัปดาห์ (ดื้อ/ซ้ำ → 20–40 mg วันละ 2 ครั้ง)\nH. pylori eradication: กิน 20–40 mg วันละ 2 ครั้ง 14 วัน ร่วมยาปฏิชีวนะ\nNSAID ulcer prevention: กิน 20 mg วันละครั้ง ตลอดที่ใช้ NSAID เสี่ยงสูง\nStress ulcer prophylaxis (ICU): กิน 40 mg วันละครั้ง\nZollinger-Ellison: กิน เริ่ม 40 mg วันละ 2 ครั้ง → ปรับถึง max 180 mg/วัน (>80 mg/วันแบ่ง 2 ครั้ง)\n⚠ ห้ามผสมกับยาอื่น (ตกตะกอน); IV push ช้า ≥5 นาที; ใช้นาน ๆ ระวัง hypomagnesemia; ลดฤทธิ์ clopidogrel (CYP2C19)"
   },
   {
     "id": 85,
@@ -3809,7 +3810,8 @@
       "N/V assessment"
     ],
     "had": false,
-    "ref": "Lexicomp; ASCO"
+    "ref": "Lexicomp; ASCO; UpToDate",
+    "dosing": "⚠ IV single dose >16 mg ไม่แนะนำ (QT prolongation); ห้ามใช้ใน congenital long-QT\nCINV ป้องกัน (highly/moderately emetogenic): IV 8 mg หรือ 0.15 mg/kg ครั้งเดียวก่อนคีโม (max 16 mg) ร่วม dexamethasone ± NK1 ± olanzapine; รูปกิน 8 mg วันละ 2 ครั้ง หรือ 24 mg ครั้งเดียว\n  • Low emetic risk: 8 mg ครั้งเดียวก่อนคีโม\nN/V เฉียบพลันรุนแรง (off-label): IV(แนะนำ)/IM/กิน 4–8 mg ครั้งเดียว ซ้ำได้ทุก 4–8 ชม. PRN\nPONV ป้องกัน: IV 4 mg ครั้งเดียวตอนจบผ่าตัด (หรือกิน 8 mg 30–60 นาทีก่อนผ่าตัด)\nPONV รักษา/rescue: IV 4 mg ครั้งเดียว\nN/V ตั้งครรภ์ รุนแรง (off-label): IV/กิน 4 mg ทุก 8 ชม. (มี hypovolemia: IV 8 mg over 15 นาที ทุก 12 ชม.)\nVertigo-associated N/V (off-label): IV/IM 4–8 mg ครั้งเดียว; กิน 4 mg ทุก 8–12 ชม.\nRadiation-induced N/V: IV/กิน 8 mg วันละ 1–2 ครั้งก่อนฉายรังสี\nหมายเหตุ: ระวัง serotonin syndrome เมื่อใช้ร่วมยา serotonergic"
   },
   {
     "id": 86,
@@ -3850,7 +3852,8 @@
       "CBC"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "Acute upper GI bleed / peptic ulcer hemorrhage (off-label):\n  • Pre-endoscopy: IV bolus 80 mg → continuous infusion 8 mg/ชม. จนส่องกล้อง (หรือ intermittent 80 mg ถ้าเลือดออก / 40 mg ถ้าไม่ออก)\n  • Post-endoscopy high-risk stigmata: IV bolus 80 mg → 8 mg/ชม. ≥72 ชม. (omit bolus ถ้าให้ก่อนแล้ว) หรือ intermittent 80 mg → 40 mg q12h ≥72 ชม. → เปลี่ยนเป็นกิน 40 mg วันละ 2 ครั้ง 14 วัน → 40 mg วันละครั้ง\nGERD (กิน): 20–40 mg วันละครั้ง ≥8 สัปดาห์ (erosive/Barrett → maintenance 40 mg วันละครั้ง); IV 40 mg วันละครั้งเมื่อกินไม่ได้\nPeptic ulcer complicated: IV/กิน 40 mg วันละ 2 ครั้ง 4 สัปดาห์ → 40 mg วันละครั้ง\nStress ulcer prophylaxis (ICU): IV/กิน 40 mg วันละครั้ง\nAspiration prophylaxis (off-label): IV 40 mg 1 ชม.ก่อน induction\nH. pylori eradication (off-label): กิน 40–80 mg วันละ 2 ครั้ง 14 วัน ร่วมยาปฏิชีวนะ\nZollinger-Ellison: กิน เริ่ม 80 mg วันละ 2 ครั้ง (max 240 mg/วัน); IV 80 mg q8–12h เมื่อกินไม่ได้\n⚠ ใช้แทน omeprazole IV ได้; IV push ช้า ≥2 นาที; เปลี่ยนเป็นกินโดยเร็ว; ใช้นาน ๆ ระวัง hypomagnesemia"
   },
   {
     "id": 87,

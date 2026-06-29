@@ -670,7 +670,8 @@
       "Anticholinergic effects"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "Acute dystonia / drug-induced EPS (เฉียบพลัน): IM/IV 1–2 mg ครั้งเดียว → ซ้ำได้ใน 15–30 นาทีถ้ายังไม่ดีขึ้น; ตามด้วยกิน 1–2 mg วันละ 2 ครั้ง 1–2 สัปดาห์เพื่อกันกลับเป็นซ้ำ\nDrug-induced EPS ทั่วไป: IM/IV/กิน เริ่ม 1–2 mg/วัน แบ่งให้ ปรับได้ถึง 6 mg/วัน\nParkinsonism: กิน เริ่ม 0.5–1 mg/วัน ก่อนนอน → ค่อย ๆ เพิ่มทีละ 0.5 mg ทุก 5–6 วัน (max 6 mg/วัน แบ่ง 2–4 ครั้ง)\nหมายเหตุ: ใช้ขนาดต่ำสุดที่ได้ผล โดยเฉพาะผู้สูงอายุ (เสี่ยง delirium); ไม่ได้ผลกับ tardive dyskinesia"
   },
   {
     "id": 16,
@@ -713,7 +714,8 @@
       "Injection site reactions"
     ],
     "had": true,
-    "ref": "Lexicomp; AAN guidelines"
+    "ref": "Lexicomp; AAN guidelines; UpToDate",
+    "dosing": "⚠ Units ไม่ interchangeable ระหว่าง brand — โดสด้านล่างเป็นของ onabotulinumtoxinA (Botox); ให้ขนาดต่ำสุดที่แนะนำเมื่อเริ่มรักษา\n⚠ ขนาดสะสมสูงสุดทุกข้อบ่งใช้รวมกัน ≤400 units ต่อ 3 เดือน\nCervical dystonia: IM เฉลี่ย ~236 units (พิสัย 198–300) แบ่งเข้ากล้ามที่เป็น (≤50 units/จุด; เข้า SCM รวม ≤100 units กันกลืนลำบาก)\nChronic migraine (ป้องกัน): IM 155 units ทุก 12 สัปดาห์ แบ่ง 5 units/จุด เข้า 31 จุด (7 มัดกล้าม)\nBlepharospasm: IM 1.25–2.5 units/จุด เข้า orbicularis oculi (max 5 units/จุด) ทุก ≥3 เดือน\nUpper/lower limb spasticity: IM ปรับตามกล้ามเนื้อ (≤50 units/จุด); single-session ≤500 units (มีข้อมูล off-label ถึง 1,200)\nPrimary axillary hyperhidrosis: Intradermal 50 units/รักแร้ แบ่ง 10–15 จุด\nStrabismus: IM 1.25–5 units/กล้าม (max 25 units/กล้าม/ครั้ง)\nOveractive bladder: Intradetrusor 100 units; neurogenic detrusor overactivity 200 units (ทุก ≥12 สัปดาห์)\nCosmetic (glabellar/forehead/canthal lines): IM 4 units/จุด รวม 20–24 units ทุก ≥3 เดือน\nหมายเหตุ: onset 2–14 วัน, ฤทธิ์อยู่ 3–6 เดือน; ฉีดถี่/โดสสูงเสี่ยงสร้าง antibody → ดื้อยา"
   },
   {
     "id": 17,
@@ -757,7 +759,8 @@
       "Respiratory function (epidural)"
     ],
     "had": true,
-    "ref": "Lexicomp; ASRA LAST guidelines"
+    "ref": "Lexicomp; ASRA LAST guidelines; UpToDate",
+    "dosing": "⚠ ห้าม IV; ขนาดขึ้นกับหัตถการ ความลึกที่ต้องการ vascularity และสภาพผู้ป่วย — ดูดทดสอบ (aspirate) ก่อนฉีดทุกครั้ง\nLocal infiltration: 0.25% เฉพาะที่ (max 175 mg)\nPeripheral nerve block: 0.25–0.5% ~5 mL (max 400 mg/วัน)\nCaudal block (preservative-free): 0.25–0.5% 15–30 mL\nEpidural (นอก caudal): 0.25–0.5% 10–20 mL ให้ทีละ 3–5 mL เฝ้าระวังพิษ\nSpinal anesthesia (0.75% ใน dextrose 8.25%): perineal/ขา 1 mL, ช่องท้องล่าง 1.6 mL, คลอดปกติ 0.8 mL, ผ่าคลอด 1–1.4 mL\nCSE สำหรับเจ็บครรภ์ (off-label, spinal): 1.75–2.5 mg + fentanyl 15 mcg; ผ่าคลอด: 8–12 mg + fentanyl 15 mcg\n⚠ ขนาดสูงสุด ~2 mg/kg (ไม่ผสม adrenaline) หรือ 3 mg/kg (ผสม adrenaline)\nหมายเหตุ: cardiotoxic มากกว่า lidocaine — เฝ้าระวัง LAST (หูอื้อ→ชัก→หัวใจหยุด); antidote = Intralipid 20% (lipid rescue)"
   },
   {
     "id": 18,
@@ -6837,7 +6840,8 @@
       "Re-sedation (observe ≥2 hr)"
     ],
     "had": false,
-    "ref": "Lexicomp; ACLS 2020"
+    "ref": "Lexicomp; ACLS 2020; UpToDate",
+    "dosing": "หมายเหตุ: BZD antagonist | ⚠️ T½ สั้นกว่า BZD → re-sedation (เฝ้า ≥2 ชม.) | ไม่ใช้ routine\nProcedural sedation reversal: IV 0.2 mg over 2 นาที → ถ้ายังไม่ตื่นพอ ซ้ำ 0.2 mg q1 นาที (≤4 ครั้ง); cumulative ปกติ 0.6–1 mg (max 1 mg)\nBZD overdose: IV 0.2 mg over 2 นาที → 0.3 mg over 3 นาที → 0.5 mg over 5 นาที ซ้ำ q1 นาที; cumulative 1–3 mg (max 3 mg, บางราย 5 mg); ถ้าไม่ตอบสนองหลัง 5 mg → ไม่ใช่ BZD เป็นหลัก\nResedation: ซ้ำ 0.5–1 mg (อัตรา 0.1 mg/นาที) q20 นาที (max 3 mg/ชม.) | long-acting → infusion 0.1–1 mg/ชม.\n⚠️⚠️ SEIZURE risk — ห้ามใช้ใน chronic BZD use, co-ingestion TCA/proconvulsant, seizure disorder, BZD dependence | อาจเกิด arrhythmia/withdrawal"
   },
   {
     "id": 154,
@@ -6880,7 +6884,8 @@
       "Lipase (if prolonged)"
     ],
     "had": true,
-    "ref": "ASRA LAST checklist 2020"
+    "ref": "ASRA LAST checklist 2020; UpToDate",
+    "dosing": "Local anesthetic systemic toxicity (LAST) — Intralipid 20%:\n  • <70 kg: bolus 1.5 mL/kg over 1–3 นาที → infusion 0.25 mL/kg/นาที (เพิ่มเป็น 0.5 ถ้ายัง unstable)\n  • ≥70 kg: bolus 100 mL over 1–3 นาที → infusion 200–250 mL over 15–20 นาที (เพิ่มเป็น 500 mL ถ้ายัง unstable)\n  • ซ้ำ bolus ได้ถ้า persistent instability | ทำ CPR ต่อระหว่างให้ถ้า arrest | ต่ออีก ≥15 นาทีหลัง stable | max 12 mL/kg\nDrug/toxin overdose (lipophilic, hemodynamic collapse refractory): bolus 1.5 mL/kg over 1–3 นาที, ซ้ำได้ถึง 3 ครั้ง q3–5 นาที → infusion 0.025 mL/kg/นาที | max 12.5 mL/kg/24 ชม.\nNutrition (TPN energy source): IV 1–1.5 g/kg/วัน (max 2.5 g/kg/วัน); ไม่เกิน 60% ของ total kcal\n⚠️ หยุด/ลด ถ้า TG >400 mg/dL (CI ถ้า >1,000) | fat overload syndrome | ระวัง egg/soy allergy | observe allergic reaction ตอนเริ่ม"
   },
   {
     "id": 155,
@@ -6924,7 +6929,8 @@
       "Mental status"
     ],
     "had": false,
-    "ref": "Lexicomp; ACLS 2020"
+    "ref": "Lexicomp; ACLS 2020; UpToDate",
+    "dosing": "Hypoglycemia (เมื่อให้ IV dextrose ไม่ได้): IM/IV/SC 1 mg, ซ้ำได้ใน 15 นาที | Intranasal 3 mg (1 actuation) รูจมูกเดียว, ซ้ำได้ด้วยอุปกรณ์ใหม่ | Gvoke SC 1 mg\nBeta-blocker overdose: IV 2–10 mg bolus, ซ้ำได้ใน 10–15 นาทีถ้าไม่ตอบสนอง → ถ้าตอบสนอง: infusion 2–5 mg/h (range 1–15) titrate\nCCB overdose: IV 2–10 mg bolus, ซ้ำได้ ×2 ห่าง 2 นาที → infusion 2–5 mg/h (range 1–15)\nAnaphylaxis (refractory ในผู้ใช้ beta-blocker): IV 1–5 mg bolus → infusion 5–15 mcg/นาที\nDiagnostic (GI relaxation): IM 1–2 mg หรือ IV 0.2–0.75 mg\n⚠️ Premedicate antiemetic ก่อน high-dose (N/V เด่นมาก) | ไม่ได้ผลถ้า glycogen depleted (ตับวาย/อดอาหารนาน/แอลกอฮอล์) | hyperglycemia/hypokalemia (dose สูง)"
   },
   {
     "id": 156,
@@ -6967,7 +6973,8 @@
       "CXR (if >24 hr)"
     ],
     "had": false,
-    "ref": "Lexicomp; AACT iron poisoning guidelines"
+    "ref": "Lexicomp; AACT iron poisoning guidelines; UpToDate",
+    "dosing": "Acute iron toxicity (รุนแรง: shock/coma/acidosis/GI bleed หรือ serum iron >500 mcg/dL): IV (preferred) 1 g → 500 mg q4h ×2 dose → 500 mg q4–12h ตามอาการ (max ~6 g/วัน) | IV infusion ห้ามเกิน 15 mg/kg/ชม. (เร็ว → hypotension); ปัสสาวะสีชมพู-แดง (vin rosé) = บ่งชี้มี free iron\nChronic iron overload: IV 40–50 mg/kg/วัน over 8–12 ชม. (max 60) 5–7 วัน/สัปดาห์ | SC 1–2 g/วัน (20–40 mg/kg) over 8–24 ชม. | IM 0.5–1 g/วัน\nAluminum toxicity (CKD): IV 5 mg/kg/สัปดาห์ (หลัง diagnostic test dose) — ระวัง neurotoxicity ถ้า aluminum >200 mcg/L\n⚠️ Hypotension ถ้า infuse เร็ว | ARDS (ใช้ >24 ชม.) | retinal/ototoxicity (chronic) | Yersinia/mucormycosis infection risk | ปรับ/ระวังใน renal impairment"
   },
   {
     "id": 157,
@@ -7010,7 +7017,8 @@
       "Mental status"
     ],
     "had": false,
-    "ref": "Lexicomp; ACMT cyanide guidelines"
+    "ref": "Lexicomp; ACMT cyanide guidelines; UpToDate",
+    "dosing": "Cyanide poisoning (ใช้ร่วม/ตามหลัง sodium nitrite หรือ hydroxocobalamin): IV 12.5 g (50 mL ของ 25%) ครั้งเดียว\n⚠ ถ้าอาการพิษกลับมา ให้ซ้ำได้ครึ่งโดส (6.25 g)\nCalciphylaxis (off-label): IV 25 g 3 ครั้ง/สัปดาห์ (หลังฟอกเลือดแต่ละครั้ง) infuse ช้า ๆ ≥30–60 นาที\nCisplatin/mechlorethamine extravasation (antidote): inject 4% solution (เจือจาง 25% 4 mL + SWFI 6 mL) ฉีด intradermal/SQ รอบ ๆ บริเวณรั่ว\nหมายเหตุ: เริ่มต้นด้วยโดสต่ำสุดที่แนะนำเสมอ; ระวัง N/V ถ้าฉีดเร็ว"
   },
   {
     "id": 158,
@@ -7053,7 +7061,8 @@
       "HR"
     ],
     "had": false,
-    "ref": "Lexicomp; ACMT digitalis guidelines"
+    "ref": "Lexicomp; ACMT digitalis guidelines; UpToDate",
+    "dosing": "หลักการ: 1 vial (40 mg) จับ digoxin ได้ ~0.5 mg\nทราบ digoxin level (steady state): จำนวน vial = (digoxin ng/mL × น้ำหนัก kg) / 100 (ปัดขึ้น)\nทราบปริมาณที่กลืน: จำนวน vial = (ปริมาณ mg ที่ดูดซึม) / 0.5  [ปริมาณดูดซึม = mg ที่กลืน × 0.8]\nAcute toxicity ไม่ทราบขนาด: 10–20 vials IV\nChronic toxicity ไม่ทราบขนาด: ผู้ใหญ่ 6 vials (เด็ก ~1–2 vials)\nภาวะคุกคามชีวิตเฉียบพลัน/cardiac arrest: ให้ IV push ได้\n⚠ หลังให้ยา digoxin level (total) จะสูงหลอก — ติดตามอาการ/ECG/K⁺ แทน\n⚠ ระวัง hypokalemia กลับเป็น hyperkalemia เมื่อ digoxin หลุดจาก receptor\nหมายเหตุ: ปกติ infuse over 30 นาที (เจือจางใน NSS); re-digitalization รอ ≥7 วัน"
   },
   {
     "id": 159,

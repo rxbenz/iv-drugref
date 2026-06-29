@@ -6237,7 +6237,8 @@
       "GI symptoms"
     ],
     "had": false,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "หมายเหตุ: anti-VEGF | ⚠️ หยุด ≥28 วันก่อนผ่าตัด elective + ไม่เริ่มจนหลังผ่าตัดใหญ่ ≥28 วันและแผลหายดี (impaired wound healing)\n💊 Oncology = protocol-specific — ยึดตาม protocol; มี dose tiers หลัก:\nColorectal (FOLFIRI/FOLFOX): 5 mg/kg q2 สัปดาห์ | CapOx: 7.5 mg/kg q3 สัปดาห์\nRecurrent glioblastoma: 10 mg/kg q2 สัปดาห์ หรือ 15 mg/kg q3 สัปดาห์ (± irinotecan/lomustine)\nMeningioma (recurrent): 10 mg/kg q2 สัปดาห์\nNSCLC (nonsquamous): 15 mg/kg q3 สัปดาห์ + carboplatin/paclitaxel → maintenance\nOvarian/cervical: 15 mg/kg q3 สัปดาห์ (ovarian 7.5–15) + chemo → maintenance\nHCC: 15 mg/kg q3 สัปดาห์ + atezolizumab (คัดกรอง esophageal varices ก่อน)\nIntravitreal (AMD/DME, off-label): 1.25 mg (0.05 mL) q4 สัปดาห์\n⚠️ Hypertension (ตรวจ BP ทุก cycle) | proteinuria | hemorrhage | GI perforation (1–3%) | impaired wound healing | arterial/venous thromboembolism | RPLS/PRES | fistula"
   },
   {
     "id": 141,

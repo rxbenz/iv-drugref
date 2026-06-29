@@ -2680,7 +2680,8 @@
       "UO"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "GI/GU spasm (รวม renal/biliary colic): IM/IV/SC 10–20 mg ครั้งเดียว; ซ้ำได้ทุก ≥30 นาที (max 100 mg/วัน)\n  • รูปกิน: 10–20 mg วันละ 3–5 ครั้ง PRN (max 60 mg/วัน)\nMalignant bowel obstruction inoperable (off-label): SC เริ่ม 20 mg → 60 mg/24 ชม. continuous SC infusion (ลดสารคัดหลั่ง/คลื่นไส้/อาเจียน)\nReduction of secretions at end of life (off-label): IV/SC 20 mg ทุก 4–6 ชม. PRN หรือ 20 mg → continuous IV/SC 20–60 mg/24 ชม. (max 100 mg/วัน)\n⚠ IV push ให้ช้า ≤20 mg/นาที เลี่ยง infusion reaction (hypotension)\n⚠ ห้ามใช้ใน glaucoma มุมแคบ, myasthenia gravis, tachyarrhythmia, GI/GU obstruction\nหมายเหตุ: เป็น quaternary ammonium → ไม่ผ่าน BBB (ไม่ทำให้สับสน — ปลอดภัยในผู้ป่วย neuro); ผลข้างเคียง anticholinergic (ปากแห้ง, ใจสั่น); ระวัง anaphylaxis (พบน้อย)"
   },
   {
     "id": 61,

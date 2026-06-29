@@ -5880,7 +5880,8 @@
       "DPD status"
     ],
     "had": true,
-    "ref": "Lexicomp; NCCN; CPIC DPYD guidelines"
+    "ref": "Lexicomp; NCCN; CPIC DPYD guidelines; UpToDate",
+    "dosing": "⚠️ Safety: ตรวจ DPYD (DPD deficiency) ก่อนเริ่ม — complete deficiency ห้ามใช้ (toxicity รุนแรง/อันตรายถึงชีวิต); partial activity → ลด dose (ตาม CPIC/DPWG)\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nColorectal FOLFOX/FOLFIRI: 400 mg/m² bolus day 1 → 2,400 mg/m² CI over 46 ชม. q2 สัปดาห์ + leucovorin (± oxaliplatin/irinotecan)\nHead&neck/Esophageal/Gastric CF: 1,000 mg/m²/วัน CI ×4–5 วัน (3,750–4,000/cycle) + cisplatin\nBreast CMF/CEF/FEC: 500–600 mg/m² days 1,8 (q3–4 สัปดาห์)\nPancreatic FOLFIRINOX: 400 bolus → 2,400 mg/m² CI 46 ชม. q2 สัปดาห์\nRectal chemoradiation: 225 mg/m²/วัน CI ต่อเนื่องระหว่างฉายแสง\nหมายเหตุ: bolus → myelosuppression เด่น | continuous infusion → hand-foot/mucositis เด่น\n⚠️ Mucositis/diarrhea (dose-limiting) | myelosuppression | hand-foot syndrome (CI) | coronary vasospasm/chest pain → หยุดยา | overdose antidote = uridine triacetate"
   },
   {
     "id": 133,
@@ -5922,7 +5923,8 @@
       "Pulmonary symptoms"
     ],
     "had": false,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "⚠️ infusion ปกติ 30 นาที — ห้ามนานเกิน 60 นาที หรือถี่เกินสัปดาห์ละครั้ง (เพิ่ม toxicity) | ห้ามสับสน injection กับ intravesical\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nPancreatic (single agent): 1,000 mg/m² weekly ×7 สัปดาห์ → พัก 1 สัปดาห์, แล้ว days 1,8,15 q28 วัน\nNSCLC/biliary/bladder/cervical/ovarian + cisplatin/carboplatin: 1,000–1,250 mg/m² days 1,8 (q21) หรือ days 1,8,15 (q28)\nBreast/pancreatic + nab-paclitaxel: 1,000 mg/m² days 1,8,15 q28 วัน\nSarcoma + docetaxel: 675–900 mg/m² days 1,8 (q21) over 90 นาที\nLymphoma (GDP/GemOx): 1,000 mg/m² days 1,8 (q21) หรือ q14\n⚠️ Myelosuppression (โดยเฉพาะ thrombocytopenia) | pulmonary toxicity (rare, อาจ fatal) | HUS/TTP (rare) | radiation recall | capillary leak | ปรับ dose ตาม CBC nadir"
   },
   {
     "id": 134,

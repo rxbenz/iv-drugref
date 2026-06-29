@@ -5701,7 +5701,8 @@
       "Allergic signs (cycle >6)"
     ],
     "had": true,
-    "ref": "Lexicomp; Calvert AJ JCO 1989; NCCN"
+    "ref": "Lexicomp; Calvert AJ JCO 1989; NCCN; UpToDate",
+    "dosing": "หมายเหตุ: คำนวณด้วย Calvert formula → total dose (mg) = Target AUC × (GFR + 25) | FDA แนะนำ cap GFR ที่ 125 mL/min กัน toxicity | measured CrCl/GFR ดีกว่าถ้า curative/น้ำหนักตัวสุดขั้ว/eGFR ≤45 หรือ >125 | antiemetic (emetogenic ปานกลาง–สูงตาม AUC)\n💊 Oncology = protocol-specific — ยึดตาม protocol; Target AUC ที่พบบ่อย:\nCombination q3 สัปดาห์ (NSCLC/ovarian/breast/endometrial + paclitaxel ฯลฯ): AUC 5–6 day 1\nWeekly (concurrent chemoradiation): AUC 2 ทุกสัปดาห์\nSingle agent: AUC 4–6 q3–4 สัปดาห์\nSeminoma adjuvant (early stage): AUC 7 single dose ครั้งเดียว\nHCT/germ cell (high-dose): AUC 7–8 ×3 วัน\n⚠️ Thrombocytopenia (dose-limiting, nadir ~day 21) + myelosuppression | hypersensitivity (โดยเฉพาะ cycle ≥6–7) | nephro/oto/neurotoxic น้อยกว่า cisplatin"
   },
   {
     "id": 129,
@@ -5744,7 +5745,8 @@
       "Allergic signs"
     ],
     "had": true,
-    "ref": "Lexicomp; NCCN; Trissel's"
+    "ref": "Lexicomp; NCCN; Trissel's; UpToDate",
+    "dosing": "⚠️ ห้ามสับสน/แทนกับ paclitaxel protein-bound (nab-paclitaxel/Abraxane) — dose คนละแบบ\n⚠️ Premedication กัน HSR (Cremophor vehicle): dexamethasone 20 mg PO ที่ 12 และ 6 ชม.ก่อน (หรือ 10–20 mg IV single) + diphenhydramine 50 mg IV + H2 (cimetidine/famotidine) IV 30–60 นาทีก่อน | อาจ omit dexamethasone รอบถัด ๆ ไปถ้าไม่มี HSR ใน 2 cycle แรก\n💊 Oncology = protocol-specific — ยึดตาม protocol; รูปแบบที่พบบ่อย:\nq3 สัปดาห์: 135–175 mg/m² over 3 ชม. (breast/ovarian/lung/อื่น ๆ ± carboplatin/cisplatin)\nWeekly: 80 mg/m²/สัปดาห์ over 1 ชม.\nDose-dense: 175 mg/m² q2 สัปดาห์ (+ growth factor)\n24-hour infusion: 135 mg/m² (NSCLC/ovarian + cisplatin)\nKaposi sarcoma (AIDS): 135 mg/m² q3 สัปดาห์ หรือ 100 mg/m² q2 สัปดาห์ (ลด dexa เป็น 10 mg)\n⚠️ Hypersensitivity (ต้อง premed + monitor ใกล้ชิด dose แรก) | peripheral neuropathy (dose-limiting, cumulative) | neutropenia (nadir ~day 8–11) | arthralgia/myalgia | bradycardia | ใช้ non-PVC set + 0.22 μm filter"
   },
   {
     "id": 130,

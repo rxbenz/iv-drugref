@@ -3273,7 +3273,8 @@
       "Mood"
     ],
     "had": true,
-    "ref": "Lexicomp; MS/NMOSD guidelines"
+    "ref": "Lexicomp; MS/NMOSD guidelines; UpToDate",
+    "dosing": "⚠ เฉพาะรูป succinate (Solu-Medrol) ให้ IV ได้; acetate (Depo-Medrol) สำหรับ IM/intra-articular เท่านั้น ห้าม IV\nขนาดทั่วไป IV: 40–125 mg/วัน (ครั้งเดียว/แบ่งให้); pulse therapy: 7–15 mg/kg/dose หรือ 500 mg–1 g/dose วันละครั้ง ×3–5 วัน\nMultiple sclerosis exacerbation: IV pulse 500 mg–1 g/วัน ×3–7 วัน (ปกติ 5 วัน) ± oral taper\nLupus nephritis / systemic rheumatic disease organ-threatening: IV pulse 250 mg–1 g/วัน (หรือ 7–15 mg/kg) ×1–3 วัน → oral glucocorticoid\nGiant cell arteritis (เสี่ยงตาบอด): IV 500 mg–1 g/วัน ×3 วัน → oral\nDermatomyositis/sarcoidosis รุนแรง/warm AIHA: IV pulse 1 g/วัน (sarcoid 10–20 mg/kg) ×3–5 วัน → oral\nAsthma/COPD exacerbation: IV/กิน 40–60 mg/วัน 5–14 วัน\nCOVID-19 (ต้องการ O₂, ทางเลือกแทน dexamethasone): IV/กิน 32 mg วันละครั้ง หรือ 16 mg วันละ 2 ครั้ง ≤10 วัน\nAnaphylaxis (เสริม, ไม่ใช่ตัวแรก): IV 1–2 mg/kg ครั้งเดียว (สูงสุด 125 mg)\nAllergic/angioedema/urticaria รุนแรง: IV 60–80 mg → เปลี่ยนเป็นกิน taper รวม ≤10 วัน\nAdrenal crisis (ทางเลือก): IV 40 mg/วัน แบ่ง 2 ครั้ง\nIBD รุนแรง (UC/Crohn): IV 40–60 mg/วัน\nPneumocystis pneumonia (เสริม): IV 30 mg วันละ 2 ครั้ง วันที่ 1–5 → 30 mg วันละครั้ง วันที่ 6–10 → 15 mg วันที่ 11–21\nARDS (off-label): IV loading 1–2 mg/kg → taper ตามตาราง 28 วัน\nImmune-checkpoint toxicity / GVHD / TTP: 💊 ขนาดตาม protocol (เช่น 1–2 mg/kg/วัน หรือ pulse 1 g ×3 วัน, ปรับตาม grade)\nIM (acetate/succinate): 40–60 mg ครั้งเดียว; intra-articular (acetate): ข้อใหญ่ 20–80 mg, ข้อกลาง 10–40, ข้อเล็ก 4–10\n⚠ Pulse ต้องให้ช้า ≥30 นาที + monitor ECG (ให้เร็ว → arrhythmia/cardiac arrest); ระวัง hyperglycemia, insomnia; หยุดนาน ๆ ต้อง taper"
   },
   {
     "id": 74,

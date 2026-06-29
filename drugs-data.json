@@ -2497,7 +2497,8 @@
       "Sedation level"
     ],
     "had": true,
-    "ref": "Lexicomp; PADIS guidelines 2018"
+    "ref": "Lexicomp; PADIS guidelines 2018; UpToDate",
+    "dosing": "⚠ QTc prolongation ขึ้นกับขนาดที่ >2 mg/ครั้ง — เลี่ยง dose ≥2 mg IV ถ้า baseline QTc >450 ms หรือมีปัจจัยเสี่ยง; monitor ECG ระหว่างและ 2–3 ชม.หลังให้\n⚠ Decanoate (50 mg/mL) = long-acting IM เท่านั้น ห้าม IV เด็ดขาด\nAgitation/aggression เฉียบพลันรุนแรง: IM/IV (off-label) 2–10 mg ซ้ำทุก ≥15 นาทีจนคุมได้ → แล้วทุก 0.5–6 ชม. PRN (≤30 mg/วัน)\nDelirium hyperactive (ICU, off-label): IM/IV ตามระดับ — เบา 0.5–2.5 mg, ปานกลาง 2–5 mg, รุนแรง 10–20 mg; ซ้ำ/เพิ่มทุก 15–30 นาทีจนสงบ → maintenance ~25% ของ loading dose รวม ทุก 6–12 ชม.\nDelirium (non-ICU): IM/IV/กิน 0.5–1 mg ซ้ำทุก 30 นาทีจนสงบ (max ~5 mg/วัน)\nCINV breakthrough (off-label): IV/กิน 0.5–1 mg ทุก 6 ชม. PRN\nPONV ป้องกัน (off-label): IV 0.5–2 mg ครั้งเดียวหลัง induction หรือท้ายผ่าตัด\nN/V ใน palliative/bowel obstruction: IV/SC/กิน 0.5–2 mg ทุก 6–8 ชม. (titrate ถึง 20 mg/วันถ้าจำเป็น)\nCannabinoid hyperemesis (off-label): IV 0.05–0.1 mg/kg ครั้งเดียว (max 5 mg)\nPostpartum psychosis (off-label): IM ตามระดับ 0.5–10 mg ซ้ำได้ทุก 30 นาที\nSchizophrenia decanoate (long-acting IM): เริ่ม 10–15 เท่าของโดสกินรายวัน (max initial 450 mg) ทุก ≤4 สัปดาห์\nหมายเหตุ: เสี่ยง EPS/NMS; ให้ benztropine/diphenhydramine ร่วมได้เพื่อกัน acute dystonia; bioavailability กิน ~60% ของ IM lactate"
   },
   {
     "id": 57,

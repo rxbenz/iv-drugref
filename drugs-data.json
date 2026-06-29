@@ -2176,7 +2176,8 @@
       "C&S"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "หมายเหตุ: IV (sodium) สำหรับ MDR/systemic ≠ Oral (tromethamine sachet 3 g สำหรับ cystitis)\nMDR bacterial infection: IV 12–24 g/วัน แบ่ง 2–4 dose (max 8 g/dose) — เป็น combination เสมอ\nUTI complicated/pyelonephritis: IV 6 g q8h ×5–14 วัน\nUncomplicated cystitis (รวมตั้งครรภ์/asymptomatic bacteriuria): Oral 3 g single dose\nCystitis recurrent prophylaxis: Oral 3 g ทุก 7–10 วัน\nProstatitis: Oral 3 g ทุก 48–72 ชม. (acute 2–4 สัปดาห์ | chronic ≥6 สัปดาห์)\n⚠️ Sodium สูง (~14 mEq/g) → ระวัง Na⁺ overload/HF + hypokalemia | monotherapy → ดื้อยาเร็ว (ใช้ร่วมเสมอ) | penetrate BBB ดี | ปรับตาม CrCl"
   },
   {
     "id": 50,

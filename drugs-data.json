@@ -4224,7 +4224,8 @@
       "Superinfection"
     ],
     "had": false,
-    "ref": "Lexicomp; Trissel's"
+    "ref": "Lexicomp; Trissel's; UpToDate",
+    "dosing": "หมายเหตุ: ขนาด = piperacillin + tazobactam รวม | max 18 g/วัน\nUsual: mild–mod 3.375 g q6h | severe 4.5 g q6h | Pseudomonas 4.5 g q6h\nExtended infusion (off-label): 4.5 g q6h over 3 ชม. (severe/MIC สูง/GFR>100) หรือ 3.375–4.5 g q8h over 4 ชม. | Continuous: 18 g/24 ชม. (loading 4.5 g over 30 นาทีถ้า sepsis)\nSepsis/septic shock: IV 4.5 g q6h (combination)\nBloodstream: community 3.375 g q6h | HAI/Pseudomonas 4.5 g q6h\nCAP/HAP/VAP: IV 4.5 g q6h (combination) — CAP ขั้นต่ำ 5 วัน, HAP/VAP ~7 วัน\nFebrile neutropenia (high-risk): IV 4.5 g q6–8h (Pseudomonas concern → q6h)\nIntra-abdominal/cholecystitis: IV 3.375 หรือ 4.5 g q6h\nDiabetic foot / SSTI: 3.375 g q6h หรือ 4.5 g q8h (Pseudomonas → 4.5 g q6h)\nCystic fibrosis exacerbation: IV 4.5 g q6h\nUTI complicated/pyelonephritis: 3.375 g q6h หรือ 4.5 g q8h ×5–7 วัน\n⚠️ extended infusion เพิ่ม T>MIC (นิยมใน critical/MIC สูง) | ปรับตาม CrCl | ระวัง hypokalemia + อาจรบกวนผล galactomannan"
   },
   {
     "id": 96,

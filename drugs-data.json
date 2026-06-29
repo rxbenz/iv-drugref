@@ -5340,7 +5340,8 @@
       "Signs of infection"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA CAP guidelines"
+    "ref": "Lexicomp; IDSA CAP guidelines; UpToDate",
+    "dosing": "หมายเหตุ: IV สำหรับ inpatient/severe; ส่วนใหญ่ใช้ oral | ไม่ต้องปรับ renal\nCAP (inpatient): IV/PO 500 mg OD ขั้นต่ำ 3 วัน (combination)\nCAP (outpatient): PO 500 mg วันที่ 1 → 250 mg OD ×4 วัน (หรือ 500 mg OD ×3 วัน)\nPID (mild–mod, alt): IV 500 mg OD ×1–2 วัน → PO 250 mg OD ครบ 7 วัน + metronidazole\nBabesiosis (severe): IV 500 mg OD + atovaquone → step-down oral; รวม 7–10 วัน\nCesarean prophylaxis (intrapartum/หลัง ROM): IV 500 mg single 1 ชม.ก่อน incision (+ standard preop abx)\nDiphtheria: IV/PO 500 mg OD ×14 วัน (+ antitoxin)\nBartonella/Actinomycosis (alt): IV/PO 500 mg OD\nOral (เทียบ): Chlamydia/NGU 1 g single | Gonorrhea (alt) 2 g + gentamicin | Typhoid 1 g OD ×5–7 วัน | GAS pharyngitis 500 mg OD ×3 วัน | MAC treatment 500–600 mg OD / prophylaxis 1.2 g/สัปดาห์ | Pertussis/COPD 500 mg วันที่ 1 → 250 mg ×4 วัน\n⚠️ QT prolongation | hepatotoxic (rare) | ไม่ต้องปรับ renal"
   },
   {
     "id": 121,
@@ -5383,7 +5384,8 @@
       "Eosinophil count"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA MRSA guidelines 2011"
+    "ref": "Lexicomp; IDSA MRSA guidelines 2011; UpToDate",
+    "dosing": "⚠️ ห้ามใช้รักษา pneumonia (ถูก pulmonary surfactant ทำลายฤทธิ์)\nMRSA bacteremia: IV 8–10 mg/kg OD (uncomplicated ≥14 วันจาก hemoculture แรกที่ลบ)\nMR-S. epidermidis: IV 6 mg/kg OD (บางราย 8–10)\nVRE (alt): IV 10–12 mg/kg OD (combination ถ้า critical/MIC สูง)\nEndocarditis (Staph): native 8–10 mg/kg OD ×4–6 สัปดาห์ | prosthetic 10 mg/kg OD ≥6 สัปดาห์ (combination) | VRE 10–12 mg/kg OD >6 สัปดาห์\nCNS (shunt/abscess/meningitis, staph): IV 6–10 mg/kg OD (+rifampin); enterococci 12 mg/kg; intraventricular 2–5 mg/วัน\nOsteomyelitis/PJI: IV 6–10 mg/kg OD ×6 สัปดาห์ (+rifampin ถ้ามี hardware)\nSeptic arthritis: IV 6 mg/kg OD ×3–4 สัปดาห์ (มี bacteremia → สูงขึ้น)\nDiabetic foot: IV 4–6 mg/kg OD (มี osteo → สูงขึ้น)\nSSTI (cellulitis/necrotizing): IV 4–6 mg/kg OD ×5–14 วัน\nSBP: IV 6 mg/kg OD ×5–7 วัน\n⚠️ ตรวจ CPK weekly (myopathy/rhabdomyolysis — หยุดยา statin ถ้าทำได้) | eosinophilic pneumonia (rare) | ปรับ interval เป็น q48h ถ้า CrCl<30"
   },
   {
     "id": 122,
@@ -5426,7 +5428,8 @@
       "Signs of infection"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA candidiasis guidelines 2016"
+    "ref": "Lexicomp; IDSA candidiasis guidelines 2016; UpToDate",
+    "dosing": "หมายเหตุ: echinocandin → ไม่ผ่าน CNS/ตา/ปัสสาวะ\nStandard: IV 70 mg loading วันที่ 1 → 50 mg OD\nCandidemia/invasive candidiasis: IV 70 mg → 50 mg OD ≥14 วันหลัง hemoculture แรกที่ลบ\nIntra-abdominal candidiasis / empiric (ICU): IV 70 mg → 50 mg OD\nInvasive aspergillosis (alt/combination): IV 70 mg → 50 mg OD (เพิ่ม 70 mg OD ถ้าตอบสนองไม่ดี)\nEsophageal candidiasis (refractory/severe): IV 70 mg → 50 mg OD ×14–28 วัน\nEndocarditis / cardiac device / septic thrombophlebitis: IV 150 mg OD (step-down azole เมื่อ stable)\nOsteoarticular: IV 70 mg → 50–70 mg OD ≥2 สัปดาห์ → oral azole (osteo 6–12 เดือน, septic arthritis ≥6 สัปดาห์)\nFebrile neutropenia (empiric antifungal): IV 70 mg → 50 mg OD\nProphylaxis (heme/HCT/SOT): IV 50 mg OD\n⚠️ ปรับใน moderate hepatic (Child-Pugh B → 35 mg OD) | ไม่ต้องปรับ renal | histamine reaction ถ้าให้เร็ว"
   },
   {
     "id": 123,
@@ -5468,7 +5471,8 @@
       "Signs of infusion reaction"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA candidiasis guidelines 2016"
+    "ref": "Lexicomp; IDSA candidiasis guidelines 2016; UpToDate",
+    "dosing": "หมายเหตุ: echinocandin → ไม่ผ่าน CNS/ตา/ปัสสาวะ | ไม่ต้องปรับ renal/hepatic\nStandard: IV 200 mg loading วันที่ 1 → 100 mg OD\nCandidemia/invasive candidiasis: IV 200 mg → 100 mg OD ≥14 วันหลัง hemoculture แรกที่ลบ\nIntra-abdominal candidiasis / empiric (ICU): IV 200 mg → 100 mg OD\nInvasive aspergillosis (alt/combination): IV 200 mg → 100 mg OD\nEsophageal candidiasis (refractory/severe): IV 200 mg OD ×14–28 วัน\nEndocarditis / cardiac device / septic thrombophlebitis: IV 200 mg OD (step-down azole เมื่อ stable)\nOsteoarticular: IV 200 mg → 100 mg OD ≥2 สัปดาห์ → oral azole (osteo 6–12 เดือน, septic arthritis ≥6 สัปดาห์)\nFebrile neutropenia (empiric antifungal) / prophylaxis (heme/HCT/SOT): IV 200 mg → 100 mg OD\n⚠️ infuse ≤1.1 mg/min (เร็ว → histamine reaction)"
   },
   {
     "id": 124,

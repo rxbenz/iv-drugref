@@ -1380,7 +1380,8 @@
       "Seizure activity"
     ],
     "had": true,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; UpToDate",
+    "dosing": "AVP deficiency / central DI: IV/SC 1 mcg ทุก 12 ชม. (รูปฉีด 4 mcg/mL); ปรับความถี่ตาม fluid balance/Na⁺ (อาจทุก 6–8 ชม.); เพิ่มเป็น 2 mcg ถ้าไม่ตอบสนอง\n  • แปลงจาก intranasal: ให้ 1/10 ของขนาดพ่นจมูก\nDeceased organ donor (off-label): IV เริ่ม 1–4 mcg ครั้งเดียว → maintenance 1–2 mcg ทุก 6 ชม. titrate\nHemophilia A (mild) / von Willebrand type 1: IV/SC 0.3 mcg/kg ครั้งเดียว (max ~20–30 mcg) ให้ 30–60 นาทีก่อนหัตถการ — ⚠ ไม่ได้ผลใน hemophilia B / vWD type 3; ห้ามใน type 2B\nUremic bleeding (off-label): IV/SC 0.3–0.4 mcg/kg ครั้งเดียว 30–60 นาทีก่อนหัตถการ\nIntracranial hemorrhage จาก antiplatelet (off-label): IV 0.4 mcg/kg ครั้งเดียว over 30 นาที (max ~40 mcg)\nกัน Na⁺ ขึ้นเร็วเกินใน severe hyponatremia (off-label, ร่วม hypertonic saline): IV/SC 1–2 mcg ทุก 6–8 ชม. (max 4 mcg q6–8h) จำกัดน้ำ\n⚠ Hyponatremia/water intoxication → จำกัดน้ำ, monitor Na⁺ ก่อน-หลัง; tachyphylaxis หลังให้ซ้ำ (มักจำกัด ≤3 วันใน bleeding)"
   },
   {
     "id": 32,

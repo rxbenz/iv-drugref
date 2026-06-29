@@ -4931,7 +4931,8 @@
       "Signs of infection"
     ],
     "had": true,
-    "ref": "Lexicomp; ILAE West syndrome guidelines"
+    "ref": "Lexicomp; ILAE West syndrome guidelines; UpToDate",
+    "dosing": "ACTH stimulation test (วินิจฉัย adrenal insufficiency):\n  • Standard-dose (แนะนำ): IM/IV 250 mcg ครั้งเดียว\n  • Low-dose (off-label, ใช้เมื่อยาขาด): IV 1 mcg ครั้งเดียว — ⚠ ต้องเจือจางเพิ่ม เสี่ยง false-positive จากความผิดพลาดในการเจือจาง/ยาติดสาย plastic\nAdrenal vein sampling ใน primary aldosteronism (off-label): IV infusion 50 mcg/ชม. เริ่ม 30 นาทีก่อนใส่สาย หรือ IV bolus 250 mcg\nInfantile spasms / West syndrome (therapeutic, Synacthen Depot): IM เริ่ม 0.25–0.5 mg วันละครั้ง/วันเว้นวัน (Depot 1 mg/วัน ×3 วัน → maintenance ปรับเฉพาะราย) คอร์ส 2–6 สัปดาห์แล้ว taper\n⚠ ต้อง taper (adrenal suppression); ระวัง hypertension, hyperglycemia, hypokalemia, immunosuppression, Cushing-like (ใช้นาน); monitor BP/BG/K⁺/growth ในทารก"
   },
   {
     "id": 111,

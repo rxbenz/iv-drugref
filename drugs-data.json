@@ -4403,7 +4403,8 @@
       "HR/ECG"
     ],
     "had": false,
-    "ref": "Lexicomp; NIH COVID guidelines"
+    "ref": "Lexicomp; NIH COVID guidelines; UpToDate",
+    "dosing": "หมายเหตุ: infuse over 30–120 นาที | เริ่มเร็วที่สุดหลังวินิจฉัย COVID-19\nHospitalized: IV 200 mg วันที่ 1 → 100 mg OD; รวม 5 วัน (หรือจน discharge) — ขยายถึง 10 วันถ้าอาการไม่ดีขึ้น | โดยทั่วไปให้ร่วม dexamethasone\nNonhospitalized (เสี่ยงเป็นรุนแรง): IV 200 mg วันที่ 1 → 100 mg OD วันที่ 2–3 (รวม 3 วัน); เริ่มภายใน 7 วันจากเริ่มมีอาการ\n⚠️ ไม่แนะนำถ้า eGFR<30 (สะสม cyclodextrin) | ตรวจ LFTs (หยุดถ้า ALT ≥5×ULN) | infusion reaction/bradycardia"
   },
   {
     "id": 100,
@@ -4672,7 +4673,8 @@
       "Peak/Trough (if IV)"
     ],
     "had": false,
-    "ref": "Lexicomp; WHO TB guidelines"
+    "ref": "Lexicomp; WHO TB guidelines; UpToDate",
+    "dosing": "หมายเหตุ: aminoglycoside | label เป็น IM (IV = off-label) | dose ตาม TBW; ถ้า >1.2×IBW ใช้ AdjBW (และ CG CrCl) | TDM แนะนำ\nUsual: IM/IV 15–30 mg/kg/วัน หรือ 1–2 g/วัน\nTB ดื้อยา: IM/IV 15 mg/kg OD หรือ 25 mg/kg 3×/สัปดาห์ (combination)\nBrucellosis: IM/IV 1 g OD + doxycycline (14–21 วันแรก)\nEndocarditis (Enterococcus, gentamicin-resistant): IM/IV 7.5 mg/kg q12h + ampicillin/penicillin ×4–6 สัปดาห์\nPlague: IM/IV 1 g q12h ×7–14 วัน\nTularemia: IM/IV 15 mg/kg q12h (max 2 g/วัน) ×10 วัน\nNTM/MAC pulmonary (adjunct): IM/IV 15 mg/kg OD หรือ 15–25 mg/kg 3×/สัปดาห์ (max 1 g)\n⚠️ Nephrotoxic + ototoxic (vestibular เด่น) | TDM | ปรับตาม CrCl"
   },
   {
     "id": 106,

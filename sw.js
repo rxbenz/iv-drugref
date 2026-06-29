@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.38.2
+// IV Drug Reference PWA — Service Worker v5.39.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -238,9 +238,20 @@
 //          event (only Allergy, already UPPER_CASE, matched). TYPE_TO_KEY now
 //          maps both casings to the same buckets, so TDM/Calc/Renal/Compat/Vanco
 //          usage is counted again (historical + live). Dashboard-only change.
+// v5.39.0: Sub-page discovery/promotion (most traffic lands on drug search then
+//          bounces). (1) Every drug card now shows a "เครื่องมือสำหรับยานี้" chip
+//          row → IV Compatibility (deep-links ?drug=<generic>, pre-fills), Renal
+//          dosing, Calculator, and TDM (only for vanco/phenytoin/AG/valproate/
+//          digoxin/tacrolimus/warfarin). No new tracking — each sub-page's
+//          trackPageView(from_page) already makes the cross-nav measurable.
+//          (2) Left nav rail is viewport-aware: open+push on desktop, but on
+//          phones it stays closed (content keeps full width) and opens as an
+//          overlay via a more prominent filled-sky edge toggle. (3) Fix PWA
+//          install banner wrapping ~1 char/line (fixed flex box had no width →
+//          shrink-to-fit collapsed the space-less Thai text); now width-capped.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.38.2';
+const CACHE_NAME = 'iv-drugref-v5.39.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

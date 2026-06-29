@@ -38,24 +38,34 @@ body.sc-open { padding-left: calc(var(--sc-rail) + env(safe-area-inset-left, 0px
 .sc-item:hover { background: #e0f2fe; color: #0ea5e9; }
 .sc-item.sc-active { background: #0ea5e9; color: #fff; }
 
+/* Edge toggle — filled sky so it reads as an obvious "open menu" affordance
+   (more prominent than the old white tab), larger tap target on touch. */
 .sc-toggle {
   position: fixed; left: 0; top: 50%; z-index: 1001; transform: translateY(-50%);
-  width: 26px; height: 58px; border: 1px solid #e2e8f0; border-left: none;
-  background: rgba(255,255,255,0.97); color: #0ea5e9;
-  box-shadow: 2px 0 10px rgba(0,0,0,.10); border-radius: 0 14px 14px 0;
-  cursor: pointer; font-size: 15px; font-weight: 800;
+  width: 30px; height: 66px; border: none;
+  background: #0ea5e9; color: #fff;
+  box-shadow: 2px 0 12px rgba(14,165,233,.35); border-radius: 0 16px 16px 0;
+  cursor: pointer; font-size: 16px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
-  transition: left .22s ease, opacity .3s; opacity: .92;
+  transition: left .22s ease, background .15s, opacity .3s; opacity: 1;
 }
-.sc-toggle:hover { opacity: 1; }
+.sc-toggle:hover { background: #0284c7; }
+[data-theme="dark"] .sc-toggle { background: #0ea5e9; color: #fff; box-shadow: 2px 0 12px rgba(14,165,233,.4); }
+[data-theme="dark"] .sc-toggle:hover { background: #38bdf8; }
 body.sc-open .sc-toggle { left: calc(var(--sc-rail) + env(safe-area-inset-left,0px)); }
+
+/* Phones: the open rail overlays content instead of pushing it, so the limited
+   content width is never squeezed (the rail floats above with its shadow). */
+@media (max-width: 767px) {
+  body.sc-open { padding-left: 0; }
+}
 
 /* Dark theme (mirrors .bottom-nav dark overrides) */
 [data-theme="dark"] .sc-rail { background: rgba(11,17,32,0.97); border-right-color: #1e3050; }
 [data-theme="dark"] .sc-item { color: #64748b; }
 [data-theme="dark"] .sc-item:hover { background: #16273f; color: #7dd3fc; }
 [data-theme="dark"] .sc-item.sc-active { background: #0ea5e9; color: #fff; }
-[data-theme="dark"] .sc-toggle { background: rgba(11,17,32,0.97); border-color: #1e3050; color: #7dd3fc; }
+/* .sc-toggle dark style is defined with the base .sc-toggle rule above (filled sky). */
 
 /* ---- Compact footer + info modal ---- */
 .sc-footer {
@@ -128,13 +138,17 @@ button.sc-install-item { background: none; border: 0; cursor: pointer; font-fami
 .sc-install-banner {
   position: fixed; left: 50%; bottom: 14px; transform: translate(-50%, 200%);
   z-index: 1090; display: flex; align-items: center; gap: 10px;
-  max-width: 92vw; padding: 10px 12px;
+  /* Needs an explicit width: a fixed flex box with only max-width shrinks to
+     fit its content, and because the Thai banner text has no inter-word spaces
+     the flex item (min-width:0) collapsed to ~1 character per line. A fixed
+     width gives the text a stable column to wrap inside. */
+  width: min(440px, 92vw); max-width: 92vw; padding: 11px 14px;
   background: #0f172a; color: #f1f5f9; border-radius: 12px;
   box-shadow: 0 8px 28px rgba(0,0,0,.35); transition: transform .35s ease;
-  font-size: 13px;
+  font-size: 13px; line-height: 1.45;
 }
 .sc-install-banner.scib-show { transform: translate(-50%, 0); }
-.scib-text { flex: 1 1 auto; min-width: 0; }
+.scib-text { flex: 1 1 auto; min-width: 0; line-height: 1.45; }
 .scib-go {
   flex: none; border: 0; cursor: pointer; font-family: inherit; font-weight: 700;
   background: #22d3ee; color: #0f172a; border-radius: 8px; padding: 7px 12px; font-size: 13px;

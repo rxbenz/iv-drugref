@@ -856,24 +856,63 @@ window.fetchDrugsFromServer = async function () {
       .catch(function () {});
   })();
 
+  // Cross-page "related tools" chip row appended to every drug card. Promotes the
+  // sub-pages (Compatibility/Renal/Calculator/TDM) from inside the main search flow
+  // — where almost all traffic lands — so users discover the modules instead of
+  // bouncing after a lookup. No bespoke tracking needed: each sub-page already
+  // calls IVDrugRef.trackPageView() on load, whose `from_page` resolves to
+  // 'drugref' via document.referrer, so cross-navigation from here is measurable
+  // on the dashboard's page_view stream. Visible labels are static (no drug-derived
+  // text injected) and the generic name is only used URL-encoded → no XSS surface.
+  function _tdmTargetFor(gl) {
+    if (gl.indexOf('vancomycin') >= 0) return { url: 'vanco-tdm.html', label: 'Vancomycin' };
+    var map = [['phenytoin', 'Phenytoin'], ['gentamicin', 'Aminoglycoside'],
+      ['amikacin', 'Aminoglycoside'], ['valproic', 'Valproate'], ['valproate', 'Valproate'],
+      ['digoxin', 'Digoxin'], ['tacrolimus', 'Tacrolimus'], ['warfarin', 'Warfarin']];
+    for (var i = 0; i < map.length; i++) if (gl.indexOf(map[i][0]) >= 0) return { url: 'tdm.html', label: map[i][1] };
+    return null;
+  }
+  function _chip(href, icon, label) {
+    return '<a class="card-tool-chip" href="' + href + '">'
+      + '<span class="ct-ic">' + icon + '</span>' + esc(label) + '</a>';
+  }
+  function _relatedTools(drug) {
+    if (!drug || !drug.generic) return '';
+    var enc = encodeURIComponent(drug.generic);
+    var gl = String(drug.generic).toLowerCase();
+    var chips = [
+      _chip('compatibility.html?drug=' + enc, '🧪', 'IV Compatibility'),
+      _chip('renal-dosing.html', '💧', 'ปรับขนาดตามไต'),
+      _chip('calculator.html', '🧮', 'คำนวณ (CrCl/หยด)')
+    ];
+    var tdm = _tdmTargetFor(gl);
+    if (tdm) chips.push(_chip(tdm.url, '🎯', 'TDM ' + tdm.label));
+    return '<div class="card-tools">'
+      + '<span class="card-tools-label">🔧 เครื่องมือสำหรับยานี้</span>'
+      + '<div class="card-tools-chips">' + chips.join('') + '</div></div>';
+  }
+
   var _doseOrig = renderDrugCard;
   renderDrugCard = function (drug) {
     var html = _doseOrig(drug);
+    var insert = '';
     var d = (drug && drug.dosing) || _doseLookup(drug);
     if (d) {
       // Per-drug verify link → UpToDate search (institution login). Lets the
       // pharmacist confirm the dose at source (anti-hallucination safeguard).
       var utdUrl = 'https://www.uptodate.com/contents/search?search='
         + encodeURIComponent(drug.generic || '');
-      var sec = '<div class="info-section">'
+      insert += '<div class="info-section">'
         + '<div class="section-title"><span class="icon">💊</span> ขนาดยา (Usual Dose)</div>'
         + renderDose(d)
         + '<a href="' + utdUrl + '" target="_blank" rel="noopener" '
         + 'style="font-size:11px;color:#2563eb;display:inline-block;margin-top:8px;text-decoration:none">'
         + '🔗 ตรวจสอบขนาดยา (UpToDate)</a>'
         + '</div>';
-      html = html.replace('<div class="card-body">', '<div class="card-body">' + sec);
     }
+    // Related-tools row shows on every card (clinical dose stays first).
+    insert += _relatedTools(drug);
+    if (insert) html = html.replace('<div class="card-body">', '<div class="card-body">' + insert);
     return html;
   };
 })();

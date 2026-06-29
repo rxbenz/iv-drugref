@@ -916,6 +916,47 @@
   color: var(--text-secondary);
 }
 
+/* Cross-page "related tools" chip row (promotes sub-pages from the search flow).
+   Compact + wraps so it stays mobile-friendly and never crowds clinical content. */
+.card-tools {
+  margin: 10px 0 2px;
+}
+.card-tools-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.card-tools-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.card-tool-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--blue-dim);
+  color: var(--accent-blue);
+  border: 1px solid var(--blue-glow);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .15s, transform .15s;
+}
+.card-tool-chip:hover {
+  background: var(--blue-glow);
+  transform: translateY(-1px);
+}
+.card-tool-chip .ct-ic {
+  font-size: 13px;
+  line-height: 1;
+}
+
 .compat-ok {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;

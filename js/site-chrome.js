@@ -353,7 +353,13 @@
 
     var stored;
     try { stored = sessionStorage.getItem('sc-open'); } catch (e) { stored = null; }
-    setOpen(stored !== 'closed');   // default OPEN on first entry
+    // First entry default is viewport-aware: OPEN on desktop (room to push content
+    // right), CLOSED on phones so the rail never eats the limited content width —
+    // there it opens as an overlay (see the max-width:767px CSS) via the prominent
+    // edge toggle. An explicit user choice (stored) always wins on later visits.
+    if (stored === 'open') setOpen(true);
+    else if (stored === 'closed') setOpen(false);
+    else setOpen(!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches));
   }
 
   if (document.readyState === 'loading') {

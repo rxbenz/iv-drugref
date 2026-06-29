@@ -3939,7 +3939,8 @@
       "Cardiovascular events"
     ],
     "had": false,
-    "ref": "Lexicomp"
+    "ref": "Lexicomp; Dynastat SmPC (EMC)",
+    "dosing": "ขนาดทั่วไป: 40 mg IV หรือ IM ครั้งแรก → ตามด้วย 20 mg หรือ 40 mg ทุก 6–12 ชม.ตามต้องการ (max 80 mg/วัน)\n⚠ ใช้ระยะสั้นที่สุด ขนาดต่ำสุดที่ได้ผล — ประสบการณ์ใช้ >3 วันมีจำกัด (เสี่ยง CV เพิ่มตามขนาด/ระยะเวลา)\nใช้ร่วม opioid ได้ (ขนาด parecoxib เท่าเดิม)\nผู้สูงอายุ (≥65 ปี): ปกติไม่ต้องปรับ; แต่ถ้าน้ำหนัก <50 kg เริ่มครึ่งขนาด + max 40 mg/วัน\nHepatic impairment: mild (Child-Pugh 5–6) ไม่ต้องปรับ; moderate (7–9) เริ่มครึ่งขนาด + max 40 mg/วัน; severe (≥10) → ห้ามใช้\nRenal impairment: mild–moderate (CrCl 30–80) ไม่ต้องปรับ; severe (CrCl <30) หรือเสี่ยงคั่งน้ำ → เริ่มขนาดต่ำสุด 20 mg + เฝ้าระวังไต\nไม่แนะนำในเด็ก <18 ปี (ไม่มีข้อมูล)\n⚠ COX-2 selective — ห้ามใน CABG, severe HF, active GI bleed; ระวัง sulfonamide allergy cross-reactivity (พบน้อย)"
   },
   {
     "id": 89,

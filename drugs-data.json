@@ -6281,7 +6281,8 @@
       "Pulmonary sx"
     ],
     "had": false,
-    "ref": "Lexicomp; NCCN"
+    "ref": "Lexicomp; NCCN; UpToDate",
+    "dosing": "หมายเหตุ: anti-HER2 | ต้องยืนยัน HER2 overexpression/amplification ก่อน | ⚠️ ห้ามสับสน/แทนกับ ado-trastuzumab emtansine (T-DM1), trastuzumab deruxtecan (T-DXd), pertuzumab/trastuzumab/hyaluronidase — คนละยา\nมี 2 schedule หลัก:\nq3 สัปดาห์: loading 8 mg/kg (over 90 นาที) → maintenance 6 mg/kg (over 30–90 นาที)\nWeekly: loading 4 mg/kg → maintenance 2 mg/kg\nBreast adjuvant (HER2+): loading 4 → 2 mg/kg weekly ระหว่าง taxane → แล้ว 6 mg/kg q3 สัปดาห์ จนครบ 52 สัปดาห์ (1 ปี; ห้ามเกิน) | หรือหลัง anthracycline: 8 → 6 mg/kg q3 สัปดาห์\nBreast metastatic: 8 → 6 mg/kg q3 สัปดาห์ (หรือ 4 → 2 weekly) ± pertuzumab/taxane จน progression\nGastric/GEJ (HER2+): 8 → 6 mg/kg q3 สัปดาห์ + chemo\n⚠️ Cardiotoxicity → ตรวจ LVEF baseline + q3 เดือน, hold ถ้า LVEF drop ≥16% | ห้ามให้ร่วม anthracycline | infusion reaction (dose แรก) | pulmonary toxicity | จัดการ cardiac risk factors ก่อนเริ่ม"
   },
   {
     "id": 142,
@@ -7218,7 +7219,8 @@
       "Infusion reactions"
     ],
     "had": false,
-    "ref": "Lexicomp; AAN MS guidelines; FDA"
+    "ref": "Lexicomp; AAN MS guidelines; FDA; UpToDate",
+    "dosing": "หมายเหตุ: anti-α4 integrin | ⚠️ PML risk (JC virus) — ตรวจ anti-JCV antibody ก่อน + q6 เดือน; เสี่ยงสูงถ้า index >0.9–1.5, ใช้ >24 เดือน, เคยได้ immunosuppressant | TOUCH program\nMultiple sclerosis (relapsing): IV 300 mg over 1 ชม. q4 สัปดาห์ — แนะนำจำกัด ~24 เดือนถ้า JCV+ | extended interval (q5–8 สัปดาห์) อาจลด PML risk ประสิทธิภาพใกล้เคียง\nCrohn disease (alt): IV 300 mg q4 สัปดาห์; หยุดถ้าไม่ตอบสนองใน 12 สัปดาห์ หรือ taper steroid ไม่ได้ใน 6 เดือน\n⚠️ PML (อาการ neuro ใหม่ → หยุด + MRI) | infusion/hypersensitivity reaction | hepatotoxicity | rebound disease ถ้าหยุดยา | ห้ามใช้ร่วม immunosuppressant อื่น"
   },
   {
     "id": 163,
@@ -7263,7 +7265,8 @@
       "Infusion reactions"
     ],
     "had": false,
-    "ref": "Lexicomp; AAN NMOSD 2020; FDA"
+    "ref": "Lexicomp; AAN NMOSD 2020; FDA; UpToDate",
+    "dosing": "⚠️⚠️ Anti-C5 → เสี่ยง meningococcal infection: vaccinate MenACWY + MenB ≥2 สัปดาห์ก่อนเริ่ม (ถ้าเร่งด่วน → ให้ antibiotic prophylaxis + vaccine เร็วที่สุด) + พิจารณา antibiotic prophylaxis ตลอดการรักษา\n— Neurology (AChR+/AQP4+) —\nMyasthenia gravis (refractory gMG) / NMOSD (AQP4+): induction IV 900 mg weekly ×4 dose → maintenance 1.2 g ที่ week 5 → 1.2 g q2 สัปดาห์\n— Hematology —\naHUS: induction 900 mg weekly ×4 → 1.2 g week 5 → 1.2 g q2 สัปดาห์\nPNH: induction 600 mg weekly ×4 → 900 mg week 5 → 900 mg q2 สัปดาห์\nSupplemental dosing ถ้าได้ plasmapheresis/PE (300–600 mg หลังทำ) / FFP / IVIG (เพิ่ม 300–600 mg)\n⚠️ Meningococcal sepsis (เฝ้าระวังอาการ meningitis) | infusion reaction | ให้ตรงเวลา ±2 วัน | ราคาสูงมาก"
   },
   {
     "id": 164,
@@ -7308,7 +7311,8 @@
       "Infection signs"
     ],
     "had": false,
-    "ref": "Lexicomp; ACR RA; AGA IBD guidelines"
+    "ref": "Lexicomp; ACR RA; AGA IBD guidelines; UpToDate",
+    "dosing": "หมายเหตุ: anti-TNF — ฉีด SUBQ (ใต้ผิวหนัง) ไม่ใช่ IV | screen TB + HBV ก่อนเริ่ม | live vaccine ห้ามใน 4 สัปดาห์ก่อนเริ่ม\nRA / Psoriatic arthritis / Axial spondyloarthritis (AS): SUBQ 40 mg q2 สัปดาห์ (RA inadequate response → 40 mg weekly หรือ 80 mg q2 สัปดาห์)\nPlaque psoriasis / Uveitis (noninfectious): SUBQ 80 mg dose แรก → 40 mg q2 สัปดาห์ (เริ่ม 1 สัปดาห์หลัง); ไม่ตอบสนอง → 40 mg weekly\nCrohn / Ulcerative colitis: induction 160 mg (วันเดียวหรือ 2 วัน) → 80 mg day 15 → maintenance 40 mg q2 สัปดาห์ (day 29); escalate 40 mg weekly/80 mg q2 สัปดาห์\nHidradenitis suppurativa: 160 mg → 80 mg day 15 → 40 mg weekly (day 29)\nTakayasu/sarcoidosis (off-label): 40 mg q1–2 สัปดาห์\n⚠️ Serious infection/TB reactivation | HBV reactivation | lymphoma/malignancy | demyelinating disease (ห้ามใน MS) | CHF NYHA III–IV | lupus-like syndrome | injection site reaction"
   },
   {
     "id": 165,

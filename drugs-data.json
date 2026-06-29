@@ -5297,7 +5297,8 @@
       "CSF (meningitis)"
     ],
     "had": false,
-    "ref": "Lexicomp; AAP Red Book"
+    "ref": "Lexicomp; AAP Red Book; UpToDate",
+    "dosing": "Usual: IV 1–2 g q6–8h | severe: 2 g q4h | max 12 g/วัน\nMeningitis: IV 2 g q4–6h ×7–21 วัน\nBrain abscess: IV 2 g q4–6h + metronidazole\nBloodstream: IV 2 g q6–8h ×7–14 วัน\nCAP (inpatient, no Pseudomonas): IV 1–2 g q8h (combination) ขั้นต่ำ 5 วัน\nIntra-abdominal/cholecystitis: IV 2 g q8h (+metronidazole)\nSBP: IV 2 g q8h ×5–7 วัน\nNecrotizing SSTI: IV 2 g q6h + metronidazole/clindamycin\nSeptic arthritis: IV 2 g q8h ×3–4 สัปดาห์\nLyme (carditis/neuro): IV 2 g q8h ×14–28 วัน\nSalmonella/enteric fever: IV 1–2 g q6–8h ×10–14 วัน\nGonorrhea (เฉพาะถ้าไม่มี ceftriaxone): IM 500 mg single | disseminated 1 g q8h\nSurgical prophylaxis: IV 1 g (2 g ถ้า ≥120 kg) ก่อน incision; ซ้ำที่ 3 ชม.ถ้าผ่าตัดนาน\n⚠️ ปรับตาม CrCl (severe <20) | cross-allergy Penicillin"
   },
   {
     "id": 120,

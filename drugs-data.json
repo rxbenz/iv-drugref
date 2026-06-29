@@ -2313,7 +2313,8 @@
       "Vestibular fn"
     ],
     "had": false,
-    "ref": "Lexicomp; IDSA"
+    "ref": "Lexicomp; IDSA; UpToDate",
+    "dosing": "หมายเหตุ: dose ตาม ABW; ถ้า >1.2×IBW ใช้ AdjBW = IBW + 0.4×(TBW–IBW)\nConventional: IV/IM 3–5 mg/kg/วัน แบ่ง q8h (loading 2.5–3) → peak 7–10, trough <2 (ideal <1)\nHigh-dose extended-interval (OD): IV 5–7 mg/kg OD → peak ~15–20, trough ≤0.5; ระวังถ้า CrCl<30\nSynergy (gram-positive, non-CNS): 3 mg/kg/วัน แบ่ง 1–3 dose → peak 3–4, trough <1\nSepsis/bacteremia: IV 5–7 mg/kg OD (adjunct, ไม่ใช้เดี่ยว)\nEndocarditis: Enterococcus 1 mg/kg q8h หรือ 3 mg/kg OD | VGS/Staph prosthetic 3 mg/kg/วัน (2 สัปดาห์แรก) — combination\nMeningitis (Listeria/Enterococcus): IV 5 mg/kg/วัน แบ่ง 3 dose + ampicillin\nIntraventricular (shunt infection, adjunct): 4–8 mg/วัน (preservative-free)\nUTI: cystitis 5 mg/kg single | complicated 5–7 mg/kg → ปรับตาม PK ×5–7 วัน\nGonorrhea (alt): IM 240 mg single + azithromycin 2 g | PID severe: 3–5 mg/kg OD\nSurgical prophylaxis: IV 5 mg/kg single ก่อน incision\nTularemia: 6 mg/kg OD ×10 วัน | Plague: 5 mg/kg OD ×7–14 วัน\n⚠️ ไม่แนะนำสำหรับ Pseudomonas (target ไม่พอ) | TDM จำเป็น | nephro/ototoxic | ปรับตาม CrCl"
   },
   {
     "id": 53,

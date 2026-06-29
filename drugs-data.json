@@ -4885,7 +4885,8 @@
       "Fibrinogen, CBC, PT/aPTT"
     ],
     "had": true,
-    "ref": "Lexicomp; AHA/ASA; TASTE trial"
+    "ref": "Lexicomp; AHA/ASA; TASTE trial; UpToDate",
+    "dosing": "Acute ischemic stroke: IV single bolus 0.25 mg/kg (max 25 mg) over 5 วินาที ภายใน 3 (–4.5) ชม.จากเริ่มอาการ\n  • ตามน้ำหนัก: <60 kg→15 mg, 60–70→17.5, 70–80→20, 80–90→22.5, ≥90→25 mg\n  • รอ 24 ชม.ก่อนเริ่ม antiplatelet/anticoagulant + CT ยืนยันไม่มีเลือดออก\nSTEMI: IV single bolus over 5 วินาที ตามน้ำหนัก <60→30 mg, 60–70→35, 70–80→40, 80–90→45, ≥90→50 mg (ร่วม ASA + clopidogrel + anticoagulant); ให้ภายใน 30 นาทีจาก first medical contact ถ้าทำ PCI ไม่ได้ใน 120 นาที\nPulmonary embolism (intermediate-high/massive, off-label): IV single bolus over 5–10 วินาที ขนาดตามน้ำหนักเท่า STEMI (<60→30 mg ... ≥90→50 mg); ตามด้วย parenteral anticoagulation เมื่อ aPTT <2× ULN\n⚠ คนละขนาดกัน — stroke ใช้ 0.25 mg/kg (max 25), แต่ STEMI/PE ใช้ band 30–50 mg ตามน้ำหนัก\n⚠ ห้าม heparin/antiplatelet 24 ชม.ใน stroke; ข้อห้ามเหมือน alteplase; dedicated line, flush NSS ก่อน-หลัง"
   },
   {
     "id": 110,

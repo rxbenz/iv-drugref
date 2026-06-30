@@ -380,6 +380,93 @@
       ]
     }
   }));
+  // ---- High-use IV antibiotics + paracetamol (standard adult doses, normal renal) ----
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'cefepime', name: 'Cefepime', sub: 'Inj. 1 g, 2 g', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl แยก (CrCl <60 ลดขนาด/ความถี่). เด็กใช้ mg/kg.',
+      indications: [
+        { label: 'ทั่วไป', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q12h' },
+        { label: 'รุนแรง / Febrile neutropenia / Pseudomonas', basis: 'flat', dose: 2, unit: 'g', interval: 'q8h', renalAdjust: 'ปรับตาม CrCl <60' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'meropenem', name: 'Meropenem', sub: 'Inj. 1 g', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl แยก (CrCl <50). เด็กใช้ mg/kg.',
+      indications: [
+        { label: 'ทั่วไป', basis: 'flat', dose: 1, unit: 'g', interval: 'q8h', note: '⚠ ห้ามใช้ร่วม valproate (ลดระดับ VPA)' },
+        { label: 'Meningitis / รุนแรง / Pseudomonas', basis: 'flat', dose: 2, unit: 'g', interval: 'q8h', renalAdjust: 'ปรับตาม CrCl <50' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'piptazo', name: 'Piperacillin/Tazobactam', sub: 'Inj. 4.5 g', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดคิดเป็น pip/tazo รวม (4.5 g = 4 g + 0.5 g), ผู้ใหญ่ ไตปกติ. ปรับตาม CrCl แยก. พิจารณา extended infusion 4 ชม. ในเชื้อดื้อ.',
+      indications: [
+        { label: 'ทั่วไป', basis: 'flat', dose: 4.5, unit: 'g', interval: 'q8h' },
+        { label: 'Pseudomonas / รุนแรง', basis: 'flat', dose: 4.5, unit: 'g', interval: 'q6h', renalAdjust: 'ปรับตาม CrCl <40' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'cefazolin', name: 'Cefazolin', sub: 'Inj. 1 g', badges: [],
+    doseRule: {
+      drugRef: 'Sanford Guide; ASHP surgical prophylaxis',
+      assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. Surgical prophylaxis ให้ภายใน 60 นาทีก่อนผ่า; ≥120 kg → 3 g; redose q4h ถ้าผ่าตัดนาน.',
+      indications: [
+        { label: 'ทั่วไป', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q8h' },
+        { label: 'Surgical prophylaxis', basis: 'flat', dose: 2, unit: 'g', interval: 'ก่อนผ่าตัด (single)', note: '≥120 kg → 3 g; redose q4h ถ้าผ่านาน' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ceftazidime', name: 'Ceftazidime', sub: 'Inj. 1 g, 2 g', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl แยก (CrCl <50). เด็กใช้ mg/kg.',
+      indications: [
+        { label: 'ทั่วไป / Pseudomonas', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q8h', renalAdjust: 'ปรับตาม CrCl <50' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'metronidazole', name: 'Metronidazole', sub: 'Inj. 500 mg/100 mL', badges: [],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่. IV ↔ กิน ขนาดเท่ากัน (1:1). C. difficile รุนแรงใช้ร่วม vancomycin กิน.',
+      indications: [
+        { label: 'Anaerobic infection', basis: 'flat', dose: 500, unit: 'mg', interval: 'q8h', maxPerDay: 4000 }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'daptomycin', name: 'Daptomycin', sub: 'Inj. 350 mg, 500 mg', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Lexicomp; IDSA MRSA guidelines',
+      assumptions: 'ใช้ actual body weight. CrCl <30 หรือฟอกไต → ทุก 48 ชม. ⚠ ห้ามใช้รักษา pneumonia (surfactant ยับยั้งยา). Monitor CPK สัปดาห์ละครั้ง.',
+      indications: [
+        { label: 'Bacteremia / endocarditis (MRSA)', basis: 'weight', weightBasis: 'actual', dose: 6, unit: 'mg/kg', interval: 'q24h', renalAdjust: 'CrCl <30 → q48h' },
+        { label: 'Skin/soft tissue (SSTI)', basis: 'weight', weightBasis: 'actual', dose: 4, unit: 'mg/kg', interval: 'q24h', renalAdjust: 'CrCl <30 → q48h' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'paracetamol-iv', name: 'Paracetamol IV', sub: 'Inj. 10 mg/mL (1 g/100 mL)', badges: [],
+    doseRule: {
+      drugRef: 'Lexicomp; UpToDate',
+      assumptions: 'รวมขนาดจากทุกแหล่ง (กิน/ฉีด/ยาผสม) ห้ามเกิน 4 g/วัน. ผู้มีปัจจัยเสี่ยงตับ (สุรา/ทุพโภชนาการ) ลด ≤2-3 g/วัน. IV infusion over 15 นาที.',
+      indications: [
+        { label: 'น้ำหนัก ≥50 kg', basis: 'flat', dose: 1, unit: 'g', interval: 'q6h', maxPerDay: 4000 },
+        { label: 'น้ำหนัก <50 kg', basis: 'weight', weightBasis: 'actual', dose: 15, unit: 'mg/kg', interval: 'q6h', maxPerDose: 750, note: 'max 75 mg/kg/วัน (≤3.75 g)' }
+      ]
+    }
+  }));
 
   // ====== CrCl Calculator ======
   // Patient data, CrCl, IBW/ABW consolidated into IVDrugRef.getPatientFromForm()

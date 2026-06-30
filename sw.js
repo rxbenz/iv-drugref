@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.41.0
+// IV Drug Reference PWA — Service Worker v5.42.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -276,9 +276,20 @@
 //          q8h); their drug-card chip deep-links to the calculator. Golden-verified
 //          (70 kg → enox 70 mg, acyclovir 700 mg). Next: author doseRule for more
 //          weight-based drugs (manual pharmacist curation, verify at source).
+// v5.42.0: Live dose calculator — Phase 1 batch 2. (1) UX: patient height is now
+//          OPTIONAL for adults (Cockcroft-Gault falls back to actual body weight;
+//          IBW/ABW/BSA paths already guard) — it stays REQUIRED for pediatrics
+//          (Schwartz eGFR needs it). Removes the "must enter height" friction for
+//          drugs that don't use it. (2) 8 more structured-doseRule drugs (standard
+//          adult IV, sourced): Cefepime, Meropenem, Piperacillin/tazobactam,
+//          Cefazolin, Ceftazidime, Metronidazole, Daptomycin, Paracetamol IV —
+//          each with the drug-card "คำนวณขนาดยา" deep-link. Combination products
+//          (Ceftazidime/Avibactam, non-pip tazobactam combos) are excluded from
+//          the single-agent calc chip so they don't pull up the wrong calculator.
+//          Golden-verified (70 kg → daptomycin 420 mg, pip/tazo 4.5 g q8h, etc.).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.41.0';
+const CACHE_NAME = 'iv-drugref-v5.42.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

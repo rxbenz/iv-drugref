@@ -872,12 +872,18 @@ window.fetchDrugsFromServer = async function () {
   // with ?drug=<id> so the calculator pre-selects the drug (Phase 0 — surfaces the
   // existing per-patient engine from the search flow without touching dosing data).
   function _calcIdFor(gl) {
+    // Combination products (e.g. Ceftazidime/Avibactam) dose differently from the
+    // single agent — don't let the base-drug keyword pull up the wrong calculator.
+    if (gl.indexOf('avibactam') >= 0 || (gl.indexOf('tazobactam') >= 0 && gl.indexOf('piperacillin') < 0)) return null;
     var map = [['vancomycin', 'vancomycin'], ['amikacin', 'amikacin'], ['gentamicin', 'gentamicin'],
       ['colistimethate', 'colistin'], ['colistin', 'colistin'], ['phenytoin', 'phenytoin'],
       ['valproate', 'valproate'], ['valproic', 'valproate'], ['levetiracetam', 'levetiracetam'],
       ['alteplase', 'alteplase'], ['tenecteplase', 'tenecteplase'],
       // Phase 1 structured-doseRule drugs
-      ['enoxaparin', 'enoxaparin'], ['ceftriaxone', 'ceftriaxone'], ['acyclovir', 'acyclovir-hsv']];
+      ['enoxaparin', 'enoxaparin'], ['ceftriaxone', 'ceftriaxone'], ['acyclovir', 'acyclovir-hsv'],
+      ['cefepime', 'cefepime'], ['meropenem', 'meropenem'], ['piperacillin', 'piptazo'],
+      ['cefazolin', 'cefazolin'], ['ceftazidime', 'ceftazidime'], ['metronidazole', 'metronidazole'],
+      ['daptomycin', 'daptomycin'], ['paracetamol', 'paracetamol-iv']];
     for (var i = 0; i < map.length; i++) if (gl.indexOf(map[i][0]) >= 0) return map[i][1];
     return null;
   }

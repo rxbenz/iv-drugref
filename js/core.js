@@ -380,8 +380,16 @@ var IVDrugRef = (function() {
     // Validate the RAW values BEFORE applying display defaults, so a cleared
     // field can no longer be masked by a phantom default. Callers gate on
     // validation.allValid, so the defaults below never reach a shown result. [C1]
+    //
+    // Height is OPTIONAL for adults: Cockcroft-Gault falls back to actual body
+    // weight when height is absent, and every IBW/ABW/BSA-based path guards for a
+    // missing height. It stays REQUIRED for pediatrics, where Schwartz eGFR needs
+    // it. So a blank height only skips validation when the patient is a valid
+    // adult; left as NaN (→ error) for peds or unknown age. [height-optional]
+    const _adult = !isNaN(ageRaw) && ageRaw >= 18;
+    const htForValidation = (_adult && isNaN(htRaw)) ? undefined : htRaw;
     const validation = validatePatientInput(
-      { age: ageRaw, wt: wtRaw, scr: scrRaw, ht: htRaw },
+      { age: ageRaw, wt: wtRaw, scr: scrRaw, ht: htForValidation },
       { age: ids.age, wt: ids.wt, scr: ids.scr, ht: ids.ht }
     );
 
@@ -1127,7 +1135,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.41.0';
+  const VERSION = '5.42.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

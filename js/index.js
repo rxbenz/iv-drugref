@@ -874,7 +874,10 @@ window.fetchDrugsFromServer = async function () {
   function _calcIdFor(gl) {
     // Combination products (e.g. Ceftazidime/Avibactam) dose differently from the
     // single agent — don't let the base-drug keyword pull up the wrong calculator.
-    if (gl.indexOf('avibactam') >= 0 || (gl.indexOf('tazobactam') >= 0 && gl.indexOf('piperacillin') < 0)) return null;
+    if (gl.indexOf('avibactam') >= 0 || gl.indexOf('sulbactam') >= 0
+      || (gl.indexOf('tazobactam') >= 0 && gl.indexOf('piperacillin') < 0)) return null;
+    // NOTE: order matters — 'liposomal amphotericin' must precede 'amphotericin'
+    // so the two AmB forms (very different mg/kg) never get cross-mapped.
     var map = [['vancomycin', 'vancomycin'], ['amikacin', 'amikacin'], ['gentamicin', 'gentamicin'],
       ['colistimethate', 'colistin'], ['colistin', 'colistin'], ['phenytoin', 'phenytoin'],
       ['valproate', 'valproate'], ['valproic', 'valproate'], ['levetiracetam', 'levetiracetam'],
@@ -883,7 +886,12 @@ window.fetchDrugsFromServer = async function () {
       ['enoxaparin', 'enoxaparin'], ['ceftriaxone', 'ceftriaxone'], ['acyclovir', 'acyclovir-hsv'],
       ['cefepime', 'cefepime'], ['meropenem', 'meropenem'], ['piperacillin', 'piptazo'],
       ['cefazolin', 'cefazolin'], ['ceftazidime', 'ceftazidime'], ['metronidazole', 'metronidazole'],
-      ['daptomycin', 'daptomycin'], ['paracetamol', 'paracetamol-iv']];
+      ['daptomycin', 'daptomycin'], ['paracetamol', 'paracetamol-iv'],
+      // Batch 3
+      ['ampicillin', 'ampicillin'], ['clindamycin', 'clindamycin'], ['levofloxacin', 'levofloxacin'],
+      ['ciprofloxacin', 'ciprofloxacin'], ['azithromycin', 'azithromycin'], ['fluconazole', 'fluconazole'],
+      ['ganciclovir', 'ganciclovir'], ['ertapenem', 'ertapenem'], ['linezolid', 'linezolid'],
+      ['liposomal amphotericin', 'ampho-liposomal'], ['amphotericin', 'ampho-conventional']];
     for (var i = 0; i < map.length; i++) if (gl.indexOf(map[i][0]) >= 0) return map[i][1];
     return null;
   }

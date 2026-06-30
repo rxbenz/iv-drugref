@@ -467,6 +467,122 @@
       ]
     }
   }));
+  // ---- Batch 3: more high-use IV anti-infectives (standard adult doses, normal renal) ----
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ampicillin', name: 'Ampicillin', sub: 'Inj. 1 g, 2 g', badges: [],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาด ampicillin เดี่ยว ผู้ใหญ่ ไตปกติ (ต่างจาก ampicillin/sulbactam). ปรับตาม CrCl แยก. เด็กใช้ mg/kg.',
+      indications: [
+        { label: 'ทั่วไป', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q6h' },
+        { label: 'Meningitis / Listeria', basis: 'flat', dose: 2, unit: 'g', interval: 'q4h', maxPerDay: 12000 }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'clindamycin', name: 'Clindamycin', sub: 'Inj. 300 mg, 600 mg', badges: [],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่. ไม่ต้องปรับตามไต. IV ↔ กิน ต่างขนาด. ใช้ขนาดสูง (900 mg) ใน toxin-mediated (necrotizing fasciitis).',
+      indications: [
+        { label: 'Serious infection', basis: 'flat', dose: [600, 900], unit: 'mg', interval: 'q8h' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'levofloxacin', name: 'Levofloxacin', sub: 'Inj. 500 mg, 750 mg', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. IV ↔ กิน 1:1. ปรับตาม CrCl <50. ⚠ QT prolongation, tendon rupture.',
+      indications: [
+        { label: 'ทั่วไป (CAP/complicated)', basis: 'flat', dose: 750, unit: 'mg', interval: 'q24h', renalAdjust: 'CrCl <50 ปรับขนาด/ความถี่' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ciprofloxacin', name: 'Ciprofloxacin', sub: 'Inj. 200 mg, 400 mg', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl <30. ⚠ QT prolongation, tendon rupture; bioavailability กิน สูง (PO 750 mg ≈ IV 400 mg).',
+      indications: [
+        { label: 'ทั่วไป', basis: 'flat', dose: 400, unit: 'mg', interval: 'q12h' },
+        { label: 'รุนแรง / Pseudomonas', basis: 'flat', dose: 400, unit: 'mg', interval: 'q8h', renalAdjust: 'CrCl <30 ปรับ' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'azithromycin', name: 'Azithromycin IV', sub: 'Inj. 500 mg', badges: [],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่. ไม่ต้องปรับตามไต. ⚠ QT prolongation. เปลี่ยนเป็นกินเมื่ออาการดีขึ้น.',
+      indications: [
+        { label: 'ทั่วไป (CAP/severe)', basis: 'flat', dose: 500, unit: 'mg', interval: 'q24h' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'fluconazole', name: 'Fluconazole', sub: 'Inj. 200 mg, 400 mg', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'IDSA Candidiasis Guidelines; Lexicomp',
+      assumptions: 'ใช้ actual body weight (candidemia). IV ↔ กิน 1:1. CrCl <50 → ลด maintenance ครึ่งหนึ่ง (loading เท่าเดิม).',
+      indications: [
+        { label: 'Candidemia — loading (ครั้งเดียว)', basis: 'weight', weightBasis: 'actual', dose: 12, unit: 'mg/kg', interval: 'loading (single)', maxPerDose: 800 },
+        { label: 'Candidemia — maintenance', basis: 'weight', weightBasis: 'actual', dose: 6, unit: 'mg/kg', interval: 'q24h', maxPerDose: 400, renalAdjust: 'CrCl <50 → ครึ่งขนาด maintenance' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ganciclovir', name: 'Ganciclovir', sub: 'Inj. 500 mg', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Lexicomp; AST/transplant CMV guidelines',
+      assumptions: 'ใช้ actual body weight (คนอ้วนพิจารณา IBW). ปรับตาม CrCl แยก. infuse ≥1 ชม. ⚠ Myelosuppression (monitor CBC), teratogenic.',
+      indications: [
+        { label: 'Induction (CMV)', basis: 'weight', weightBasis: 'actual', dose: 5, unit: 'mg/kg', interval: 'q12h', renalAdjust: 'ปรับตาม CrCl <70' },
+        { label: 'Maintenance', basis: 'weight', weightBasis: 'actual', dose: 5, unit: 'mg/kg', interval: 'q24h', renalAdjust: 'ปรับตาม CrCl <70' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ertapenem', name: 'Ertapenem', sub: 'Inj. 1 g', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. CrCl <30 → 500 mg q24h. ⚠ ไม่ครอบคลุม Pseudomonas/Acinetobacter.',
+      indications: [
+        { label: 'ทั่วไป', basis: 'flat', dose: 1, unit: 'g', interval: 'q24h', renalAdjust: 'CrCl <30 → 500 mg q24h' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'linezolid', name: 'Linezolid', sub: 'Inj. 600 mg/300 mL', badges: [],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาดผู้ใหญ่. ไม่ต้องปรับตามไต. IV ↔ กิน 1:1. ⚠ Myelosuppression ถ้าใช้ >14 วัน (monitor CBC), serotonin syndrome (+ SSRI).',
+      indications: [
+        { label: 'MRSA / VRE', basis: 'flat', dose: 600, unit: 'mg', interval: 'q12h' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ampho-liposomal', name: 'Liposomal Amphotericin B', sub: 'AmBisome — ⚠ คนละขนาดกับ conventional', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'IDSA Aspergillosis/Mucormycosis Guidelines; Lexicomp',
+      assumptions: 'ใช้ actual body weight. ⚠⚠ ขนาดสูงกว่า conventional AmB หลายเท่า — อย่าสับสน! Infuse over ~2 ชม.; premedicate; monitor K⁺/Mg²⁺/SCr.',
+      indications: [
+        { label: 'Invasive fungal (Aspergillus/Candida)', basis: 'weight', weightBasis: 'actual', dose: [3, 5], unit: 'mg/kg', interval: 'q24h' },
+        { label: 'Mucormycosis / CNS', basis: 'weight', weightBasis: 'actual', dose: [5, 10], unit: 'mg/kg', interval: 'q24h' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ampho-conventional', name: 'Amphotericin B (conventional)', sub: 'Deoxycholate — ⚠ คนละขนาดกับ liposomal', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Lexicomp; IDSA antifungal guidelines',
+      assumptions: 'ใช้ actual body weight. ⚠⚠ ขนาด 0.5–1 mg/kg/วัน เท่านั้น — ห้ามใช้ขนาด liposomal (3–5 mg/kg)! Test dose ก่อน; premedicate; nephrotoxic มาก (hydrate, monitor SCr/K⁺/Mg²⁺); infuse over 2–6 ชม.',
+      indications: [
+        { label: 'Invasive fungal', basis: 'weight', weightBasis: 'actual', dose: [0.5, 1], unit: 'mg/kg', interval: 'q24h', note: 'max ~1.5 mg/kg/วัน' }
+      ]
+    }
+  }));
 
   // ====== CrCl Calculator ======
   // Patient data, CrCl, IBW/ABW consolidated into IVDrugRef.getPatientFromForm()

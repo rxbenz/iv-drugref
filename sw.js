@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.42.0
+// IV Drug Reference PWA — Service Worker v5.43.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -287,9 +287,20 @@
 //          (Ceftazidime/Avibactam, non-pip tazobactam combos) are excluded from
 //          the single-agent calc chip so they don't pull up the wrong calculator.
 //          Golden-verified (70 kg → daptomycin 420 mg, pip/tazo 4.5 g q8h, etc.).
+// v5.43.0: Live dose calculator — Phase 1 batch 3. 11 more structured-doseRule
+//          drugs (standard adult IV, sourced): Ampicillin, Clindamycin,
+//          Levofloxacin, Ciprofloxacin, Azithromycin, Fluconazole (12→6 mg/kg),
+//          Ganciclovir (5 mg/kg q12h), Ertapenem, Linezolid, and BOTH amphotericin
+//          B forms as SEPARATE calculators — Liposomal (3–5 mg/kg) vs conventional
+//          (0.5–1 mg/kg) — since conflating them is a serious dosing error.
+//          _calcIdFor disambiguates the two AmB cards (liposomal keyword checked
+//          first) and now also excludes sulbactam combos (Ampicillin/Sulbactam no
+//          longer maps to the ampicillin-only calc). Golden-verified (70 kg →
+//          liposomal AmB 210–350 mg vs conventional 35–70 mg; ganciclovir 350 mg).
+//          ~31 drugs now compute a per-patient dose from the drug card.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.42.0';
+const CACHE_NAME = 'iv-drugref-v5.43.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

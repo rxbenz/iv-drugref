@@ -713,11 +713,32 @@
   });
 
   // ====== Init ======
+  // Deep-link pre-select: the drug-card "🧮 คำนวณขนาดยา" chip links here as
+  // calculator.html?drug=<id>. Match the param to a CALC_DRUGS entry (by id, or by
+  // name as a fallback) and pre-select it so the user lands ready to enter patient
+  // params. Patient fields stay blank and the result is still explicit-trigger only
+  // (no auto-dose) — this only chooses the drug.
+  function preselectFromQuery() {
+    try {
+      var q = new URLSearchParams(location.search).get('drug');
+      if (!q) return;
+      var ql = q.trim().toLowerCase();
+      var hit = CALC_DRUGS.find(function(d) {
+        return d.id === ql || d.name.toLowerCase().indexOf(ql) >= 0 || ql.indexOf(d.id) >= 0;
+      });
+      if (!hit) return;
+      selectDrug(hit.id);
+      var grid = document.getElementById('drugGrid');
+      if (grid && grid.scrollIntoView) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) { /* ignore malformed query */ }
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     IVDrugRef.trackPageView('calculator');
     IVDrugRef.patientCtx.init();
     updateCrCl();
     renderDrugGrid();
+    preselectFromQuery();
   });
 
   window.addEventListener('beforeunload', sendCalcPageLeave);

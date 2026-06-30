@@ -867,6 +867,18 @@ window.fetchDrugsFromServer = async function () {
     for (var i = 0; i < map.length; i++) if (gl.indexOf(map[i][0]) >= 0) return { url: 'tdm.html', label: map[i][1] };
     return null;
   }
+  // Drugs the Dose Calculator (calculator.js CALC_DRUGS) can compute a per-patient
+  // dose for. For these, the calculator chip becomes "คำนวณขนาดยา" and deep-links
+  // with ?drug=<id> so the calculator pre-selects the drug (Phase 0 — surfaces the
+  // existing per-patient engine from the search flow without touching dosing data).
+  function _calcIdFor(gl) {
+    var map = [['vancomycin', 'vancomycin'], ['amikacin', 'amikacin'], ['gentamicin', 'gentamicin'],
+      ['colistimethate', 'colistin'], ['colistin', 'colistin'], ['phenytoin', 'phenytoin'],
+      ['valproate', 'valproate'], ['valproic', 'valproate'], ['levetiracetam', 'levetiracetam'],
+      ['alteplase', 'alteplase'], ['tenecteplase', 'tenecteplase']];
+    for (var i = 0; i < map.length; i++) if (gl.indexOf(map[i][0]) >= 0) return map[i][1];
+    return null;
+  }
   function _chip(href, icon, label) {
     return '<a class="card-tool-chip" href="' + href + '">'
       + '<span class="ct-ic">' + icon + '</span>' + esc(label) + '</a>';
@@ -875,10 +887,14 @@ window.fetchDrugsFromServer = async function () {
     if (!drug || !drug.generic) return '';
     var enc = encodeURIComponent(drug.generic);
     var gl = String(drug.generic).toLowerCase();
+    var calcId = _calcIdFor(gl);
+    var calcChip = calcId
+      ? _chip('calculator.html?drug=' + encodeURIComponent(calcId), '🧮', 'คำนวณขนาดยา')
+      : _chip('calculator.html', '🧮', 'คำนวณ (CrCl/หยด)');
     var chips = [
       _chip('compatibility.html?drug=' + enc, '🧪', 'IV Compatibility'),
       _chip('renal-dosing.html', '💧', 'ปรับขนาดตามไต'),
-      _chip('calculator.html', '🧮', 'คำนวณ (CrCl/หยด)')
+      calcChip
     ];
     var tdm = _tdmTargetFor(gl);
     if (tdm) chips.push(_chip(tdm.url, '🎯', 'TDM ' + tdm.label));

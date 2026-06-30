@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.39.1
+// IV Drug Reference PWA — Service Worker v5.40.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -254,9 +254,18 @@
 //          cross-link (_uxCrossLinks, v5.15.3). Both deep-linked the same
 //          ?drug=<generic>, so the legacy one was removed; the answer-line
 //          (diluent/rate) it shared a wrapper with is unchanged.
+// v5.40.0: Live dose calculator — Phase 0 (connect, don't rebuild). The Dose
+//          Calculator already computes a per-patient dose for 9 drugs (vanco,
+//          amikacin, gentamicin, colistin, phenytoin/valproate/levetiracetam
+//          loading, alteplase, tenecteplase). For those drugs the drug-card tool
+//          chip now reads "🧮 คำนวณขนาดยา" and deep-links calculator.html?drug=<id>;
+//          calculator.js parses the param and pre-selects the drug (patient fields
+//          stay blank, result still explicit-trigger — no auto-dose). Non-calc
+//          drugs keep the generic "คำนวณ (CrCl/หยด)" chip. Surfaces the existing
+//          per-patient engine from the search flow with zero dosing-data changes.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.39.1';
+const CACHE_NAME = 'iv-drugref-v5.40.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

@@ -205,12 +205,13 @@ const CURATED_RENAL_DRUGS = [
     recommended:'2.5-20 mg/day (titrate)',
     dosingTable:[
       {range:'>30',dose:'2.5-20 mg',freq:'q12-24h',note:'Titrate to response'},
-      {range:'10–30',dose:'2.5-5 mg',freq:'q24h',note:'Start low'},
-      {range:'<10 / HD',dose:'2.5 mg',freq:'q24h',note:'Dialyzable'}
+      {range:'10–30',dose:'2.5 mg → max 20 mg/day',freq:'q24h',note:'Titrate slowly'},
+      {range:'<10',dose:'1.25 mg',freq:'q24h',note:'or 2.5 mg q48h; consider alternative'},
+      {range:'HD',dose:'2.5 mg',freq:'3×/wk post-HD',note:'Max 10 mg/day'}
     ],
-    info:'<strong>⚠ Monitor:</strong> K+, SCr (ยอมรับ SCr เพิ่ม ≤30% จาก baseline)<br>ถ้า SCr เพิ่ม >30% หรือ K+ >5.5 → ลด dose หรือหยุด<br><strong>HD:</strong> Give supplemental dose post-HD (20-25% dialyzable)',
+    info:'<strong>⚠ Monitor:</strong> K+, SCr (ยอมรับ SCr เพิ่ม ≤30% จาก baseline)<br>ถ้า SCr เพิ่ม >30% หรือ K+ >5.5 → ลด dose หรือหยุด<br><strong>HD:</strong> enalaprilat ~45% dialyzable — ให้ 2.5 mg 3×/สัปดาห์ หลังฟอก (max 10 mg/day)',
     infoType:'blue',
-    ref:'Lexicomp 2024 | KDIGO CKD Guidelines 2024'},
+    ref:'UpToDate (Lexicomp) 2025 | KDIGO CKD 2024'},
 
   // ── ANALGESICS ──
   {id:'morphine',name:'Morphine','class':'analgesic',sub:'Opioid',badges:['analgesic','renal','avoid'],

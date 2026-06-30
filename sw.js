@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.49.0
+// IV Drug Reference PWA — Service Worker v5.49.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -370,9 +370,18 @@
 //          to compat-only (2 tabs: Check + Matrix; DDI tab/results/mode removed,
 //          header back to "IV Compatibility"). Sidebar "อันตรกิริยา" now points to
 //          interactions.html. SW caches the new page.
+// v5.49.1: Renal dose correction — Enalapril severe-renal/HD tiers were higher
+//          than current UpToDate/Lexicomp expert-opinion renal dosing. CrCl<10:
+//          2.5 mg q24h → 1.25 mg q24h (or 2.5 mg q48h; consider alternative). HD
+//          split into its own row: 2.5 mg 3×/wk post-HD (was lumped as q24h),
+//          max 10 mg/day, enalaprilat ~45% dialyzable. 10–30 now shows titrate-up
+//          to max 20 mg/day. Fixed in both renal-dosing.js (live fallback) and
+//          curated-renal-drugs.js (admin import source). NOTE: if the live page
+//          serves renal data from Supabase, update Enalapril via the admin Renal
+//          panel to re-sync the corrected row.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.49.0';
+const CACHE_NAME = 'iv-drugref-v5.49.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

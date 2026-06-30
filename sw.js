@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.43.0
+// IV Drug Reference PWA — Service Worker v5.44.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -298,9 +298,22 @@
 //          longer maps to the ampicillin-only calc). Golden-verified (70 kg →
 //          liposomal AmB 210–350 mg vs conventional 35–70 mg; ganciclovir 350 mg).
 //          ~31 drugs now compute a per-patient dose from the drug card.
+// v5.44.0: Live dose calculator — Phase 2 (automatic renal dose adjustment). The
+//          doseRule engine now supports per-indication renalTiers:[{min,max,
+//          interval,doseFactor,dose,avoid,note}]; it picks the CrCl tier for the
+//          patient and shows the ADJUSTED dose in the headline — TRANSPARENTLY:
+//          the standard (normal-renal) dose stays listed for reference and the
+//          full tier table renders with the patient's CrCl row highlighted green
+//          (same pattern as the vanco calc). renalTiers authored (standard
+//          Sanford/Lexicomp) for Enoxaparin, Cefepime, Meropenem (×2), Ceftazidime,
+//          Daptomycin (×2), Levofloxacin, Ciprofloxacin (×2), Fluconazole maint,
+//          Ganciclovir (×2), Ertapenem. Golden-verified across CrCl: enox <30 →
+//          q24h; meropenem CrCl 41 → 1 g q12h, CrCl 21 → 500 mg q12h; levofloxacin
+//          CrCl 41 → 750 q48h; ganciclovir CrCl 41 → 175 mg q24h. Drugs without
+//          renalTiers keep their free-text renal caution (no regression). Tests 148.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.43.0';
+const CACHE_NAME = 'iv-drugref-v5.44.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

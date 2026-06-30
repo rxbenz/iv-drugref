@@ -276,6 +276,46 @@
     if (mg >= 1000) return (Math.round(mg / 100) / 10) + ' g';
     return (Math.round(mg * 10) / 10) + ' mg';
   }
+  // ---- Renal-tier support (Phase 2) ----
+  // An indication may carry renalTiers:[{min,max,interval,doseFactor,dose,avoid,note}].
+  // Tiers are authored contiguous over CrCl; the first matching [min,max) wins. A
+  // tier with no interval/doseFactor/dose/avoid means "use the normal dose".
+  function _renalTierFor(tiers, crcl) {
+    if (!tiers || crcl == null) return null;
+    for (var i = 0; i < tiers.length; i++) {
+      var t = tiers[i];
+      if ((t.min == null || crcl >= t.min) && (t.max == null || crcl < t.max)) return t;
+    }
+    return null;
+  }
+  function _tierIsMod(t) { return !!(t && (t.avoid || t.interval || t.doseFactor != null || t.dose != null)); }
+  function _tierRangeLabel(t) {
+    if (t.min != null && t.max != null) return t.min + '–' + t.max;
+    if (t.min != null) return '≥' + t.min;
+    if (t.max != null) return '<' + t.max;
+    return 'ทุกค่า';
+  }
+  function _tierActionLabel(ind, t) {
+    if (t.avoid) return '⚠ หลีกเลี่ยง / ปรึกษาเภสัช';
+    var p = [];
+    if (t.dose != null) p.push('ขนาด ' + t.dose + ' ' + ind.unit);
+    else if (t.doseFactor != null) p.push('×' + t.doseFactor + ' ของขนาดปกติ');
+    p.push(t.interval || ind.interval);
+    if (t.note) p.push(t.note);
+    return p.join(' ');
+  }
+  // Build the full renal-tier table with the patient's matching row highlighted.
+  function _renalTableHtml(ind, matched) {
+    var body = ind.renalTiers.map(function (t) {
+      var hl = (t === matched);
+      return '<tr' + (hl ? ' style="background:#dcfce7;font-weight:600;"' : '') + '>'
+        + '<td style="padding:3px 7px;border:1px solid #ddd;">' + _tierRangeLabel(t) + '</td>'
+        + '<td style="padding:3px 7px;border:1px solid #ddd;">' + _tierActionLabel(ind, t) + '</td></tr>';
+    }).join('');
+    return '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:4px;">'
+      + '<tr style="background:#e6f1fb;"><th style="padding:3px 7px;border:1px solid #85B7EB;text-align:left;">CrCl (mL/min)</th>'
+      + '<th style="padding:3px 7px;border:1px solid #85B7EB;text-align:left;">ปรับเป็น</th></tr>' + body + '</table>';
+  }
   function _evalIndication(pt, ind) {
     var doseArr = Array.isArray(ind.dose) ? ind.dose : [ind.dose];
     var wkg = pt.wt, wLabel = 'actual ' + pt.wt + ' kg';
@@ -292,24 +332,54 @@
       return amt;
     }
     var perLo = perDoseMg(doseArr[0]), perHi = perDoseMg(doseArr[doseArr.length - 1]);
-    var dpd = _dosesPerDay(ind.interval);
-    var dayLo = dpd ? perLo * dpd : null, dayHi = dpd ? perHi * dpd : null, dayCapped = false;
-    if (ind.maxPerDay) {
-      if (dayLo != null && dayLo > ind.maxPerDay) { dayLo = ind.maxPerDay; dayCapped = true; }
-      if (dayHi != null && dayHi > ind.maxPerDay) { dayHi = ind.maxPerDay; dayCapped = true; }
-    }
-    var perStr = perLo === perHi ? _fmtAmt(perLo) : (_fmtAmt(perLo) + '–' + _fmtAmt(perHi));
     var doseStr = doseArr.length === 1 ? doseArr[0] : (doseArr[0] + '–' + doseArr[doseArr.length - 1]);
     var basisStr = ind.basis === 'weight' ? (doseStr + ' ' + ind.unit + ' × ' + wLabel)
       : ind.basis === 'bsa' ? (doseStr + ' ' + ind.unit + ' × BSA ' + (pt.bsa || 0).toFixed(2) + ' m²')
         : (doseStr + ' ' + ind.unit + ' (fixed)');
-    var rows = [{ l: ind.label, v: '<strong>' + perStr + ' ' + ind.interval + '</strong>' },
-      { l: '· คิดจาก', v: basisStr }];
-    if (dayLo != null) rows.push({ l: '· รวมต่อวัน', v: (dayLo === dayHi ? _fmtAmt(dayLo) : _fmtAmt(dayLo) + '–' + _fmtAmt(dayHi)) + (dayCapped ? ' (ถึงเพดาน max/วัน)' : '') });
+    var baseInterval = ind.interval;
+    var baseStr = perLo === perHi ? _fmtAmt(perLo) : (_fmtAmt(perLo) + '–' + _fmtAmt(perHi));
+
+    // --- Renal auto-adjust (Phase 2): pick the CrCl tier, derive the shown dose ---
+    var rTier = _renalTierFor(ind.renalTiers, pt.crcl);
+    var adjusted = false, avoid = false;
+    var sLo = perLo, sHi = perHi, sInterval = ind.interval;
+    if (rTier && _tierIsMod(rTier)) {
+      if (rTier.avoid) { avoid = true; adjusted = true; }
+      else {
+        if (rTier.dose != null) { sLo = perDoseMg(rTier.dose); sHi = perDoseMg(rTier.dose); }
+        else if (rTier.doseFactor != null) {
+          sLo = perLo * rTier.doseFactor; sHi = perHi * rTier.doseFactor;
+          if (ind.roundTo) { sLo = _roundStep(sLo, ind.roundTo); sHi = _roundStep(sHi, ind.roundTo); }
+        }
+        if (rTier.interval) sInterval = rTier.interval;
+        adjusted = true;
+      }
+    }
+
+    var dpd = _dosesPerDay(sInterval);
+    var dayLo = dpd ? sLo * dpd : null, dayHi = dpd ? sHi * dpd : null, dayCapped = false;
+    if (ind.maxPerDay) {
+      if (dayLo != null && dayLo > ind.maxPerDay) { dayLo = ind.maxPerDay; dayCapped = true; }
+      if (dayHi != null && dayHi > ind.maxPerDay) { dayHi = ind.maxPerDay; dayCapped = true; }
+    }
+    var shownStr = avoid ? '⚠ หลีกเลี่ยง / ปรึกษาเภสัช' : (sLo === sHi ? _fmtAmt(sLo) : _fmtAmt(sLo) + '–' + _fmtAmt(sHi));
+    var crclTag = pt.crcl != null ? ' (CrCl ' + pt.crcl.toFixed(0) + ')' : '';
+
+    var rows = [{ l: ind.label, v: '<strong>' + shownStr + (avoid ? '' : ' ' + sInterval) + '</strong>' + (adjusted ? ' <span style="color:#0369a1;">— ปรับตามไต' + crclTag + '</span>' : '') }];
+    rows.push({ l: '· คิดจาก', v: basisStr });
+    if (adjusted && !avoid) rows.push({ l: '· ขนาดมาตรฐาน (ไตปกติ)', v: baseStr + ' ' + baseInterval });
+    if (rTier && !adjusted) rows.push({ l: '· ปรับตามไต', v: 'CrCl ' + (pt.crcl != null ? pt.crcl.toFixed(0) : '?') + ' → ใช้ขนาดปกติ' });
+    if (!avoid && dayLo != null) rows.push({ l: '· รวมต่อวัน', v: (dayLo === dayHi ? _fmtAmt(dayLo) : _fmtAmt(dayLo) + '–' + _fmtAmt(dayHi)) + (dayCapped ? ' (ถึงเพดาน max/วัน)' : '') });
     if (ind.maxPerDose) rows.push({ l: '· เพดาน/ครั้ง', v: _fmtAmt(ind.maxPerDose) });
-    if (ind.renalAdjust) rows.push({ l: '· ⚠ ปรับตามไต', v: ind.renalAdjust + (pt.crcl != null ? ' (CrCl ปัจจุบัน ' + pt.crcl.toFixed(0) + ')' : '') });
+    // No renalTiers but a free-text renal caution → keep showing it (backward compat).
+    if (!ind.renalTiers && ind.renalAdjust) rows.push({ l: '· ⚠ ปรับตามไต', v: ind.renalAdjust + crclTag });
     if (ind.note) rows.push({ l: '· หมายเหตุ', v: ind.note });
-    return { perHi: perHi, dayHi: dayHi, rows: rows, titleStr: ind.label + ': ' + perStr + ' ' + ind.interval };
+
+    var renalTable = ind.renalTiers ? _renalTableHtml(ind, rTier) : null;
+    return {
+      perHi: avoid ? 0 : sHi, dayHi: dayHi, rows: rows, renalTable: renalTable, indLabel: ind.label,
+      titleStr: ind.label + ': ' + shownStr + (avoid ? '' : ' ' + sInterval) + (adjusted && !avoid ? ' (ปรับตามไต)' : '')
+    };
   }
   function _ruleCalc(pt, def) {
     var dr = def.doseRule;
@@ -322,22 +392,23 @@
         infoType: 'amber'
       };
     }
-    var allRows = [], primary = null;
+    var allRows = [], primary = null, renalTables = '';
     dr.indications.forEach(function (ind, i) {
       var r = _evalIndication(pt, ind);
       if (i === 0) primary = r;
       if (i > 0) allRows.push({ l: '—', v: '' });
       allRows = allRows.concat(r.rows);
+      if (r.renalTable) renalTables += '<div style="margin-top:6px;"><strong>📋 ปรับขนาดตามไต — ' + r.indLabel + ':</strong>' + r.renalTable + '</div>';
     });
+    var info = '<strong>📋 วิธีคิด:</strong> โปรแกรมคูณ/ใส่ค่าตามกฎด้านบนกับค่าคนไข้ที่กรอก';
+    if (renalTables) info += '<br>' + renalTables + '<span style="font-size:11px;color:#64748b;">(แถวสีเขียว = ช่วง CrCl ของผู้ป่วยรายนี้)</span>';
+    info += '<br><strong>สมมติฐาน:</strong> ' + dr.assumptions
+      + '<br><strong>📚 อ้างอิง:</strong> ' + dr.drugRef
+      + '<br>⚠ เป็นค่าตั้งต้น ต้องตรวจสอบกับแหล่งอ้างอิง + clinical judgment ทุกครั้ง';
     return {
       calculatedDose: primary ? (primary.dayHi || primary.perHi) : 0,
       title: primary ? primary.titleStr : def.name,
-      details: allRows,
-      info: '<strong>📋 วิธีคิด:</strong> โปรแกรมคูณ/ใส่ค่าตามกฎด้านบนกับค่าคนไข้ที่กรอก<br>'
-        + '<strong>สมมติฐาน:</strong> ' + dr.assumptions + '<br>'
-        + '<strong>📚 อ้างอิง:</strong> ' + dr.drugRef + '<br>'
-        + '⚠ เป็นค่าตั้งต้น ต้องตรวจสอบกับแหล่งอ้างอิง + clinical judgment ทุกครั้ง',
-      infoType: 'blue'
+      details: allRows, info: info, infoType: 'blue'
     };
   }
   function makeRuleDrug(def) {
@@ -355,7 +426,7 @@
       drugRef: 'Lexicomp; ASH/CHEST VTE guidelines',
       assumptions: 'ใช้ actual body weight (treatment dose). CrCl <30 ต้องปรับเป็นวันละครั้ง — โปรแกรมยังไม่ปรับตามไตให้อัตโนมัติ. Prophylaxis = 40 mg SC วันละครั้ง (fixed ไม่อิงน้ำหนัก).',
       indications: [
-        { label: 'VTE/ACS treatment', basis: 'weight', weightBasis: 'actual', dose: 1, unit: 'mg/kg', interval: 'q12h', renalAdjust: 'CrCl <30 → 1 mg/kg วันละครั้ง' }
+        { label: 'VTE/ACS treatment', basis: 'weight', weightBasis: 'actual', dose: 1, unit: 'mg/kg', interval: 'q12h', renalTiers: [{ min: 30 }, { max: 30, interval: 'q24h' }] }
       ]
     }
   }));
@@ -388,7 +459,7 @@
       assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl แยก (CrCl <60 ลดขนาด/ความถี่). เด็กใช้ mg/kg.',
       indications: [
         { label: 'ทั่วไป', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q12h' },
-        { label: 'รุนแรง / Febrile neutropenia / Pseudomonas', basis: 'flat', dose: 2, unit: 'g', interval: 'q8h', renalAdjust: 'ปรับตาม CrCl <60' }
+        { label: 'รุนแรง / Febrile neutropenia / Pseudomonas', basis: 'flat', dose: 2, unit: 'g', interval: 'q8h', renalTiers: [{ min: 60 }, { min: 30, max: 60, interval: 'q12h' }, { min: 11, max: 30, interval: 'q24h' }, { max: 11, interval: 'q24h', doseFactor: 0.5 }] }
       ]
     }
   }));
@@ -398,8 +469,8 @@
       drugRef: 'Sanford Guide; Lexicomp',
       assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl แยก (CrCl <50). เด็กใช้ mg/kg.',
       indications: [
-        { label: 'ทั่วไป', basis: 'flat', dose: 1, unit: 'g', interval: 'q8h', note: '⚠ ห้ามใช้ร่วม valproate (ลดระดับ VPA)' },
-        { label: 'Meningitis / รุนแรง / Pseudomonas', basis: 'flat', dose: 2, unit: 'g', interval: 'q8h', renalAdjust: 'ปรับตาม CrCl <50' }
+        { label: 'ทั่วไป', basis: 'flat', dose: 1, unit: 'g', interval: 'q8h', note: '⚠ ห้ามใช้ร่วม valproate (ลดระดับ VPA)', renalTiers: [{ min: 50 }, { min: 25, max: 50, interval: 'q12h' }, { min: 10, max: 25, doseFactor: 0.5, interval: 'q12h' }, { max: 10, doseFactor: 0.5, interval: 'q24h' }] },
+        { label: 'Meningitis / รุนแรง / Pseudomonas', basis: 'flat', dose: 2, unit: 'g', interval: 'q8h', renalTiers: [{ min: 50 }, { min: 25, max: 50, interval: 'q12h' }, { min: 10, max: 25, doseFactor: 0.5, interval: 'q12h' }, { max: 10, doseFactor: 0.5, interval: 'q24h' }] }
       ]
     }
   }));
@@ -431,7 +502,7 @@
       drugRef: 'Sanford Guide; Lexicomp',
       assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl แยก (CrCl <50). เด็กใช้ mg/kg.',
       indications: [
-        { label: 'ทั่วไป / Pseudomonas', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q8h', renalAdjust: 'ปรับตาม CrCl <50' }
+        { label: 'ทั่วไป / Pseudomonas', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q8h', renalTiers: [{ min: 50 }, { min: 30, max: 50, interval: 'q12h' }, { min: 16, max: 30, interval: 'q24h' }, { max: 16, interval: 'q24h', doseFactor: 0.5 }] }
       ]
     }
   }));
@@ -451,8 +522,8 @@
       drugRef: 'Lexicomp; IDSA MRSA guidelines',
       assumptions: 'ใช้ actual body weight. CrCl <30 หรือฟอกไต → ทุก 48 ชม. ⚠ ห้ามใช้รักษา pneumonia (surfactant ยับยั้งยา). Monitor CPK สัปดาห์ละครั้ง.',
       indications: [
-        { label: 'Bacteremia / endocarditis (MRSA)', basis: 'weight', weightBasis: 'actual', dose: 6, unit: 'mg/kg', interval: 'q24h', renalAdjust: 'CrCl <30 → q48h' },
-        { label: 'Skin/soft tissue (SSTI)', basis: 'weight', weightBasis: 'actual', dose: 4, unit: 'mg/kg', interval: 'q24h', renalAdjust: 'CrCl <30 → q48h' }
+        { label: 'Bacteremia / endocarditis (MRSA)', basis: 'weight', weightBasis: 'actual', dose: 6, unit: 'mg/kg', interval: 'q24h', renalTiers: [{ min: 30 }, { max: 30, interval: 'q48h' }] },
+        { label: 'Skin/soft tissue (SSTI)', basis: 'weight', weightBasis: 'actual', dose: 4, unit: 'mg/kg', interval: 'q24h', renalTiers: [{ min: 30 }, { max: 30, interval: 'q48h' }] }
       ]
     }
   }));
@@ -495,7 +566,7 @@
       drugRef: 'Sanford Guide; Lexicomp',
       assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. IV ↔ กิน 1:1. ปรับตาม CrCl <50. ⚠ QT prolongation, tendon rupture.',
       indications: [
-        { label: 'ทั่วไป (CAP/complicated)', basis: 'flat', dose: 750, unit: 'mg', interval: 'q24h', renalAdjust: 'CrCl <50 ปรับขนาด/ความถี่' }
+        { label: 'ทั่วไป (CAP/complicated)', basis: 'flat', dose: 750, unit: 'mg', interval: 'q24h', renalTiers: [{ min: 50 }, { min: 20, max: 50, interval: 'q48h' }, { max: 20, dose: 500, interval: 'q48h', note: '(loading 750 ครั้งแรก)' }] }
       ]
     }
   }));
@@ -505,8 +576,8 @@
       drugRef: 'Sanford Guide; Lexicomp',
       assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. ปรับตาม CrCl <30. ⚠ QT prolongation, tendon rupture; bioavailability กิน สูง (PO 750 mg ≈ IV 400 mg).',
       indications: [
-        { label: 'ทั่วไป', basis: 'flat', dose: 400, unit: 'mg', interval: 'q12h' },
-        { label: 'รุนแรง / Pseudomonas', basis: 'flat', dose: 400, unit: 'mg', interval: 'q8h', renalAdjust: 'CrCl <30 ปรับ' }
+        { label: 'ทั่วไป', basis: 'flat', dose: 400, unit: 'mg', interval: 'q12h', renalTiers: [{ min: 30 }, { max: 30, interval: 'q24h' }] },
+        { label: 'รุนแรง / Pseudomonas', basis: 'flat', dose: 400, unit: 'mg', interval: 'q8h', renalTiers: [{ min: 30 }, { max: 30, interval: 'q12h' }] }
       ]
     }
   }));
@@ -527,7 +598,7 @@
       assumptions: 'ใช้ actual body weight (candidemia). IV ↔ กิน 1:1. CrCl <50 → ลด maintenance ครึ่งหนึ่ง (loading เท่าเดิม).',
       indications: [
         { label: 'Candidemia — loading (ครั้งเดียว)', basis: 'weight', weightBasis: 'actual', dose: 12, unit: 'mg/kg', interval: 'loading (single)', maxPerDose: 800 },
-        { label: 'Candidemia — maintenance', basis: 'weight', weightBasis: 'actual', dose: 6, unit: 'mg/kg', interval: 'q24h', maxPerDose: 400, renalAdjust: 'CrCl <50 → ครึ่งขนาด maintenance' }
+        { label: 'Candidemia — maintenance', basis: 'weight', weightBasis: 'actual', dose: 6, unit: 'mg/kg', interval: 'q24h', maxPerDose: 400, renalTiers: [{ min: 50 }, { max: 50, doseFactor: 0.5 }] }
       ]
     }
   }));
@@ -537,8 +608,8 @@
       drugRef: 'Lexicomp; AST/transplant CMV guidelines',
       assumptions: 'ใช้ actual body weight (คนอ้วนพิจารณา IBW). ปรับตาม CrCl แยก. infuse ≥1 ชม. ⚠ Myelosuppression (monitor CBC), teratogenic.',
       indications: [
-        { label: 'Induction (CMV)', basis: 'weight', weightBasis: 'actual', dose: 5, unit: 'mg/kg', interval: 'q12h', renalAdjust: 'ปรับตาม CrCl <70' },
-        { label: 'Maintenance', basis: 'weight', weightBasis: 'actual', dose: 5, unit: 'mg/kg', interval: 'q24h', renalAdjust: 'ปรับตาม CrCl <70' }
+        { label: 'Induction (CMV)', basis: 'weight', weightBasis: 'actual', dose: 5, unit: 'mg/kg', interval: 'q12h', renalTiers: [{ min: 70 }, { min: 50, max: 70, doseFactor: 0.5 }, { min: 25, max: 50, doseFactor: 0.5, interval: 'q24h' }, { min: 10, max: 25, doseFactor: 0.25, interval: 'q24h' }, { max: 10, doseFactor: 0.25, interval: '3×/สัปดาห์', note: 'หลัง HD' }] },
+        { label: 'Maintenance', basis: 'weight', weightBasis: 'actual', dose: 5, unit: 'mg/kg', interval: 'q24h', renalTiers: [{ min: 70 }, { min: 50, max: 70, doseFactor: 0.5 }, { min: 25, max: 50, doseFactor: 0.5, interval: 'q48h' }, { min: 10, max: 25, doseFactor: 0.25, interval: 'q48h' }, { max: 10, doseFactor: 0.25, interval: '1×/สัปดาห์', note: 'หลัง HD' }] }
       ]
     }
   }));
@@ -548,7 +619,7 @@
       drugRef: 'Sanford Guide; Lexicomp',
       assumptions: 'ขนาดผู้ใหญ่ ไตปกติ. CrCl <30 → 500 mg q24h. ⚠ ไม่ครอบคลุม Pseudomonas/Acinetobacter.',
       indications: [
-        { label: 'ทั่วไป', basis: 'flat', dose: 1, unit: 'g', interval: 'q24h', renalAdjust: 'CrCl <30 → 500 mg q24h' }
+        { label: 'ทั่วไป', basis: 'flat', dose: 1, unit: 'g', interval: 'q24h', renalTiers: [{ min: 30 }, { max: 30, dose: 0.5 }] }
       ]
     }
   }));

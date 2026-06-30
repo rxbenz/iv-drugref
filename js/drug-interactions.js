@@ -387,7 +387,10 @@
   window.DrugInteractions = {
     check: check, renderHtml: renderHtml, loadRemote: loadRemote,
     onUpdate: null,                       // host (compatibility.js) sets this to re-render
-    _CLASS_DEFS: CLASS_DEFS, _CURATED: CURATED_DDI
+    // _CURATED / _CLASS_RULES_SEED keep their reference to the BUILT-IN default
+    // arrays even after loadRemote() reassigns the working tables — so the admin
+    // "Import Defaults" seed always reflects the in-code defaults, not remote.
+    _CLASS_DEFS: CLASS_DEFS, _CURATED: CURATED_DDI, _CLASS_RULES_SEED: CLASS_RULES
   };
 
   // Auto-sync on load (browser only; the Node test harness has no fetch/localStorage

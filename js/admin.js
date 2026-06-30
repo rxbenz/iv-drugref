@@ -28,6 +28,11 @@ let state = {
   compatPairs: [],
   compatPage: 1,
   editingCompatId: null,
+  // DDI (drug interaction) data
+  ddiPairs: [],
+  ddiRules: [],
+  editingDDIPairId: null,
+  editingDDIRuleId: null,
   // Renal dosing
   renalDrugs: [],
   renalPage: 1,
@@ -2031,6 +2036,261 @@ async function importCuratedPairs() {
 }
 
 /* ═══════════════════════════════════════════
+   DRUG INTERACTION (DDI) DATA CRUD
+   ═══════════════════════════════════════════ */
+// The 10 additive-risk classes (must match CLASS_DEFS in drug-interactions.js).
+const DDI_CLASSES = [
+  { key: 'QT', label: '💓 QT prolongation' },
+  { key: 'serotonergic', label: '🧠 Serotonin syndrome' },
+  { key: 'nephrotoxic', label: '🫘 Nephrotoxicity' },
+  { key: 'bleeding', label: '🩸 Bleeding' },
+  { key: 'hyperK', label: '⚡ Hyperkalemia' },
+  { key: 'ototoxic', label: '👂 Ototoxicity' },
+  { key: 'cnsDepress', label: '😴 CNS/resp depression' },
+  { key: 'bradycardia', label: '🐢 Bradycardia/AV block' },
+  { key: 'hypotension', label: '📉 Hypotension' },
+  { key: 'anticholinergic', label: '🌵 Anticholinergic' }
+];
+const DDI_SEV_LABEL = { contraindicated: '⛔ ห้ามใช้ร่วม', major: '🟠 รุนแรง', moderate: '🟡 ปานกลาง', minor: '⚪ เล็กน้อย' };
+
+async function loadDDIData() {
+  showLoading('กำลังโหลดข้อมูล DDI...');
+  try {
+    const [p, r] = await Promise.all([apiCall('getDDIPairs'), apiCall('getDDIClassRules')]);
+    state.ddiPairs = (p && p.pairs) || [];
+    state.ddiRules = (r && r.rules) || [];
+    renderDDIPairsTable();
+    renderDDIRulesTable();
+  } catch (e) {
+    console.error('loadDDIData error:', e);
+    toast('โหลดข้อมูล DDI ล้มเหลว (ต้อง deploy backend ก่อน?)', 'error');
+  }
+  hideLoading();
+}
+
+// ── Curated pairs ───────────────────────────────────────────────────
+// Build a human label for one side from the stored sheet row (single keyword
+// or a JSON-array string of keywords).
+function ddiSideLabel(single, multi) {
+  if (multi) {
+    try { const a = JSON.parse(multi); if (Array.isArray(a) && a.length) return a.join(' / '); }
+    catch (e) { return String(multi); }
+  }
+  return single || '—';
+}
+
+function renderDDIPairsTable() {
+  const cnt = document.getElementById('ddi-pairs-count');
+  if (cnt) cnt.textContent = state.ddiPairs.length;
+  const q = (document.getElementById('search-ddi-pair')?.value || '').toLowerCase().trim();
+  let rows = state.ddiPairs;
+  if (q) rows = rows.filter(p =>
+    [p.a, p.aAny, p.b, p.bAny, p.severity, p.mechanism].some(v => String(v || '').toLowerCase().includes(q)));
+
+  const tbody = document.getElementById('ddi-pairs-body');
+  if (!tbody) return;
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">ไม่มีข้อมูล</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((p, idx) => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:12px">${idx + 1}</td>
+      <td><strong>${escHtml(ddiSideLabel(p.a, p.aAny))}</strong></td>
+      <td><strong>${escHtml(ddiSideLabel(p.b, p.bAny))}</strong></td>
+      <td>${escHtml(DDI_SEV_LABEL[p.severity] || p.severity || '')}</td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:280px">${escHtml((p.mechanism || '').slice(0, 90))}${(p.mechanism || '').length > 90 ? '…' : ''}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm btn-outline" data-action="editDDIPair" data-id="${escHtml(String(p.id))}" title="แก้ไข">✏️</button>
+          ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDDIPair" data-id="${escHtml(String(p.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function filterDDIPairs() { renderDDIPairsTable(); }
+
+function openDDIPairModal(pair = null) {
+  state.editingDDIPairId = pair ? pair.id : null;
+  document.getElementById('ddi-pair-modal-title').textContent = pair ? 'แก้ไขคู่ยา DDI' : 'เพิ่มคู่ยา DDI';
+  const arr = (v) => { if (!v) return ''; try { const a = JSON.parse(v); return Array.isArray(a) ? a.join(', ') : String(v); } catch (e) { return String(v); } };
+  document.getElementById('df-a').value = pair ? (pair.a || '') : '';
+  document.getElementById('df-aAny').value = pair ? arr(pair.aAny) : '';
+  document.getElementById('df-b').value = pair ? (pair.b || '') : '';
+  document.getElementById('df-bAny').value = pair ? arr(pair.bAny) : '';
+  document.getElementById('df-severity').value = pair ? (pair.severity || 'major') : 'major';
+  document.getElementById('df-mechanism').value = pair ? (pair.mechanism || '') : '';
+  document.getElementById('df-management').value = pair ? (pair.management || '') : '';
+  document.getElementById('df-ref').value = pair ? (pair.ref || '') : '';
+  document.getElementById('ddi-pair-modal').classList.add('open');
+}
+function closeDDIPairModal() {
+  document.getElementById('ddi-pair-modal').classList.remove('open');
+  state.editingDDIPairId = null;
+}
+
+// comma string → JSON-array string (the sheet/Supabase format) or '' for ≤1 token
+function ddiCsvToJsonArr(s) {
+  const a = String(s || '').split(',').map(x => x.toLowerCase().trim()).filter(Boolean);
+  return a.length ? JSON.stringify(a) : '';
+}
+
+async function saveDDIPair() {
+  const a = document.getElementById('df-a').value.trim().toLowerCase();
+  const aAny = ddiCsvToJsonArr(document.getElementById('df-aAny').value);
+  const b = document.getElementById('df-b').value.trim().toLowerCase();
+  const bAny = ddiCsvToJsonArr(document.getElementById('df-bAny').value);
+  if (!(a || aAny) || !(b || bAny)) { toast('ต้องระบุยาทั้งฝั่ง A และ B (ช่องเดี่ยวหรือหลายตัว)', 'error'); return; }
+  const payload = {
+    a: aAny ? '' : a, aAny: aAny, b: bAny ? '' : b, bAny: bAny,
+    severity: document.getElementById('df-severity').value,
+    mechanism: document.getElementById('df-mechanism').value.trim(),
+    management: document.getElementById('df-management').value.trim(),
+    ref: document.getElementById('df-ref').value.trim()
+  };
+  showLoading('กำลังบันทึก...');
+  try {
+    if (state.editingDDIPairId) {
+      await apiCall('updateDDIPair', Object.assign({ id: state.editingDDIPairId }, payload));
+      toast('✅ อัพเดทคู่ยาแล้ว', 'success');
+    } else {
+      await apiCall('createDDIPair', payload);
+      toast('✅ เพิ่มคู่ยาแล้ว', 'success');
+    }
+    closeDDIPairModal();
+    await loadDDIData();
+  } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  hideLoading();
+}
+function editDDIPair(id) {
+  const p = state.ddiPairs.find(x => String(x.id) === String(id));
+  if (p) openDDIPairModal(p);
+}
+async function deleteDDIPair(id) {
+  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
+  const p = state.ddiPairs.find(x => String(x.id) === String(id));
+  if (!p) return;
+  if (!confirm('ลบคู่ยา DDI นี้?')) return;
+  showLoading('กำลังลบ...');
+  try { await apiCall('deleteDDIPair', { id }); toast('🗑 ลบแล้ว', 'success'); await loadDDIData(); }
+  catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  hideLoading();
+}
+
+// ── Class rules ─────────────────────────────────────────────────────
+function renderDDIRulesTable() {
+  const cnt = document.getElementById('ddi-rules-count');
+  if (cnt) cnt.textContent = state.ddiRules.length;
+  const q = (document.getElementById('search-ddi-rule')?.value || '').toLowerCase().trim();
+  let rows = state.ddiRules;
+  if (q) rows = rows.filter(r => String(r.keyword || '').toLowerCase().includes(q) || String(r.classes || '').toLowerCase().includes(q));
+
+  const tbody = document.getElementById('ddi-rules-body');
+  if (!tbody) return;
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px">ไม่มีข้อมูล</td></tr>';
+    return;
+  }
+  const lbl = {}; DDI_CLASSES.forEach(c => lbl[c.key] = c.label);
+  tbody.innerHTML = rows.map((r, idx) => {
+    const cls = String(r.classes || '').split(',').map(s => s.trim()).filter(Boolean).map(k => lbl[k] || k).join(', ');
+    return `<tr>
+      <td style="color:var(--text-muted);font-size:12px">${idx + 1}</td>
+      <td><strong>${escHtml(r.keyword || '')}</strong></td>
+      <td style="font-size:12px">${escHtml(cls)}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm btn-outline" data-action="editDDIRule" data-id="${escHtml(String(r.id))}" title="แก้ไข">✏️</button>
+          ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDDIRule" data-id="${escHtml(String(r.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterDDIRules() { renderDDIRulesTable(); }
+
+function openDDIRuleModal(rule = null) {
+  state.editingDDIRuleId = rule ? rule.id : null;
+  document.getElementById('ddi-rule-modal-title').textContent = rule ? 'แก้ไข Class Rule' : 'เพิ่ม Class Rule';
+  document.getElementById('rf-keyword').value = rule ? (rule.keyword || '') : '';
+  const selected = rule ? String(rule.classes || '').split(',').map(s => s.trim()).filter(Boolean) : [];
+  const wrap = document.getElementById('rf-classes');
+  wrap.innerHTML = DDI_CLASSES.map(c =>
+    `<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+       <input type="checkbox" class="rf-cls" value="${c.key}" ${selected.includes(c.key) ? 'checked' : ''}> ${c.label}
+     </label>`).join('');
+  document.getElementById('ddi-rule-modal').classList.add('open');
+}
+function closeDDIRuleModal() {
+  document.getElementById('ddi-rule-modal').classList.remove('open');
+  state.editingDDIRuleId = null;
+}
+async function saveDDIRule() {
+  const keyword = document.getElementById('rf-keyword').value.trim().toLowerCase();
+  const classes = Array.from(document.querySelectorAll('#rf-classes .rf-cls:checked')).map(c => c.value).join(',');
+  if (!keyword) { toast('ต้องระบุ keyword', 'error'); return; }
+  if (!classes) { toast('เลือกอย่างน้อย 1 คลาส', 'error'); return; }
+  showLoading('กำลังบันทึก...');
+  try {
+    if (state.editingDDIRuleId) {
+      await apiCall('updateDDIClassRule', { id: state.editingDDIRuleId, keyword, classes });
+      toast('✅ อัพเดทแล้ว', 'success');
+    } else {
+      await apiCall('createDDIClassRule', { keyword, classes });
+      toast('✅ เพิ่มแล้ว', 'success');
+    }
+    closeDDIRuleModal();
+    await loadDDIData();
+  } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  hideLoading();
+}
+function editDDIRule(id) {
+  const r = state.ddiRules.find(x => String(x.id) === String(id));
+  if (r) openDDIRuleModal(r);
+}
+async function deleteDDIRule(id) {
+  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
+  if (!confirm('ลบ class rule นี้?')) return;
+  showLoading('กำลังลบ...');
+  try { await apiCall('deleteDDIClassRule', { id }); toast('🗑 ลบแล้ว', 'success'); await loadDDIData(); }
+  catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  hideLoading();
+}
+
+// ── Import defaults (seed sheets from the hardcoded engine data) ─────
+// Reads the live defaults straight off window.DrugInteractions so the seed can
+// never drift from the engine. Creates rows one-by-one via the existing CRUD.
+async function importDDIDefaults() {
+  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
+  const DI = window.DrugInteractions;
+  if (!DI || !DI._CURATED) { toast('ไม่พบ engine (drug-interactions.js) — เปิดหน้า DDI ก่อน', 'error'); return; }
+  if (!confirm('นำเข้า curated pairs + class rules จากค่า default ในโค้ด? (จะเพิ่มเป็นรายการใหม่)')) return;
+  showLoading('กำลังนำเข้า defaults...');
+  let okP = 0, okR = 0, fail = 0;
+  try {
+    for (const p of DI._CURATED) {
+      const payload = {
+        a: p.a || '', aAny: (p.aAny && p.aAny.length) ? JSON.stringify(p.aAny) : '',
+        b: p.b || '', bAny: (p.bAny && p.bAny.length) ? JSON.stringify(p.bAny) : '',
+        severity: p.severity || 'major', mechanism: p.mechanism || '',
+        management: p.management || '', ref: p.ref || ''
+      };
+      try { await apiCall('createDDIPair', payload); okP++; } catch (e) { fail++; }
+    }
+    // class rules come off the engine's internal table via the public check()
+    // path is not exposed; rebuild from _CLASS_DEFS keys + the known CLASS_RULES
+    // is internal — instead seed from DI._classRulesForSeed if present.
+    const rules = (DI._CLASS_RULES_SEED || []);
+    for (const r of rules) {
+      try { await apiCall('createDDIClassRule', { keyword: r[0], classes: r[1].join(',') }); okR++; } catch (e) { fail++; }
+    }
+    toast(`✅ นำเข้าแล้ว: ${okP} pairs, ${okR} rules${fail ? ' (ล้มเหลว ' + fail + ')' : ''}`, fail ? 'info' : 'success');
+    await loadDDIData();
+  } catch (e) { toast('Import ล้มเหลว: ' + e.message, 'error'); }
+  hideLoading();
+}
+
+/* ═══════════════════════════════════════════
    RENAL DOSING DATA CRUD
    ═══════════════════════════════════════════ */
 const RENAL_PER_PAGE = 25;
@@ -2918,6 +3178,7 @@ function switchTab(tab) {
   if (tab === 'users') loadUsers();
   if (tab === 'quality') renderQualityDashboard();
   if (tab === 'compat') loadCompatPairs();
+  if (tab === 'ddi') loadDDIData();
   if (tab === 'renal') loadRenalDrugs();
   if (tab === 'allergy') loadAllergyData();
   if (tab === 'analytics') loadAnalyticsSummary();
@@ -3314,6 +3575,20 @@ document.addEventListener('DOMContentLoaded', () => {
     compatGoPage: function(e, t) { compatGoPage(+t.dataset.page); },
     exportCompatCSV: function() { exportCompatCSV(); },
     importCuratedPairs: function() { importCuratedPairs(); },
+    // DDI (drug interaction)
+    openDDIPairModal: function() { openDDIPairModal(); },
+    closeDDIPairModal: function() { closeDDIPairModal(); },
+    saveDDIPair: function() { saveDDIPair(); },
+    editDDIPair: function(e, t) { editDDIPair(t.dataset.id); },
+    deleteDDIPair: function(e, t) { deleteDDIPair(t.dataset.id); },
+    filterDDIPairs: function() { filterDDIPairs(); },
+    openDDIRuleModal: function() { openDDIRuleModal(); },
+    closeDDIRuleModal: function() { closeDDIRuleModal(); },
+    saveDDIRule: function() { saveDDIRule(); },
+    editDDIRule: function(e, t) { editDDIRule(t.dataset.id); },
+    deleteDDIRule: function(e, t) { deleteDDIRule(t.dataset.id); },
+    filterDDIRules: function() { filterDDIRules(); },
+    importDDIDefaults: function() { importDDIDefaults(); },
     // Renal dosing
     openRenalModal: function() { openRenalModal(); },
     closeRenalModal: function() { closeRenalModal(); },

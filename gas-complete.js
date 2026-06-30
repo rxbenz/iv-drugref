@@ -67,7 +67,9 @@ var SHEETS = {
   ALLERGY_REFS: 'AllergyRefs',
   FEATURE_USE: 'FeatureUse',
   MICRO_FEEDBACK: 'MicroFeedback',
-  SUS_ITEMS: 'SusItems'
+  SUS_ITEMS: 'SusItems',
+  DDI_PAIRS: 'DDIPairs',
+  DDI_CLASS_RULES: 'DDIClassRules'
 };
 
 // ──────────────────────────────────────────────
@@ -252,6 +254,24 @@ function doGet(e) {
         return handleDeleteCompatPair(user, data);
       case 'bulkcreatecompatpairs':
         return handleBulkCreateCompatPairs(user, data);
+
+      // ── Drug–Drug Interaction (DDI) data ──
+      case 'getddipairs':
+        return handleGetDDIPairs(user);
+      case 'createddipair':
+        return handleCreateDDIPair(user, data);
+      case 'updateddipair':
+        return handleUpdateDDIPair(user, data);
+      case 'deleteddipair':
+        return handleDeleteDDIPair(user, data);
+      case 'getddiclassrules':
+        return handleGetDDIClassRules(user);
+      case 'createddiclassrule':
+        return handleCreateDDIClassRule(user, data);
+      case 'updateddiclassrule':
+        return handleUpdateDDIClassRule(user, data);
+      case 'deleteddiclassrule':
+        return handleDeleteDDIClassRule(user, data);
 
       // ── Renal Dosing Data ──
       case 'renaldrugs':
@@ -1390,6 +1410,201 @@ function handleBulkCreateCompatPairs(user, data) {
   addAuditLog(user, 'bulkImportCompat', '', '', 'Imported ' + created + ' new, updated ' + updated + ', skipped ' + skipped + ' unchanged');
   _syncCompatSafe();   // dual-write to Supabase (best-effort)
   return jsonResponse({ success: true, created: created, updated: updated, skipped: skipped });
+}
+
+
+// ════════════════════════════════════════════════
+// DRUG–DRUG INTERACTION (DDI) DATA CRUD
+// ════════════════════════════════════════════════
+// Two tables mirror the data hardcoded in js/drug-interactions.js:
+//   • DDIPairs       — curated explicit pairs. `data` jsonb = the full pair
+//     object {a|aAny, b|bAny, severity, mechanism, management, ref}. The aAny/
+//     bAny multi-keyword arrays are stored JSON-encoded in the sheet column.
+//   • DDIClassRules  — keyword→classes. `classes` column is a comma list.
+// Writes dual-write to Supabase (ddi_pairs / ddi_class_rules) best-effort, the
+// same pattern as compat pairs. CLASS DEFINITIONS stay in client code.
+var DDI_PAIR_HEADERS = ['id', 'a', 'aAny', 'b', 'bAny', 'severity', 'mechanism', 'management', 'ref', 'createdBy', 'createdAt', 'updatedAt'];
+var DDI_CLASS_HEADERS = ['id', 'keyword', 'classes', 'createdBy', 'createdAt', 'updatedAt'];
+
+// Parse a sheet cell that may hold a JSON array (aAny/bAny) → array or undefined.
+function _ddiParseArr(v) {
+  if (!v) return undefined;
+  if (Array.isArray(v)) return v;
+  try { var a = JSON.parse(v); return Array.isArray(a) && a.length ? a : undefined; } catch (e) { return undefined; }
+}
+
+// ── DDI curated pairs ───────────────────────────────────────────────
+function handleGetDDIPairs(user) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  return jsonResponse({ pairs: getSheetData(SHEETS.DDI_PAIRS), myRole: perm.role });
+}
+
+function handleCreateDDIPair(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  var sheet = getOrCreateSheet(SHEETS.DDI_PAIRS, DDI_PAIR_HEADERS);
+  var id = Date.now();
+  var now = new Date().toISOString();
+  sheet.appendRow([
+    id, data.a || '', data.aAny || '', data.b || '', data.bAny || '',
+    data.severity || 'major', data.mechanism || '', data.management || '', data.ref || '',
+    user, now, now
+  ]);
+  addAuditLog(user, 'createDDIPair', id, (data.a || data.aAny || '') + ' + ' + (data.b || data.bAny || ''), 'Severity: ' + (data.severity || 'major'));
+  _syncDDIPairsSafe();
+  return jsonResponse({ success: true, id: id, message: 'DDI pair created' });
+}
+
+function handleUpdateDDIPair(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  var sheet = getSS().getSheetByName(SHEETS.DDI_PAIRS);
+  if (!sheet) return errorResponse('DDIPairs sheet not found');
+  var all = sheet.getDataRange().getValues();
+  var headers = all[0];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) return errorResponse('ID column not found');
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      for (var key in data) {
+        if (key === 'id') continue;
+        var col = headers.indexOf(key);
+        if (col >= 0) sheet.getRange(i + 1, col + 1).setValue(data[key]);
+      }
+      var updCol = headers.indexOf('updatedAt');
+      if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
+      addAuditLog(user, 'updateDDIPair', data.id, '', 'Updated');
+      _syncDDIPairsSafe();
+      return jsonResponse({ success: true, id: data.id, message: 'DDI pair updated' });
+    }
+  }
+  return errorResponse('DDI pair not found: ' + data.id);
+}
+
+function handleDeleteDDIPair(user, data) {
+  var perm = checkPermission(user, 'admin');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ต้องเป็น admin' });
+  var sheet = getSS().getSheetByName(SHEETS.DDI_PAIRS);
+  if (!sheet) return errorResponse('DDIPairs sheet not found');
+  var all = sheet.getDataRange().getValues();
+  var idCol = all[0].indexOf('id');
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      sheet.deleteRow(i + 1);
+      addAuditLog(user, 'deleteDDIPair', data.id, '', 'Deleted');
+      try { _supaDelete('ddi_pairs', 'id', String(data.id)); } catch (e) { Logger.log('ddi pair del supabase: ' + e.message); }
+      return jsonResponse({ success: true, message: 'DDI pair deleted' });
+    }
+  }
+  return errorResponse('DDI pair not found: ' + data.id);
+}
+
+// ── DDI class rules (keyword → classes) ─────────────────────────────
+function handleGetDDIClassRules(user) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  return jsonResponse({ rules: getSheetData(SHEETS.DDI_CLASS_RULES), myRole: perm.role });
+}
+
+function handleCreateDDIClassRule(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  var sheet = getOrCreateSheet(SHEETS.DDI_CLASS_RULES, DDI_CLASS_HEADERS);
+  var id = Date.now();
+  var now = new Date().toISOString();
+  sheet.appendRow([id, (data.keyword || '').toLowerCase().trim(), data.classes || '', user, now, now]);
+  addAuditLog(user, 'createDDIClassRule', id, data.keyword, 'Classes: ' + (data.classes || ''));
+  _syncDDIClassRulesSafe();
+  return jsonResponse({ success: true, id: id, message: 'DDI class rule created' });
+}
+
+function handleUpdateDDIClassRule(user, data) {
+  var perm = checkPermission(user, 'editor');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  var sheet = getSS().getSheetByName(SHEETS.DDI_CLASS_RULES);
+  if (!sheet) return errorResponse('DDIClassRules sheet not found');
+  var all = sheet.getDataRange().getValues();
+  var headers = all[0];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) return errorResponse('ID column not found');
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      for (var key in data) {
+        if (key === 'id') continue;
+        var col = headers.indexOf(key);
+        if (col >= 0) sheet.getRange(i + 1, col + 1).setValue(key === 'keyword' ? String(data[key]).toLowerCase().trim() : data[key]);
+      }
+      var updCol = headers.indexOf('updatedAt');
+      if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
+      addAuditLog(user, 'updateDDIClassRule', data.id, '', 'Updated');
+      _syncDDIClassRulesSafe();
+      return jsonResponse({ success: true, id: data.id, message: 'DDI class rule updated' });
+    }
+  }
+  return errorResponse('DDI class rule not found: ' + data.id);
+}
+
+function handleDeleteDDIClassRule(user, data) {
+  var perm = checkPermission(user, 'admin');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ต้องเป็น admin' });
+  var sheet = getSS().getSheetByName(SHEETS.DDI_CLASS_RULES);
+  if (!sheet) return errorResponse('DDIClassRules sheet not found');
+  var all = sheet.getDataRange().getValues();
+  var idCol = all[0].indexOf('id');
+  for (var i = 1; i < all.length; i++) {
+    if (String(all[i][idCol]) === String(data.id)) {
+      sheet.deleteRow(i + 1);
+      addAuditLog(user, 'deleteDDIClassRule', data.id, '', 'Deleted');
+      try { _supaDelete('ddi_class_rules', 'id', String(data.id)); } catch (e) { Logger.log('ddi rule del supabase: ' + e.message); }
+      return jsonResponse({ success: true, message: 'DDI class rule deleted' });
+    }
+  }
+  return errorResponse('DDI class rule not found: ' + data.id);
+}
+
+// ── DDI Supabase sync (dual-write) ──────────────────────────────────
+// Reshape each sheet row into the client-consumed `data` object:
+//   pair  → {a?, aAny?, b?, bAny?, severity, mechanism, management, ref}
+//   rule  → {keyword, classes:[...]}
+function _syncDDIPairsToSupabase() {
+  var pairs = getSheetData(SHEETS.DDI_PAIRS);
+  var rows = pairs.filter(function (p) { return p.id; }).map(function (p) {
+    var d = { severity: p.severity || 'major', mechanism: p.mechanism || '', management: p.management || '', ref: p.ref || '' };
+    var aAny = _ddiParseArr(p.aAny), bAny = _ddiParseArr(p.bAny);
+    if (aAny) d.aAny = aAny; else if (p.a) d.a = String(p.a).toLowerCase().trim();
+    if (bAny) d.bAny = bAny; else if (p.b) d.b = String(p.b).toLowerCase().trim();
+    return { id: String(p.id), a: p.a || '', b: p.b || '', data: d };
+  });
+  _supaUpsert('ddi_pairs', rows);
+  return rows.length;
+}
+function _syncDDIPairsSafe() {
+  try { _syncDDIPairsToSupabase(); } catch (e) { Logger.log('ddi pairs->supabase sync failed: ' + e.message); }
+}
+
+function _syncDDIClassRulesToSupabase() {
+  var rules = getSheetData(SHEETS.DDI_CLASS_RULES);
+  var rows = rules.filter(function (r) { return r.id; }).map(function (r) {
+    var kw = String(r.keyword || '').toLowerCase().trim();
+    var classes = String(r.classes || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    return { id: String(r.id), keyword: kw, data: { keyword: kw, classes: classes } };
+  });
+  _supaUpsert('ddi_class_rules', rows);
+  return rows.length;
+}
+function _syncDDIClassRulesSafe() {
+  try { _syncDDIClassRulesToSupabase(); } catch (e) { Logger.log('ddi rules->supabase sync failed: ' + e.message); }
+}
+
+// One-time backfill — run from the ADMIN GAS editor after supabase/ddi.sql.
+// Seeds Supabase from whatever is in the DDIPairs / DDIClassRules sheets. If
+// those sheets are empty, first run seedDDIFromDefaults() (paste the defaults).
+function migrateDDIToSupabaseNow() {
+  var p = _syncDDIPairsToSupabase();
+  var r = _syncDDIClassRulesToSupabase();
+  Logger.log('ddi_pairs upserted: ' + p + ', ddi_class_rules upserted: ' + r);
+  return { pairs: p, rules: r };
 }
 
 

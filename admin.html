@@ -71,6 +71,7 @@
     <button class="tab-btn" data-tab="users" data-action="switchTab">👥 จัดการผู้ใช้</button>
     <button class="tab-btn" data-tab="quality" data-action="switchTab">📊 Data Quality</button>
     <button class="tab-btn" data-tab="compat" data-action="switchTab">🔗 Compatibility</button>
+    <button class="tab-btn" data-tab="ddi" data-action="switchTab">💊 DDI</button>
     <button class="tab-btn" data-tab="renal" data-action="switchTab">💊 Renal Dosing</button>
     <button class="tab-btn" data-tab="allergy" data-action="switchTab">🛡️ Allergy</button>
     <button class="tab-btn" data-tab="analytics" data-action="switchTab">📈 Analytics</button>
@@ -365,6 +366,131 @@
     <div class="modal-footer">
       <button class="btn btn-outline" data-action="closeCompatModal">ยกเลิก</button>
       <button class="btn btn-primary" data-action="saveCompatPair">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PANEL: DRUG INTERACTION (DDI) ═══════ -->
+    <div class="panel" id="ddi-panel">
+      <h2 style="margin-bottom:4px">💊 Drug Interaction (DDI) Database</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        จัดการ <b>คู่ยาเฉพาะ (curated pairs)</b> และ <b>การ tag ยาเข้าคลาส (class rules)</b> ที่ใช้คัดกรองอันตรกิริยา —
+        นิยามคลาส (กลไก/ความรุนแรง) อยู่ในโค้ด <code>drug-interactions.js</code>
+      </p>
+      <div class="info-box" id="ddi-backend-note" style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:#92400e">
+        ⚠️ ฟีเจอร์นี้ต้อง deploy backend ก่อน: รัน <code>supabase/ddi.sql</code> + copy <code>gas-complete.js</code> เข้า ADMIN GAS แล้ว Deploy
+        ถ้ายังไม่ได้ทำ การบันทึกจะ error (หน้าเว็บฝั่งผู้ใช้ยังใช้ค่า default ในโค้ดได้ตามปกติ)
+      </div>
+
+      <!-- Curated pairs -->
+      <h3 style="margin:8px 0 4px">🔗 Curated Pairs — <span id="ddi-pairs-count">0</span> คู่</h3>
+      <div class="toolbar" style="margin-top:8px">
+        <input type="text" class="search-box" id="search-ddi-pair" placeholder="ค้นหาคู่ยา..." data-action="filterDDIPairs">
+        <button class="btn btn-primary" data-action="openDDIPairModal">＋ เพิ่มคู่ยา</button>
+        <button class="btn btn-outline" data-action="importDDIDefaults" title="นำเข้า curated pairs + class rules จากค่า default ที่ hardcode ไว้">📦 Import Defaults</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead><tr><th>#</th><th>ฝั่ง A</th><th>ฝั่ง B</th><th>ความรุนแรง</th><th>กลไก</th><th>จัดการ</th></tr></thead>
+          <tbody id="ddi-pairs-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Class rules -->
+      <h3 style="margin:24px 0 4px">🏷️ Class Rules (keyword → คลาส) — <span id="ddi-rules-count">0</span> รายการ</h3>
+      <div class="toolbar" style="margin-top:8px">
+        <input type="text" class="search-box" id="search-ddi-rule" placeholder="ค้นหา keyword/คลาส..." data-action="filterDDIRules">
+        <button class="btn btn-primary" data-action="openDDIRuleModal">＋ เพิ่ม class rule</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="drug-table">
+          <thead><tr><th>#</th><th>Keyword (ชื่อยา)</th><th>คลาส</th><th>จัดการ</th></tr></thead>
+          <tbody id="ddi-rules-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+<!-- ═══════ DDI PAIR MODAL ═══════ -->
+<div class="modal-overlay" id="ddi-pair-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h2 id="ddi-pair-modal-title">เพิ่มคู่ยา DDI</h2>
+      <button class="modal-close" data-action="closeDDIPairModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+        ใส่ keyword ของชื่อยา (ตัวพิมพ์เล็ก, จับแบบ substring). “หลายตัว” = คั่นด้วย comma เช่น <code>meropenem, ertapenem, imipenem</code>
+        (ถ้ากรอกช่อง “หลายตัว” ระบบจะใช้ช่องนั้นแทนช่องเดี่ยว)
+      </p>
+      <form id="ddi-pair-form">
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">ฝั่ง A — keyword เดี่ยว</label>
+          <input type="text" class="form-input" id="df-a" placeholder="เช่น valpro">
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">ฝั่ง A — หลายตัว (comma)</label>
+          <input type="text" class="form-input" id="df-aAny" placeholder="เช่น amikacin, gentamicin">
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">ฝั่ง B — keyword เดี่ยว</label>
+          <input type="text" class="form-input" id="df-b" placeholder="เช่น warfarin">
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">ฝั่ง B — หลายตัว (comma)</label>
+          <input type="text" class="form-input" id="df-bAny" placeholder="เช่น meropenem, ertapenem, imipenem">
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">ความรุนแรง *</label>
+          <select class="form-select" id="df-severity" required>
+            <option value="contraindicated">⛔ ห้ามใช้ร่วม (contraindicated)</option>
+            <option value="major" selected>🟠 รุนแรง (major)</option>
+            <option value="moderate">🟡 ปานกลาง (moderate)</option>
+            <option value="minor">⚪ เล็กน้อย (minor)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">กลไก (mechanism)</label>
+          <textarea class="form-input" id="df-mechanism" rows="2" placeholder="อธิบายกลไกของอันตรกิริยา"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">การจัดการ (management)</label>
+          <textarea class="form-input" id="df-management" rows="2" placeholder="คำแนะนำการจัดการ"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">Reference</label>
+          <input type="text" class="form-input" id="df-ref" placeholder="เช่น Lexicomp">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeDDIPairModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveDDIPair">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DDI CLASS RULE MODAL ═══════ -->
+<div class="modal-overlay" id="ddi-rule-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h2 id="ddi-rule-modal-title">เพิ่ม Class Rule</h2>
+      <button class="modal-close" data-action="closeDDIRuleModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="ddi-rule-form">
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Keyword (ชื่อยา, ตัวพิมพ์เล็ก) *</label>
+          <input type="text" class="form-input" id="rf-keyword" required placeholder="เช่น amiodarone">
+        </div>
+        <div class="form-group">
+          <label class="form-label">คลาส (เลือกได้หลายอัน) *</label>
+          <div id="rf-classes" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-action="closeDDIRuleModal">ยกเลิก</button>
+      <button class="btn btn-primary" data-action="saveDDIRule">💾 บันทึก</button>
     </div>
   </div>
 </div>
@@ -887,6 +1013,7 @@
 <script src="js/error-tracker.js"></script>
 <script src="js/core.js"></script>
 <script src="js/allergy-data.js"></script>
+<script src="js/drug-interactions.js"></script>
 <script src="js/admin.js"></script>
 
 </body>

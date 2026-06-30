@@ -425,7 +425,8 @@
     if (tab === 'drugs' || tab === 'overview') renderDrugs(searches, drugExpands);
     if (tab === 'tdm' || tab === 'overview') renderTDM(tdmUsage);
     if (tab === 'renal' || tab === 'overview') renderRenal(renalDosing);
-    if (tab === 'compat' || tab === 'overview') renderCompat(compatUsage, ddiChecks);
+    if (tab === 'compat' || tab === 'overview') renderCompat(compatUsage);
+    if (tab === 'ddi' || tab === 'overview') renderDDIStats(ddiChecks);
     if (tab === 'allergy' || tab === 'overview') renderAllergy(allergyLookups);
     if (tab === 'dosecalc' || tab === 'overview') renderDoseCalc(doseCalcs);
     if (tab === 'ratings' || tab === 'overview') renderRatingsNPS(drugRatings, npsResponses);
@@ -733,7 +734,7 @@
   // ============================================================
   // RENDER: Compat
   // ============================================================
-  function renderCompat(compat, ddi) {
+  function renderCompat(compat) {
     const users = uniqueSet(compat, 'user_id');
     const pairChecks = compat.filter(r => r.mode === 'pair');
     const multiChecks = compat.filter(r => r.mode === 'multi');
@@ -761,14 +762,12 @@
     const daily = dailyCount(compat);
     const days = Object.keys(daily).sort();
     mc('compatDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Compat Checks', data:days.map(d => daily[d]), borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.1)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
-
-    renderDDIStats(ddi || []);
   }
 
-  // ── DDI sub-section (pharmacological interactions) on the Compat tab ──
-  // Lives on the same tab because it's the same page's "💊 อันตรกิริยาระหว่างยา"
-  // mode. Charts WHICH interaction classes fire most + severity mix, so we can
-  // see whether the curated/class-tag coverage matches what users actually hit.
+  // ── DDI tab (pharmacological interactions) ──────────────────────────
+  // Its OWN dashboard tab (the DDI checker is a separate mode from physical
+  // compatibility). Charts WHICH interaction classes fire most + severity mix,
+  // so we can see whether the curated/class-tag coverage matches real usage.
   function renderDDIStats(ddi) {
     const el = document.getElementById('ddiStats');
     if (!el) return;                       // older dashboard.html without the DDI block

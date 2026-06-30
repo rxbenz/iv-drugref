@@ -892,3 +892,31 @@
   margin: 6px 0 8px;
   display: inline-block;
 }
+
+/* ===== Drug Interaction (DDI) section — appended below compatibility result ===== */
+.ddi-section { margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--border); }
+.ddi-head { font-size: 14px; font-weight: 800; color: var(--text-primary); margin-bottom: 10px; }
+.ddi-none {
+  font-size: 13px; color: var(--accent-green, #059669);
+  background: var(--green-dim, rgba(5,150,105,0.08)); border: 1px solid var(--green-dim, rgba(5,150,105,0.2));
+  border-radius: 10px; padding: 10px 12px;
+}
+.ddi-card { border: 1px solid; border-radius: 12px; padding: 11px 13px; margin-bottom: 10px; }
+.ddi-card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.ddi-badge {
+  font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 999px;
+  border: 1px solid; background: #fff;
+}
+.ddi-title { font-size: 13.5px; font-weight: 700; color: #0f172a; }
+.ddi-drugs { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+.ddi-row { font-size: 12.5px; line-height: 1.55; color: #334155; margin-top: 2px; }
+.ddi-row b { color: #0f172a; }
+.ddi-ref { font-size: 11px; color: #64748b; margin-top: 6px; }
+.ddi-disclaimer {
+  font-size: 11.5px; line-height: 1.5; color: var(--text-secondary);
+  background: var(--tag-bg); border: 1px solid var(--tag-border);
+  border-radius: 10px; padding: 9px 11px; margin-top: 4px;
+}
+/* DDI cards use light-mode literal colours (badge/title); keep them legible in dark mode */
+[data-theme="dark"] .ddi-title, [data-theme="dark"] .ddi-row, [data-theme="dark"] .ddi-row b { color: #0f172a; }
+[data-theme="dark"] .ddi-drugs { color: #1e293b; }

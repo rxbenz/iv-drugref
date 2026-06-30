@@ -855,13 +855,47 @@ function checkMultiCompat() {
   container.innerHTML = (n === 2)
     ? renderPairDetail(drugs[0], drugs[1], pairs[0].result)
     : renderGroupedResults(pairs);
+
+  // Pharmacological DRUG INTERACTION (DDI) lives in its OWN tab (renderDDI),
+  // not mixed into the physical-compatibility result — but it reuses this same
+  // selected-drug list, so refresh it whenever the selection changes.
+  if (typeof renderDDI === 'function') renderDDI();
+}
+
+// ===== DRUG INTERACTION (DDI) — pharmacological, its OWN tab =====
+// Reuses the SAME selected-drug picker as the compatibility check, but renders
+// only DDI findings into #ddiResults — kept on a separate tab so physical
+// (Y-site) compatibility and pharmacological interactions never blur together.
+function renderDDI() {
+  const container = document.getElementById('ddiResults');
+  if (!container) return;
+  const drugs = selectedMultiDrugs.map(id => DRUGS.find(d => d.i === id)).filter(Boolean);
+  if (drugs.length < 2) {
+    container.innerHTML = '<p class="check-hint">💊 เพิ่มยา ≥2 ตัว เพื่อตรวจ <b>อันตรกิริยาระหว่างยา (DDI)</b>'
+      + '<br><span style="font-size:11px;color:var(--text-muted)">เภสัชวิทยา — คนละเรื่องกับ “เข้ากันในสาย” (กายภาพ)</span></p>';
+    return;
+  }
+  container.innerHTML = window.DrugInteractions
+    ? window.DrugInteractions.renderHtml(drugs.map(d => d.g)) : '';
+  if (typeof IVDrugRef !== 'undefined' && IVDrugRef.sendAnalytics) {
+    IVDrugRef.sendAnalytics({ type: 'ddi_check', drugs_count: drugs.length });
+  }
 }
 
 // ===== MODE SWITCHING =====
 function switchMode(mode) {
-  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
-  document.getElementById('checkSection').classList.toggle('active', mode === 'check');
+  document.querySelectorAll('.mode-tab').forEach(t => {
+    const on = t.dataset.mode === mode;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  // 'check' and 'ddi' share the same picker section; only the results panel swaps.
+  const isPick = (mode === 'check' || mode === 'ddi');
+  document.getElementById('checkSection').classList.toggle('active', isPick);
   document.getElementById('matrixSection').classList.toggle('active', mode === 'matrix');
+  const mr = document.getElementById('multiResults'); if (mr) mr.style.display = (mode === 'ddi') ? 'none' : '';
+  const dr = document.getElementById('ddiResults'); if (dr) dr.style.display = (mode === 'ddi') ? '' : 'none';
+  if (mode === 'ddi') renderDDI();
 
   if (mode === 'matrix') {
     renderMatrix();
@@ -913,6 +947,12 @@ document.addEventListener('click', e => {
         if (_hit) addMultiDrug(_hit.i);
       }
     } catch (e) { /* ignore deep-link errors */ }
+
+    // Deep-link straight to the Drug Interaction tab (sidebar "อันตรกิริยา" entry
+    // → compatibility.html?mode=ddi). Default stays on the compatibility tab.
+    try {
+      if (new URLSearchParams(location.search).get('mode') === 'ddi') switchMode('ddi');
+    } catch (e) { /* ignore */ }
 
     // Event delegation — replaces all inline handlers
     IVDrugRef.delegate(document, 'click', {

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.44.0
+// IV Drug Reference PWA — Service Worker v5.45.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -311,9 +311,25 @@
 //          q24h; meropenem CrCl 41 → 1 g q12h, CrCl 21 → 500 mg q12h; levofloxacin
 //          CrCl 41 → 750 q48h; ganciclovir CrCl 41 → 175 mg q24h. Drugs without
 //          renalTiers keep their free-text renal caution (no regression). Tests 148.
+// v5.45.0: Drug–drug interaction (DDI) checker — Phase 0 (class-collision engine).
+//          PHARMACOLOGICAL interaction screening, kept DISTINCT from the physical
+//          (Y-site/admixture) compatibility: a new "💊 อันตรกิริยาระหว่างยา" tab on
+//          the compatibility page reuses the same multi-drug picker but renders
+//          only DDI findings (compat tab renamed "🧪 เข้ากันในสาย"; nothing mixed).
+//          Engine (js/drug-interactions.js): hybrid model — additive-risk CLASS
+//          tags (QT/serotonergic/nephrotoxic/bleeding/hyperK/ototoxic) flag when
+//          ≥2 selected drugs share a class (scales without N² pairs) + a small set
+//          of curated explicit pairs (valproate+carbapenem, linezolid+sympatho-
+//          mimetic [MAOI], digoxin+K-wasting, methotrexate+NSAID). Each finding
+//          shows severity badge + mechanism + management + reference; section
+//          carries a "not exhaustive — verify at source" disclaimer. Decision
+//          support only (NOT a full Lexicomp clone). Locked by 9 tests (157 total).
+//          Discoverability: a dedicated left-rail entry "💊 อันตรกิริยา" deep-links
+//          to compatibility.html?mode=ddi (opens straight on the DDI tab); the page
+//          header/title updated to cover both functions ("เข้ากัน & อันตรกิริยายา").
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.44.0';
+const CACHE_NAME = 'iv-drugref-v5.45.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

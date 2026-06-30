@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://bzwbagojjpiazbeaahmg.supabase.co; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IV Compatibility Checker — IV DrugRef</title>
-  <meta name="description" content="IV Drug Compatibility Checker — Pair checker, matrix view, multi-drug compatibility">
+  <title>Compatibility & Drug Interaction — IV DrugRef</title>
+  <meta name="description" content="IV compatibility (Y-site/admixture) + drug–drug interaction (DDI) checker — multi-drug, matrix view">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -34,14 +34,15 @@
 <div class="header-left">
 <a href="index.html" class="header-back">← กลับ</a>
 <div class="header-title-area">
-<div class="logo-text">🔗 IV Compatibility Checker</div>
+<div class="logo-text">🔗 เข้ากัน & อันตรกิริยายา</div>
 <div class="logo-sub">IV Drug Quick Reference <span data-app-version>v5.36.1</span> — 167 drugs</div>
 </div>
 <button class="onboarding-help-btn" data-action="showTutorial" aria-label="Tutorial" title="Tutorial">?</button>
 </div>
 </div>
 <div class="mode-tabs" id="modeTabs" role="tablist" aria-label="Compatibility check mode">
-<button class="mode-tab active" data-mode="check" data-action="switchMode" role="tab" aria-selected="true">🔍 ตรวจสอบ</button>
+<button class="mode-tab active" data-mode="check" data-action="switchMode" role="tab" aria-selected="true">🧪 เข้ากันในสาย</button>
+<button class="mode-tab" data-mode="ddi" data-action="switchMode" role="tab" aria-selected="false">💊 อันตรกิริยาระหว่างยา</button>
 <button class="mode-tab" data-mode="matrix" data-action="switchMode" role="tab" aria-selected="false">📊 Matrix</button>
 </div>
 </div>
@@ -65,6 +66,7 @@
 <div class="chips-wrap" id="fluidChips"></div>
 </div>
 <div class="multi-results" id="multiResults"></div>
+<div class="multi-results" id="ddiResults" style="display:none"></div>
 </div>
 </div>
 
@@ -94,6 +96,7 @@
 <!-- BUILD:JS -->
 <script src="js/error-tracker.js"></script>
 <script src="js/core.js"></script>
+<script src="js/drug-interactions.js"></script>
 <script src="js/compatibility.js"></script>
 <script src="js/quick-actions.js"></script>
 <script src="js/onboarding.js"></script>

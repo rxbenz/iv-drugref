@@ -49,12 +49,13 @@
     { file: 'vanco-tdm.html',     ic: '🧪', key: 'vanco' },
     { file: 'renal-dosing.html',  ic: '🧬', key: 'renal' },
     { file: 'compatibility.html', ic: '🔗', key: 'compat' },
+    { file: 'compatibility.html?mode=ddi', ic: '💊', key: 'ddi' },
     { file: 'allergy.html',       ic: '🛡️', key: 'allergy' }
   ];
 
   var STR = {
     th: {
-      search: 'ค้นหายา', calc: 'คำนวณ', tdm: 'TDM', vanco: 'Vanco', renal: 'Renal', compat: 'เข้ากัน', allergy: 'แพ้ยา',
+      search: 'ค้นหายา', calc: 'คำนวณ', tdm: 'TDM', vanco: 'Vanco', renal: 'Renal', compat: 'เข้ากัน', ddi: 'อันตรกิริยา', allergy: 'แพ้ยา',
       by: 'ภก.ฐาปนัท นาคครุฑ (Benz) · สถาบันประสาทวิทยา',
       infoBtn: 'ℹ️ เกี่ยวกับ / Disclaimer / License',
       aboutTitle: 'ℹ️ เกี่ยวกับแอปนี้',
@@ -73,7 +74,7 @@
       later: 'ไม่ตอนนี้'
     },
     en: {
-      search: 'Search', calc: 'Calc', tdm: 'TDM', vanco: 'Vanco', renal: 'Renal', compat: 'Compat', allergy: 'Allergy',
+      search: 'Search', calc: 'Calc', tdm: 'TDM', vanco: 'Vanco', renal: 'Renal', compat: 'Compat', ddi: 'DDI', allergy: 'Allergy',
       by: 'Thapanat Nakkrut (Benz) · Neurological Institute of Thailand',
       infoBtn: 'ℹ️ About / Disclaimer / License',
       aboutTitle: 'ℹ️ About this app',

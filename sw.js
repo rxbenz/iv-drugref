@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.45.0
+// IV Drug Reference PWA — Service Worker v5.46.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -327,9 +327,17 @@
 //          Discoverability: a dedicated left-rail entry "💊 อันตรกิริยา" deep-links
 //          to compatibility.html?mode=ddi (opens straight on the DDI tab); the page
 //          header/title updated to cover both functions ("เข้ากัน & อันตรกิริยายา").
+// v5.46.0: Dashboard — DDI analytics. The ddi_check event (compatibility.js) is now
+//          enriched with findings_count / classes / top_severity, and the dashboard
+//          counts it (TYPE_TO_KEY ddi_check→ddiChecks, was dropped by the
+//          if(!key)continue filter — same class of undercount bug as v5.38.2). New
+//          "💊 Drug Interaction (DDI)" block on the Compat tab: stat cards (checks /
+//          unique users / checks-with-findings / major-severity) + Top Interaction
+//          Classes bar + Severity Mix doughnut. Dose-calc tracking unchanged (new
+//          doseRule drugs already surface via the existing dose_calc event).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.45.0';
+const CACHE_NAME = 'iv-drugref-v5.46.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

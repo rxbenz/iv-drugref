@@ -875,10 +875,26 @@ function renderDDI() {
       + '<br><span style="font-size:11px;color:var(--text-muted)">เภสัชวิทยา — คนละเรื่องกับ “เข้ากันในสาย” (กายภาพ)</span></p>';
     return;
   }
+  const genericList = drugs.map(d => d.g);
   container.innerHTML = window.DrugInteractions
-    ? window.DrugInteractions.renderHtml(drugs.map(d => d.g)) : '';
+    ? window.DrugInteractions.renderHtml(genericList) : '';
   if (typeof IVDrugRef !== 'undefined' && IVDrugRef.sendAnalytics) {
-    IVDrugRef.sendAnalytics({ type: 'ddi_check', drugs_count: drugs.length });
+    // Enrich the event so the dashboard can chart which interaction classes fire
+    // and how severe they are — not just the count of drugs in the picker.
+    const findings = (window.DrugInteractions && window.DrugInteractions.check)
+      ? window.DrugInteractions.check(genericList) : [];
+    // class-kind findings carry a `cls` key; collect the flagged ones for the chart
+    const classes = findings.filter(f => f.cls).map(f => f.cls);
+    const sevRank = { major: 3, moderate: 2, minor: 1 };
+    const topSeverity = findings.reduce((top, f) =>
+      (sevRank[f.severity] || 0) > (sevRank[top] || 0) ? f.severity : top, '');
+    IVDrugRef.sendAnalytics({
+      type: 'ddi_check',
+      drugs_count: drugs.length,
+      findings_count: findings.length,
+      classes: classes.join(','),
+      top_severity: topSeverity || 'none'
+    });
   }
 }
 

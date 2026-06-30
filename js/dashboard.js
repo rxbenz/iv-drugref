@@ -272,6 +272,8 @@
     RENAL_DOSING: 'renalDosing', renal_dosing: 'renalDosing',
     // IV compatibility
     COMPAT_CHECK: 'compatUsage', compat_usage: 'compatUsage', COMPAT_USAGE: 'compatUsage',
+    // Drug–drug interaction (DDI) — pharmacological, separate tab on the compat page
+    DDI_CHECK: 'ddiChecks', ddi_check: 'ddiChecks', DDI_CHECKS: 'ddiChecks',
     // Vanco-TDM "calc visit"
     CALC_VISIT: 'calcVisits', calc_visit: 'calcVisits', CALC_VISITS: 'calcVisits',
     // Allergy
@@ -290,7 +292,7 @@
     try {
       const raw = {
         sessions: [], searches: [], surveys: [], doseCalcs: [], drugExpands: [],
-        tdmUsage: [], pageViews: [], renalDosing: [], compatUsage: [], drugRatings: [],
+        tdmUsage: [], pageViews: [], renalDosing: [], compatUsage: [], ddiChecks: [], drugRatings: [],
         npsResponses: [], allergyLookups: [], featureUse: [], microFeedback: [],
         susItems: [], calcVisits: [], filters: [], errors: []
       };
@@ -408,6 +410,7 @@
     const pageViews = applyFilters(RAW.pageViews || []);
     const renalDosing = applyFilters(RAW.renalDosing || []);
     const compatUsage = applyFilters(RAW.compatUsage || []);
+    const ddiChecks = applyFilters(RAW.ddiChecks || []);
     const drugRatings = applyFilters(RAW.drugRatings || []);
     const npsResponses = applyFilters(RAW.npsResponses || []);
     const allergyLookups = applyFilters(RAW.allergyLookups || []);
@@ -422,7 +425,7 @@
     if (tab === 'drugs' || tab === 'overview') renderDrugs(searches, drugExpands);
     if (tab === 'tdm' || tab === 'overview') renderTDM(tdmUsage);
     if (tab === 'renal' || tab === 'overview') renderRenal(renalDosing);
-    if (tab === 'compat' || tab === 'overview') renderCompat(compatUsage);
+    if (tab === 'compat' || tab === 'overview') renderCompat(compatUsage, ddiChecks);
     if (tab === 'allergy' || tab === 'overview') renderAllergy(allergyLookups);
     if (tab === 'dosecalc' || tab === 'overview') renderDoseCalc(doseCalcs);
     if (tab === 'ratings' || tab === 'overview') renderRatingsNPS(drugRatings, npsResponses);
@@ -730,7 +733,7 @@
   // ============================================================
   // RENDER: Compat
   // ============================================================
-  function renderCompat(compat) {
+  function renderCompat(compat, ddi) {
     const users = uniqueSet(compat, 'user_id');
     const pairChecks = compat.filter(r => r.mode === 'pair');
     const multiChecks = compat.filter(r => r.mode === 'multi');
@@ -758,6 +761,42 @@
     const daily = dailyCount(compat);
     const days = Object.keys(daily).sort();
     mc('compatDayChart', {type:'line', data:{labels:days.map(d => d.substring(5)), datasets:[{label:'Compat Checks', data:days.map(d => daily[d]), borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.1)', fill:true, tension:0.3, pointRadius:3}]}, options:{...CD, plugins:{legend:{display:false}}}});
+
+    renderDDIStats(ddi || []);
+  }
+
+  // ── DDI sub-section (pharmacological interactions) on the Compat tab ──
+  // Lives on the same tab because it's the same page's "💊 อันตรกิริยาระหว่างยา"
+  // mode. Charts WHICH interaction classes fire most + severity mix, so we can
+  // see whether the curated/class-tag coverage matches what users actually hit.
+  function renderDDIStats(ddi) {
+    const el = document.getElementById('ddiStats');
+    if (!el) return;                       // older dashboard.html without the DDI block
+    const users = uniqueSet(ddi, 'user_id');
+    // a "flagged" check = at least one finding surfaced
+    const num = r => { const n = parseInt(r.findings_count, 10); return isNaN(n) ? 0 : n; };
+    const flagged = ddi.filter(r => num(r) > 0);
+    const major = ddi.filter(r => r.top_severity === 'major');
+
+    el.innerHTML = [
+      statBox('💊', ddi.length.toLocaleString(), 'DDI Checks', 'purple'),
+      statBox('👤', users.size.toLocaleString(), 'Unique Users', 'blue'),
+      statBox('⚠️', flagged.length.toLocaleString(), 'Checks w/ Findings', 'amber'),
+      statBox('🚨', major.length.toLocaleString(), 'Major Severity', 'red')
+    ].join('');
+
+    // Top interaction classes — the `classes` field is a comma-joined list per check
+    const classCount = {};
+    ddi.forEach(r => {
+      String(r.classes || '').split(',').map(s => s.trim()).filter(Boolean)
+        .forEach(c => { classCount[c] = (classCount[c] || 0) + 1; });
+    });
+    const topClasses = Object.entries(classCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    mc('ddiClassChart', {type:'bar', data:{labels:topClasses.map(c => c[0]), datasets:[{label:'Times flagged', data:topClasses.map(c => c[1]), backgroundColor:'#dc2626', borderRadius:4}]}, options:{...CD, indexAxis:'y', plugins:{legend:{display:false}}}});
+
+    // Severity mix across all DDI checks (none = no interaction surfaced)
+    const sevCount = countBy(ddi, 'top_severity');
+    mc('ddiSevChart', {type:'doughnut', data:{labels:Object.keys(sevCount), datasets:[{data:Object.values(sevCount), backgroundColor:['#dc2626','#d97706','#0ea5e9','#64748b','#059669']}]}, options:{responsive:true, plugins:{legend:{position:'bottom', labels:{color:'#8899b4', font:{size:10}}}}}});
   }
 
   // ============================================================

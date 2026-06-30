@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://bzwbagojjpiazbeaahmg.supabase.co; img-src 'self' data: https:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drug Interaction (DDI) — IV DrugRef</title>
+  <meta name="description" content="Drug–drug interaction (DDI) checker — pharmacological screening (QT, serotonergic, nephrotoxic, bleeding…) + curated pairs">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+  <!-- Google Fonts (async, non-render-blocking) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap"></noscript>
+  <!-- BUILD:CSS -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/compatibility.css">
+  <link rel="stylesheet" href="css/quick-actions.css">
+  <link rel="stylesheet" href="css/onboarding.css">
+  <link rel="stylesheet" href="css/site-chrome.css">
+</head>
+<body>
+<a href="#content" class="skip-to-content">Skip to content</a>
+
+<header class="header">
+<div class="header-inner">
+<div class="header-top">
+<div class="header-left">
+<a href="index.html" class="header-back">← กลับ</a>
+<div class="header-title-area">
+<div class="logo-text">💊 อันตรกิริยาระหว่างยา (DDI)</div>
+<div class="logo-sub">Drug–Drug Interaction · IV DrugRef <span data-app-version>v5.48.0</span></div>
+</div>
+<button class="onboarding-help-btn" data-action="showTutorial" aria-label="Tutorial" title="Tutorial">?</button>
+</div>
+</div>
+</div>
+</header>
+
+<main class="content" id="content">
+<div class="check-section active">
+<div class="multi-drug-area">
+
+<div class="ddi-intro">
+🧠 ตรวจ <b>อันตรกิริยาทางเภสัชวิทยา</b> (เช่น ยืด QT, serotonin syndrome, พิษต่อไตเสริมกัน, เลือดออก) —
+คนละเรื่องกับ <a href="compatibility.html">“เข้ากันในสาย” (IV Compatibility)</a> ที่เป็นความเข้ากันทางกายภาพ
+</div>
+
+<div class="check-search-wrap" id="ddiSearchWrap">
+<input type="text" class="multi-search" id="ddiSearch" placeholder="🔍 พิมพ์ชื่อยา เพื่อเพิ่ม…" autocomplete="off" aria-label="ค้นหายาเพื่อเพิ่ม">
+<div class="drug-suggestions" id="ddiSuggestions" style="display:none"></div>
+</div>
+
+<div class="selected-drugs" id="ddiSelected"></div>
+
+<div class="quick-chips" id="ddiQuickWrap">
+<div class="quick-chips-title">🔥 ICU/High-alert (แตะเพื่อเพิ่ม)</div>
+<div class="chips-wrap" id="ddiQuickChips"></div>
+</div>
+
+<div class="multi-results" id="ddiResults"></div>
+</div>
+</div>
+
+<div class="disclaimer">
+<strong>⚠️ Disclaimer:</strong> เป็นการคัดกรองเบื้องต้น (high-alert + class-based) <strong>ไม่ครอบคลุมทุก interaction</strong> และไม่ทดแทนฐานข้อมูล DDI ฉบับเต็ม (Lexicomp/Micromedex) — ตรวจซ้ำกับแหล่งอ้างอิงปฐมภูมิและใช้ดุลยพินิจทางวิชาชีพก่อนตัดสินใจทุกครั้ง
+</div>
+</main>
+
+<!-- BUILD:JS -->
+<script src="js/error-tracker.js"></script>
+<script src="js/core.js"></script>
+<script src="js/drug-interactions.js"></script>
+<script src="js/compat-drugs.js"></script>
+<script src="js/interactions.js"></script>
+<script src="js/quick-actions.js"></script>
+<script src="js/onboarding.js"></script>
+<script src="translations-en.js"></script>
+<script src="i18n.js"></script>
+
+<script src="js/survey.js"></script>
+<script src="js/site-chrome.js"></script>
+</body>
+</html>

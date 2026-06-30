@@ -122,6 +122,9 @@ function loadVancoModels() {
 // matching logic runs (no DOM at load).
 function loadCompatibility() {
   const { sandbox } = loadCore();
+  // The drug dataset was extracted to js/compat-drugs.js (window.COMPAT_DRUGS);
+  // load it first so compatibility.js's `const DRUGS = window.COMPAT_DRUGS` resolves.
+  vm.runInContext(readJs('compat-drugs.js'), sandbox, { filename: 'compat-drugs.js' });
   let src = readJs('compatibility.js');
   const cut = src.indexOf("document.addEventListener('click'");
   if (cut > 0) src = src.slice(0, cut);

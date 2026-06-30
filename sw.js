@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.48.0
+// IV Drug Reference PWA — Service Worker v5.49.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -360,9 +360,19 @@
 //          reachability). (4) Compat header drug count single-sourced from DRUGS.
 //          NOTE: the DDI write path needs the user to run supabase/ddi.sql + copy
 //          gas-complete.js to the ADMIN GAS and Deploy.
+// v5.49.0: DDI fully split into its OWN page (interactions.html) — no longer a tab
+//          on the compatibility page (the two are different clinical questions:
+//          physical Y-site vs pharmacological interaction). New standalone
+//          interactions.js (lightweight picker) reuses the shared engine
+//          (drug-interactions.js) + the drug list, which was extracted from
+//          compatibility.js into js/compat-drugs.js (window.COMPAT_DRUGS) so both
+//          pages share ONE dataset (no duplication). Compatibility page reverted
+//          to compat-only (2 tabs: Check + Matrix; DDI tab/results/mode removed,
+//          header back to "IV Compatibility"). Sidebar "อันตรกิริยา" now points to
+//          interactions.html. SW caches the new page.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.48.0';
+const CACHE_NAME = 'iv-drugref-v5.49.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -383,6 +393,7 @@ const ASSETS_TO_CACHE = [
   './tdm.html',
   './renal-dosing.html',
   './compatibility.html',
+  './interactions.html',
   './allergy.html',
   './dashboard.html',
   './admin.html',

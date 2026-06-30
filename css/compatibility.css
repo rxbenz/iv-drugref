@@ -920,3 +920,38 @@
 /* DDI cards use light-mode literal colours (badge/title); keep them legible in dark mode */
 [data-theme="dark"] .ddi-title, [data-theme="dark"] .ddi-row, [data-theme="dark"] .ddi-row b { color: #0f172a; }
 [data-theme="dark"] .ddi-drugs { color: #1e293b; }
+
+/* ===== Standalone DDI page (interactions.html) — picker chrome ===== */
+.ddi-intro {
+  background: var(--surface, #f8fafc); border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px; padding: 10px 13px; margin-bottom: 14px;
+  font-size: 13px; color: var(--text-muted, #64748b); line-height: 1.5;
+}
+.ddi-intro a { color: var(--primary, #2563eb); font-weight: 600; }
+.ddi-sg-item {
+  padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--border, #e2e8f0);
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
+}
+.ddi-sg-item:hover { background: var(--hover, #f1f5f9); }
+.ddi-sg-item:last-child { border-bottom: none; }
+.ddi-sg-trade { font-size: 11px; color: var(--text-muted, #94a3b8); }
+.ddi-sg-alert { font-size: 12px; }
+.ddi-sg-empty { padding: 10px 12px; color: var(--text-muted, #94a3b8); font-size: 13px; }
+.ddi-pill {
+  display: inline-flex; align-items: center; gap: 4px; margin: 4px 4px 0 0;
+  padding: 6px 8px 6px 11px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  background: var(--primary-soft, #eff6ff); color: var(--primary, #2563eb);
+  border: 1px solid var(--primary, #2563eb);
+}
+.ddi-pill-x {
+  border: none; background: transparent; color: inherit; cursor: pointer;
+  font-size: 16px; line-height: 1; padding: 0 2px; opacity: .7;
+}
+.ddi-pill-x:hover { opacity: 1; }
+.ddi-chip {
+  margin: 4px 4px 0 0; padding: 6px 11px; border-radius: 999px; cursor: pointer;
+  font-size: 12px; font-weight: 600; background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0); color: var(--text, #334155);
+}
+.ddi-chip:hover { background: var(--primary-soft, #eff6ff); border-color: var(--primary, #2563eb); color: var(--primary, #2563eb); }
+[data-theme="dark"] .ddi-pill { background: rgba(37,99,235,.18); }

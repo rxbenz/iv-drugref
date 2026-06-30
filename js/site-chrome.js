@@ -49,7 +49,7 @@
     { file: 'vanco-tdm.html',     ic: '🧪', key: 'vanco' },
     { file: 'renal-dosing.html',  ic: '🧬', key: 'renal' },
     { file: 'compatibility.html', ic: '🔗', key: 'compat' },
-    { file: 'compatibility.html?mode=ddi', ic: '💊', key: 'ddi' },
+    { file: 'interactions.html',  ic: '💊', key: 'ddi' },
     { file: 'allergy.html',       ic: '🛡️', key: 'allergy' }
   ];
 

@@ -945,6 +945,13 @@ document.addEventListener('click', e => {
     // Fetch sheet-managed compat pairs (async, non-blocking — CURATED is fallback)
     loadCompatPairsFromSheet();
 
+    // Single-source the header drug count from the actual dataset (no stale literal).
+    // Exclude IV fluids/diluents — they're selectable entities, not "drugs".
+    var _dc = document.getElementById('compatDrugCount');
+    if (_dc && typeof DRUGS !== 'undefined') {
+      _dc.textContent = DRUGS.filter(function (d) { return !d.isFluid; }).length;
+    }
+
     // When admin-managed DDI data finishes syncing from Supabase, re-render the
     // DDI panel so any already-selected drugs reflect the latest pairs/tags.
     if (window.DrugInteractions) window.DrugInteractions.onUpdate = function () {

@@ -169,7 +169,7 @@ async function apiCall(action, data = {}) {
     throw new Error('No script URL');
   }
 
-  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers', 'getCompatPairs', 'getRenalDrugs', 'getAllergyGroups'].includes(action);
+  const isRead = ['getDrugs', 'getAudit', 'getCategories', 'getUsers', 'getCompatPairs', 'getRenalDrugs', 'getAllergyGroups', 'getDDIPairs', 'getDDIClassRules', 'version'].includes(action);
   const url = new URL(cfg.scriptUrl);
   url.searchParams.set('action', action);
   url.searchParams.set('user', state.user?.email || 'unknown');
@@ -218,6 +218,50 @@ async function apiCall(action, data = {}) {
   // Add small delay to let GAS finish writing
   await new Promise(r => setTimeout(r, 1000));
   return { success: true, message: 'Sent (POST no-cors)' };
+}
+
+// Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
+// If the deployed GAS reports an older value, the editor copy wasn't redeployed.
+const EXPECTED_GAS_VERSION = '5.47.0';
+
+async function checkBackendVersion() {
+  const box = document.getElementById('version-check-result');
+  if (!box) return;
+  box.style.display = 'block';
+  box.innerHTML = '<span style="color:var(--text-muted);font-size:13px">🔄 กำลังตรวจ...</span>';
+
+  const appVer = (window.IVDrugRef && IVDrugRef.VERSION) ||
+    (document.querySelector('[data-app-version]')?.textContent || '—').replace(/^v/, '');
+
+  // GAS version via ?action=version
+  let gasVer = null, gasErr = null;
+  try { const r = await apiCall('version'); gasVer = r && r.version; }
+  catch (e) { gasErr = e.message; }
+
+  // Supabase reachability — does the ddi_pairs table answer? (also proves ddi.sql ran)
+  let supaOk = false, supaErr = null;
+  try {
+    const SB = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+    const KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+    const res = await fetch(SB + '/rest/v1/ddi_pairs?select=id&limit=1', { headers: { apikey: KEY, Authorization: 'Bearer ' + KEY } });
+    supaOk = res.ok;
+    if (!res.ok) supaErr = 'HTTP ' + res.status + (res.status === 404 ? ' (ยังไม่ได้รัน ddi.sql?)' : '');
+  } catch (e) { supaErr = e.message; }
+
+  const gasMatch = gasVer && gasVer === EXPECTED_GAS_VERSION;
+  const row = (label, value, ok, note) =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+       <span style="width:18px">${ok ? '✅' : '⚠️'}</span>
+       <span style="flex:1;font-size:13px">${escHtml(label)}</span>
+       <code style="font-size:12px">${escHtml(value)}</code>
+       ${note ? `<span style="font-size:11px;color:var(--text-muted)">${escHtml(note)}</span>` : ''}
+     </div>`;
+
+  box.innerHTML =
+    row('App version (frontend)', 'v' + appVer, true, '') +
+    row('GAS version (deployed)', gasErr ? 'error' : ('v' + (gasVer || '?')), gasMatch,
+        gasErr ? gasErr : (gasMatch ? 'ตรงกับโค้ด' : 'คาดหวัง v' + EXPECTED_GAS_VERSION + ' — ยัง deploy ไม่ครบ?')) +
+    row('Supabase (ddi_pairs)', supaOk ? 'reachable' : 'unreachable', supaOk, supaErr || 'พร้อมใช้งาน DDI');
 }
 
 async function testConnection() {
@@ -3547,6 +3591,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addUser: function() { addUser(); },
     saveSettings: function() { saveSettings(); },
     testConnection: function() { testConnection(); },
+    checkBackendVersion: function() { checkBackendVersion(); },
     exportDrugsJSON: function() { exportDrugsJSON(); },
     publishChanges: function() { publishChanges(); },
     closeDrugModal: function() { closeDrugModal(); },

@@ -248,6 +248,14 @@
         <pre id="test-result" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px;font-family:var(--mono);white-space:pre-wrap;max-height:400px;overflow-y:auto"></pre>
 
         <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
+        <h3 style="margin-bottom:12px">🔢 ตรวจเวอร์ชัน Backend</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+          เช็คว่า GAS ที่ deploy ตรงกับโค้ดล่าสุดหรือยัง (สำคัญหลังแก้ <code>gas-complete.js</code> เช่นเพิ่ม DDI) และ Supabase เชื่อมต่อได้
+        </p>
+        <button class="btn btn-outline" data-action="checkBackendVersion">🔢 ตรวจเวอร์ชัน</button>
+        <div id="version-check-result" style="display:none;margin-top:12px"></div>
+
+        <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
         <h3 style="margin-bottom:12px">📦 Publish to GitHub</h3>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
           อัพเดทไฟล์ drugs-data.json (local fallback) ให้ตรงกับข้อมูลใน Google Sheets<br>

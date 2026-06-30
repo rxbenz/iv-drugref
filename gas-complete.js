@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.28.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่
+var GAS_VERSION = '5.47.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.47.0 = + DDI CRUD)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 

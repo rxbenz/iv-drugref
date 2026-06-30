@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.47.0
+// IV Drug Reference PWA — Service Worker v5.48.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -347,9 +347,22 @@
 //          aminoglycoside+NMBA, magnesium+NMBA, MTX+cotrimoxazole, phenytoin+
 //          valproate. Carbapenem/valproate stay untagged so the valproate+carbapenem
 //          curated pair fires alone (no class leakage). Locked by +10 tests (167).
+// v5.48.0: DDI admin-managed + dashboard polish. (1) Admin can now maintain DDI
+//          data: new "💊 DDI" admin tab (curated pairs + keyword→class rules CRUD)
+//          backed by GAS handlers (DDIPairs/DDIClassRules sheets) that dual-write
+//          to Supabase (ddi_pairs / ddi_class_rules, supabase/ddi.sql). The live
+//          screen reads these via drug-interactions.js loadRemote() with the
+//          in-code defaults as offline fallback — no split-brain (same pattern as
+//          compat_pairs). "Import Defaults" seeds the sheets from the engine.
+//          (2) Dashboard: DDI moved to its OWN tab (split from Compat) — stat cards
+//          + Top Interaction Classes + Severity Mix. (3) Admin Settings: backend
+//          version-check (app vs deployed GAS_VERSION 5.47.0 + Supabase ddi_pairs
+//          reachability). (4) Compat header drug count single-sourced from DRUGS.
+//          NOTE: the DDI write path needs the user to run supabase/ddi.sql + copy
+//          gas-complete.js to the ADMIN GAS and Deploy.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.47.0';
+const CACHE_NAME = 'iv-drugref-v5.48.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

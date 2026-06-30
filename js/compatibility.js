@@ -945,6 +945,12 @@ document.addEventListener('click', e => {
     // Fetch sheet-managed compat pairs (async, non-blocking — CURATED is fallback)
     loadCompatPairsFromSheet();
 
+    // When admin-managed DDI data finishes syncing from Supabase, re-render the
+    // DDI panel so any already-selected drugs reflect the latest pairs/tags.
+    if (window.DrugInteractions) window.DrugInteractions.onUpdate = function () {
+      try { renderDDI(); } catch (e) { /* panel may not be mounted yet */ }
+    };
+
     populateSelects();
     buildMatrixFilter();
     checkMultiCompat();

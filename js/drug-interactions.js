@@ -315,5 +315,84 @@
     return head + cards + disclaimer + '</div>';
   }
 
-  window.DrugInteractions = { check: check, renderHtml: renderHtml, _CLASS_DEFS: CLASS_DEFS, _CURATED: CURATED_DDI };
+  // ── Remote (admin-managed) override ─────────────────────────────────
+  // The curated pairs + class tags above are the BUILT-IN defaults (and the
+  // offline fallback). When the admin maintains them in Supabase (ddi_pairs /
+  // ddi_class_rules, public-read), we replace the in-memory tables so the live
+  // screen reflects edits without a code change — exactly like compatibility.js
+  // pulls compat_pairs. If the tables are missing/empty or the fetch fails, the
+  // built-in defaults stay. CLASS_DEFS (class metadata) is NOT remote — it's
+  // structural and edited in code.
+  var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
+  var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
+  var LS_KEY = 'ddiData_v1', LS_TS = 'ddiData_v1_ts', CACHE_TTL = 6 * 60 * 60 * 1000; // 6h
+  var VALID_CLASSES = Object.keys(CLASS_DEFS);
+
+  // Validate + install a remote payload ({pairs, rules}); returns true if anything applied.
+  function _applyRemote(payload) {
+    var applied = false;
+    if (payload && Array.isArray(payload.pairs) && payload.pairs.length) {
+      // keep only well-formed pairs (need at least one side-key + the other)
+      var pairs = payload.pairs.filter(function (p) {
+        return p && (p.a || (p.aAny && p.aAny.length)) && (p.b || (p.bAny && p.bAny.length));
+      });
+      if (pairs.length) { CURATED_DDI = pairs; applied = true; }
+    }
+    if (payload && Array.isArray(payload.rules) && payload.rules.length) {
+      var rules = payload.rules
+        .filter(function (r) { return r && r.keyword && Array.isArray(r.classes); })
+        .map(function (r) {
+          var kw = String(r.keyword).toLowerCase().trim();
+          var cls = r.classes.filter(function (c) { return VALID_CLASSES.indexOf(c) >= 0; });
+          return [kw, cls];
+        })
+        .filter(function (x) { return x[0] && x[1].length; });
+      if (rules.length) { CLASS_RULES = rules; applied = true; }
+    }
+    if (applied && typeof window.DrugInteractions === 'object' &&
+        typeof window.DrugInteractions.onUpdate === 'function') {
+      try { window.DrugInteractions.onUpdate(); } catch (e) { /* host re-render is best-effort */ }
+    }
+    return applied;
+  }
+
+  function _supaGet(table) {
+    return fetch(SB_URL + '/rest/v1/' + table + '?select=data', {
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store'
+    }).then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { return Array.isArray(rows) ? rows.map(function (x) { return x.data; }).filter(Boolean) : []; })
+      .catch(function () { return []; });
+  }
+
+  function loadRemote() {
+    // 1) warm from cache immediately (so an offline reload still gets last-synced data)
+    try {
+      var c = localStorage.getItem(LS_KEY);
+      var ts = parseInt(localStorage.getItem(LS_TS) || '0', 10);
+      if (c && (Date.now() - ts) < CACHE_TTL) _applyRemote(JSON.parse(c));
+    } catch (e) { /* ignore cache errors */ }
+    // 2) fetch fresh in the background
+    Promise.all([_supaGet('ddi_pairs'), _supaGet('ddi_class_rules')]).then(function (res) {
+      var payload = { pairs: res[0], rules: res[1] };
+      if (_applyRemote(payload)) {
+        try {
+          localStorage.setItem(LS_KEY, JSON.stringify(payload));
+          localStorage.setItem(LS_TS, String(Date.now()));
+        } catch (e) { /* storage full — non-fatal */ }
+        if (window.console) console.log('[DDI] synced ' + payload.pairs.length + ' pairs / ' + payload.rules.length + ' class rules from Supabase');
+      }
+    });
+  }
+
+  window.DrugInteractions = {
+    check: check, renderHtml: renderHtml, loadRemote: loadRemote,
+    onUpdate: null,                       // host (compatibility.js) sets this to re-render
+    _CLASS_DEFS: CLASS_DEFS, _CURATED: CURATED_DDI
+  };
+
+  // Auto-sync on load (browser only; the Node test harness has no fetch/localStorage
+  // and never calls this, so the built-in defaults are what the tests lock).
+  if (typeof window !== 'undefined' && typeof fetch === 'function') {
+    try { loadRemote(); } catch (e) { /* defaults remain */ }
+  }
 })();

@@ -253,6 +253,134 @@
     },
   ];
 
+  // ====== Generic structured dose-rule engine (Phase 1) ======
+  // Instead of a bespoke calc(), a drug may declare a structured `doseRule`. The
+  // engine computes a per-patient dose from it (weight / flat / BSA basis; single
+  // value or [low,high] range; per-dose & per-day caps; rounding) and ALWAYS prints
+  // the rule, the assumptions, and the source reference next to the number so the
+  // result is verifiable. It runs through the SAME calc(pt) contract + Calculate
+  // button, so getPatientFromForm() validation and the pediatric guard already gate
+  // it. Adult rules FAIL CLOSED for age <18 (the numbers are adult-specific).
+  function _dosesPerDay(interval) {
+    var m = /q\s*(\d+(?:\.\d+)?)\s*h/i.exec(interval || '');
+    if (m) return 24 / parseFloat(m[1]);
+    if (/\b(od|daily|q24h)\b/i.test(interval)) return 1;
+    if (/\bbid\b/i.test(interval)) return 2;
+    if (/\btid\b/i.test(interval)) return 3;
+    if (/\bqid\b/i.test(interval)) return 4;
+    return null;
+  }
+  function _roundStep(v, step) { return step ? Math.round(v / step) * step : Math.round(v * 10) / 10; }
+  // Display a milligram amount, switching to grams at >=1000 mg for readability.
+  function _fmtAmt(mg) {
+    if (mg >= 1000) return (Math.round(mg / 100) / 10) + ' g';
+    return (Math.round(mg * 10) / 10) + ' mg';
+  }
+  function _evalIndication(pt, ind) {
+    var doseArr = Array.isArray(ind.dose) ? ind.dose : [ind.dose];
+    var wkg = pt.wt, wLabel = 'actual ' + pt.wt + ' kg';
+    if (ind.basis === 'weight' && ind.weightBasis === 'ibw') { wkg = pt.ibw || pt.wt; wLabel = 'IBW ' + (pt.ibw || pt.wt) + ' kg'; }
+    if (ind.basis === 'weight' && ind.weightBasis === 'abw') { wkg = pt.abw || pt.wt; wLabel = 'ABW ' + (pt.abw || pt.wt) + ' kg'; }
+    var unitToMg = ind.unit === 'g' ? 1000 : 1;
+    function perDoseMg(d) {
+      var amt;
+      if (ind.basis === 'weight') amt = d * wkg;            // d = mg/kg
+      else if (ind.basis === 'bsa') amt = d * (pt.bsa || 0); // d = mg/m2
+      else amt = d * unitToMg;                               // flat: d in mg or g
+      if (ind.roundTo) amt = _roundStep(amt, ind.roundTo);
+      if (ind.maxPerDose && amt > ind.maxPerDose) amt = ind.maxPerDose;
+      return amt;
+    }
+    var perLo = perDoseMg(doseArr[0]), perHi = perDoseMg(doseArr[doseArr.length - 1]);
+    var dpd = _dosesPerDay(ind.interval);
+    var dayLo = dpd ? perLo * dpd : null, dayHi = dpd ? perHi * dpd : null, dayCapped = false;
+    if (ind.maxPerDay) {
+      if (dayLo != null && dayLo > ind.maxPerDay) { dayLo = ind.maxPerDay; dayCapped = true; }
+      if (dayHi != null && dayHi > ind.maxPerDay) { dayHi = ind.maxPerDay; dayCapped = true; }
+    }
+    var perStr = perLo === perHi ? _fmtAmt(perLo) : (_fmtAmt(perLo) + '–' + _fmtAmt(perHi));
+    var doseStr = doseArr.length === 1 ? doseArr[0] : (doseArr[0] + '–' + doseArr[doseArr.length - 1]);
+    var basisStr = ind.basis === 'weight' ? (doseStr + ' ' + ind.unit + ' × ' + wLabel)
+      : ind.basis === 'bsa' ? (doseStr + ' ' + ind.unit + ' × BSA ' + (pt.bsa || 0).toFixed(2) + ' m²')
+        : (doseStr + ' ' + ind.unit + ' (fixed)');
+    var rows = [{ l: ind.label, v: '<strong>' + perStr + ' ' + ind.interval + '</strong>' },
+      { l: '· คิดจาก', v: basisStr }];
+    if (dayLo != null) rows.push({ l: '· รวมต่อวัน', v: (dayLo === dayHi ? _fmtAmt(dayLo) : _fmtAmt(dayLo) + '–' + _fmtAmt(dayHi)) + (dayCapped ? ' (ถึงเพดาน max/วัน)' : '') });
+    if (ind.maxPerDose) rows.push({ l: '· เพดาน/ครั้ง', v: _fmtAmt(ind.maxPerDose) });
+    if (ind.renalAdjust) rows.push({ l: '· ⚠ ปรับตามไต', v: ind.renalAdjust + (pt.crcl != null ? ' (CrCl ปัจจุบัน ' + pt.crcl.toFixed(0) + ')' : '') });
+    if (ind.note) rows.push({ l: '· หมายเหตุ', v: ind.note });
+    return { perHi: perHi, dayHi: dayHi, rows: rows, titleStr: ind.label + ': ' + perStr + ' ' + ind.interval };
+  }
+  function _ruleCalc(pt, def) {
+    var dr = def.doseRule;
+    // Fail closed for pediatrics: these rules encode ADULT doses.
+    if (pt.isPediatric) {
+      return {
+        calculatedDose: 0, title: def.name + ' — ขนาดผู้ใหญ่ (ไม่คำนวณให้เด็ก)',
+        details: [{ l: '⚠ อายุ <18 ปี', v: 'กฎนี้เป็นขนาดผู้ใหญ่ — ไม่คำนวณให้สำหรับเด็ก กรุณาใช้ขนาด mg/kg เด็กตามแหล่งอ้างอิง' }],
+        info: '<strong>📚 อ้างอิง:</strong> ' + dr.drugRef + '<br>⚠ ขนาดเด็กต่างจากผู้ใหญ่ ต้องคำนวณ/ตรวจสอบแยก',
+        infoType: 'amber'
+      };
+    }
+    var allRows = [], primary = null;
+    dr.indications.forEach(function (ind, i) {
+      var r = _evalIndication(pt, ind);
+      if (i === 0) primary = r;
+      if (i > 0) allRows.push({ l: '—', v: '' });
+      allRows = allRows.concat(r.rows);
+    });
+    return {
+      calculatedDose: primary ? (primary.dayHi || primary.perHi) : 0,
+      title: primary ? primary.titleStr : def.name,
+      details: allRows,
+      info: '<strong>📋 วิธีคิด:</strong> โปรแกรมคูณ/ใส่ค่าตามกฎด้านบนกับค่าคนไข้ที่กรอก<br>'
+        + '<strong>สมมติฐาน:</strong> ' + dr.assumptions + '<br>'
+        + '<strong>📚 อ้างอิง:</strong> ' + dr.drugRef + '<br>'
+        + '⚠ เป็นค่าตั้งต้น ต้องตรวจสอบกับแหล่งอ้างอิง + clinical judgment ทุกครั้ง',
+      infoType: 'blue'
+    };
+  }
+  function makeRuleDrug(def) {
+    return {
+      id: def.id, name: def.name, sub: def.sub || '', badges: def.badges || [],
+      maxDose: def.maxDose || null, doseRule: def.doseRule,
+      calc: function (pt) { return _ruleCalc(pt, def); }
+    };
+  }
+
+  // ---- Phase 1 demo drugs (structured doseRule; verified standard ADULT doses) ----
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'enoxaparin', name: 'Enoxaparin (treatment)', sub: 'Clexane — SC', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'Lexicomp; ASH/CHEST VTE guidelines',
+      assumptions: 'ใช้ actual body weight (treatment dose). CrCl <30 ต้องปรับเป็นวันละครั้ง — โปรแกรมยังไม่ปรับตามไตให้อัตโนมัติ. Prophylaxis = 40 mg SC วันละครั้ง (fixed ไม่อิงน้ำหนัก).',
+      indications: [
+        { label: 'VTE/ACS treatment', basis: 'weight', weightBasis: 'actual', dose: 1, unit: 'mg/kg', interval: 'q12h', renalAdjust: 'CrCl <30 → 1 mg/kg วันละครั้ง' }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'ceftriaxone', name: 'Ceftriaxone', sub: 'Inj. 1 g, 2 g', badges: [],
+    doseRule: {
+      drugRef: 'Sanford Guide; Lexicomp',
+      assumptions: 'ขนาด flat ผู้ใหญ่ ไตปกติ (ceftriaxone ไม่ต้องปรับตามไตทั่วไป). เด็กใช้ขนาด mg/kg แยกต่างหาก.',
+      indications: [
+        { label: 'ทั่วไป (most infections)', basis: 'flat', dose: [1, 2], unit: 'g', interval: 'q24h' },
+        { label: 'Meningitis', basis: 'flat', dose: 2, unit: 'g', interval: 'q12h', maxPerDay: 4000 }
+      ]
+    }
+  }));
+  CALC_DRUGS.push(makeRuleDrug({
+    id: 'acyclovir-hsv', name: 'Acyclovir (HSV encephalitis)', sub: 'Inj. 250 mg', badges: ['badge-renal'],
+    doseRule: {
+      drugRef: 'IDSA Encephalitis Guidelines; Lexicomp',
+      assumptions: 'ใช้ actual body weight; ในคนอ้วนพิจารณาใช้ IBW เพื่อลด nephrotoxicity. ปรับตาม CrCl แยก. Infuse ≥1 ชม. + ให้สารน้ำเพียงพอ.',
+      indications: [
+        { label: 'HSV encephalitis', basis: 'weight', weightBasis: 'actual', dose: 10, unit: 'mg/kg', interval: 'q8h', renalAdjust: 'ปรับตาม CrCl (เช่น CrCl 25-50 → q12h)', note: 'infuse ≥1 ชม., hydrate' }
+      ]
+    }
+  }));
+
   // ====== CrCl Calculator ======
   // Patient data, CrCl, IBW/ABW consolidated into IVDrugRef.getPatientFromForm()
 

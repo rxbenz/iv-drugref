@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.40.0
+// IV Drug Reference PWA — Service Worker v5.41.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -263,9 +263,22 @@
 //          stay blank, result still explicit-trigger — no auto-dose). Non-calc
 //          drugs keep the generic "คำนวณ (CrCl/หยด)" chip. Surfaces the existing
 //          per-patient engine from the search flow with zero dosing-data changes.
+// v5.41.0: Live dose calculator — Phase 1 (structured doseRule engine). A drug can
+//          now declare a machine-computable `doseRule` (basis weight/flat/bsa,
+//          single value or [low,high] range, per-dose & per-day caps, rounding,
+//          renal-adjust caution) instead of a bespoke calc(); a generic engine
+//          (_ruleCalc) renders the per-patient dose AND always prints the rule,
+//          the math, the assumptions, and the source reference for verification.
+//          Adult rules FAIL CLOSED for age <18 (numbers are adult-specific).
+//          Wired through the same Calculate button → validation + pediatric guard
+//          gate it (no auto-dose). 3 demo drugs added: Enoxaparin (1 mg/kg q12h),
+//          Ceftriaxone (flat 1–2 g; meningitis 2 g q12h), Acyclovir HSV (10 mg/kg
+//          q8h); their drug-card chip deep-links to the calculator. Golden-verified
+//          (70 kg → enox 70 mg, acyclovir 700 mg). Next: author doseRule for more
+//          weight-based drugs (manual pharmacist curation, verify at source).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.40.0';
+const CACHE_NAME = 'iv-drugref-v5.41.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

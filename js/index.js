@@ -875,7 +875,9 @@ window.fetchDrugsFromServer = async function () {
     var map = [['vancomycin', 'vancomycin'], ['amikacin', 'amikacin'], ['gentamicin', 'gentamicin'],
       ['colistimethate', 'colistin'], ['colistin', 'colistin'], ['phenytoin', 'phenytoin'],
       ['valproate', 'valproate'], ['valproic', 'valproate'], ['levetiracetam', 'levetiracetam'],
-      ['alteplase', 'alteplase'], ['tenecteplase', 'tenecteplase']];
+      ['alteplase', 'alteplase'], ['tenecteplase', 'tenecteplase'],
+      // Phase 1 structured-doseRule drugs
+      ['enoxaparin', 'enoxaparin'], ['ceftriaxone', 'ceftriaxone'], ['acyclovir', 'acyclovir-hsv']];
     for (var i = 0; i < map.length; i++) if (gl.indexOf(map[i][0]) >= 0) return map[i][1];
     return null;
   }

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.49.2
+// IV Drug Reference PWA — Service Worker v5.49.3
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -379,9 +379,18 @@
 //          curated-renal-drugs.js (admin import source). NOTE: if the live page
 //          serves renal data from Supabase, update Enalapril via the admin Renal
 //          panel to re-sync the corrected row.
+// v5.49.3: Renal-dosing review — 4 corrections from the 26-drug audit (both
+//          renal-dosing.js + curated-renal-drugs.js): (1) Digoxin AF level target
+//          0.8–2.0 → 0.8–1.2 ng/mL (avoid >1.2; assoc. ↑mortality, DIG trial).
+//          (2) Allopurinol — renal doses reframed as START doses per ACR 2020:
+//          titrate above the renal cap to urate <6 with monitoring (was rigid cap).
+//          (3) Dabigatran — split <30 into 15–30 (EU: contraindicated · US FDA:
+//          75 mg BID) + <15/HD contraindicated; labeling note added. (4) Cefepime
+//          neurotoxicity caution confirmed already present (no change). Same
+//          Supabase re-sync caveat as v5.49.x. No test/formula changes.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.49.2';
+const CACHE_NAME = 'iv-drugref-v5.49.3';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

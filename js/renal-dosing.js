@@ -684,15 +684,17 @@
         let rec;
         if (gfr > 50) rec = '150 mg BID (AF) | 150 mg BID (VTE treatment)';
         else if (gfr > 30) rec = '110 mg BID (ลด dose)';
-        else rec = '⚠ ห้ามใช้ (CrCl <30)';
+        else if (gfr > 15) rec = 'EU: ห้ามใช้ · US: 75 mg BID';
+        else rec = '⚠ ห้ามใช้ (CrCl <15/HD)';
         return {
           recommended: rec,
           table: [
             { range: '>50', dose: '150 mg', freq: 'BID', note: 'Normal dose', hl: gfr > 50 },
             { range: '30–50', dose: '110 mg', freq: 'BID', note: 'ลด dose (age ≥80, P-gp inhib)', hlAmber: gfr > 30 && gfr <= 50 },
-            { range: '<30', dose: '⚠ Contraindicated', freq: '—', note: 'ห้ามใช้', hlRed: gfr <= 30 },
+            { range: '15–30', dose: '⚠ EU: ห้ามใช้ · US: 75 mg', freq: 'BID', note: 'ขึ้นกับฉลาก (ดู note)', hlRed: gfr > 15 && gfr <= 30 },
+            { range: '<15 / HD', dose: '⚠ Contraindicated', freq: '—', note: 'ห้ามใช้', hlRed: gfr <= 15 },
           ],
-          info: '<strong>⚠ Renal elimination 80%:</strong> ห้ามใช้ถ้า CrCl <30<br><strong>Drug interaction:</strong> P-gp inhibitors (verapamil, dronedarone) → ลด dose<br><strong>Reversal:</strong> Idarucizumab (Praxbind)<br><strong>HD:</strong> Dialyzable — สามารถ remove ได้ 60% ใน 2-3 ชม.',
+          info: '<strong>⚠ Renal elimination 80% — labeling ต่างกัน:</strong> EU/ไทย (มี 110 mg): ห้ามใช้ถ้า CrCl &lt;30 · US (FDA): CrCl 15–30 ให้ <strong>75 mg BID</strong> (AF), &lt;15/HD ไม่แนะนำ — ยืนยันฉลากที่ใช้<br><strong>Drug interaction:</strong> P-gp inhibitors (verapamil, dronedarone) → ลด dose<br><strong>Reversal:</strong> Idarucizumab (Praxbind)<br><strong>HD:</strong> Dialyzable — สามารถ remove ได้ 60% ใน 2-3 ชม.',
           infoType: 'red',
           ref: 'Lexicomp 2024 | ESC AF Guidelines 2024'
         };
@@ -717,7 +719,7 @@
             { range: '10–50', dose: '0.0625-0.125 mg', freq: 'q24h', note: 'ลด dose 50%', hlAmber: gfr > 10 && gfr <= 50 },
             { range: '<10 / HD', dose: '0.0625 mg', freq: 'q48h', note: 'By level', hlRed: gfr <= 10 },
           ],
-          info: '<strong>TDM:</strong> Target 0.5-0.9 ng/mL (HF) | 0.8-2.0 (AF)<br><strong>⚠ Toxicity risk:</strong> เพิ่มขึ้นเมื่อ K+ ต่ำ, renal impairment<br><strong>HD:</strong> Not significantly removed<br><strong>Drug interaction:</strong> Amiodarone, verapamil → ลด dose 50%',
+          info: '<strong>TDM:</strong> Target 0.5-0.9 ng/mL (HF) | 0.8-1.2 (AF; หลีกเลี่ยง >1.2 — สัมพันธ์กับ mortality เพิ่ม)<br><strong>⚠ Toxicity risk:</strong> เพิ่มขึ้นเมื่อ K+ ต่ำ, renal impairment<br><strong>HD:</strong> Not significantly removed<br><strong>Drug interaction:</strong> Amiodarone, verapamil → ลด dose 50%',
           infoType: 'amber',
           ref: 'Lexicomp 2024 | ACC/AHA HF Guidelines 2022'
         };
@@ -889,19 +891,19 @@
       sub: 'Xanthine Oxidase Inhibitor',
       getDosing: function(gfr) {
         let rec;
-        if (gfr > 60) rec = '100-300 mg/day';
-        else if (gfr > 30) rec = '100-200 mg/day';
-        else if (gfr > 15) rec = '100 mg/day';
-        else rec = '100 mg q48h';
+        if (gfr > 60) rec = 'เริ่ม 100 mg/day → titrate';
+        else if (gfr > 30) rec = 'เริ่ม 50-100 mg/day → titrate';
+        else if (gfr > 15) rec = 'เริ่ม 50 mg/day → titrate';
+        else rec = 'เริ่ม 50 mg/day → titrate ช้า';
         return {
           recommended: rec,
           table: [
-            { range: '>60', dose: '100-300 mg', freq: 'q24h', note: 'Titrate to uric acid <6', hl: gfr > 60 },
-            { range: '30–60', dose: '100-200 mg', freq: 'q24h', note: '', hlAmber: gfr > 30 && gfr <= 60 },
-            { range: '15–30', dose: '100 mg', freq: 'q24h', note: '', hlAmber: gfr > 15 && gfr <= 30 },
-            { range: '<15 / HD', dose: '100 mg', freq: 'q48h', note: 'Post-HD on dialysis days', hlRed: gfr <= 15 },
+            { range: '>60', dose: '100 mg start', freq: 'q24h', note: 'Titrate ขึ้นสู่ urate <6', hl: gfr > 60 },
+            { range: '30–60', dose: '50-100 mg start', freq: 'q24h', note: 'Titrate ขึ้นได้เกิน cap (monitor)', hlAmber: gfr > 30 && gfr <= 60 },
+            { range: '15–30', dose: '50 mg start', freq: 'q24h', note: 'Titrate ขึ้นได้เกิน cap (monitor)', hlAmber: gfr > 15 && gfr <= 30 },
+            { range: '<15 / HD', dose: '50 mg start', freq: 'q24h', note: 'Titrate ช้า ๆ; HD: post-HD', hlRed: gfr <= 15 },
           ],
-          info: '<strong>Active metabolite Oxipurinol:</strong> สะสมใน renal impairment → เสี่ยง hypersensitivity syndrome<br><strong>HLA-B*5801:</strong> Screen ก่อนเริ่มยา (โดยเฉพาะ Thai/Asian) — ลด risk SJS/TEN<br><strong>HD:</strong> Dialyzable — give post-HD<br><strong>Alternative:</strong> Febuxostat (ไม่ต้องปรับ dose)',
+          info: '<strong>ACR 2020:</strong> ขนาดตามไต = <em>starting dose</em> เท่านั้น — เริ่มต่ำแล้ว titrate ขึ้นทีละน้อย <strong>เกิน renal cap ได้</strong> สู่ target urate &lt;6 mg/dL พร้อม monitor (ไม่จำกัดที่ cap ตายตัว)<br><strong>Active metabolite Oxipurinol:</strong> สะสมใน renal impairment → เสี่ยง hypersensitivity syndrome<br><strong>HLA-B*5801:</strong> Screen ก่อนเริ่มยา (โดยเฉพาะ Thai/Asian) — ลด risk SJS/TEN<br><strong>HD:</strong> Dialyzable — give post-HD<br><strong>Alternative:</strong> Febuxostat (ไม่ต้องปรับ dose)',
           infoType: 'amber',
           ref: 'Lexicomp 2024 | ACR Gout Guidelines 2020'
         };

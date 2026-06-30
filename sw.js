@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.49.3
+// IV Drug Reference PWA — Service Worker v5.49.4
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -388,9 +388,19 @@
 //          75 mg BID) + <15/HD contraindicated; labeling note added. (4) Cefepime
 //          neurotoxicity caution confirmed already present (no change). Same
 //          Supabase re-sync caveat as v5.49.x. No test/formula changes.
+// v5.49.4: Renal data de-duplication (bug). admin.js carried its OWN inline copy
+//          of CURATED_RENAL_DRUGS (the admin "Import CURATED" source) that the
+//          v5.49.1/.3 fixes never touched — so Enalapril/Digoxin/Allopurinol/
+//          Dabigatran were still old there, and js/curated-renal-drugs.js (the
+//          intended source) was an orphan loaded by nobody. Now admin loads
+//          js/curated-renal-drugs.js (corrected) and the inline copy is removed —
+//          single source, no drift. (Diff confirmed the two copies were identical
+//          except those 4 corrected drugs.) NOTE: the LIVE renal page reads
+//          Supabase renal_drugs first (renal-dosing.js = fallback); if populated,
+//          re-sync the 4 drugs via the admin Renal panel for the device to show them.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.49.3';
+const CACHE_NAME = 'iv-drugref-v5.49.4';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

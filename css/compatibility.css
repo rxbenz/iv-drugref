@@ -922,12 +922,6 @@
 [data-theme="dark"] .ddi-drugs { color: #1e293b; }
 
 /* ===== Standalone DDI page (interactions.html) — picker chrome ===== */
-.ddi-intro {
-  background: var(--surface, #f8fafc); border: 1px solid var(--border, #e2e8f0);
-  border-radius: 10px; padding: 10px 13px; margin-bottom: 14px;
-  font-size: 13px; color: var(--text-muted, #64748b); line-height: 1.5;
-}
-.ddi-intro a { color: var(--primary, #2563eb); font-weight: 600; }
 .ddi-sg-item {
   padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--border, #e2e8f0);
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;

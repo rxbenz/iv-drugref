@@ -70,8 +70,7 @@
     if (!container) return;
     var drugs = selected.map(byId).filter(Boolean);
     if (drugs.length < 2) {
-      container.innerHTML = '<p class="check-hint">💊 เพิ่มยา <b>≥2 ตัว</b> เพื่อตรวจอันตรกิริยาระหว่างยา (DDI)' +
-        '<br><span style="font-size:11px;color:var(--text-muted)">เภสัชวิทยา — คนละเรื่องกับ “เข้ากันในสาย” (กายภาพ) ที่หน้า IV Compatibility</span></p>';
+      container.innerHTML = '<p class="check-hint">💊 เพิ่มยา <b>≥2 ตัว</b> เพื่อตรวจอันตรกิริยาระหว่างยา (DDI)</p>';
       return;
     }
     var genericList = drugs.map(function (d) { return d.g; });

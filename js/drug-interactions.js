@@ -58,27 +58,79 @@
       mechanism: 'ยาพิษต่อหู (aminoglycoside/vancomycin/loop diuretic/cisplatin) ร่วมกัน → เสริมความเสียหายต่อการได้ยิน/สมดุล',
       management: 'ติดตามการได้ยิน/อาการเวียน, เลี่ยงใช้ร่วมระยะยาว, ติดตามระดับยา (TDM)',
       ref: 'Lexicomp'
+    },
+    cnsDepress: {
+      label: 'Additive CNS/respiratory depression (กดประสาท/การหายใจ)', severity: 'moderate', icon: '😴',
+      mechanism: 'ยากดประสาทส่วนกลางหลายตัว (opioid/benzodiazepine/barbiturate/propofol/sedating antihistamine) ร่วมกัน → กดการหายใจและระดับความรู้สึกตัวเสริมกัน',
+      management: 'มัก “ตั้งใจ” ใช้ร่วมใน ICU ที่ monitor — ต้องเฝ้า RR/SpO₂/sedation score, มีอุปกรณ์ช่วยหายใจ + naloxone/flumazenil พร้อม; ระวังมากนอก ICU/ผู้สูงอายุ',
+      ref: 'Lexicomp'
+    },
+    bradycardia: {
+      label: 'Additive bradycardia / AV block (หัวใจเต้นช้า)', severity: 'major', icon: '🐢',
+      mechanism: 'ยากดอัตราการเต้นหัวใจ/การนำไฟฟ้า (β-blocker + non-DHP CCB + digoxin + amiodarone + dexmedetomidine) ร่วมกัน → bradycardia/AV block รุนแรง',
+      management: 'เลี่ยง IV β-blocker ร่วม IV diltiazem/verapamil; ติดตาม HR + ECG ต่อเนื่อง, เตรียม atropine/pacing',
+      ref: 'Lexicomp'
+    },
+    hypotension: {
+      label: 'Additive hypotension / vasodilation (ความดันต่ำ)', severity: 'moderate', icon: '📉',
+      mechanism: 'ยาขยายหลอดเลือด/ลดความดันหลายตัว (nitrate/nitroprusside/hydralazine/dihydropyridine CCB/milrinone) ร่วมกัน → ความดันโลหิตตกเสริมกัน',
+      management: 'titrate ทีละตัว, ติดตาม BP ใกล้ชิด (มัก invasive line), ระวัง reflex tachycardia',
+      ref: 'Lexicomp'
+    },
+    anticholinergic: {
+      label: 'Additive anticholinergic burden (ฤทธิ์ต้านโคลิเนอร์จิก)', severity: 'moderate', icon: '🌵',
+      mechanism: 'ยาต้านโคลิเนอร์จิกหลายตัว (atropine/glycopyrrolate/hyoscine/antihistamine/benztropine) ร่วมกัน → ปากแห้ง, ปัสสาวะคั่ง, ลำไส้ไม่เคลื่อน (ileus), สับสน/เพ้อ',
+      management: 'ประเมินความจำเป็น, ระวัง delirium ในผู้สูงอายุ + urinary retention/ileus, ติดตามอาการ',
+      ref: 'Lexicomp'
     }
   };
 
-  // keyword (lowercase substring of generic) → classes it belongs to
+  // keyword (lowercase substring of generic) → classes it belongs to.
+  // Keywords must be substrings of an actual dataset generic (lowercased) to match.
   var CLASS_RULES = [
-    ['amiodarone', ['QT']], ['ciprofloxacin', ['QT']], ['levofloxacin', ['QT']],
+    // ---- QT prolongation ----
+    ['amiodarone', ['QT', 'bradycardia']], ['ciprofloxacin', ['QT']], ['levofloxacin', ['QT']],
     ['moxifloxacin', ['QT']], ['fluconazole', ['QT']], ['voriconazole', ['QT']],
     ['haloperidol', ['QT']], ['ondansetron', ['QT', 'serotonergic']], ['azithromycin', ['QT']],
-    ['erythromycin', ['QT']], ['clarithromycin', ['QT']], ['methadone', ['QT']],
-    ['fentanyl', ['serotonergic']], ['tramadol', ['serotonergic']], ['linezolid', ['serotonergic']],
-    ['metoclopramide', ['serotonergic']], ['pethidine', ['serotonergic']], ['meperidine', ['serotonergic']],
+    ['erythromycin', ['QT']], ['clarithromycin', ['QT']], ['methadone', ['QT', 'serotonergic']],
+    ['cotrimoxazole', ['QT', 'hyperK']], ['tigecycline', ['QT']], ['pentamidine', ['QT']],
+    // ---- Serotonergic ----
+    ['fentanyl', ['serotonergic']], ['remifentanil', ['serotonergic']], ['tramadol', ['serotonergic']],
+    ['linezolid', ['serotonergic']], ['metoclopramide', ['serotonergic']],
+    ['pethidine', ['serotonergic']], ['meperidine', ['serotonergic']],
+    // ---- Nephrotoxic ----
     ['amikacin', ['nephrotoxic', 'ototoxic']], ['gentamicin', ['nephrotoxic', 'ototoxic']],
     ['streptomycin', ['nephrotoxic', 'ototoxic']], ['vancomycin', ['nephrotoxic', 'ototoxic']],
-    ['colistin', ['nephrotoxic']], ['colistimethate', ['nephrotoxic']],
-    ['amphotericin', ['nephrotoxic']], ['acyclovir', ['nephrotoxic']], ['ganciclovir', ['nephrotoxic']],
-    ['cisplatin', ['nephrotoxic', 'ototoxic']], ['foscarnet', ['nephrotoxic']],
+    ['colistin', ['nephrotoxic']], ['colistimethate', ['nephrotoxic']], ['polymyxin', ['nephrotoxic']],
+    ['amphotericin', ['nephrotoxic', 'hyperK']], ['acyclovir', ['nephrotoxic']], ['ganciclovir', ['nephrotoxic']],
+    ['cisplatin', ['nephrotoxic', 'ototoxic']], ['carboplatin', ['nephrotoxic']], ['foscarnet', ['nephrotoxic']],
+    ['ifosfamide', ['nephrotoxic']], ['methotrexate', ['nephrotoxic']],
     ['diclofenac', ['nephrotoxic', 'bleeding']], ['ketorolac', ['nephrotoxic', 'bleeding']],
     ['parecoxib', ['nephrotoxic']], ['furosemide', ['ototoxic']],
+    // ---- Bleeding ----
     ['enoxaparin', ['bleeding']], ['heparin', ['bleeding']], ['warfarin', ['bleeding']],
     ['alteplase', ['bleeding']], ['tenecteplase', ['bleeding']], ['streptokinase', ['bleeding']],
-    ['potassium', ['hyperK']]
+    ['abciximab', ['bleeding']], ['eptifibatide', ['bleeding']], ['tirofiban', ['bleeding']],
+    // ---- Hyperkalemia ----
+    ['potassium', ['hyperK']], ['spironolactone', ['hyperK']],
+    // ---- CNS / respiratory depression ----
+    ['morphine', ['cnsDepress']], ['fentanyl', ['cnsDepress']], ['remifentanil', ['cnsDepress']],
+    ['pethidine', ['cnsDepress']], ['meperidine', ['cnsDepress']], ['tramadol', ['cnsDepress']],
+    ['methadone', ['cnsDepress']], ['midazolam', ['cnsDepress']], ['diazepam', ['cnsDepress']],
+    ['lorazepam', ['cnsDepress']], ['phenobarbital', ['cnsDepress']], ['thiopental', ['cnsDepress']],
+    ['propofol', ['cnsDepress', 'hypotension']], ['ketamine', ['cnsDepress']],
+    // ---- Bradycardia / AV block ----
+    ['esmolol', ['bradycardia']], ['labetalol', ['bradycardia']], ['metoprolol', ['bradycardia']],
+    ['propranolol', ['bradycardia']], ['diltiazem', ['bradycardia']], ['verapamil', ['bradycardia']],
+    ['digoxin', ['bradycardia']], ['dexmedetomidine', ['bradycardia']],
+    // ---- Hypotension / vasodilation ----
+    ['glyceryl trinitrate', ['hypotension']], ['nitroglycerin', ['hypotension']], ['nitroprusside', ['hypotension']],
+    ['hydralazine', ['hypotension']], ['nicardipine', ['hypotension']], ['nimodipine', ['hypotension']],
+    ['milrinone', ['hypotension']],
+    // ---- Anticholinergic ----
+    ['atropine', ['anticholinergic']], ['glycopyrrolate', ['anticholinergic']],
+    ['hyoscine', ['anticholinergic']], ['chlorpheniramine', ['anticholinergic', 'cnsDepress']],
+    ['dimenhydrinate', ['anticholinergic', 'cnsDepress']], ['benztropine', ['anticholinergic']]
   ];
 
   // ---- Curated explicit pairs (named interactions the class model can't express) ----
@@ -108,6 +160,64 @@
       a: 'methotrexate', bAny: ['diclofenac', 'parecoxib', 'ketorolac', 'ibuprofen', 'naproxen'], severity: 'major',
       mechanism: 'NSAID ลดการขับ methotrexate ทางไต → ↑ระดับ/พิษ MTX (สำคัญมากใน high-dose MTX)',
       management: 'เลี่ยง NSAID ในช่วง high-dose MTX; ถ้า low-dose ติดตาม CBC/ไต',
+      ref: 'Lexicomp'
+    },
+    {
+      a: 'methotrexate', bAny: ['cotrimoxazole', 'tmp', 'smx', 'trimethoprim', 'sulfamethoxazole'], severity: 'major',
+      mechanism: 'Cotrimoxazole (TMP/SMX) เสริมฤทธิ์ต้านโฟเลต + ลดการขับ MTX ทางไต → กดไขกระดูกรุนแรง (pancytopenia)',
+      management: 'เลี่ยงคู่นี้; ถ้าจำเป็นต้องติดตาม CBC ใกล้ชิด + พิจารณา leucovorin rescue',
+      ref: 'Lexicomp'
+    },
+    {
+      a: 'ceftriaxone', bAny: ['calcium chloride', 'calcium gluconate', 'calcium'], severity: 'major',
+      mechanism: 'Ceftriaxone จับ calcium เกิดตะกอน ceftriaxone–calcium → ห้ามใช้ร่วม/ผสมสายเดียวกันในทารกแรกเกิด (<28 วัน) เด็ดขาด (เสียชีวิตได้)',
+      management: 'ทารกแรกเกิด: ห้ามให้ ceftriaxone กับสารละลายที่มี calcium พร้อมกันโดยสิ้นเชิง; ผู้ป่วยอื่นให้แยกสาย/แยกเวลา + flush สายระหว่างยา',
+      ref: 'US FDA; Lexicomp'
+    },
+    {
+      a: 'digoxin', bAny: ['calcium chloride', 'calcium gluconate', 'calcium'], severity: 'major',
+      mechanism: 'Calcium IV เพิ่มความไวของกล้ามเนื้อหัวใจต่อ digoxin → เสี่ยง arrhythmia รุนแรง (“stone heart”) โดยเฉพาะถ้า dig เป็นพิษ',
+      management: 'เลี่ยง IV calcium ในผู้ป่วยที่ได้ digoxin/สงสัย dig toxicity; ถ้าจำเป็นให้ช้า ๆ + ติดตาม ECG',
+      ref: 'Lexicomp'
+    },
+    {
+      a: 'digoxin', b: 'amiodarone', severity: 'major',
+      mechanism: 'Amiodarone ลดการขับ digoxin (ยับยั้ง P-gp) → ระดับ digoxin เพิ่ม ~2 เท่า → พิษ digoxin',
+      management: 'ลดขนาด digoxin ลงครึ่งหนึ่งเมื่อเริ่ม amiodarone, ติดตามระดับ digoxin + ECG; ระวัง bradycardia เสริม',
+      ref: 'Lexicomp'
+    },
+    {
+      a: 'digoxin', bAny: ['diltiazem', 'verapamil'], severity: 'major',
+      mechanism: 'Non-DHP CCB เพิ่มระดับ digoxin (ยับยั้ง P-gp) + เสริม bradycardia/AV block',
+      management: 'ติดตามระดับ digoxin + HR/ECG, พิจารณาลดขนาด digoxin; ระวัง AV block',
+      ref: 'Lexicomp'
+    },
+    {
+      a: 'amiodarone', b: 'warfarin', severity: 'major',
+      mechanism: 'Amiodarone ยับยั้ง CYP2C9 → ↑ฤทธิ์ warfarin → INR สูง/เลือดออก (ผลอยู่นานหลายสัปดาห์เพราะ amiodarone half-life ยาว)',
+      management: 'ลดขนาด warfarin ~30–50% เมื่อเริ่ม amiodarone, ติดตาม INR ถี่ขึ้น',
+      ref: 'Lexicomp'
+    },
+    {
+      aAny: ['amikacin', 'gentamicin', 'streptomycin', 'tobramycin', 'neomycin'],
+      bAny: ['atracurium', 'cisatracurium', 'rocuronium', 'vecuronium', 'pancuronium', 'succinylcholine'],
+      severity: 'major',
+      mechanism: 'Aminoglycoside เสริมฤทธิ์ยาคลายกล้ามเนื้อ (neuromuscular blockade) → อัมพาต/กดการหายใจนานขึ้น',
+      management: 'เฝ้าระวังการฟื้นของกล้ามเนื้อ (train-of-four), อาจต้องช่วยหายใจนานขึ้น; ระวังในผู้ป่วยไตเสื่อม',
+      ref: 'Lexicomp'
+    },
+    {
+      a: 'magnesium',
+      bAny: ['atracurium', 'cisatracurium', 'rocuronium', 'vecuronium', 'pancuronium', 'succinylcholine'],
+      severity: 'moderate',
+      mechanism: 'Magnesium เสริมฤทธิ์ยาคลายกล้ามเนื้อ → block ลึก/นานขึ้น',
+      management: 'ลดขนาด NMBA, ติดตาม neuromuscular monitoring, ระวังกดการหายใจ',
+      ref: 'Lexicomp'
+    },
+    {
+      a: 'phenytoin', bAny: ['valpro'], severity: 'moderate',
+      mechanism: 'Valproate แย่งจับโปรตีน + ยับยั้งเมแทบอลิซึมของ phenytoin → free phenytoin สูงขึ้น (total อาจดูปกติ)',
+      management: 'แปลผลด้วย free phenytoin หรือปรับตาม albumin, ติดตามอาการพิษ (nystagmus/ataxia)',
       ref: 'Lexicomp'
     }
   ];

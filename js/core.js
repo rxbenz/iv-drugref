@@ -1135,7 +1135,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.46.0';
+  const VERSION = '5.47.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

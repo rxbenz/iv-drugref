@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.46.0
+// IV Drug Reference PWA — Service Worker v5.47.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -335,9 +335,21 @@
 //          unique users / checks-with-findings / major-severity) + Top Interaction
 //          Classes bar + Severity Mix doughnut. Dose-calc tracking unchanged (new
 //          doseRule drugs already surface via the existing dose_calc event).
+// v5.47.0: DDI Phase 1 — broader coverage (js/drug-interactions.js). +4 additive
+//          classes: CNS/respiratory depression (opioid+benzo+barbiturate+propofol+
+//          sedating antihistamine), bradycardia/AV block (β-blocker+non-DHP CCB+
+//          digoxin+amiodarone+dexmedetomidine), hypotension/vasodilation (nitrate+
+//          nitroprusside+hydralazine+DHP CCB+milrinone), anticholinergic burden
+//          (atropine+glycopyrrolate+hyoscine+antihistamine+benztropine). Class tags
+//          expanded ~40→~70 keywords (only dataset generics). +9 curated pairs:
+//          ceftriaxone+IV-calcium (neonatal precipitation), digoxin+IV-calcium,
+//          digoxin+amiodarone, digoxin+non-DHP-CCB, amiodarone+warfarin,
+//          aminoglycoside+NMBA, magnesium+NMBA, MTX+cotrimoxazole, phenytoin+
+//          valproate. Carbapenem/valproate stay untagged so the valproate+carbapenem
+//          curated pair fires alone (no class leakage). Locked by +10 tests (167).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.46.0';
+const CACHE_NAME = 'iv-drugref-v5.47.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

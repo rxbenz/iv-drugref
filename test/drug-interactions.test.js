@@ -49,6 +49,50 @@ test('no false positives for unrelated drugs', () => {
   assert.deepStrictEqual(DI.check(['Cefazolin', 'NSS']), []);
 });
 
+// ---- Phase 1: new additive classes ----
+test('class: two CNS depressants flag additive CNS/resp depression', () => {
+  assert.ok(titles(['Morphine', 'Midazolam']).some(x => /CNS|respiratory|กดประสาท/i.test(x)));
+});
+
+test('class: β-blocker + non-DHP CCB flag additive bradycardia', () => {
+  assert.ok(titles(['Esmolol', 'Diltiazem IV']).some(x => /bradycardia|เต้นช้า/i.test(x)));
+});
+
+test('class: two vasodilators flag additive hypotension', () => {
+  assert.ok(titles(['Glyceryl Trinitrate (NTG)', 'Sodium Nitroprusside']).some(x => /hypotension|ความดันต่ำ/i.test(x)));
+});
+
+test('class: two anticholinergics flag additive anticholinergic burden', () => {
+  assert.ok(titles(['Atropine', 'Glycopyrrolate']).some(x => /anticholinergic|โคลิเนอร์จิก/i.test(x)));
+});
+
+// ---- Phase 1: new curated pairs ----
+test('curated: ceftriaxone + IV calcium', () => {
+  assert.ok(titles(['Ceftriaxone', 'Calcium Gluconate']).some(x => /Ceftriaxone/i.test(x)));
+});
+
+test('curated: digoxin + amiodarone (PK level rise)', () => {
+  const t = titles(['Digoxin', 'Amiodarone']);
+  assert.ok(t.some(x => /Digoxin/i.test(x) && /Amiodarone/i.test(x)));
+});
+
+test('curated: methotrexate + cotrimoxazole (myelosuppression)', () => {
+  assert.ok(titles(['Methotrexate IV (high-dose)', 'Cotrimoxazole (TMP/SMX)']).some(x => /Methotrexate/i.test(x)));
+});
+
+test('curated: aminoglycoside + neuromuscular blocker (prolonged paralysis)', () => {
+  assert.ok(titles(['Gentamicin', 'Rocuronium']).some(x => /Gentamicin/i.test(x) && /Rocuronium/i.test(x)));
+});
+
+test('curated: phenytoin + valproate (free phenytoin rise)', () => {
+  assert.ok(titles(['Phenytoin', 'Sodium Valproate']).some(x => /Phenytoin/i.test(x)));
+});
+
+test('valproate + carbapenem still fires exactly one finding (no class leakage)', () => {
+  // meropenem/valproate must stay untagged so the curated pair is the sole finding
+  assert.strictEqual(DI.check(['Sodium Valproate', 'Meropenem']).length, 1);
+});
+
 test('findings are severity-sorted (major before moderate)', () => {
   const s = sevs(['Vancomycin', 'Gentamicin']); // nephrotoxic(major) + ototoxic(moderate)
   const order = { contraindicated: 0, major: 1, moderate: 2, minor: 3 };

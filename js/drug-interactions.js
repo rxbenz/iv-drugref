@@ -325,7 +325,7 @@
   // structural and edited in code.
   var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
   var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
-  var LS_KEY = 'ddiData_v1', LS_TS = 'ddiData_v1_ts', CACHE_TTL = 6 * 60 * 60 * 1000; // 6h
+  var LS_KEY = 'ddiData_v2', LS_TS = 'ddiData_v2_ts';   // v2: invalidates the old warm-then-fetch cache
   var VALID_CLASSES = Object.keys(CLASS_DEFS);
 
   // Validate + install a remote payload ({pairs, rules}); returns true if anything applied.
@@ -356,30 +356,41 @@
     return applied;
   }
 
+  // Returns {ok, data} so the caller can tell a real (possibly empty) answer from
+  // a network failure — critical for fetch-first: an online empty table must use
+  // code defaults, NOT a stale cache.
   function _supaGet(table) {
     return fetch(SB_URL + '/rest/v1/' + table + '?select=data', {
       headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store'
-    }).then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (rows) { return Array.isArray(rows) ? rows.map(function (x) { return x.data; }).filter(Boolean) : []; })
-      .catch(function () { return []; });
+    }).then(function (r) {
+      if (!r.ok) return { ok: false, data: [] };
+      return r.json().then(function (rows) {
+        return { ok: true, data: Array.isArray(rows) ? rows.map(function (x) { return x.data; }).filter(Boolean) : [] };
+      });
+    }).catch(function () { return { ok: false, data: [] }; });
   }
 
+  // FETCH-FIRST: when online, the live Supabase answer is authoritative (so admin
+  // edits always show); the localStorage cache is used ONLY as an offline fallback.
+  // (The old warm-then-fetch order could leave a stale cached value on screen.)
   function loadRemote() {
-    // 1) warm from cache immediately (so an offline reload still gets last-synced data)
-    try {
-      var c = localStorage.getItem(LS_KEY);
-      var ts = parseInt(localStorage.getItem(LS_TS) || '0', 10);
-      if (c && (Date.now() - ts) < CACHE_TTL) _applyRemote(JSON.parse(c));
-    } catch (e) { /* ignore cache errors */ }
-    // 2) fetch fresh in the background
     Promise.all([_supaGet('ddi_pairs'), _supaGet('ddi_class_rules')]).then(function (res) {
-      var payload = { pairs: res[0], rules: res[1] };
-      if (_applyRemote(payload)) {
+      var pRes = res[0], rRes = res[1];
+      if (pRes.ok || rRes.ok) {
+        // Got a real response from Supabase → use it (empty ⇒ code defaults stay).
+        var payload = { pairs: pRes.data, rules: rRes.data };
+        _applyRemote(payload);
         try {
           localStorage.setItem(LS_KEY, JSON.stringify(payload));
           localStorage.setItem(LS_TS, String(Date.now()));
         } catch (e) { /* storage full — non-fatal */ }
-        if (window.console) console.log('[DDI] synced ' + payload.pairs.length + ' pairs / ' + payload.rules.length + ' class rules from Supabase');
+        if (window.console) console.log('[DDI] synced ' + payload.pairs.length + ' pairs / ' + payload.rules.length + ' class rules from Supabase (live)');
+      } else {
+        // Both fetches failed (offline) → warm from the last-synced cache.
+        try {
+          var c = localStorage.getItem(LS_KEY);
+          if (c) { _applyRemote(JSON.parse(c)); if (window.console) console.log('[DDI] offline — using cached data'); }
+        } catch (e) { /* ignore cache errors */ }
       }
     });
   }

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.51.0
+// IV Drug Reference PWA — Service Worker v5.51.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -428,9 +428,17 @@
 //          Imports are idempotent: compat re-uses existing ids by pair-key,
 //          DDI uses deterministic seed ids — no duplicate rows on re-run. The DDI
 //          tab's old "deploy GAS" note is gone (only supabase/ddi.sql is needed).
+// v5.51.1: FIX — admin edits didn't appear in the live app. The SW fetch handler
+//          only skipped google hosts; Supabase REST calls fell through to the
+//          cache-first branch, so the SW served STALE ddi_pairs/compat_pairs/
+//          renal_drugs/allergy responses for up to 7 days (even on reload) — the
+//          client's cache:'no-store' can't bypass the SW. Now supabase.co (and
+//          script.googleusercontent.com) are network-only like script.google.com.
+//          Old cached API responses are purged when this SW activates (versioned
+//          CACHE_NAME). Affects every Supabase-read page.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.51.0';
+const CACHE_NAME = 'iv-drugref-v5.51.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -506,8 +514,15 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Skip Google Apps Script & external API calls (never cache)
+  // Skip Google Apps Script, Supabase & external API calls (NEVER cache).
+  // Supabase REST (reference data: drugs/compat/renal/allergy/ddi + analytics)
+  // MUST be network-only — otherwise the SW's cache-first fallback (below) serves
+  // stale API responses for days, so admin edits never appear in the live app
+  // even on reload. Letting these fall through to the browser keeps the client's
+  // own `cache:'no-store'` effective.
   if (url.hostname === 'script.google.com' ||
+      url.hostname.includes('script.googleusercontent.com') ||
+      url.hostname.includes('supabase.co') ||
       url.hostname.includes('googleapis.com') ||
       url.hostname.includes('gstatic.com')) {
     return;

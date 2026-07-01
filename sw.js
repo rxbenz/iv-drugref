@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.50.1
+// IV Drug Reference PWA — Service Worker v5.51.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -417,9 +417,20 @@
 //          US-only "15–30→75 mg" tier (kept as a demoted footnote). Ref → Pradaxa
 //          SmPC. Both renal-dosing.js + curated-renal-drugs.js. Re-sync to
 //          Supabase via the admin Renal "Import CURATED" (upsert) or SQL.
+// v5.51.0: Phase B of the Supabase migration — the admin COMPAT + DDI tabs now
+//          read & write DIRECTLY to Supabase (compat_pairs / ddi_pairs /
+//          ddi_class_rules), GAS out of their path (drugs/allergy/users still on
+//          GAS → Phase C). admin-supabase.js gained a generic table API
+//          (getRows/upsertRow/deleteRow/bulkUpsert + TABLE_PK) with renal now a
+//          thin wrapper; per-tab helpers reshape each table's data jsonb to match
+//          the public readers. Shared Supabase auth gate (ensureSupaWrite /
+//          supaWriteAdmin / refreshSupaStatus) + a status bar on each migrated tab.
+//          Imports are idempotent: compat re-uses existing ids by pair-key,
+//          DDI uses deterministic seed ids — no duplicate rows on re-run. The DDI
+//          tab's old "deploy GAS" note is gone (only supabase/ddi.sql is needed).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.50.1';
+const CACHE_NAME = 'iv-drugref-v5.51.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

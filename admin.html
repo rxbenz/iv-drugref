@@ -305,9 +305,14 @@
 <!-- ═══════ PANEL: COMPATIBILITY ═══════ -->
     <div class="panel" id="compat-panel">
       <h2 style="margin-bottom:4px">🔗 Compatibility Database</h2>
-      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
-        จัดการข้อมูลคู่ยา Y-site compatibility — ปัจจุบัน <span id="compat-total-count">0</span> คู่
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+        จัดการข้อมูลคู่ยา Y-site compatibility — ปัจจุบัน <span id="compat-total-count">0</span> คู่ ·
+        <b style="color:var(--primary)">Phase B: เขียนตรงเข้า Supabase</b>
       </p>
+      <div id="compat-supa-status" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px">
+        <span id="compat-supa-text" style="color:var(--text-muted)">⏳ กำลังตรวจสถานะ Supabase…</span>
+        <button class="btn btn-sm btn-outline" id="compat-supa-connect" data-action="connectSupabase" style="display:none">🔗 เชื่อม Supabase เพื่อแก้ไข</button>
+      </div>
 
       <div class="stats-row" id="compat-stats"></div>
 
@@ -387,9 +392,10 @@
         จัดการ <b>คู่ยาเฉพาะ (curated pairs)</b> และ <b>การ tag ยาเข้าคลาส (class rules)</b> ที่ใช้คัดกรองอันตรกิริยา —
         นิยามคลาส (กลไก/ความรุนแรง) อยู่ในโค้ด <code>drug-interactions.js</code>
       </p>
-      <div class="info-box" id="ddi-backend-note" style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:#92400e">
-        ⚠️ ฟีเจอร์นี้ต้อง deploy backend ก่อน: รัน <code>supabase/ddi.sql</code> + copy <code>gas-complete.js</code> เข้า ADMIN GAS แล้ว Deploy
-        ถ้ายังไม่ได้ทำ การบันทึกจะ error (หน้าเว็บฝั่งผู้ใช้ยังใช้ค่า default ในโค้ดได้ตามปกติ)
+      <div id="ddi-supa-status" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:8px 12px;margin-bottom:16px;font-size:12px">
+        <span id="ddi-supa-text" style="color:var(--text-muted)">⏳ กำลังตรวจสถานะ Supabase…</span>
+        <button class="btn btn-sm btn-outline" id="ddi-supa-connect" data-action="connectSupabase" style="display:none">🔗 เชื่อม Supabase เพื่อแก้ไข</button>
+        <span style="color:var(--primary);font-weight:600">Phase B: เขียนตรงเข้า Supabase (ต้องรัน supabase/ddi.sql ครั้งเดียว)</span>
       </div>
 
       <!-- Curated pairs -->

@@ -1763,15 +1763,17 @@ const RESULT_LABELS = { c: '✅ Compatible', i: '❌ Incompatible', v: '⚠️ V
 const RESULT_BADGE = { c: 'badge-approved', i: 'badge-had', v: 'badge-pending' };
 
 async function loadCompatPairs() {
+  refreshSupaStatus();
   showLoading('กำลังโหลดข้อมูล compatibility...');
   try {
-    const result = await apiCall('getCompatPairs');
-    state.compatPairs = result.pairs || [];
+    // Phase B: read direct from Supabase compat_pairs (public read; GAS out of path).
+    state.compatPairs = await AdminSupabase.getCompatPairs();
     renderCompatStats();
     renderCompatTable();
+    refreshSupaStatus();
   } catch (e) {
     console.error('loadCompatPairs error:', e);
-    toast('โหลดข้อมูล compatibility ล้มเหลว', 'error');
+    toast('โหลดข้อมูล compatibility ล้มเหลว: ' + e.message, 'error');
   }
   hideLoading();
 }
@@ -1835,7 +1837,7 @@ function renderCompatTable() {
         <td>
           <div style="display:flex;gap:4px">
             <button class="btn btn-sm btn-outline" data-action="editCompatPair" data-id="${escHtml(String(p.id))}" title="แก้ไข">✏️</button>
-            ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteCompatPair" data-id="${escHtml(String(p.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+            ${compatCanDelete() ? `<button class="btn btn-sm btn-outline" data-action="deleteCompatPair" data-id="${escHtml(String(p.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
           </div>
         </td>
       </tr>
@@ -1896,15 +1898,14 @@ async function saveCompatPair() {
     return;
   }
 
+  if (!(await ensureSupaWrite())) return;
+  // Phase B: upsert direct to Supabase. Create generates a stable text id;
+  // edit keeps the existing id (upsert by id).
+  const id = state.editingCompatId || ('cp_' + Date.now());
   showLoading('กำลังบันทึก...');
   try {
-    if (state.editingCompatId) {
-      await apiCall('updateCompatPair', { id: state.editingCompatId, drugA, drugB, result, ref });
-      toast('✅ อัพเดทคู่ยาแล้ว', 'success');
-    } else {
-      await apiCall('createCompatPair', { drugA, drugB, result, ref });
-      toast('✅ เพิ่มคู่ยาแล้ว', 'success');
-    }
+    await AdminSupabase.upsertCompatPair({ id, drugA, drugB, result, ref });
+    toast(state.editingCompatId ? '✅ อัพเดทคู่ยาแล้ว' : '✅ เพิ่มคู่ยาแล้ว', 'success');
     closeCompatModal();
     await loadCompatPairs();
   } catch (e) {
@@ -1919,14 +1920,13 @@ function editCompatPair(id) {
 }
 
 async function deleteCompatPair(id) {
-  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
   const pair = state.compatPairs.find(p => String(p.id) === String(id));
   if (!pair) return;
   if (!confirm(`ลบคู่ยา "${pair.drugA} + ${pair.drugB}" ?`)) return;
-
+  if (!(await ensureSupaWrite())) return;   // RLS is the real gate (is_admin)
   showLoading('กำลังลบ...');
   try {
-    await apiCall('deleteCompatPair', { id });
+    await AdminSupabase.deleteCompatPair(id);
     toast('🗑 ลบคู่ยาแล้ว', 'success');
     await loadCompatPairs();
   } catch (e) {
@@ -2049,38 +2049,27 @@ const CURATED_PAIRS = [
 ];
 
 async function importCuratedPairs() {
-  if (state.compatPairs.length > 0) {
-    if (!confirm(`มีข้อมูลอยู่แล้ว ${state.compatPairs.length} คู่\nระบบจะข้ามคู่ยาที่ซ้ำ — ต้องการ import CURATED ${CURATED_PAIRS.length} คู่?`)) return;
-  } else {
-    if (!confirm(`Import ข้อมูล CURATED ${CURATED_PAIRS.length} คู่ยา เข้าสู่ Google Sheets?`)) return;
-  }
+  // Phase B: bulk-upsert CURATED pairs to Supabase. Idempotent — compat ids are
+  // synthetic (not natural keys), so we match existing rows by the normalized
+  // pair-key and REUSE their id (update in place); only genuinely-new pairs get
+  // a fresh id. This prevents duplicate rows on re-import.
+  if (!confirm('นำเข้า/อัปเดต CURATED ' + CURATED_PAIRS.length + ' คู่ยา เข้า Supabase?\nคู่ที่มีอยู่จะถูกอัปเดต (result/ref) — ไม่สร้างซ้ำ')) return;
+  if (!(await ensureSupaWrite())) return;
 
-  const pairs = CURATED_PAIRS.map(([drugA, drugB, result]) => ({
-    drugA, drugB, result, ref: "Trissel's / Lexicomp"
-  }));
+  const keyOf = (a, b) => [a, b].map(s => String(s || '').toLowerCase().trim()).sort().join('|');
+  const existing = {};
+  state.compatPairs.forEach(p => { existing[keyOf(p.drugA, p.drugB)] = p.id; });
+  let seq = Date.now();
+  const rows = CURATED_PAIRS.map(([drugA, drugB, result]) => {
+    const k = keyOf(drugA, drugB);
+    const id = existing[k] || ('cp_' + (seq++));
+    return { id: String(id), drugA, drugB, result, ref: "Trissel's / Lexicomp" };
+  });
 
-  showLoading(`กำลัง import ${pairs.length} คู่ยา...`);
+  showLoading('กำลัง upsert ' + rows.length + ' คู่ยา...');
   try {
-    // Use POST directly for bulk — payload is large
-    const cfg = getConfig();
-    const postUrl = cfg.scriptUrl + '?action=bulkCreateCompatPairs&user=' + encodeURIComponent(state.user?.email || 'unknown');
-    const body = JSON.stringify({ action: 'bulkCreateCompatPairs', user: state.user?.email || 'unknown', pairs });
-
-    if (body.length < 6000) {
-      // Small enough for GET
-      const result = await apiCall('bulkCreateCompatPairs', { pairs });
-      toast(`✅ Import สำเร็จ: เพิ่ม ${result.created} คู่, ข้าม ${result.skipped} คู่ซ้ำ`, 'success');
-    } else {
-      // Large payload → POST no-cors
-      await fetch(postUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: body,
-      });
-      await new Promise(r => setTimeout(r, 2000));
-      toast('✅ ส่งข้อมูล import แล้ว — กำลังโหลดใหม่...', 'success');
-    }
+    const n = await AdminSupabase.bulkUpsertCompatPairs(rows);
+    toast('✅ Import สำเร็จ: upsert ' + n + ' คู่ (คู่ที่มีอยู่อัปเดตในที่)', 'success');
     await loadCompatPairs();
   } catch (e) {
     toast('❌ Import ล้มเหลว: ' + e.message, 'error');
@@ -2107,24 +2096,29 @@ const DDI_CLASSES = [
 const DDI_SEV_LABEL = { contraindicated: '⛔ ห้ามใช้ร่วม', major: '🟠 รุนแรง', moderate: '🟡 ปานกลาง', minor: '⚪ เล็กน้อย' };
 
 async function loadDDIData() {
+  refreshSupaStatus();
   showLoading('กำลังโหลดข้อมูล DDI...');
   try {
-    const [p, r] = await Promise.all([apiCall('getDDIPairs'), apiCall('getDDIClassRules')]);
-    state.ddiPairs = (p && p.pairs) || [];
-    state.ddiRules = (r && r.rules) || [];
+    // Phase B: read direct from Supabase (public read). aAny/bAny come back as
+    // ARRAYS and classes as an array (AdminSupabase normalizes).
+    const [p, r] = await Promise.all([AdminSupabase.getDDIPairs(), AdminSupabase.getDDIClassRules()]);
+    state.ddiPairs = p || [];
+    state.ddiRules = r || [];
     renderDDIPairsTable();
     renderDDIRulesTable();
+    refreshSupaStatus();
   } catch (e) {
     console.error('loadDDIData error:', e);
-    toast('โหลดข้อมูล DDI ล้มเหลว (ต้อง deploy backend ก่อน?)', 'error');
+    toast('โหลดข้อมูล DDI ล้มเหลว: ' + e.message, 'error');
   }
   hideLoading();
 }
 
 // ── Curated pairs ───────────────────────────────────────────────────
-// Build a human label for one side from the stored sheet row (single keyword
-// or a JSON-array string of keywords).
+// Build a human label for one side. Accepts an array (Supabase), a JSON-array
+// string (legacy), or a single keyword string.
 function ddiSideLabel(single, multi) {
+  if (Array.isArray(multi)) return multi.length ? multi.join(' / ') : (single || '—');
   if (multi) {
     try { const a = JSON.parse(multi); if (Array.isArray(a) && a.length) return a.join(' / '); }
     catch (e) { return String(multi); }
@@ -2156,7 +2150,7 @@ function renderDDIPairsTable() {
       <td>
         <div style="display:flex;gap:4px">
           <button class="btn btn-sm btn-outline" data-action="editDDIPair" data-id="${escHtml(String(p.id))}" title="แก้ไข">✏️</button>
-          ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDDIPair" data-id="${escHtml(String(p.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+          ${supaWriteAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDDIPair" data-id="${escHtml(String(p.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
         </div>
       </td>
     </tr>`).join('');
@@ -2166,7 +2160,7 @@ function filterDDIPairs() { renderDDIPairsTable(); }
 function openDDIPairModal(pair = null) {
   state.editingDDIPairId = pair ? pair.id : null;
   document.getElementById('ddi-pair-modal-title').textContent = pair ? 'แก้ไขคู่ยา DDI' : 'เพิ่มคู่ยา DDI';
-  const arr = (v) => { if (!v) return ''; try { const a = JSON.parse(v); return Array.isArray(a) ? a.join(', ') : String(v); } catch (e) { return String(v); } };
+  const arr = (v) => { if (!v) return ''; if (Array.isArray(v)) return v.join(', '); try { const a = JSON.parse(v); return Array.isArray(a) ? a.join(', ') : String(v); } catch (e) { return String(v); } };
   document.getElementById('df-a').value = pair ? (pair.a || '') : '';
   document.getElementById('df-aAny').value = pair ? arr(pair.aAny) : '';
   document.getElementById('df-b').value = pair ? (pair.b || '') : '';
@@ -2194,7 +2188,11 @@ async function saveDDIPair() {
   const b = document.getElementById('df-b').value.trim().toLowerCase();
   const bAny = ddiCsvToJsonArr(document.getElementById('df-bAny').value);
   if (!(a || aAny) || !(b || bAny)) { toast('ต้องระบุยาทั้งฝั่ง A และ B (ช่องเดี่ยวหรือหลายตัว)', 'error'); return; }
+  if (!(await ensureSupaWrite())) return;
+  // Phase B: upsert direct to Supabase (aAny/bAny normalized to arrays inside).
+  const id = state.editingDDIPairId || ('ddip_' + Date.now());
   const payload = {
+    id,
     a: aAny ? '' : a, aAny: aAny, b: bAny ? '' : b, bAny: bAny,
     severity: document.getElementById('df-severity').value,
     mechanism: document.getElementById('df-mechanism').value.trim(),
@@ -2203,13 +2201,8 @@ async function saveDDIPair() {
   };
   showLoading('กำลังบันทึก...');
   try {
-    if (state.editingDDIPairId) {
-      await apiCall('updateDDIPair', Object.assign({ id: state.editingDDIPairId }, payload));
-      toast('✅ อัพเดทคู่ยาแล้ว', 'success');
-    } else {
-      await apiCall('createDDIPair', payload);
-      toast('✅ เพิ่มคู่ยาแล้ว', 'success');
-    }
+    await AdminSupabase.upsertDDIPair(payload);
+    toast(state.editingDDIPairId ? '✅ อัพเดทคู่ยาแล้ว' : '✅ เพิ่มคู่ยาแล้ว', 'success');
     closeDDIPairModal();
     await loadDDIData();
   } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
@@ -2220,12 +2213,12 @@ function editDDIPair(id) {
   if (p) openDDIPairModal(p);
 }
 async function deleteDDIPair(id) {
-  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
   const p = state.ddiPairs.find(x => String(x.id) === String(id));
   if (!p) return;
   if (!confirm('ลบคู่ยา DDI นี้?')) return;
+  if (!(await ensureSupaWrite())) return;
   showLoading('กำลังลบ...');
-  try { await apiCall('deleteDDIPair', { id }); toast('🗑 ลบแล้ว', 'success'); await loadDDIData(); }
+  try { await AdminSupabase.deleteDDIPair(id); toast('🗑 ลบแล้ว', 'success'); await loadDDIData(); }
   catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   hideLoading();
 }
@@ -2254,7 +2247,7 @@ function renderDDIRulesTable() {
       <td>
         <div style="display:flex;gap:4px">
           <button class="btn btn-sm btn-outline" data-action="editDDIRule" data-id="${escHtml(String(r.id))}" title="แก้ไข">✏️</button>
-          ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDDIRule" data-id="${escHtml(String(r.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+          ${supaWriteAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteDDIRule" data-id="${escHtml(String(r.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -2283,15 +2276,12 @@ async function saveDDIRule() {
   const classes = Array.from(document.querySelectorAll('#rf-classes .rf-cls:checked')).map(c => c.value).join(',');
   if (!keyword) { toast('ต้องระบุ keyword', 'error'); return; }
   if (!classes) { toast('เลือกอย่างน้อย 1 คลาส', 'error'); return; }
+  if (!(await ensureSupaWrite())) return;
+  const id = state.editingDDIRuleId || ('ddir_' + Date.now());
   showLoading('กำลังบันทึก...');
   try {
-    if (state.editingDDIRuleId) {
-      await apiCall('updateDDIClassRule', { id: state.editingDDIRuleId, keyword, classes });
-      toast('✅ อัพเดทแล้ว', 'success');
-    } else {
-      await apiCall('createDDIClassRule', { keyword, classes });
-      toast('✅ เพิ่มแล้ว', 'success');
-    }
+    await AdminSupabase.upsertDDIClassRule({ id, keyword, classes });
+    toast(state.editingDDIRuleId ? '✅ อัพเดทแล้ว' : '✅ เพิ่มแล้ว', 'success');
     closeDDIRuleModal();
     await loadDDIData();
   } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
@@ -2302,42 +2292,35 @@ function editDDIRule(id) {
   if (r) openDDIRuleModal(r);
 }
 async function deleteDDIRule(id) {
-  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
   if (!confirm('ลบ class rule นี้?')) return;
+  if (!(await ensureSupaWrite())) return;
   showLoading('กำลังลบ...');
-  try { await apiCall('deleteDDIClassRule', { id }); toast('🗑 ลบแล้ว', 'success'); await loadDDIData(); }
+  try { await AdminSupabase.deleteDDIClassRule(id); toast('🗑 ลบแล้ว', 'success'); await loadDDIData(); }
   catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   hideLoading();
 }
 
-// ── Import defaults (seed sheets from the hardcoded engine data) ─────
+// ── Import defaults (seed Supabase from the hardcoded engine data) ──────
 // Reads the live defaults straight off window.DrugInteractions so the seed can
-// never drift from the engine. Creates rows one-by-one via the existing CRUD.
+// never drift from the engine. Idempotent: deterministic seed ids (by index /
+// keyword) → re-running upserts in place instead of creating duplicates.
 async function importDDIDefaults() {
-  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
   const DI = window.DrugInteractions;
   if (!DI || !DI._CURATED) { toast('ไม่พบ engine (drug-interactions.js) — เปิดหน้า DDI ก่อน', 'error'); return; }
-  if (!confirm('นำเข้า curated pairs + class rules จากค่า default ในโค้ด? (จะเพิ่มเป็นรายการใหม่)')) return;
+  if (!confirm('นำเข้า/อัปเดต curated pairs + class rules จากค่า default ในโค้ดเข้า Supabase?\n(idempotent — เขียนทับ seed เดิม ไม่สร้างซ้ำ)')) return;
+  if (!(await ensureSupaWrite())) return;
   showLoading('กำลังนำเข้า defaults...');
-  let okP = 0, okR = 0, fail = 0;
   try {
-    for (const p of DI._CURATED) {
-      const payload = {
-        a: p.a || '', aAny: (p.aAny && p.aAny.length) ? JSON.stringify(p.aAny) : '',
-        b: p.b || '', bAny: (p.bAny && p.bAny.length) ? JSON.stringify(p.bAny) : '',
-        severity: p.severity || 'major', mechanism: p.mechanism || '',
-        management: p.management || '', ref: p.ref || ''
-      };
-      try { await apiCall('createDDIPair', payload); okP++; } catch (e) { fail++; }
-    }
-    // class rules come off the engine's internal table via the public check()
-    // path is not exposed; rebuild from _CLASS_DEFS keys + the known CLASS_RULES
-    // is internal — instead seed from DI._classRulesForSeed if present.
-    const rules = (DI._CLASS_RULES_SEED || []);
-    for (const r of rules) {
-      try { await apiCall('createDDIClassRule', { keyword: r[0], classes: r[1].join(',') }); okR++; } catch (e) { fail++; }
-    }
-    toast(`✅ นำเข้าแล้ว: ${okP} pairs, ${okR} rules${fail ? ' (ล้มเหลว ' + fail + ')' : ''}`, fail ? 'info' : 'success');
+    const pairs = DI._CURATED.map((p, i) => ({
+      id: 'ddip_seed_' + i, a: p.a || '', aAny: p.aAny || [], b: p.b || '', bAny: p.bAny || [],
+      severity: p.severity || 'major', mechanism: p.mechanism || '', management: p.management || '', ref: p.ref || ''
+    }));
+    const rules = (DI._CLASS_RULES_SEED || []).map(r => ({
+      id: 'ddir_seed_' + String(r[0]).replace(/[^a-z0-9]+/g, '_'), keyword: r[0], classes: r[1]
+    }));
+    const nP = await AdminSupabase.bulkUpsertDDIPairs(pairs);
+    const nR = await AdminSupabase.bulkUpsertDDIClassRules(rules);
+    toast('✅ นำเข้าแล้ว: ' + nP + ' pairs, ' + nR + ' rules (upsert)', 'success');
     await loadDDIData();
   } catch (e) { toast('Import ล้มเหลว: ' + e.message, 'error'); }
   hideLoading();
@@ -2368,49 +2351,53 @@ async function loadRenalDrugs() {
   hideLoading();
 }
 
-// ── Phase A: Supabase session/admin gate for Renal writes ──────────────────
-// Cached Supabase admin flag — the delete button + write gates read this so the
-// UI reflects the ACTUAL (RLS) authority, not the legacy GAS role. Set by
-// renderRenalSupaStatus() once the async is_admin() check resolves.
-let _renalSupaAdmin = false;
-// Delete is a write → gate on Supabase admin (RLS is the real authority); still
-// allow a legacy GAS admin as a fallback so existing behavior isn't lost.
-function renalCanDelete() { return _renalSupaAdmin === true || isAdmin(); }
+// ── Phase A/B: Supabase session/admin gate for direct writes ───────────────
+// Shared across the migrated tabs (Renal, Compat, DDI). _supaAdmin caches the
+// Supabase is_admin() result so delete buttons + write gates reflect the ACTUAL
+// (RLS) authority, not the legacy GAS role. Set by refreshSupaStatus().
+let _supaAdmin = false;
+// A write (incl. delete) is authorized by Supabase RLS is_admin(); allow a legacy
+// GAS admin as a fallback so existing behavior isn't lost.
+function supaWriteAdmin() { return _supaAdmin === true || isAdmin(); }
+function renalCanDelete()  { return supaWriteAdmin(); }
+function compatCanDelete() { return supaWriteAdmin(); }
 
-async function ensureRenalWriteAccess() {
+// Table-agnostic write gate (session + Supabase is_admin). Used by every
+// migrated tab's create/update/delete/import.
+async function ensureSupaWrite() {
   if (!window.AdminSupabase || !AdminSupabase.available()) {
     toast('❌ Supabase ยังไม่พร้อม (โหลดไลบรารีไม่สำเร็จ)', 'error'); return false;
   }
   const st = await AdminSupabase.status();
   if (!st.signedIn) {
     toast('⚠️ ต้องเชื่อม Supabase ก่อนแก้ไข — กดปุ่ม "🔗 เชื่อม Supabase"', 'info');
-    renderRenalSupaStatus();
+    refreshSupaStatus();
     return false;
   }
   if (!st.isAdmin) {
-    // Distinguish a network/RPC failure (retryable) from a definitive "not admin".
     if (st.adminError) toast('⚠️ ตรวจสอบสิทธิ์ admin ไม่สำเร็จ (เครือข่าย/Supabase) — ลองอีกครั้ง', 'error');
     else toast('❌ บัญชี ' + st.email + ' ไม่มีสิทธิ์ admin ใน Supabase (ไม่อยู่ใน allowlist)', 'error');
     return false;
   }
   return true;
 }
+// Phase A name kept for its callers (saveRenalDrug/deleteRenalDrug/importCuratedRenal).
+function ensureRenalWriteAccess() { return ensureSupaWrite(); }
 
-function connectRenalSupabase() {
+function connectSupabase() {
   if (!window.AdminSupabase) { toast('Supabase ยังไม่โหลด', 'error'); return; }
   AdminSupabase.connect().catch(function (e) { toast('เชื่อม Supabase ล้มเหลว: ' + e.message, 'error'); });
 }
+function connectRenalSupabase() { connectSupabase(); }   // legacy data-action alias
 
-async function renderRenalSupaStatus() {
-  const txt = document.getElementById('renal-supa-text');
-  const btn = document.getElementById('renal-supa-connect');
+// Render a single status bar (#<prefix>-supa-text / #<prefix>-supa-connect).
+function _renderSupaBar(prefix, st) {
+  const txt = document.getElementById(prefix + '-supa-text');
+  const btn = document.getElementById(prefix + '-supa-connect');
   if (!txt || !btn) return;
-  if (!window.AdminSupabase || !AdminSupabase.available()) {
-    txt.textContent = '⚠️ Supabase library ไม่โหลด — ตรวจ CSP/เครือข่าย'; btn.style.display = 'none';
-    _setRenalSupaAdmin(false);
-    return;
+  if (!st.available) {
+    txt.textContent = '⚠️ Supabase library ไม่โหลด — ตรวจ CSP/เครือข่าย'; btn.style.display = 'none'; return;
   }
-  const st = await AdminSupabase.status();
   if (st.signedIn && st.isAdmin) {
     txt.innerHTML = '✅ เชื่อม Supabase แล้ว: <b>' + escHtml(st.email) + '</b> (admin) — แก้ไขได้ทันที';
     btn.style.display = 'none';
@@ -2424,19 +2411,34 @@ async function renderRenalSupaStatus() {
     txt.textContent = '🔒 อ่านข้อมูลได้ (public) — ต้องเชื่อม Supabase เพื่อแก้ไข';
     btn.style.display = 'inline-block';
   }
-  // Only a DEFINITIVE admin:true grants delete; error/unknown → no delete button.
-  _setRenalSupaAdmin(st.signedIn && st.isAdmin === true && !st.adminError);
 }
 
-// Update the cached Supabase-admin flag; if it changed, re-render the table so
-// the delete (🗑) button appears/disappears to match the real authority.
-function _setRenalSupaAdmin(v) {
-  if (_renalSupaAdmin === v) return;
-  _renalSupaAdmin = v;
-  const panel = document.getElementById('renal-panel');
-  if (panel && panel.classList.contains('active') && state.renalDrugs && state.renalDrugs.length) {
-    try { renderRenalTable(); } catch (e) { /* table may not be mounted */ }
+// Refresh every present status bar + the shared admin flag; re-render active tab.
+async function refreshSupaStatus() {
+  let st;
+  if (!window.AdminSupabase || !AdminSupabase.available()) {
+    st = { available: false, signedIn: false, email: '', isAdmin: false, adminError: false };
+  } else {
+    st = await AdminSupabase.status(); st.available = true;
   }
+  ['renal', 'compat', 'ddi'].forEach(function (p) { _renderSupaBar(p, st); });
+  _setSupaAdmin(st.available && st.signedIn && st.isAdmin === true && !st.adminError);
+}
+// Phase A name kept for its callers (loadRenalDrugs, handleCredentialResponse).
+function renderRenalSupaStatus() { return refreshSupaStatus(); }
+
+// Update the shared flag; if it changed, re-render whichever migrated tab is
+// active so its delete (🗑) buttons match the real authority.
+function _setSupaAdmin(v) {
+  if (_supaAdmin === v) return;
+  _supaAdmin = v;
+  const panel = document.querySelector('.panel.active');
+  if (!panel) return;
+  try {
+    if (panel.id === 'renal-panel' && state.renalDrugs && state.renalDrugs.length) renderRenalTable();
+    else if (panel.id === 'compat-panel' && state.compatPairs && state.compatPairs.length) renderCompatTable();
+    else if (panel.id === 'ddi-panel' && (state.ddiPairs || state.ddiRules)) { renderDDIPairsTable(); renderDDIRulesTable(); }
+  } catch (e) { /* table may not be mounted */ }
 }
 
 function getFilteredRenalDrugs() {
@@ -3407,6 +3409,7 @@ document.addEventListener('DOMContentLoaded', () => {
     exportRenalCSV: function() { exportRenalCSV(); },
     importCuratedRenal: function() { importCuratedRenal(); },
     connectRenalSupabase: function() { connectRenalSupabase(); },
+    connectSupabase: function() { connectSupabase(); },
     addRenalDosingRow: function() { addRenalDosingRow('', '', '', ''); },
     removeRenalDosingRow: function(e, t) { t.closest('.renal-dosing-row').remove(); },
     toggleRenalPreview: function(e, t) { toggleRenalPreview(t.dataset.preview === 'true'); },

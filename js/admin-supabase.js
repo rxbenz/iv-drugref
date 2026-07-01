@@ -20,6 +20,7 @@
   var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
   var _client = null;
   var _adminOk = null;   // cached is_admin() result (null = unknown)
+  var _adminErr = false; // true when the last is_admin() check ERRORED (vs a clean false)
 
   function client() {
     if (_client) return _client;
@@ -36,13 +37,21 @@
     catch (e) { return null; }
   }
 
+  // Returns true/false on a DEFINITIVE result; on an RPC/network error returns
+  // false but sets _adminErr so callers can show a retryable message instead of
+  // misreporting a real admin as "not in allowlist". Errors are NOT cached.
   async function isAdmin(force) {
-    var c = client(); if (!c) return false;
-    if (_adminOk !== null && !force) return _adminOk;
-    try { var r = await c.rpc('is_admin'); _adminOk = !r.error && r.data === true; }
-    catch (e) { _adminOk = false; }
+    var c = client(); if (!c) { _adminErr = false; return false; }
+    if (_adminOk !== null && !force) { _adminErr = false; return _adminOk; }
+    _adminErr = false;
+    try {
+      var r = await c.rpc('is_admin');
+      if (r.error) { _adminErr = true; return false; }   // don't cache an errored check
+      _adminOk = r.data === true;
+    } catch (e) { _adminErr = true; return false; }
     return _adminOk;
   }
+  function adminCheckErrored() { return _adminErr; }
 
   // Seamless: turn a Google GIS credential (id_token) into a Supabase session
   // without a redirect. No-throw; returns true only on success.
@@ -67,13 +76,15 @@
     _adminOk = null;
   }
 
-  // Combined status for the UI: {available, signedIn, email, isAdmin}.
+  // Combined status for the UI: {available, signedIn, email, isAdmin, adminError}.
+  // adminError=true means the is_admin() check couldn't be completed (network/RPC)
+  // — distinct from a definitive isAdmin:false (email not in the allowlist).
   async function status() {
-    if (!available()) return { available: false, signedIn: false, email: '', isAdmin: false };
+    if (!available()) return { available: false, signedIn: false, email: '', isAdmin: false, adminError: false };
     var s = await session();
-    if (!s) return { available: true, signedIn: false, email: '', isAdmin: false };
+    if (!s) return { available: true, signedIn: false, email: '', isAdmin: false, adminError: false };
     var admin = await isAdmin(true);
-    return { available: true, signedIn: true, email: (s.user && s.user.email) || '', isAdmin: admin };
+    return { available: true, signedIn: true, email: (s.user && s.user.email) || '', isAdmin: admin, adminError: adminCheckErrored() };
   }
 
   // ---- Renal reference data (renal_drugs) ----------------------------------
@@ -145,7 +156,7 @@
 
   window.AdminSupabase = {
     available: available, client: client,
-    session: session, isAdmin: isAdmin, status: status,
+    session: session, isAdmin: isAdmin, adminCheckErrored: adminCheckErrored, status: status,
     signInWithGoogleIdToken: signInWithGoogleIdToken, connect: connect, signOut: signOut,
     getRenalDrugs: getRenalDrugs, upsertRenalDrug: upsertRenalDrug,
     deleteRenalDrug: deleteRenalDrug, bulkUpsertRenalDrugs: bulkUpsertRenalDrugs

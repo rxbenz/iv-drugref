@@ -2369,6 +2369,14 @@ async function loadRenalDrugs() {
 }
 
 // ── Phase A: Supabase session/admin gate for Renal writes ──────────────────
+// Cached Supabase admin flag — the delete button + write gates read this so the
+// UI reflects the ACTUAL (RLS) authority, not the legacy GAS role. Set by
+// renderRenalSupaStatus() once the async is_admin() check resolves.
+let _renalSupaAdmin = false;
+// Delete is a write → gate on Supabase admin (RLS is the real authority); still
+// allow a legacy GAS admin as a fallback so existing behavior isn't lost.
+function renalCanDelete() { return _renalSupaAdmin === true || isAdmin(); }
+
 async function ensureRenalWriteAccess() {
   if (!window.AdminSupabase || !AdminSupabase.available()) {
     toast('❌ Supabase ยังไม่พร้อม (โหลดไลบรารีไม่สำเร็จ)', 'error'); return false;
@@ -2380,7 +2388,9 @@ async function ensureRenalWriteAccess() {
     return false;
   }
   if (!st.isAdmin) {
-    toast('❌ บัญชี ' + st.email + ' ไม่มีสิทธิ์ admin ใน Supabase (ไม่อยู่ใน allowlist)', 'error');
+    // Distinguish a network/RPC failure (retryable) from a definitive "not admin".
+    if (st.adminError) toast('⚠️ ตรวจสอบสิทธิ์ admin ไม่สำเร็จ (เครือข่าย/Supabase) — ลองอีกครั้ง', 'error');
+    else toast('❌ บัญชี ' + st.email + ' ไม่มีสิทธิ์ admin ใน Supabase (ไม่อยู่ใน allowlist)', 'error');
     return false;
   }
   return true;
@@ -2396,11 +2406,16 @@ async function renderRenalSupaStatus() {
   const btn = document.getElementById('renal-supa-connect');
   if (!txt || !btn) return;
   if (!window.AdminSupabase || !AdminSupabase.available()) {
-    txt.textContent = '⚠️ Supabase library ไม่โหลด — ตรวจ CSP/เครือข่าย'; btn.style.display = 'none'; return;
+    txt.textContent = '⚠️ Supabase library ไม่โหลด — ตรวจ CSP/เครือข่าย'; btn.style.display = 'none';
+    _setRenalSupaAdmin(false);
+    return;
   }
   const st = await AdminSupabase.status();
   if (st.signedIn && st.isAdmin) {
     txt.innerHTML = '✅ เชื่อม Supabase แล้ว: <b>' + escHtml(st.email) + '</b> (admin) — แก้ไขได้ทันที';
+    btn.style.display = 'none';
+  } else if (st.signedIn && st.adminError) {
+    txt.innerHTML = '⚠️ ลงชื่อเป็น <b>' + escHtml(st.email) + '</b> — ตรวจสิทธิ์ admin ไม่สำเร็จ (เครือข่าย) ลองใหม่';
     btn.style.display = 'none';
   } else if (st.signedIn && !st.isAdmin) {
     txt.innerHTML = '⚠️ ลงชื่อเป็น <b>' + escHtml(st.email) + '</b> แต่ไม่ใช่ admin ใน Supabase — แก้ไขไม่ได้';
@@ -2408,6 +2423,19 @@ async function renderRenalSupaStatus() {
   } else {
     txt.textContent = '🔒 อ่านข้อมูลได้ (public) — ต้องเชื่อม Supabase เพื่อแก้ไข';
     btn.style.display = 'inline-block';
+  }
+  // Only a DEFINITIVE admin:true grants delete; error/unknown → no delete button.
+  _setRenalSupaAdmin(st.signedIn && st.isAdmin === true && !st.adminError);
+}
+
+// Update the cached Supabase-admin flag; if it changed, re-render the table so
+// the delete (🗑) button appears/disappears to match the real authority.
+function _setRenalSupaAdmin(v) {
+  if (_renalSupaAdmin === v) return;
+  _renalSupaAdmin = v;
+  const panel = document.getElementById('renal-panel');
+  if (panel && panel.classList.contains('active') && state.renalDrugs && state.renalDrugs.length) {
+    try { renderRenalTable(); } catch (e) { /* table may not be mounted */ }
   }
 }
 
@@ -2457,7 +2485,7 @@ function renderRenalTable() {
         <td>
           <div style="display:flex;gap:4px">
             <button class="btn btn-sm btn-outline" data-action="editRenalDrug" data-id="${escHtml(String(d.id))}" title="แก้ไข">✏️</button>
-            ${isAdmin() ? `<button class="btn btn-sm btn-outline" data-action="deleteRenalDrug" data-id="${escHtml(String(d.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
+            ${renalCanDelete() ? `<button class="btn btn-sm btn-outline" data-action="deleteRenalDrug" data-id="${escHtml(String(d.id))}" title="ลบ" style="color:var(--danger)">🗑</button>` : ''}
           </div>
         </td>
       </tr>
@@ -2562,6 +2590,11 @@ function collectRenalFormData() {
 async function saveRenalDrug() {
   const data = collectRenalFormData();
   if (!data.id || !data.name) { toast('กรุณากรอก Drug ID และ Drug Name', 'error'); return; }
+  // Create mode: guard against silently overwriting an existing drug (upsert keys
+  // on id). rf-id is read-only when editing, so this only fires for new adds.
+  if (!state.editingRenalId && state.renalDrugs.some(d => String(d.id) === String(data.id))) {
+    if (!confirm('มียา id "' + data.id + '" อยู่แล้ว\nการบันทึกจะ "เขียนทับ" ข้อมูลเดิมทั้งหมด — ยืนยันไหม?')) return;
+  }
   if (!(await ensureRenalWriteAccess())) return;
   showLoading('กำลังบันทึก...');
   try {

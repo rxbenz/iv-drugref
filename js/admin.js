@@ -102,6 +102,15 @@ function handleCredentialResponse(response) {
   }
   state.user = { name: payload.name, email: payload.email, picture: payload.picture };
   showApp(state.user);
+  // Phase A: best-effort — exchange the Google id_token for a Supabase session
+  // (no extra login/redirect) so the Renal tab can write direct to Supabase.
+  // Silent no-op if the Supabase Google provider isn't configured for id_token;
+  // the "🔗 เชื่อม Supabase" button (OAuth redirect) is the fallback.
+  if (window.AdminSupabase && response.credential) {
+    AdminSupabase.signInWithGoogleIdToken(response.credential).then(function (ok) {
+      if (ok && typeof renderRenalSupaStatus === 'function') renderRenalSupaStatus();
+    });
+  }
 }
 
 function parseJwt(token) {
@@ -2343,21 +2352,63 @@ const INFO_TYPE_LABELS = {blue:'🔵 Info',amber:'🟡 Warning',red:'🔴 Danger
 const INFO_TYPE_COLORS = {blue:'#eff6ff',amber:'#fffbeb',red:'#fef2f2',teal:'#f0fdfa'};
 
 async function loadRenalDrugs() {
+  renderRenalSupaStatus();
   showLoading('กำลังโหลดข้อมูล renal dosing...');
   try {
-    const result = await apiCall('getRenalDrugs');
-    state.renalDrugs = (result.drugs || []).map(d => ({
-      ...d,
-      badges: typeof d.badges === 'string' ? JSON.parse(d.badges || '[]') : (d.badges || []),
-      dosingTable: typeof d.dosingTable === 'string' ? JSON.parse(d.dosingTable || '[]') : (d.dosingTable || [])
-    }));
+    // Phase A: read direct from Supabase (public read; GAS no longer in the path).
+    // AdminSupabase already returns normalized objects (badges/dosingTable arrays).
+    state.renalDrugs = await AdminSupabase.getRenalDrugs();
     renderRenalStats();
     renderRenalTable();
+    renderRenalSupaStatus();
   } catch (e) {
     console.error('loadRenalDrugs error:', e);
-    toast('โหลดข้อมูล renal dosing ล้มเหลว', 'error');
+    toast('โหลดข้อมูล renal dosing ล้มเหลว: ' + e.message, 'error');
   }
   hideLoading();
+}
+
+// ── Phase A: Supabase session/admin gate for Renal writes ──────────────────
+async function ensureRenalWriteAccess() {
+  if (!window.AdminSupabase || !AdminSupabase.available()) {
+    toast('❌ Supabase ยังไม่พร้อม (โหลดไลบรารีไม่สำเร็จ)', 'error'); return false;
+  }
+  const st = await AdminSupabase.status();
+  if (!st.signedIn) {
+    toast('⚠️ ต้องเชื่อม Supabase ก่อนแก้ไข — กดปุ่ม "🔗 เชื่อม Supabase"', 'info');
+    renderRenalSupaStatus();
+    return false;
+  }
+  if (!st.isAdmin) {
+    toast('❌ บัญชี ' + st.email + ' ไม่มีสิทธิ์ admin ใน Supabase (ไม่อยู่ใน allowlist)', 'error');
+    return false;
+  }
+  return true;
+}
+
+function connectRenalSupabase() {
+  if (!window.AdminSupabase) { toast('Supabase ยังไม่โหลด', 'error'); return; }
+  AdminSupabase.connect().catch(function (e) { toast('เชื่อม Supabase ล้มเหลว: ' + e.message, 'error'); });
+}
+
+async function renderRenalSupaStatus() {
+  const txt = document.getElementById('renal-supa-text');
+  const btn = document.getElementById('renal-supa-connect');
+  if (!txt || !btn) return;
+  if (!window.AdminSupabase || !AdminSupabase.available()) {
+    txt.textContent = '⚠️ Supabase library ไม่โหลด — ตรวจ CSP/เครือข่าย'; btn.style.display = 'none'; return;
+  }
+  const st = await AdminSupabase.status();
+  if (st.signedIn && st.isAdmin) {
+    txt.innerHTML = '✅ เชื่อม Supabase แล้ว: <b>' + escHtml(st.email) + '</b> (admin) — แก้ไขได้ทันที';
+    btn.style.display = 'none';
+  } else if (st.signedIn && !st.isAdmin) {
+    txt.innerHTML = '⚠️ ลงชื่อเป็น <b>' + escHtml(st.email) + '</b> แต่ไม่ใช่ admin ใน Supabase — แก้ไขไม่ได้';
+    btn.style.display = 'none';
+  } else {
+    txt.textContent = '🔒 อ่านข้อมูลได้ (public) — ต้องเชื่อม Supabase เพื่อแก้ไข';
+    btn.style.display = 'inline-block';
+  }
 }
 
 function getFilteredRenalDrugs() {
@@ -2511,15 +2562,12 @@ function collectRenalFormData() {
 async function saveRenalDrug() {
   const data = collectRenalFormData();
   if (!data.id || !data.name) { toast('กรุณากรอก Drug ID และ Drug Name', 'error'); return; }
+  if (!(await ensureRenalWriteAccess())) return;
   showLoading('กำลังบันทึก...');
   try {
-    if (state.editingRenalId) {
-      await apiCall('updateRenalDrug', data);
-      toast('✅ อัพเดทยาแล้ว', 'success');
-    } else {
-      await apiCall('createRenalDrug', data);
-      toast('✅ เพิ่มยาแล้ว', 'success');
-    }
+    // Phase A: upsert direct to Supabase (create OR update, keyed by id).
+    await AdminSupabase.upsertRenalDrug(data);
+    toast(state.editingRenalId ? '✅ อัพเดทยาแล้ว' : '✅ เพิ่มยาแล้ว', 'success');
     closeRenalModal();
     await loadRenalDrugs();
   } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
@@ -2532,13 +2580,13 @@ function editRenalDrug(id) {
 }
 
 async function deleteRenalDrug(id) {
-  if (!isAdmin()) { toast('❌ เฉพาะ Admin เท่านั้น', 'error'); return; }
   const drug = state.renalDrugs.find(d => String(d.id) === String(id));
   if (!drug) return;
   if (!confirm(`ลบยา "${drug.name}" ?`)) return;
+  if (!(await ensureRenalWriteAccess())) return;   // RLS is the real gate (is_admin)
   showLoading('กำลังลบ...');
   try {
-    await apiCall('deleteRenalDrug', { id });
+    await AdminSupabase.deleteRenalDrug(id);
     toast('🗑 ลบยาแล้ว', 'success');
     await loadRenalDrugs();
   } catch (e) { toast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
@@ -2595,11 +2643,11 @@ function exportRenalCSV() {
 // so a clinical fix only needs to land in one place.
 
 async function importCuratedRenal() {
-  if (state.renalDrugs.length > 0) {
-    if (!confirm('มีข้อมูลอยู่แล้ว ' + state.renalDrugs.length + ' รายการ\nระบบจะข้ามยาที่ซ้ำ — ต้องการ import CURATED ' + CURATED_RENAL_DRUGS.length + ' รายการ?')) return;
-  } else {
-    if (!confirm('Import ข้อมูล CURATED ' + CURATED_RENAL_DRUGS.length + ' ยา เข้าสู่ Google Sheets?')) return;
-  }
+  // Phase A: upsert the corrected in-code dataset (curated-renal-drugs.js) into
+  // Supabase — this is also the "re-sync code → Supabase" button (upsert, so it
+  // OVERWRITES existing rows to match the code, not skip-if-exists like GAS did).
+  if (!confirm('เขียนทับ (upsert) ข้อมูล renal ' + CURATED_RENAL_DRUGS.length + ' ยา จากโค้ดล่าสุดเข้า Supabase?\nยาที่มีอยู่จะถูกอัปเดตให้ตรงกับโค้ด (เช่นค่าที่เพิ่งแก้)')) return;
+  if (!(await ensureRenalWriteAccess())) return;
 
   const drugs = CURATED_RENAL_DRUGS.map(d => ({
     id: d.id, name: d.name, 'class': d['class'], sub: d.sub,
@@ -2607,24 +2655,10 @@ async function importCuratedRenal() {
     dosingTable: d.dosingTable, info: d.info, infoType: d.infoType, ref: d.ref
   }));
 
-  showLoading('กำลัง import ' + drugs.length + ' ยา...');
+  showLoading('กำลัง upsert ' + drugs.length + ' ยา เข้า Supabase...');
   try {
-    const cfg = getConfig();
-    const postUrl = cfg.scriptUrl + '?action=bulkCreateRenalDrugs&user=' + encodeURIComponent(state.user?.email || 'unknown');
-    const body = JSON.stringify({ action: 'bulkCreateRenalDrugs', user: state.user?.email || 'unknown', drugs: drugs });
-
-    if (body.length < 6000) {
-      const result = await apiCall('bulkCreateRenalDrugs', { drugs });
-      toast('✅ Import สำเร็จ: เพิ่ม ' + result.created + ' ยา, ข้าม ' + result.skipped + ' ซ้ำ', 'success');
-    } else {
-      await fetch(postUrl, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: body,
-      });
-      await new Promise(r => setTimeout(r, 2500));
-      toast('✅ ส่งข้อมูล import แล้ว — กำลังโหลดใหม่...', 'success');
-    }
+    const n = await AdminSupabase.bulkUpsertRenalDrugs(drugs);
+    toast('✅ Upsert สำเร็จ: ' + n + ' ยา (เขียนทับให้ตรงโค้ด)', 'success');
     await loadRenalDrugs();
   } catch (e) {
     toast('❌ Import ล้มเหลว: ' + e.message, 'error');
@@ -3339,6 +3373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renalGoPage: function(e, t) { renalGoPage(+t.dataset.page); },
     exportRenalCSV: function() { exportRenalCSV(); },
     importCuratedRenal: function() { importCuratedRenal(); },
+    connectRenalSupabase: function() { connectRenalSupabase(); },
     addRenalDosingRow: function() { addRenalDosingRow('', '', '', ''); },
     removeRenalDosingRow: function(e, t) { t.closest('.renal-dosing-row').remove(); },
     toggleRenalPreview: function(e, t) { toggleRenalPreview(t.dataset.preview === 'true'); },

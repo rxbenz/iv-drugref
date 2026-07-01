@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.51.1
+// IV Drug Reference PWA — Service Worker v5.51.2
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -436,9 +436,17 @@
 //          script.googleusercontent.com) are network-only like script.google.com.
 //          Old cached API responses are purged when this SW activates (versioned
 //          CACHE_NAME). Affects every Supabase-read page.
+// v5.51.2: FIX that makes v5.51.1 actually take effect — the SW now skipWaiting()s
+//          on install. Before, a fixed SW stayed "waiting" until the user clicked
+//          the update toast (or closed every tab), so the OLD buggy SW kept
+//          controlling and serving stale Supabase responses even though the page
+//          already showed the new version string. Now: new SW installs →
+//          skipWaiting → activates → clients.claim (activate) → core.js
+//          controllerchange auto-reloads → next Supabase read is network-only.
+//          Updates are now automatic (no "close all tabs"/manual accept needed).
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.51.1';
+const CACHE_NAME = 'iv-drugref-v5.51.2';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -486,7 +494,12 @@ self.addEventListener('install', (e) => {
         console.log('[SW] Caching core assets');
         return cache.addAll(ASSETS_TO_CACHE);
       })
-    // No skipWaiting() — new SW waits until user accepts the update prompt
+      // Activate the new SW IMMEDIATELY instead of waiting for every tab to close.
+      // Without this, a fixed SW stays "waiting" while the OLD SW keeps serving —
+      // e.g. the cache-first Supabase bug (v5.51.1) never took effect because the
+      // buggy SW remained the controller. skipWaiting + clients.claim (in activate)
+      // make the fix apply on the next navigation, no "close all tabs" needed.
+      .then(() => self.skipWaiting())
   );
 });
 

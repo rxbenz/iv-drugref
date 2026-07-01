@@ -1179,13 +1179,8 @@
   }
 
   function loadRemoteRenalDrugs() {
-    try {
-      var c = localStorage.getItem(RENAL_CACHE_KEY);
-      if (c && applyRenalRemote(JSON.parse(c))) renderDrugList();
-    } catch (e) { /* ignore bad cache */ }
-    // Read from Supabase (public read). Each row's `data` is the full drug
-    // object; reshape to { drugs: [...] } for applyRenalRemote. Falls back to
-    // the hardcoded RENAL_DRUGS if offline / table empty.
+    // FETCH-FIRST: live Supabase is authoritative online (admin edits show
+    // immediately); the localStorage cache is only an offline fallback.
     var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
     var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
     fetch(SB_URL + '/rest/v1/renal_drugs?select=data', {
@@ -1200,7 +1195,13 @@
           try { localStorage.setItem(RENAL_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
         }
       })
-      .catch(function () { /* offline -> keep hardcoded */ });
+      .catch(function () {
+        // Offline → warm from the last-synced cache (hardcoded stays if none).
+        try {
+          var c = localStorage.getItem(RENAL_CACHE_KEY);
+          if (c && applyRenalRemote(JSON.parse(c))) renderDrugList();
+        } catch (e) { /* ignore bad cache */ }
+      });
   }
 
   /**

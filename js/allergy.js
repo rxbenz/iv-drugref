@@ -612,13 +612,8 @@
   }
 
   function loadRemoteAllergyData() {
-    // 1) apply cached copy immediately (works offline)
-    try {
-      var cached = localStorage.getItem(ALLERGY_CACHE_KEY);
-      if (cached) applyAndRerender(JSON.parse(cached));
-    } catch (e) { /* ignore bad cache */ }
-    // 2) refresh from Supabase (public read) — groups + refs tables; each row's
-    //    `data` is the raw record. applyRemoteData parses it (same as from GAS).
+    // FETCH-FIRST: live Supabase is authoritative online (admin edits show
+    // immediately); the localStorage cache is only an offline fallback.
     var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
     var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
     var H = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
@@ -634,7 +629,13 @@
           try { localStorage.setItem(ALLERGY_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
         }
       })
-      .catch(function () { /* offline -> keep hardcoded defaults */ });
+      .catch(function () {
+        // Offline → warm from the last-synced cache (hardcoded defaults stay if none).
+        try {
+          var cached = localStorage.getItem(ALLERGY_CACHE_KEY);
+          if (cached) applyAndRerender(JSON.parse(cached));
+        } catch (e) { /* ignore bad cache */ }
+      });
   }
 
   function init() {

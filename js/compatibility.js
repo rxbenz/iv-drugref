@@ -320,22 +320,9 @@ function rebuildCuratedMap(pairs) {
 }
 
 function loadCompatPairsFromSheet() {
-  // Check cache first
-  try {
-    const cached = localStorage.getItem(COMPAT_LS_KEY);
-    const cachedTs = parseInt(localStorage.getItem(COMPAT_LS_TS) || '0');
-    if (cached && (Date.now() - cachedTs) < COMPAT_CACHE_TTL) {
-      const pairs = JSON.parse(cached);
-      if (pairs.length > 0) {
-        rebuildCuratedMap(pairs);
-        console.log('[Compat] Loaded ' + pairs.length + ' pairs from cache');
-      }
-    }
-  } catch (e) { /* ignore cache errors */ }
-
-  // Fetch fresh data from Supabase compat_pairs (public read). Each row's
-  // `data` is the full pair object; reshape to [[drugA, drugB, result], ...]
-  // for rebuildCuratedMap. CURATED fallback stays if offline / empty.
+  // FETCH-FIRST: the live Supabase answer is authoritative online (so admin edits
+  // always show); the localStorage cache is used ONLY as an offline fallback.
+  // Each row's `data` is the full pair object → reshape to [[drugA,drugB,result]].
   var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
   var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
   fetch(SB_URL + '/rest/v1/compat_pairs?select=data', {
@@ -350,10 +337,16 @@ function loadCompatPairsFromSheet() {
         rebuildCuratedMap(pairs);
         localStorage.setItem(COMPAT_LS_KEY, JSON.stringify(pairs));
         localStorage.setItem(COMPAT_LS_TS, String(Date.now()));
-        console.log('[Compat] Synced ' + pairs.length + ' pairs from Supabase');
+        console.log('[Compat] Synced ' + pairs.length + ' pairs from Supabase (live)');
       }
     })
-    .catch(function() { /* silent — CURATED fallback is already loaded */ });
+    .catch(function() {
+      // Offline → warm from the last-synced cache (CURATED stays if none).
+      try {
+        var cached = localStorage.getItem(COMPAT_LS_KEY);
+        if (cached) { var pairs = JSON.parse(cached); if (pairs.length > 0) rebuildCuratedMap(pairs); }
+      } catch (e) { /* ignore */ }
+    });
 }
 
 // Enhanced drug matching

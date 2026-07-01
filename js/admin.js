@@ -2059,11 +2059,16 @@ async function importCuratedPairs() {
   const keyOf = (a, b) => [a, b].map(s => String(s || '').toLowerCase().trim()).sort().join('|');
   const existing = {};
   state.compatPairs.forEach(p => { existing[keyOf(p.drugA, p.drugB)] = p.id; });
+  // Dedupe CURATED_PAIRS by pair-key FIRST — the list contains both-direction
+  // duplicates (A+B and B+A) that collapse to one key; without this, one upsert
+  // batch would carry two rows with the same id (Postgres 21000) or mint two rows.
+  const uniq = new Map();
+  CURATED_PAIRS.forEach(([drugA, drugB, result]) => { uniq.set(keyOf(drugA, drugB), { drugA, drugB, result }); });
   let seq = Date.now();
-  const rows = CURATED_PAIRS.map(([drugA, drugB, result]) => {
-    const k = keyOf(drugA, drugB);
+  const rows = [];
+  uniq.forEach((p, k) => {
     const id = existing[k] || ('cp_' + (seq++));
-    return { id: String(id), drugA, drugB, result, ref: "Trissel's / Lexicomp" };
+    rows.push({ id: String(id), drugA: p.drugA, drugB: p.drugB, result: p.result, ref: "Trissel's / Lexicomp" });
   });
 
   showLoading('กำลัง upsert ' + rows.length + ' คู่ยา...');
@@ -2311,13 +2316,44 @@ async function importDDIDefaults() {
   if (!(await ensureSupaWrite())) return;
   showLoading('กำลังนำเข้า defaults...');
   try {
-    const pairs = DI._CURATED.map((p, i) => ({
-      id: 'ddip_seed_' + i, a: p.a || '', aAny: p.aAny || [], b: p.b || '', bAny: p.bAny || [],
-      severity: p.severity || 'major', mechanism: p.mechanism || '', management: p.management || '', ref: p.ref || ''
-    }));
-    const rules = (DI._CLASS_RULES_SEED || []).map(r => ({
-      id: 'ddir_seed_' + String(r[0]).replace(/[^a-z0-9]+/g, '_'), keyword: r[0], classes: r[1]
-    }));
+    // ── Class rules: dedupe by keyword + UNION their classes (CLASS_RULES lists
+    // some keywords twice, e.g. fentanyl in serotonergic AND cnsDepress). Without
+    // this, two rows share the same id in one upsert batch → Postgres 21000.
+    // Reuse an existing row's id (matched by keyword) so re-seeding updates in
+    // place instead of duplicating admin-created rules.
+    const ruleMap = new Map();   // keyword → Set(classes)
+    (DI._CLASS_RULES_SEED || []).forEach(r => {
+      const kw = String(r[0]).toLowerCase().trim();
+      if (!ruleMap.has(kw)) ruleMap.set(kw, new Set());
+      (r[1] || []).forEach(c => ruleMap.get(kw).add(c));
+    });
+    const existRuleId = {};
+    (state.ddiRules || []).forEach(r => { if (r.keyword) existRuleId[String(r.keyword).toLowerCase().trim()] = r.id; });
+    const rules = [];
+    ruleMap.forEach((clsSet, kw) => {
+      rules.push({ id: existRuleId[kw] || ('ddir_seed_' + kw.replace(/[^a-z0-9]+/g, '_')), keyword: kw, classes: Array.from(clsSet) });
+    });
+
+    // ── Pairs: match existing rows by a normalized signature (sides + severity)
+    // so re-seed reuses their id (no duplicate across id schemes); dedupe the
+    // seed by signature too.
+    const sigOf = (p) => {
+      const side = (single, any) => (any && any.length)
+        ? any.map(x => String(x).toLowerCase().trim()).sort().join('+')
+        : String(single || '').toLowerCase().trim();
+      return [side(p.a, p.aAny), side(p.b, p.bAny)].sort().join('|') + '|' + (p.severity || 'major');
+    };
+    const existPairId = {};
+    (state.ddiPairs || []).forEach(p => { existPairId[sigOf(p)] = p.id; });
+    const seen = new Map();
+    (DI._CURATED || []).forEach((p, i) => { const s = sigOf(p); if (!seen.has(s)) seen.set(s, { p: p, i: i }); });
+    const pairs = [];
+    seen.forEach((v, s) => {
+      const p = v.p;
+      pairs.push({ id: existPairId[s] || ('ddip_seed_' + v.i), a: p.a || '', aAny: p.aAny || [], b: p.b || '', bAny: p.bAny || [],
+        severity: p.severity || 'major', mechanism: p.mechanism || '', management: p.management || '', ref: p.ref || '' });
+    });
+
     const nP = await AdminSupabase.bulkUpsertDDIPairs(pairs);
     const nR = await AdminSupabase.bulkUpsertDDIClassRules(rules);
     toast('✅ นำเข้าแล้ว: ' + nP + ' pairs, ' + nR + ' rules (upsert)', 'success');

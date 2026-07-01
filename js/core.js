@@ -879,6 +879,16 @@ var IVDrugRef = (function() {
     navigator.serviceWorker.register('sw.js').then(reg => {
       console.log('[SW] Registered:', reg.scope);
 
+      // Force an update check now + whenever the app regains focus. Installed PWA
+      // windows are long-lived and may not navigate, so the browser's automatic
+      // sw.js check can lag for days — leaving an old SW controlling (e.g. the
+      // pre-v5.51.1 cache-first-Supabase bug). reg.update() re-fetches sw.js; if it
+      // changed, the new SW installs → skipWaiting (v5.51.2+) → activates → reload.
+      try { reg.update(); } catch (e) { /* best-effort */ }
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') { try { reg.update(); } catch (e) {} }
+      });
+
       // If a new SW is already waiting (e.g. user revisits after deploy)
       if (reg.waiting) { showUpdateToast(reg.waiting); return; }
 
@@ -1135,7 +1145,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.51.3';
+  const VERSION = '5.51.4';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

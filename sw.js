@@ -398,6 +398,16 @@
 //          except those 4 corrected drugs.) NOTE: the LIVE renal page reads
 //          Supabase renal_drugs first (renal-dosing.js = fallback); if populated,
 //          re-sync the 4 drugs via the admin Renal panel for the device to show them.
+// v5.50.0: Phase A of the "Supabase-only, retire GAS" migration. The admin Renal
+//          tab now reads AND writes reference data DIRECTLY to Supabase renal_drugs
+//          (RLS admin-only via is_admin()) — GAS is out of the renal path; all
+//          other admin tabs still use GAS (unchanged). New js/admin-supabase.js
+//          (supabase-js bridge: auth + renal CRUD). Admin auth reuses the existing
+//          Google login: best-effort signInWithGoogleIdToken (no redirect) with a
+//          "🔗 เชื่อม Supabase" OAuth-redirect fallback; RLS is the real write gate.
+//          importCuratedRenal now UPSERTS (re-sync code → Supabase button). GAS
+//          renal handlers kept for reversibility. One-time Supabase config needed
+//          (Google provider authorized-client-id and/or redirect URL allowlist).
 // ============================================================================
 
 const CACHE_NAME = 'iv-drugref-v5.50.0';

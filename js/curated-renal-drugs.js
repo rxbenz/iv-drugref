@@ -181,14 +181,13 @@ const CURATED_RENAL_DRUGS = [
   {id:'dabigatran',name:'Dabigatran','class':'ac',sub:'DOAC (Direct Thrombin Inhibitor)',badges:['ac','renal','avoid'],
     recommended:'150 mg BID (AF) | 150 mg BID (VTE treatment)',
     dosingTable:[
-      {range:'>50',dose:'150 mg',freq:'BID',note:'Normal dose'},
-      {range:'30–50',dose:'110 mg',freq:'BID',note:'ลด dose (age ≥80, P-gp inhib)'},
-      {range:'15–30',dose:'⚠ EU: ห้ามใช้ · US: 75 mg',freq:'BID',note:'ขึ้นกับฉลาก (ดู note)'},
-      {range:'<15 / HD',dose:'⚠ Contraindicated',freq:'—',note:'ห้ามใช้'}
+      {range:'>50',dose:'150 mg',freq:'BID',note:'Standard (300 mg/day)'},
+      {range:'30–50',dose:'150 mg',freq:'BID',note:'ลด 110 BID ถ้า age≥80 / P-gp inhib / เสี่ยงเลือดออก; เช็ค CrCl ปีละครั้ง'},
+      {range:'<30 / HD',dose:'⚠ Contraindicated',freq:'—',note:'ห้ามใช้ (severe renal, CrCl <30)'}
     ],
-    info:'<strong>⚠ Renal elimination 80% — labeling ต่างกัน:</strong> EU/ไทย (มี 110 mg): ห้ามใช้ถ้า CrCl &lt;30 · US (FDA): CrCl 15–30 ให้ <strong>75 mg BID</strong> (AF), &lt;15/HD ไม่แนะนำ — ยืนยันฉลากที่ใช้<br><strong>Drug interaction:</strong> P-gp inhibitors (verapamil, dronedarone) → ลด dose<br><strong>Reversal:</strong> Idarucizumab (Praxbind)<br><strong>HD:</strong> Dialyzable — สามารถ remove ได้ 60% ใน 2-3 ชม.',
+    info:'<strong>⚠ Renal elimination 80%:</strong> ฉลาก EU/BI (ไทย): <strong>CrCl &lt;30 = ห้ามใช้</strong> (severe renal impairment)<br><strong>ลดเป็น 110 mg BID (220/วัน) เมื่อ:</strong> อายุ ≥80 ปี · ใช้ร่วม P-gp inhibitor (amiodarone/verapamil/quinidine) · เสี่ยงเลือดออกสูง<br><strong>Ortho prophylaxis + CrCl 30–50 หรือ P-gp inhib:</strong> 150 mg วันละครั้ง (75×2)<br><strong>Reversal:</strong> Idarucizumab (Praxbind) · dialysable (ข้อมูลจำกัด)<br><em>US FDA ต่าง: CrCl 15–30 → 75 mg BID</em>',
     infoType:'red',
-    ref:'Lexicomp 2024 | ESC AF 2024 | US FDA label'},
+    ref:'Pradaxa SmPC (Boehringer Ingelheim) | ESC AF 2024'},
 
   // ── CARDIOVASCULAR ──
   {id:'digoxin',name:'Digoxin','class':'cv',sub:'Cardiac Glycoside',badges:['cv','renal','nephrotox'],

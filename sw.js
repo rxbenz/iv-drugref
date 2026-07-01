@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.50.0
+// IV Drug Reference PWA — Service Worker v5.50.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -408,9 +408,18 @@
 //          importCuratedRenal now UPSERTS (re-sync code → Supabase button). GAS
 //          renal handlers kept for reversibility. One-time Supabase config needed
 //          (Google provider authorized-client-id and/or redirect URL allowlist).
+// v5.50.1: Dabigatran renal table re-aligned to the EU/BI (Thailand) Pradaxa SmPC
+//          (from the physical leaflet): CrCl <30 = CONTRAINDICATED (severe renal);
+//          CrCl 30–50 keeps 150 mg BID standard (the 110 mg BID reduction is
+//          driven by age ≥80 / P-gp inhibitor [amiodarone·verapamil·quinidine] /
+//          bleeding risk — NOT by CrCl alone); ortho prophylaxis + moderate renal
+//          or P-gp → 150 mg once daily. Dropped the blanket "30–50→110" and the
+//          US-only "15–30→75 mg" tier (kept as a demoted footnote). Ref → Pradaxa
+//          SmPC. Both renal-dosing.js + curated-renal-drugs.js. Re-sync to
+//          Supabase via the admin Renal "Import CURATED" (upsert) or SQL.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.50.0';
+const CACHE_NAME = 'iv-drugref-v5.50.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

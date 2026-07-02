@@ -98,3 +98,60 @@ test('findings are severity-sorted (major before moderate)', () => {
   const order = { contraindicated: 0, major: 1, moderate: 2, minor: 3 };
   for (let i = 1; i < s.length; i++) assert.ok(order[s[i - 1]] <= order[s[i]]);
 });
+
+// ---- Merge-over-defaults (the Midazolam+Morphine safety-floor fix) ----
+// _applyRemote must MERGE Supabase data over the code defaults, never REPLACE them,
+// so an incomplete/stale remote table can never silently drop a vetted interaction.
+test('remote SAFETY FLOOR: incomplete remote rules can NOT drop a code interaction', () => {
+  // Simulate the exact bug: Supabase has SOME class rules but is missing the
+  // opioid/benzo cnsDepress tags entirely.
+  DI._applyRemote({ pairs: [], rules: [
+    { keyword: 'amiodarone', classes: ['QT'] },
+    { keyword: 'ciprofloxacin', classes: ['QT'] }
+  ] });
+  // Midazolam+Morphine (cnsDepress in code defaults) MUST still fire despite the
+  // remote set omitting them.
+  assert.ok(titles(['Morphine', 'Midazolam']).some(x => /CNS|respiratory|กดประสาท/i.test(x)),
+    'code cnsDepress floor must survive an incomplete remote sync');
+  DI._applyRemote({}); // reset working tables to pure defaults
+});
+
+test('remote can ADD a new keyword/class not in code defaults', () => {
+  DI._applyRemote({ pairs: [], rules: [{ keyword: 'cefazolin', classes: ['QT'] }] });
+  // cefazolin now QT-tagged remotely → collides with a code QT drug
+  assert.ok(titles(['Cefazolin', 'Amiodarone']).some(x => /QT/.test(x)),
+    'remote-added tag should take effect');
+  DI._applyRemote({});
+  // ...and after reset, cefazolin is untagged again (no phantom QT)
+  assert.deepStrictEqual(DI.check(['Cefazolin', 'NSS']), []);
+});
+
+test('remote UNIONs classes onto an existing code keyword (never subtracts)', () => {
+  // Remote says morphine is ONLY serotonergic (omits cnsDepress). Union keeps both.
+  DI._applyRemote({ pairs: [], rules: [{ keyword: 'morphine', classes: ['serotonergic'] }] });
+  assert.ok(titles(['Morphine', 'Midazolam']).some(x => /CNS|respiratory|กดประสาท/i.test(x)),
+    'union must retain the code cnsDepress tag');
+  DI._applyRemote({});
+});
+
+test('remote curated pair with same identity OVERRIDES default (no duplicate)', () => {
+  // Admin edits valproate+meropenem severity via Supabase; must stay ONE finding.
+  DI._applyRemote({ rules: [], pairs: [
+    { a: 'valpro', bAny: ['meropenem', 'ertapenem', 'imipenem', 'penem'], severity: 'moderate',
+      mechanism: 'edited', management: 'edited', ref: 'edited' }
+  ] });
+  const f = DI.check(['Sodium Valproate', 'Meropenem']);
+  assert.strictEqual(f.length, 1, 'same-identity remote pair overrides, not duplicates');
+  assert.strictEqual(f[0].severity, 'moderate', 'remote edit should win');
+  DI._applyRemote({});
+  // reset restores the default severity
+  assert.strictEqual(DI.check(['Sodium Valproate', 'Meropenem'])[0].severity, 'major');
+});
+
+test('_applyRemote({}) is a clean reset to code defaults', () => {
+  DI._applyRemote({ rules: [{ keyword: 'zzz_fake', classes: ['QT'] }] });
+  DI._applyRemote({});
+  // the pristine seed is untouched by any merge
+  assert.ok(DI._CLASS_RULES_SEED.every(r => r[0] !== 'zzz_fake'));
+  assert.ok(titles(['Morphine', 'Midazolam']).some(x => /CNS|respiratory|กดประสาท/i.test(x)));
+});

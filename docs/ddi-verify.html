@@ -50,17 +50,20 @@ small{color:#64748b}
 checkbox</b> เมื่อยืนยันว่าถูกต้อง — สถานะการติ๊กถูกบันทึกไว้ในเบราว์เซอร์อัตโนมัติ (เปิดไฟล์ซ้ำก็ไม่หาย)
 รายการที่<b>ผิด/ขาด</b>ไม่ต้องติ๊ก — จดส่งกลับมา เช่น "class cnsDepress ควรเป็น major, คู่ #5 กลไกไม่ถูก, ขาดยา X ใน class Y"</div>
 
-<h2>🔎 0) วิเคราะห์กรณี Midazolam + Morphine ที่ไม่ขึ้นเตือน</h2>
+<h2>🔎 0) วิเคราะห์กรณี Midazolam + Morphine ที่ไม่ขึ้นเตือน — แก้แล้วใน v5.51.6</h2>
 <div class="alert"><b>สาเหตุ: ข้อมูลใน Supabase ไม่ครบ ไม่ใช่ตัวกลไกตรวจผิด</b><br>
 ในโค้ด default ทั้ง <code>morphine</code> และ <code>midazolam</code> ติด tag <code>cnsDepress</code> อยู่แล้ว
 — ถ้าแอพใช้ค่า default จะต้องขึ้นเตือน "Additive CNS/respiratory depression"<br><br>
-แต่แอพจะเอาตาราง <code>ddi_class_rules</code> จาก Supabase มา<b>แทนที่</b>ค่า default ทั้งชุด
-— และตารางนั้นน่าจะ<b>มีข้อมูลไม่ครบ</b> (สาเหตุที่เป็นไปได้มากสุด: การ Import Defaults รุ่นแรก
-เคยมีบั๊ก keyword ซ้ำ ทำให้ import ล้มกลางคัน/ได้บางส่วน — บั๊กนั้นแก้แล้วใน v5.51.0)
-ยากลุ่ม opioid/benzodiazepine จึงหายไปจากชุดที่ใช้จริงบนหน้าเว็บ
-→ ยืนยันได้ด้วย SQL ในหัวข้อ 5)<br><br>
-<b>วิธีแก้ (หลังตรวจข้อมูลในเอกสารนี้เสร็จ):</b> เข้า admin → แท็บ DDI → กด "Import Defaults" อีกครั้ง
-(เวอร์ชันปัจจุบันจะ merge/update รายการเดิมให้เอง ไม่สร้างซ้ำ) แล้วข้อมูลครบชุดล่าสุดจะถูก sync ขึ้น Supabase</div>
+แต่โค้ดเดิมเอาตาราง <code>ddi_class_rules</code> จาก Supabase มา<b>แทนที่</b> (replace) ค่า default ทั้งชุด
+— และตารางนั้น<b>มีข้อมูลไม่ครบ</b> (ขาด tag cnsDepress ของยากลุ่ม opioid/benzodiazepine)
+ยาคู่นี้จึงหายไปจากชุดที่ใช้จริงบนหน้าเว็บ → ยืนยันได้ด้วย SQL ในหัวข้อ 5)<br><br>
+<b>วิธีแก้ (ทำแล้ว, v5.51.6):</b> เปลี่ยนจาก "แทนที่" เป็น <b>"ผสานทับค่า default" (merge-over-defaults)</b> —
+โค้ด default กลายเป็น<b>พื้นขั้นต่ำ (safety floor)</b> ที่ Supabase ลบทิ้งไม่ได้: class ของแต่ละยาจะ
+<b>รวม (union)</b> ระหว่าง default กับ Supabase (admin เพิ่มได้ แต่ลบ tag ที่ vetted ในโค้ดออกจากหน้าจอไม่ได้)
+ส่วนคู่ curated จะ code∪remote (admin แก้รายละเอียดคู่เดิมได้ ทับได้ แต่คู่ในโค้ดไม่หาย)
+→ ตั้งแต่นี้ ตารางบน Supabase ที่ไม่ครบ/ล้าสมัย <b>จะบังอันตรกิริยาที่มีในโค้ดไม่ได้อีก</b>
+(Midazolam + Morphine จึงขึ้นเตือนแน่นอน ไม่ว่า Supabase จะมีข้อมูลครบหรือไม่)<br>
+<small>การกด "Import Defaults" ใน admin ยังทำได้เพื่อให้ Supabase เก็บชุดเต็มไว้ตรงกัน แต่ไม่ใช่เงื่อนไขบังคับอีกต่อไป</small></div>
 <div class="warn"><b>จุดที่ควรพิจารณาเป็นพิเศษ (ผมติดธงไว้ให้):</b><br>
 1. <b>cnsDepress ตอนนี้ตั้งระดับเป็น Moderate</b> — แต่ UpToDate/Lexicomp จัด Opioid + Benzodiazepine เป็น
 <b>Risk D / Major</b> และ US FDA มี Boxed Warning สำหรับคู่นี้ → ควรพิจารณาปรับเป็น <b>Major</b>

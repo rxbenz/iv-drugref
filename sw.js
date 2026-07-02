@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.51.5
+// IV Drug Reference PWA — Service Worker v5.51.6
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -444,9 +444,25 @@
 //          skipWaiting → activates → clients.claim (activate) → core.js
 //          controllerchange auto-reloads → next Supabase read is network-only.
 //          Updates are now automatic (no "close all tabs"/manual accept needed).
+// v5.51.3: FETCH-FIRST DDI read — loadRemote() now treats the live Supabase answer
+//          as authoritative (empty ⇒ code defaults) and only falls back to the
+//          localStorage cache when offline; ends the stale warm-then-fetch flash.
+// v5.51.4: core.js registers reg.update() on load + on visibilitychange so an
+//          installed PWA (which never navigates) still picks up a new sw.js.
+// v5.51.5: FETCH-FIRST applied to Compat / Renal / Allergy reads too (same
+//          pattern as DDI) so every admin-edited table shows live edits.
+// v5.51.6: SAFETY FLOOR for DDI — the Supabase ddi_pairs/ddi_class_rules are now
+//          MERGED OVER the built-in code defaults instead of REPLACING them.
+//          Root cause of "Midazolam+Morphine shows no interaction": the remote
+//          ddi_class_rules was present but incomplete (missing the opioid/benzo
+//          cnsDepress tags), and the old code REPLACED the full code set with it,
+//          silently dropping vetted interactions. Now class-rule classes are
+//          UNIONed per keyword (code floor can never shrink) and curated pairs are
+//          code∪remote by side-identity (remote edits override, code pairs kept).
+//          An incomplete/stale remote table can no longer hide a known interaction.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.51.5';
+const CACHE_NAME = 'iv-drugref-v5.51.6';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

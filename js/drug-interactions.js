@@ -325,35 +325,76 @@
   // structural and edited in code.
   var SB_URL = 'https://bzwbagojjpiazbeaahmg.supabase.co';
   var SB_KEY = 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S';
-  var LS_KEY = 'ddiData_v2', LS_TS = 'ddiData_v2_ts';   // v2: invalidates the old warm-then-fetch cache
+  var LS_KEY = 'ddiData_v3', LS_TS = 'ddiData_v3_ts';   // v3: merge-over-defaults (was replace)
   var VALID_CLASSES = Object.keys(CLASS_DEFS);
 
-  // Validate + install a remote payload ({pairs, rules}); returns true if anything applied.
+  // Pristine code defaults — the guaranteed SAFETY FLOOR. loadRemote() MERGES the
+  // admin's Supabase data OVER these; it never REPLACES them. This is deliberate:
+  // for a clinical screen, an incomplete/stale remote table must NEVER be able to
+  // silently drop a vetted interaction (that's exactly the Midazolam+Morphine bug —
+  // the remote ddi_class_rules was missing cnsDepress tags and wiped the code set).
+  // Captured once so every re-sync re-merges from the ORIGINAL defaults, not from a
+  // previously-merged (possibly already-augmented) working set.
+  var DEFAULT_CLASS_RULES = CLASS_RULES.slice();
+  var DEFAULT_CURATED = CURATED_DDI.slice();
+
+  // Side-identity of a curated pair = sorted(sideA, sideB), IGNORING severity, so an
+  // admin editing a pair's severity/mechanism overrides the default in place instead
+  // of producing a duplicate finding.
+  function _pairIdentity(p) {
+    function side(single, any) {
+      return (any && any.length)
+        ? any.map(function (x) { return String(x).toLowerCase().trim(); }).sort().join('+')
+        : String(single || '').toLowerCase().trim();
+    }
+    return [side(p.a, p.aAny), side(p.b, p.bAny)].sort().join('|');
+  }
+  // Curated pairs: code ∪ remote by side-identity. A remote pair with the same
+  // identity OVERRIDES the code default (admin can edit); new identities are added;
+  // code pairs the admin never touched are always kept.
+  function _mergeCurated(remotePairs) {
+    var map = {}, order = [];
+    function put(p) {
+      if (!p || !((p.a || (p.aAny && p.aAny.length)) && (p.b || (p.bAny && p.bAny.length)))) return;
+      var id = _pairIdentity(p); if (!(id in map)) order.push(id); map[id] = p;
+    }
+    DEFAULT_CURATED.forEach(put);
+    (Array.isArray(remotePairs) ? remotePairs : []).forEach(put);   // remote wins on same id
+    return order.map(function (id) { return map[id]; });
+  }
+  // Class rules: code ∪ remote, classes UNIONed per keyword. The union means admin
+  // can ADD keywords or ADD classes to a keyword, but can never REMOVE a code-vetted
+  // safety tag from the live screen — the floor holds. (Removing/correcting a wrong
+  // default tag is a code change, verified via docs/ddi-verify.html, by design.)
+  function _mergeClassRules(remoteRules) {
+    var map = {};   // keyword → { class: 1 }
+    function add(kw, classes) {
+      kw = String(kw == null ? '' : kw).toLowerCase().trim();
+      if (!kw || !Array.isArray(classes)) return;
+      if (!map[kw]) map[kw] = {};
+      classes.forEach(function (c) { if (VALID_CLASSES.indexOf(c) >= 0) map[kw][c] = 1; });
+    }
+    DEFAULT_CLASS_RULES.forEach(function (r) { add(r[0], r[1] || []); });
+    (Array.isArray(remoteRules) ? remoteRules : []).forEach(function (r) {
+      if (r && r.keyword) add(r.keyword, r.classes);
+    });
+    return Object.keys(map).map(function (kw) { return [kw, Object.keys(map[kw])]; })
+      .filter(function (x) { return x[1].length; });
+  }
+
+  // Install a remote payload ({pairs, rules}) MERGED over the code defaults.
+  // Always returns true: the merge yields at least the code floor, so the working
+  // tables are always (re)installed and the host re-renders. Idempotent — calling
+  // with an empty/absent payload cleanly resets the working tables to pure defaults.
   function _applyRemote(payload) {
-    var applied = false;
-    if (payload && Array.isArray(payload.pairs) && payload.pairs.length) {
-      // keep only well-formed pairs (need at least one side-key + the other)
-      var pairs = payload.pairs.filter(function (p) {
-        return p && (p.a || (p.aAny && p.aAny.length)) && (p.b || (p.bAny && p.bAny.length));
-      });
-      if (pairs.length) { CURATED_DDI = pairs; applied = true; }
-    }
-    if (payload && Array.isArray(payload.rules) && payload.rules.length) {
-      var rules = payload.rules
-        .filter(function (r) { return r && r.keyword && Array.isArray(r.classes); })
-        .map(function (r) {
-          var kw = String(r.keyword).toLowerCase().trim();
-          var cls = r.classes.filter(function (c) { return VALID_CLASSES.indexOf(c) >= 0; });
-          return [kw, cls];
-        })
-        .filter(function (x) { return x[0] && x[1].length; });
-      if (rules.length) { CLASS_RULES = rules; applied = true; }
-    }
-    if (applied && typeof window.DrugInteractions === 'object' &&
+    payload = payload || {};
+    CURATED_DDI = _mergeCurated(payload.pairs);
+    CLASS_RULES = _mergeClassRules(payload.rules);
+    if (typeof window.DrugInteractions === 'object' &&
         typeof window.DrugInteractions.onUpdate === 'function') {
       try { window.DrugInteractions.onUpdate(); } catch (e) { /* host re-render is best-effort */ }
     }
-    return applied;
+    return true;
   }
 
   // Returns {ok, data} so the caller can tell a real (possibly empty) answer from
@@ -397,11 +438,12 @@
 
   window.DrugInteractions = {
     check: check, renderHtml: renderHtml, loadRemote: loadRemote,
-    onUpdate: null,                       // host (compatibility.js) sets this to re-render
-    // _CURATED / _CLASS_RULES_SEED keep their reference to the BUILT-IN default
-    // arrays even after loadRemote() reassigns the working tables — so the admin
-    // "Import Defaults" seed always reflects the in-code defaults, not remote.
-    _CLASS_DEFS: CLASS_DEFS, _CURATED: CURATED_DDI, _CLASS_RULES_SEED: CLASS_RULES
+    onUpdate: null,                       // host (interactions.js) sets this to re-render
+    // _CURATED / _CLASS_RULES_SEED expose the pristine BUILT-IN defaults (the merge
+    // floor) so the admin "Import Defaults" seed always reflects the in-code defaults,
+    // never the merged/remote working tables.
+    _CLASS_DEFS: CLASS_DEFS, _CURATED: DEFAULT_CURATED, _CLASS_RULES_SEED: DEFAULT_CLASS_RULES,
+    _applyRemote: _applyRemote        // exposed for tests (merge-over-defaults semantics)
   };
 
   // Auto-sync on load (browser only; the Node test harness has no fetch/localStorage

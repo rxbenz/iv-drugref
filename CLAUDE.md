@@ -192,6 +192,40 @@ admin-write RLS via `is_admin()`): `drugs`, `compat_pairs`, `renal_drugs`,
   is the `is_admin()` allowlist in `admins`); admin-panel writes still go through
   GAS (the dual-write bridge) rather than writing Supabase directly.
 
+### Drug–Drug Interaction (DDI) engine — `js/drug-interactions.js`
+Pharmacological interaction screening (SEPARATE from IV/Y-site compatibility),
+its own page (`interactions.html` + `js/interactions.js`), shared drug list
+(`window.COMPAT_DRUGS`). Hybrid model: (A) additive-risk **CLASS tags** per drug
+(≥2 selected drugs share a class → auto-flag; 10 classes: QT, serotonergic,
+nephrotoxic, bleeding, hyperK, ototoxic, cnsDepress, bradycardia, hypotension,
+anticholinergic) + (B) **curated explicit pairs** for named interactions the
+class model can't express (e.g. valproate+carbapenem). `CLASS_DEFS` (class
+metadata: severity/mechanism/management) is code-only, NOT remote.
+
+- **Admin edits via Supabase** (`ddi_pairs` / `ddi_class_rules`, public-read /
+  admin-write; admin writes go direct via `AdminSupabase`, Phase B). "Import
+  Defaults" (`admin.js importDDIDefaults`) seeds them from the code defaults
+  (`DrugInteractions._CURATED` / `._CLASS_RULES_SEED` — the **pristine** arrays).
+- **MERGE-OVER-DEFAULTS (v5.51.6, safety-critical — do NOT revert to replace):**
+  `loadRemote()`→`_applyRemote()` MERGES the remote tables **over** the built-in
+  code defaults; it never replaces them. **Class rules**: classes are **UNIONed**
+  per keyword, so the code set is a guaranteed **floor** — an incomplete/stale
+  Supabase table can never silently drop a vetted interaction (admin can ADD
+  keywords/classes but not remove a code tag from the live screen). **Curated
+  pairs**: code ∪ remote by **side-identity** (sorted sides, ignoring severity) —
+  a same-identity remote pair OVERRIDES the code default (admin can edit
+  severity/mechanism), new ones are added, untouched code pairs are always kept.
+  To REMOVE/correct a wrong default tag → change the code + regenerate
+  `docs/ddi-verify.html`, not Supabase. Locked by `test/drug-interactions.test.js`
+  ("remote SAFETY FLOOR" / "UNIONs classes" / "OVERRIDES default" tests).
+  *(This is why "Midazolam+Morphine shows no interaction" happened pre-fix: the
+  remote ddi_class_rules was missing the cnsDepress tags and REPLACED the code
+  floor.)*
+- **Verify doc**: `docs/ddi-verify.html` (interactive checkboxes, localStorage
+  progress) is generated from the code defaults by `node docs/gen-ddi-verify.js` —
+  regenerate after any DDI data edit so the pharmacist can re-verify vs
+  UpToDate/Lexicomp.
+
 ### GitHub
 - **Repo**: `https://github.com/rxbenz/iv-drugref.git`
 - **Branch**: `main`

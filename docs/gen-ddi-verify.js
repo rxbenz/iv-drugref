@@ -142,8 +142,9 @@ checkbox</b> เมื่อยืนยันว่าถูกต้อง —
 <div class="warn"><b>จุดที่ควรพิจารณาเป็นพิเศษ (ผมติดธงไว้ให้):</b><br>
 1. <b>✅ cnsDepress = Major แล้ว (v5.51.7)</b> — ปรับจาก Moderate → Major ตาม UpToDate/Lexicomp Risk D
 + US FDA Boxed Warning (opioid + benzodiazepine) ข้อความ "จัดการ" ยังคงบริบท ICU (ใช้ร่วมได้ภายใต้ monitor) ไว้<br>
-2. <b>dexmedetomidine</b> ติดแค่ bradycardia — เป็นยา sedative ควรติด <code>cnsDepress</code> ด้วยไหม?<br>
-3. <b>ketamine</b> ติด cnsDepress ไว้ (กดหายใจน้อยกว่ากลุ่มอื่น) — คงไว้หรือถอด?<br>
+2. <b>✅ dexmedetomidine คงไว้แค่ bradycardia</b> — ตัดสินใจ (2 ก.ค. 2026) ไม่เพิ่ม cnsDepress
+เพราะ dexmedetomidine กดการหายใจน้อยมาก (จุดเด่นทางคลินิก)<br>
+3. <b>✅ ketamine คง cnsDepress ไว้</b> — ตัดสินใจ (2 ก.ค. 2026) คงไว้ตามเดิม<br>
 4. <b>tramadol/pethidine + ondansetron</b> จะชนกันผ่าน class serotonergic — สอดคล้อง Lexicomp (Risk C)<br>
 5. ยาในฐานข้อมูล compat ที่<b>ยังไม่ติด tag ใด ๆ</b> เช่น olanzapine (QT/CNS), quetiapine ไม่มีในระบบ IV
 — ช่วยดูหัวข้อ 2) ว่ามียาที่ใช้บ่อยในโรงพยาบาลคุณตกหล่นไหม</div>

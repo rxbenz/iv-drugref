@@ -884,9 +884,14 @@ var IVDrugRef = (function() {
       // sw.js check can lag for days — leaving an old SW controlling (e.g. the
       // pre-v5.51.1 cache-first-Supabase bug). reg.update() re-fetches sw.js; if it
       // changed, the new SW installs → skipWaiting (v5.51.2+) → activates → reload.
-      try { reg.update(); } catch (e) { /* best-effort */ }
+      // reg.update() returns a Promise — a synchronous try/catch does NOT catch its
+      // rejection (offline / transient sw.js fetch fail / "Not found"). Unhandled, it
+      // bubbles to window.onunhandledrejection and pops the error-tracker toast
+      // ("เกิดข้อผิดพลาดเล็กน้อย") on every page load. Swallow it on the promise —
+      // the update check is best-effort by design.
+      reg.update().catch(() => {});
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') { try { reg.update(); } catch (e) {} }
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
       });
 
       // If a new SW is already waiting (e.g. user revisits after deploy)
@@ -984,8 +989,8 @@ var IVDrugRef = (function() {
           // Trigger SW update check
           if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
             navigator.serviceWorker.getRegistration().then(function(reg) {
-              if (reg) reg.update();
-            });
+              if (reg) reg.update().catch(function() {});
+            }).catch(function() {});
           }
         }
       })
@@ -1017,12 +1022,15 @@ var IVDrugRef = (function() {
               // Reload after a short delay regardless
               setTimeout(function() { window.location.reload(); }, 1500);
             }, 2000);
+          }).catch(function() {
+            // update() failed (offline/transient) — reload anyway to pick up new files
+            setTimeout(function() { window.location.reload(); }, 1500);
           });
         } else {
           // No SW — just reload
           setTimeout(function() { window.location.reload(); }, 1500);
         }
-      });
+      }).catch(function() { setTimeout(function() { window.location.reload(); }, 1500); });
     } else {
       // No SW — just reload
       setTimeout(function() { window.location.reload(); }, 1500);

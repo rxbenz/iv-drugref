@@ -338,12 +338,30 @@
   var DEFAULT_CLASS_RULES = CLASS_RULES.slice();
   var DEFAULT_CURATED = CURATED_DDI.slice();
 
+  // Tolerant array parse. A remote jsonb field SHOULD arrive as a real array (the
+  // Supabase public read returns native JSON), but a manual SQL insert or a future
+  // write path could stringify it ('["x"]'). Coerce defensively so ONE malformed
+  // row can't throw inside the merge and abort the whole _applyRemote (which would
+  // silently discard ALL remote pairs+rules AND skip the class-rule merge/onUpdate).
+  function _arr(v) {
+    if (Array.isArray(v)) return v;
+    if (typeof v === 'string' && v.trim()) {
+      try { var a = JSON.parse(v); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+    }
+    return [];
+  }
+  // Case-insensitive canonical class lookup: defaults use camelCase ('cnsDepress'),
+  // but a remote token in any casing ('cnsdepress') should still resolve to the class.
+  var _CLASS_CANON = {};
+  VALID_CLASSES.forEach(function (c) { _CLASS_CANON[c.toLowerCase()] = c; });
+
   // Side-identity of a curated pair = sorted(sideA, sideB), IGNORING severity, so an
   // admin editing a pair's severity/mechanism overrides the default in place instead
   // of producing a duplicate finding.
   function _pairIdentity(p) {
-    function side(single, any) {
-      return (any && any.length)
+    function side(single, anyRaw) {
+      var any = _arr(anyRaw);
+      return any.length
         ? any.map(function (x) { return String(x).toLowerCase().trim(); }).sort().join('+')
         : String(single || '').toLowerCase().trim();
     }
@@ -351,15 +369,19 @@
   }
   // Curated pairs: code ∪ remote by side-identity. A remote pair with the same
   // identity OVERRIDES the code default (admin can edit); new identities are added;
-  // code pairs the admin never touched are always kept.
+  // code pairs the admin never touched are always kept. aAny/bAny are coerced to real
+  // arrays on store so downstream _matchKw never iterates a stray string.
   function _mergeCurated(remotePairs) {
     var map = {}, order = [];
     function put(p) {
-      if (!p || !((p.a || (p.aAny && p.aAny.length)) && (p.b || (p.bAny && p.bAny.length)))) return;
-      var id = _pairIdentity(p); if (!(id in map)) order.push(id); map[id] = p;
+      if (!p) return;
+      var aA = _arr(p.aAny), bA = _arr(p.bAny);
+      if (!((p.a || aA.length) && (p.b || bA.length))) return;
+      var norm = Object.assign({}, p, { aAny: aA, bAny: bA });
+      var id = _pairIdentity(norm); if (!(id in map)) order.push(id); map[id] = norm;
     }
     DEFAULT_CURATED.forEach(put);
-    (Array.isArray(remotePairs) ? remotePairs : []).forEach(put);   // remote wins on same id
+    (_arr(remotePairs)).forEach(put);   // remote wins on same id
     return order.map(function (id) { return map[id]; });
   }
   // Class rules: code ∪ remote, classes UNIONed per keyword. The union means admin
@@ -367,15 +389,18 @@
   // safety tag from the live screen — the floor holds. (Removing/correcting a wrong
   // default tag is a code change, verified via docs/ddi-verify.html, by design.)
   function _mergeClassRules(remoteRules) {
-    var map = {};   // keyword → { class: 1 }
-    function add(kw, classes) {
+    var map = {};   // keyword → { canonicalClass: 1 }
+    function add(kw, classesRaw) {
       kw = String(kw == null ? '' : kw).toLowerCase().trim();
-      if (!kw || !Array.isArray(classes)) return;
+      if (!kw) return;
       if (!map[kw]) map[kw] = {};
-      classes.forEach(function (c) { if (VALID_CLASSES.indexOf(c) >= 0) map[kw][c] = 1; });
+      _arr(classesRaw).forEach(function (c) {
+        var canon = _CLASS_CANON[String(c == null ? '' : c).toLowerCase().trim()];
+        if (canon) map[kw][canon] = 1;
+      });
     }
     DEFAULT_CLASS_RULES.forEach(function (r) { add(r[0], r[1] || []); });
-    (Array.isArray(remoteRules) ? remoteRules : []).forEach(function (r) {
+    (_arr(remoteRules)).forEach(function (r) {
       if (r && r.keyword) add(r.keyword, r.classes);
     });
     return Object.keys(map).map(function (kw) { return [kw, Object.keys(map[kw])]; })

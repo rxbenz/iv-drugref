@@ -155,3 +155,24 @@ test('_applyRemote({}) is a clean reset to code defaults', () => {
   assert.ok(DI._CLASS_RULES_SEED.every(r => r[0] !== 'zzz_fake'));
   assert.ok(titles(['Morphine', 'Midazolam']).some(x => /CNS|respiratory|กดประสาท/i.test(x)));
 });
+
+// ---- Defensive hardening (malformed remote must not abort the merge) ----
+test('a malformed remote pair (stringified array side) does NOT crash the merge', () => {
+  // One bad row must not throw and discard ALL remote data + skip the class merge.
+  assert.doesNotThrow(() => DI._applyRemote({
+    pairs: [{ a: 'digoxin', bAny: '["furosemide"]', severity: 'major' }],  // aAny/bAny as JSON string
+    rules: [{ keyword: 'ondansetron', classes: '["QT"]' }]                  // classes as JSON string
+  }));
+  // code floor still intact after a malformed sync
+  assert.ok(titles(['Morphine', 'Midazolam']).some(x => /CNS|respiratory|กดประสาท/i.test(x)));
+  DI._applyRemote({});
+});
+
+test('remote class token resolves case-insensitively to a canonical class', () => {
+  DI._applyRemote({ pairs: [], rules: [{ keyword: 'cefazolin', classes: ['CNSDEPRESS'] }] });
+  // cefazolin now cnsDepress (wrong-case token canonicalized) → collides with morphine
+  assert.ok(titles(['Cefazolin', 'Morphine']).some(x => /CNS|respiratory|กดประสาท/i.test(x)),
+    'wrong-case remote class should still resolve');
+  DI._applyRemote({});
+  assert.deepStrictEqual(DI.check(['Cefazolin', 'NSS']), []);
+});

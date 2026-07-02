@@ -460,6 +460,12 @@
 //          UNIONed per keyword (code floor can never shrink) and curated pairs are
 //          code∪remote by side-identity (remote edits override, code pairs kept).
 //          An incomplete/stale remote table can no longer hide a known interaction.
+//          Also FIX: the "เกิดข้อผิดพลาดเล็กน้อย" toast on EVERY page (app/dashboard/
+//          admin). core.js called reg.update() inside a synchronous try/catch, which
+//          can't catch a Promise rejection — reg.update() rejecting ("Failed to update
+//          a ServiceWorker … Not found", offline/transient) bubbled to
+//          unhandledrejection → error-tracker medium toast. All reg.update() calls now
+//          .catch() their own rejection (best-effort update, no user-facing error).
 // ============================================================================
 
 const CACHE_NAME = 'iv-drugref-v5.51.6';

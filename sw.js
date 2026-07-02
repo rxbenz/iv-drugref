@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.51.6
+// IV Drug Reference PWA — Service Worker v5.51.7
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -466,9 +466,14 @@
 //          a ServiceWorker … Not found", offline/transient) bubbled to
 //          unhandledrejection → error-tracker medium toast. All reg.update() calls now
 //          .catch() their own rejection (best-effort update, no user-facing error).
+// v5.51.7: DDI clinical data — cnsDepress (additive CNS/respiratory depression) class
+//          severity Moderate → MAJOR, per UpToDate/Lexicomp Risk D + US FDA Boxed
+//          Warning for opioid + benzodiazepine. Mechanism/management text updated to
+//          call out the opioid+benzo Boxed Warning while keeping the ICU-monitoring
+//          nuance. docs/ddi-verify.html regenerated.
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.51.6';
+const CACHE_NAME = 'iv-drugref-v5.51.7';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

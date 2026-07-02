@@ -60,10 +60,10 @@
       ref: 'Lexicomp'
     },
     cnsDepress: {
-      label: 'Additive CNS/respiratory depression (กดประสาท/การหายใจ)', severity: 'moderate', icon: '😴',
-      mechanism: 'ยากดประสาทส่วนกลางหลายตัว (opioid/benzodiazepine/barbiturate/propofol/sedating antihistamine) ร่วมกัน → กดการหายใจและระดับความรู้สึกตัวเสริมกัน',
-      management: 'มัก “ตั้งใจ” ใช้ร่วมใน ICU ที่ monitor — ต้องเฝ้า RR/SpO₂/sedation score, มีอุปกรณ์ช่วยหายใจ + naloxone/flumazenil พร้อม; ระวังมากนอก ICU/ผู้สูงอายุ',
-      ref: 'Lexicomp'
+      label: 'Additive CNS/respiratory depression (กดประสาท/การหายใจ)', severity: 'major', icon: '😴',
+      mechanism: 'ยากดประสาทส่วนกลางหลายตัว (opioid/benzodiazepine/barbiturate/propofol/sedating antihistamine) ร่วมกัน → กดการหายใจและระดับความรู้สึกตัวเสริมกัน — โดยเฉพาะ opioid + benzodiazepine (US FDA Boxed Warning; UpToDate/Lexicomp Risk D)',
+      management: 'opioid + benzodiazepine = คู่เสี่ยงสูงสุด (Boxed Warning) — เลี่ยง/ใช้ขนาดต่ำสุด-สั้นที่สุดถ้าจำเป็น. มัก “ตั้งใจ” ใช้ร่วมใน ICU ที่ monitor ได้ — ต้องเฝ้า RR/SpO₂/sedation score, มีอุปกรณ์ช่วยหายใจ + naloxone/flumazenil พร้อม; ระวังมากนอก ICU/ผู้สูงอายุ',
+      ref: 'US FDA Boxed Warning; Lexicomp; UpToDate'
     },
     bradycardia: {
       label: 'Additive bradycardia / AV block (หัวใจเต้นช้า)', severity: 'major', icon: '🐢',

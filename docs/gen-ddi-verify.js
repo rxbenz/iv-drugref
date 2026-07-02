@@ -140,10 +140,8 @@ checkbox</b> เมื่อยืนยันว่าถูกต้อง —
 (Midazolam + Morphine จึงขึ้นเตือนแน่นอน ไม่ว่า Supabase จะมีข้อมูลครบหรือไม่)<br>
 <small>การกด "Import Defaults" ใน admin ยังทำได้เพื่อให้ Supabase เก็บชุดเต็มไว้ตรงกัน แต่ไม่ใช่เงื่อนไขบังคับอีกต่อไป</small></div>
 <div class="warn"><b>จุดที่ควรพิจารณาเป็นพิเศษ (ผมติดธงไว้ให้):</b><br>
-1. <b>cnsDepress ตอนนี้ตั้งระดับเป็น Moderate</b> — แต่ UpToDate/Lexicomp จัด Opioid + Benzodiazepine เป็น
-<b>Risk D / Major</b> และ US FDA มี Boxed Warning สำหรับคู่นี้ → ควรพิจารณาปรับเป็น <b>Major</b>
-(เหตุที่เดิมตั้ง moderate: ใน ICU มักตั้งใจใช้ร่วมภายใต้ monitor เช่น fentanyl+midazolam sedation
-— ถ้าปรับเป็น major ข้อความ "จัดการ" ยังอธิบายบริบท ICU ไว้อยู่)<br>
+1. <b>✅ cnsDepress = Major แล้ว (v5.51.7)</b> — ปรับจาก Moderate → Major ตาม UpToDate/Lexicomp Risk D
++ US FDA Boxed Warning (opioid + benzodiazepine) ข้อความ "จัดการ" ยังคงบริบท ICU (ใช้ร่วมได้ภายใต้ monitor) ไว้<br>
 2. <b>dexmedetomidine</b> ติดแค่ bradycardia — เป็นยา sedative ควรติด <code>cnsDepress</code> ด้วยไหม?<br>
 3. <b>ketamine</b> ติด cnsDepress ไว้ (กดหายใจน้อยกว่ากลุ่มอื่น) — คงไว้หรือถอด?<br>
 4. <b>tramadol/pethidine + ondansetron</b> จะชนกันผ่าน class serotonergic — สอดคล้อง Lexicomp (Risk C)<br>

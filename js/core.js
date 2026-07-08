@@ -970,19 +970,33 @@ var IVDrugRef = (function() {
       .then(function(data) {
         if (!data || !data.version) return;
 
-        // First load: store current version
-        if (!_currentAppVersion) {
-          _currentAppVersion = data.version;
-          return;
-        }
+        // Baseline = the version embedded in the RUNNING build (VERSION), NOT the
+        // first value fetched from version.json. This is what makes "force update
+        // every session" actually work: if the loaded page is a STALE cached build,
+        // the very first check already sees version.json.version !== VERSION and
+        // forces the reload. The old code adopted the freshly-fetched server value
+        // on first load and returned without comparing, so a stale build was never
+        // caught on open — only if the version changed again while the tab stayed
+        // open. Seeding from VERSION closes that gap.
+        if (!_currentAppVersion) _currentAppVersion = VERSION;
 
-        // Version matches — nothing to do
+        // Running the latest build — nothing to do
         if (data.version === _currentAppVersion) return;
 
         console.log('[VersionCheck] New version:', data.version, '(current:', _currentAppVersion + ')', 'force:', data.forceUpdate);
 
         if (data.forceUpdate) {
-          // Force update: show non-dismissable banner then reload
+          // Force update: show non-dismissable banner then reload.
+          // Loop guard: force ONCE per target version per session. If we already
+          // forced to this version this session but the build is still stale (e.g.
+          // version.json/build drift, or the cache refused to refresh), stop forcing
+          // so the page can't get stuck in a reload loop — the dismissible SW toast /
+          // next navigation picks it up instead.
+          var _guardKey = 'ivdr_forced_' + data.version;
+          var _alreadyForced = false;
+          try { _alreadyForced = sessionStorage.getItem(_guardKey) === '1'; } catch (e) {}
+          if (_alreadyForced) return;
+          try { sessionStorage.setItem(_guardKey, '1'); } catch (e) {}
           showForceUpdateBanner(data.version);
         } else {
           // Normal: let SW handle it (toast with dismiss option)
@@ -1050,6 +1064,180 @@ var IVDrugRef = (function() {
         checkForUpdate();
       }
     });
+  }
+
+
+  // ============================================================
+  // WHAT'S NEW — release-notes popup (Thai) shown once per new version
+  // ============================================================
+  // User-facing changelog, NEWEST FIRST. `npm run release` PREPENDS a new entry
+  // right after the `const RELEASE_NOTES = [` line, so keep that line intact.
+  // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
+  const RELEASE_NOTES = [
+    {
+      v: '5.52.0',
+      date: '2026-07-08',
+      title: "แจ้งเตือนอัปเดต + บังคับใช้เวอร์ชันล่าสุด",
+      items: [
+        "🎉 เพิ่มหน้าต่าง “มีอะไรใหม่” — เปิดแอพแล้วเห็นสรุปสิ่งที่อัปเดตทันที (แสดงครั้งเดียวต่อเวอร์ชัน)",
+        "⚡ บังคับอัปเดตเป็นเวอร์ชันล่าสุดทุกครั้งที่เปิดแอพ ไม่ต้องล้างแคชเอง",
+        "🔄 ตรวจจับเวอร์ชันที่ค้างในเครื่องได้แม่นขึ้น โหลดของใหม่ไวขึ้น และกันรีโหลดวนซ้ำ"
+      ]
+    },
+  ];
+
+  // Modal styling — uses the app's theme CSS variables so it auto-switches
+  // light/dark (theme.css is loaded on every page; core.js is inlined per page).
+  const _WN_CSS =
+    '.wn-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;' +
+    'justify-content:center;padding:16px;background:rgba(0,0,0,0.45);opacity:0;' +
+    'transition:opacity .25s ease;-webkit-tap-highlight-color:transparent;}' +
+    '.wn-overlay.wn-visible{opacity:1;}' +
+    '.wn-sheet{background:var(--card,#fff);color:var(--text,#1e293b);' +
+    'border:1px solid var(--card-border,#e2e8f0);border-radius:var(--radius-lg,16px);' +
+    'box-shadow:var(--shadow-lg,0 8px 24px rgba(0,0,0,0.2));font-family:var(--sans,inherit);' +
+    'width:100%;max-width:440px;max-height:82vh;display:flex;flex-direction:column;' +
+    'overflow:hidden;transform:translateY(12px) scale(.98);transition:transform .25s ease;}' +
+    '.wn-overlay.wn-visible .wn-sheet{transform:none;}' +
+    '.wn-header{padding:20px 20px 12px;border-bottom:1px solid var(--card-border,#e2e8f0);}' +
+    '.wn-title{font-size:19px;font-weight:800;}' +
+    '.wn-sub{font-size:12.5px;color:var(--text2,#64748b);margin-top:3px;}' +
+    '.wn-body{padding:6px 20px 10px;overflow-y:auto;}' +
+    '.wn-rel{margin:8px 0;}' +
+    '.wn-rel-head{font-size:12px;font-weight:700;color:var(--blue,#0ea5e9);letter-spacing:.3px;}' +
+    '.wn-rel-title{font-size:14px;font-weight:700;margin:2px 0 4px;}' +
+    '.wn-list{margin:0;padding:0;list-style:none;}' +
+    '.wn-list li{padding:8px 0;font-size:13.5px;line-height:1.55;' +
+    'border-top:1px solid var(--card-border,#eef2f7);}' +
+    '.wn-rel .wn-list li:first-child{border-top:none;}' +
+    '.wn-footer{padding:12px 20px 18px;border-top:1px solid var(--card-border,#e2e8f0);' +
+    'display:flex;justify-content:flex-end;}' +
+    '.wn-close{background:var(--blue,#0ea5e9);color:#fff;border:none;border-radius:10px;' +
+    'padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}' +
+    '.wn-close:hover{filter:brightness(1.05);}';
+
+  // Semver-ish compare (x.y.z numeric): 1 if a>b, -1 if a<b, 0 if equal.
+  function _wnCmp(a, b) {
+    var pa = String(a).split('.'), pb = String(b).split('.');
+    for (var i = 0; i < 3; i++) {
+      var x = parseInt(pa[i], 10) || 0, y = parseInt(pb[i], 10) || 0;
+      if (x > y) return 1;
+      if (x < y) return -1;
+    }
+    return 0;
+  }
+
+  function _wnEsc(s) {
+    return (s == null ? '' : String(s))
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function _wnLang() {
+    try {
+      return (window.IVDrugRefI18n && IVDrugRefI18n.getCurrentLang &&
+        IVDrugRefI18n.getCurrentLang()) || 'th';
+    } catch (e) { return 'th'; }
+  }
+
+  // Build + show the What's New modal for the given release-note entries.
+  function showWhatsNewModal(notes) {
+    if (!notes || !notes.length) return;
+    if (document.getElementById('whats-new-modal')) return;
+    if (!document.getElementById('whats-new-styles')) {
+      var st = document.createElement('style');
+      st.id = 'whats-new-styles';
+      st.textContent = _WN_CSS;
+      document.head.appendChild(st);
+    }
+    var en = _wnLang() === 'en';
+    var title = en ? "🎉 What's New" : '🎉 มีอะไรใหม่';
+    var sub = en ? 'Updates in this version' : 'อัปเดตในเวอร์ชันนี้';
+    var closeLbl = en ? 'Got it' : 'รับทราบ';
+    var body = notes.map(function (n) {
+      var items = (n.items || []).map(function (it) {
+        return '<li>' + _wnEsc(it) + '</li>';
+      }).join('');
+      var head = 'v' + _wnEsc(n.v) + (n.date ? ' · ' + _wnEsc(n.date) : '');
+      return '<div class="wn-rel">' +
+        '<div class="wn-rel-head">' + head + '</div>' +
+        (n.title ? '<div class="wn-rel-title">' + _wnEsc(n.title) + '</div>' : '') +
+        '<ul class="wn-list">' + items + '</ul></div>';
+    }).join('');
+
+    var overlay = document.createElement('div');
+    overlay.id = 'whats-new-modal';
+    overlay.className = 'wn-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', en ? "What's New" : 'มีอะไรใหม่');
+    overlay.setAttribute('data-i18n-done', '1');
+    overlay.innerHTML =
+      '<div class="wn-sheet">' +
+        '<div class="wn-header"><div class="wn-title">' + title + '</div>' +
+        '<div class="wn-sub">' + sub + '</div></div>' +
+        '<div class="wn-body">' + body + '</div>' +
+        '<div class="wn-footer"><button type="button" class="wn-close">' + closeLbl + '</button></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.offsetHeight; // reflow so the fade/scale transition runs
+    overlay.classList.add('wn-visible');
+
+    function close() {
+      overlay.classList.remove('wn-visible');
+      document.removeEventListener('keydown', onKey);
+      setTimeout(function () { if (overlay.parentNode) overlay.remove(); }, 260);
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    overlay.querySelector('.wn-close').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+  }
+
+  // Show the What's New popup on app open — only when the app version changed since
+  // the user last saw it (localStorage.ivdr_lastSeenVersion). Brand-new installs are
+  // seeded silently (no popup on the first ever run).
+  function maybeShowWhatsNew() {
+    var seen = null;
+    try { seen = localStorage.getItem('ivdr_lastSeenVersion'); } catch (e) {}
+    function markSeen() { try { localStorage.setItem('ivdr_lastSeenVersion', VERSION); } catch (e) {} }
+
+    if (seen === VERSION) return;          // already seen this version
+
+    if (!seen) {
+      // No "seen" version stored yet. This is the FIRST release that tracks it, so
+      // every prior user also lands here — don't silently skip them. Distinguish a
+      // returning user (has prior app state from before this feature) from a truly
+      // fresh install: show the current notes to returning users so this rollout is
+      // visible on their next open; seed silently for a brand-new install.
+      var returning = false;
+      try {
+        returning = !!(localStorage.getItem('anonUserId') ||
+          localStorage.getItem('anonSessionDate') ||
+          localStorage.getItem('drugData_v4') ||
+          localStorage.getItem('drugFavorites'));
+      } catch (e) {}
+      markSeen();
+      if (returning) {
+        var cur = RELEASE_NOTES.filter(function (n) { return _wnCmp(n.v, VERSION) <= 0; });
+        if (cur.length) showWhatsNewModal(cur.slice(0, 3));
+      }
+      return;
+    }
+
+    // Returning across an update: show every note newer than what they last saw.
+    var fresh = RELEASE_NOTES.filter(function (n) {
+      return _wnCmp(n.v, seen) > 0 && _wnCmp(n.v, VERSION) <= 0;
+    });
+    markSeen();                            // mark seen even if no notes, so it shows once
+    if (fresh.length) showWhatsNewModal(fresh);
+  }
+
+  // Manual re-open (e.g. an About/menu link) — shows the latest few releases
+  // regardless of the "seen" flag.
+  function showWhatsNew() {
+    var cur = RELEASE_NOTES.filter(function (n) { return _wnCmp(n.v, VERSION) <= 0; });
+    if (cur.length) showWhatsNewModal(cur.slice(0, 5));
   }
 
 
@@ -1153,7 +1341,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.51.7';
+  const VERSION = '5.52.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -1322,6 +1510,10 @@ var IVDrugRef = (function() {
     // Service Worker & Version Check
     registerSW,
     startVersionCheck,
+
+    // What's New popup (release notes)
+    showWhatsNew,
+    maybeShowWhatsNew,
 
     // Utility helpers
     generateId,
@@ -1630,4 +1822,13 @@ document.addEventListener('DOMContentLoaded', () => {
       el.textContent = 'v' + IVDrugRef.VERSION;
     });
   } catch (e) { /* non-critical */ }
+
+  // "What's New" popup — show once when the app version changed since last open.
+  // Deferred a tick so the page chrome/theme is in place before the modal appears.
+  try {
+    setTimeout(function () { IVDrugRef.maybeShowWhatsNew(); }, 800);
+  } catch (e) { /* non-critical */ }
 });
+
+// Global entry point for a menu/About "มีอะไรใหม่" link to re-open the notes.
+window.showWhatsNew = function () { try { IVDrugRef.showWhatsNew(); } catch (e) {} };

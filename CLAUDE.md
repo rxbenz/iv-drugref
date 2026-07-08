@@ -44,9 +44,15 @@ v5.0-modular/          ← ONLY working directory (this repo)
 └── dist/              ← Built output (gitignored)
 ```
 
-> **Current version: 5.30.0** (see `package.json` / `version.json`). When
-> shipping a release, bump the version string in `package.json`, `version.json`,
-> `sw.js`, and the per-page footers so the force-update path fires.
+> **Current version: see `package.json` / `version.json`** (single source; don't
+> hardcode a number here). When shipping a release, run **`npm run release --
+> <version> --title "หัวข้อไทย" "โน้ต1" "โน้ต2"`** (`bump-version.js`) — it bumps
+> `package.json`, `version.json` (+ `forceUpdate:true`), `sw.js` (header +
+> `CACHE_NAME` + changelog line) and `core.js` `VERSION` **in lockstep** and
+> prepends a Thai `RELEASE_NOTES` entry (the "What's New" popup content). Never
+> hand-edit these version strings — a drift between `core.js VERSION` and
+> `version.json` breaks force-update. Per-page footers auto-update from
+> `[data-app-version]` (no edit needed).
 > **App version is single-sourced**: `core.js` `VERSION` fills every
 > `[data-app-version]` element (footers, header badges, the index `#versionInfo`
 > footer, and the `showAbout` dialog) — don't hardcode version numbers in HTML/JS
@@ -281,13 +287,34 @@ must go through it (GAS/Sheet data is admin-authored → stored-XSS vector).
 alert background sync). It caches everything **except** `version.json`, which
 is always fetched network-only. `version.json` = `{version, forceUpdate}`:
 when `forceUpdate` is true (or the version changes), the client busts the SW
-cache and reloads. The SW header carries its own version string (currently
-`v5.30.0`), and its top-of-file changelog is a useful release log.
+cache and reloads. The SW header carries its own version string, and its
+top-of-file changelog is a useful release log.
 
-**Release checklist when bumping version**: update `package.json`,
-`version.json`, the `sw.js` version constant + changelog, and the per-page
-footer version strings together — otherwise the force-update won't trigger
-consistently.
+**Force update EVERY session (v5.52.0)**: `core.js` `checkForUpdate()` seeds its
+baseline from the **build-embedded `VERSION`** (not the first value fetched from
+`version.json`). So on the very first check after load, a **stale cached build**
+already sees `version.json.version !== VERSION` and force-reloads — the old code
+adopted the server value and never compared, so a behind build was only caught if
+the version changed while the tab stayed open. A per-session sessionStorage guard
+(`ivdr_forced_<v>`) forces at most once per target version so a build/`version.json`
+drift can't cause a reload loop (falls back to the dismissible SW toast).
+
+**Release**: run `npm run release -- <version> --title "…" "โน้ต…"` — do NOT
+hand-edit version strings (see the Architecture note above). It keeps
+`core.js VERSION` and `version.json` in lockstep (a drift breaks force-update).
+
+### "What's New" popup — `RELEASE_NOTES` in `core.js` (v5.52.0)
+On app open, `maybeShowWhatsNew()` shows a **Thai** modal of what changed, **once
+per version** (tracked in `localStorage.ivdr_lastSeenVersion`). Content = the
+`RELEASE_NOTES` array in `core.js` (newest-first; `{v,date,title,items[]}`), which
+`npm run release` prepends to automatically — so the popup is guaranteed to match
+the running build (embedded, not fetched; works offline). Gating: brand-new
+installs are seeded silently (no nag on first ever run) unless prior app state
+exists (`anonUserId`/`drugData_v4`/…), in which case the current notes show once so
+the rollout is visible to existing users. The modal is self-contained (built in
+`core.js`, themed via the theme CSS vars → auto light/dark) so it works on all 8
+pages with no per-page HTML/CSS. Re-open manually via `window.showWhatsNew()` /
+`IVDrugRef.showWhatsNew()` (wire a menu/About link to it if desired).
 
 ### CURATED_PAIRS / CURATED_RENAL_DRUGS
 Hardcoded reference data in `js/admin.js` for bulk importing to Google Sheets via admin panel.

@@ -90,6 +90,21 @@ function replaceOnce(file, oldStr, newStr, label) {
 // ── 1) package.json ─────────────────────────────────────────────────────────
 replaceOnce('package.json', '"version": "' + OLD + '"', '"version": "' + NEW + '"', 'version');
 
+// ── 1b) package-lock.json — keep the root version in sync, else `npm ci`
+//        (used by the deploy workflow) errors on a package.json/lock mismatch.
+//        Only the app's own version lines match "<OLD>" (no dependency is on it),
+//        so a plain replace-all is safe and keeps the diff to the version fields.
+(function () {
+  const p = P('package-lock.json');
+  if (!fs.existsSync(p)) { warned.push('package-lock.json — ไม่พบไฟล์ (ข้าม)'); return; }
+  let lock = fs.readFileSync(p, 'utf8');
+  const needle = '"version": "' + OLD + '"';
+  if (lock.indexOf(needle) === -1) { warned.push('package-lock.json — ไม่พบ version เดิม'); return; }
+  lock = lock.split(needle).join('"version": "' + NEW + '"');
+  fs.writeFileSync(p, lock);
+  changed.push('package-lock.json — version (sync กับ package.json)');
+})();
+
 // ── 2) version.json  (+ force forceUpdate:true) ─────────────────────────────
 (function () {
   const p = P('version.json');

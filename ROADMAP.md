@@ -207,6 +207,37 @@
 - **ขึ้นกับ**: P2.4 (เอา fluids เข้า data model ก่อน แล้วค่อยจัด UI รอบเดียว) ·
   **Effort**: M–L · **ผลตอบแทน**: สูง (ลด friction การใช้งานจริง)
 
+### P2.6 ช่องทาง LINE (LINE Channel) — 🔵 PLANNED (แผนอนุมัติ 2026-07-17)
+- **ที่มา** (ผู้ใช้ร้องขอ): เพิ่ม LINE เป็น**ช่องทางเสริม** เข้าถึงข้อมูลยาจากแอป LINE
+  โดย **PWA เดิมคงพฤติกรรมเดิมทุกอย่าง** (additive only — โค้ดใหม่อยู่หลัง feature
+  detection / URL param ใหม่เท่านั้น) · มี LINE OA อยู่แล้ว
+- **แผนเต็ม + คู่มือ**: [`docs/line-channel/`](docs/line-channel/README.md)
+  (แผนแม่บท `00-plan.md` · Phase 0 `01-prerequisites.md`) — 8 phases:
+  - [ ] **Phase 0** เตรียมคอนโซล: เปิด Messaging API บน OA, เก็บ secret/token,
+        Supabase CLI, เช็คโควตา (S · ไม่มีโค้ด)
+  - [ ] **Phase 1** LINE entry: กัน reload วนใน LINE WebView (`core.js` force-update
+        downgrade — `forceUpdate:true` เปิดอยู่จริง) + ซ่อน install UI + LIFF app +
+        rich menu 6 ปุ่ม (S/M)
+  - [ ] **Phase 2** โครงบอต: Supabase Edge Function `line-webhook` + ตรวจ
+        `X-Line-Signature` + ตอบเมนู (M) — GAS เป็น webhook ไม่ได้ (อ่าน header ไม่ได้)
+  - [ ] **Phase 3** บอตค้นข้อมูลยา → Flex card + disclaimer + deep link `?drug=` (M)
+  - [ ] **Phase 4** บอตเช็คคู่ Y-site (`A + B`) + renal + deep link ใหม่
+        (`compatibility.html?a=&b=`, `renal-dosing.html?drug=`) (M)
+  - [ ] **Phase 5** ประกาศด่วน: admin UI + route `createUrgentAlert` เข้า doGet
+        (วันนี้ยังไม่มี UI/route — editor-run เท่านั้น) + pre-check Admin/Analytics
+        deployment mismatch (M)
+  - [ ] **Phase 6** broadcast ประกาศด่วนเข้า LINE ผ่าน GAS `UrlFetchApp` + ตัวเช็ค
+        โควตาก่อนส่ง + `SECRETS.md` (S)
+  - [ ] **Phase 7** อัปเกรดปุ่มแชร์: LIFF `shareTargetPicker` → `line.me/R/share` →
+        clipboard เดิม (desktop ไม่เปลี่ยน) + CSP 4 หน้า (M)
+- **กติกาความปลอดภัยคลินิก**: บอต = lookup อ้างอิงเท่านั้น **ห้ามคำนวณ dose/TDM
+  ในแชต** (เครื่องมือคำนวณอยู่ในแอปหลัง pediatric guard); ทุกคำตอบแนบ disclaimer
+  ไทย + ปุ่มเปิดหน้าเต็มในแอป; ชื่อยากำกวม → เสนอตัวเลือก ไม่เดา
+- **Secrets**: repo เป็น public — token เก็บใน Supabase secrets + GAS Script
+  Properties เท่านั้น (แบบแผน `SUPABASE_SERVICE_KEY` เดิม) ห้าม commit
+- **Effort**: รวม M–L (ซอยเป็น 8 phase เล็ก แต่ละ phase จบในตัว/ใช้งานได้จริง) ·
+  **ผลตอบแทน**: สูง (ช่องทางที่บุคลากรใช้เป็นหลักอยู่แล้ว; reply บอตฟรีไม่จำกัด)
+
 ---
 
 ## P3 — คุณภาพโค้ด, ความปลอดภัยเชิงป้องกัน, ขัดเกลา

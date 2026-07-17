@@ -652,6 +652,7 @@ renderDrugCard=function(drug){
       data = data || {};
       data.platform = detectPlatform();
       data.standalone = isStandalone();
+      data.line_inapp = (window.IVDrugRef && IVDrugRef.isLineInApp) ? IVDrugRef.isLineInApp() : /\bLine\/\d/i.test(navigator.userAgent||'');
       data.online = navigator.onLine;
       data.screen_w = (window.screen && screen.width) || 0;
       data.screen_h = (window.screen && screen.height) || 0;

@@ -40,6 +40,13 @@
     if (/android/i.test(ua)) return 'android';
     return 'desktop';
   }
+  // LINE in-app browser / LIFF WebView — UA carries "Line/<version>". Installing a
+  // PWA from inside LINE is meaningless, so we suppress the install UI there.
+  // (Local copy of IVDrugRef.isLineInApp so site-chrome stays dependency-free.)
+  function isLineInApp() {
+    try { return /\bLine\/\d/i.test(navigator.userAgent || ''); } catch (e) { return false; }
+  }
+  function suppressInstall() { return isInstalled() || isLineInApp(); }
 
   // 7 user pages (order = display order). label keys resolved per language below.
   var PAGES = [
@@ -152,7 +159,7 @@
     });
     // install entry point (hidden when already installed)
     html += '<button type="button" class="sc-item sc-install-item" data-k="install"' +
-      (isInstalled() ? ' style="display:none"' : '') + '>' +
+      (suppressInstall() ? ' style="display:none"' : '') + '>' +
       '<span class="sc-ic">📲</span><span class="sc-lb"></span></button>';
     rail.innerHTML = html;
 
@@ -203,7 +210,7 @@
     var banner = null;
     var dismissed = false;
     try { dismissed = localStorage.getItem('pwaInstallDismissed') === '1' || localStorage.getItem('pwaInstalled') === '1'; } catch (e) {}
-    if (!isInstalled() && !dismissed) {
+    if (!suppressInstall() && !dismissed) {
       banner = document.createElement('div');
       banner.className = 'sc-install-banner';
       banner.setAttribute('data-i18n-done', '1');

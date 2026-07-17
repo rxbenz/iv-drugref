@@ -920,6 +920,23 @@ document.addEventListener('click', e => {
       }
     } catch (e) { /* ignore deep-link errors */ }
 
+    // M-4 (LINE bot): pre-select TWO drugs from ?a=&b= then auto-check (additive;
+    // the single ?drug=/?search= path above is untouched).
+    try {
+      var _pp = new URLSearchParams(location.search);
+      var _a = _pp.get('a'), _b = _pp.get('b');
+      if (_a && _b) {
+        [_a, _b].forEach(function(nm){
+          var _nl = nm.trim().toLowerCase();
+          var _h = DRUGS.filter(function(d){ return !d.isFluid; }).find(function(d){
+            var g = (d.g || '').toLowerCase();
+            return g === _nl || g.indexOf(_nl) === 0 || (_nl.length > 3 && _nl.indexOf(g) === 0) || normKey(d.g) === normKey(nm);
+          });
+          if (_h) addMultiDrug(_h.i);
+        });
+      }
+    } catch (e) { /* ignore deep-link errors */ }
+
     // Event delegation — replaces all inline handlers
     IVDrugRef.delegate(document, 'click', {
       switchMode: function(e, t) { switchMode(t.dataset.mode); },

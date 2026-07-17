@@ -1220,6 +1220,20 @@
     renderDrugList();
     loadRemoteRenalDrugs();   // P2.1: override with Sheet-authored data if available
 
+    // Deep-link: ?drug=<name> preselects a renal drug (e.g. from the LINE bot).
+    try {
+      var _rd = new URLSearchParams(location.search).get('drug');
+      if (_rd) {
+        var _rk = _rd.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        var _rhit = RENAL_DRUGS.find(function (d) {
+          var n = (d.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          var id = (d.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          return n === _rk || id === _rk || (_rk.length > 3 && (n.indexOf(_rk) === 0 || id.indexOf(_rk) === 0));
+        });
+        if (_rhit) selectDrug(_rhit.id);
+      }
+    } catch (e) { /* ignore deep-link errors */ }
+
     // Set up input listeners for patient parameters
     document.getElementById('ptAge').addEventListener('input', recalc);
     document.getElementById('ptWt').addEventListener('input', recalc);

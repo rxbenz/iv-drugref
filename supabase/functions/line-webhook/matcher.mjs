@@ -92,3 +92,53 @@ export function matchDrug(query, drugs) {
   if (fuzzy.length) return { status: 'suggest', candidates: fuzzy.slice(0, 3).map((x) => x.d) };
   return { status: 'none' };
 }
+
+// ---------- Phase 4: Y-site compatibility key matching ----------
+// Ported from js/compatibility.js (normWords / keyCandidates / CATION_PREFIXES,
+// the salt-collision fix). A cation salt yields [cation+anion, cation] so a
+// salt-specific curated pair wins but a bare-cation entry still matches as a
+// fallback — and one salt's data never leaks to a different salt of the cation.
+const CATION_PREFIXES = new Set(['calcium', 'potassium', 'sodium', 'magnesium', 'ammonium', 'ferric', 'ferrous', 'zinc']);
+
+function normWords(name) {
+  return String(name || '').toLowerCase().split(/[\s,()\/]+/)
+    .map((w) => w.replace(/[^a-z]/g, '')).filter(Boolean);
+}
+
+// Candidate keys most-specific → generic (salt-aware).
+export function compatKeyCandidates(name) {
+  const words = normWords(name);
+  if (!words.length) return [String(name || '').toLowerCase().replace(/[^a-z]/g, '')];
+  const cation = words[0];
+  if (CATION_PREFIXES.has(cation) && words.length >= 2) return [cation + words[1], cation];
+  return [cation];
+}
+
+// Build a lookup from compat_pairs [[a, b, result], …]. Each pair is keyed under
+// the sorted join of each side's MOST-SPECIFIC key — mirroring the app's CURATED_MAP.
+export function buildCompatMap(pairs) {
+  const map = {};
+  for (const p of (pairs || [])) {
+    if (!Array.isArray(p) || p.length < 2) continue;
+    const ka = compatKeyCandidates(p[0])[0];
+    const kb = compatKeyCandidates(p[1])[0];
+    if (!ka || !kb) continue;
+    map[[ka, kb].sort().join('|')] = p[2] || 'c';
+  }
+  return map;
+}
+
+// Look up a pair by probing both sides' candidate keys specific → generic
+// (like getCompatibility). Returns 'c' | 'i' | 'v' | null.
+export function lookupCompat(map, nameA, nameB) {
+  if (!map) return null;
+  const ca = compatKeyCandidates(nameA);
+  const cb = compatKeyCandidates(nameB);
+  for (const ka of ca) {
+    for (const kb of cb) {
+      const hit = map[[ka, kb].sort().join('|')];
+      if (hit) return hit;
+    }
+  }
+  return null;
+}

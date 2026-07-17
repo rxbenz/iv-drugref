@@ -13,8 +13,8 @@
 // See docs/line-channel/03-webhook-bot.md.
 // ============================================================
 import { verifyLineSignature } from './verify.mjs';
-import { buildHelp, buildGreeting, buildDrugFlex, buildSuggestions, buildNotFound } from './messages.mjs';
-import { parseMessage, matchDrug } from './matcher.mjs';
+import { buildHelp, buildGreeting, buildDrugFlex, buildSuggestions, buildNotFound, buildPairResult, buildRenalNote } from './messages.mjs';
+import { parseMessage, matchDrug, buildCompatMap, lookupCompat } from './matcher.mjs';
 
 const LINE_REPLY_URL = 'https://api.line.me/v2/bot/message/reply';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -63,6 +63,29 @@ async function getDrugs(): Promise<Array<Record<string, unknown>>> {
   }
 }
 
+// ---- compat pairs: fetch-first from Supabase, 5-min cache (same shape as app) ----
+let _pairs: Array<[string, string, string]> | null = null;
+let _pairsAt = 0;
+async function getCompatPairs(): Promise<Array<[string, string, string]>> {
+  const now = Date.now();
+  if (_pairs && now - _pairsAt < DRUG_TTL) return _pairs;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/compat_pairs?select=data`, {
+      headers: { apikey: SUPABASE_ANON_KEY, authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+    if (!res.ok) return _pairs ?? [];
+    const rows = await res.json();
+    const pairs = (Array.isArray(rows) ? rows : [])
+      .map((r: Record<string, any>) => r?.data)
+      .filter(Boolean)
+      .map((d: Record<string, any>): [string, string, string] => [d.drugA || '', d.drugB || '', d.result || 'c']);
+    if (pairs.length) { _pairs = pairs; _pairsAt = now; }
+    return pairs.length ? pairs : (_pairs ?? []);
+  } catch {
+    return _pairs ?? [];
+  }
+}
+
 async function sha256hex(s: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -104,7 +127,34 @@ async function handleText(text: string, replyToken: string, userId: string | und
     return;
   }
 
-  // help + (pair/renal — handled in Phase 4) → the menu for now
+  if (parsed.kind === 'pair') {
+    const drugs = await getDrugs();
+    const rA = matchDrug(parsed.a, drugs);
+    const rB = matchDrug(parsed.b, drugs);
+    const nameA = rA.status === 'found' ? String(rA.drug.generic) : parsed.a;
+    const nameB = rB.status === 'found' ? String(rB.drug.generic) : parsed.b;
+    const code = lookupCompat(buildCompatMap(await getCompatPairs()), nameA, nameB);
+    await replyMessage(replyToken, [buildPairResult(nameA, nameB, code)], token);
+    await logQuery('pair', parsed.a + ' + ' + parsed.b, code, userId);
+    return;
+  }
+
+  if (parsed.kind === 'renal') {
+    const r = matchDrug(parsed.query, await getDrugs());
+    if (r.status === 'found') {
+      await replyMessage(replyToken, [buildRenalNote(String(r.drug.generic))], token);
+      await logQuery('renal', parsed.query, String(r.drug.generic), userId);
+    } else if (r.status === 'suggest') {
+      await replyMessage(replyToken, [buildSuggestions(parsed.query, r.candidates)], token);
+      await logQuery('renal_suggest', parsed.query, null, userId);
+    } else {
+      await replyMessage(replyToken, [buildNotFound(parsed.query)], token);
+      await logQuery('renal_none', parsed.query, null, userId);
+    }
+    return;
+  }
+
+  // help (and anything unrecognized) → the menu
   await replyMessage(replyToken, buildHelp(), token);
 }
 

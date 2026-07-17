@@ -71,3 +71,39 @@ test('buildDrugFlex: card carries generic, disclaimer, HAD flag, incompat + app 
   assert.ok(s.includes('High-Alert'), 'HAD drugs flagged');
   assert.ok(s.includes('Ceftriaxone'), 'incompatibility shown');
 });
+
+test('compat: buildCompatMap + lookupCompat — both orders, salt-aware, no leak', async () => {
+  const { buildCompatMap, lookupCompat } = await loadMatcher();
+  const map = buildCompatMap([
+    ['Vancomycin', 'Heparin', 'i'],
+    ['Potassium', 'Furosemide', 'c'],          // bare cation (KCl additive)
+    ['Calcium gluconate', 'Ceftriaxone', 'i'],
+  ]);
+  assert.strictEqual(lookupCompat(map, 'Vancomycin', 'Heparin'), 'i');
+  assert.strictEqual(lookupCompat(map, 'Heparin', 'Vancomycin'), 'i');          // order-independent
+  assert.strictEqual(lookupCompat(map, 'Potassium chloride', 'Furosemide'), 'c'); // salt → bare-cation fallback
+  assert.strictEqual(lookupCompat(map, 'Calcium gluconate', 'Ceftriaxone'), 'i');
+  assert.strictEqual(lookupCompat(map, 'Calcium chloride', 'Ceftriaxone'), null); // one salt's data never leaks
+  assert.strictEqual(lookupCompat(map, 'Aspirin', 'Water'), null);
+});
+
+test('buildPairResult: colored result carries the pair, disclaimer, deep link', async () => {
+  const { buildPairResult, DISCLAIMER, APP_BASE } = await loadMessages();
+  const flex = buildPairResult('Vancomycin', 'Heparin', 'i');
+  const s = JSON.stringify(flex);
+  assert.strictEqual(flex.type, 'flex');
+  assert.ok(s.includes('ไม่เข้ากัน'));
+  assert.ok(s.includes(APP_BASE + '/compatibility.html?a=Vancomycin&b=Heparin'));
+  assert.ok(s.includes(DISCLAIMER));
+  assert.ok(JSON.stringify(buildPairResult('A', 'B', null)).includes('ไม่มีข้อมูล'), 'null → no-data label');
+});
+
+test('buildRenalNote: routes to the app calculator, never computes a dose', async () => {
+  const { buildRenalNote, DISCLAIMER, APP_BASE } = await loadMessages();
+  const msg = buildRenalNote('Vancomycin');
+  assert.strictEqual(msg.type, 'text');
+  assert.ok(msg.text.includes('Vancomycin'));
+  assert.ok(msg.text.includes(APP_BASE + '/renal-dosing.html?drug=Vancomycin'));
+  assert.ok(/ไม่คำนวณ/.test(msg.text), 'renal reply must state it does not calculate');
+  assert.ok(msg.text.includes(DISCLAIMER));
+});

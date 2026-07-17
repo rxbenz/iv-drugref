@@ -18,7 +18,7 @@ export const DISCLAIMER =
   'บอทไม่คำนวณขนาดยา — เครื่องมือคำนวณอยู่ในแอป';
 
 // Build a full app URL (reuses the app's existing deep-link params, e.g.
-// index.html?search=… / compatibility.html?drug=…). Used by Phase 3+.
+// index.html?search=… / index.html?drug=…).
 export function appLink(pathAndQuery = '') {
   return pathAndQuery ? `${APP_BASE}/${pathAndQuery}` : APP_BASE;
 }
@@ -30,8 +30,7 @@ const HOW_TO =
   '• "ยา A + ยา B" — เช็คการเข้ากันได้ (Y-site)\n' +
   '• "ไต <ชื่อยา>" — ขนาดยาในผู้ป่วยไต';
 
-// Reply to any text message. Phase 2 skeleton always returns this menu;
-// Phase 3 replaces the text-message path with real drug lookup.
+// Reply to help/menu requests (and non-drug intents until Phase 4).
 export function buildHelp() {
   const text = HOW_TO + '\n\nเปิดแอปเต็ม: ' + APP_BASE + '\n\n' + DISCLAIMER;
   return [{ type: 'text', text }];
@@ -43,4 +42,109 @@ export function buildGreeting() {
     'สวัสดีค่ะ 🙌 นี่คือผู้ช่วยค้นข้อมูลยา IV DrugRef\n\n' +
     HOW_TO + '\n\nหรือกดเมนูด้านล่าง / เปิดแอปเต็ม: ' + APP_BASE + '\n\n' + DISCLAIMER;
   return [{ type: 'text', text }];
+}
+
+// ---------- Phase 3: drug lookup replies ----------
+
+// Coerce a drug field to a clean display string ('' for missing / "-" placeholders).
+function asText(v) {
+  if (v == null) return '';
+  const s = Array.isArray(v) ? v.join(', ') : String(v);
+  const t = s.trim();
+  return (t === '' || t === '-') ? '' : t;
+}
+
+// A label/value row inside the Flex card.
+function kvRow(label, value) {
+  return {
+    type: 'box', layout: 'baseline', spacing: 'sm',
+    contents: [
+      { type: 'text', text: label, size: 'sm', color: '#8a8a8a', flex: 2, wrap: true },
+      { type: 'text', text: value, size: 'sm', color: '#111111', flex: 5, wrap: true },
+    ],
+  };
+}
+
+// A Flex bubble for one drug — same admin-verified reference fields the app shows.
+// Footer button deep-links to the full app card (index.html?drug=…).
+export function buildDrugFlex(drug) {
+  const g = asText(drug.generic) || 'ยา';
+  const reconst = drug.reconst || {};
+  const dilution = drug.dilution || {};
+  const admin = drug.admin || {};
+  const compat = drug.compat || {};
+
+  const rows = [];
+  const strength = asText(drug.strength);
+  const solvent = asText(reconst.solvent);
+  const rvol = asText(reconst.volume);
+  const diluent = asText(dilution.diluent);
+  const finalConc = asText(dilution.finalConc);
+  const rate = asText(admin.rate);
+  const incompat = asText(compat.incompat);
+
+  if (strength) rows.push(kvRow('ความแรง', strength));
+  if (solvent) rows.push(kvRow('การผสม', solvent + (rvol ? ' • ' + rvol : '')));
+  if (diluent || finalConc) rows.push(kvRow('เจือจาง', [diluent, finalConc].filter(Boolean).join(' → ')));
+  if (rate) rows.push(kvRow('อัตราให้ยา', rate));
+
+  const body = [
+    { type: 'text', text: g, weight: 'bold', size: 'xl', wrap: true, color: '#0e7490' },
+  ];
+  const trade = asText(drug.trade);
+  if (trade) body.push({ type: 'text', text: trade, size: 'xs', color: '#8a8a8a', wrap: true });
+  if (drug.had) {
+    body.push({ type: 'text', text: '⚠️ ยาความเสี่ยงสูง (High-Alert)', size: 'xs', weight: 'bold', color: '#b91c1c', margin: 'sm' });
+  }
+  body.push({ type: 'separator', margin: 'md' });
+  if (rows.length) {
+    body.push({ type: 'box', layout: 'vertical', spacing: 'sm', margin: 'md', contents: rows });
+  } else {
+    body.push({ type: 'text', text: 'ดูรายละเอียดในแอป', size: 'sm', color: '#8a8a8a', margin: 'md' });
+  }
+  if (incompat) {
+    body.push({
+      type: 'box', layout: 'vertical', margin: 'md', paddingAll: 'sm',
+      backgroundColor: '#fef2f2', cornerRadius: 'md',
+      contents: [{ type: 'text', text: '⚠️ ห้ามผสม: ' + incompat, size: 'xs', color: '#b91c1c', wrap: true }],
+    });
+  }
+  body.push({ type: 'separator', margin: 'md' });
+  body.push({ type: 'text', text: DISCLAIMER, size: 'xxs', color: '#9a9a9a', wrap: true, margin: 'md' });
+
+  return {
+    type: 'flex',
+    altText: g + ' — ข้อมูลยา IV (อ้างอิง)',
+    contents: {
+      type: 'bubble',
+      body: { type: 'box', layout: 'vertical', contents: body },
+      footer: {
+        type: 'box', layout: 'vertical',
+        contents: [{
+          type: 'button', style: 'primary', color: '#0e7490', height: 'sm',
+          action: { type: 'uri', label: 'เปิดในแอป', uri: appLink('index.html?drug=' + encodeURIComponent(g)) },
+        }],
+      },
+    },
+  };
+}
+
+// Ambiguous / typo → a text message with tappable candidate buttons (each taps
+// back the exact generic name so the next round resolves to a single card).
+export function buildSuggestions(query, candidates) {
+  const names = (candidates || []).map((d) => asText(d && d.generic)).filter(Boolean).slice(0, 3);
+  const items = names.map((n) => ({
+    type: 'action', action: { type: 'message', label: n.slice(0, 20), text: n },
+  }));
+  const text = 'ไม่แน่ใจว่าหมายถึงตัวไหน — เลือกได้เลย 👇\n(คุณพิมพ์: "' + query + '")';
+  return { type: 'text', text, quickReply: { items } };
+}
+
+// No match → point the user at the app's search (which has its own fallback data).
+export function buildNotFound(query) {
+  const text =
+    'ไม่พบยา "' + query + '" 🔎\n' +
+    'ลองพิมพ์ชื่อสามัญเป็นภาษาอังกฤษ หรือค้นในแอป:\n' +
+    appLink('index.html?search=' + encodeURIComponent(query)) + '\n\n' + DISCLAIMER;
+  return { type: 'text', text };
 }

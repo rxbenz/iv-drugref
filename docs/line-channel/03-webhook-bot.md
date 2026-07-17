@@ -1,7 +1,7 @@
 # Phase 2 — โครงบอต: webhook + ตรวจลายเซ็น (คู่มือคอนโซล)
 
 > เป้าหมาย: เอาโค้ดบอตขึ้น Supabase (ผ่านหน้าเว็บ) → ต่อเข้ากับ LINE → ทักบอตแล้วได้เมนูตอบ
-> โค้ดอยู่ที่ `supabase/functions/line-webhook/` (3 ไฟล์: `index.ts`, `verify.mjs`, `messages.mjs`)
+> โค้ดอยู่ที่ `supabase/functions/line-webhook/` (4 ไฟล์: `index.ts`, `verify.mjs`, `messages.mjs`, `matcher.mjs`)
 >
 > ⚠️ **ห้ามวาง Channel secret / access token ลงไฟล์ใน repo** — วางเฉพาะในหน้า Supabase Secrets เท่านั้น
 
@@ -11,10 +11,11 @@
 3. ตั้งชื่อฟังก์ชัน: **`line-webhook`** (ต้องชื่อนี้เป๊ะ — URL อ้างจากชื่อ)
 4. ในเอดิเตอร์จะมีไฟล์ `index.ts` มาให้ 1 ไฟล์ → **ลบเนื้อหาเดิม** แล้ววางเนื้อหาจาก
    `supabase/functions/line-webhook/index.ts`
-5. **เพิ่มอีก 2 ไฟล์** (ปุ่ม + / New file ในเอดิเตอร์) ชื่อให้ตรง แล้ววางเนื้อหาจาก repo:
+5. **เพิ่มอีก 3 ไฟล์** (ปุ่ม + / New file ในเอดิเตอร์) ชื่อให้ตรง แล้ววางเนื้อหาจาก repo:
    - `verify.mjs`
    - `messages.mjs`
-   > ทั้ง 3 ไฟล์ต้องอยู่**โฟลเดอร์เดียวกัน** (index.ts อ้าง `./verify.mjs`, `./messages.mjs`)
+   - `matcher.mjs`
+   > ทั้ง 4 ไฟล์ต้องอยู่**โฟลเดอร์เดียวกัน** (index.ts อ้าง `./verify.mjs`, `./messages.mjs`, `./matcher.mjs`)
 6. **สำคัญมาก — ปิด Verify JWT**: ในหน้า deploy/ตั้งค่าฟังก์ชัน หา **"Enforce JWT verification" / "Verify JWT"** แล้ว**ปิด (OFF)**
    - เพราะ LINE ไม่ได้ส่ง Supabase JWT มา ถ้าเปิดไว้จะโดนปฏิเสธก่อนถึงโค้ดเรา
    - ความปลอดภัยมาจาก **การตรวจลายเซ็น LINE** ในโค้ดแทน (ไฟล์ `verify.mjs`)

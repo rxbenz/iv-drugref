@@ -870,6 +870,26 @@ var IVDrugRef = (function() {
   // ============================================================
 
   /**
+   * Detect LINE's in-app browser / LIFF WebView.
+   * LINE's WebView user-agent carries a "Line/<version>" token (e.g.
+   * ".../ Line/13.5.0"); LIFF pages opened from the LINE client run in the same
+   * WebView. Used to keep the app safe inside LINE: the force-update auto-reload
+   * and the SW-controllerchange auto-reload are both downgraded to dismissible,
+   * user-tapped reloads there — an in-app WebView may lack a service worker to
+   * make a reload "stick", and its sessionStorage (our reload-loop guard) can be
+   * ephemeral, so with forceUpdate:true a silent auto-reload could loop.
+   * Pure function (ua injectable) so it is unit-testable.
+   * @param {string} [ua] - user-agent string (defaults to navigator.userAgent)
+   * @returns {boolean}
+   */
+  function isLineInApp(ua) {
+    try {
+      var s = ua != null ? ua : ((typeof navigator !== 'undefined' && navigator.userAgent) || '');
+      return /\bLine\/\d/i.test(s);
+    } catch (e) { return false; }
+  }
+
+  /**
    * Register service worker with user-prompted update flow.
    * When a new SW is found waiting, shows a toast asking the user to reload.
    */
@@ -910,10 +930,13 @@ var IVDrugRef = (function() {
       });
     }).catch(err => console.warn('[SW] Registration failed:', err));
 
-    // When the new SW takes over, reload the page
+    // When the new SW takes over, reload the page — EXCEPT inside LINE's in-app
+    // WebView, where a silent auto-reload can loop; there we show a dismissible
+    // update toast and let the user reload manually.
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (refreshing) return;
+      if (isLineInApp()) { showUpdateToast(null); return; }
       refreshing = true;
       window.location.reload();
     });
@@ -942,7 +965,14 @@ var IVDrugRef = (function() {
     toast.classList.add('visible');
 
     document.getElementById('sw-update-accept').addEventListener('click', function() {
-      waitingSW.postMessage({ type: 'SKIP_WAITING' });
+      // Normal browsers with a waiting SW: SKIP_WAITING → controllerchange → reload.
+      // In LINE (or when called without a waiting SW), do a direct user-initiated
+      // reload — the SKIP_WAITING→controllerchange auto-reload path is off in LINE.
+      if (waitingSW && !isLineInApp()) {
+        try { waitingSW.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+      } else {
+        window.location.reload();
+      }
       toast.remove();
     });
     document.getElementById('sw-update-dismiss').addEventListener('click', function() {
@@ -963,6 +993,9 @@ var IVDrugRef = (function() {
   var VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
   var _versionCheckTimer = null;
   var _currentAppVersion = null; // set from version.json on first load
+  var _lineUpdatePromptShown = false; // in-LINE dismissible update banner shown this
+                                      // page-load (in-memory guard; the WebView's
+                                      // sessionStorage can be ephemeral)
 
   function checkForUpdate() {
     fetch('version.json?_t=' + Date.now(), { cache: 'no-store' })
@@ -986,6 +1019,17 @@ var IVDrugRef = (function() {
         console.log('[VersionCheck] New version:', data.version, '(current:', _currentAppVersion + ')', 'force:', data.forceUpdate);
 
         if (data.forceUpdate) {
+          // Inside LINE's in-app WebView, NEVER auto-reload: the sessionStorage
+          // loop-guard can be ephemeral there and there may be no SW to make the
+          // reload "stick", so forceUpdate:true could reload-loop. Show a
+          // dismissible banner with a manual reload button instead, guarded by an
+          // in-memory flag so it doesn't re-stack on each 5-min/visibility check.
+          if (isLineInApp()) {
+            if (_lineUpdatePromptShown) return;
+            _lineUpdatePromptShown = true;
+            showLineUpdateBanner(data.version);
+            return;
+          }
           // Force update: show non-dismissable banner then reload.
           // Loop guard: force ONCE per target version per session. If we already
           // forced to this version this session but the build is still stale (e.g.
@@ -1049,6 +1093,30 @@ var IVDrugRef = (function() {
       // No SW — just reload
       setTimeout(function() { window.location.reload(); }, 1500);
     }
+  }
+
+  // Dismissible "new version" banner for LINE's in-app WebView — mirrors the
+  // force-update banner visually but NEVER auto-reloads (avoids the reload loop).
+  // The user taps "โหลดใหม่" to refresh, or dismisses. See checkForUpdate().
+  function showLineUpdateBanner(newVersion) {
+    if (document.getElementById('force-update-banner')) return;
+    var banner = document.createElement('div');
+    banner.id = 'force-update-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;' +
+      'background:#2563eb;color:#fff;padding:12px 16px;text-align:center;font-size:14px;' +
+      'font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;' +
+      'justify-content:center;gap:12px;flex-wrap:wrap;';
+    banner.innerHTML =
+      '<span>มีเวอร์ชันใหม่ (' + newVersion + ') พร้อมใช้งาน</span>' +
+      '<button id="line-update-reload" style="background:#fff;color:#2563eb;border:0;' +
+      'border-radius:6px;padding:6px 14px;font-weight:700;cursor:pointer;">โหลดใหม่</button>' +
+      '<button id="line-update-dismiss" aria-label="ปิด" style="background:transparent;' +
+      'color:#fff;border:0;font-size:20px;line-height:1;cursor:pointer;">&times;</button>';
+    document.body.appendChild(banner);
+    var reloadBtn = document.getElementById('line-update-reload');
+    var dismissBtn = document.getElementById('line-update-dismiss');
+    if (reloadBtn) reloadBtn.addEventListener('click', function() { window.location.reload(); });
+    if (dismissBtn) dismissBtn.addEventListener('click', function() { banner.remove(); });
   }
 
   function startVersionCheck() {
@@ -1510,6 +1578,7 @@ var IVDrugRef = (function() {
     // Service Worker & Version Check
     registerSW,
     startVersionCheck,
+    isLineInApp, // LINE in-app / LIFF WebView detection (used by site-chrome, index)
 
     // What's New popup (release notes)
     showWhatsNew,

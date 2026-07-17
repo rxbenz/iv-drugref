@@ -993,11 +993,16 @@ var IVDrugRef = (function() {
   var VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
   var _versionCheckTimer = null;
   var _currentAppVersion = null; // set from version.json on first load
-  var _lineUpdatePromptShown = false; // in-LINE dismissible update banner shown this
-                                      // page-load (in-memory guard; the WebView's
-                                      // sessionStorage can be ephemeral)
 
   function checkForUpdate() {
+    // Inside LINE's in-app WebView there is no service worker, so a reload cannot
+    // reliably pick up a new build — and version.json's `version` (the git hash,
+    // stamped by build.js for cache-busting) never equals core.js VERSION (semver),
+    // so the check would flag "new version" on EVERY page load and nag forever
+    // (the banner the user reported). The update can't be completed here, so skip
+    // the whole version check in LINE. Real browsers / the installed PWA still
+    // force-update normally (the SW makes the reload actually stick).
+    if (isLineInApp()) return;
     fetch('version.json?_t=' + Date.now(), { cache: 'no-store' })
       .then(function(r) { return r.ok ? r.json() : null; })
       .then(function(data) {
@@ -1019,17 +1024,8 @@ var IVDrugRef = (function() {
         console.log('[VersionCheck] New version:', data.version, '(current:', _currentAppVersion + ')', 'force:', data.forceUpdate);
 
         if (data.forceUpdate) {
-          // Inside LINE's in-app WebView, NEVER auto-reload: the sessionStorage
-          // loop-guard can be ephemeral there and there may be no SW to make the
-          // reload "stick", so forceUpdate:true could reload-loop. Show a
-          // dismissible banner with a manual reload button instead, guarded by an
-          // in-memory flag so it doesn't re-stack on each 5-min/visibility check.
-          if (isLineInApp()) {
-            if (_lineUpdatePromptShown) return;
-            _lineUpdatePromptShown = true;
-            showLineUpdateBanner(data.version);
-            return;
-          }
+          // (LINE's in-app WebView is handled by the early return in
+          // checkForUpdate — it never reaches here.)
           // Force update: show non-dismissable banner then reload.
           // Loop guard: force ONCE per target version per session. If we already
           // forced to this version this session but the build is still stale (e.g.
@@ -1095,30 +1091,6 @@ var IVDrugRef = (function() {
     }
   }
 
-  // Dismissible "new version" banner for LINE's in-app WebView — mirrors the
-  // force-update banner visually but NEVER auto-reloads (avoids the reload loop).
-  // The user taps "โหลดใหม่" to refresh, or dismisses. See checkForUpdate().
-  function showLineUpdateBanner(newVersion) {
-    if (document.getElementById('force-update-banner')) return;
-    var banner = document.createElement('div');
-    banner.id = 'force-update-banner';
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;' +
-      'background:#2563eb;color:#fff;padding:12px 16px;text-align:center;font-size:14px;' +
-      'font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;' +
-      'justify-content:center;gap:12px;flex-wrap:wrap;';
-    banner.innerHTML =
-      '<span>มีเวอร์ชันใหม่ (' + newVersion + ') พร้อมใช้งาน</span>' +
-      '<button id="line-update-reload" style="background:#fff;color:#2563eb;border:0;' +
-      'border-radius:6px;padding:6px 14px;font-weight:700;cursor:pointer;">โหลดใหม่</button>' +
-      '<button id="line-update-dismiss" aria-label="ปิด" style="background:transparent;' +
-      'color:#fff;border:0;font-size:20px;line-height:1;cursor:pointer;">&times;</button>';
-    document.body.appendChild(banner);
-    var reloadBtn = document.getElementById('line-update-reload');
-    var dismissBtn = document.getElementById('line-update-dismiss');
-    if (reloadBtn) reloadBtn.addEventListener('click', function() { window.location.reload(); });
-    if (dismissBtn) dismissBtn.addEventListener('click', function() { banner.remove(); });
-  }
-
   function startVersionCheck() {
     // Initial check after 3s (let page load first)
     setTimeout(checkForUpdate, 3000);
@@ -1142,6 +1114,15 @@ var IVDrugRef = (function() {
   // right after the `const RELEASE_NOTES = [` line, so keep that line intact.
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
+    {
+      v: '5.55.0',
+      date: '2026-07-17',
+      title: "แก้แถบเวอร์ชันเด้งซ้ำใน LINE",
+      items: [
+        "แก้แถบ 'มีเวอร์ชันใหม่' ที่เด้งซ้ำทุกครั้งเมื่อเปิดแอปผ่าน LINE (ปิดการเช็คเวอร์ชันใน LINE ที่ทำงานไม่ได้อยู่แล้วเพราะไม่มี service worker)",
+        "เบราว์เซอร์ปกติ / ติดตั้งแอปไว้ ยังอัปเดตอัตโนมัติเหมือนเดิม"
+      ]
+    },
     {
       v: '5.54.0',
       date: '2026-07-17',
@@ -1427,7 +1408,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.54.0';
+  const VERSION = '5.55.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

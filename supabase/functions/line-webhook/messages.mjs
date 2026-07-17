@@ -148,3 +148,58 @@ export function buildNotFound(query) {
     appLink('index.html?search=' + encodeURIComponent(query)) + '\n\n' + DISCLAIMER;
   return { type: 'text', text };
 }
+
+// ---------- Phase 4: Y-site pair result + renal note ----------
+
+// result code (js/compatibility.js): c=compatible, i=incompatible, v=variable
+const COMPAT_STYLE = {
+  c: { emoji: '✅', label: 'เข้ากันได้ (Y-site)', color: '#15803d', bg: '#f0fdf4' },
+  i: { emoji: '❌', label: 'ไม่เข้ากัน — ห้ามให้ร่วมสาย/ผสม', color: '#b91c1c', bg: '#fef2f2' },
+  v: { emoji: '⚠️', label: 'ข้อมูลแปรผัน — โปรดตรวจสอบ/ระวัง', color: '#b45309', bg: '#fffbeb' },
+};
+const COMPAT_NONE = { emoji: '❔', label: 'ไม่มีข้อมูลคู่นี้โดยตรง', color: '#6b7280', bg: '#f3f4f6' };
+
+// Flex result for an "A + B" Y-site compatibility check. `code` = 'c'|'i'|'v'|null.
+export function buildPairResult(nameA, nameB, code) {
+  const st = COMPAT_STYLE[code] || COMPAT_NONE;
+  const pairText = nameA + ' + ' + nameB;
+  const uri = appLink('compatibility.html?a=' + encodeURIComponent(nameA) + '&b=' + encodeURIComponent(nameB));
+  const contents = [
+    {
+      type: 'box', layout: 'vertical', paddingAll: 'md', backgroundColor: st.bg, cornerRadius: 'md',
+      contents: [{ type: 'text', text: st.emoji + ' ' + st.label, weight: 'bold', size: 'md', color: st.color, wrap: true }],
+    },
+    { type: 'text', text: pairText, size: 'sm', color: '#111111', wrap: true, margin: 'md' },
+  ];
+  if (code === 'v' || !code) {
+    contents.push({ type: 'text', text: 'ดูรายละเอียด/ทางเลือกยาที่เข้ากันได้ในแอป', size: 'xs', color: '#6b7280', wrap: true, margin: 'sm' });
+  }
+  contents.push({ type: 'separator', margin: 'md' });
+  contents.push({ type: 'text', text: DISCLAIMER, size: 'xxs', color: '#9a9a9a', wrap: true, margin: 'md' });
+  return {
+    type: 'flex',
+    altText: pairText + ' — ' + st.label,
+    contents: {
+      type: 'bubble',
+      body: { type: 'box', layout: 'vertical', spacing: 'sm', contents },
+      footer: {
+        type: 'box', layout: 'vertical',
+        contents: [{
+          type: 'button', style: 'primary', color: '#0e7490', height: 'sm',
+          action: { type: 'uri', label: 'เปิดในแอป', uri },
+        }],
+      },
+    },
+  };
+}
+
+// "ไต X" → the bot does NOT compute renal doses (weight + GFR dependent);
+// it routes to the app's renal calculator. Keeps the reference-lookup contract.
+export function buildRenalNote(generic) {
+  const text =
+    '🧪 การปรับขนาดยา "' + generic + '" ในผู้ป่วยไตขึ้นกับ น้ำหนัก + ค่าการทำงานของไต (GFR) ' +
+    'ของผู้ป่วยแต่ละราย — บอทไม่คำนวณให้ (ความปลอดภัย)\n\n' +
+    'เปิดในแอปเพื่อใส่ค่าแล้วคำนวณ:\n' +
+    appLink('renal-dosing.html?drug=' + encodeURIComponent(generic)) + '\n\n' + DISCLAIMER;
+  return { type: 'text', text };
+}

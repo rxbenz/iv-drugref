@@ -1143,6 +1143,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.54.0',
+      date: '2026-07-17',
+      title: "เชื่อมช่องทาง LINE — เช็คคู่ยา/ไต 🔗",
+      items: [
+        "รองรับลิงก์จากแชต LINE เปิดหน้าเช็คยาเข้ากันได้ (2 ตัว) และปรับขนาดยาไต ได้ตรงตัวยาเลย",
+        "การใช้งานผ่านเบราว์เซอร์ปกติเหมือนเดิมทุกอย่าง"
+      ]
+    },
+    {
       v: '5.53.0',
       date: '2026-07-17',
       title: "เตรียมช่องทาง LINE 🟢",
@@ -1418,7 +1427,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.53.0';
+  const VERSION = '5.54.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

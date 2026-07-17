@@ -68,12 +68,14 @@
 
 ## 6. รายละเอียดต่อ Phase
 
-### Phase 0 — เตรียมคอนโซล (S · ไม่มีโค้ด)
+### Phase 0 — เตรียมคอนโซล (S · ไม่มีโค้ด) — ✅ DONE (2026-07-17)
 ตามคู่มือ [`01-prerequisites.md`](01-prerequisites.md): เปิด/ยืนยัน Messaging API channel
 บน OA เดิม → เก็บ Channel secret + ออก Channel access token (เก็บใน password manager
-**ไม่ใช่ใน repo**) → สร้าง LINE Login channel (รองรับ LIFF ใน Phase 1) → ติดตั้ง
-Supabase CLI + `supabase login` → เช็คโควตาข้อความฟรีจริงแล้วจดไว้
-**ตรวจ**: `supabase projects list` เห็นโปรเจกต์ `bzwbagojjpiazbeaahmg`; มี secret/token ครบ
+**ไม่ใช่ใน repo**) → สร้าง LINE Login channel (รองรับ LIFF ใน Phase 1) → **ยืนยันเปิดหน้า
+Edge Functions ใน Supabase dashboard ได้** (deploy ผ่านเว็บ Via Editor — **ไม่ใช้ CLI**) →
+เช็คโควตาข้อความฟรีจริงแล้วจดไว้
+**ตรวจ**: ✅ Messaging API เปิด · secret/token เก็บแล้ว · Login channel สร้างแล้ว ·
+Edge Functions dashboard เปิดได้ · โควตา = ฟรี 300 ข้อความ/เดือน (เพดานตายตัว), ผู้ติดตาม ~0
 
 ### Phase 1 — LINE entry: กัน reload วน + rich menu (S/M) — *ship โค้ดก่อน แล้วค่อยเปิด rich menu*
 **โค้ด**
@@ -104,9 +106,14 @@ Supabase CLI + `supabase login` → เช็คโควตาข้อคว�
 - ใหม่ `test/line-messages.test.js` (node --test, dynamic `import()`)
 - ใหม่ `scripts/line-webhook-sim.sh`: จำลอง LINE POST พร้อมลายเซ็นจริง (openssl HMAC + curl,
   secret อ่านจาก env) — ทดสอบทั้งเคส 200 และ 403
-- `package.json`: เพิ่ม script `"deploy:line-webhook": "supabase functions deploy line-webhook --project-ref bzwbagojjpiazbeaahmg --no-verify-jwt"`
-  (**ต้องมี `--no-verify-jwt`** เพราะ LINE ไม่ส่ง Supabase JWT — ความปลอดภัยมาจากลายเซ็น LINE แทน)
-**คอนโซล** (คู่มือ `03-webhook-bot.md`): `supabase secrets set LINE_CHANNEL_SECRET=… LINE_CHANNEL_ACCESS_TOKEN=… LIFF_ID=…`;
+- **Deploy = ผ่านหน้าเว็บ Supabase dashboard (Via Editor)** ไม่ใช้ CLI (ตามที่เลือกไว้):
+  Edge Functions → **Deploy a new function** ชื่อ `line-webhook` → วางโค้ด `index.ts` +
+  ไฟล์ `lib/*.mjs` ในเอดิเตอร์ → Deploy · ที่ **Function settings** ตั้ง **Verify JWT = OFF**
+  (เทียบเท่า `--no-verify-jwt` — จำเป็นเพราะ LINE ไม่ส่ง Supabase JWT; ความปลอดภัยมาจาก
+  ลายเซ็น LINE แทน) · repo เก็บโค้ดเป็น source of truth แล้วก๊อปวางลง dashboard (แบบเดียว
+  กับที่ทำ `gas-complete.js` ลง GAS editor)
+**คอนโซล** (คู่มือ `03-webhook-bot.md`): ตั้งของลับที่ **Edge Functions → Secrets**
+(`LINE_CHANNEL_SECRET`, `LINE_CHANNEL_ACCESS_TOKEN`, `LIFF_ID`);
 วาง webhook URL `https://bzwbagojjpiazbeaahmg.supabase.co/functions/v1/line-webhook`
 ใน LINE Developers console + กด Verify; **ปิด auto-reply/greeting เดิมของ OA**
 **ตรวจ**: `npm test` เขียว; sim script ได้ 200/403 ตามคาด; ทักบอตจากมือถือแล้วได้เมนูตอบ

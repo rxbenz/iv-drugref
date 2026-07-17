@@ -89,7 +89,7 @@ GAS ยังคงเหมาะกับงาน **ขาออก** (ยิ
 
 | Phase | เนื้อหา | ขนาด | คู่มือ | สถานะ |
 |---|---|---|---|---|
-| 0 | เตรียมคอนโซล LINE + Supabase CLI | S | [`01-prerequisites.md`](01-prerequisites.md) | 🔵 พร้อมเริ่ม |
+| 0 | เตรียมคอนโซล LINE + Supabase dashboard | S | [`01-prerequisites.md`](01-prerequisites.md) | ✅ เสร็จ (2026-07-17) |
 | 1 | กัน reload วนใน LINE + rich menu + LIFF | S/M | `02-rich-menu-liff.md` (จะสร้างตอนทำ) | ⬜ รอ Phase 0 |
 | 2 | โครงบอต: webhook + ตรวจลายเซ็น + ตอบเมนู | M | `03-webhook-bot.md` (จะสร้างตอนทำ) | ⬜ |
 | 3 | บอตค้นข้อมูลยา (Flex card + deep link) | M | — | ⬜ |

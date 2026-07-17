@@ -13,7 +13,7 @@
 - [ ] **Channel secret** (จดเก็บส่วนตัว) — ไว้ตรวจลายเซ็นว่าคำขอมาจาก LINE จริง
 - [ ] **Channel access token** (จดเก็บส่วนตัว) — ไว้ให้บอตส่งข้อความออก
 - [ ] LINE Login channel (เปล่า ๆ ไว้ก่อน) — ที่อยู่ของ LIFF app ใน Phase 1
-- [ ] Supabase CLI ใช้งานได้ + login แล้ว
+- [ ] ยืนยันเปิดหน้า Edge Functions ใน Supabase dashboard ได้ (deploy ผ่านเว็บ — ไม่ใช้ CLI)
 - [ ] ตัวเลขโควตาข้อความฟรี/เดือนของ OA (จดลงตารางท้ายไฟล์นี้)
 
 ---
@@ -64,30 +64,24 @@
    - App types: เลือก **Web app**
 3. สร้างเสร็จปล่อยไว้แค่นี้ (สถานะ Developing ได้ ไม่ต้อง publish จนกว่าจะใช้จริง)
 
-## ขั้นที่ 4 — ติดตั้ง Supabase CLI + login
+## ขั้นที่ 4 — ยืนยันว่าเปิดหน้า Edge Functions ใน Supabase dashboard ได้
 
-**Supabase CLI คืออะไร**: โปรแกรมบนเครื่องเราไว้คุยกับ Supabase — Phase 2 จะใช้มัน
-"ส่งโค้ดบอต (Edge Function) ขึ้นไปรัน" และ "ตั้งค่า secret" (คล้าย ๆ ที่เราวางโค้ด
-`gas-complete.js` ลง GAS editor แต่เป็นแบบพิมพ์คำสั่งแทน)
+> **การตัดสินใจ (2026-07-17)**: เราจะ **deploy บอตผ่านหน้าเว็บ Supabase dashboard**
+> (โหมด **Via Editor** — เขียน/วางโค้ดในเบราว์เซอร์แล้วกด Deploy) **ไม่ใช้ Supabase CLI**
+> — เหมือน mental model การวางโค้ดลง GAS editor ที่คุ้นอยู่แล้ว และไม่ต้องแตะ terminal เลย
 
-ใช้ผ่าน `npx` ได้เลยไม่ต้องติดตั้งถาวร (เครื่องต้องมี Node.js ซึ่งมีอยู่แล้วเพราะใช้
-`npm run build` ได้):
+**Edge Function คืออะไร**: โปรแกรมเล็ก ๆ ที่ฝากรันบนเซิร์ฟเวอร์ Supabase — Phase 2
+เราจะใช้เป็น "webhook" (ที่รับข้อความจาก LINE มาตอบ)
 
-```bash
-# 1) เช็คว่ารันได้ (ครั้งแรกจะดาวน์โหลดสักครู่)
-npx supabase@latest --version
+**ขั้นนี้แค่ยืนยันว่ามี "ที่ให้ลงบอต" พร้อม (ไม่ต้องสร้าง function ตอนนี้):**
+1. เข้า https://supabase.com/dashboard → เปิดโปรเจกต์ **`iv-drugref`**
+2. เมนูซ้าย → **Edge Functions**
+3. หน้าเปิดได้ (ยังว่าง ไม่มี function = ถูกต้อง) เห็นการ์ด **Via Editor**
+   ("Create and edit functions directly in the browser") + เมนู **Secrets** ทางซ้าย = ผ่าน ✅
 
-# 2) login — จะเปิดเบราว์เซอร์ให้กด Authorize (หรือให้วาง access token)
-npx supabase@latest login
-
-# 3) ทดสอบว่าเห็นโปรเจกต์ของเรา
-npx supabase@latest projects list
-```
-
-**ผ่านเมื่อ**: ข้อ 3 แสดงรายการที่มีโปรเจกต์ `iv-drugref` (ref `bzwbagojjpiazbeaahmg`)
-
-> ถ้า login ด้วยเบราว์เซอร์ไม่สะดวก: เข้า https://supabase.com/dashboard/account/tokens →
-> **Generate new token** → copy มาวางตอน CLI ถาม (token นี้ก็เป็นค่าลับ — เก็บแบบเดียวกัน)
+> Phase 2 เราจะกด **Deploy a new function** → เขียนโค้ดใน editor → ตั้งของลับที่เมนู
+> **Secrets** (`LINE_CHANNEL_SECRET` / `LINE_CHANNEL_ACCESS_TOKEN` / `LIFF_ID`) —
+> ทั้งหมดทำในเว็บ ไม่ต้องใช้ CLI
 
 ## ขั้นที่ 5 — เช็คโควตาข้อความฟรีของ OA แล้วจดไว้
 
@@ -99,23 +93,30 @@ npx supabase@latest projects list
 ผู้ติดตาม 100 คน กด broadcast 1 ครั้ง = ใช้ 100 ข้อความ ส่วน**บอตตอบแชต (reply) ฟรี
 ไม่จำกัด ไม่เกี่ยวกับโควตานี้**
 
-| รายการ | ค่า (กรอกเมื่อทำจริง) |
+| รายการ | ค่า (บันทึก 2026-07-17) |
 |---|---|
-| ชื่อแพลนปัจจุบัน | _________ |
-| ข้อความฟรี/เดือน | _________ |
-| จำนวนผู้ติดตามปัจจุบัน | _________ |
-| → broadcast ได้ประมาณ (ฟรี ÷ ผู้ติดตาม) | _________ ครั้ง/เดือน |
+| ชื่อแพลนปัจจุบัน | **ฟรี (Free)** — กำลังใช้งาน |
+| ข้อความฟรี/เดือน | **300** (เพดานตายตัว — แพลนฟรีส่งเกินไม่ได้) |
+| จำนวนผู้ติดตามปัจจุบัน | **~0** (OA ใหม่ ยังไม่มีเพื่อน) |
+| → broadcast ได้ประมาณ (ฟรี ÷ ผู้ติดตาม) | ยังคำนวณไม่ได้ (ผู้ติดตาม 0) — คิดใหม่ตอน Phase 6 |
+
+> **หมายเหตุแพ็กเกจ (กันสับสน)**: LINE มี 2 แพ็กเกจ**แยกกัน** —
+> (1) **แพ็กเกจรายเดือน** (ฟรี 300 / เบสิค ฿1,280 = 15,000 / โปร ฿1,780 = 35,000 ข้อความ/เดือน)
+> = โควตา **broadcast/push**; (2) **OA แชทแพ็กเกจ** (ฟรี / ฿555) = ฟีเจอร์จัดการแชท
+> ของเจ้าหน้าที่ (แท็ก/โน้ต/ประวัติ). **บอตเราใช้แค่แพลนฟรีของทั้งคู่** — reply ผ่าน API
+> ฟรีไม่จำกัด; broadcast ค่อยพิจารณาอัปเกรดถ้าเพื่อนเยอะจนเกิน 300/เดือน
 
 ---
 
-## Checklist ปิด Phase 0
+## Checklist ปิด Phase 0 — ✅ เสร็จครบ (2026-07-17)
 
-- [ ] Messaging API เปิดแล้ว (เห็น channel ใน LINE Developers Console)
-- [ ] Channel secret อยู่ใน password manager
-- [ ] Channel access token (long-lived) อยู่ใน password manager
-- [ ] LINE Login channel สร้างแล้ว (ว่าง ๆ รอ LIFF)
-- [ ] `npx supabase@latest projects list` เห็น `bzwbagojjpiazbeaahmg`
-- [ ] ตารางโควตาด้านบนกรอกครบ
+- [x] Messaging API เปิดแล้ว (เห็น channel ใน LINE Developers Console)
+- [x] Channel secret อยู่ใน password manager
+- [x] Channel access token (long-lived) อยู่ใน password manager
+- [x] LINE Login channel สร้างแล้ว (ว่าง ๆ รอ LIFF)
+- [x] เปิดหน้า Edge Functions ใน Supabase dashboard ได้ (Via Editor + Secrets พร้อม)
+- [x] โควตาบันทึกแล้ว: ฟรี 300 ข้อความ/เดือน (เพดานตายตัว), ผู้ติดตาม ~0
 
-เสร็จแล้วแจ้งในแชตได้เลย → เริ่ม **Phase 1** (โค้ดกัน reload วนใน LINE + สร้าง LIFF app
-+ rich menu — จะมีคู่มือ `02-rich-menu-liff.md` ให้ตอนนั้น)
+**Phase 0 จบแล้ว** → ต่อ **Phase 1**: โค้ดกัน reload วนใน LINE (`isLineInApp` +
+downgrade force-update + ซ่อนปุ่ม install) + เทสต์ แล้วสร้าง LIFF app + rich menu
+(คู่มือ `02-rich-menu-liff.md` จะมาพร้อม Phase 1)

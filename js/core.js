@@ -1143,6 +1143,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.53.0',
+      date: '2026-07-17',
+      title: "เตรียมช่องทาง LINE 🟢",
+      items: [
+        "รองรับการเปิดแอปผ่าน LINE ได้ลื่นขึ้น (แก้ปัญหาหน้าจอโหลดซ้ำเมื่อเปิดในแอป LINE)",
+        "การใช้งานผ่านเบราว์เซอร์ปกติเหมือนเดิมทุกอย่าง"
+      ]
+    },
+    {
       v: '5.52.0',
       date: '2026-07-08',
       title: "แจ้งเตือนอัปเดต + บังคับใช้เวอร์ชันล่าสุด",
@@ -1409,7 +1418,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.52.0';
+  const VERSION = '5.53.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

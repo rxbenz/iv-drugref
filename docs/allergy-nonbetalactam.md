@@ -453,3 +453,60 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 
 > Encoded ใน `js/allergy-data.js` (group `heparin`), locked โดย 3 tests ใน
 > `test/allergy-data.test.js` (รวม 132 tests ผ่าน).
+
+---
+
+## กลุ่มที่เพิ่มใหม่ (multi-drug feature) — 🟡 DRAFT ต้อง verify ก่อน merge
+
+> ⚠️ **เนื้อหาคลินิก 2 กลุ่มด้านล่าง + Parecoxib เป็น "ร่าง" ที่ต้องให้เภสัชกร
+> ตรวจสอบกับ UpToDate / Lexicomp / primary source ก่อน merge เข้า `main`**
+> (โครงสร้าง + engine + test พร้อมแล้ว — ที่ต้อง sign-off คือ "classification"
+> ของแต่ละยา). Encoded ใน `js/allergy-data.js` (groups `tetracycline`,
+> `nitroimidazole`) + Parecoxib ใน group `nsaid`. Locked โดย tests ใน
+> `test/allergy-data.test.js` (`data: tetracycline …`, `data: nitroimidazole …`,
+> `data: Parecoxib …`, `multi EXAMPLE …`).
+
+### เพิ่ม Parecoxib เข้ากลุ่ม NSAID (safe / COX-2 selective)
+- **หลักการ**: parecoxib เป็น prodrug ของ valdecoxib, COX-2 selective สูง (มีรูปแบบ
+  ฉีด IV/IM) → ผู้ป่วย NSAID **cross-reactive** (NERD/NECD/NIUA, กลไก COX-1 เชิง
+  เภสัชวิทยา) ส่วนใหญ่ทนได้ เทียบเท่า celecoxib / etoricoxib ที่มีในกลุ่มอยู่แล้ว
+- **คำเตือน sulfonamide**: parecoxib/valdecoxib มีหมู่ sulfonamide → label ระบุ
+  ระวัง/เลี่ยงถ้าเคยแพ้ sulfonamide รุนแรง **แต่** non-antibiotic sulfonamide มักไม่
+  แพ้ข้ามเชิงภูมิ (Strom 2003) — จึงจัดสอดคล้อง celecoxib (ที่กลุ่ม sulfonamide จัด
+  เป็น safe อยู่แล้ว). ใส่ไว้ในช่อง `advice` ของ entry
+- **จุดที่ต้อง verify**: (1) parecoxib อยู่ใน "safe" ของ NSAID cross-reactive
+  เหมาะสมไหม (2) ควรใส่ parecoxib ในกลุ่ม sulfonamide ด้วยหรือไม่ (mirror celecoxib
+  = safe / หรือ caution)
+- **อ้างอิงที่ใช้ (กลุ่ม NSAID เดิม)**: Kowalski 2013 · Doña 2020 · nsaidReview2026
+
+### กลุ่ม Tetracyclines — 🟡 DRAFT
+- **allergens**: Doxycycline, Minocycline, Tetracycline, Tigecycline
+- **โมเดล**: `crossClassCaution: true` + `keepSafeOnScar: true` (แนวเดียวกับ
+  fluoroquinolone) — หลักฐานแพ้ข้าม **ภายในกลุ่มจำกัด/ไม่ชัดเจน** → tetracycline
+  ตัวอื่น = ⚠️ caution (non-SCAR), ยกระดับเป็น 🚫 avoid เมื่อ SCAR; ยานอกกลุ่ม = safe
+- **หมายเหตุเฉพาะตัว**: **Minocycline** สัมพันธ์กับ DRESS และ drug-induced lupus
+  (คนละกลไก) — ใส่ callout เตือน
+- **safe (ทางเลือก)**: beta-lactam (ถ้าไม่แพ้) · macrolide · clindamycin · TMP-SMX
+- **จุดที่ต้อง verify**: อัตรา/ความมีอยู่จริงของแพ้ข้ามภายในกลุ่ม tetracycline,
+  ความเหมาะสมของ "caution vs avoid", ทางเลือก safe ตามบริบทการติดเชื้อ
+- **อ้างอิงที่ใช้ (ชั่วคราว)**: khan2022 (practice parameter, non-beta-lactam
+  antibiotic allergy — หลักการทั่วไป) → **ต้องหา primary source เฉพาะกลุ่มมาเสริม**
+
+### กลุ่ม Nitroimidazoles — 🟡 DRAFT
+- **allergens**: Metronidazole, Tinidazole, Secnidazole, Ornidazole
+- **โมเดล**: NBL group ปกติ (default cross = 🚫 avoid) + `keepSafeOnScar: true` —
+  metronidazole ↔ tinidazole (และตัวอื่น) มีหมู่ **5-nitroimidazole** ร่วมกัน และ
+  มี **รายงานแพ้ข้าม** → เลี่ยงทั้งกลุ่ม; ยานอกกลุ่ม = safe
+- **safe (ทางเลือกคุม anaerobe)**: clindamycin · amoxicillin-clavulanate /
+  piperacillin-tazobactam (ถ้าไม่แพ้ beta-lactam) · vancomycin PO (เฉพาะ CDI)
+- **จุดที่ต้อง verify**: ความหนักแน่นของหลักฐานแพ้ข้าม metronidazole↔tinidazole,
+  รายการทางเลือก safe ตามชนิดการติดเชื้อ (intra-abdominal / CDI / protozoa)
+- **อ้างอิงที่ใช้ (ชั่วคราว)**: khan2022 → **ต้องหา primary source (case series
+  แพ้ข้าม nitroimidazole) มาเสริม**
+
+### หมายเหตุ: ฟีเจอร์ "แพ้ยาหลายชนิด" (multi-drug)
+หน้า allergy รองรับการเลือกยาที่แพ้ได้หลายตัว (แต่ละตัวตั้ง severity/phenotype/nature
+แยกกัน) แล้วรวมผลแบบ **worst-wins** ต่อยาเป้าหมาย + ตอบคำถาม "ใช้ยา X ได้ไหม"
+(candidate). Engine อยู่ที่ `AllergyData.buildMultiReport()` — เป็นชั้นรวมผลล้วน
+(ไม่เพิ่ม clinical logic ใหม่ นอกจากกฎ "แพ้เอง = เลี่ยงเสมอ" และ "ยาที่ปลอดภัยกับทุก
+ตัวที่แพ้เท่านั้นจึงจะขึ้น safe"). Locked โดย `multi …` / `multi EXAMPLE …` tests.

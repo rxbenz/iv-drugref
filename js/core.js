@@ -778,21 +778,35 @@ var IVDrugRef = (function() {
    */
   function sendAnalytics(data) {
     if (!hasAnalyticsConsent()) return;
-    const now = Date.now();
-    if (now - _reqWindowStart > 60000) { _reqCount = 0; _reqWindowStart = now; }
-    if (_reqCount >= 20) return;
-    _reqCount++;
     var enriched = {
       ...data,
       session_id: getSessionId(),
       user_id: getUserId()
     };
-    // Offline: queue to IndexedDB for later flush
+    // Offline: queue to IndexedDB for later flush. Do this BEFORE the rate
+    // counter so offline events don't consume the online send budget.
     if (!navigator.onLine) {
       enriched.queued_at = new Date().toISOString();
       queueAnalyticsEvent(enriched);
       return;
     }
+    // Online rate limit: 60/min rolling (was 20 — a pharmacist doing rapid
+    // lookups is exactly the power user we most want to measure, and 20
+    // truncated their busiest bursts). Over the cap → queue for the next flush
+    // instead of dropping outright.
+    const now = Date.now();
+    if (now - _reqWindowStart > 60000) {
+      _reqCount = 0; _reqWindowStart = now;
+      // Drain any overflow queued during the previous minute (also covers the
+      // online-overflow path below, which otherwise only flushed on reconnect).
+      try { flushAnalyticsQueue(); } catch (e) {}
+    }
+    if (_reqCount >= 60) {
+      enriched.queued_at = new Date().toISOString();
+      queueAnalyticsEvent(enriched);
+      return;
+    }
+    _reqCount++;
     // Primary sink: Supabase (Phase 1). Dual-write to GAS keeps the legacy
     // dashboard working until it migrates (Phase 1 step 5).
     sendToSupabase(enriched);
@@ -1117,6 +1131,17 @@ var IVDrugRef = (function() {
   // right after the `const RELEASE_NOTES = [` line, so keep that line intact.
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
+    {
+      v: '5.65.0',
+      date: '2026-07-24',
+      title: "ความปลอดภัย + การเข้าถึง (a11y) + ความแม่นยำข้อมูล",
+      items: [
+        "🔒 อุดช่องโหว่ XSS ในหน้า dashboard (comment/ชื่อยาที่ผู้ใช้ส่งเข้ามาถูก escape ก่อนแสดง) และย้าย GitHub token ของแอดมินไป sessionStorage (ปลอดภัยขึ้น)",
+        "⌨️ รองรับคีย์บอร์ด/screen reader ดีขึ้น: modal ดักโฟกัส (Tab วนในกล่อง แล้วคืนโฟกัสเดิม) + ผูก label กับช่องกรอกในหน้า TDM/Vanco",
+        "✅ แผงแอดมิน: ตรวจข้อมูลก่อนบันทึกลง Supabase (ผล compat ต้องถูกต้อง, renal ต้องมีขนาดยา + ช่วง GFR ที่ถูกต้อง) และเตือนจำนวนรายการที่จะถูกเขียนทับตอน import",
+        "📊 Analytics แม่นยำขึ้น: เพิ่มลิมิต 20→60 ครั้ง/นาที (ไม่ตกหล่นตอนใช้ถี่) และ cross-filter ไม่นับข้ามชุดข้อมูลที่ไม่มีมิตินั้น"
+      ]
+    },
     {
       v: '5.64.0',
       date: '2026-07-24',
@@ -1500,7 +1525,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.64.0';
+  const VERSION = '5.65.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -1622,12 +1647,56 @@ var IVDrugRef = (function() {
   }
 
   // ============================================================
+  // trapFocus — accessible modal focus management
+  // Marks `el` as a dialog, moves focus in, traps Tab, and returns a release()
+  // that restores focus to whatever was focused before it opened. Call on modal
+  // open; call the returned fn on close. Safe no-op if el is missing.
+  // ============================================================
+  function trapFocus(el, opts) {
+    if (!el) return function(){};
+    opts = opts || {};
+    var prevFocus = document.activeElement;
+    el.setAttribute('role', el.getAttribute('role') || 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    var SEL = 'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    function focusables(){
+      return Array.prototype.filter.call(el.querySelectorAll(SEL), function(n){
+        return n.offsetParent !== null || n === document.activeElement; // visible only
+      });
+    }
+    // Move focus into the dialog (first focusable, else the container itself).
+    var f = focusables();
+    if (f.length) { try { f[0].focus(); } catch(e){} }
+    else { el.setAttribute('tabindex', '-1'); try { el.focus(); } catch(e){} }
+    function onKey(e){
+      if (e.key !== 'Tab') return;
+      var list = focusables();
+      if (!list.length) { e.preventDefault(); return; }
+      var first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+    el.addEventListener('keydown', onKey);
+    return function release(){
+      el.removeEventListener('keydown', onKey);
+      // Restore focus to the trigger (unless the caller opted out or it's gone).
+      if (!opts.noRestore && prevFocus && typeof prevFocus.focus === 'function' &&
+          document.contains(prevFocus)) {
+        try { prevFocus.focus(); } catch(e){}
+      }
+    };
+  }
+
+  // ============================================================
   // PUBLIC API
   // ============================================================
   return {
     // Version info
     VERSION,
     APP_NAME,
+
+    // a11y
+    trapFocus,
 
     // Validation
     VALIDATION_RULES,

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.64.0
+// IV Drug Reference PWA — Service Worker v5.65.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -484,9 +484,10 @@
 // v5.62.0: ปรับปรุงความแม่นยำเครื่องคำนวณ Vanco TDM
 // v5.63.0: ปรับความแม่นยำคำเตือนความปลอดภัยคลินิก
 // v5.64.0: แก้ระบบอัปเดตอัตโนมัติ + ความเสถียร
+// v5.65.0: ความปลอดภัย + การเข้าถึง (a11y) + ความแม่นยำข้อมูล
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.64.0';
+const CACHE_NAME = 'iv-drugref-v5.65.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

@@ -63,18 +63,18 @@
   <div class="card-head">👤 PATIENT INFORMATION</div>
   <div class="card-body">
     <div class="row row-4" style="margin-bottom:10px">
-      <div class="field"><label>Weight (kg)</label><input type="number" id="ptWt" value="70" min="20" max="300" step="0.1"></div>
-      <div class="field"><label>Age (yr)</label><input type="number" id="ptAge" value="55" min="1" max="120"></div>
-      <div class="field"><label>Sex</label><select id="ptSex"><option value="M">Male</option><option value="F">Female</option></select></div>
-      <div class="field"><label>SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div>
+      <div class="field"><label for="ptWt">Weight (kg)</label><input type="number" id="ptWt" value="70" min="20" max="300" step="0.1"></div>
+      <div class="field"><label for="ptAge">Age (yr)</label><input type="number" id="ptAge" value="55" min="1" max="120"></div>
+      <div class="field"><label for="ptSex">Sex</label><select id="ptSex"><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="field"><label for="ptScr">SCr (mg/dL)</label><input type="number" id="ptScr" value="1.0" min="0.1" max="20" step="0.1"></div>
     </div>
     <div id="validationMessages" class="validation-container" style="display:none;"></div>
     <div id="tdmGuardBanner" style="display:none;"></div>
     <div class="row row-4">
-      <div class="field"><label>Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div>
-      <div class="field"><label>Albumin (g/dL)</label><input type="number" id="ptAlb" value="4.0" min="0.5" max="6" step="0.1"></div>
-      <div class="field"><label>CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly></div>
-      <div class="field"><label>Dialysis</label><select id="ptDialysis"><option value="none">None</option><option value="HD">HD</option><option value="CRRT">CRRT</option></select></div>
+      <div class="field"><label for="ptHt">Height (cm)</label><input type="number" id="ptHt" value="170" min="100" max="250"></div>
+      <div class="field"><label for="ptAlb">Albumin (g/dL)</label><input type="number" id="ptAlb" value="4.0" min="0.5" max="6" step="0.1"></div>
+      <div class="field"><label for="ptCrCl">CrCl (mL/min)</label><input type="text" id="ptCrCl" readonly></div>
+      <div class="field"><label for="ptDialysis">Dialysis</label><select id="ptDialysis"><option value="none">None</option><option value="HD">HD</option><option value="CRRT">CRRT</option></select></div>
     </div>
     <div class="row" style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ptICU"> ICU / Critically ill</label>
@@ -93,9 +93,9 @@
 
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Total Phenytoin (mcg/mL)</label><input type="number" id="phenyLevel" value="12" min="0.1" max="60" step="0.1"></div>
-      <div class="field"><label>Free Phenytoin (mcg/mL)</label><input type="number" id="phenyFree" value="" placeholder="ถ้ามี" min="0" max="10" step="0.1"></div>
-      <div class="field"><label>Current Dose (mg/day)</label><input type="number" id="phenyDose" value="300" min="50" max="800" step="25"></div>
+      <div class="field"><label for="phenyLevel">Total Phenytoin (mcg/mL)</label><input type="number" id="phenyLevel" value="12" min="0.1" max="60" step="0.1"></div>
+      <div class="field"><label for="phenyFree">Free Phenytoin (mcg/mL)</label><input type="number" id="phenyFree" value="" placeholder="ถ้ามี" min="0" max="10" step="0.1"></div>
+      <div class="field"><label for="phenyDose">Current Dose (mg/day)</label><input type="number" id="phenyDose" value="300" min="50" max="800" step="25"></div>
     </div>
     <div class="info-box blue" style="font-size:11px;margin-top:10px">
       <strong>📍 Sampling Guide:</strong><br>
@@ -122,7 +122,7 @@
     </div></div>
 
     <div class="card"><div class="card-head">🎯 DOSE PREDICTION</div><div class="card-body">
-      <div class="slider-row"><label>Target Css (mcg/mL)</label><input type="range" id="phenyTargetCss" min="5" max="25" step="0.5" value="15"><span class="slider-val" id="phenyTargetVal">15 mcg/mL</span></div>
+      <div class="slider-row"><label for="phenyTargetCss">Target Css (mcg/mL)</label><input type="range" id="phenyTargetCss" min="5" max="25" step="0.5" value="15"><span class="slider-val" id="phenyTargetVal">15 mcg/mL</span></div>
       <div id="phenyDosePredict"></div>
       <div id="phenyDoseTable"></div>
     </div></div>
@@ -141,27 +141,27 @@
 
   <div class="card"><div class="card-head">💉 DRUG SELECTION</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Drug</label><select id="agDrug" data-action="agUpdateUI">
+      <div class="field"><label for="agDrug">Drug</label><select id="agDrug" data-action="agUpdateUI">
         <option value="amikacin">Amikacin</option>
         <option value="gentamicin">Gentamicin</option>
       </select></div>
-      <div class="field"><label>Dosing Strategy</label><select id="agStrategy" data-action="agUpdateUI">
+      <div class="field"><label for="agStrategy">Dosing Strategy</label><select id="agStrategy" data-action="agUpdateUI">
         <option value="extended">Extended-interval (ODA)</option>
         <option value="conventional">Conventional (MDD)</option>
       </select></div>
-      <div class="field"><label>Current Dose (mg)</label><input type="number" id="agDose" value="1050" min="50" max="3000" step="50"></div>
+      <div class="field"><label for="agDose">Current Dose (mg)</label><input type="number" id="agDose" value="1050" min="50" max="3000" step="50"></div>
     </div>
   </div></div>
 
   <div class="card"><div class="card-head">🩸 MEASURED LEVELS</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Peak (mcg/mL)</label><input type="number" id="agPeak" value="" placeholder="30 min post-infusion" min="0" max="100" step="0.1"></div>
-      <div class="field"><label>Trough (mcg/mL)</label><input type="number" id="agTrough" value="" placeholder="30 min pre-dose" min="0" max="50" step="0.1"></div>
-      <div class="field"><label>Random Level (mcg/mL)</label><input type="number" id="agRandom" value="" placeholder="Hartford nomogram" min="0" max="100" step="0.1"></div>
+      <div class="field"><label for="agPeak">Peak (mcg/mL)</label><input type="number" id="agPeak" value="" placeholder="30 min post-infusion" min="0" max="100" step="0.1"></div>
+      <div class="field"><label for="agTrough">Trough (mcg/mL)</label><input type="number" id="agTrough" value="" placeholder="30 min pre-dose" min="0" max="50" step="0.1"></div>
+      <div class="field"><label for="agRandom">Random Level (mcg/mL)</label><input type="number" id="agRandom" value="" placeholder="Hartford nomogram" min="0" max="100" step="0.1"></div>
     </div>
     <div class="row row-2" style="margin-top:10px">
-      <div class="field"><label>Time of Random Level (hr post-dose)</label><input type="number" id="agRandomTime" value="8" min="1" max="24" step="0.5"></div>
-      <div class="field"><label>Infusion Duration (hr)</label><input type="number" id="agInfusion" value="0.5" min="0.25" max="2" step="0.25"></div>
+      <div class="field"><label for="agRandomTime">Time of Random Level (hr post-dose)</label><input type="number" id="agRandomTime" value="8" min="1" max="24" step="0.5"></div>
+      <div class="field"><label for="agInfusion">Infusion Duration (hr)</label><input type="number" id="agInfusion" value="0.5" min="0.25" max="2" step="0.25"></div>
     </div>
     <div class="info-box blue" style="font-size:11px;margin-top:10px">
       <strong>📍 Sampling Guide:</strong><br>
@@ -195,13 +195,13 @@
 
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Total VPA (mcg/mL)</label><input type="number" id="vpaLevel" value="70" min="1" max="250" step="1"></div>
-      <div class="field"><label>Free VPA (mcg/mL)</label><input type="number" id="vpaFree" value="" placeholder="ถ้ามี" min="0" max="50" step="0.1"></div>
-      <div class="field"><label>Current Dose (mg/day)</label><input type="number" id="vpaDose" value="1000" min="100" max="4000" step="100"></div>
+      <div class="field"><label for="vpaLevel">Total VPA (mcg/mL)</label><input type="number" id="vpaLevel" value="70" min="1" max="250" step="1"></div>
+      <div class="field"><label for="vpaFree">Free VPA (mcg/mL)</label><input type="number" id="vpaFree" value="" placeholder="ถ้ามี" min="0" max="50" step="0.1"></div>
+      <div class="field"><label for="vpaDose">Current Dose (mg/day)</label><input type="number" id="vpaDose" value="1000" min="100" max="4000" step="100"></div>
     </div>
     <div class="row row-2" style="margin-top:10px">
-      <div class="field"><label>Formulation</label><select id="vpaForm"><option value="DR">Delayed-release (Depakote)</option><option value="ER">Extended-release (Depakote ER)</option><option value="syrup">Syrup/Solution</option><option value="IV">IV</option></select></div>
-      <div class="field"><label>Indication</label><select id="vpaIndication"><option value="epilepsy">Epilepsy</option><option value="SE">Status Epilepticus</option><option value="bipolar">Bipolar</option><option value="migraine">Migraine prophylaxis</option></select></div>
+      <div class="field"><label for="vpaForm">Formulation</label><select id="vpaForm"><option value="DR">Delayed-release (Depakote)</option><option value="ER">Extended-release (Depakote ER)</option><option value="syrup">Syrup/Solution</option><option value="IV">IV</option></select></div>
+      <div class="field"><label for="vpaIndication">Indication</label><select id="vpaIndication"><option value="epilepsy">Epilepsy</option><option value="SE">Status Epilepticus</option><option value="bipolar">Bipolar</option><option value="migraine">Migraine prophylaxis</option></select></div>
     </div>
     <div class="info-box blue" style="font-size:11px;margin-top:10px">
       <strong>📍 Sampling Guide:</strong><br>
@@ -219,7 +219,7 @@
     <div class="card"><div class="card-head">📊 FREE LEVEL CORRECTION</div><div class="card-body"><div id="vpaFreeCorrection"></div></div></div>
     <div class="card"><div class="card-head">📐 LEVEL INTERPRETATION</div><div class="card-body"><div id="vpaInterpretation"></div></div></div>
     <div class="card"><div class="card-head">🎯 DOSE ADJUSTMENT</div><div class="card-body">
-      <div class="slider-row"><label>Target (mcg/mL)</label><input type="range" id="vpaTarget" min="30" max="120" step="5" value="75"><span class="slider-val" id="vpaTargetVal">75 mcg/mL</span></div>
+      <div class="slider-row"><label for="vpaTarget">Target (mcg/mL)</label><input type="range" id="vpaTarget" min="30" max="120" step="5" value="75"><span class="slider-val" id="vpaTargetVal">75 mcg/mL</span></div>
       <div id="vpaDoseRec"></div>
     </div></div>
     <div class="card"><div class="card-head">⚠ DRUG INTERACTIONS</div><div class="card-body"><div id="vpaInteractions"></div></div></div>
@@ -232,13 +232,13 @@
 <div class="drug-section" id="sec_tacrolimus" role="tabpanel" aria-labelledby="tab_tacrolimus">
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Trough Level (ng/mL)</label>
+      <div class="field"><label for="tacroLevel">Trough Level (ng/mL)</label>
         <input type="number" id="tacroLevel" value="" placeholder="C0 trough" min="0.1" max="60" step="0.1">
       </div>
-      <div class="field"><label>Dose (mg BID)</label>
+      <div class="field"><label for="tacroDose">Dose (mg BID)</label>
         <input type="number" id="tacroDose" value="2" min="0.25" max="20" step="0.25">
       </div>
-      <div class="field"><label>Transplant Type</label>
+      <div class="field"><label for="tacroTxType">Transplant Type</label>
         <select id="tacroTxType">
           <option value="kidney">Kidney</option>
           <option value="liver">Liver</option>
@@ -249,13 +249,13 @@
       </div>
     </div>
     <div class="row row-3" style="margin-top:10px">
-      <div class="field"><label>Post-Tx Day</label>
+      <div class="field"><label for="tacroPostTxDay">Post-Tx Day</label>
         <input type="number" id="tacroPostTxDay" value="30" min="1" max="3650" step="1">
       </div>
-      <div class="field"><label>Hematocrit (%)</label>
+      <div class="field"><label for="tacroHct">Hematocrit (%)</label>
         <input type="number" id="tacroHct" value="33" min="15" max="60" step="1">
       </div>
-      <div class="field"><label>CYP3A5 Genotype</label>
+      <div class="field"><label for="tacroCYP3A5">CYP3A5 Genotype</label>
         <select id="tacroCYP3A5">
           <option value="unknown">Unknown</option>
           <option value="expressor">*1/*1 or *1/*3 (Expressor)</option>
@@ -288,7 +288,7 @@
     </div>
     <div class="card"><div class="card-head">🎯 DOSE OPTIMIZATION</div>
       <div class="card-body">
-        <div class="slider-row"><label>Target Trough (ng/mL)</label>
+        <div class="slider-row"><label for="tacroTargetTrough">Target Trough (ng/mL)</label>
           <input type="range" id="tacroTargetTrough" min="3" max="20" step="0.5" value="8">
           <span class="slider-val" id="tacroTargetVal">8 ng/mL</span>
         </div>
@@ -311,18 +311,18 @@
 <div class="drug-section" id="sec_digoxin" role="tabpanel" aria-labelledby="tab_digoxin">
   <div class="card"><div class="card-head">🩸 MEASURED LEVEL</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Serum Digoxin (ng/mL)</label>
+      <div class="field"><label for="digLevel">Serum Digoxin (ng/mL)</label>
         <input type="number" id="digLevel" value="" placeholder="SDC" min="0.1" max="10" step="0.1">
       </div>
-      <div class="field"><label>Time Since Last Dose (hr)</label>
+      <div class="field"><label for="digTimeSinceLastDose">Time Since Last Dose (hr)</label>
         <input type="number" id="digTimeSinceLastDose" value="12" min="0" max="48" step="0.5">
       </div>
-      <div class="field"><label>Daily Dose (mcg)</label>
+      <div class="field"><label for="digDose">Daily Dose (mcg)</label>
         <input type="number" id="digDose" value="125" min="31.25" max="500" step="31.25">
       </div>
     </div>
     <div class="row row-3" style="margin-top:10px">
-      <div class="field"><label>Formulation</label>
+      <div class="field"><label for="digFormulation">Formulation</label>
         <select id="digFormulation">
           <option value="tablet">Tablet (F=0.7)</option>
           <option value="elixir">Elixir (F=0.8)</option>
@@ -330,13 +330,13 @@
           <option value="iv">IV (F=1.0)</option>
         </select>
       </div>
-      <div class="field"><label>Indication</label>
+      <div class="field"><label for="digIndication">Indication</label>
         <select id="digIndication">
           <option value="hf">Heart Failure (0.5-0.9)</option>
           <option value="af">AF Rate Control (0.8-2.0)</option>
         </select>
       </div>
-      <div class="field"><label>Concurrent Drugs</label>
+      <div class="field"><label for="digInteraction">Concurrent Drugs</label>
         <select id="digInteraction">
           <option value="none">None</option>
           <option value="amiodarone">Amiodarone (↓50% dose)</option>
@@ -384,13 +384,13 @@
 <div class="drug-section" id="sec_warfarin" role="tabpanel" aria-labelledby="tab_warfarin">
   <div class="card"><div class="card-head">🩸 INR-BASED DOSE ADJUSTMENT</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>Current INR</label>
+      <div class="field"><label for="warINR">Current INR</label>
         <input type="number" id="warINR" value="" placeholder="INR" min="0.5" max="15" step="0.1">
       </div>
-      <div class="field"><label>Current Weekly Dose (mg)</label>
+      <div class="field"><label for="warWeeklyDose">Current Weekly Dose (mg)</label>
         <input type="number" id="warWeeklyDose" value="35" min="1" max="150" step="0.5">
       </div>
-      <div class="field"><label>Indication</label>
+      <div class="field"><label for="warIndication">Indication</label>
         <select id="warIndication">
           <option value="standard">AF/DVT/PE (INR 2.0-3.0)</option>
           <option value="valve">Mechanical Valve (INR 2.5-3.5)</option>
@@ -413,7 +413,7 @@
 
   <div class="card" style="margin-top:16px"><div class="card-head">🧬 PHARMACOGENOMICS-GUIDED DOSING (IWPC)</div><div class="card-body">
     <div class="row row-3">
-      <div class="field"><label>CYP2C9 Genotype</label>
+      <div class="field"><label for="warCYP2C9">CYP2C9 Genotype</label>
         <select id="warCYP2C9">
           <option value="*1/*1">*1/*1 (Normal)</option>
           <option value="*1/*2">*1/*2 (IM)</option>
@@ -423,14 +423,14 @@
           <option value="*3/*3">*3/*3 (PM)</option>
         </select>
       </div>
-      <div class="field"><label>VKORC1 -1639 G>A</label>
+      <div class="field"><label for="warVKORC1">VKORC1 -1639 G>A</label>
         <select id="warVKORC1">
           <option value="GG">G/G (Normal dose)</option>
           <option value="AG">A/G (Lower dose)</option>
           <option value="AA">A/A (Lowest dose)</option>
         </select>
       </div>
-      <div class="field"><label>Race</label>
+      <div class="field"><label for="warRace">Race</label>
         <select id="warRace">
           <option value="asian">Asian</option>
           <option value="black">Black</option>
@@ -439,10 +439,10 @@
       </div>
     </div>
     <div class="row row-3" style="margin-top:10px">
-      <div class="field"><label>Concurrent Amiodarone</label>
+      <div class="field"><label for="warAmiodarone">Concurrent Amiodarone</label>
         <select id="warAmiodarone"><option value="0">No</option><option value="1">Yes</option></select>
       </div>
-      <div class="field"><label>Enzyme Inducer (Rifampin, CBZ)</label>
+      <div class="field"><label for="warEnzyme">Enzyme Inducer (Rifampin, CBZ)</label>
         <select id="warEnzyme"><option value="0">No</option><option value="1">Yes</option></select>
       </div>
     </div>

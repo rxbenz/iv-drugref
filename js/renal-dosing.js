@@ -1146,12 +1146,18 @@
     document.body.classList.add('recom-modal-open');
     var sheet = sec.querySelector('.recom-sheet');
     if (sheet) sheet.scrollTop = 0;
+    // a11y: trap focus in the dialog + restore it to the drug row on close.
+    if (window.IVDrugRef && IVDrugRef.trapFocus) {
+      _recomRelease = IVDrugRef.trapFocus(sheet || sec);
+    }
   }
 
+  var _recomRelease = null;
   function closeDrugRecom() {
     selectedDrug = null;
     document.getElementById('recomSection').classList.remove('visible');
     document.body.classList.remove('recom-modal-open');
+    if (_recomRelease) { _recomRelease(); _recomRelease = null; }
     renderDrugList(document.getElementById('drugSearch').value.toLowerCase().trim());
   }
 

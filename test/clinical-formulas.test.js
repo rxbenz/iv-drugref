@@ -267,21 +267,25 @@ test('engine — exposes the 5 PK functions', () => {
     assert.equal(typeof engine[fn], 'function', fn + ' present');
 });
 
-test('engine calcAUC_ss — reproduces CLAUDE.md golden AUC24 (1000mg q12h)', () => {
-  // AUC24 = calcAUC_ss(tau) × (24/tau); golden values documented in CLAUDE.md.
+test('engine calcAUC_ss — AUC24 = exact daily_dose/CL (1000mg q12h)', () => {
+  // AUC24 = calcAUC_ss(tau) × (24/tau) = daily_dose/CL EXACTLY (SS mass balance,
+  // compartment-independent). These are the corrected exact values; the old
+  // numeric integrator under-reported by 3-12% (Buelga 324/Goti 535/Llopis 561).
   const auc24 = (id) => engine.calcAUC_ss(models[id].clFn(ENG_REF), models[id].vdFn(ENG_REF), 1000, 12, 1) * 2;
-  near(auc24('buelga'), 324, 1.0, 'Buelga AUC24');
-  near(auc24('goti'),   535, 1.0, 'Goti AUC24');
-  near(auc24('llopis'), 561, 1.0, 'Llopis AUC24');
+  near(auc24('buelga'), 334.2, 0.5, 'Buelga AUC24');
+  near(auc24('goti'),   548.0, 0.5, 'Goti AUC24');
+  near(auc24('llopis'), 572.4, 0.5, 'Llopis AUC24');
 });
 
-test('engine calcAUC_ss — numeric AUC tracks exact daily_dose/CL (within ~4%)', () => {
-  // At steady state AUC24 = daily_dose/CL exactly; the numeric integrator sits
-  // slightly under due to carry-term clamping. Guards the integration math.
-  const cl = models.goti.clFn(ENG_REF);
-  const auc24 = engine.calcAUC_ss(cl, models.goti.vdFn(ENG_REF), 1000, 12, 1) * 2;
+test('engine calcAUC_ss — AUC24 is INFUSION-INDEPENDENT (exact dose/CL) ⭐', () => {
+  // Regression lock for the fixed carry-term bug: the AUC must not change with
+  // infusion duration (the old integrator lost 3% @1h → 12% @4h).
+  const cl = models.goti.clFn(ENG_REF), vd = models.goti.vdFn(ENG_REF);
   const exact = 2000 / cl;
-  assert.ok(auc24 <= exact && auc24 > exact * 0.96, `numeric ${auc24.toFixed(1)} just under exact ${exact.toFixed(1)}`);
+  for (const inf of [0.5, 1, 2, 3, 4]) {
+    const auc24 = engine.calcAUC_ss(cl, vd, 1000, 12, inf) * 2;
+    near(auc24, exact, 1e-9, `AUC24 @${inf}h infusion == exact ${exact.toFixed(2)}`);
+  }
 });
 
 test('engine ssPeakTrough — golden peak/trough, peak>trough, trough>0', () => {
@@ -304,6 +308,16 @@ test('engine bayesianMAP — a higher-than-predicted trough lowers estimated CL'
   const high = engine.bayesianMAP(ENG_REF, ENG_DOSES, [{ time: 54, value: popPred * 1.5 }], models.goti);
   assert.equal(high.method, 'Bayesian MAP');
   assert.ok(high.cl < high.popCL, `higher level → CL ${high.cl.toFixed(2)} < pop ${high.popCL.toFixed(2)}`);
+});
+
+test('engine bayesianMAP — variance (ω²/σ²) weighting locks the shrinkage magnitude ⭐', () => {
+  // Regression lock for the ω-vs-ω² fix: the MAP must divide the log-prior by
+  // ω² and the residual by σ² (not ω/σ). With a 50%-elevated trough the fixed
+  // engine shrinks CL to ~0.67·popCL; the old (÷ω) code stayed at ~0.74·pop
+  // (weaker individualization — data under-weighted). Regresses if divisors revert.
+  const popPred = engine.predictConc(54, models.goti.clFn(ENG_REF), models.goti.vdFn(ENG_REF), ENG_DOSES);
+  const high = engine.bayesianMAP(ENG_REF, ENG_DOSES, [{ time: 54, value: popPred * 1.5 }], models.goti);
+  near(high.cl / high.popCL, 0.671, 0.02, 'MAP shrinkage cl/popCL (variance-weighted)');
 });
 
 test('engine runMCMC — produces samples and reports progress (smoke)', async () => {

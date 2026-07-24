@@ -1115,6 +1115,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.60.0',
+      date: '2026-07-24',
+      title: "เพิ่มกลุ่มแพ้ยา PPI + Sulfonylurea",
+      items: [
+        "PPI: แบ่ง 2 กลุ่มโครงสร้าง — omeprazole/esomeprazole/pantoprazole (benzimidazole) แพ้ข้ามกันสูง, lansoprazole/rabeprazole (pyridine) แยกกลุ่ม — ต่างกลุ่มยืนยันด้วย skin test/DPT ก่อนใช้, H2RA (famotidine) เป็นทางเลือกปลอดภัย",
+        "Sulfonylurea: SU เป็น non-antibiotic sulfonamide → แพ้ข้ามกับ sulfa antibiotic ต่ำ; SU ตัวอื่นให้ระวัง; ยาเบาหวานนอกกลุ่ม SU (metformin/DPP-4i/SGLT2i/insulin) ใช้ได้ปลอดภัย"
+      ]
+    },
+    {
       v: '5.59.0',
       date: '2026-07-24',
       title: "เพิ่มกลุ่มแพ้ยา Aminoglycoside + Macrolide",
@@ -1446,7 +1455,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.59.0';
+  const VERSION = '5.60.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

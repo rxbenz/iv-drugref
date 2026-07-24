@@ -819,6 +819,62 @@ test('data: verified refs on aminoglycoside + macrolide groups', () => {
   [...agRefs, ...macRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
 });
 
+// ─────────────── new groups: PPI + sulfonylurea ───────────────────────────
+test('data: PPI — same structural cluster avoid, different cluster caution, H2RA safe', () => {
+  const r = A.buildReport('omeprazole', 'ige');
+  assert.ok(r && r.isNbl, 'omeprazole resolves to an NBL group');
+  // benzimidazole cluster (esomeprazole/pantoprazole) → avoid
+  assert.ok(r.avoid.some((x) => /Esomeprazole/.test(x.drug.generic)), 'esomeprazole avoid (same benzimidazole cluster)');
+  assert.ok(r.avoid.some((x) => /Pantoprazole/.test(x.drug.generic)), 'pantoprazole avoid (same benzimidazole cluster)');
+  // pyridine cluster (lansoprazole/rabeprazole) → caution
+  assert.ok(r.caution.some((x) => /Lansoprazole/.test(x.drug.generic)), 'lansoprazole caution (different pyridine cluster)');
+  assert.ok(r.caution.some((x) => /Rabeprazole/.test(x.drug.generic)), 'rabeprazole caution (different pyridine cluster)');
+  // H2RA safe alternative
+  assert.ok(r.safer.some((x) => /Famotidine/.test(x.drug.generic)), 'famotidine safer (H2RA, different class)');
+  // the reverse: lansoprazole culprit → rabeprazole avoid, omeprazole caution (clusters swap)
+  const l = A.buildReport('lansoprazole', 'ige');
+  assert.ok(l.avoid.some((x) => /Rabeprazole/.test(x.drug.generic)), 'rabeprazole avoid when lansoprazole is culprit (same pyridine cluster)');
+  assert.ok(l.caution.some((x) => /Omeprazole/.test(x.drug.generic)), 'omeprazole caution when lansoprazole is culprit (different cluster)');
+});
+
+test('data: PPI — SCAR escalates every PPI to avoid, H2RA stays safe (keepSafeOnScar)', () => {
+  const s = A.buildReport('omeprazole', 'scar');
+  assert.ok(s.avoid.some((x) => /Lansoprazole/.test(x.drug.generic)), 'SCAR: different-cluster PPI escalates to avoid');
+  assert.ok(s.avoid.some((x) => /Pantoprazole/.test(x.drug.generic)), 'SCAR: same-cluster PPI stays avoid');
+  assert.ok(s.safer.some((x) => /Famotidine/.test(x.drug.generic)), 'SCAR: famotidine still safe (keepSafeOnScar)');
+});
+
+test('data: sulfonylurea — other SUs caution (non-SCAR) → avoid at SCAR; metformin always safe', () => {
+  const r = A.buildReport('glibenclamide', 'ige');
+  assert.ok(r && r.isNbl, 'glibenclamide resolves to an NBL group');
+  assert.ok(r.caution.some((x) => /Glipizide|Glimepiride/.test(x.drug.generic)), 'other sulfonylureas caution (non-SCAR)');
+  assert.ok(r.safer.some((x) => /Metformin/.test(x.drug.generic)), 'metformin safer (non-SU antidiabetic)');
+  // sulfa antibiotic is safe with a low-cross note (Strom/Johnson), not avoided
+  assert.ok(r.safer.some((x) => /Cotrimoxazole/.test(x.drug.generic)), 'sulfa antibiotic safer (non-arylamine, low cross)');
+  const s = A.buildReport('glibenclamide', 'scar');
+  assert.ok(s.avoid.some((x) => /Glipizide/.test(x.drug.generic)), 'SCAR → other SUs escalate to avoid');
+  assert.ok(s.safer.some((x) => /Metformin/.test(x.drug.generic)), 'SCAR: metformin (unrelated) still safe — never mis-flagged');
+});
+
+test('multi: PPI + sulfonylurea candidates route correctly', () => {
+  const p1 = A.buildMultiReport([{ id: 'omeprazole', severity: 'ige' }], 'pantoprazole');
+  assert.equal(p1.candidate.bucket, 'avoid', 'pantoprazole avoid vs omeprazole (same cluster)');
+  const p2 = A.buildMultiReport([{ id: 'omeprazole', severity: 'ige' }], 'famotidine');
+  assert.ok(p2.candidate.related && p2.candidate.bucket === 'safer', 'famotidine safer vs omeprazole (H2RA)');
+  const s1 = A.buildMultiReport([{ id: 'glibenclamide', severity: 'ige' }], 'metformin');
+  assert.ok(s1.candidate.related && s1.candidate.bucket === 'safer', 'metformin safer vs glibenclamide');
+});
+
+test('data: verified refs on PPI + sulfonylurea groups', () => {
+  const ppi = A.buildReport('omeprazole', 'ige');
+  const ppiRefs = new Set(ppi.avoid.concat(ppi.safer).flatMap((x) => x.refs || []));
+  assert.ok(ppiRefs.has('bavbek2024'), 'PPI cites Bavbek 2024 (EAACI)');
+  const su = A.buildReport('glibenclamide', 'ige');
+  const suRefs = new Set(su.caution.concat(su.safer).flatMap((x) => x.refs || []));
+  assert.ok(suRefs.has('johnson2005') || suRefs.has('ghimire2013'), 'sulfonylurea cites Johnson 2005 / Ghimire 2013');
+  [...ppiRefs, ...suRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
+});
+
 // ───────────── applyRemoteData (A3 Sheet override) — KEEP LAST ─────────────
 // These MUST be the final tests: applyRemoteData mutates the shared NBL_GROUPS/
 // NBL_INDEX/REFS singleton, so the override test below replaces the hardcoded

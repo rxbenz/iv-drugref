@@ -588,3 +588,40 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 
 > ทั้ง 2 กลุ่ม locked โดย `test/allergy-data.test.js` (`data: aminoglycoside …`, `data: macrolide …`,
 > `multi: aminoglycoside candidate …`, `data: verified refs on aminoglycoside + macrolide …`).
+
+## ✅ กลุ่ม PPI (Proton Pump Inhibitor) (pharmacist-verified 2026-07)
+- **allergens:** Omeprazole, Esomeprazole, Pantoprazole (benzimidazole cluster) · Lansoprazole, Rabeprazole (pyridine cluster)
+- **โมเดล:** `clusterAware` เดิม — cluster ตาม side chain ที่ดัด: **benzimidazole**
+  (omeprazole/esomeprazole/pantoprazole — methoxy/difluoromethoxy) = same cluster → **avoid** ·
+  **pyridine** (lansoprazole/rabeprazole/dexlansoprazole) = different cluster → **caution** ·
+  `keepSafeOnScar:true` (H2RA/antacid คนละ class → ปลอดภัยแม้ SCAR)
+- **🔑 ใจความ:** แพ้ข้ามไป PPI ตัวอื่นเฉลี่ย **61.6%** · แพ้ทั้งกลุ่ม **8.9%** → **ไม่มี PPI ตัวไหน
+  safe ก่อน work-up**; PPI ต่างกลุ่มแพ้ข้ามต่ำกว่าแต่ต้องยืนยันด้วย **skin test + DPT** เสมอ ·
+  benzimidazole cluster (ome/eso/panto) แพ้ข้ามกันสูงสุด · **H2RA (famotidine) = ทางเลือกปลอดภัย**
+  (Sobrevia 2010: ranitidine ทนได้ทุกเคส) · SCAR → เลี่ยง PPI ทุกตัว
+- **หลักฐาน:** **Bavbek 2024** (Allergy — EAACI position paper, ตาราง substituent + ตัวเลข 61.6%/8.9%,
+  skin test + DPT ก่อนเลือก alternative) · Sobrevia 2010 (JIACI — Pattern 1 pan-PPI vs Pattern 2
+  within-cluster; ranitidine ทนได้) · Kepil Özdemir 2013 (Clin Exp Allergy — skin test ยืนยัน cross)
+- **refs:** bavbek2024, sobrevia2010, kepilOzdemir2013
+
+## ✅ กลุ่ม Sulfonylurea (pharmacist-verified 2026-07)
+- **allergens:** Glibenclamide (Glyburide), Glipizide, Gliclazide, Glimepiride, Chlorpropamide, Tolbutamide
+- **โมเดล:** `crossClassCaution` (เหมือน fluoroquinolone/macrolide) — SU ตัวอื่น = **caution**
+  (ยกเป็น **avoid เมื่อ SCAR**) · `keepSafeOnScar:true` (ยาเบาหวานนอกกลุ่ม SU ไม่เกี่ยวโครงสร้าง →
+  ต้องปลอดภัยเสมอ)
+- **🔑 ใจความ:** sulfonylurea = **non-antibiotic (non-arylamine) sulfonamide** — ไม่มีหมู่ N4
+  arylamine → แพ้ข้ามเชิงภูมิกับ **sulfa antibiotic ต่ำ/theoretical** (ตัวกำหนดคือ N1/N4 substitution
+  ไม่ใช่หมู่ sulfonamide ร่วม) · **within-SU (SU↔SU) ไม่มีการศึกษาโดยตรง** → จัด caution ไว้ก่อน (ดุลพินิจ
+  เภสัชกร) · **ยาเบาหวานนอกกลุ่ม SU** (metformin/glinide/DPP-4i/SGLT2i/GLP-1/insulin/pioglitazone)
+  = ทางเลือกปลอดภัยชัดเจน
+- **หลักฐาน:** **Johnson 2005** (Ann Pharmacother — *"dogma แพ้ข้าม antibiotic↔non-antibiotic ไม่มี
+  ข้อมูลหนุน"*) · **Ghimire 2013** (J Clin Pharm Ther — non-sulfonylarylamine = *"required
+  precaution"*, คำเตือนแพ้ข้าม = theoretical) · Giles/Pharmacy 2019 (7(3):132 — N1/N4 substitution
+  เป็นตัวกำหนด, low risk แต่ prudent ถ้าอาการรุนแรง) · Strom 2003 (NEJM, ในโค้ดแล้ว)
+- **หมายเหตุ engine:** `keepSafeOnScar` เป็น group-level → ต้องเก็บ metformin/insulin (ไม่เกี่ยว) ให้
+  safe เสมอ ไม่งั้นถูก mis-flag เป็น caution ตอน SCAR · การ precaution ของ sulfa antibiotic/thiazide
+  ตอน SCAR จึงสื่อผ่าน per-item note + noteScar แทนการ downgrade bucket
+- **refs:** strom2003, johnson2005, ghimire2013, sulfaAllergyRev2019
+
+> ทั้ง 2 กลุ่ม locked โดย `test/allergy-data.test.js` (`data: PPI …`, `data: sulfonylurea …`,
+> `multi: PPI + sulfonylurea candidates …`, `data: verified refs on PPI + sulfonylurea …`).

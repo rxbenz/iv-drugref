@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.59.0
+// IV Drug Reference PWA — Service Worker v5.60.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -479,9 +479,10 @@
 // v5.57.0: อัปเดตหน้าแพ้ยา: เตือน SCAR + ตรวจยาได้ทุกตัว
 // v5.58.0: เพิ่มกลุ่มยาแพ้: Opioid + Corticosteroid
 // v5.59.0: เพิ่มกลุ่มแพ้ยา Aminoglycoside + Macrolide
+// v5.60.0: เพิ่มกลุ่มแพ้ยา PPI + Sulfonylurea
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.59.0';
+const CACHE_NAME = 'iv-drugref-v5.60.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

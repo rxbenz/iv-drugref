@@ -1115,6 +1115,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.58.0',
+      date: '2026-07-24',
+      title: "เพิ่มกลุ่มยาแพ้: Opioid + Corticosteroid",
+      items: [
+        "💉 หน้าแพ้ยา: เพิ่มกลุ่ม Opioid — แยก “แพ้จริง vs pseudoallergy (histamine)” + แนะยาต่างกลุ่มโครงสร้างที่ใช้แทนได้ (Khalaf 2025)",
+        "💊 เพิ่มกลุ่ม Corticosteroid — จัดกลุ่ม A/B/C/D, กลุ่ม C (betamethasone/dexamethasone) เป็นทางเลือก + เตือนแพ้สารเพิ่ม (excipient: succinate/CMC)"
+      ]
+    },
+    {
       v: '5.57.0',
       date: '2026-07-24',
       title: "อัปเดตหน้าแพ้ยา: เตือน SCAR + ตรวจยาได้ทุกตัว",
@@ -1428,7 +1437,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.57.0';
+  const VERSION = '5.58.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

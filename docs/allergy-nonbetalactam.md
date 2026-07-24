@@ -520,3 +520,41 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 (candidate). Engine อยู่ที่ `AllergyData.buildMultiReport()` — เป็นชั้นรวมผลล้วน
 (ไม่เพิ่ม clinical logic ใหม่ นอกจากกฎ "แพ้เอง = เลี่ยงเสมอ" และ "ยาที่ปลอดภัยกับทุก
 ตัวที่แพ้เท่านั้นจึงจะขึ้น safe"). Locked โดย `multi …` / `multi EXAMPLE …` tests.
+
+---
+
+## ✅ กลุ่ม Opioid (pharmacist-verified 2026-07)
+- **allergens:** Morphine, Codeine, Oxycodone, Hydromorphone, Fentanyl, Pethidine(Meperidine),
+  Tramadol, Methadone
+- **โมเดล:** `clusterAware` + `clusterCaution:true` (flag ใหม่) — **ต่างกลุ่มโครงสร้าง = safer**
+  (0% cross), **กลุ่มเดียวกัน = caution** (≤~7%). กลุ่มโครงสร้าง: phenanthrene / phenylpiperidine /
+  diphenylheptane / phenylpropylamine
+- **หลักฐาน:** **Khalaf 2025** (J Pain Palliat Care Pharmacother): *"No cross-reactivity among any
+  opioid drug classes → 100% re-exposure tolerance"*; Baldo 2018 (JACI Pract editorial); ASHP/
+  Ann Pharmacother 2019
+- **pseudo block (สำคัญ):** อาการที่เรียกว่า "แพ้ opioid" ส่วนใหญ่ = **pseudoallergy** (morphine/
+  codeine/pethidine กระตุ้น histamine โดยตรง → คัน/ผื่น/หน้าแดง) หรือผลข้างเคียง — ไม่ใช่ IgE ·
+  fentanyl/sufentanil/alfentanil/remifentanil/tramadol ปล่อย histamine น้อย → ทางเลือกเมื่อ
+  pseudoallergy · nature=intolerance → แสดง pseudo box
+- **⚙️ engine:** เพิ่ม flag `clusterCaution` ใน `buildNblReport` (same cluster=caution/moderate,
+  different=safer/negligible; SCAR ยัง avoid) + collect `crossSafer` เข้า safer bucket
+- **refs:** khalaf2025, baldo2018, ashp2019
+
+## ✅ กลุ่ม Corticosteroid (pharmacist-verified 2026-07)
+- **allergens:** Hydrocortisone, Prednisolone, Methylprednisolone (A) · Triamcinolone, Budesonide (B) ·
+  Betamethasone, Dexamethasone (C) · Clobetasol (D1)
+- **โมเดล:** `clusterAware` เดิม — cluster = **A/B/C/D1/D2** (Coopman 1989 / Matura-Goossens D1-D2 /
+  Baeck 2011); same group = avoid, different group = caution; **กลุ่ม C (betamethasone/dexamethasone)
+  = แพ้ข้ามต่ำสุด → safe (ทางเลือกแรก)**
+- **หลักฐาน:** **Baeck 2011** (Allergy, molecular modelling) · Berbegal/Actas 2016 (review, Coopman
+  A/B/C/D — *"betamethasone/dexamethasone tolerated in many cases"*) · Chen 2022 (JAMA Dermatol) ·
+  Baker 2015 · JIACI 2006
+- **excipient (สำคัญ):** immediate/anaphylaxis มัก**แพ้ excipient** ไม่ใช่ตัวสเตียรอยด์ — succinate
+  ester (hydrocortisone/methylprednisolone succinate), **carboxymethylcellulose (CMC)** (เคส Triamcort
+  intra-articular — Guillet 2025), PEG → เลือกสูตรที่ไม่มี excipient นั้น · pseudo box อธิบาย
+- **หมายเหตุ:** Baeck cluster — A↔D2 และ C↔D1 มักจับกลุ่มกัน (ใส่ note ใน sub/callout) · ถ้าแพ้กลุ่ม C
+  เอง (พบน้อย) ให้ประเมินเป็นราย ๆ
+- **refs:** baeck2011, berbegal2016, chen2022cs, baker2015, jiaci2006cs, guillet2025
+
+> ทั้ง 2 กลุ่ม locked โดย `test/allergy-data.test.js` (`data: opioid …`, `data: corticosteroid …`,
+> `multi: opioid candidate …`, `data: verified refs on opioid + corticosteroid …`).

@@ -784,6 +784,41 @@ test('data: verified refs on opioid + corticosteroid groups', () => {
   [...opRefs, ...csRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
 });
 
+// ─────────────── new groups: aminoglycoside + macrolide ───────────────────
+test('data: aminoglycoside — deoxystreptamine same-cluster avoid (≥50%), streptomycin safe', () => {
+  const r = A.buildReport('gentamicin', 'ige');
+  assert.ok(r && r.isNbl, 'gentamicin resolves to an NBL group');
+  assert.ok(r.avoid.some((x) => /Tobramycin/.test(x.drug.generic)), 'tobramycin avoid (same deoxystreptamine)');
+  assert.ok(r.avoid.some((x) => /Neomycin/.test(x.drug.generic)), 'neomycin avoid (deoxystreptamine)');
+  assert.ok(r.safer.some((x) => /Streptomycin/.test(x.drug.generic)), 'streptomycin safer (streptidine, no cross)');
+});
+
+test('data: macrolide — low in-class cross = caution, escalates to avoid at SCAR', () => {
+  const r = A.buildReport('erythromycin', 'ige');
+  assert.ok(r && r.isNbl, 'erythromycin resolves to an NBL group');
+  assert.ok(r.caution.some((x) => /Clarithromycin|Azithromycin/.test(x.drug.generic)), 'other macrolides caution (non-SCAR)');
+  assert.ok(r.safer.some((x) => /Beta-lactam|Doxycycline/.test(x.drug.generic)), 'non-macrolide safe');
+  const s = A.buildReport('erythromycin', 'scar');
+  assert.ok(s.avoid.some((x) => /Clarithromycin/.test(x.drug.generic)), 'SCAR → in-class escalates to avoid');
+});
+
+test('multi: aminoglycoside candidate — allergic to gentamicin → amikacin avoid, streptomycin safer', () => {
+  const m = A.buildMultiReport([{ id: 'gentamicin', severity: 'ige' }], 'amikacin');
+  assert.equal(m.candidate.bucket, 'avoid', 'amikacin avoid (deoxystreptamine)');
+  const m2 = A.buildMultiReport([{ id: 'gentamicin', severity: 'ige' }], 'streptomycin');
+  assert.ok(m2.candidate.related && m2.candidate.bucket === 'safer', 'streptomycin safer (streptidine)');
+});
+
+test('data: verified refs on aminoglycoside + macrolide groups', () => {
+  const ag = A.buildReport('gentamicin', 'ige');
+  const agRefs = new Set(ag.avoid.concat(ag.safer).flatMap((x) => x.refs || []));
+  assert.ok(agRefs.has('childsKean2019'), 'aminoglycoside cites Childs-Kean 2019');
+  const mac = A.buildReport('erythromycin', 'ige');
+  const macRefs = new Set(mac.caution.concat(mac.safer).flatMap((x) => x.refs || []));
+  assert.ok(macRefs.has('shaeer2019'), 'macrolide cites Shaeer 2019');
+  [...agRefs, ...macRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
+});
+
 // ───────────── applyRemoteData (A3 Sheet override) — KEEP LAST ─────────────
 // These MUST be the final tests: applyRemoteData mutates the shared NBL_GROUPS/
 // NBL_INDEX/REFS singleton, so the override test below replaces the hardcoded

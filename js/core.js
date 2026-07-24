@@ -1115,6 +1115,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.62.0',
+      date: '2026-07-24',
+      title: "ปรับปรุงความแม่นยำเครื่องคำนวณ Vanco TDM",
+      items: [
+        "🔧 แก้สูตร AUC₂₄ ให้เป็นค่าแม่นตรงตามหลัก mass balance (dose/CL) — ค่าเดิมต่ำกว่าจริง 3–12% โดยเฉพาะเมื่อ infusion นาน",
+        "🎯 แก้การถ่วงน้ำหนักผล vanco level ในโมเดล Bayesian (ω²/σ²) — ค่าประมาณรายผู้ป่วยตอบสนองต่อระดับยาที่วัดจริงถูกต้องขึ้น ช่วงความเชื่อมั่นแคบลงสู่ค่าที่ควรเป็น"
+      ]
+    },
+    {
       v: '5.61.0',
       date: '2026-07-24',
       title: "NSAID 5 phenotype + Heparin HIT/DTH/immediate",
@@ -1464,7 +1473,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.61.0';
+  const VERSION = '5.62.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

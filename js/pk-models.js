@@ -142,6 +142,13 @@
   // omega_cl/omega_vd/sigma/name/id), so the engine is compartment-agnostic and
   // a future 2-comp swap (P0.3b) lands here once, not in two files.
 
+  // omega_cl / omega_vd / sigma (and the tc.* equivalents) are stored as the
+  // CV / SD of the (log-)normal random effects — the value the papers report as
+  // "%CV". A lognormal MAP/MCMC penalty divides by the VARIANCE, so every
+  // objective squares them through _v2(). Keeping this in one helper stops the
+  // 1-comp and 2-comp fitters from silently diverging.
+  function _v2(x){ return x*x; }
+
   function predictConc(t,cl,vd,doseHist){
     if(!vd||vd<=0||!cl||!isFinite(cl)||!isFinite(vd))return 0;
     const ke=cl/vd;
@@ -163,23 +170,15 @@
     if(!cl||!vd||cl<=0||vd<=0||!infusion||infusion<=0||!interval||interval<=0)return NaN;
     const ke=cl/vd;
     if(!isFinite(ke)||ke<=0)return NaN;
-    // Numeric integration at steady-state using accumulation factor
-    const k0=dose/infusion, acc=1/(1-Math.exp(-ke*interval));
-    const N=300; const dt=interval/N; let auc=0;
-    for(let i=0;i<N;i++){
-      const t=i*dt+dt/2; // midpoint
-      let c;
-      if(t<=infusion){
-        const cInf=(k0/(ke*vd))*(1-Math.exp(-ke*t));
-        const cCarry=(k0/(ke*vd))*(1-Math.exp(-ke*infusion))*Math.exp(-ke*(interval-infusion+t))*(acc-1);
-        c=cInf+Math.max(cCarry,0);
-      } else {
-        const cEnd=(k0/(ke*vd))*(1-Math.exp(-ke*infusion))*acc;
-        c=cEnd*Math.exp(-ke*(t-infusion));
-      }
-      auc+=Math.max(c,0)*dt;
-    }
-    return auc;
+    // Steady-state AUC over ONE dosing interval = dose / CL EXACTLY, by mass
+    // balance (amount in per interval = amount eliminated = CL·AUC_interval).
+    // This is compartment-independent, so it is exact for the 1- and 2-comp
+    // paths alike. The previous 300-point numeric integrator used a malformed
+    // carry term (wrong exponent + a Math.max clamp) and under-reported the AUC
+    // by 3-12%, worsening with infusion duration — the very number the whole
+    // tool is built around. Vd/infusion kept in the signature (call-site compat)
+    // but the AUC does not depend on them.
+    return dose/cl;
   }
 
   // Steady-state peak & trough
@@ -201,12 +200,12 @@
     function obj(cl,vd){
       if(cl<=0||vd<=0||!isFinite(cl)||!isFinite(vd))return 1e10;
       const eCL=Math.log(cl/popCL),eVd=Math.log(vd/popVd);
-      let o=eCL*eCL/model.omega_cl+eVd*eVd/model.omega_vd;
+      let o=eCL*eCL/_v2(model.omega_cl)+eVd*eVd/_v2(model.omega_vd);
       if(!isFinite(o))return 1e10;
       for(const lv of measuredLevels){
         const pred=predictConc(lv.time,cl,vd,doseHist);
         if(pred<=0||!isFinite(pred))return 1e10;
-        o+=Math.pow(Math.log(lv.value)-Math.log(pred),2)/model.sigma;
+        o+=Math.pow(Math.log(lv.value)-Math.log(pred),2)/_v2(model.sigma);
         if(!isFinite(o))return 1e10;
       }
       return o;
@@ -247,12 +246,12 @@
 
     function logPost(cl,vd){
       if(cl<=0||vd<=0||!isFinite(cl)||!isFinite(vd))return -1e10;
-      let lp=-0.5*(Math.pow(Math.log(cl/popCL),2)/model.omega_cl+Math.pow(Math.log(vd/popVd),2)/model.omega_vd);
+      let lp=-0.5*(Math.pow(Math.log(cl/popCL),2)/_v2(model.omega_cl)+Math.pow(Math.log(vd/popVd),2)/_v2(model.omega_vd));
       if(!isFinite(lp))return -1e10;
       for(const lv of measuredLevels){
         const pred=predictConc(lv.time,cl,vd,doseHist);
         if(pred<=0||!isFinite(pred))return -1e10;
-        lp-=0.5*Math.pow(Math.log(lv.value)-Math.log(pred),2)/model.sigma;
+        lp-=0.5*Math.pow(Math.log(lv.value)-Math.log(pred),2)/_v2(model.sigma);
         if(!isFinite(lp))return -1e10;
       }
       return lp;
@@ -260,6 +259,10 @@
 
     const samples=[];
     let cl=mapR.cl,vd=mapR.vd,lp=logPost(cl,vd);
+    // step scaled 2.4/√d (d=2) per the optimal-scaling heuristic — matches
+    // runMCMC2c (which uses 2.4/√3). Previously the 1-comp used a bare ×2.4,
+    // over-stepping and mixing worse than the 2-comp sampler.
+    const s=2.4/Math.sqrt(2);
     const sdCL=Math.sqrt(model.omega_cl)*popCL*0.15;
     const sdVd=Math.sqrt(model.omega_vd)*popVd*0.15;
     let accepted=0;
@@ -273,7 +276,7 @@
         const u1=Math.max(Math.random(),1e-15),u2=Math.random();
         const z1=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
         const z2=Math.sqrt(-2*Math.log(u1))*Math.sin(2*Math.PI*u2);
-        const pCL=cl+z1*sdCL*2.4, pVd=vd+z2*sdVd*2.4;
+        const pCL=cl+z1*sdCL*s, pVd=vd+z2*sdVd*s;
         if(!isFinite(pCL)||!isFinite(pVd))continue;
         const pLP=logPost(pCL,pVd);
         if(isFinite(pLP)&&pLP>-1e9&&Math.log(Math.random())<pLP-lp){cl=pCL;vd=pVd;lp=pLP;accepted++;}
@@ -386,13 +389,13 @@
     function obj(cl,v1,v2){
       if(cl<=0||v1<=0||v2<=0||!isFinite(cl)||!isFinite(v1)||!isFinite(v2))return 1e10;
       var eCL=Math.log(cl/popCL),eV1=Math.log(v1/popV1),eV2=Math.log(v2/popV2);
-      var o=eCL*eCL/tc.omega_cl+eV1*eV1/tc.omega_v1+eV2*eV2/tc.omega_v2;
+      var o=eCL*eCL/_v2(tc.omega_cl)+eV1*eV1/_v2(tc.omega_v1)+eV2*eV2/_v2(tc.omega_v2);
       if(!isFinite(o))return 1e10;
       for(var i=0;i<measuredLevels.length;i++){
         var lv=measuredLevels[i];
         var pred=predictConc2c(lv.time,cl,v1,q,v2,doseHist);
         if(pred<=0||!isFinite(pred))return 1e10;
-        o+=Math.pow(Math.log(lv.value)-Math.log(pred),2)/sigma;
+        o+=Math.pow(Math.log(lv.value)-Math.log(pred),2)/_v2(sigma);
         if(!isFinite(o))return 1e10;
       }
       return o;
@@ -419,15 +422,15 @@
     var sigma=(tc.sigma_prop!=null?tc.sigma_prop:model.sigma);
     function logPost(cl,v1,v2){
       if(cl<=0||v1<=0||v2<=0||!isFinite(cl)||!isFinite(v1)||!isFinite(v2))return -1e10;
-      var lp=-0.5*(Math.pow(Math.log(cl/popCL),2)/tc.omega_cl
-                  +Math.pow(Math.log(v1/popV1),2)/tc.omega_v1
-                  +Math.pow(Math.log(v2/popV2),2)/tc.omega_v2);
+      var lp=-0.5*(Math.pow(Math.log(cl/popCL),2)/_v2(tc.omega_cl)
+                  +Math.pow(Math.log(v1/popV1),2)/_v2(tc.omega_v1)
+                  +Math.pow(Math.log(v2/popV2),2)/_v2(tc.omega_v2));
       if(!isFinite(lp))return -1e10;
       for(var i=0;i<measuredLevels.length;i++){
         var lv=measuredLevels[i];
         var pred=predictConc2c(lv.time,cl,v1,q,v2,doseHist);
         if(pred<=0||!isFinite(pred))return -1e10;
-        lp-=0.5*Math.pow(Math.log(lv.value)-Math.log(pred),2)/sigma;
+        lp-=0.5*Math.pow(Math.log(lv.value)-Math.log(pred),2)/_v2(sigma);
         if(!isFinite(lp))return -1e10;
       }
       return lp;

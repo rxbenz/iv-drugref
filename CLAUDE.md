@@ -449,7 +449,8 @@ displayed peak/trough (and the graph shape) get more accurate.
   a simulated trough; higher trough → lower CL; runMCMC2c smoke; auto-dispatch
   routes correctly.
 - **Same prior/residual convention as the 1-comp engine** (proportional
-  residual + omega divisor) so the two behave consistently. The papers'
+  residual + ω²/σ² variance divisor since v5.62.0) so the two behave
+  consistently. The papers'
   **additive** residual term (Colin 1.23 / Goti 3.4 / Llopis r2 mg/L) is kept
   in `tc.sigma_add` but **not yet modeled** (engine is proportional-only, as on
   the 1-comp Colin path) — a documented backlog item.
@@ -477,13 +478,46 @@ primary papers:
   startup model still `auto` (lowest OFV).
 - Interim amber banner in both vanco UIs: "AUC calculation updated (v5.10.0)".
 
-Verified (45M/70kg/170cm/SCr1.0, 1000mg q12h): Buelga CL 5.99 (AUC 324),
-Goti CL 3.65 (AUC 535), Llopis CL 3.49 (AUC 561, CG-LBW). Old Goti 1167 → 535.
+Verified (45M/70kg/170cm/SCr1.0, 1000mg q12h): Buelga CL 5.99 (AUC 334),
+Goti CL 3.65 (AUC 548), Llopis CL 3.49 (AUC 572, CG-LBW). Old Goti 1167 → 548.
+> **AUC values corrected in v5.62.0.** The CL values are unchanged; the AUC24
+> was previously computed by a numeric integrator that under-reported by 3–12%
+> (worse for longer infusions). `calcAUC_ss` now returns the exact `dose/CL`
+> (SS mass balance, compartment-independent), so the golden AUCs rose slightly
+> (324→334 / 535→548 / 561→572). See "Vanco Bayesian engine correction" below.
 
 **Now unified** in the shared `js/pk-models.js` (ROADMAP P1.1) — both `tdm.js`
 (`VancoTDM`) and `vanco-tdm.js` consume `window.VancoPK`, so a coefficient fix
 lands in one place. 2-comp engine + 4-param fit = future Option A if peak/trough
 fidelity needed.
+
+### Vanco Bayesian engine correction (v5.62.0) — TWO math fixes, adversarial review
+An adversarial PK/stats review (on the `claude/fable-app-comprehensive-review-lo0m8d`
+branch; cherry-picked to main in v5.62.0) found two localized defects in the engine
+(`js/pk-models.js`) that corrupted the two numbers clinicians act on. Both fixed
++ regression-locked; **CL population values and 2-comp kinetics were already
+correct and are unchanged**.
+
+- **Bug 1 — `calcAUC_ss` under-reported AUC.** The 300-point numeric integrator
+  used a malformed carry term (wrong exponent `-ke·(interval-infusion+t)` +
+  `Math.max(cCarry,0)` clamp) → AUC biased **low 3% @1h → 12% @4h infusion**.
+  Fixed: `calcAUC_ss` now returns the EXACT `dose/CL` (SS interval AUC by mass
+  balance, compartment-independent). AUC24 is now infusion-independent.
+- **Bug 2 — MAP/MCMC used ω/σ instead of ω²/σ².** `omega_cl`/`omega_vd`/`sigma`
+  (and `tc.*`) are stored as the papers' **CV/SD** (e.g. Colin `omega_cl:0.279` =
+  "27.9% CV"). A lognormal MAP penalty divides by the **variance**, so every
+  objective now squares them via the shared `_v2(x)=x*x` helper — in ALL FOUR
+  fitters (`bayesianMAP`, `runMCMC`, `bayesianMAP2c`, `runMCMC2c`; the 2-comp
+  path is the default for Goti + every peds Colin fit). Before, measured levels
+  were under-weighted → the individual estimate over-shrank toward population
+  (opposite of Bayesian intent) and the 90% CIs were ~2.5× too wide. **When
+  editing a model's `omega_*`/`sigma`/`tc.omega_*`/`tc.sigma_prop`, keep storing
+  the CV/SD — the engine squares it.**
+- Bonus: 1-comp `runMCMC` proposal step now uses `2.4/√2` (matches `runMCMC2c`'s
+  `2.4/√3`); acceptance ≈0.45 (was over-stepping).
+- Golden tests updated: exact AUC24 (Buelga 334 / Goti 548 / Llopis 572),
+  an infusion-independence lock, and a MAP shrinkage-magnitude lock (cl/popCL
+  ≈0.671 for a +50% trough — regresses to ≈0.74 if the divisors revert).
 
 ### Shared vanco PK models — `js/pk-models.js` (v-P1.1)
 Single source of truth for the vancomycin population-PK models (5 adult +

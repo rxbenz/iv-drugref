@@ -48,6 +48,7 @@
     acr2023cm: 'ACR Committee on Drugs and Contrast Media. ACR Manual on Contrast Media (2023) — premedication regimens & "no iodine allergy"/seafood myth.',
     ash2018hit: 'Cuker A, et al. American Society of Hematology 2018 guidelines for management of venous thromboembolism: heparin-induced thrombocytopenia. Blood Adv 2018;2(22):3360-92.',
     dthHeparin: 'Schindewolf M, et al. Delayed-type hypersensitivity to heparins/heparinoids — patterns of cross-reactivity; tolerance of fondaparinux. (Allergy 2007;62; PMID 17573880 / PMID 15025697)',
+    grims2007: 'Grims RH, Weger W, Reiter H, Arbab E, Kränke B, Aberer W. Delayed-type hypersensitivity to low molecular weight heparins and heparinoids: cross-reactivity does not depend on molecular weight. Br J Dermatol 2007;157(3):514-517. (7/8 patients cross-reacted to other LMWHs by subcutaneous testing; fondaparinux tolerated by ALL patients; even the lowest-MW LMWH bemiparin had the highest cross-reactivity → DTH cross-reactivity is MW-independent)',
     vfr2021: 'Alvarez-Arango S, et al. Vancomycin Infusion Reaction — Moving Beyond "Red Man Syndrome". N Engl J Med 2021;384(14):1283-1286. (rate-related, non-IgE; rename)',
     vfrMgmt: 'Sivagnanam S, Deleu D. Red man syndrome. Crit Care 2003;7(2):119-120. + Martin/ASHP-IDSA vancomycin guidance — slow infusion ≥60 min/g (≤10 mg/min) ± antihistamine.',
     vancoHsr: 'Glycopeptide hypersensitivity — DRESS, linear IgA bullous dermatosis, anaphylaxis; vancomycin↔teicoplanin cross-reactivity variable (~10-15%). (Minhas 2016; An 2011; Hwang 2021)',
@@ -357,13 +358,28 @@
       // hypersensitivity splits into a cross-reactive (pharmacologic, COX-1) arm
       // and a single-drug (immunologic, chemical-group) arm — the two give
       // OPPOSITE recommendations, so make it an explicit input, not just a note.
-      phenotypeLabel: 'ลักษณะการแพ้ NSAID',
-      phenotypeDefault: 'cross',
+      // 5 clinical phenotypes (EAACI/ENDA — Kowalski 2013, Doña 2020). Each maps to
+      // the cross-reactive (COX-1) arm or the single-drug (chemical-group) arm — the
+      // two give OPPOSITE recommendations. `maps` drives the engine; the legacy
+      // 'cross'/'single' ids still resolve via the fallback (218 tests unchanged).
+      phenotypeLabel: 'ชนิดการแพ้ NSAID (phenotype)',
+      phenotypeDefault: 'niua',
       phenotypes: [
-        { id: 'cross',  label: 'Cross-reactive: แพ้ NSAID หลายตัว / หืด-ริดสีดวงจมูก (NERD) / ลมพิษ (NECD-NIUA)',
-          note: 'Cross-reactive (COX-1, pseudoallergy): เลี่ยง COX-1 แรงทั้งหมด · COX-2 selective/paracetamol มักใช้ได้' },
-        { id: 'single', label: 'Single-drug: แพ้ NSAID ตัวเดียว (เคยใช้ตัวอื่นได้ / anaphylaxis ต่อตัวเดียว)',
-          note: 'Single-drug (selective, immunologic): เลี่ยงเฉพาะตัวที่แพ้ + NSAID กลุ่มเคมีเดียวกัน · กลุ่มเคมีอื่นใช้ได้แม้เป็น COX-1 แรง' }
+        { id: 'nerd', maps: 'cross',
+          label: 'NERD — หืด/ไซนัส/ริดสีดวงจมูก (respiratory, มีโรคทางเดินหายใจเรื้อรัง)',
+          note: 'NERD (cross-reactive, COX-1): เลี่ยง COX-1 แรงทุกตัว · COX-2 selective + paracetamol <1 g ทนได้ในผู้ป่วยส่วนใหญ่ · antileukotriene (montelukast) ช่วยคุมอาการ · ถ้าจำเป็นต้องใช้ ASA ระยะยาว (เช่นโรคหัวใจ) พิจารณา aspirin desensitization โดยผู้เชี่ยวชาญ' },
+        { id: 'necd', maps: 'cross',
+          label: 'NECD — ลมพิษเรื้อรังกำเริบจาก NSAID (มีลมพิษเรื้อรังเดิม)',
+          note: 'NECD (cross-reactive, COX-1): เลี่ยง COX-1 แรงทุกตัว · COX-2 selective มักทนได้ · ควบคุมลมพิษเรื้อรังพื้นฐานให้ดีก่อน' },
+        { id: 'niua', maps: 'cross',
+          label: 'NIUA — ลมพิษ/angioedema จาก NSAID ≥2 ตัว (ไม่มีโรคผิวหนัง/หายใจเดิม)',
+          note: 'NIUA (cross-reactive, COX-1): เลี่ยง COX-1 แรงทุกตัว · COX-2 selective มักทนได้ (ยืนยันด้วย challenge ตามดุลพินิจ)' },
+        { id: 'sniuaa', maps: 'single',
+          label: 'SNIUAA — แพ้ NSAID ตัวเดียว: ลมพิษ/angioedema/anaphylaxis (เฉียบพลัน, IgE)',
+          note: 'SNIUAA (single-drug, IgE): เลี่ยงเฉพาะตัวที่แพ้ + NSAID กลุ่มเคมีเดียวกัน · NSAID กลุ่มเคมีอื่นมักใช้ได้แม้เป็น COX-1 แรง (ยืนยันด้วย challenge ก่อนใช้)' },
+        { id: 'snidr', maps: 'single',
+          label: 'SNIDR — แพ้ NSAID ตัวเดียว: ปฏิกิริยาชนิดช้า (FDE/ผื่น/SCAR)',
+          note: 'SNIDR (single-drug, T-cell): เลี่ยงเฉพาะตัวที่แพ้ + NSAID กลุ่มเคมีเดียวกัน · กลุ่มเคมีอื่นมักใช้ได้ · ถ้าเป็น SCAR (SJS/TEN/DRESS) ห้าม challenge เด็ดขาด' }
       ]
     },
     {
@@ -647,14 +663,31 @@
     {
       id: 'heparin',
       label: 'Heparins (เฮพาริน / LMWH)',
-      refs: ['ash2018hit', 'dthHeparin'],
+      refs: ['ash2018hit', 'dthHeparin', 'grims2007'],
       keepSafeOnScar: true,   // non-heparin anticoagulants are the recommended switch
+      // Phenotype changes the MANAGEMENT (not the cross-reactivity routing — heparin
+      // is whole-class avoid regardless). HIT vs delayed-type vs immediate give
+      // different alternatives, so make it an explicit input.
+      phenotypeLabel: 'ชนิดปฏิกิริยาต่อ heparin',
+      phenotypeDefault: 'dth',
+      phenotypes: [
+        { id: 'hit',
+          label: 'HIT — เกล็ดเลือดต่ำจากภูมิคุ้มกัน (± ลิ่มเลือดอุดตัน) ~5-10 วันหลังได้ heparin',
+          note: 'HIT (immune, anti-PF4/heparin — ไม่ใช่ผื่นแพ้ แต่อันตรายถึงชีวิต): เลี่ยง heparin ทุกตัวเด็ดขาด (UFH↔LMWH แพ้ข้าม ~50% in vivo) · ⚠️ ห้ามสลับไปใช้ LMWH แทน UFH · danaparoid มี cross-reactivity ใน vitro → ใช้ได้แต่ระวัง · ทางเลือกหลัก: DTI (argatroban/bivalirudin), fondaparinux หรือ DOAC (ASH 2018) · ส่งตรวจ anti-PF4 antibody' },
+        { id: 'dth',
+          label: 'DTH — ผื่น eczema/แดงคันที่จุดฉีดใต้ผิวหนัง (ชนิดช้า)',
+          note: 'DTH (delayed-type, ผื่นที่จุดฉีด SC): แพ้ข้ามกว้างระหว่าง UFH↔LMWH โดยไม่ขึ้นกับน้ำหนักโมเลกุล (Grims 2007: 7/8 แพ้ข้าม, แม้ bemiparin ที่ MW ต่ำสุด) · fondaparinux ทนได้ทุกราย → ทางเลือกแรก · IV UFH มักใช้ได้แม้แพ้ SC heparin · ยืนยันทางเลือกด้วย SC skin test' },
+        { id: 'immediate',
+          label: 'Immediate — ลมพิษ/angioedema/anaphylaxis เฉียบพลัน (IgE, พบน้อย)',
+          note: 'Immediate/anaphylaxis (IgE, พบน้อยมาก): เลี่ยง heparin ทุกตัว → ใช้ยาต้านการแข็งตัวนอกกลุ่ม heparin (DTI: argatroban/bivalirudin, fondaparinux หรือ DOAC) · ยืนยันด้วย skin test / ปรึกษาผู้เชี่ยวชาญภูมิแพ้ยา' }
+      ],
       allergens: [
         { id: 'heparin-ufh', generic: 'Heparin (UFH)', th: 'เฮพารินไม่แยกส่วน', trade: ['Heparin sodium'] },
         { id: 'enoxaparin',  generic: 'Enoxaparin',    th: 'อีน็อกซาพาริน',    trade: ['Clexane', 'Lovenox'] },
         { id: 'dalteparin',  generic: 'Dalteparin',    th: 'ดัลทีพาริน',       trade: ['Fragmin'] },
         { id: 'nadroparin',  generic: 'Nadroparin',    th: 'นาโดรพาริน',       trade: ['Fraxiparine'] },
-        { id: 'tinzaparin',  generic: 'Tinzaparin',    th: 'ทินซาพาริน',       trade: ['Innohep'] }
+        { id: 'tinzaparin',  generic: 'Tinzaparin',    th: 'ทินซาพาริน',       trade: ['Innohep'] },
+        { id: 'danaparoid',  generic: 'Danaparoid',    th: 'ดานาพารอยด์',      trade: ['Orgaran'] }
       ],
       crossReason: 'แพ้ข้ามทั้งกลุ่ม heparin — HIT: UFH↔LMWH ~50% in vivo · DTH: แพ้ข้ามกว้าง (ไม่ขึ้นกับ MW)',
       crossReactive: [
@@ -1233,7 +1266,34 @@
   // partition every other NSAID in the group by whether it shares the culprit's
   // chemical group. Same group → avoid (immunologic cross-reactivity within the
   // chemical class); different group → tolerated (even strong COX-1 inhibitors).
-  function buildNblSingleDrug(g, a, sev, isScar) {
+  // --- phenotype resolution (generic, group-agnostic) ----------------------
+  // A group may expose `phenotypes:[{id,label,note,maps?}]`. `maps:'cross'|'single'`
+  // says which cross-reactivity ARM the phenotype routes to; when absent we fall
+  // back to the legacy id convention ('single' → single-drug, everything else →
+  // cross-reactive) so pre-existing 'cross'/'single' values keep working unchanged.
+  function phenotypeMapsToSingle(g, phenotypeId) {
+    if (!phenotypeId) return false;
+    var list = (g && g.phenotypes) || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === phenotypeId) {
+        if (list[i].maps) return list[i].maps === 'single';
+        break;
+      }
+    }
+    return phenotypeId === 'single';
+  }
+  // Management guidance attached to the selected phenotype (shown prominently in
+  // the UI). Empty string when the group has no phenotypes or none is selected.
+  function phenotypeNoteFor(g, phenotypeId) {
+    if (!phenotypeId) return '';
+    var list = (g && g.phenotypes) || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === phenotypeId) return list[i].note || '';
+    }
+    return '';
+  }
+
+  function buildNblSingleDrug(g, a, sev, isScar, phenotypeNote) {
     const lbl = (g.chemLabels && g.chemLabels[a.chem]) || a.chem || '';
     const seen = {};
     const pool = [];
@@ -1281,6 +1341,7 @@
     return {
       allergen: { generic: a.generic, th: a.th, class: g.label, trade: a.trade },
       severity: sev, severityNote: note, calloutNote: callout,
+      phenotypeNote: phenotypeNote || '',
       avoid: avoid, caution: caution, safer: safer,
       nonBetaLactam: null, blocked: false, isNbl: true
     };
@@ -1300,8 +1361,8 @@
     // same-chemical-group siblings; every other chemical group is tolerated
     // (even strong COX-1 inhibitors). SCAR from an NSAID is also single-drug
     // (SNIDR) → route it here too, but keep the no-challenge guidance.
-    if (g.chemGroupAware && (opts.phenotype === 'single' || isScar)) {
-      return buildNblSingleDrug(g, a, sev, isScar);
+    if (g.chemGroupAware && (phenotypeMapsToSingle(g, opts.phenotype) || isScar)) {
+      return buildNblSingleDrug(g, a, sev, isScar, phenotypeNoteFor(g, opts.phenotype));
     }
 
     // in-class cross-reactive drugs — each carries its own decision/tier so the
@@ -1370,8 +1431,11 @@
     });
 
     // group-level caution items (e.g. NSAID preferential COX-2) — always caution
-    // (independent of severity); SCAR keeps them in caution too.
-    const cautionItems = (g.caution || []).map(function (d) {
+    // (independent of severity); SCAR keeps them in caution too. Exclude the culprit
+    // itself (a caution-list drug can also be a selectable allergen, e.g. danaparoid).
+    const cautionItems = (g.caution || []).filter(function (d) {
+      return !(d.id && d.id === allergenId) && d.generic !== a.generic;
+    }).map(function (d) {
       return {
         drug: { generic: d.generic, th: d.th, class: d.sub },
         decision: 'caution', tier: 'low', pct: d.pct || 'ระวัง',
@@ -1409,6 +1473,7 @@
       severity: sev,
       severityNote: note,
       calloutNote: callout,
+      phenotypeNote: phenotypeNoteFor(g, opts.phenotype),
       avoid: crossAvoid,
       caution: cautionItems
         .concat(crossCaution)
@@ -1640,7 +1705,8 @@
       var rep = buildReport(s.id, s.severity, opts);
       if (!rep) return;
       allergens.push({ id: s.id, meta: meta, severity: rep.severity, nature: s.nature || 'allergy',
-        phenotype: s.phenotype || '', calloutNote: rep.calloutNote || '', report: rep });
+        phenotype: s.phenotype || '', calloutNote: rep.calloutNote || '',
+        phenotypeNote: rep.phenotypeNote || '', report: rep });
 
       if (rep.notAllergy) {
         // intolerance = not an immune allergy → the drug itself is NOT

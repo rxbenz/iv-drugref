@@ -346,9 +346,15 @@
       var extra = al.nature === 'intolerance' ? 'ไม่ทนยา' : (al.severity && al.severity.label) || '';
       return '<span class="al-sum-chip">' + esc(al.meta.generic) + (extra ? ' <small>· ' + esc(extra) + '</small>' : '') + '</span>';
     }).join('');
+    // per-allergen phenotype/subtype management guidance (NSAID NERD/SNIDR…,
+    // heparin HIT/DTH/immediate…) — surfaced from report.allergens[].phenotypeNote
+    var pnotes = report.allergens.filter(function (al) { return al.phenotypeNote; }).map(function (al) {
+      return '<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border,#e2e8f0);font-size:12px;line-height:1.55">' +
+        '🧭 <strong>' + esc(al.meta.generic) + ':</strong> ' + esc(al.phenotypeNote) + '</div>';
+    }).join('');
     return '<div class="info-box blue al-summary" style="margin-bottom:14px">' +
       '<strong>ผู้ป่วยแพ้ ' + report.allergens.length + ' รายการ:</strong>' +
-      '<div class="al-sum-chips">' + chips + '</div></div>';
+      '<div class="al-sum-chips">' + chips + '</div>' + pnotes + '</div>';
   }
   // Prominent SCAR safety banner — when ANY selected allergen is a SCAR-severity
   // reaction (SJS/TEN/DRESS/AGEP), the whole related class is contraindicated and

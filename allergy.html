@@ -32,38 +32,40 @@
 
 <div class="container">
 
-  <!-- input -->
+  <!-- input: drugs the patient is allergic to (multiple) -->
   <div class="section">
-    <div class="section-header">🧪 เลือกข้อมูลผู้ป่วย</div>
-    <div class="field-grid">
-      <div class="field">
-        <label for="allergenSearch">ยาที่ผู้ป่วยแพ้</label>
-        <div id="allergenPicker">
-          <div class="ap-search">
-            <span class="ap-ic" aria-hidden="true">🔍</span>
-            <input type="text" id="allergenSearch" autocomplete="off" autocorrect="off"
-              spellcheck="false" placeholder="พิมพ์เพื่อค้นหา (ไทย/อังกฤษ) เช่น amoxicillin, ซัลฟา...">
-            <button type="button" class="ap-clr" id="allergenClear" aria-label="ล้าง">✕</button>
-          </div>
-          <div class="ap-selected" id="allergenSelected" style="display:none;"></div>
-          <div class="ap-chips" id="allergenChips"></div>
-          <div class="ap-list" id="allergenList" role="listbox"></div>
+    <div class="section-header">🧪 ยาที่ผู้ป่วยแพ้ (เพิ่มได้หลายตัว)</div>
+    <div class="field">
+      <label for="allergenSearch">ค้นหา &amp; เพิ่มยาที่แพ้ (ไทย/อังกฤษ)</label>
+      <div id="allergenPicker">
+        <div class="ap-search">
+          <span class="ap-ic" aria-hidden="true">🔍</span>
+          <input type="text" id="allergenSearch" autocomplete="off" autocorrect="off"
+            spellcheck="false" placeholder="พิมพ์เพื่อค้นหา เช่น aspirin, ciprofloxacin, ซัลฟา...">
+          <button type="button" class="ap-clr" id="allergenClear" aria-label="ล้าง">✕</button>
         </div>
+        <div class="ap-chips" id="allergenChips"></div>
+        <div class="ap-list" id="allergenList" role="listbox"></div>
       </div>
-      <div class="field">
-        <label for="natureSelect">ลักษณะปฏิกิริยา</label>
-        <select id="natureSelect">
-          <option value="allergy">แพ้จริง / สงสัยแพ้ (ผื่น · ลมพิษ · หน้า-ปากบวม · หายใจลำบาก · SCAR)</option>
-          <option value="intolerance">ผลข้างเคียง / ไม่ทนยา (คลื่นไส้ · ปวดท้อง · ท้องเสีย · ปวดหัว · ใจสั่น)</option>
-        </select>
-      </div>
-      <div class="field" id="severityField">
-        <label for="severitySelect">ลักษณะ/ความรุนแรงของอาการแพ้</label>
-        <select id="severitySelect"></select>
-      </div>
-      <div class="field" id="phenotypeField" style="display:none;">
-        <label for="phenotypeSelect" id="phenotypeLabel">ลักษณะการแพ้</label>
-        <select id="phenotypeSelect"></select>
+      <!-- selected allergen cards (each with its own severity / nature / phenotype) -->
+      <div id="allergenSelectedList"></div>
+    </div>
+  </div>
+
+  <!-- input: optional candidate — "can the patient use this drug?" -->
+  <div class="section">
+    <div class="section-header">🔎 ตรวจว่าใช้ยานี้ได้ไหม (ถ้ามี)</div>
+    <div class="field">
+      <label for="candidateSearch">ยาที่อยากตรวจ — ระบบจะเทียบกับยาที่แพ้ทั้งหมด</label>
+      <div id="candidatePicker">
+        <div class="ap-search">
+          <span class="ap-ic" aria-hidden="true">🔍</span>
+          <input type="text" id="candidateSearch" autocomplete="off" autocorrect="off"
+            spellcheck="false" placeholder="พิมพ์ชื่อยาที่อยากตรวจ เช่น parecoxib">
+          <button type="button" class="ap-clr" id="candidateClear" aria-label="ล้าง">✕</button>
+        </div>
+        <div class="ap-selected" id="candidateSelected" style="display:none;"></div>
+        <div class="ap-list" id="candidateList" role="listbox"></div>
       </div>
     </div>
   </div>

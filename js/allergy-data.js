@@ -50,7 +50,19 @@
     dthHeparin: 'Schindewolf M, et al. Delayed-type hypersensitivity to heparins/heparinoids — patterns of cross-reactivity; tolerance of fondaparinux. (Allergy 2007;62; PMID 17573880 / PMID 15025697)',
     vfr2021: 'Alvarez-Arango S, et al. Vancomycin Infusion Reaction — Moving Beyond "Red Man Syndrome". N Engl J Med 2021;384(14):1283-1286. (rate-related, non-IgE; rename)',
     vfrMgmt: 'Sivagnanam S, Deleu D. Red man syndrome. Crit Care 2003;7(2):119-120. + Martin/ASHP-IDSA vancomycin guidance — slow infusion ≥60 min/g (≤10 mg/min) ± antihistamine.',
-    vancoHsr: 'Glycopeptide hypersensitivity — DRESS, linear IgA bullous dermatosis, anaphylaxis; vancomycin↔teicoplanin cross-reactivity variable (~10-15%). (Minhas 2016; An 2011; Hwang 2021)'
+    vancoHsr: 'Glycopeptide hypersensitivity — DRESS, linear IgA bullous dermatosis, anaphylaxis; vancomycin↔teicoplanin cross-reactivity variable (~10-15%). (Minhas 2016; An 2011; Hwang 2021)',
+    // Parecoxib / COX-2 in NSAID hypersensitivity (pharmacist-verified 2026-07)
+    colanardi2008: 'Colanardi MC, et al. Safety of parecoxib in patients with nonsteroidal anti-inflammatory drug-induced urticaria or angioedema. Ann Allergy Asthma Immunol 2008;100(1):82-85. (PMID 18254487 — n=79 incl. 31 multiple-class/cross-reactive, 0% reacted to parecoxib)',
+    // Tetracycline group (pharmacist-verified 2026-07)
+    maciag2020: 'Maciag MC, et al. Hypersensitivity to tetracyclines: skin testing, graded challenge, and desensitization regimens. Ann Allergy Asthma Immunol 2020;124(6):589-593. (cross-reactivity "not established"; skin test + graded challenge/desensitization enable use)',
+    hamilton2019: 'Hamilton LA, Guarascio AJ. Tetracycline Allergy. Pharmacy (Basel) 2019;7(3):104.',
+    tham1996: 'Tham SN, Kwok YK, Chan HL. Cross-reactivity in fixed drug eruptions to tetracyclines. Arch Dermatol 1996;132(9):1134-1135. (tetracycline↔doxycycline ~62.5%, ↔minocycline ~18.75%, 37.5% no cross-sensitivity)',
+    correia1999: 'Correia O, Delgado L, Polonia J. Genital fixed drug eruption: cross-reactivity between doxycycline and minocycline. Clin Exp Dermatol 1999;24(2):137.',
+    minoLupus: 'Minocycline-specific severe reactions — Shepherd J. Minocycline-induced lupus. J Am Board Fam Pract 2002;15(3):239-241; Brown RJ, et al. Minocycline-induced drug hypersensitivity syndrome followed by multiple autoimmune sequelae. Arch Dermatol 2009;145(1):63-66.',
+    // Nitroimidazole group (pharmacist-verified 2026-07)
+    gendelman2014: 'Gendelman SR, Pien LC, Gutta RC, Abouhassan SR. Modified oral metronidazole desensitization protocol. Allergy Rhinol (Providence) 2014;5(2):e66-e69. ("because of the similar chemical structure of nitroimidazoles, patients with hypersensitivity to metronidazole may also have hypersensitivity to tinidazole")',
+    hollis2022: 'Hollis CC, Mlauzi C, Ashton M. Oral metronidazole desensitization for IgE-mediated hypersensitivity. Cureus 2022;14(7):e26849. (tinidazole "posed a serious risk" → desensitize metronidazole rather than switch)',
+    cahill2021: 'Cahill JA, Sahota PS, Kan M. Failure of a single day metronidazole desensitization protocol, and success of a modified two-day protocol. Allergy Asthma Clin Immunol 2021;17(1):136.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -245,7 +257,7 @@
     {
       id: 'nsaid',
       label: 'NSAIDs',
-      refs: ['kowalski2013', 'dona2020', 'khan2022', 'nsaidReview2026'],
+      refs: ['kowalski2013', 'dona2020', 'khan2022', 'nsaidReview2026', 'colanardi2008'],
       // chemical-class awareness: in the SINGLE-DRUG (selective) phenotype,
       // cross-reactivity follows CHEMICAL GROUP, not COX-1 potency. Each entry
       // carries `chem`; buildNblReport names the culprit's same-group siblings.
@@ -291,6 +303,9 @@
           reason: 'COX-2 selective; oral challenge พบแพ้ข้ามเพียง ~2%' },
         { generic: 'Etoricoxib', th: 'อีโทริค็อกซิบ', sub: 'COX-2 selective', pct: 'แพ้ข้ามต่ำมาก', chem: 'coxib',
           reason: 'COX-2 selective; ทนได้ดีในผู้ป่วย cross-reactive' },
+        { generic: 'Parecoxib', th: 'พาเรค็อกซิบ', sub: 'COX-2 selective (IV/IM)', pct: 'แพ้ข้ามต่ำมาก', chem: 'coxib',
+          reason: 'COX-2 selective สูง (prodrug ของ valdecoxib, มีรูปแบบฉีด IV/IM); ผู้ป่วย NSAID cross-reactive ส่วนใหญ่ใช้ได้ (Colanardi 2008: n=79 รวมกลุ่ม cross-reactive 31 ราย แพ้ 0%) เทียบเท่า celecoxib/etoricoxib',
+          advice: 'แนะนำยืนยันด้วย graded challenge ก่อนใช้จริง · มีหมู่ sulfonamide แต่เป็น non-antibiotic sulfonamide (ไม่มีหมู่ N4 arylamine) → ไม่แพ้ข้ามกับ sulfonamide antibiotic (CCJM 2025; Strom 2003) — ให้ในผู้แพ้ sulfa antibiotic ได้เหมือน celecoxib' },
         { generic: 'Paracetamol (Acetaminophen)', th: 'พาราเซตามอล', sub: 'weak COX-1', pct: 'ส่วนใหญ่ใช้ได้', chem: 'aminophenol',
           reason: 'weak COX-1; ขนาดสูง (>1 g) อาจกระตุ้นอาการในผู้ป่วยส่วนน้อย' }
       ],
@@ -688,6 +703,82 @@
         ],
         refs: ['vfr2021', 'vfrMgmt']
       }
+    },
+    // ── Tetracyclines ────────────────────────────────────────────────────────
+    // In-class cross-reactivity is NOT well established (limited data), so other
+    // tetracyclines are "caution" (non-SCAR) and escalate to "avoid" only at
+    // SCAR — the same conservative stance as modern fluoroquinolone guidance.
+    // Non-tetracycline antibiotics stay safe even at SCAR (keepSafeOnScar).
+    // Pharmacist-verified 2026-07 (refs on the group) — see docs/allergy-nonbetalactam.md
+    {
+      id: 'tetracycline',
+      label: 'Tetracyclines',
+      refs: ['maciag2020', 'hamilton2019', 'tham1996', 'correia1999', 'minoLupus'],
+      crossClassCaution: true,
+      keepSafeOnScar: true,
+      allergens: [
+        { id: 'doxycycline',  generic: 'Doxycycline',  th: 'ด็อกซีไซคลิน', trade: ['Vibramycin'] },
+        { id: 'minocycline',  generic: 'Minocycline',  th: 'ไมโนไซคลิน',   trade: ['Minocin'] },
+        { id: 'tetracycline', generic: 'Tetracycline', th: 'เตตราไซคลิน',  trade: [] },
+        { id: 'tigecycline',  generic: 'Tigecycline',  th: 'ไทเกไซคลิน',   trade: ['Tygacil'] }
+      ],
+      crossReason: 'tetracycline กลุ่มเดียวกัน — ข้อมูลแพ้ข้ามภายในกลุ่มจำกัด/ไม่ชัดเจน',
+      crossReactive: [
+        { id: 'doxycycline',  generic: 'Doxycycline',  th: 'ด็อกซีไซคลิน', sub: 'Tetracycline', pct: 'ข้อมูลจำกัด' },
+        { id: 'minocycline',  generic: 'Minocycline',  th: 'ไมโนไซคลิน',   sub: 'Tetracycline (เสี่ยง DRESS/DILE เอง)', pct: 'ข้อมูลจำกัด',
+          reason: 'minocycline สัมพันธ์กับ DRESS และ drug-induced lupus เฉพาะตัว (คนละกลไก) — ระวังเป็นพิเศษ' },
+        { id: 'tetracycline', generic: 'Tetracycline', th: 'เตตราไซคลิน',  sub: 'Tetracycline', pct: 'ข้อมูลจำกัด' },
+        { id: 'tigecycline',  generic: 'Tigecycline',  th: 'ไทเกไซคลิน',   sub: 'Glycylcycline (อนุพันธ์ tetracycline)', pct: 'ข้อมูลจำกัด' }
+      ],
+      safeReason: 'ยาต่างกลุ่ม (ไม่ใช่ tetracycline) → ไม่มีปัญหาแพ้ข้าม — เลือกตามชนิดการติดเชื้อ',
+      safe: [
+        { generic: 'Beta-lactam (ถ้าไม่แพ้)', th: 'กลุ่มเบต้าแลคแทม', sub: 'เช่น amoxicillin / cephalexin' },
+        { generic: 'Azithromycin / Clarithromycin', th: 'กลุ่มแมโครไลด์', sub: 'Macrolide' },
+        { generic: 'Clindamycin', th: 'คลินดามัยซิน', sub: 'Lincosamide' },
+        { generic: 'TMP-SMX (Cotrimoxazole)', th: 'โคไตรม็อกซาโซล', sub: 'Sulfonamide antibiotic' }
+      ],
+      noteMild: 'แพ้ข้ามในกลุ่ม tetracycline "แปรปรวน/ยังไม่สรุป" — โดยทั่วไปเลือกยานอกกลุ่มก่อน; ถ้าจำเป็นต้องใช้ tetracycline ตัวอื่น ยืนยันความปลอดภัยด้วย skin test + graded challenge (Maciag 2020)',
+      noteIge:  'แพ้ข้ามในกลุ่ม tetracycline "แปรปรวน/ยังไม่สรุป" — เลือกยานอกกลุ่มก่อน; ถ้าจำเป็นต้องใช้ tetracycline ตัวอื่น ยืนยันด้วย skin test + graded challenge; แพ้รุนแรง/จำเป็นจริง พิจารณา desensitization',
+      noteScar: 'SCAR จาก tetracycline: เลี่ยง tetracycline ทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม tetracycline',
+      singleDrugCallout: '⚠️ แพ้ข้ามภายในกลุ่ม tetracycline "แปรปรวน/ยังไม่สรุป" (FDE: tetra↔doxy ~62.5%, tetra↔mino ~18.75%, ~37.5% ไม่แพ้ข้าม — Tham 1996) → ไม่จำเป็นต้อง avoid ยกกลุ่ม: ยา tetracycline ตัวอื่นมักใช้ได้หลังยืนยันด้วย skin test + graded challenge (Maciag 2020) · minocycline เสี่ยง DRESS / drug-induced lupus / Sweet syndrome เฉพาะตัว'
+    },
+    // ── Nitroimidazoles ──────────────────────────────────────────────────────
+    // metronidazole ↔ tinidazole (and secnidazole/ornidazole) share the
+    // 5-nitroimidazole nucleus and cross-reactivity IS reported → treat other
+    // nitroimidazoles as "avoid" (default cross = high). Non-nitroimidazole
+    // anaerobe cover stays safe even at SCAR (keepSafeOnScar).
+    // Pharmacist-verified 2026-07 (refs on the group) — see docs/allergy-nonbetalactam.md
+    {
+      id: 'nitroimidazole',
+      label: 'Nitroimidazoles',
+      refs: ['gendelman2014', 'hollis2022', 'cahill2021'],
+      keepSafeOnScar: true,
+      allergens: [
+        { id: 'metronidazole', generic: 'Metronidazole', th: 'เมโทรนิดาโซล', trade: ['Flagyl'] },
+        { id: 'tinidazole',    generic: 'Tinidazole',    th: 'ทินิดาโซล',    trade: [] },
+        { id: 'secnidazole',   generic: 'Secnidazole',   th: 'เซคนิดาโซล',   trade: [] },
+        { id: 'ornidazole',    generic: 'Ornidazole',    th: 'ออร์นิดาโซล',   trade: [] }
+      ],
+      crossReason: '5-nitroimidazole เหมือนกัน → มีรายงานแพ้ข้ามภายในกลุ่ม',
+      crossReactive: [
+        { id: 'metronidazole', generic: 'Metronidazole', th: 'เมโทรนิดาโซล', sub: 'Nitroimidazole' },
+        { id: 'tinidazole',    generic: 'Tinidazole',    th: 'ทินิดาโซล',    sub: 'Nitroimidazole' },
+        { id: 'secnidazole',   generic: 'Secnidazole',   th: 'เซคนิดาโซล',   sub: 'Nitroimidazole' },
+        { id: 'ornidazole',    generic: 'Ornidazole',    th: 'ออร์นิดาโซล',   sub: 'Nitroimidazole' }
+      ],
+      safeReason: 'ยาต่างกลุ่ม (ไม่ใช่ nitroimidazole) → ไม่แพ้ข้าม — เลือกตามชนิดการติดเชื้อ',
+      safe: [
+        { generic: 'Clindamycin', th: 'คลินดามัยซิน', sub: 'Lincosamide (คุม anaerobe)' },
+        { generic: 'Amoxicillin-clavulanate (ถ้าไม่แพ้ beta-lactam)', th: 'อะม็อกซี-คลาวูลาเนต', sub: 'Beta-lactam/BLI (คุม anaerobe)' },
+        { generic: 'Piperacillin-tazobactam (ถ้าไม่แพ้ beta-lactam)', th: 'ไพเพอราซิลลิน-ทาโซแบคแทม', sub: 'Beta-lactam/BLI (คุม anaerobe)' },
+        { generic: 'Vancomycin (PO — สำหรับ C. difficile)', th: 'แวนโคไมซินชนิดกิน', sub: 'Glycopeptide (CDI)' }
+      ],
+      noteMild: 'มีรายงานแพ้ข้ามในกลุ่ม nitroimidazole (metronidazole↔tinidazole) — เลี่ยงทั้งกลุ่ม; ใช้ยานอกกลุ่มตามชนิดการติดเชื้อ',
+      noteIge:  'เลี่ยง nitroimidazole ทั้งกลุ่ม (มีรายงานแพ้ข้ามหมู่ 5-nitroimidazole) · ใช้ยานอกกลุ่ม (clindamycin / beta-lactam-BLI ถ้าไม่แพ้)',
+      noteScar: 'SCAR จาก nitroimidazole: เลี่ยงทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม nitroimidazole',
+      singleDrugCallout: '💡 metronidazole กับ nitroimidazole ตัวอื่น (tinidazole / secnidazole / ornidazole) มีหมู่ 5-nitroimidazole ร่วมกัน → แพ้ข้ามกันได้ (Gendelman 2014) จึงเลี่ยงทั้งกลุ่ม · ทางเลือกคุม anaerobe ทั่วไป: clindamycin หรือ beta-lactam/BLI (ถ้าไม่แพ้) · ⚠️ ยกเว้น trichomoniasis ที่มีแต่ nitroimidazole ได้ผล → แนวทางคือ desensitize metronidazole ภายใต้การเฝ้าระวัง (ไม่ใช่สลับไป tinidazole ที่แพ้ข้าม หรือยานอกกลุ่มที่ล้มเหลวสูง) (Hollis 2022; Cahill 2021)'
     }
   ];
 
@@ -981,6 +1072,27 @@
   }
   function _alBool(v) { return v === true || v === 'true' || v === 'TRUE'; }
 
+  // UNION a code list with a Sheet list by drug identity so a code-defined entry
+  // is a guaranteed FLOOR (mirrors the DDI "safety floor" in js/drug-interactions.js:
+  // an incomplete/stale Supabase table can never silently drop a vetted code
+  // entry). The Sheet may OVERRIDE a same-identity entry (edit pct/reason/…) and
+  // ADD new entries; it cannot DELETE a code entry. To remove/correct a wrong
+  // code entry, change the code, not Supabase. Identity = id (preferred) else
+  // normalized generic (normName is hoisted from section 12).
+  function _alKey(d) { return (d && d.id) ? 'id:' + d.id : 'nm:' + normName(d && d.generic); }
+  function _alMergeList(hcList, sheetVal) {
+    var sheet = _alParse(sheetVal, null);
+    if (!Array.isArray(sheet)) return (hcList || []).slice();   // no usable Sheet list → keep code floor
+    var out = [], idx = {};
+    (hcList || []).forEach(function (d) { idx[_alKey(d)] = out.length; out.push(d); });
+    sheet.forEach(function (d) {
+      var k = _alKey(d);
+      if (idx[k] != null) out[idx[k]] = Object.assign({}, out[idx[k]], d);   // Sheet overrides same identity
+      else { idx[k] = out.length; out.push(d); }                             // brand-new Sheet entry
+    });
+    return out;
+  }
+
   function applyRemoteData(remote) {
     if (!remote) return false;
     // refs: merge remote citations over the hardcoded map (remote wins)
@@ -1002,10 +1114,11 @@
       return Object.assign({}, hc, {   // start from code so logic fields survive
         id: g.id, label: g.label || hc.label || '',
         refs: _alParse(g.refs, hc.refs || []),
-        allergens: _alParse(g.allergens, hc.allergens || []),
-        crossReactive: _alParse(g.crossReactive, hc.crossReactive || []),
-        safe: _alParse(g.safe, hc.safe || []),
-        caution: _alParse(g.caution, hc.caution || []),
+        // list fields UNION over the code floor (safety floor — see _alMergeList)
+        allergens: _alMergeList(hc.allergens, g.allergens),
+        crossReactive: _alMergeList(hc.crossReactive, g.crossReactive),
+        safe: _alMergeList(hc.safe, g.safe),
+        caution: _alMergeList(hc.caution, g.caution),
         crossReason: g.crossReason || hc.crossReason || '',
         cautionReason: g.cautionReason || hc.cautionReason || '',
         safeReason: g.safeReason || hc.safeReason || '',
@@ -1054,12 +1167,216 @@
     return true;
   }
 
+  // --- 12. Multi-allergen aggregation ----------------------------------------
+  // Combine the single-allergen reports for SEVERAL culprit drugs into ONE
+  // verdict per target drug (worst-case wins) and, optionally, answer the
+  // clinician's real question: "the patient is allergic to A, B, C … can they
+  // use <candidate>?". Pure/testable; REUSES buildReport unchanged (no new
+  // clinical logic — only aggregation + a safe "worst-wins" combine rule).
+
+  // Normalize a display generic to a stable match key. NBL report entries carry
+  // only `generic` (no id), and a generic may include a Thai/qualifier suffix in
+  // parentheses (e.g. "Aspirin (ขนาดยาแก้ปวด…)") — take the text before the first
+  // "(" and lowercase it. Beta-lactam entries keep their real id (preferred).
+  function normName(s) {
+    return String(s == null ? '' : s).split('(')[0].toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+
+  // Build a name→canonical-id alias so the SAME real drug collapses to one
+  // bucket even when one source carries an `id` and another only a display name
+  // (e.g. the tetracycline allergen `doxycycline` vs the fluoroquinolone group's
+  // plain "Doxycycline" safe-alternative entry). Rebuilt per call so it always
+  // reflects the current (possibly remote-merged) NBL_GROUPS.
+  function _buildAlias() {
+    var byId = {}, byNorm = {};
+    function reg(id, generic) { if (id) { byId[id] = id; if (generic) byNorm[normName(generic)] = id; } }
+    DRUGS.forEach(function (d) { reg(d.id, d.generic); });
+    NBL_GROUPS.forEach(function (g) {
+      (g.allergens || []).forEach(function (a) { reg(a.id, a.generic); });
+      ['crossReactive', 'safe', 'caution'].forEach(function (k) {
+        (g[k] || []).forEach(function (d) { if (d.id) reg(d.id, d.generic); });
+      });
+    });
+    return { byId: byId, byNorm: byNorm };
+  }
+  function _canonKey(drug, alias) {
+    if (!drug) return 'nm:';
+    if (drug.id && alias.byId[drug.id]) return 'id:' + alias.byId[drug.id];
+    if (drug.id) return 'id:' + drug.id;
+    var nk = normName(drug.generic);
+    return alias.byNorm[nk] ? 'id:' + alias.byNorm[nk] : 'nm:' + nk;
+  }
+
+  // Every selectable / targetable drug with a stable canonical key + display —
+  // the candidate picker's universe (includes target-only drugs like parecoxib).
+  function drugUniverse() {
+    var alias = _buildAlias(), out = [], seen = {};
+    function add(drug, gid, glabel) {
+      var key = _canonKey(drug, alias);
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push({ key: key, generic: drug.generic, th: drug.th || '', gid: gid || '', glabel: glabel || '' });
+    }
+    DRUGS.forEach(function (d) { add(d, d.class, d.class); });
+    NBL_GROUPS.forEach(function (g) {
+      (g.allergens || []).forEach(function (a) { add(a, g.id, g.label); });
+      ['crossReactive', 'safe', 'caution'].forEach(function (k) {
+        (g[k] || []).forEach(function (d) { if (d.generic) add(d, g.id, g.label); });
+      });
+    });
+    return out;
+  }
+
+  function _resolveCandidate(candidate, alias) {
+    if (!candidate) return null;
+    if (typeof candidate === 'object') {
+      if (candidate.key) return { key: candidate.key, name: candidate.name || candidate.generic || '', th: candidate.th || '' };
+      candidate = candidate.id || candidate.generic || candidate.name || '';
+    }
+    var s = String(candidate).trim();
+    if (!s) return null;
+    // already a canonical key form ('id:x' / 'nm:x') — resolve display via the universe
+    if (/^(id|nm):/.test(s)) {
+      var uk = drugUniverse();
+      for (var q = 0; q < uk.length; q++) if (uk[q].key === s) return { key: uk[q].key, name: uk[q].generic, th: uk[q].th };
+      return { key: s, name: s.replace(/^(id|nm):/, ''), th: '' };
+    }
+    if (DRUG_BY_ID[s]) return { key: _canonKey(DRUG_BY_ID[s], alias), name: DRUG_BY_ID[s].generic, th: DRUG_BY_ID[s].th };
+    if (NBL_INDEX[s]) { var a = NBL_INDEX[s].allergen; return { key: _canonKey({ id: s, generic: a.generic }, alias), name: a.generic, th: a.th || '' }; }
+    var nk = normName(s), uni = drugUniverse();
+    for (var i = 0; i < uni.length; i++) {
+      if (uni[i].key === 'id:' + s || uni[i].key === 'nm:' + nk || normName(uni[i].generic) === nk) {
+        return { key: uni[i].key, name: uni[i].generic, th: uni[i].th };
+      }
+    }
+    return { key: (alias.byNorm[nk] ? 'id:' + alias.byNorm[nk] : 'nm:' + nk), name: s, th: '' };
+  }
+
+  var BUCKET_RANK = { safer: 1, caution: 2, avoid: 3 };
+  var RANK_BUCKET = { 0: 'safer', 1: 'safer', 2: 'caution', 3: 'avoid' };
+
+  // selections: [{ id, severity, nature?, phenotype? }]  (per-drug settings)
+  // candidate:  a drug id / generic / universe item {key,…}  (optional)
+  function buildMultiReport(selections, candidate) {
+    selections = (selections || []).filter(function (s) { return s && s.id; });
+    var alias = _buildAlias();
+    var allergens = [];         // resolved per-allergen meta + full single report
+    var intoleranceNotes = [];  // nature=intolerance advisories (shown separately)
+    var byTarget = {};          // canonKey -> { drug, verdicts:[] }
+
+    function ensureTarget(key, drug) {
+      if (!byTarget[key]) byTarget[key] = { key: key, drug: drug, verdicts: [] };
+      return byTarget[key];
+    }
+
+    selections.forEach(function (s) {
+      var meta = allergenMeta(s.id);
+      if (!meta) return;
+      var opts = {};
+      if (s.nature === 'intolerance') opts.nature = 'intolerance';
+      if (s.phenotype) opts.phenotype = s.phenotype;
+      var rep = buildReport(s.id, s.severity, opts);
+      if (!rep) return;
+      allergens.push({ id: s.id, meta: meta, severity: rep.severity, nature: s.nature || 'allergy',
+        phenotype: s.phenotype || '', calloutNote: rep.calloutNote || '', report: rep });
+
+      if (rep.notAllergy) {
+        // intolerance = not an immune allergy → the drug itself is NOT
+        // contraindicated and there is NO cross-reactivity to avoid; surface an
+        // advisory instead of feeding avoid/caution/safer buckets.
+        intoleranceNotes.push({ allergen: meta, advisory: rep.advisory || '', caveat: rep.caveat || '', pseudo: rep.pseudo || null });
+        return;
+      }
+
+      // the culprit itself is ALWAYS avoid (the patient is allergic to it) —
+      // this must override any other allergen's report that lists it as "safe"
+      // (e.g. Doxycycline sits in Ciprofloxacin's safe list, but the patient is
+      // also allergic to Doxycycline → it must land in the avoid bucket).
+      var selfKey = _canonKey({ id: s.id, generic: meta.generic }, alias);
+      ensureTarget(selfKey, { id: s.id, generic: meta.generic, th: meta.th, class: meta.class })
+        .verdicts.push({ allergenId: s.id, allergenName: meta.generic, bucket: 'avoid', tier: 'high',
+          pct: 'ยาที่แพ้เอง', reason: 'ยาตัวเดียวกับที่ผู้ป่วยแพ้', refs: [], advice: '', self: true });
+
+      ['avoid', 'caution', 'safer'].forEach(function (bucket) {
+        (rep[bucket] || []).forEach(function (it) {
+          var key = _canonKey(it.drug, alias);
+          ensureTarget(key, it.drug).verdicts.push({ allergenId: s.id, allergenName: meta.generic,
+            bucket: bucket, tier: it.tier, pct: it.pct, reason: it.reason, refs: it.refs || [], advice: it.advice || '' });
+        });
+      });
+    });
+
+    function worstOf(verdicts) {
+      var rank = 0, worst = null;
+      verdicts.forEach(function (v) { var r = BUCKET_RANK[v.bucket] || 0; if (r > rank) { rank = r; worst = v; } });
+      return { rank: rank, worst: worst || verdicts[0] };
+    }
+    function dedupeRefs(verdicts) {
+      var seen = {}, out = [];
+      verdicts.forEach(function (v) { (v.refs || []).forEach(function (k) { if (!seen[k]) { seen[k] = true; out.push(k); } }); });
+      return out;
+    }
+    function driversOf(verdicts) {
+      return verdicts.map(function (v) {
+        return { allergenId: v.allergenId, allergenName: v.allergenName, bucket: v.bucket,
+          tier: v.tier, pct: v.pct, reason: v.reason, advice: v.advice || '', self: !!v.self };
+      });
+    }
+
+    var avoid = [], caution = [], safer = [];
+    Object.keys(byTarget).forEach(function (key) {
+      var t = byTarget[key];
+      var w = worstOf(t.verdicts);
+      var worst = w.worst;
+      var row = { drug: t.drug, tier: worst.tier, pct: worst.pct, reason: worst.reason,
+        advice: worst.advice || '', refs: dedupeRefs(t.verdicts), decision: RANK_BUCKET[w.rank],
+        drivers: driversOf(t.verdicts) };
+      if (w.rank >= 3) avoid.push(row);
+      else if (w.rank === 2) caution.push(row);
+      else safer.push(row);
+    });
+
+    function tierOrder(t) { return TIERS[t] ? TIERS[t].order : 99; }
+    avoid.sort(function (x, y) { return tierOrder(x.tier) - tierOrder(y.tier); });
+    caution.sort(function (x, y) { return tierOrder(x.tier) - tierOrder(y.tier); });
+    safer.sort(function (x, y) { return tierOrder(y.tier) - tierOrder(x.tier); });
+
+    // candidate ("can they use X?") = pure lookup into the aggregated index
+    var candOut = null;
+    if (candidate) {
+      var c = _resolveCandidate(candidate, alias);
+      if (c) {
+        var t = byTarget[c.key];
+        if (t) {
+          var w = worstOf(t.verdicts);
+          candOut = { key: c.key, name: c.name, th: c.th, bucket: RANK_BUCKET[w.rank],
+            tier: w.worst ? w.worst.tier : '', related: true, drivers: driversOf(t.verdicts),
+            unrelated: allergens.filter(function (al) {
+              return !t.verdicts.some(function (v) { return v.allergenId === al.id; });
+            }).map(function (al) { return al.meta.generic; }) };
+        } else {
+          candOut = { key: c.key, name: c.name, th: c.th, bucket: 'unknown', tier: '',
+            related: false, drivers: [], unrelated: allergens.map(function (al) { return al.meta.generic; }) };
+        }
+      }
+    }
+
+    var refKeys = {};
+    [avoid, caution, safer].forEach(function (list) {
+      list.forEach(function (row) { (row.refs || []).forEach(function (k) { refKeys[k] = true; }); });
+    });
+
+    return { multi: true, allergens: allergens, intoleranceNotes: intoleranceNotes,
+      candidate: candOut, avoid: avoid, caution: caution, safer: safer, refs: Object.keys(refKeys) };
+  }
+
   root.AllergyData = {
     REFS: REFS, TIERS: TIERS, CLUSTERS: CLUSTERS, DRUGS: DRUGS, DRUG_BY_ID: DRUG_BY_ID,
     applyRemoteData: applyRemoteData,
     OVERRIDES: OVERRIDES, SEVERITY: SEVERITY, NON_BETA_LACTAM: NON_BETA_LACTAM,
     NBL_GROUPS: NBL_GROUPS, NBL_INDEX: NBL_INDEX,
-    computeRelation: computeRelation, buildReport: buildReport
+    computeRelation: computeRelation, buildReport: buildReport,
+    buildMultiReport: buildMultiReport, drugUniverse: drugUniverse, normName: normName
   };
 
   // Node/test export (browser ignores)

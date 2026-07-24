@@ -600,6 +600,141 @@ test('override beats structural rule (cefazolin target wins over low default)', 
   assert.equal(tierOf('penicillinV', 'cefazolin'), 'negligible');
 });
 
+// ═══════════════════ buildMultiReport — multi-allergen aggregation ═════════
+// Combine several culprit drugs into ONE worst-wins verdict per target, plus
+// the "can they use <candidate>?" lookup. Reuses buildReport unchanged; these
+// run BEFORE the applyRemoteData mutation tests (which replace the singleton).
+
+test('multi: single allergen ≈ buildReport (+ self-avoid of the culprit)', () => {
+  const m = A.buildMultiReport([{ id: 'amoxicillin', severity: 'ige' }]);
+  assert.ok(m.multi && Array.isArray(m.avoid) && Array.isArray(m.safer));
+  assert.ok(m.safer.some((r) => /Meropenem/.test(r.drug.generic)), 'meropenem safer');
+  assert.ok(m.avoid.some((r) => /Ampicillin/.test(r.drug.generic)), 'ampicillin avoid');
+  assert.ok(m.avoid.some((r) => /^Amoxicillin$/.test(r.drug.generic) && r.drivers.some((d) => d.self)),
+    'culprit shown as self-avoid');
+});
+
+test('multi: worst-wins — safe for one allergen but the culprit of another => avoid', () => {
+  // allergic to BOTH amoxicillin and cephalexin. From amoxicillin's report
+  // cephalexin is only "low/safer" (different R1), but the patient is allergic
+  // to cephalexin itself → it must land in avoid, never safer.
+  const m = A.buildMultiReport([
+    { id: 'amoxicillin', severity: 'ige' },
+    { id: 'cephalexin', severity: 'ige' }
+  ]);
+  assert.ok(m.avoid.some((r) => /^Cephalexin$/.test(r.drug.generic)), 'cephalexin in avoid');
+  assert.ok(!m.safer.some((r) => /^Cephalexin$/.test(r.drug.generic)), 'cephalexin NOT in safer');
+  const row = m.avoid.find((r) => /^Cephalexin$/.test(r.drug.generic));
+  assert.ok(row.drivers.some((d) => d.self), 'self driver present on cephalexin');
+});
+
+test('multi: a target is deduped across allergens (one row, both drivers)', () => {
+  const m = A.buildMultiReport([
+    { id: 'amoxicillin', severity: 'ige' },
+    { id: 'ampicillin', severity: 'ige' }
+  ]);
+  const meros = m.safer.concat(m.avoid, m.caution).filter((r) => /^Meropenem$/.test(r.drug.generic));
+  assert.equal(meros.length, 1, 'meropenem appears exactly once');
+  assert.ok(meros[0].drivers.length >= 2, 'both allergens recorded as drivers');
+});
+
+test('multi candidate: related safer / avoid, and unrelated => not related', () => {
+  const sel = [{ id: 'amoxicillin', severity: 'ige' }];
+  const safe = A.buildMultiReport(sel, 'meropenem');
+  assert.ok(safe.candidate && safe.candidate.related && safe.candidate.bucket === 'safer', 'meropenem safer');
+  const bad = A.buildMultiReport(sel, 'ampicillin');
+  assert.equal(bad.candidate.bucket, 'avoid', 'ampicillin avoid');
+  // a drug that only lives in an NBL group is unrelated to a penicillin allergy
+  const unrel = A.buildMultiReport(sel, 'metronidazole');
+  assert.equal(unrel.candidate.related, false, 'metronidazole unrelated to penicillin allergy');
+});
+
+test('multi candidate: a candidate that is itself a culprit => avoid (self)', () => {
+  const m = A.buildMultiReport([{ id: 'ciprofloxacin', severity: 'ige' }], 'ciprofloxacin');
+  assert.equal(m.candidate.bucket, 'avoid');
+  assert.ok(m.candidate.drivers.some((d) => d.self), 'self driver');
+});
+
+test('multi: intolerance contributes an advisory, not cross-reactivity/self-avoid', () => {
+  const m = A.buildMultiReport([{ id: 'ciprofloxacin', severity: 'ige', nature: 'intolerance' }]);
+  assert.equal(m.intoleranceNotes.length, 1, 'one intolerance note');
+  assert.equal(m.avoid.length + m.caution.length + m.safer.length, 0,
+    'intolerance yields no avoid/caution/safer (not even self-avoid)');
+});
+
+test('multi candidate: accepts a canonical key string OR a universe item (name resolved)', () => {
+  const sel = [{ id: 'aspirin', severity: 'ige' }];
+  const byKey = A.buildMultiReport(sel, 'nm:parecoxib');
+  assert.ok(byKey.candidate && byKey.candidate.related && byKey.candidate.bucket === 'safer', 'key string resolves + related');
+  assert.equal(byKey.candidate.name, 'Parecoxib', 'display name resolved (not the raw key)');
+  const uni = A.drugUniverse().find((x) => /^Parecoxib$/.test(x.generic));
+  assert.ok(uni, 'parecoxib present in the drug universe');
+  assert.equal(A.buildMultiReport(sel, uni).candidate.bucket, 'safer', 'universe item resolves');
+});
+
+// ─────────────── new clinical data: parecoxib + 2 NBL groups ──────────────
+test('data: Parecoxib present as a COX-2 safe option for a cross-reactive NSAID allergy', () => {
+  const r = A.buildReport('aspirin', 'ige', { phenotype: 'cross' });
+  assert.ok(r.safer.some((x) => /^Parecoxib$/.test(x.drug.generic)), 'parecoxib listed as safer');
+});
+
+test('data: tetracycline group — other tetracyclines caution (non-SCAR), non-tetracyclines safe', () => {
+  const r = A.buildReport('doxycycline', 'ige');
+  assert.ok(r && r.isNbl, 'doxycycline resolves to an NBL group');
+  assert.ok(r.caution.some((x) => /Minocycline/.test(x.drug.generic)), 'minocycline caution (non-SCAR)');
+  assert.ok(r.safer.some((x) => /Macrolide|Azithromycin/.test(x.drug.generic)), 'non-tetracycline safe');
+  const s = A.buildReport('doxycycline', 'scar');
+  assert.ok(s.avoid.some((x) => /Minocycline/.test(x.drug.generic)), 'SCAR → in-class escalates to avoid');
+});
+
+test('data: nitroimidazole group — other nitroimidazoles avoid, clindamycin safe', () => {
+  const r = A.buildReport('metronidazole', 'ige');
+  assert.ok(r && r.isNbl, 'metronidazole resolves to an NBL group');
+  assert.ok(r.avoid.some((x) => /Tinidazole/.test(x.drug.generic)), 'tinidazole avoid (shared 5-nitroimidazole)');
+  assert.ok(r.safer.some((x) => /Clindamycin/.test(x.drug.generic)), 'clindamycin safe alternative');
+});
+
+test('data: verified primary-source refs attached to new groups (not the khan2022 placeholder)', () => {
+  const tet = A.buildReport('doxycycline', 'ige');
+  const tetRefs = new Set(tet.caution.concat(tet.safer).flatMap((x) => x.refs || []));
+  assert.ok(tetRefs.has('maciag2020') && tetRefs.has('tham1996'), 'tetracycline cites Maciag + Tham');
+  const nz = A.buildReport('metronidazole', 'ige');
+  const nzRefs = new Set(nz.avoid.concat(nz.safer).flatMap((x) => x.refs || []));
+  assert.ok(nzRefs.has('gendelman2014'), 'nitroimidazole cites Gendelman');
+  [...tetRefs, ...nzRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
+});
+
+test('data: parecoxib carries graded-challenge + sulfonamide guidance', () => {
+  const r = A.buildReport('aspirin', 'ige', { phenotype: 'cross' });
+  const p = r.safer.find((x) => /^Parecoxib$/.test(x.drug.generic));
+  assert.ok(p && /graded challenge/.test(p.advice), 'graded-challenge advice present on parecoxib');
+});
+
+test('multi EXAMPLE: aspirin+cipro+doxy+metro → parecoxib usable; doxy/metro avoid (self)', () => {
+  const sel = [
+    { id: 'aspirin', severity: 'ige' },
+    { id: 'ciprofloxacin', severity: 'ige' },
+    { id: 'doxycycline', severity: 'ige' },
+    { id: 'metronidazole', severity: 'ige' }
+  ];
+  const m = A.buildMultiReport(sel, 'parecoxib');
+  // candidate parecoxib → usable (COX-2 selective vs the aspirin/NSAID allergy)
+  assert.ok(m.candidate && m.candidate.related, 'parecoxib related to the NSAID allergy');
+  assert.equal(m.candidate.bucket, 'safer', 'parecoxib usable (safer)');
+  assert.ok(m.candidate.drivers.some((d) => /Aspirin/.test(d.allergenName) && d.bucket === 'safer'),
+    'driven by the aspirin allergy as safer');
+  // doxycycline & metronidazole are culprits → AVOID (self), never safer, even
+  // though ciprofloxacin's report lists them as safe alternatives.
+  const inList = (list, re) => list.some((r) => re.test(r.drug.generic));
+  assert.ok(inList(m.avoid, /^Doxycycline$/), 'doxycycline in avoid (self)');
+  assert.ok(inList(m.avoid, /^Metronidazole$/), 'metronidazole in avoid (self)');
+  assert.ok(!inList(m.safer, /^Doxycycline$/), 'doxycycline NOT in safer');
+  assert.ok(!inList(m.safer, /^Metronidazole$/), 'metronidazole NOT in safer');
+  const doxy = m.avoid.find((r) => /^Doxycycline$/.test(r.drug.generic));
+  assert.ok(doxy.drivers.some((d) => d.self) && doxy.drivers.some((d) => /Ciprofloxacin/.test(d.allergenName)),
+    'doxycycline shows both the self-avoid and the ciprofloxacin-safe drivers');
+});
+
 // ───────────── applyRemoteData (A3 Sheet override) — KEEP LAST ─────────────
 // These MUST be the final tests: applyRemoteData mutates the shared NBL_GROUPS/
 // NBL_INDEX/REFS singleton, so the override test below replaces the hardcoded
@@ -636,6 +771,29 @@ test('NBL: applyRemoteData preserves code-defined NSAID phenotypes (Sheet has no
   const r = A.buildReport('ibuprofen', 'ige', { phenotype: 'single' });
   assert.ok(r.avoid.some((x) => /Naproxen/.test(x.drug.generic)), 'same chem -> avoid');
   assert.ok(r.safer.some((x) => /Diclofenac/.test(x.drug.generic)), 'different chem -> safe');
+});
+
+test('NBL: applyRemoteData UNION safety-floor — Sheet cannot drop a code entry, can override/add', () => {
+  const ok = A.applyRemoteData({
+    groups: [{
+      id: 'nsaid', type: 'nbl', label: 'NSAIDs', sortOrder: 0,
+      allergens: JSON.stringify([{ id: 'aspirin', generic: 'Aspirin', th: 'แอสไพริน', chem: 'salicylate' }]),
+      crossReactive: '[]',
+      // Sheet safe list OMITS parecoxib, OVERRIDES celecoxib (new pct), ADDs a new drug
+      safe: JSON.stringify([
+        { generic: 'Celecoxib', th: 'ซีลีค็อกซิบ', sub: 'COX-2 selective', pct: 'SHEET-OVERRIDE', chem: 'coxib' },
+        { generic: 'Lumiracoxib', th: 'ลูมิราค็อกซิบ', sub: 'COX-2 selective', chem: 'coxib' }
+      ]),
+      caution: '[]'
+    }]
+  });
+  assert.equal(ok, true);
+  const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');
+  const safeNames = g.safe.map((d) => d.generic);
+  assert.ok(safeNames.some((n) => /^Parecoxib$/.test(n)), 'code floor: parecoxib NOT dropped by Sheet');
+  assert.ok(safeNames.some((n) => /^Lumiracoxib$/.test(n)), 'Sheet can ADD a new safe drug');
+  const cele = g.safe.find((d) => /^Celecoxib$/.test(d.generic));
+  assert.equal(cele.pct, 'SHEET-OVERRIDE', 'Sheet can OVERRIDE a same-identity entry');
 });
 
 test('NBL: applyRemoteData adds Sheet groups + UNION-keeps code groups — LAST TEST', () => {

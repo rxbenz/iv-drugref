@@ -50,7 +50,19 @@
     dthHeparin: 'Schindewolf M, et al. Delayed-type hypersensitivity to heparins/heparinoids — patterns of cross-reactivity; tolerance of fondaparinux. (Allergy 2007;62; PMID 17573880 / PMID 15025697)',
     vfr2021: 'Alvarez-Arango S, et al. Vancomycin Infusion Reaction — Moving Beyond "Red Man Syndrome". N Engl J Med 2021;384(14):1283-1286. (rate-related, non-IgE; rename)',
     vfrMgmt: 'Sivagnanam S, Deleu D. Red man syndrome. Crit Care 2003;7(2):119-120. + Martin/ASHP-IDSA vancomycin guidance — slow infusion ≥60 min/g (≤10 mg/min) ± antihistamine.',
-    vancoHsr: 'Glycopeptide hypersensitivity — DRESS, linear IgA bullous dermatosis, anaphylaxis; vancomycin↔teicoplanin cross-reactivity variable (~10-15%). (Minhas 2016; An 2011; Hwang 2021)'
+    vancoHsr: 'Glycopeptide hypersensitivity — DRESS, linear IgA bullous dermatosis, anaphylaxis; vancomycin↔teicoplanin cross-reactivity variable (~10-15%). (Minhas 2016; An 2011; Hwang 2021)',
+    // Parecoxib / COX-2 in NSAID hypersensitivity (pharmacist-verified 2026-07)
+    colanardi2008: 'Colanardi MC, et al. Safety of parecoxib in patients with nonsteroidal anti-inflammatory drug-induced urticaria or angioedema. Ann Allergy Asthma Immunol 2008;100(1):82-85. (PMID 18254487 — n=79 incl. 31 multiple-class/cross-reactive, 0% reacted to parecoxib)',
+    // Tetracycline group (pharmacist-verified 2026-07)
+    maciag2020: 'Maciag MC, et al. Hypersensitivity to tetracyclines: skin testing, graded challenge, and desensitization regimens. Ann Allergy Asthma Immunol 2020;124(6):589-593. (cross-reactivity "not established"; skin test + graded challenge/desensitization enable use)',
+    hamilton2019: 'Hamilton LA, Guarascio AJ. Tetracycline Allergy. Pharmacy (Basel) 2019;7(3):104.',
+    tham1996: 'Tham SN, Kwok YK, Chan HL. Cross-reactivity in fixed drug eruptions to tetracyclines. Arch Dermatol 1996;132(9):1134-1135. (tetracycline↔doxycycline ~62.5%, ↔minocycline ~18.75%, 37.5% no cross-sensitivity)',
+    correia1999: 'Correia O, Delgado L, Polonia J. Genital fixed drug eruption: cross-reactivity between doxycycline and minocycline. Clin Exp Dermatol 1999;24(2):137.',
+    minoLupus: 'Minocycline-specific severe reactions — Shepherd J. Minocycline-induced lupus. J Am Board Fam Pract 2002;15(3):239-241; Brown RJ, et al. Minocycline-induced drug hypersensitivity syndrome followed by multiple autoimmune sequelae. Arch Dermatol 2009;145(1):63-66.',
+    // Nitroimidazole group (pharmacist-verified 2026-07)
+    gendelman2014: 'Gendelman SR, Pien LC, Gutta RC, Abouhassan SR. Modified oral metronidazole desensitization protocol. Allergy Rhinol (Providence) 2014;5(2):e66-e69. ("because of the similar chemical structure of nitroimidazoles, patients with hypersensitivity to metronidazole may also have hypersensitivity to tinidazole")',
+    hollis2022: 'Hollis CC, Mlauzi C, Ashton M. Oral metronidazole desensitization for IgE-mediated hypersensitivity. Cureus 2022;14(7):e26849. (tinidazole "posed a serious risk" → desensitize metronidazole rather than switch)',
+    cahill2021: 'Cahill JA, Sahota PS, Kan M. Failure of a single day metronidazole desensitization protocol, and success of a modified two-day protocol. Allergy Asthma Clin Immunol 2021;17(1):136.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -245,7 +257,7 @@
     {
       id: 'nsaid',
       label: 'NSAIDs',
-      refs: ['kowalski2013', 'dona2020', 'khan2022', 'nsaidReview2026'],
+      refs: ['kowalski2013', 'dona2020', 'khan2022', 'nsaidReview2026', 'colanardi2008'],
       // chemical-class awareness: in the SINGLE-DRUG (selective) phenotype,
       // cross-reactivity follows CHEMICAL GROUP, not COX-1 potency. Each entry
       // carries `chem`; buildNblReport names the culprit's same-group siblings.
@@ -292,8 +304,8 @@
         { generic: 'Etoricoxib', th: 'อีโทริค็อกซิบ', sub: 'COX-2 selective', pct: 'แพ้ข้ามต่ำมาก', chem: 'coxib',
           reason: 'COX-2 selective; ทนได้ดีในผู้ป่วย cross-reactive' },
         { generic: 'Parecoxib', th: 'พาเรค็อกซิบ', sub: 'COX-2 selective (IV/IM)', pct: 'แพ้ข้ามต่ำมาก', chem: 'coxib',
-          reason: 'COX-2 selective สูง (prodrug ของ valdecoxib, มีรูปแบบฉีด IV/IM); ผู้ป่วย NSAID cross-reactive ส่วนใหญ่ใช้ได้ เทียบเท่า celecoxib/etoricoxib',
-          advice: 'มีหมู่ sulfonamide: ตาม label ให้ระวัง/เลี่ยงถ้าเคยแพ้ sulfonamide รุนแรง — แต่ non-antibiotic sulfonamide มักไม่แพ้ข้ามเชิงภูมิ (Strom 2003)' },
+          reason: 'COX-2 selective สูง (prodrug ของ valdecoxib, มีรูปแบบฉีด IV/IM); ผู้ป่วย NSAID cross-reactive ส่วนใหญ่ใช้ได้ (Colanardi 2008: n=79 รวมกลุ่ม cross-reactive 31 ราย แพ้ 0%) เทียบเท่า celecoxib/etoricoxib',
+          advice: 'แนะนำยืนยันด้วย graded challenge ก่อนใช้จริง · มีหมู่ sulfonamide แต่เป็น non-antibiotic sulfonamide (ไม่มีหมู่ N4 arylamine) → ไม่แพ้ข้ามกับ sulfonamide antibiotic (CCJM 2025; Strom 2003) — ให้ในผู้แพ้ sulfa antibiotic ได้เหมือน celecoxib' },
         { generic: 'Paracetamol (Acetaminophen)', th: 'พาราเซตามอล', sub: 'weak COX-1', pct: 'ส่วนใหญ่ใช้ได้', chem: 'aminophenol',
           reason: 'weak COX-1; ขนาดสูง (>1 g) อาจกระตุ้นอาการในผู้ป่วยส่วนน้อย' }
       ],
@@ -697,11 +709,11 @@
     // tetracyclines are "caution" (non-SCAR) and escalate to "avoid" only at
     // SCAR — the same conservative stance as modern fluoroquinolone guidance.
     // Non-tetracycline antibiotics stay safe even at SCAR (keepSafeOnScar).
-    // ⚠️ CLINICAL DATA PENDING PHARMACIST VERIFICATION — see docs/allergy-nonbetalactam.md
+    // Pharmacist-verified 2026-07 (refs on the group) — see docs/allergy-nonbetalactam.md
     {
       id: 'tetracycline',
       label: 'Tetracyclines',
-      refs: ['khan2022'],
+      refs: ['maciag2020', 'hamilton2019', 'tham1996', 'correia1999', 'minoLupus'],
       crossClassCaution: true,
       keepSafeOnScar: true,
       allergens: [
@@ -725,22 +737,22 @@
         { generic: 'Clindamycin', th: 'คลินดามัยซิน', sub: 'Lincosamide' },
         { generic: 'TMP-SMX (Cotrimoxazole)', th: 'โคไตรม็อกซาโซล', sub: 'Sulfonamide antibiotic' }
       ],
-      noteMild: 'แพ้ข้ามในกลุ่ม tetracycline มีข้อมูลจำกัด — โดยทั่วไปใช้ยานอกกลุ่มก่อน; ถ้าจำเป็นต้องใช้ tetracycline ตัวอื่นควรปรึกษาผู้เชี่ยวชาญ/ยืนยันความปลอดภัย',
-      noteIge:  'แพ้ข้ามในกลุ่ม tetracycline มีข้อมูลจำกัด — ใช้ยานอกกลุ่มก่อน; ถ้าจำเป็นต้องใช้ tetracycline ตัวอื่นควรปรึกษาผู้เชี่ยวชาญ',
+      noteMild: 'แพ้ข้ามในกลุ่ม tetracycline "แปรปรวน/ยังไม่สรุป" — โดยทั่วไปเลือกยานอกกลุ่มก่อน; ถ้าจำเป็นต้องใช้ tetracycline ตัวอื่น ยืนยันความปลอดภัยด้วย skin test + graded challenge (Maciag 2020)',
+      noteIge:  'แพ้ข้ามในกลุ่ม tetracycline "แปรปรวน/ยังไม่สรุป" — เลือกยานอกกลุ่มก่อน; ถ้าจำเป็นต้องใช้ tetracycline ตัวอื่น ยืนยันด้วย skin test + graded challenge; แพ้รุนแรง/จำเป็นจริง พิจารณา desensitization',
       noteScar: 'SCAR จาก tetracycline: เลี่ยง tetracycline ทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
       scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม tetracycline',
-      singleDrugCallout: '⚠️ ข้อมูลแพ้ข้ามภายในกลุ่ม tetracycline ยังจำกัด/ไม่ชัดเจน — ค่าเริ่มต้นที่ปลอดภัยสุดคือใช้ยานอกกลุ่ม · minocycline มีความเสี่ยง DRESS / drug-induced lupus เฉพาะตัว · (ข้อมูลกลุ่มนี้อยู่ระหว่างตรวจสอบกับแหล่งอ้างอิงคลินิก)'
+      singleDrugCallout: '⚠️ แพ้ข้ามภายในกลุ่ม tetracycline "แปรปรวน/ยังไม่สรุป" (FDE: tetra↔doxy ~62.5%, tetra↔mino ~18.75%, ~37.5% ไม่แพ้ข้าม — Tham 1996) → ไม่จำเป็นต้อง avoid ยกกลุ่ม: ยา tetracycline ตัวอื่นมักใช้ได้หลังยืนยันด้วย skin test + graded challenge (Maciag 2020) · minocycline เสี่ยง DRESS / drug-induced lupus / Sweet syndrome เฉพาะตัว'
     },
     // ── Nitroimidazoles ──────────────────────────────────────────────────────
     // metronidazole ↔ tinidazole (and secnidazole/ornidazole) share the
     // 5-nitroimidazole nucleus and cross-reactivity IS reported → treat other
     // nitroimidazoles as "avoid" (default cross = high). Non-nitroimidazole
     // anaerobe cover stays safe even at SCAR (keepSafeOnScar).
-    // ⚠️ CLINICAL DATA PENDING PHARMACIST VERIFICATION — see docs/allergy-nonbetalactam.md
+    // Pharmacist-verified 2026-07 (refs on the group) — see docs/allergy-nonbetalactam.md
     {
       id: 'nitroimidazole',
       label: 'Nitroimidazoles',
-      refs: ['khan2022'],
+      refs: ['gendelman2014', 'hollis2022', 'cahill2021'],
       keepSafeOnScar: true,
       allergens: [
         { id: 'metronidazole', generic: 'Metronidazole', th: 'เมโทรนิดาโซล', trade: ['Flagyl'] },
@@ -766,7 +778,7 @@
       noteIge:  'เลี่ยง nitroimidazole ทั้งกลุ่ม (มีรายงานแพ้ข้ามหมู่ 5-nitroimidazole) · ใช้ยานอกกลุ่ม (clindamycin / beta-lactam-BLI ถ้าไม่แพ้)',
       noteScar: 'SCAR จาก nitroimidazole: เลี่ยงทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
       scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม nitroimidazole',
-      singleDrugCallout: '💡 metronidazole กับ nitroimidazole ตัวอื่น (tinidazole / secnidazole / ornidazole) มีหมู่ 5-nitroimidazole ร่วมกัน → มีรายงานแพ้ข้าม จึงเลี่ยงทั้งกลุ่ม · ทางเลือกคุม anaerobe: clindamycin หรือ beta-lactam/BLI (ถ้าไม่แพ้) · (รายละเอียดอยู่ระหว่างตรวจสอบกับแหล่งอ้างอิงคลินิก)'
+      singleDrugCallout: '💡 metronidazole กับ nitroimidazole ตัวอื่น (tinidazole / secnidazole / ornidazole) มีหมู่ 5-nitroimidazole ร่วมกัน → แพ้ข้ามกันได้ (Gendelman 2014) จึงเลี่ยงทั้งกลุ่ม · ทางเลือกคุม anaerobe ทั่วไป: clindamycin หรือ beta-lactam/BLI (ถ้าไม่แพ้) · ⚠️ ยกเว้น trichomoniasis ที่มีแต่ nitroimidazole ได้ผล → แนวทางคือ desensitize metronidazole ภายใต้การเฝ้าระวัง (ไม่ใช่สลับไป tinidazole ที่แพ้ข้าม หรือยานอกกลุ่มที่ล้มเหลวสูง) (Hollis 2022; Cahill 2021)'
     }
   ];
 

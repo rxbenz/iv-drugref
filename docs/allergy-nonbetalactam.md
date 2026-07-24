@@ -456,53 +456,63 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 
 ---
 
-## กลุ่มที่เพิ่มใหม่ (multi-drug feature) — 🟡 DRAFT ต้อง verify ก่อน merge
+## กลุ่มที่เพิ่มใหม่ (multi-drug feature) — ✅ pharmacist-verified 2026-07
 
-> ⚠️ **เนื้อหาคลินิก 2 กลุ่มด้านล่าง + Parecoxib เป็น "ร่าง" ที่ต้องให้เภสัชกร
-> ตรวจสอบกับ UpToDate / Lexicomp / primary source ก่อน merge เข้า `main`**
-> (โครงสร้าง + engine + test พร้อมแล้ว — ที่ต้อง sign-off คือ "classification"
-> ของแต่ละยา). Encoded ใน `js/allergy-data.js` (groups `tetracycline`,
-> `nitroimidazole`) + Parecoxib ใน group `nsaid`. Locked โดย tests ใน
-> `test/allergy-data.test.js` (`data: tetracycline …`, `data: nitroimidazole …`,
-> `data: Parecoxib …`, `multi EXAMPLE …`).
+> ✅ **เนื้อหาคลินิก 3 จุดด้านล่าง verify กับ primary source (full paper) แล้ว —
+> ทุก classification ถูกต้อง ไม่มีการเปลี่ยน bucket** Encoded ใน `js/allergy-data.js`
+> (groups `tetracycline`, `nitroimidazole`) + Parecoxib ใน group `nsaid`. Locked
+> โดย tests ใน `test/allergy-data.test.js` (`data: tetracycline …`,
+> `data: nitroimidazole …`, `data: Parecoxib …`, `data: verified … refs`,
+> `multi EXAMPLE …`).
 
-### เพิ่ม Parecoxib เข้ากลุ่ม NSAID (safe / COX-2 selective)
-- **หลักการ**: parecoxib เป็น prodrug ของ valdecoxib, COX-2 selective สูง (มีรูปแบบ
-  ฉีด IV/IM) → ผู้ป่วย NSAID **cross-reactive** (NERD/NECD/NIUA, กลไก COX-1 เชิง
-  เภสัชวิทยา) ส่วนใหญ่ทนได้ เทียบเท่า celecoxib / etoricoxib ที่มีในกลุ่มอยู่แล้ว
-- **คำเตือน sulfonamide**: parecoxib/valdecoxib มีหมู่ sulfonamide → label ระบุ
-  ระวัง/เลี่ยงถ้าเคยแพ้ sulfonamide รุนแรง **แต่** non-antibiotic sulfonamide มักไม่
-  แพ้ข้ามเชิงภูมิ (Strom 2003) — จึงจัดสอดคล้อง celecoxib (ที่กลุ่ม sulfonamide จัด
-  เป็น safe อยู่แล้ว). ใส่ไว้ในช่อง `advice` ของ entry
-- **จุดที่ต้อง verify**: (1) parecoxib อยู่ใน "safe" ของ NSAID cross-reactive
-  เหมาะสมไหม (2) ควรใส่ parecoxib ในกลุ่ม sulfonamide ด้วยหรือไม่ (mirror celecoxib
-  = safe / หรือ caution)
-- **อ้างอิงที่ใช้ (กลุ่ม NSAID เดิม)**: Kowalski 2013 · Doña 2020 · nsaidReview2026
+### ✅ Parecoxib เข้ากลุ่ม NSAID (safe / COX-2 selective)
+- **หลักการ**: parecoxib = prodrug ของ valdecoxib, COX-2 selective สูง (มีรูปแบบฉีด
+  IV/IM) → ผู้ป่วย NSAID **cross-reactive** (NERD/NECD/NIUA, กลไก COX-1) ส่วนใหญ่ทนได้
+  เทียบเท่า celecoxib / etoricoxib
+- **หลักฐาน**: **Colanardi 2008** (Ann Allergy Asthma Immunol 100:82-85, PMID 18254487) —
+  n=79 (รวม multiple-class/cross-reactive 31 ราย), challenge parecoxib 40mg → **แพ้ 0%
+  ทุกกลุ่ม**; 23% แพ้ยาปฏิชีวนะร่วม (รวม cotrimoxazole 1) + atopy 20% ก็ยังทน · เทียบ
+  coxib อื่น: etoricoxib 0-7%, celecoxib 0-33.3%, valdecoxib 2.4-4% → parecoxib ดีสุด
+- **sulfonamide**: parecoxib เป็น **non-antibiotic sulfonamide** ที่ **ไม่มีหมู่ N4
+  arylamine** → ไม่แพ้ข้ามกับ sulfonamide antibiotic (**CCJM 2025** 92(3):147; Strom
+  2003) จึงให้ในผู้แพ้ sulfa antibiotic ได้ (เหมือน celecoxib). *ไม่* เพิ่ม parecoxib
+  ในกลุ่ม sulfonamide — candidate check ที่ตอบ "ไม่เกี่ยวข้อง/ใช้ได้" เมื่อคนไข้แพ้ sulfa
+  เป็นคำตอบที่ถูกต้องตาม CCJM แล้ว · valdecoxib SJS/TEN (JAAD 2004) = SCAR idiosyncratic
+  คนละเรื่อง cross-react → severity gate จัดการ
+- **แนวปฏิบัติ**: ควรยืนยันด้วย **graded challenge** ก่อนใช้จริง (Colanardi)
+- **refs**: kowalski2013 · dona2020 · nsaidReview2026 · **colanardi2008** · ccjm2025
 
-### กลุ่ม Tetracyclines — 🟡 DRAFT
+### ✅ กลุ่ม Tetracyclines (caution — verified)
 - **allergens**: Doxycycline, Minocycline, Tetracycline, Tigecycline
-- **โมเดล**: `crossClassCaution: true` + `keepSafeOnScar: true` (แนวเดียวกับ
-  fluoroquinolone) — หลักฐานแพ้ข้าม **ภายในกลุ่มจำกัด/ไม่ชัดเจน** → tetracycline
-  ตัวอื่น = ⚠️ caution (non-SCAR), ยกระดับเป็น 🚫 avoid เมื่อ SCAR; ยานอกกลุ่ม = safe
-- **หมายเหตุเฉพาะตัว**: **Minocycline** สัมพันธ์กับ DRESS และ drug-induced lupus
-  (คนละกลไก) — ใส่ callout เตือน
-- **safe (ทางเลือก)**: beta-lactam (ถ้าไม่แพ้) · macrolide · clindamycin · TMP-SMX
-- **จุดที่ต้อง verify**: อัตรา/ความมีอยู่จริงของแพ้ข้ามภายในกลุ่ม tetracycline,
-  ความเหมาะสมของ "caution vs avoid", ทางเลือก safe ตามบริบทการติดเชื้อ
-- **อ้างอิงที่ใช้ (ชั่วคราว)**: khan2022 (practice parameter, non-beta-lactam
-  antibiotic allergy — หลักการทั่วไป) → **ต้องหา primary source เฉพาะกลุ่มมาเสริม**
+- **โมเดล**: `crossClassCaution: true` + `keepSafeOnScar: true` → tetracycline ตัวอื่น =
+  ⚠️ caution (non-SCAR), 🚫 avoid ที่ SCAR; ยานอกกลุ่ม = safe
+- **หลักฐาน (แพ้ข้าม "แปรปรวน/ยังไม่สรุป" → caution ถูกต้อง):**
+  - **Maciag 2020** (Ann Allergy Asthma Immunol 124:589-593): "rate of cross-reactivity …
+    **has not been established**"; case series 10 ราย แพ้ข้ามแปรปรวน; จัดการด้วย skin test +
+    graded challenge + desensitization → **ไม่ contraindicate ทั้ง class**
+  - **Tham 1996** (Arch Dermatol 132(9):1134-1135): FDE cross tetra↔doxy **62.5%**,
+    tetra↔mino **18.75%**, **37.5% ไม่แพ้ข้าม**
+  - **Hamilton 2019** (Pharmacy 7(3):104) — review หนุน; **Correia 1999** (CED 24:137) —
+    case แพ้ข้าม doxy↔mino
+- **minocycline เฉพาะตัว**: DRESS / drug-induced lupus / Sweet (Shepherd 2002; Brown 2009)
+- **safe**: beta-lactam (ถ้าไม่แพ้) · macrolide · clindamycin · TMP-SMX
+- **refs**: maciag2020 · hamilton2019 · tham1996 · correia1999 · minoLupus
 
-### กลุ่ม Nitroimidazoles — 🟡 DRAFT
+### ✅ กลุ่ม Nitroimidazoles (avoid — verified)
 - **allergens**: Metronidazole, Tinidazole, Secnidazole, Ornidazole
-- **โมเดล**: NBL group ปกติ (default cross = 🚫 avoid) + `keepSafeOnScar: true` —
-  metronidazole ↔ tinidazole (และตัวอื่น) มีหมู่ **5-nitroimidazole** ร่วมกัน และ
-  มี **รายงานแพ้ข้าม** → เลี่ยงทั้งกลุ่ม; ยานอกกลุ่ม = safe
-- **safe (ทางเลือกคุม anaerobe)**: clindamycin · amoxicillin-clavulanate /
+- **โมเดล**: NBL ปกติ (cross = 🚫 avoid) + `keepSafeOnScar: true` → เลี่ยงทั้งกลุ่ม
+- **หลักฐาน (cross-reactivity ยืนยัน → avoid ถูกต้อง):**
+  - **Gendelman 2014** (Allergy Rhinol 5(2):e66-e69): *"because of the similar chemical
+    structure of nitroimidazoles, patients with hypersensitivity to metronidazole may also
+    have hypersensitivity to tinidazole"*
+  - **Hollis 2022** (Cureus 14(7):e26849): tinidazole "posed a serious risk" ในผู้ป่วย
+    metronidazole-anaphylaxis · **Cahill 2021** (AACI 17:136): desensitization protocol
+- **safe (ทางเลือกคุม anaerobe ทั่วไป)**: clindamycin · amoxicillin-clavulanate /
   piperacillin-tazobactam (ถ้าไม่แพ้ beta-lactam) · vancomycin PO (เฉพาะ CDI)
-- **จุดที่ต้อง verify**: ความหนักแน่นของหลักฐานแพ้ข้าม metronidazole↔tinidazole,
-  รายการทางเลือก safe ตามชนิดการติดเชื้อ (intra-abdominal / CDI / protozoa)
-- **อ้างอิงที่ใช้ (ชั่วคราว)**: khan2022 → **ต้องหา primary source (case series
-  แพ้ข้าม nitroimidazole) มาเสริม**
+- **⚠️ ข้อสำคัญ (trichomoniasis)**: มีแต่ nitroimidazole ที่ได้ผล → แนวทางคือ **desensitize
+  metronidazole** ภายใต้การเฝ้าระวัง ไม่ใช่สลับไป tinidazole (แพ้ข้าม) หรือยานอกกลุ่ม
+  (fail สูง) — encoded ใน callout
+- **refs**: gendelman2014 · hollis2022 · cahill2021
 
 ### หมายเหตุ: ฟีเจอร์ "แพ้ยาหลายชนิด" (multi-drug)
 หน้า allergy รองรับการเลือกยาที่แพ้ได้หลายตัว (แต่ละตัวตั้ง severity/phenotype/nature

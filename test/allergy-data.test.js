@@ -694,6 +694,22 @@ test('data: nitroimidazole group — other nitroimidazoles avoid, clindamycin sa
   assert.ok(r.safer.some((x) => /Clindamycin/.test(x.drug.generic)), 'clindamycin safe alternative');
 });
 
+test('data: verified primary-source refs attached to new groups (not the khan2022 placeholder)', () => {
+  const tet = A.buildReport('doxycycline', 'ige');
+  const tetRefs = new Set(tet.caution.concat(tet.safer).flatMap((x) => x.refs || []));
+  assert.ok(tetRefs.has('maciag2020') && tetRefs.has('tham1996'), 'tetracycline cites Maciag + Tham');
+  const nz = A.buildReport('metronidazole', 'ige');
+  const nzRefs = new Set(nz.avoid.concat(nz.safer).flatMap((x) => x.refs || []));
+  assert.ok(nzRefs.has('gendelman2014'), 'nitroimidazole cites Gendelman');
+  [...tetRefs, ...nzRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
+});
+
+test('data: parecoxib carries graded-challenge + sulfonamide guidance', () => {
+  const r = A.buildReport('aspirin', 'ige', { phenotype: 'cross' });
+  const p = r.safer.find((x) => /^Parecoxib$/.test(x.drug.generic));
+  assert.ok(p && /graded challenge/.test(p.advice), 'graded-challenge advice present on parecoxib');
+});
+
 test('multi EXAMPLE: aspirin+cipro+doxy+metro → parecoxib usable; doxy/metro avoid (self)', () => {
   const sel = [
     { id: 'aspirin', severity: 'ige' },

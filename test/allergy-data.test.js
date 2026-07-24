@@ -735,6 +735,55 @@ test('multi EXAMPLE: aspirin+cipro+doxy+metro → parecoxib usable; doxy/metro a
     'doxycycline shows both the self-avoid and the ciprofloxacin-safe drivers');
 });
 
+// ─────────────── new groups: opioid + corticosteroid ──────────────────────
+test('data: opioid — same structural class caution, different class safer (clusterCaution)', () => {
+  const r = A.buildReport('morphine', 'ige');
+  assert.ok(r && r.isNbl, 'morphine resolves to an NBL group');
+  assert.ok(r.caution.some((x) => /Codeine/.test(x.drug.generic)), 'codeine caution (same phenanthrene class)');
+  assert.ok(!r.avoid.some((x) => /Codeine/.test(x.drug.generic)), 'same-class is caution, not avoid');
+  assert.ok(r.safer.some((x) => /Fentanyl/.test(x.drug.generic)), 'fentanyl safer (different class)');
+  assert.ok(r.safer.some((x) => /Methadone/.test(x.drug.generic)), 'methadone safer (different class)');
+});
+
+test('data: opioid — SCAR escalates same-class to avoid; intolerance → histamine pseudo block', () => {
+  const s = A.buildReport('morphine', 'scar');
+  assert.ok(s.avoid.some((x) => /Codeine/.test(x.drug.generic)), 'SCAR → same-class escalates to avoid');
+  const p = A.buildReport('morphine', 'ige', { nature: 'intolerance' });
+  assert.ok(p.notAllergy && p.pseudo && /histamine/i.test(p.pseudo.title + ' ' + p.pseudo.points.join(' ')),
+    'intolerance → pseudo histamine-release block');
+});
+
+test('data: corticosteroid — same group avoid, group C (betamethasone/dex) safer', () => {
+  const r = A.buildReport('hydrocortisone', 'ige');
+  assert.ok(r && r.isNbl, 'hydrocortisone resolves to an NBL group');
+  assert.ok(r.avoid.some((x) => /Methylprednisolone/.test(x.drug.generic)), 'group A → avoid (same group)');
+  assert.ok(r.caution.some((x) => /Triamcinolone|Budesonide/.test(x.drug.generic)), 'group B → caution');
+  assert.ok(r.safer.some((x) => /Betamethasone|Dexamethasone/.test(x.drug.generic)), 'group C → safer alternative');
+});
+
+test('data: corticosteroid — excipient pseudo block (succinate / CMC) on intolerance', () => {
+  const p = A.buildReport('methylprednisolone', 'ige', { nature: 'intolerance' });
+  assert.ok(p.notAllergy && p.pseudo && /excipient|CMC|succinate|carboxymethyl/i.test(p.pseudo.points.join(' ')),
+    'pseudo block names the excipient culprits');
+});
+
+test('multi: opioid candidate — allergic to morphine → fentanyl usable, codeine caution', () => {
+  const m = A.buildMultiReport([{ id: 'morphine', severity: 'ige' }], 'fentanyl');
+  assert.ok(m.candidate && m.candidate.related && m.candidate.bucket === 'safer', 'fentanyl safer (different class)');
+  const m2 = A.buildMultiReport([{ id: 'morphine', severity: 'ige' }], 'codeine');
+  assert.equal(m2.candidate.bucket, 'caution', 'codeine caution (same phenanthrene class)');
+});
+
+test('data: verified refs on opioid + corticosteroid groups', () => {
+  const op = A.buildReport('morphine', 'ige');
+  const opRefs = new Set(op.caution.concat(op.safer).flatMap((x) => x.refs || []));
+  assert.ok(opRefs.has('khalaf2025'), 'opioid cites Khalaf 2025');
+  const cs = A.buildReport('hydrocortisone', 'ige');
+  const csRefs = new Set(cs.avoid.concat(cs.safer).flatMap((x) => x.refs || []));
+  assert.ok(csRefs.has('baeck2011'), 'corticosteroid cites Baeck 2011');
+  [...opRefs, ...csRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
+});
+
 // ───────────── applyRemoteData (A3 Sheet override) — KEEP LAST ─────────────
 // These MUST be the final tests: applyRemoteData mutates the shared NBL_GROUPS/
 // NBL_INDEX/REFS singleton, so the override test below replaces the hardcoded

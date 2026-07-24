@@ -62,7 +62,18 @@
     // Nitroimidazole group (pharmacist-verified 2026-07)
     gendelman2014: 'Gendelman SR, Pien LC, Gutta RC, Abouhassan SR. Modified oral metronidazole desensitization protocol. Allergy Rhinol (Providence) 2014;5(2):e66-e69. ("because of the similar chemical structure of nitroimidazoles, patients with hypersensitivity to metronidazole may also have hypersensitivity to tinidazole")',
     hollis2022: 'Hollis CC, Mlauzi C, Ashton M. Oral metronidazole desensitization for IgE-mediated hypersensitivity. Cureus 2022;14(7):e26849. (tinidazole "posed a serious risk" → desensitize metronidazole rather than switch)',
-    cahill2021: 'Cahill JA, Sahota PS, Kan M. Failure of a single day metronidazole desensitization protocol, and success of a modified two-day protocol. Allergy Asthma Clin Immunol 2021;17(1):136.'
+    cahill2021: 'Cahill JA, Sahota PS, Kan M. Failure of a single day metronidazole desensitization protocol, and success of a modified two-day protocol. Allergy Asthma Clin Immunol 2021;17(1):136.',
+    // Opioid group (pharmacist-verified 2026-07)
+    khalaf2025: 'Khalaf A, Lane M, Meyer Reid J. Opioid Allergy Cross-Reactivity: A Retrospective Study Across Three Opioid Classes. J Pain Palliat Care Pharmacother 2025. (NO cross-reactivity between opioid structural classes → 100% re-exposure tolerance)',
+    baldo2018: 'Baldo BA. Opioid analgesic drugs: misuse, toxicity, and hypersensitivity (Editorial). J Allergy Clin Immunol Pract 2018. (pseudoallergy/histamine release vs true IgE; structural classes — morphine/codeine/meperidine release histamine, fentanyl minimal)',
+    ashp2019: 'Assessment of opioid cross-reactivity and provider perceptions in hospitalized patients. Ann Pharmacother 2019;53(11):1117-1123.',
+    // Corticosteroid group (pharmacist-verified 2026-07)
+    baeck2011: 'Baeck M, Chemelle JA, Goossens A, Nicolas JF, Terreux R. Corticosteroid cross-reactivity: clinical and molecular modelling tools. Allergy 2011;66(10):1367-1374.',
+    berbegal2016: 'Berbegal L, DeLeon FJ, Silvestre JF. Hypersensitivity Reactions to Corticosteroids. Actas Dermosifiliogr 2016;107(2):107-115. (Coopman A/B/C/D; betamethasone/dexamethasone tolerated in many cases)',
+    chen2022cs: 'Chen JY, Yiannias JA, Hall MR, et al. Reevaluating Corticosteroid Classification Models in Patient Patch Testing. JAMA Dermatol 2022.',
+    baker2015: 'Baker A, Empson M, The R, Fitzharris P. Skin testing for immediate hypersensitivity to corticosteroids: a case series and literature review. Clin Exp Allergy 2015;45(3):669-676.',
+    jiaci2006cs: 'Immediate hypersensitivity to corticosteroids. J Investig Allergol Clin Immunol 2006;16(1):51-56. (the causative agent may be an excipient, not the steroid molecule)',
+    guillet2025: 'Guillet C, et al. Anaphylaxis to carboxymethylcellulose in an intra-articular triamcinolone (Triamcort) injection — a case report. Front Allergy 2025;6:1663395. doi:10.3389/falgy.2025.1663395'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -779,6 +790,137 @@
       noteScar: 'SCAR จาก nitroimidazole: เลี่ยงทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
       scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม nitroimidazole',
       singleDrugCallout: '💡 metronidazole กับ nitroimidazole ตัวอื่น (tinidazole / secnidazole / ornidazole) มีหมู่ 5-nitroimidazole ร่วมกัน → แพ้ข้ามกันได้ (Gendelman 2014) จึงเลี่ยงทั้งกลุ่ม · ทางเลือกคุม anaerobe ทั่วไป: clindamycin หรือ beta-lactam/BLI (ถ้าไม่แพ้) · ⚠️ ยกเว้น trichomoniasis ที่มีแต่ nitroimidazole ได้ผล → แนวทางคือ desensitize metronidazole ภายใต้การเฝ้าระวัง (ไม่ใช่สลับไป tinidazole ที่แพ้ข้าม หรือยานอกกลุ่มที่ล้มเหลวสูง) (Hollis 2022; Cahill 2021)'
+    },
+    // ── Opioids ──────────────────────────────────────────────────────────────
+    // MOST "opioid allergy" is NOT immune allergy: it is pseudoallergy (direct mast
+    // cell histamine release by morphine/codeine/meperidine) or a side effect. TRUE
+    // IgE allergy is rare and cross-reactivity follows the STRUCTURAL CLASS: Khalaf
+    // 2025 found NO cross-reactivity between classes (100% tolerance); in-class risk
+    // is low (≤~7%). Modelled clusterAware + clusterCaution → same class = caution,
+    // different class = safer. `pseudo` block covers the histamine-release path.
+    // Pharmacist-verified 2026-07 — see docs/allergy-nonbetalactam.md
+    {
+      id: 'opioid',
+      label: 'Opioids',
+      refs: ['khalaf2025', 'baldo2018', 'ashp2019'],
+      clusterAware: true,
+      clusterCaution: true,   // same structural class = caution (low), different = safer
+      keepSafeOnScar: true,
+      allergens: [
+        { id: 'morphine',      generic: 'Morphine',      th: 'มอร์ฟีน',        trade: [],            cluster: 'phenanthrene' },
+        { id: 'codeine',       generic: 'Codeine',       th: 'โคเดอีน',         trade: [],            cluster: 'phenanthrene' },
+        { id: 'oxycodone',     generic: 'Oxycodone',     th: 'ออกซิโคโดน',      trade: ['OxyContin'], cluster: 'phenanthrene' },
+        { id: 'hydromorphone', generic: 'Hydromorphone', th: 'ไฮโดรมอร์โฟน',    trade: ['Dilaudid'],  cluster: 'phenanthrene' },
+        { id: 'fentanyl',      generic: 'Fentanyl',      th: 'เฟนทานิล',        trade: [],            cluster: 'phenylpiperidine' },
+        { id: 'pethidine',     generic: 'Pethidine (Meperidine)', th: 'เพทิดีน', trade: [],            cluster: 'phenylpiperidine' },
+        { id: 'tramadol',      generic: 'Tramadol',      th: 'ทรามาดอล',        trade: [],            cluster: 'phenylpropylamine' },
+        { id: 'methadone',     generic: 'Methadone',     th: 'เมทาโดน',         trade: [],            cluster: 'diphenylheptane' }
+      ],
+      crossReason: 'opioid กลุ่มโครงสร้างเดียวกัน — แพ้ข้ามในกลุ่มต่ำ (≤~7%); คนละกลุ่มแทบไม่แพ้ข้าม (Khalaf 2025: 0%)',
+      crossReactive: [
+        { id: 'morphine',      generic: 'Morphine',      th: 'มอร์ฟีน',      sub: 'Phenanthrene', cluster: 'phenanthrene' },
+        { id: 'codeine',       generic: 'Codeine',       th: 'โคเดอีน',       sub: 'Phenanthrene', cluster: 'phenanthrene' },
+        { id: 'oxycodone',     generic: 'Oxycodone',     th: 'ออกซิโคโดน',    sub: 'Phenanthrene', cluster: 'phenanthrene' },
+        { id: 'hydromorphone', generic: 'Hydromorphone', th: 'ไฮโดรมอร์โฟน',  sub: 'Phenanthrene', cluster: 'phenanthrene' },
+        { generic: 'Hydrocodone',   th: 'ไฮโดรโคโดน',    sub: 'Phenanthrene', cluster: 'phenanthrene' },
+        { generic: 'Oxymorphone',   th: 'ออกซิมอร์โฟน',  sub: 'Phenanthrene', cluster: 'phenanthrene' },
+        { generic: 'Buprenorphine', th: 'บูพรีนอร์ฟีน',  sub: 'Phenanthrene (partial agonist)', cluster: 'phenanthrene' },
+        { generic: 'Nalbuphine',    th: 'นาลบูฟีน',      sub: 'Phenanthrene', cluster: 'phenanthrene' },
+        { id: 'fentanyl',      generic: 'Fentanyl',      th: 'เฟนทานิล',      sub: 'Phenylpiperidine', cluster: 'phenylpiperidine' },
+        { generic: 'Alfentanil',   th: 'อัลเฟนทานิล',   sub: 'Phenylpiperidine', cluster: 'phenylpiperidine' },
+        { generic: 'Sufentanil',   th: 'ซูเฟนทานิล',    sub: 'Phenylpiperidine', cluster: 'phenylpiperidine' },
+        { generic: 'Remifentanil', th: 'เรมิเฟนทานิล',  sub: 'Phenylpiperidine', cluster: 'phenylpiperidine' },
+        { id: 'pethidine',     generic: 'Pethidine (Meperidine)', th: 'เพทิดีน', sub: 'Phenylpiperidine', cluster: 'phenylpiperidine' },
+        { id: 'methadone',     generic: 'Methadone',     th: 'เมทาโดน',       sub: 'Diphenylheptane', cluster: 'diphenylheptane' },
+        { id: 'tramadol',      generic: 'Tramadol',      th: 'ทรามาดอล',      sub: 'Phenylpropylamine', cluster: 'phenylpropylamine' },
+        { generic: 'Tapentadol',   th: 'ทาเพนทาดอล',    sub: 'Phenylpropylamine', cluster: 'phenylpropylamine' }
+      ],
+      safeReason: 'ยาแก้ปวดนอกกลุ่ม opioid → ไม่เกี่ยวข้องกับการแพ้ opioid (ใช้ได้)',
+      safe: [
+        { generic: 'Paracetamol (Acetaminophen)', th: 'พาราเซตามอล', sub: 'Non-opioid analgesic' },
+        { generic: 'NSAID (ถ้าไม่แพ้)', th: 'ยากลุ่ม NSAID', sub: 'Non-opioid analgesic' }
+      ],
+      noteMild: 'ปฏิกิริยา opioid ส่วนใหญ่ = pseudoallergy (histamine) หรือผลข้างเคียง ไม่ใช่แพ้จริง — เลือก "ผลข้างเคียง/ไม่ทนยา" เพื่อดูวิธีจัดการ',
+      noteIge:  'แพ้ opioid จริง (IgE) พบน้อย — แพ้ข้ามตามกลุ่มโครงสร้าง: คนละกลุ่ม (เช่น phenanthrene→fentanyl) แทบไม่แพ้ข้าม (Khalaf 2025: 0%); ในกลุ่มเดียวกันเสี่ยงต่ำ (≤~7%) — เริ่มขนาดน้อย/สังเกตอาการ',
+      noteScar: 'SCAR จาก opioid (พบน้อยมาก): เลี่ยง opioid ที่แพ้ + กลุ่มโครงสร้างเดียวกัน · ห้าม challenge · ปรึกษาผู้เชี่ยวชาญ',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงกลุ่มโครงสร้างเดียวกัน · ใช้ยานอกกลุ่ม opioid',
+      singleDrugCallout: '💡 อาการที่เรียกว่า "แพ้ opioid" ส่วนใหญ่ไม่ใช่การแพ้ทางภูมิคุ้มกัน — เป็น pseudoallergy (morphine/codeine/pethidine กระตุ้น histamine โดยตรง → คัน/ผื่น/หน้าแดง) หรือผลข้างเคียง (คลื่นไส้/ท้องผูก/ง่วง) → เลือก "ผลข้างเคียง/ไม่ทนยา" เพื่อดูวิธีจัดการ · แพ้จริง (IgE) พบน้อยมาก และเปลี่ยนไปกลุ่มโครงสร้างอื่นได้ (Khalaf 2025: แพ้ข้ามข้ามกลุ่ม 0%)',
+      pseudo: {
+        title: 'ปฏิกิริยาต่อ opioid ส่วนใหญ่ไม่ใช่การแพ้ (pseudoallergy / histamine release)',
+        points: [
+          '"แพ้ opioid" ที่พบบ่อยเป็นผลข้างเคียง (คลื่นไส้ อาเจียน ท้องผูก ง่วงซึม) หรือ pseudoallergy — ไม่ใช่ IgE',
+          'morphine, codeine, pethidine (meperidine) กระตุ้น mast cell ปล่อย histamine โดยตรง → คัน ผื่น หน้าแดง ลมพิษเฉพาะที่ (ไม่ใช่แพ้ภูมิคุ้มกัน · ขึ้นกับขนาด/อัตราการให้)',
+          'fentanyl, sufentanil, alfentanil, remifentanil, tramadol ปล่อย histamine น้อยมาก',
+          '🎯 จัดการ: ถ้าเป็น pseudoallergy → เปลี่ยนเป็น opioid ที่ปล่อย histamine น้อย (fentanyl / hydromorphone / oxycodone) หรือให้ช้าลง ± antihistamine · true IgE allergy พบน้อยมาก'
+        ],
+        refs: ['baldo2018', 'ashp2019']
+      }
+    },
+    // ── Corticosteroids ──────────────────────────────────────────────────────
+    // Delayed (contact) allergy is the common form, classified by STRUCTURAL GROUP
+    // A/B/C/D (Coopman 1989; Matura-Goossens D1/D2; Baeck 2011 molecular clusters).
+    // Group C (betamethasone/dexamethasone) has the LOWEST cross-reactivity and is
+    // the usual safe alternative. IMMEDIATE reactions/anaphylaxis are often to an
+    // EXCIPIENT (succinate ester, carboxymethylcellulose, PEG), not the steroid.
+    // Modelled clusterAware (same group = avoid, different = caution) + group C in
+    // the safe list + a `pseudo` block for the excipient path.
+    // Pharmacist-verified 2026-07 — see docs/allergy-nonbetalactam.md
+    {
+      id: 'corticosteroid',
+      label: 'Corticosteroids',
+      refs: ['baeck2011', 'berbegal2016', 'chen2022cs', 'baker2015', 'jiaci2006cs', 'guillet2025'],
+      clusterAware: true,
+      keepSafeOnScar: true,
+      allergens: [
+        { id: 'hydrocortisone',     generic: 'Hydrocortisone',     th: 'ไฮโดรคอร์ติโซน',  trade: [],            cluster: 'A' },
+        { id: 'prednisolone',       generic: 'Prednisolone',       th: 'เพรดนิโซโลน',     trade: [],            cluster: 'A' },
+        { id: 'methylprednisolone', generic: 'Methylprednisolone', th: 'เมทิลเพรดนิโซโลน', trade: ['Solu-Medrol'], cluster: 'A' },
+        { id: 'triamcinolone',      generic: 'Triamcinolone',      th: 'ไทรแอมซิโนโลน',   trade: ['Kenacort'],  cluster: 'B' },
+        { id: 'budesonide',         generic: 'Budesonide',         th: 'บูเดโซไนด์',      trade: [],            cluster: 'B' },
+        { id: 'betamethasone',      generic: 'Betamethasone',      th: 'เบตาเมทาโซน',     trade: [],            cluster: 'C' },
+        { id: 'dexamethasone',      generic: 'Dexamethasone',      th: 'เดกซาเมทาโซน',    trade: [],            cluster: 'C' },
+        { id: 'clobetasol',         generic: 'Clobetasol propionate', th: 'โคลเบทาซอล',  trade: ['Dermovate'], cluster: 'D1' }
+      ],
+      crossReason: 'corticosteroid กลุ่มโครงสร้างเดียวกัน (Coopman A/B/C/D) → แพ้ข้ามกัน (A↔D2 มักจับกลุ่ม)',
+      crossReactive: [
+        { id: 'hydrocortisone',     generic: 'Hydrocortisone',     th: 'ไฮโดรคอร์ติโซน',  sub: 'Group A', cluster: 'A' },
+        { id: 'prednisolone',       generic: 'Prednisolone',       th: 'เพรดนิโซโลน',     sub: 'Group A', cluster: 'A' },
+        { generic: 'Prednisone',    th: 'เพรดนิโซน',      sub: 'Group A', cluster: 'A' },
+        { id: 'methylprednisolone', generic: 'Methylprednisolone', th: 'เมทิลเพรดนิโซโลน', sub: 'Group A', cluster: 'A' },
+        { generic: 'Cortisone acetate', th: 'คอร์ติโซน', sub: 'Group A', cluster: 'A' },
+        { id: 'triamcinolone',      generic: 'Triamcinolone acetonide', th: 'ไทรแอมซิโนโลน', sub: 'Group B (acetonide)', cluster: 'B' },
+        { id: 'budesonide',         generic: 'Budesonide',         th: 'บูเดโซไนด์',      sub: 'Group B (acetonide)', cluster: 'B' },
+        { generic: 'Fluocinolone acetonide', th: 'ฟลูโอซิโนโลน', sub: 'Group B (acetonide)', cluster: 'B' },
+        { generic: 'Desonide',      th: 'เดโซไนด์',       sub: 'Group B (acetonide)', cluster: 'B' },
+        { id: 'clobetasol',         generic: 'Clobetasol propionate', th: 'โคลเบทาซอล', sub: 'Group D1', cluster: 'D1' },
+        { generic: 'Betamethasone dipropionate', th: 'เบตาเมทาโซน ไดโพรพิโอเนต', sub: 'Group D1', cluster: 'D1' },
+        { generic: 'Mometasone furoate', th: 'โมเมทาโซน', sub: 'Group D1', cluster: 'D1' },
+        { generic: 'Hydrocortisone-17-butyrate', th: 'ไฮโดรคอร์ติโซน บิวทิเรต', sub: 'Group D2 (labile ester · A↔D2 cross)', cluster: 'D2' },
+        { generic: 'Methylprednisolone aceponate', th: 'เมทิลเพรดนิโซโลน อะซีโพเนต', sub: 'Group D2', cluster: 'D2' },
+        { generic: 'Prednicarbate', th: 'เพรดนิคาร์เบต', sub: 'Group D2', cluster: 'D2' }
+      ],
+      safeReason: 'กลุ่ม C (betamethasone/dexamethasone) แพ้ข้ามต่ำสุด → มักทนได้ (ทางเลือกแรก); ยืนยันด้วย test ถ้าจำเป็น',
+      safe: [
+        { generic: 'Betamethasone', th: 'เบตาเมทาโซน', sub: 'Group C — แพ้ข้ามต่ำสุด', pct: 'มักทนได้', cluster: 'C',
+          reason: 'Group C แพ้ข้ามต่ำสุด (Actas 2016: tolerated in many cases) — ทางเลือกแรกในผู้แพ้ corticosteroid กลุ่มอื่น' },
+        { generic: 'Dexamethasone', th: 'เดกซาเมทาโซน', sub: 'Group C — แพ้ข้ามต่ำสุด', pct: 'มักทนได้', cluster: 'C',
+          reason: 'Group C แพ้ข้ามต่ำสุด — ทางเลือกแรก (ถ้าแพ้กลุ่ม C เอง ให้ประเมินเป็นราย ๆ)' }
+      ],
+      noteMild: 'corticosteroid ส่วนใหญ่เป็น delayed/contact allergy (จากยาทา) — จัดกลุ่ม A/B/C/D; เลี่ยงกลุ่มที่แพ้ · กลุ่ม C (betamethasone/dexamethasone) มักทนได้',
+      noteIge:  'immediate/anaphylaxis ต่อ corticosteroid ฉีด: พิจารณาแพ้ "excipient" (succinate ester / CMC / PEG) ไม่ใช่ตัวสเตียรอยด์ — เลือกสูตรที่ไม่มี excipient นั้น · กลุ่ม C มักทนได้ · ยืนยันด้วย skin test',
+      noteScar: 'SCAR จาก corticosteroid (พบน้อย): เลี่ยงกลุ่มที่แพ้ + โครงสร้างใกล้เคียง · ห้าม challenge · ปรึกษาผู้เชี่ยวชาญ',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงกลุ่มโครงสร้างเดียวกัน · ประเมินเป็นราย ๆ',
+      singleDrugCallout: '💡 corticosteroid จัดกลุ่มโครงสร้าง A/B/C/D (Coopman/Baeck) — แพ้ข้ามภายในกลุ่มเดียวกัน (A↔D2 มักจับกลุ่ม) · กลุ่ม C (betamethasone/dexamethasone) แพ้ข้ามต่ำสุด = ทางเลือกแรก · ⚠️ ปฏิกิริยาเฉียบพลัน/anaphylaxis มักแพ้ "สารเพิ่ม (excipient)" ไม่ใช่ตัวสเตียรอยด์ — succinate ester (hydrocortisone/methylprednisolone succinate), carboxymethylcellulose (CMC · ในสูตร depot เช่น triamcinolone), PEG → เลือกสูตร/ยี่ห้อที่ไม่มี excipient นั้น (Guillet 2025)',
+      pseudo: {
+        title: 'ปฏิกิริยาเฉียบพลันต่อ corticosteroid — พิจารณา "สารเพิ่ม (excipient)"',
+        points: [
+          'immediate reaction / anaphylaxis ต่อ corticosteroid ฉีด มัก "ไม่ใช่" แพ้ตัวสเตียรอยด์ แต่แพ้ excipient (JIACI 2006; Baker 2015)',
+          'excipient ที่พบบ่อย: succinate ester (hydrocortisone / methylprednisolone sodium succinate), carboxymethylcellulose (CMC / carmellose — ในสูตร depot เช่น triamcinolone/Triamcort — Guillet 2025), PEG',
+          '🎯 จัดการ: เลือกสูตร/ยี่ห้อที่ไม่มี excipient ที่สงสัย (เช่น เปลี่ยน succinate → phosphate ester) · ยืนยันด้วย skin test',
+          'delayed/contact allergy (จากยาทา) = แบบที่พบบ่อยสุด → ตรวจด้วย patch test'
+        ],
+        refs: ['guillet2025', 'jiaci2006cs', 'baker2015']
+      }
     }
   ];
 
@@ -969,13 +1111,24 @@
     const crossAsCaution = !!g.crossClassCaution && !isScar;
     const culpritCluster = a.cluster;
     const crossList = g.crossReactive.filter(function (d) { return d.id !== allergenId; }).map(function (d) {
-      let decision, tier, pctDefault;
+      let decision, tier, pctDefault, reasonDefault;
       if (g.clusterAware) {
         const sameCluster = !!d.cluster && !!culpritCluster && d.cluster === culpritCluster;
-        if (isScar || sameCluster) { decision = 'avoid'; tier = 'high'; }
-        else { decision = 'caution'; tier = 'low'; }
-        pctDefault = sameCluster ? 'แพ้ข้ามสูง (side chain เดียวกัน)'
-                                 : 'เสี่ยงแพ้ข้าม — ยืนยันด้วย skin test';
+        if (g.clusterCaution) {
+          // opioid-style structural class: SAME class = caution (low in-class cross,
+          // ≤~7%), DIFFERENT class = safer (cross-reactivity between classes ~0%,
+          // Khalaf 2025). SCAR still escalates same/related to avoid.
+          if (isScar) { decision = 'avoid'; tier = 'high'; }
+          else if (sameCluster) { decision = 'caution'; tier = 'moderate'; }
+          else { decision = 'safer'; tier = 'negligible'; }
+          pctDefault = sameCluster ? 'กลุ่มโครงสร้างเดียวกัน (แพ้ข้ามต่ำ ≤~7%)' : 'คนละกลุ่มโครงสร้าง (แทบไม่แพ้ข้าม)';
+          reasonDefault = sameCluster ? 'กลุ่มโครงสร้างเดียวกับตัวที่แพ้ → อาจแพ้ข้าม (ความเสี่ยงต่ำ)'
+                                      : 'คนละกลุ่มโครงสร้างกับตัวที่แพ้ → แทบไม่แพ้ข้าม';
+        } else if (isScar || sameCluster) { decision = 'avoid'; tier = 'high';
+          pctDefault = sameCluster ? 'แพ้ข้ามสูง (side chain เดียวกัน)' : 'เสี่ยงแพ้ข้าม — ยืนยันด้วย skin test';
+        } else { decision = 'caution'; tier = 'low';
+          pctDefault = 'เสี่ยงแพ้ข้าม — ยืนยันด้วย skin test';
+        }
       } else {
         decision = crossAsCaution ? 'caution' : 'avoid';
         tier = crossAsCaution ? 'low' : 'high';
@@ -985,12 +1138,14 @@
         drug: { generic: d.generic, th: d.th, class: d.sub },
         decision: decision, tier: tier,
         pct: d.pct || pctDefault,
-        reason: d.reason || g.crossReason, refs: g.refs,
+        reason: d.reason || reasonDefault || g.crossReason, refs: g.refs,
         advice: d.advice || (isScar ? 'หลีกเลี่ยงทั้งหมด · ห้าม challenge' : '')
       };
     });
     const crossAvoid = crossList.filter(function (x) { return x.decision === 'avoid'; });
     const crossCaution = crossList.filter(function (x) { return x.decision === 'caution'; });
+    // clusterCaution groups (e.g. opioid) route DIFFERENT-cluster members to "safer"
+    const crossSafer = crossList.filter(function (x) { return x.decision === 'safer'; });
 
     // safe alternatives -> "safer" normally; downgraded to "caution" if SCAR —
     // UNLESS the group opts out (keepSafeOnScar: e.g. non-aromatic AEDs are the
@@ -1052,7 +1207,7 @@
       caution: cautionItems
         .concat(crossCaution)
         .concat(scarDowngradesSafe ? safeItems : []),
-      safer: scarDowngradesSafe ? [] : safeItems,
+      safer: scarDowngradesSafe ? [] : safeItems.concat(crossSafer),
       nonBetaLactam: null,   // for NBL the "safe" list already names the alternatives
       blocked: false,
       isNbl: true
@@ -1131,6 +1286,7 @@
         // code doesn't define one (e.g. a brand-new Sheet-only group).
         keepSafeOnScar: logicFlag(hc.keepSafeOnScar, g.keepSafeOnScar),
         clusterAware: logicFlag(hc.clusterAware, g.clusterAware),
+        clusterCaution: logicFlag(hc.clusterCaution, g.clusterCaution),
         crossClassCaution: logicFlag(hc.crossClassCaution, g.crossClassCaution),
         chemGroupAware: logicFlag(hc.chemGroupAware, g.chemGroupAware),
         chemLabels: (hc.chemLabels != null ? hc.chemLabels : _alParse(g.chemLabels, '')),

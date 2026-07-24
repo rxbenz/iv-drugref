@@ -1115,6 +1115,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.59.0',
+      date: '2026-07-24',
+      title: "เพิ่มกลุ่มแพ้ยา Aminoglycoside + Macrolide",
+      items: [
+        "Aminoglycoside: กลุ่ม deoxystreptamine (gentamicin/tobramycin/amikacin/neomycin) แพ้ข้ามกัน ≥50% ถ้าแพ้ตัวหนึ่งเลี่ยงทั้งกลุ่ม — streptomycin โครงสร้างต่างใช้ได้",
+        "Macrolide: แพ้ข้ามในกลุ่มต่ำ/ไม่สม่ำเสมอ (erythromycin/clarithromycin/azithromycin) — ยืนยันด้วย drug provocation test ก่อนใช้ตัวอื่น หรือเลือกยานอกกลุ่ม"
+      ]
+    },
+    {
       v: '5.58.0',
       date: '2026-07-24',
       title: "เพิ่มกลุ่มยาแพ้: Opioid + Corticosteroid",
@@ -1437,7 +1446,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.58.0';
+  const VERSION = '5.59.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

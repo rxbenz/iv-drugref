@@ -558,3 +558,33 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 
 > ทั้ง 2 กลุ่ม locked โดย `test/allergy-data.test.js` (`data: opioid …`, `data: corticosteroid …`,
 > `multi: opioid candidate …`, `data: verified refs on opioid + corticosteroid …`).
+
+## ✅ กลุ่ม Aminoglycoside (pharmacist-verified 2026-07)
+- **allergens:** Gentamicin, Tobramycin, Amikacin, Neomycin (deoxystreptamine) · Streptomycin (streptidine)
+- **โมเดล:** `clusterAware` เดิม — cluster ตาม "แกน aminocyclitol": **deoxystreptamine**
+  (gentamicin/tobramycin/amikacin/kanamycin/neomycin/paromomycin) = same cluster → **avoid** ·
+  **streptidine** (streptomycin) โครงสร้างต่าง → **safe (ไม่แพ้ข้าม)** · `keepSafeOnScar:true`
+- **🔑 ใจความ:** แพ้ข้ามในกลุ่ม deoxystreptamine **สูง ≥50%** (neomycin↔tobramycin ถึง **65%**) →
+  *"all deoxystreptamine aminoglycosides carry a contraindication if HS to another"* → ถ้าแพ้ตัวใด
+  ตัวหนึ่งให้ถือว่า **contraindicate ทั้ง subgroup** · streptomycin (streptidine) แยกออก = ไม่แพ้ข้าม ·
+  อาการที่พบบ่อยสุด = **allergic contact dermatitis** จาก neomycin ชนิดทา (systemic HSR พบน้อยกว่า)
+- **หลักฐาน:** **Childs-Kean 2019** (Pharmacy Basel 7(3):124 — review หลัก, ตัวเลข ≥50% / 65% /
+  contraindication statement) · Di Leo 2022 (Clin Rev Allergy Immunol) · WAO NBL statement
+- **refs:** childsKean2019, diLeo2022, waoNbl
+
+## ✅ กลุ่ม Macrolide (pharmacist-verified 2026-07)
+- **allergens:** Erythromycin, Clarithromycin, Azithromycin, Roxithromycin, Spiramycin
+- **โมเดล:** `crossClassCaution:true` (เหมือน fluoroquinolone) — macrolide ตัวอื่น = **caution**
+  (non-SCAR), ยกระดับเป็น **avoid เมื่อ SCAR** · ยาต่างกลุ่ม (beta-lactam/doxycycline/FQ/clindamycin)
+  = **safe** · `keepSafeOnScar:true`
+- **🔑 ใจความ:** แพ้ข้ามในกลุ่ม macrolide **ต่ำและไม่สม่ำเสมอ** — หลักฐานเป็น **case report** เป็นหลัก
+  (erythromycin↔clarithromycin [14-membered]; erythromycin↔azithromycin) · ผู้ป่วยหลายรายทน macrolide
+  ตัวอื่นได้ · HSR โดยรวมพบ **0.4–3%** · **drug provocation test** เป็นวิธีเดียวที่ยืนยัน tolerance ของ
+  macrolide ตัวอื่นได้ → การเลี่ยงทั้งกลุ่มอาจไม่จำเป็น แต่ค่าเริ่มต้นที่ปลอดภัยสุด = ยานอกกลุ่ม
+- **หลักฐาน:** **Shaeer 2019** (Pharmacy Basel 7(3):135 — review หลัก, *"cross-reactivity low/
+  inconsistent … lack of evidence for cross-sensitization"*, HSR 0.4–3%) · Pereira 2024 (Asia Pac
+  Allergy — DPT to confirm/exclude) · macrolide peds provocation cohort 2024 · WAO NBL statement
+- **refs:** shaeer2019, pereira2024, macroPeds2024, waoNbl
+
+> ทั้ง 2 กลุ่ม locked โดย `test/allergy-data.test.js` (`data: aminoglycoside …`, `data: macrolide …`,
+> `multi: aminoglycoside candidate …`, `data: verified refs on aminoglycoside + macrolide …`).

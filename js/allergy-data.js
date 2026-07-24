@@ -73,7 +73,15 @@
     chen2022cs: 'Chen JY, Yiannias JA, Hall MR, et al. Reevaluating Corticosteroid Classification Models in Patient Patch Testing. JAMA Dermatol 2022.',
     baker2015: 'Baker A, Empson M, The R, Fitzharris P. Skin testing for immediate hypersensitivity to corticosteroids: a case series and literature review. Clin Exp Allergy 2015;45(3):669-676.',
     jiaci2006cs: 'Immediate hypersensitivity to corticosteroids. J Investig Allergol Clin Immunol 2006;16(1):51-56. (the causative agent may be an excipient, not the steroid molecule)',
-    guillet2025: 'Guillet C, et al. Anaphylaxis to carboxymethylcellulose in an intra-articular triamcinolone (Triamcort) injection — a case report. Front Allergy 2025;6:1663395. doi:10.3389/falgy.2025.1663395'
+    guillet2025: 'Guillet C, et al. Anaphylaxis to carboxymethylcellulose in an intra-articular triamcinolone (Triamcort) injection — a case report. Front Allergy 2025;6:1663395. doi:10.3389/falgy.2025.1663395',
+    // Aminoglycoside group (pharmacist-verified 2026-07)
+    childsKean2019: 'Childs-Kean LM, Shaeer KM, Varghese Gupta S, Cho JC. Aminoglycoside Allergic Reactions. Pharmacy (Basel) 2019;7(3):124. (deoxystreptamine group cross-reactivity ≥50%; neomycin↔tobramycin up to 65%; all deoxystreptamine aminoglycosides contraindicated if HS to another; streptomycin/streptidine separate)',
+    diLeo2022: 'Di Leo E, et al. Immediate and Delayed Hypersensitivity Reactions to Antibiotics: Aminoglycosides, Clindamycin, Linezolid, and Metronidazole. Clin Rev Allergy Immunol 2022;62(3):505-518.',
+    waoNbl: 'Sánchez-Borges M, Thong B, Blanca M, et al. Hypersensitivity reactions to non beta-lactam antimicrobial agents — a statement of the WAO Special Committee on Drug Allergy. World Allergy Organ J. (aminoglycoside + macrolide cross-reactivity)',
+    // Macrolide group (pharmacist-verified 2026-07)
+    shaeer2019: 'Shaeer KM, Chahine EB, Varghese Gupta S, Cho JC. Macrolide Allergic Reactions. Pharmacy (Basel) 2019;7(3):135. (cross-reactivity low/inconsistent — some patients tolerate a different macrolide; lack of evidence for cross-sensitization; HSR 0.4-3%)',
+    pereira2024: 'Pereira HP, Cardoso Lopes J, Carrapatoso I, Faria E, et al. Immediate-hypersensitivity reactions to macrolides: experience in an allergy department. Asia Pac Allergy 2024. (drug provocation test to confirm/exclude cross-reactivity)',
+    macroPeds2024: 'Cross-reactivity of macrolides in children with macrolide hypersensitivity — provocation-test cohort. Turk Arch Pediatr 2024.'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -921,6 +929,93 @@
         ],
         refs: ['guillet2025', 'jiaci2006cs', 'baker2015']
       }
+    },
+    // ── Aminoglycosides ──────────────────────────────────────────────────────
+    // Cross-reactivity is driven by the aminocyclitol nucleus: the DEOXYSTREPTAMINE
+    // group (gentamicin/tobramycin/amikacin/kanamycin/neomycin/paromomycin) cross-
+    // reacts ≥50% (neomycin↔tobramycin up to 65%) → "all deoxystreptamine amino-
+    // glycosides carry a contraindication if HS to another" (Childs-Kean 2019).
+    // STREPTOMYCIN (streptidine) is structurally separate → no cross-reactivity.
+    // Modelled clusterAware (same cluster = avoid) + streptomycin in the safe list.
+    // Most reactions are contact dermatitis (neomycin, a common topical sensitizer).
+    // Pharmacist-verified 2026-07 — see docs/allergy-nonbetalactam.md
+    {
+      id: 'aminoglycoside',
+      label: 'Aminoglycosides',
+      refs: ['childsKean2019', 'diLeo2022', 'waoNbl'],
+      clusterAware: true,
+      keepSafeOnScar: true,
+      allergens: [
+        { id: 'gentamicin',   generic: 'Gentamicin',   th: 'เจนตามัยซิน',   trade: [], cluster: 'deoxystreptamine' },
+        { id: 'tobramycin',   generic: 'Tobramycin',   th: 'โทบรามัยซิน',   trade: [], cluster: 'deoxystreptamine' },
+        { id: 'amikacin',     generic: 'Amikacin',     th: 'อะมิคาซิน',     trade: [], cluster: 'deoxystreptamine' },
+        { id: 'neomycin',     generic: 'Neomycin',     th: 'นีโอมัยซิน',    trade: [], cluster: 'deoxystreptamine' },
+        { id: 'streptomycin', generic: 'Streptomycin', th: 'สเตรปโตมัยซิน', trade: [], cluster: 'streptidine' }
+      ],
+      crossReason: 'aminoglycoside กลุ่ม deoxystreptamine เหมือนกัน → แพ้ข้าม ≥50% (ถือว่า contraindicate ทั้ง subgroup)',
+      crossReactive: [
+        { id: 'gentamicin',   generic: 'Gentamicin',   th: 'เจนตามัยซิน',   sub: 'Deoxystreptamine (4,6-disubstituted)', cluster: 'deoxystreptamine' },
+        { id: 'tobramycin',   generic: 'Tobramycin',   th: 'โทบรามัยซิน',   sub: 'Deoxystreptamine (4,6)', cluster: 'deoxystreptamine' },
+        { id: 'amikacin',     generic: 'Amikacin',     th: 'อะมิคาซิน',     sub: 'Deoxystreptamine (4,6)', cluster: 'deoxystreptamine' },
+        { generic: 'Kanamycin', th: 'คานามัยซิน', sub: 'Deoxystreptamine (4,6)', cluster: 'deoxystreptamine' },
+        { id: 'neomycin',     generic: 'Neomycin',     th: 'นีโอมัยซิน',    sub: 'Deoxystreptamine (4,5) · sensitizer พบบ่อย', cluster: 'deoxystreptamine' },
+        { generic: 'Paromomycin', th: 'พาโรมัยซิน', sub: 'Deoxystreptamine (4,5)', cluster: 'deoxystreptamine' }
+      ],
+      safeReason: 'streptomycin (streptidine) โครงสร้างต่าง → ไม่แพ้ข้ามกับ deoxystreptamine · หรือใช้ยานอกกลุ่ม aminoglycoside',
+      safe: [
+        { generic: 'Streptomycin', th: 'สเตรปโตมัยซิน', sub: 'Streptidine — ไม่แพ้ข้ามกับ deoxystreptamine', pct: 'ไม่แพ้ข้าม', cluster: 'streptidine',
+          reason: 'streptomycin เป็น streptidine (คนละแกนกับ deoxystreptamine) → ไม่แพ้ข้าม (ถ้าแพ้ streptomycin เอง ให้ประเมินเป็นราย ๆ)' },
+        { generic: 'Beta-lactam (ถ้าไม่แพ้)', th: 'กลุ่มเบต้าแลคแทม', sub: 'ยานอกกลุ่ม (เลือกตามการติดเชื้อ)' },
+        { generic: 'Fluoroquinolone (ถ้าไม่แพ้)', th: 'กลุ่มฟลูออโรควิโนโลน', sub: 'ยานอกกลุ่ม' }
+      ],
+      noteMild: 'แพ้ aminoglycoside กลุ่ม deoxystreptamine → เลี่ยงทั้ง subgroup (แพ้ข้าม ≥50%) · streptomycin / ยานอกกลุ่มใช้ได้ · ส่วนใหญ่ที่พบเป็น contact dermatitis (neomycin ทา)',
+      noteIge:  'IgE/anaphylaxis ต่อ deoxystreptamine aminoglycoside → เลี่ยง gentamicin/tobramycin/amikacin/kanamycin/neomycin/paromomycin ทั้งหมด (แพ้ข้าม ≥50%) · เลือก streptomycin หรือยานอกกลุ่ม',
+      noteScar: 'SCAR จาก aminoglycoside: เลี่ยงกลุ่ม deoxystreptamine ทั้งหมดเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่ม',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงทั้ง subgroup deoxystreptamine',
+      singleDrugCallout: '💡 aminoglycoside กลุ่ม deoxystreptamine (gentamicin / tobramycin / amikacin / kanamycin / neomycin / paromomycin) แพ้ข้ามกันสูง ≥50% (neomycin↔tobramycin ถึง 65%) → ถ้าแพ้ตัวใดตัวหนึ่งให้ถือว่า contraindicate ทั้ง subgroup (Childs-Kean 2019) · streptomycin (streptidine) โครงสร้างต่าง = ไม่แพ้ข้าม · อาการที่พบบ่อยสุดคือ allergic contact dermatitis จาก neomycin ชนิดทา'
+    },
+    // ── Macrolides ───────────────────────────────────────────────────────────
+    // In-class cross-reactivity is LOW and INCONSISTENT — "some patients can tolerate
+    // a different macrolide"; only case-report cross-reactivity (erythromycin↔
+    // clarithromycin [14-membered]; erythromycin↔azithromycin). Drug provocation
+    // testing is the only valid way to confirm tolerance (Shaeer 2019; Pereira 2024).
+    // Modelled crossClassCaution (like fluoroquinolone): other macrolides = caution,
+    // escalate to avoid at SCAR; non-macrolides stay safe.
+    // Pharmacist-verified 2026-07 — see docs/allergy-nonbetalactam.md
+    {
+      id: 'macrolide',
+      label: 'Macrolides',
+      refs: ['shaeer2019', 'pereira2024', 'macroPeds2024', 'waoNbl'],
+      crossClassCaution: true,
+      keepSafeOnScar: true,
+      allergens: [
+        { id: 'erythromycin',   generic: 'Erythromycin',   th: 'อีริโทรมัยซิน',   trade: [] },
+        { id: 'clarithromycin', generic: 'Clarithromycin', th: 'คลาริโทรมัยซิน',  trade: ['Klacid'] },
+        { id: 'azithromycin',   generic: 'Azithromycin',   th: 'อะซิโทรมัยซิน',   trade: ['Zithromax'] },
+        { id: 'roxithromycin',  generic: 'Roxithromycin',  th: 'ร็อกซิโทรมัยซิน', trade: [] },
+        { id: 'spiramycin',     generic: 'Spiramycin',     th: 'สไปรามัยซิน',     trade: [] }
+      ],
+      crossReason: 'macrolide กลุ่มเดียวกัน — แพ้ข้ามต่ำ/ไม่สม่ำเสมอ (ยืนยันด้วย drug provocation test)',
+      crossReactive: [
+        { id: 'erythromycin',   generic: 'Erythromycin',   th: 'อีริโทรมัยซิน',  sub: 'Macrolide 14-membered', pct: 'แพ้ข้ามต่ำ' },
+        { id: 'clarithromycin', generic: 'Clarithromycin', th: 'คลาริโทรมัยซิน', sub: 'Macrolide 14-membered', pct: 'แพ้ข้ามต่ำ' },
+        { generic: 'Roxithromycin', th: 'ร็อกซิโทรมัยซิน', sub: 'Macrolide 14-membered', pct: 'แพ้ข้ามต่ำ' },
+        { id: 'azithromycin',   generic: 'Azithromycin',   th: 'อะซิโทรมัยซิน',  sub: 'Macrolide 15-membered (azalide)', pct: 'แพ้ข้ามต่ำ' },
+        { generic: 'Spiramycin', th: 'สไปรามัยซิน', sub: 'Macrolide 16-membered', pct: 'ข้อมูลจำกัด' },
+        { generic: 'Josamycin', th: 'โจซามัยซิน', sub: 'Macrolide 16-membered', pct: 'ข้อมูลจำกัด' }
+      ],
+      safeReason: 'ยาต่างกลุ่ม (ไม่ใช่ macrolide) → ไม่แพ้ข้าม — เลือกตามชนิดการติดเชื้อ',
+      safe: [
+        { generic: 'Beta-lactam (ถ้าไม่แพ้)', th: 'กลุ่มเบต้าแลคแทม', sub: 'เช่น amoxicillin / cephalexin' },
+        { generic: 'Doxycycline', th: 'ด็อกซีไซคลิน', sub: 'Tetracycline' },
+        { generic: 'Fluoroquinolone (ถ้าไม่แพ้)', th: 'กลุ่มฟลูออโรควิโนโลน', sub: 'เช่น levofloxacin' },
+        { generic: 'Clindamycin', th: 'คลินดามัยซิน', sub: 'Lincosamide' }
+      ],
+      noteMild: 'แพ้ข้ามในกลุ่ม macrolide ต่ำ/ไม่สม่ำเสมอ — ผู้ป่วยหลายรายทน macrolide ตัวอื่นได้; ยืนยันด้วย drug provocation test ก่อนใช้ หรือใช้ยานอกกลุ่ม',
+      noteIge:  'แพ้ข้ามในกลุ่ม macrolide ต่ำ/ไม่สม่ำเสมอ — ถ้าจำเป็นต้องใช้ macrolide ตัวอื่น ยืนยันด้วย drug provocation test (วิธีเดียวที่ยืนยัน tolerance); ทางเลือกที่ปลอดภัยสุด = ยานอกกลุ่ม',
+      noteScar: 'SCAR จาก macrolide: เลี่ยง macrolide ทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
+      scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม macrolide',
+      singleDrugCallout: '💡 แพ้ข้ามในกลุ่ม macrolide ต่ำและไม่สม่ำเสมอ (หลักฐานเป็น case report เป็นหลัก — Shaeer 2019; HSR พบ 0.4–3%) → การเลี่ยงทั้งกลุ่มอาจไม่จำเป็น แต่ drug provocation test เป็นวิธีเดียวที่ยืนยัน tolerance ของ macrolide ตัวอื่นได้ · มีรายงานแพ้ข้าม erythromycin↔clarithromycin (14-membered) และ erythromycin↔azithromycin · ค่าเริ่มต้นที่ปลอดภัยสุด = ยานอกกลุ่ม · SCAR = เลี่ยงทั้งกลุ่ม'
     }
   ];
 

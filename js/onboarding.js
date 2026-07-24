@@ -79,6 +79,26 @@
         desc: '\u0E04\u0E49\u0E19\u0E2B\u0E32\u0E22\u0E32\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E23\u0E2D\u0E07\u0E15\u0E32\u0E21\u0E2B\u0E21\u0E27\u0E14 (Antibiotics, Antifungals \u0E2F\u0E25\u0E2F) \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E14\u0E39\u0E02\u0E19\u0E32\u0E14\u0E22\u0E32\u0E17\u0E35\u0E48\u0E41\u0E19\u0E30\u0E19\u0E33\u0E15\u0E32\u0E21 GFR \u0E02\u0E2D\u0E07\u0E1C\u0E39\u0E49\u0E1B\u0E48\u0E27\u0E22',
         position: 'below'
       }
+    ],
+    allergy: [
+      {
+        target: '#allergenPicker',
+        title: '🧪 เพิ่มยาที่ผู้ป่วยแพ้ (หลายตัวได้)',
+        desc: 'พิมพ์ค้นหา (ไทย/อังกฤษ) แล้วแตะเพื่อเพิ่ม — เพิ่มได้หลายตัว แต่ละตัวตั้งความรุนแรง / ลักษณะการแพ้แยกกันได้ในการ์ดด้านล่าง',
+        position: 'below'
+      },
+      {
+        target: '#candidatePicker',
+        title: '🔎 ตรวจว่า “ใช้ยานี้ได้ไหม”',
+        desc: 'ใส่ยาที่อยากตรวจ (เช่น parecoxib) ระบบจะเทียบกับยาที่แพ้ทุกตัว แล้วสรุปว่า ใช้ได้ / ระวัง / เลี่ยง พร้อมเหตุผลรายตัว',
+        position: 'below'
+      },
+      {
+        target: '#allergyResult',
+        title: '📋 ผลลัพธ์รวม',
+        desc: 'ดูกลุ่ม 🚫 เลี่ยง / ⚠️ ระวัง / ✅ ปลอดภัยกว่า (รวมจากยาที่แพ้ทุกตัว) · แตะการ์ดเพื่อดูเหตุผล + อ้างอิง',
+        position: 'below'
+      }
     ]
   };
 

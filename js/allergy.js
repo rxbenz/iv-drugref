@@ -180,7 +180,24 @@
   }
 
   // ===== candidate picker ("can they use X?") ===============================
-  function buildUniverse() { UNIVERSE = A.drugUniverse ? A.drugUniverse() : []; }
+  // Candidate universe = every allergy-DB drug (allergens + targets, canonical
+  // keys) PLUS the shared IV-drug list (window.COMPAT_DRUGS, ~167 drugs) so the
+  // user can check ANY drug, not only ones in the allergy tables. Compat-only
+  // drugs get an 'nm:' key; buildMultiReport's candidate lookup then reports them
+  // as "not related → presumed usable" when they don't touch any selected allergy.
+  function buildUniverse() {
+    UNIVERSE = A.drugUniverse ? A.drugUniverse().slice() : [];
+    var norm = A.normName || function (s) { return String(s == null ? '' : s).split('(')[0].toLowerCase().trim(); };
+    var seen = {};
+    UNIVERSE.forEach(function (u) { seen[norm(u.generic)] = true; });
+    (window.COMPAT_DRUGS || []).forEach(function (d) {
+      var g = d.g || d.generic; if (!g) return;
+      var nk = norm(g);
+      if (!nk || seen[nk]) return;
+      seen[nk] = true;
+      UNIVERSE.push({ key: 'nm:' + nk, generic: g, th: '', glabel: 'ยาอื่น ๆ (นอกฐานแพ้ยา)' });
+    });
+  }
   function candByKey(key) { for (var i = 0; i < UNIVERSE.length; i++) if (UNIVERSE[i].key === key) return UNIVERSE[i]; return null; }
   function filteredCandidates() {
     var q = cq.trim().toLowerCase(), qth = cq.trim();
@@ -333,6 +350,20 @@
       '<strong>ผู้ป่วยแพ้ ' + report.allergens.length + ' รายการ:</strong>' +
       '<div class="al-sum-chips">' + chips + '</div></div>';
   }
+  // Prominent SCAR safety banner — when ANY selected allergen is a SCAR-severity
+  // reaction (SJS/TEN/DRESS/AGEP), the whole related class is contraindicated and
+  // challenge/desensitization is forbidden. The per-allergen reports already route
+  // this correctly into "avoid"; this banner surfaces the emphatic warning that the
+  // single-drug view showed but the aggregate view otherwise wouldn't.
+  function scarBannerHtml(report) {
+    var scar = report.allergens.filter(function (al) { return al.severity && al.severity.blockAllBetaLactam; });
+    if (!scar.length) return '';
+    var names = scar.map(function (al) { return esc(al.meta.generic) + (al.meta.th ? ' (' + esc(al.meta.th) + ')' : ''); }).join(' · ');
+    return '<div class="info-box red" style="margin-bottom:14px">' +
+      '⛔ <strong>อาการแพ้รุนแรงชนิด SCAR</strong> (' + names + ') — ' +
+      'หลีกเลี่ยงยาในกลุ่มที่เกี่ยวข้อง<strong>ทั้งหมด</strong>และยาที่โครงสร้างใกล้เคียง · ' +
+      '<strong>ห้าม</strong> challenge / desensitization เด็ดขาด · ปรึกษาผู้เชี่ยวชาญด้านภูมิแพ้ยาก่อนตัดสินใจใช้ยาที่เกี่ยวข้อง</div>';
+  }
   function candVerdictText(c) {
     return ({ avoid: '🚫 ควรหลีกเลี่ยง', caution: '⚠️ ใช้ด้วยความระมัดระวัง',
       safer: '✅ น่าจะใช้ได้ (ปลอดภัยกว่า)', unknown: 'ℹ️ ไม่พบความสัมพันธ์การแพ้ข้าม (โดยหลักการใช้ได้)' })[c.bucket] || c.bucket;
@@ -397,6 +428,7 @@
     var html = '';
     if (report.candidate) html += candidateBannerHtml(report.candidate);
     html += caseSummaryHtml(report);
+    html += scarBannerHtml(report);
     html += actionsHtml();
     (report.intoleranceNotes || []).forEach(function (n) { html += intoleranceHtml(n); });
     html += controlsHtml();

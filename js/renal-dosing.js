@@ -39,7 +39,9 @@
     const htIn = pt.ht / 2.54; // cm → inches
     const ibw = pt.sex === 'M' ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
     const bmi = pt.wt / ((pt.ht / 100) ** 2);
-    const abw = ibw + 0.4 * (pt.wt - ibw);
+    // Underweight guard (same rule as core.js calcABW): if actual < IBW use
+    // actual weight — the 40% formula would otherwise report ABW above TBW.
+    const abw = pt.wt < ibw ? pt.wt : ibw + 0.4 * (pt.wt - ibw);
     const isObese = pt.wt > ibw * 1.3; // ABW >130% IBW
     const isUnderweight = pt.wt < ibw;
     const bsa = IVDrugRef.calcBSA(pt.ht, pt.wt); // Use core BSA calculation
@@ -60,6 +62,12 @@
    */
   function getActiveGFR() {
     const pt = getPatient();
+    // Pediatric (<18): band drugs with the SAME Schwartz eGFR the page displays.
+    // Adult CG here would silently disagree with the displayed value (P0.2-class
+    // display↔engine mismatch — same defect fixed on the TDM pages in v5.10.0).
+    if (pt.age < 18) {
+      return IVDrugRef.calcSchwartz(pt.ht, pt.scr);
+    }
     if (activeFormula === 'cg') {
       const useWt = pt.isObese ? pt.abw : pt.wt;
       return IVDrugRef.calcCockcroftGault(pt.age, useWt, pt.scr, pt.sex);
@@ -343,8 +351,10 @@
       id: 'vancomycin', name: 'Vancomycin', class: 'abx', badges: ['abx','renal','hd'],
       sub: 'Glycopeptide',
       getDosing: function(gfr, pt) {
-        const dose = Math.round(pt.wt * 15 / 250) * 250;
-        const doseHigh = Math.round(pt.wt * 20 / 250) * 250;
+        // Round to the nearest 250 mg but never below 250 — Math.round alone
+        // yields "0 mg" for weight ≤8 kg.
+        const dose = Math.max(250, Math.round(pt.wt * 15 / 250) * 250);
+        const doseHigh = Math.max(250, Math.round(pt.wt * 20 / 250) * 250);
         let rec, freq, css;
         if (gfr > 80) { rec = `${dose}–${doseHigh} mg q8-12h`; freq = 'q8-12h'; css = 'highlight'; }
         else if (gfr > 50) { rec = `${dose} mg q12h`; freq = 'q12h'; css = 'highlight'; }
@@ -473,19 +483,23 @@
       id: 'ceftazidime', name: 'Ceftazidime', class: 'abx', badges: ['abx','renal','hd'],
       sub: '3rd gen Cephalosporin (anti-Pseudomonas)',
       getDosing: function(gfr, pt) {
+        // Bands per Fortaz PI: 31–50 q12h | 16–30 q24h | 6–15 500mg q24h |
+        // <6 500mg q48h. Headline derived from the SAME bands as the table
+        // (previously the 6–15 headline contradicted its own table row).
         let rec;
         if (gfr > 50) rec = '1–2 g q8h';
         else if (gfr > 30) rec = '1 g q12h';
         else if (gfr > 15) rec = '1 g q24h';
-        else rec = '500 mg–1 g q24-48h';
+        else if (gfr > 5) rec = '500 mg q24h';
+        else rec = '1 g loading → 500 mg q48h (HD: give post-HD)';
         return {
           recommended: rec,
           table: [
             { range: '>50', dose: '1–2 g', freq: 'q8h', note: 'Normal', hl: gfr > 50 },
             { range: '31–50', dose: '1 g', freq: 'q12h', note: '', hl: gfr > 30 && gfr <= 50 },
             { range: '16–30', dose: '1 g', freq: 'q24h', note: '', hlAmber: gfr > 15 && gfr <= 30 },
-            { range: '6–15', dose: '500 mg', freq: 'q24h', note: '', hlAmber: gfr > 6 && gfr <= 15 },
-            { range: '<6 / HD', dose: '1 g loading → 500 mg', freq: 'q24-48h', note: 'Give post-HD', hlRed: gfr <= 6 },
+            { range: '6–15', dose: '500 mg', freq: 'q24h', note: '', hlAmber: gfr > 5 && gfr <= 15 },
+            { range: '<6 / HD', dose: '1 g loading → 500 mg', freq: 'q48h', note: 'Give post-HD', hlRed: gfr <= 5 },
           ],
           info: `<strong>CRRT:</strong> 1-2 g q8-12h<br><strong>Extended infusion:</strong> อาจพิจารณา 3-4 hr infusion`,
           infoType: 'blue',
@@ -497,18 +511,20 @@
       id: 'cefepime', name: 'Cefepime', class: 'abx', badges: ['abx','renal'],
       sub: '4th gen Cephalosporin',
       getDosing: function(gfr, pt) {
+        // Bands per Maxipime PI / Lexicomp: >60 | 30–60 | 11–29 | <11.
+        // Boundaries are contiguous (GFR exactly 30 belongs to the 30–60 row).
         let rec;
         if (gfr > 60) rec = '1–2 g q8h';
-        else if (gfr > 30) rec = '1–2 g q12h';
-        else if (gfr > 10) rec = '1 g q24h';
+        else if (gfr >= 30) rec = '1–2 g q12h';
+        else if (gfr >= 11) rec = '1 g q24h';
         else rec = '500 mg–1 g q24h';
         return {
           recommended: rec,
           table: [
             { range: '>60', dose: '1–2 g', freq: 'q8h', note: 'Normal', hl: gfr > 60 },
-            { range: '30–60', dose: '1–2 g', freq: 'q12h', note: '', hl: gfr > 30 && gfr <= 60 },
-            { range: '11–29', dose: '1 g', freq: 'q24h', note: '', hlAmber: gfr > 10 && gfr <= 29 },
-            { range: '≤10 / HD', dose: '500 mg–1 g', freq: 'q24h', note: 'Give post-HD', hlRed: gfr <= 10 },
+            { range: '30–60', dose: '1–2 g', freq: 'q12h', note: '', hl: gfr >= 30 && gfr <= 60 },
+            { range: '11–29', dose: '1 g', freq: 'q24h', note: '', hlAmber: gfr >= 11 && gfr < 30 },
+            { range: '<11 / HD', dose: '500 mg–1 g', freq: 'q24h', note: 'Give post-HD', hlRed: gfr < 11 },
           ],
           info: `<strong>⚠ Neurotoxicity risk สูงขึ้นมาก</strong>เมื่อไม่ปรับ dose ใน CKD → confusion, seizures, myoclonus<br><strong>CRRT:</strong> 1-2 g q8-12h`,
           infoType: 'amber',
@@ -953,9 +969,15 @@
     try {
       const pt = getPatient();
       const data = drug.getDosing(gfr, pt);
-      const rec = (data.recommended || '').toLowerCase();
-      return rec.includes('contraindicated') || rec.includes('ห้ามใช้') ||
-             rec.includes('หลีกเลี่ยง') || rec.includes('avoid');
+      // Scan the headline AND the matched table row(s) — remote (Supabase)
+      // drugs may carry the CI wording only inside the GFR band row.
+      let hay = (data.recommended || '');
+      (data.table || []).forEach(function (r) {
+        if (r.hl || r.hlAmber || r.hlRed) hay += ' ' + [r.dose, r.freq, r.note].join(' ');
+      });
+      hay = hay.toLowerCase();
+      return hay.includes('contraindicated') || hay.includes('ห้ามใช้') ||
+             hay.includes('หลีกเลี่ยง') || hay.includes('avoid');
     } catch (e) {
       return true; // conservative: treat as contraindicated if can't check
     }
@@ -1005,17 +1027,18 @@
 
     list.innerHTML = bannerHtml + drugs.map(d => {
       const contraindicated = isSevereCKD && isDrugContraindicated(d, gfr);
+      // Name/sub/badges may come from Supabase (admin-authored) — escape.
       return `
-      <div class="drug-item ${selectedDrug === d.id ? 'active' : ''} ${contraindicated ? 'cds-contraindicated' : ''}" data-action="selectDrug" data-id="${d.id}">
+      <div class="drug-item ${selectedDrug === d.id ? 'active' : ''} ${contraindicated ? 'cds-contraindicated' : ''}" data-action="selectDrug" data-id="${IVDrugRef.escHtml(d.id)}">
         <div class="drug-item-header">
           <div>
-            <div class="drug-item-name">${d.name}</div>
-            <div class="drug-item-class">${d.sub}</div>
+            <div class="drug-item-name">${IVDrugRef.escHtml(d.name)}</div>
+            <div class="drug-item-class">${IVDrugRef.escHtml(d.sub)}</div>
           </div>
           ${contraindicated ? '<span class="badge badge-had" style="margin-left:auto;font-size:10px;">⚠ CI</span>' : ''}
         </div>
         <div class="drug-item-badges">
-          ${d.badges.map(b => `<span class="badge badge-${b}">${badgeLabels[b] || b}</span>`).join('')}
+          ${d.badges.map(b => `<span class="badge badge-${IVDrugRef.escHtml(b)}">${IVDrugRef.escHtml(badgeLabels[b] || b)}</span>`).join('')}
         </div>
       </div>`;
     }).join('');
@@ -1053,7 +1076,7 @@
       type: 'renal_dosing',
       drug_name: drug.name,
       drug_class: drug.class,
-      formula_used: activeFormula === 'cg' ? 'Cockcroft-Gault' : 'CKD-EPI 2021',
+      formula_used: pt.age < 18 ? 'Schwartz' : (activeFormula === 'cg' ? 'Cockcroft-Gault' : 'CKD-EPI 2021'),
       gfr_value: gfr.toFixed(1),
       ckd_stage: stage.stage,
       recommended_dose: data.recommended,
@@ -1075,14 +1098,27 @@
 
     const gfr = getActiveGFR();
     const pt = getPatient();
+
+    // Infant (<1 yr) hard block: the guard banner already explains why; do NOT
+    // render a dose recommendation computed from an invalid GFR.
+    if (window.PediatricGuard &&
+        window.PediatricGuard.getGuardStatus(pt, window.PediatricGuard.CONTEXTS.RENAL_DOSING).blocked) {
+      closeDrugRecom();
+      return;
+    }
+
     const data = drug.getDosing(gfr, pt);
-    const formulaLabel = activeFormula === 'cg'
-      ? `CrCl ${gfr.toFixed(1)} mL/min (CG)`
-      : `eGFR ${gfr.toFixed(1)} mL/min/1.73m² (CKD-EPI)`;
+    const formulaLabel = pt.age < 18
+      ? `eGFR ${gfr.toFixed(1)} mL/min/1.73m² (Schwartz)`
+      : activeFormula === 'cg'
+        ? `CrCl ${gfr.toFixed(1)} mL/min (CG)`
+        : `eGFR ${gfr.toFixed(1)} mL/min/1.73m² (CKD-EPI)`;
 
     const sec = document.getElementById('recomSection');
     document.getElementById('recomDrugName').textContent = drug.name;
 
+    // Table cells / recommended may come from Supabase (admin-authored) — escape.
+    const esc = IVDrugRef.escHtml;
     let tableHTML = `<table class="dose-table">
       <thead><tr><th>GFR Range</th><th>Dose</th><th>Frequency</th><th>Note</th></tr></thead><tbody>`;
     data.table.forEach(r => {
@@ -1090,14 +1126,14 @@
       if (r.hl) cls = 'highlight';
       else if (r.hlAmber) cls = 'highlight-amber';
       else if (r.hlRed) cls = 'highlight-red';
-      tableHTML += `<tr class="${cls}"><td>${r.range}</td><td>${r.dose}</td><td>${r.freq}</td><td>${r.note}</td></tr>`;
+      tableHTML += `<tr class="${cls}"><td>${esc(r.range)}</td><td>${esc(r.dose)}</td><td>${esc(r.freq)}</td><td>${esc(r.note)}</td></tr>`;
     });
     tableHTML += '</tbody></table>';
 
     document.getElementById('recomBody').innerHTML = `
       <div class="current-dose-box">
         <div class="current-dose-label">Recommended for ${formulaLabel}</div>
-        <div class="current-dose-value">${data.recommended}</div>
+        <div class="current-dose-value">${esc(data.recommended)}</div>
       </div>
       <div class="dose-table-wrap">${tableHTML}</div>
       <div class="info-box ${data.infoType}">${data.info}</div>
@@ -1110,12 +1146,18 @@
     document.body.classList.add('recom-modal-open');
     var sheet = sec.querySelector('.recom-sheet');
     if (sheet) sheet.scrollTop = 0;
+    // a11y: trap focus in the dialog + restore it to the drug row on close.
+    if (window.IVDrugRef && IVDrugRef.trapFocus) {
+      _recomRelease = IVDrugRef.trapFocus(sheet || sec);
+    }
   }
 
+  var _recomRelease = null;
   function closeDrugRecom() {
     selectedDrug = null;
     document.getElementById('recomSection').classList.remove('visible');
     document.body.classList.remove('recom-modal-open');
+    if (_recomRelease) { _recomRelease(); _recomRelease = null; }
     renderDrugList(document.getElementById('drugSearch').value.toLowerCase().trim());
   }
 
@@ -1137,12 +1179,19 @@
   }
 
   // Best-effort: does an active GFR fall inside a free-text range label
-  // ("≥80", ">50", "26–50", "<10 / HD")? Used to highlight the matching row.
+  // ("≥80", ">50", "26–50", "<10 / HD")? Used to highlight the matching row
+  // and to derive the patient-specific headline for Supabase-sourced drugs.
+  // "≤"/"≥" (and "<="/">=") are INCLUSIVE; bare "<"/">" are strict — otherwise
+  // a GFR exactly on a band boundary (e.g. 30 with "≤30") matches no row.
   function rdRangeHit(range, gfr) {
     var s = String(range == null ? '' : range).replace(/[–—]/g, '-').replace(/\s+/g, '');
     var m;
-    if ((m = s.match(/^[<≤]=?(\d+(?:\.\d+)?)/))) return gfr < parseFloat(m[1]);
-    if ((m = s.match(/^[>≥]=?(\d+(?:\.\d+)?)/))) return gfr > parseFloat(m[1]);
+    if ((m = s.match(/^([<≤])(=?)(\d+(?:\.\d+)?)/))) {
+      return (m[1] === '≤' || m[2] === '=') ? gfr <= parseFloat(m[3]) : gfr < parseFloat(m[3]);
+    }
+    if ((m = s.match(/^([>≥])(=?)(\d+(?:\.\d+)?)/))) {
+      return (m[1] === '≥' || m[2] === '=') ? gfr >= parseFloat(m[3]) : gfr > parseFloat(m[3]);
+    }
     if ((m = s.match(/(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/))) return gfr >= parseFloat(m[1]) && gfr <= parseFloat(m[2]);
     return false;
   }
@@ -1165,10 +1214,29 @@
         badges: rdParse(x.badges, []),
         recommended: recommended, // kept top-level for the search filter
         getDosing: function (gfr) {
+          // GFR-AWARE headline (v5.52.0 safety fix): the Sheet's static
+          // `recommended` is the NORMAL-renal dose. Showing it verbatim as
+          // "Recommended for CrCl X" gave ESRD patients the normal dose and
+          // hid contraindications (e.g. metformin at GFR <30). Derive the
+          // headline from the GFR band row that matches this patient instead.
+          var matched = null;
           var table = (dosingTable || []).map(function (r) {
-            return { range: r.range, dose: r.dose, freq: r.freq, note: r.note || '', hl: rdRangeHit(r.range, gfr) };
+            var hit = rdRangeHit(r.range, gfr);
+            if (hit && !matched) matched = r;
+            return { range: r.range, dose: r.dose, freq: r.freq, note: r.note || '', hl: hit };
           });
-          return { recommended: recommended, table: table, info: info, infoType: infoType, ref: ref };
+          var rec;
+          if (matched) {
+            rec = [matched.dose, matched.freq].filter(Boolean).join(' ');
+            if (matched.note) rec += ' — ' + matched.note;
+          } else if (!table.length) {
+            rec = recommended; // no banded table (e.g. no-adjustment drug) → static dose
+          } else {
+            // Banded table but no row matches this GFR → don't claim the
+            // normal dose; point to the table instead of guessing.
+            rec = recommended + ' — ⚠ ไม่พบช่วง GFR ที่ตรง กรุณาตรวจสอบตารางด้านล่าง';
+          }
+          return { recommended: rec, table: table, info: info, infoType: infoType, ref: ref };
         }
       };
     }).filter(function (x) { return x.id && x.name; });

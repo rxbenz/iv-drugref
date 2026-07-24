@@ -198,13 +198,26 @@
 
   const FILTER_FIELDS = { drug:['drug_name','drug_clicked','drug_id'], platform:['platform'], class:['drug_class'], formula:['formula_used'], stage:['ckd_stage'], interpretation:['interpretation'], role:['role'], user:['user_id','session_id'] };
 
+  // Data dimensions a dataset must carry to be filterable by them (as opposed to
+  // date/user/platform which apply everywhere). If one of these is the active
+  // filter and the dataset carries NONE of it, the dataset is EXCLUDED (not
+  // passed through unfiltered) so denominators don't overstate.
+  const DATA_DIMENSIONS = ['drug', 'class', 'formula', 'stage', 'interpretation'];
+
   function detectApplicableFilters(rows) {
-    const sample = rows.slice(0, Math.min(rows.length, FILTER_SAMPLE_SIZE));
+    // Scan a large slice (not 50): a bucket whose field only appears after the
+    // first rows was mis-detected as "not filterable" and skipped filtering.
+    const n = Math.min(rows.length, 5000);
     const applicable = {};
     for (const key of Object.keys(FILTERS)) {
       if (key === 'user' || key === 'platform') { applicable[key] = true; continue; }
       const fields = FILTER_FIELDS[key] || [];
-      applicable[key] = sample.some(r => fields.some(f => r[f] !== undefined && r[f] !== null && String(r[f]).trim() !== ''));
+      let ok = false;
+      for (let i = 0; i < n && !ok; i++) {
+        const r = rows[i];
+        ok = fields.some(f => r[f] !== undefined && r[f] !== null && String(r[f]).trim() !== '');
+      }
+      applicable[key] = ok;
     }
     return applicable;
   }
@@ -214,6 +227,15 @@
     const to = document.getElementById('dateTo').value;
     const q = document.getElementById('globalSearch').value.trim().toLowerCase();
     const applicable = detectApplicableFilters(rows);
+
+    // Honest denominators: if a data-dimension filter is active but this dataset
+    // can't carry it (e.g. filter drug=Vancomycin over the sessions dataset,
+    // which has no drug field), EXCLUDE the whole dataset instead of returning
+    // it unfiltered — otherwise "480 users" would sit beside "12 Vanco searches"
+    // implying all 480 touched Vancomycin.
+    for (const key of DATA_DIMENSIONS) {
+      if (FILTERS[key] && !applicable[key]) return [];
+    }
 
     return rows.filter(r => {
       if (from || to) {
@@ -941,7 +963,7 @@
         topEl.innerHTML = '<table class="tw"><tr><th>Drug</th><th>Avg</th><th>Count</th></tr>' +
           sorted.map(function(d) {
             var stars = '★'.repeat(Math.round(d.avg)) + '☆'.repeat(5 - Math.round(d.avg));
-            return '<tr><td>' + d.name + '</td><td><span style="color:#f59e0b">' + stars + '</span> ' + d.avg.toFixed(1) + '</td><td>' + d.count + '</td></tr>';
+            return '<tr><td>' + esc(d.name) + '</td><td><span style="color:#f59e0b">' + stars + '</span> ' + d.avg.toFixed(1) + '</td><td>' + d.count + '</td></tr>';
           }).join('') + '</table>';
       }
     }
@@ -959,7 +981,7 @@
           var color = score >= 9 ? C.green : score >= 7 ? C.amber : C.red;
           return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">' +
             '<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:' + color + ';color:#fff;text-align:center;line-height:24px;font-weight:700;font-size:11px;margin-right:8px">' + score + '</span>' +
-            '<span style="color:var(--text2)">' + (r.comment || '') + '</span>' +
+            '<span style="color:var(--text2)">' + esc(r.comment || '') + '</span>' +
             '<span style="float:right;font-size:10px;color:var(--text3)">' + cat + '</span></div>';
         }).join('');
       }

@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.62.0
+// IV Drug Reference PWA — Service Worker v5.66.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -482,9 +482,13 @@
 // v5.60.0: เพิ่มกลุ่มแพ้ยา PPI + Sulfonylurea
 // v5.61.0: NSAID 5 phenotype + Heparin HIT/DTH/immediate
 // v5.62.0: ปรับปรุงความแม่นยำเครื่องคำนวณ Vanco TDM
+// v5.63.0: ปรับความแม่นยำคำเตือนความปลอดภัยคลินิก
+// v5.64.0: แก้ระบบอัปเดตอัตโนมัติ + ความเสถียร
+// v5.65.0: ความปลอดภัย + การเข้าถึง (a11y) + ความแม่นยำข้อมูล
+// v5.66.0: เสริมความปลอดภัยระบบหลังบ้าน (backend hardening)
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.62.0';
+const CACHE_NAME = 'iv-drugref-v5.66.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -515,7 +519,8 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
 
   // Standalone JS (not inlined — loaded separately)
-  './error-tracker.js',
+  // NOTE: error-tracker.js is INLINED into every page by build.js — it must
+  // NOT be listed here (a 404 here broke SW install for all of v5.51.x).
   './i18n.js',
   './translations-en.js',
 
@@ -530,7 +535,19 @@ self.addEventListener('install', (e) => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('[SW] Caching core assets');
-        return cache.addAll(ASSETS_TO_CACHE);
+        // Per-asset caching instead of cache.addAll: addAll rejects the WHOLE
+        // install if any single asset 404s, which silently disabled the SW for
+        // every deploy of v5.51.x. Missing assets are logged and skipped —
+        // they'll be picked up at runtime by the fetch handler instead.
+        return Promise.allSettled(
+          ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => {
+            console.warn('[SW] Precache failed (skipped):', url, err && err.message);
+            throw err;
+          }))
+        ).then(results => {
+          const failed = results.filter(r => r.status === 'rejected').length;
+          if (failed) console.warn('[SW] Precache: ' + failed + '/' + ASSETS_TO_CACHE.length + ' assets failed');
+        });
       })
       // Activate the new SW IMMEDIATELY instead of waiting for every tab to close.
       // Without this, a fixed SW stays "waiting" while the OLD SW keeps serving —

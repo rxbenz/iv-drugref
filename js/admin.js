@@ -52,11 +52,20 @@ function defaultScriptUrl() {
 }
 
 function getConfig() {
+  // ghToken is a real GitHub PAT (repo scope → can push to main → auto-deploy).
+  // Keep it in sessionStorage (cleared when the tab closes), NOT localStorage, so
+  // a persistent-XSS/compromised-CDN read window is limited to the live session
+  // rather than forever. One-time migration: move any legacy localStorage token.
+  var legacyTok = localStorage.getItem(LS_PREFIX + 'ghToken');
+  if (legacyTok) {
+    try { sessionStorage.setItem(LS_PREFIX + 'ghToken', legacyTok); } catch (e) {}
+    localStorage.removeItem(LS_PREFIX + 'ghToken');
+  }
   return {
     scriptUrl: localStorage.getItem(LS_PREFIX + 'scriptUrl') || defaultScriptUrl(),
     clientId: localStorage.getItem(LS_PREFIX + 'clientId') || DEFAULT_CLIENT_ID,
     allowedEmails: (localStorage.getItem(LS_PREFIX + 'allowedEmails') || '').split(',').map(e => e.trim()).filter(Boolean),
-    ghToken: localStorage.getItem(LS_PREFIX + 'ghToken') || '',
+    ghToken: sessionStorage.getItem(LS_PREFIX + 'ghToken') || '',
     ghRepo: localStorage.getItem(LS_PREFIX + 'ghRepo') || 'rxbenz/iv-drugref',
   };
 }
@@ -64,7 +73,11 @@ function saveConfig(cfg) {
   localStorage.setItem(LS_PREFIX + 'scriptUrl', cfg.scriptUrl);
   localStorage.setItem(LS_PREFIX + 'clientId', cfg.clientId);
   localStorage.setItem(LS_PREFIX + 'allowedEmails', cfg.allowedEmails.join(','));
-  if (cfg.ghToken !== undefined) localStorage.setItem(LS_PREFIX + 'ghToken', cfg.ghToken);
+  // ghToken → sessionStorage only (see getConfig note).
+  if (cfg.ghToken !== undefined) {
+    try { sessionStorage.setItem(LS_PREFIX + 'ghToken', cfg.ghToken); } catch (e) {}
+    localStorage.removeItem(LS_PREFIX + 'ghToken');
+  }
   if (cfg.ghRepo !== undefined) localStorage.setItem(LS_PREFIX + 'ghRepo', cfg.ghRepo);
 }
 
@@ -100,7 +113,10 @@ function handleCredentialResponse(response) {
     err.style.display = 'block';
     return;
   }
-  state.user = { name: payload.name, email: payload.email, picture: payload.picture };
+  // Keep the raw GIS id_token (a signed JWT) so writes can carry a VERIFIABLE
+  // identity to GAS — the plain user= email param is trivially spoofable. GAS
+  // verifies this server-side when REQUIRE_ID_TOKEN is enabled (opt-in).
+  state.user = { name: payload.name, email: payload.email, picture: payload.picture, idToken: response.credential };
   showApp(state.user);
   // Phase A: best-effort — exchange the Google id_token for a Supabase session
   // (no extra login/redirect) so the Renal tab can write direct to Supabase.
@@ -182,6 +198,9 @@ async function apiCall(action, data = {}) {
   const url = new URL(cfg.scriptUrl);
   url.searchParams.set('action', action);
   url.searchParams.set('user', state.user?.email || 'unknown');
+  // Signed id_token for server-side identity verification (see GAS _resolveUser).
+  // GAS ignores it unless REQUIRE_ID_TOKEN='on', so this is harmless until then.
+  if (state.user?.idToken) url.searchParams.set('idToken', state.user.idToken);
 
   if (isRead) {
     Object.entries(data).forEach(([k, v]) => url.searchParams.set(k, v));
@@ -214,7 +233,8 @@ async function apiCall(action, data = {}) {
   // Large payload → use POST no-cors (fire-and-forget)
   console.log(`[API] ${action} via POST no-cors (payload: ${jsonData.length} chars)`);
   const postUrl = cfg.scriptUrl + '?action=' + action +
-    '&user=' + encodeURIComponent(state.user?.email || 'unknown');
+    '&user=' + encodeURIComponent(state.user?.email || 'unknown') +
+    (state.user?.idToken ? '&idToken=' + encodeURIComponent(state.user.idToken) : '');
 
   await fetch(postUrl, {
     method: 'POST',
@@ -231,7 +251,7 @@ async function apiCall(action, data = {}) {
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.47.0';
+const EXPECTED_GAS_VERSION = '5.66.0';
 
 async function checkBackendVersion() {
   const box = document.getElementById('version-check-result');
@@ -1897,6 +1917,16 @@ async function saveCompatPair() {
     toast('กรุณากรอกชื่อยาทั้ง 2 ช่อง', 'error');
     return;
   }
+  // Validation before this reaches production readers: result must be a known
+  // code, and a self-pair is meaningless.
+  if (!['c', 'i', 'v'].includes(result)) {
+    toast('ผลลัพธ์ต้องเป็น compatible / incompatible / variable', 'error');
+    return;
+  }
+  if (drugA.toLowerCase() === drugB.toLowerCase()) {
+    toast('ชื่อยาทั้งสองช่องซ้ำกัน', 'error');
+    return;
+  }
 
   if (!(await ensureSupaWrite())) return;
   // Phase B: upsert direct to Supabase. Create generates a stable text id;
@@ -2053,12 +2083,18 @@ async function importCuratedPairs() {
   // synthetic (not natural keys), so we match existing rows by the normalized
   // pair-key and REUSE their id (update in place); only genuinely-new pairs get
   // a fresh id. This prevents duplicate rows on re-import.
-  if (!confirm('นำเข้า/อัปเดต CURATED ' + CURATED_PAIRS.length + ' คู่ยา เข้า Supabase?\nคู่ที่มีอยู่จะถูกอัปเดต (result/ref) — ไม่สร้างซ้ำ')) return;
-  if (!(await ensureSupaWrite())) return;
-
   const keyOf = (a, b) => [a, b].map(s => String(s || '').toLowerCase().trim()).sort().join('|');
   const existing = {};
   state.compatPairs.forEach(p => { existing[keyOf(p.drugA, p.drugB)] = p.id; });
+  // Warn how many existing pairs will be overwritten (result + ref reset to the
+  // code values), so a panel-side correction isn't silently reverted.
+  var curatedKeys = {};
+  CURATED_PAIRS.forEach(([a, b]) => { curatedKeys[keyOf(a, b)] = 1; });
+  var overwriteN = Object.keys(curatedKeys).filter(k => existing[k]).length;
+  var msg2 = 'นำเข้า/อัปเดต CURATED ' + CURATED_PAIRS.length + ' คู่ยา เข้า Supabase? (ไม่สร้างซ้ำ)';
+  if (overwriteN) msg2 += '\n\n⚠ จะเขียนทับ result/ref ของคู่ที่มีอยู่ ' + overwriteN + ' คู่ ด้วยค่าจากโค้ด';
+  if (!confirm(msg2)) return;
+  if (!(await ensureSupaWrite())) return;
   // Dedupe CURATED_PAIRS by pair-key FIRST — the list contains both-direction
   // duplicates (A+B and B+A) that collapse to one key; without this, one upsert
   // batch would carry two rows with the same id (Postgres 21000) or mint two rows.
@@ -2625,9 +2661,29 @@ function collectRenalFormData() {
   };
 }
 
+// Validate a renal drug before it upserts to Supabase and out to clinicians.
+// Returns an error string (Thai) or null when valid.
+function validateRenalData(data) {
+  if (!data.id || !data.name) return 'กรุณากรอก Drug ID และ Drug Name';
+  var hasRec = !!(data.recommended && data.recommended.trim());
+  var rows = data.dosingTable || [];
+  if (!hasRec && !rows.length) return 'ต้องมี Recommended หรือ ตารางขนาดยาตาม GFR อย่างน้อย 1 แถว';
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if (!r.dose || !r.dose.trim()) return 'แถวตารางที่ ' + (i + 1) + ': กรุณากรอก Dose';
+    // Range must look like a GFR band (a number, or an HD/CAPD/PD keyword).
+    var rng = String(r.range || '');
+    if (!/\d/.test(rng) && !/hd|capd|pd|crrt|dialysis|ฟอกไต/i.test(rng)) {
+      return 'แถวตารางที่ ' + (i + 1) + ': ช่วง GFR ("' + rng + '") ไม่ถูกต้อง — ต้องมีตัวเลข หรือ HD/CAPD/PD';
+    }
+  }
+  return null;
+}
+
 async function saveRenalDrug() {
   const data = collectRenalFormData();
-  if (!data.id || !data.name) { toast('กรุณากรอก Drug ID และ Drug Name', 'error'); return; }
+  const vErr = validateRenalData(data);
+  if (vErr) { toast(vErr, 'error'); return; }
   // Create mode: guard against silently overwriting an existing drug (upsert keys
   // on id). rf-id is read-only when editing, so this only fires for new adds.
   if (!state.editingRenalId && state.renalDrugs.some(d => String(d.id) === String(data.id))) {
@@ -2717,7 +2773,17 @@ async function importCuratedRenal() {
   // Phase A: upsert the corrected in-code dataset (curated-renal-drugs.js) into
   // Supabase — this is also the "re-sync code → Supabase" button (upsert, so it
   // OVERWRITES existing rows to match the code, not skip-if-exists like GAS did).
-  if (!confirm('เขียนทับ (upsert) ข้อมูล renal ' + CURATED_RENAL_DRUGS.length + ' ยา จากโค้ดล่าสุดเข้า Supabase?\nยาที่มีอยู่จะถูกอัปเดตให้ตรงกับโค้ด (เช่นค่าที่เพิ่งแก้)')) return;
+  // Warn EXACTLY how many live rows will be overwritten so an admin doesn't
+  // silently revert a clinical correction made in the panel.
+  var existingIds = {};
+  (state.renalDrugs || []).forEach(function (d) { existingIds[String(d.id)] = 1; });
+  var overwriteCount = CURATED_RENAL_DRUGS.filter(function (d) { return existingIds[String(d.id)]; }).length;
+  var msg = 'Import renal จากโค้ด ' + CURATED_RENAL_DRUGS.length + ' ยาเข้า Supabase?';
+  if (overwriteCount) {
+    msg += '\n\n⚠ จะ "เขียนทับ" ยาที่มีอยู่แล้ว ' + overwriteCount + ' ตัว — ' +
+           'ถ้ามีการแก้ค่าในแผงจัดการหลังจากนี้ ค่านั้นจะถูกทับด้วยค่าจากโค้ด';
+  }
+  if (!confirm(msg)) return;
   if (!(await ensureRenalWriteAccess())) return;
 
   const drugs = CURATED_RENAL_DRUGS.map(d => ({

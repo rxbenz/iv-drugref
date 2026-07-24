@@ -748,7 +748,10 @@ var IVDrugRef = (function() {
         type: enriched.type || 'unknown',
         session_id: enriched.session_id || null,
         user_id: enriched.user_id || null,
-        app_version: enriched.app_version || null,
+        // Default to the running app version — callers never set this, so it
+        // was null on virtually every event row (useless for adoption charts).
+        app_version: enriched.app_version ||
+          ((typeof IVDrugRef !== 'undefined' && IVDrugRef.VERSION) ? IVDrugRef.VERSION : null),
         client_ts: enriched.queued_at || new Date().toISOString(),
         data: {}
       };
@@ -775,21 +778,35 @@ var IVDrugRef = (function() {
    */
   function sendAnalytics(data) {
     if (!hasAnalyticsConsent()) return;
-    const now = Date.now();
-    if (now - _reqWindowStart > 60000) { _reqCount = 0; _reqWindowStart = now; }
-    if (_reqCount >= 20) return;
-    _reqCount++;
     var enriched = {
       ...data,
       session_id: getSessionId(),
       user_id: getUserId()
     };
-    // Offline: queue to IndexedDB for later flush
+    // Offline: queue to IndexedDB for later flush. Do this BEFORE the rate
+    // counter so offline events don't consume the online send budget.
     if (!navigator.onLine) {
       enriched.queued_at = new Date().toISOString();
       queueAnalyticsEvent(enriched);
       return;
     }
+    // Online rate limit: 60/min rolling (was 20 — a pharmacist doing rapid
+    // lookups is exactly the power user we most want to measure, and 20
+    // truncated their busiest bursts). Over the cap → queue for the next flush
+    // instead of dropping outright.
+    const now = Date.now();
+    if (now - _reqWindowStart > 60000) {
+      _reqCount = 0; _reqWindowStart = now;
+      // Drain any overflow queued during the previous minute (also covers the
+      // online-overflow path below, which otherwise only flushed on reconnect).
+      try { flushAnalyticsQueue(); } catch (e) {}
+    }
+    if (_reqCount >= 60) {
+      enriched.queued_at = new Date().toISOString();
+      queueAnalyticsEvent(enriched);
+      return;
+    }
+    _reqCount++;
     // Primary sink: Supabase (Phase 1). Dual-write to GAS keeps the legacy
     // dashboard working until it migrates (Phase 1 step 5).
     sendToSupabase(enriched);
@@ -1114,6 +1131,49 @@ var IVDrugRef = (function() {
   // right after the `const RELEASE_NOTES = [` line, so keep that line intact.
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
+    {
+      v: '5.66.0',
+      date: '2026-07-24',
+      title: "เสริมความปลอดภัยระบบหลังบ้าน (backend hardening)",
+      items: [
+        "🔐 เตรียมระบบยืนยันตัวตนแบบ signed token สำหรับการแก้ข้อมูลผ่านแผงแอดมิน และ SQL ปิดไม่ให้บุคคลภายนอกอ่านข้อมูลยาที่ยังไม่อนุมัติ/ข้อมูลส่วนบุคคล — ส่วนนี้ต้องตั้งค่าฝั่งเซิร์ฟเวอร์เพิ่ม (ดู docs/gas-security-hardening.md) จึงจะมีผลเต็มที่"
+      ]
+    },
+    {
+      v: '5.65.0',
+      date: '2026-07-24',
+      title: "ความปลอดภัย + การเข้าถึง (a11y) + ความแม่นยำข้อมูล",
+      items: [
+        "🔒 อุดช่องโหว่ XSS ในหน้า dashboard (comment/ชื่อยาที่ผู้ใช้ส่งเข้ามาถูก escape ก่อนแสดง) และย้าย GitHub token ของแอดมินไป sessionStorage (ปลอดภัยขึ้น)",
+        "⌨️ รองรับคีย์บอร์ด/screen reader ดีขึ้น: modal ดักโฟกัส (Tab วนในกล่อง แล้วคืนโฟกัสเดิม) + ผูก label กับช่องกรอกในหน้า TDM/Vanco",
+        "✅ แผงแอดมิน: ตรวจข้อมูลก่อนบันทึกลง Supabase (ผล compat ต้องถูกต้อง, renal ต้องมีขนาดยา + ช่วง GFR ที่ถูกต้อง) และเตือนจำนวนรายการที่จะถูกเขียนทับตอน import",
+        "📊 Analytics แม่นยำขึ้น: เพิ่มลิมิต 20→60 ครั้ง/นาที (ไม่ตกหล่นตอนใช้ถี่) และ cross-filter ไม่นับข้ามชุดข้อมูลที่ไม่มีมิตินั้น"
+      ]
+    },
+    {
+      v: '5.64.0',
+      date: '2026-07-24',
+      title: "แก้ระบบอัปเดตอัตโนมัติ + ความเสถียร",
+      items: [
+        "🔄 แก้ Service Worker ที่ติดตั้งไม่สำเร็จทุกครั้งที่ deploy (ต้นเหตุที่แอปค้างเวอร์ชันเก่า) — ตอนนี้อัปเดตเป็นเวอร์ชันล่าสุดได้จริงอัตโนมัติ",
+        "🔔 ปุ่มปิด/รับทราบแจ้งเตือนด่วน (urgent alert) กดได้แล้ว (เดิมกดไม่ทำงานเพราะ id เป็นข้อความ)",
+        "🕐 เวลา 'ซิงค์ล่าสุด' ในโหมดออฟไลน์แสดงเวลาที่ดึงข้อมูลจริง (เดิมโชว์เวลาเปิดหน้าเสมอ ทำให้ข้อมูลเก่าดูเหมือนเพิ่งอัปเดต)",
+        "📊 คะแนนรีวิวยา + แบบสอบถามความพึงพอใจ (NPS) ส่งเข้าระบบวิเคราะห์ได้แล้ว (เดิมส่งผิดทางจนไม่ปรากฏใน dashboard)",
+        "🛠️ ระบบ build ตรวจไฟล์หายอัตโนมัติ + เพิ่ม CI รันเทสต์ทุกครั้งก่อน merge"
+      ]
+    },
+    {
+      v: '5.63.0',
+      date: '2026-07-24',
+      title: "ปรับความแม่นยำคำเตือนความปลอดภัยคลินิก",
+      items: [
+        "🩺 Renal dosing: คนไข้ไตวายระยะสุดท้ายได้ขนาดยาตามค่า GFR จริง + ขึ้นธงห้ามใช้ (CI) ถูกต้อง และเด็กอายุ <1 ปีถูกบล็อกการคำนวณจริง (เดิมโชว์ขนาดยาใต้แบนเนอร์เตือน)",
+        "💉 Vancomycin: ขนาดยาตามน้ำหนักไม่ปัดเป็น 0 mg ในเด็กเล็ก และ aminoglycoside ใช้ AdjBW เมื่อน้ำหนักเกิน >120% IBW",
+        "⚠️ ปฏิกิริยาระหว่างยา: DigiFab (ยาแก้พิษ digoxin) ไม่ถูกเตือนผิดว่าตีกับ digoxin อีกต่อไป",
+        "🧪 ความเข้ากันได้ IV: Calcium/Magnesium + Phosphate = เข้ากันไม่ได้ (ตกตะกอน) และการ sync ข้อมูลไม่ลบคู่ยาอันตรายที่มีในระบบทิ้ง",
+        "🔬 แพ้ข้ามยา: carbapenem→carbapenem = เสี่ยงสูง (ไม่ใช่น้อยมาก), ค้นด้วยชื่อการค้า (เช่น Bactrim) ได้, ครอบคลุม 17 กลุ่มยา"
+      ]
+    },
     {
       v: '5.62.0',
       date: '2026-07-24',
@@ -1473,7 +1533,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.62.0';
+  const VERSION = '5.66.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================
@@ -1595,12 +1655,56 @@ var IVDrugRef = (function() {
   }
 
   // ============================================================
+  // trapFocus — accessible modal focus management
+  // Marks `el` as a dialog, moves focus in, traps Tab, and returns a release()
+  // that restores focus to whatever was focused before it opened. Call on modal
+  // open; call the returned fn on close. Safe no-op if el is missing.
+  // ============================================================
+  function trapFocus(el, opts) {
+    if (!el) return function(){};
+    opts = opts || {};
+    var prevFocus = document.activeElement;
+    el.setAttribute('role', el.getAttribute('role') || 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    var SEL = 'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    function focusables(){
+      return Array.prototype.filter.call(el.querySelectorAll(SEL), function(n){
+        return n.offsetParent !== null || n === document.activeElement; // visible only
+      });
+    }
+    // Move focus into the dialog (first focusable, else the container itself).
+    var f = focusables();
+    if (f.length) { try { f[0].focus(); } catch(e){} }
+    else { el.setAttribute('tabindex', '-1'); try { el.focus(); } catch(e){} }
+    function onKey(e){
+      if (e.key !== 'Tab') return;
+      var list = focusables();
+      if (!list.length) { e.preventDefault(); return; }
+      var first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+    el.addEventListener('keydown', onKey);
+    return function release(){
+      el.removeEventListener('keydown', onKey);
+      // Restore focus to the trigger (unless the caller opted out or it's gone).
+      if (!opts.noRestore && prevFocus && typeof prevFocus.focus === 'function' &&
+          document.contains(prevFocus)) {
+        try { prevFocus.focus(); } catch(e){}
+      }
+    };
+  }
+
+  // ============================================================
   // PUBLIC API
   // ============================================================
   return {
     // Version info
     VERSION,
     APP_NAME,
+
+    // a11y
+    trapFocus,
 
     // Validation
     VALIDATION_RULES,
@@ -1785,10 +1889,16 @@ var IVDrugRef = (function() {
             localStorage.setItem('drugData_v4',JSON.stringify(backup.drugs));
             localStorage.setItem('iv_drugref_last_sync',String(backup.timestamp||Date.now()));
             console.log('[Core] Restored '+backup.drugs.length+' drugs from IndexedDB backup');
-            // Reload to let index.js pick up the restored data
-            if(typeof DRUGS==='undefined'||!window.DRUGS||window.DRUGS.length===0){
-              window.location.reload();
-            }
+            // Reload ONLY where the restored data is actually consumed: the
+            // index page (drugList) with an empty DRUGS array. `window.DRUGS`
+            // never exists (top-level `let` doesn't attach to window), so the
+            // old guard was always-true and reloaded EVERY page once.
+            var needsReload=false;
+            try{
+              needsReload=!!document.getElementById('drugList')&&
+                (typeof DRUGS==='undefined'||!DRUGS||DRUGS.length===0);
+            }catch(err){}
+            if(needsReload)window.location.reload();
           }catch(e){}
         }
       });
@@ -1798,17 +1908,19 @@ var IVDrugRef = (function() {
     var drugs=JSON.parse(raw);
     if(!Array.isArray(drugs))return;
     var fixed=false;
+    // NOTE: no early `return` inside this forEach — a `return` after parsing
+    // monitoring used to skip normalizing categories/reconst/… for that drug.
     drugs.forEach(function(d){
       if(d.monitoring&&typeof d.monitoring==='string'){
-        var v=d.monitoring.trim();
-        if(v[0]==='['){try{d.monitoring=JSON.parse(v);fixed=true;return}catch(e){}}
-        d.monitoring=v.split(',').map(function(s){return s.trim()}).filter(Boolean);
+        var v=d.monitoring.trim(),vp=null;
+        if(v[0]==='['){try{vp=JSON.parse(v)}catch(e){}}
+        d.monitoring=vp||v.split(',').map(function(s){return s.trim()}).filter(Boolean);
         fixed=true;
       }
       if(d.categories&&typeof d.categories==='string'){
-        var c=d.categories.trim();
-        if(c[0]==='['){try{d.categories=JSON.parse(c);fixed=true;return}catch(e){}}
-        d.categories=c.split(',').map(function(s){return s.trim()}).filter(Boolean);
+        var c=d.categories.trim(),cp=null;
+        if(c[0]==='['){try{cp=JSON.parse(c)}catch(e){}}
+        d.categories=cp||c.split(',').map(function(s){return s.trim()}).filter(Boolean);
         fixed=true;
       }
       ['reconst','dilution','admin','stability','compat'].forEach(function(k){
@@ -1817,10 +1929,17 @@ var IVDrugRef = (function() {
     });
     if(fixed)localStorage.setItem('drugData_v4',JSON.stringify(drugs));
 
-    // Backup to IndexedDB (fire-and-forget)
+    // Backup to IndexedDB (fire-and-forget).
+    // last_sync must reflect when data was actually FETCHED (drugData_v4_ts,
+    // stamped by the fetch path) — stamping Date.now() on every page load made
+    // the offline banner report week-old data as "just synced".
     if(drugs.length>0){
-      localStorage.setItem('iv_drugref_last_sync',String(Date.now()));
-      IVDrugRef.idbPut('drugDataBackup',{id:'main',drugs:drugs,timestamp:Date.now()});
+      var syncTs=Number(localStorage.getItem('drugData_v4_ts'));
+      if(!isFinite(syncTs)||syncTs<=0){
+        syncTs=Number(localStorage.getItem('iv_drugref_last_sync'))||Date.now();
+      }
+      localStorage.setItem('iv_drugref_last_sync',String(syncTs));
+      IVDrugRef.idbPut('drugDataBackup',{id:'main',drugs:drugs,timestamp:syncTs});
     }
   }catch(e){}
 })();
@@ -1905,7 +2024,10 @@ document.addEventListener('keydown', function(e) {
   // Urgent alert modal (dynamically created, removed on close)
   var urgentModal = document.getElementById('urgentModal');
   if (urgentModal) {
+    // closeUrgentModal is a delegate ACTION in the blob, not a global function —
+    // fall back to removing the modal directly or Esc silently did nothing here.
     if (typeof closeUrgentModal === 'function') closeUrgentModal();
+    else urgentModal.remove();
     return;
   }
 

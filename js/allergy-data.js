@@ -214,8 +214,17 @@
     if (a.class === 'penicillin' && t.class === 'penicillin') {
       return { decision: 'avoid', tier: 'high', pct: 'ถือว่าแพ้ทั้งกลุ่ม', reason: 'แกน penicillin เดียวกัน', refs: ['khan2022'], advice: '' };
     }
-    // (4) target carbapenem -> negligible
-    if (t.class === 'carbapenem') {
+    // (3b) carbapenem <-> carbapenem (shared bicyclic beta-lactam core) -> high.
+    // MUST come before rule (4): a patient allergic to one carbapenem must NOT be
+    // told a sibling carbapenem is "negligible / give without testing". The 0.87%
+    // figure below is carbapenem cross-reactivity in PENICILLIN-allergic patients,
+    // not carbapenem→carbapenem.
+    if (a.class === 'carbapenem' && t.class === 'carbapenem') {
+      return { decision: 'avoid', tier: 'high', pct: 'ถือว่าแพ้ทั้งกลุ่ม',
+        reason: 'แกน carbapenem (bicyclic beta-lactam) เดียวกัน', refs: ['khan2022'], advice: '' };
+    }
+    // (4) target carbapenem, allergen NOT a carbapenem -> negligible
+    if (t.class === 'carbapenem' && a.class !== 'carbapenem') {
       return { decision: 'safer', tier: 'negligible', pct: '0.87%', pctCI: '0.32–2.32',
         reason: 'carbapenem แพ้ข้ามต่ำมาก', refs: ['picard2019', 'khan2022'], advice: 'Khan: ให้ได้ทุกกรณีไม่ต้องทดสอบ (ยกเว้น SCAR)' };
     }

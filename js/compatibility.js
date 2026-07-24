@@ -133,6 +133,11 @@ const CURATED=[
 ['Ketamine','Midazolam','c'],['Ketamine','Fentanyl','c'],['Ketamine','Morphine','c'],
 ['Ketamine','Diazepam','i'],['Ketamine','Sodium bicarbonate','i'],['Ketamine','Phenobarbital','i'],
 ['Calcium','Sodium bicarbonate','i'],['Calcium','Potassium','c'],
+// Calcium/Magnesium + Potassium PHOSPHATE → precipitation (calcium/magnesium
+// phosphate). Salt-specific 'i' rows beat the bare-cation 'calcium|potassium'='c'
+// fallback (probed specific→generic) so a phosphate salt is never called compatible.
+['Calcium chloride','Potassium phosphate','i'],['Calcium gluconate','Potassium phosphate','i'],
+['Magnesium','Potassium phosphate','i'],['Calcium','Potassium phosphate','i'],
 ['Levetiracetam','Diazepam','v'],['Levetiracetam','Sodium Valproate','c'],
 // Valproic+Meropenem: PK interaction (↓VPA 60-90%), NOT physical Y-site incompatibility — removed from compat matrix
 ['Methylprednisolone','Heparin','c'],['Methylprednisolone','Ondansetron','c'],
@@ -160,17 +165,20 @@ const CURATED=[
 ['Milrinone','Heparin','c'],['Milrinone','Potassium','c'],['Milrinone','Morphine','c'],['Milrinone','Human Insulin','c'],
 ['Milrinone','Furosemide','i'],['Milrinone','Sodium bicarbonate','i'],
 ['Daptomycin','Dexamethasone','c'],['Daptomycin','Heparin','c'],
-['Daptomycin','RL','i'],['Daptomycin','Sodium bicarbonate','i'],
+['Daptomycin','Sodium bicarbonate','i'],
 ['Caspofungin','Dexamethasone','c'],['Caspofungin','Meropenem','c'],
-['Caspofungin','D5W','i'],['Caspofungin','Sodium bicarbonate','i'],
+['Caspofungin','Sodium bicarbonate','i'],
+// NOTE: Daptomycin+RL, Caspofungin+D5W, Amphotericin B+NSS, Phenytoin+D5W are
+// drug–FLUID pairs → moved to FLUID_CURATED (below) so the Supabase compat sync
+// (which rebuilds CURATED_MAP from drug–drug rows only) can't wipe them.
 ['Norepinephrine','Calcium chloride','c'],['Norepinephrine','Milrinone','c'],['Norepinephrine','Diltiazem','c'],
 ['Norepinephrine','Cefepime','c'],
 ['Dopamine','Calcium chloride','c'],['Dopamine','Milrinone','c'],['Dopamine','Diltiazem','c'],
 ['Heparin','Cefepime','c'],['Heparin','Diltiazem','c'],['Heparin','Milrinone','c'],
 ['Midazolam','Cefepime','c'],['Midazolam','Diltiazem','c'],
 // Audit additions: critical missing pairs
-['Phenytoin','D5W','i'],['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium chloride','i'],
-['Pantoprazole','Midazolam','v'],['Amphotericin B','NSS','i'],['20% Mannitol','Potassium chloride','i'],
+['Ceftriaxone','Calcium gluconate','i'],['Ceftriaxone','Calcium chloride','i'],
+['Pantoprazole','Midazolam','v'],['20% Mannitol','Potassium chloride','i'],
 ];
 
 // ===== DRUG–FLUID (DILUENT) CURATED — P2.4, pharmacist-reviewed (v5.15.0) =====
@@ -180,6 +188,10 @@ const CURATED=[
 // sync never drops them. Source: docs/drug-fluid-compatibility.md (fluidKey() resolves names).
 const FLUID_CURATED = [
   // -- incompatible (i) --
+  ['Daptomycin','RL','i'],                 // moved from CURATED (v5.53.0): survives Supabase sync
+  ['Caspofungin','D5W','i'],               // ห้ามผสม Dextrose (PI) — moved from CURATED
+  ['Amphotericin B','NSS','i'],            // precipitates in saline; D5W only — moved from CURATED
+  ['Phenytoin','D5W','i'],                 // precipitation in dextrose (PI) — moved from CURATED
   ['Hydralazine IV','D5W','i'],            // dextrose degrades hydralazine (SmPC)
   ['Tenecteplase','D5W','i'],              // precipitation w/ dextrose (TNKase PI); flush line w/ NSS
   ['Nicardipine','RL','i'],                // Cardene IV PI (also incompat w/ NaHCO3)
@@ -298,10 +310,13 @@ const CATION_PREFIXES = new Set(['calcium','potassium','sodium','magnesium','amm
 // are stored under their MOST-SPECIFIC key (keyCandidates[0]) so bare "Calcium"
 // and "Calcium chloride" land on distinct keys.
 const CURATED_MAP = {};
-CURATED.forEach(([a, b, s]) => {
-  const key = [curatedKeyFor(a), curatedKeyFor(b)].sort().join('|');
-  CURATED_MAP[key] = s;
-});
+function _applyBaseCurated() {
+  CURATED.forEach(([a, b, s]) => {
+    const key = [curatedKeyFor(a), curatedKeyFor(b)].sort().join('|');
+    CURATED_MAP[key] = s;
+  });
+}
+_applyBaseCurated();
 applyFluidCurated(); // overlay code-side drug–fluid pairs (sheet holds drug-drug only)
 
 // ===== DYNAMIC COMPAT DATA — fetch from Google Sheets =====
@@ -311,7 +326,13 @@ const COMPAT_CACHE_TTL = 30 * 60 * 1000; // 30 min
 
 function rebuildCuratedMap(pairs) {
   // pairs = [[drugA, drugB, result], ...]
+  // MERGE, don't replace: start from the built-in 250+ pair safety net, then
+  // OVERLAY the admin sheet on top. Previously this wiped CURATED_MAP and rebuilt
+  // from the sheet only, so a truncated/partial Supabase response silently
+  // downgraded known incompatibilities (e.g. Vancomycin+Ceftriaxone) to nodata
+  // on every page load. Now a missing sheet row just falls back to the built-in.
   Object.keys(CURATED_MAP).forEach(k => delete CURATED_MAP[k]);
+  _applyBaseCurated();
   pairs.forEach(([a, b, s]) => {
     const key = [curatedKeyFor(a), curatedKeyFor(b)].sort().join('|');
     CURATED_MAP[key] = s;
@@ -331,8 +352,12 @@ function loadCompatPairsFromSheet() {
     .then(function(r) { return r.json(); })
     .then(function(rows) {
       if (!Array.isArray(rows)) return;
+      // FAIL CLOSED: drop malformed rows instead of defaulting a missing
+      // `result` to 'c' — a data glitch must never read as "compatible".
+      var VALID_RESULT = { c: 1, i: 1, v: 1 };
       var pairs = rows.map(function(x) { return x.data; }).filter(Boolean)
-        .map(function(d) { return [d.drugA || '', d.drugB || '', d.result || 'c']; });
+        .filter(function(d) { return d.drugA && d.drugB && VALID_RESULT[d.result]; })
+        .map(function(d) { return [d.drugA, d.drugB, d.result]; });
       if (pairs.length > 0) {
         rebuildCuratedMap(pairs);
         localStorage.setItem(COMPAT_LS_KEY, JSON.stringify(pairs));
@@ -474,9 +499,18 @@ function getCompatibility(drugA, drugB) {
     return { status: 'compatible', detail, source: 'drugfield' };
   }
   
-  // 3) Check for variable hints
-  const allText = (drugA.y + drugA.x + drugB.y + drugB.x).toLowerCase();
-  if (allText.includes('variable')) return { status: 'variable', detail: 'Variable compatibility reported', source: 'text' };
+  // 3) Check for variable hints — but ONLY when "variable" co-occurs with the
+  // PARTNER drug's name in the same field. Previously any drug whose text said
+  // "variable" (e.g. Ciprofloxacin's ".x: Dexamethasone (variable)") tagged
+  // every unrelated pair (Cipro + Dobutamine) as variable — a false caution.
+  const aTxt = (drugA.y + ' ' + drugA.x).toLowerCase();
+  const bTxt = (drugB.y + ' ' + drugB.x).toLowerCase();
+  const bWord = drugB.g.toLowerCase().split(/[\s(]/)[0];
+  const aWord = drugA.g.toLowerCase().split(/[\s(]/)[0];
+  if ((aTxt.includes('variable') && bWord.length > 2 && aTxt.includes(bWord)) ||
+      (bTxt.includes('variable') && aWord.length > 2 && bTxt.includes(aWord))) {
+    return { status: 'variable', detail: 'Variable compatibility reported', source: 'text' };
+  }
   
   return { status: 'nodata', detail: 'ไม่มีข้อมูล compatibility โดยตรง\nตรวจสอบจาก Trissel\'s หรือ Lexicomp', source: 'none' };
 }
@@ -716,23 +750,28 @@ function renderMatrix() {
     return;
   }
   
+  const esc = IVDrugRef.escHtml;
+  // Glyph per status so the matrix is NOT color-only (colorblind-safe): a
+  // red-green colorblind reader could otherwise mistake incompatible for
+  // compatible. Letter + color together. C=compatible I=incompatible V=variable ?=no data.
+  const GLYPH = { c: 'C', i: 'I', v: 'V', n: '?' };
   let html = '<table class="matrix-table"><tr><th class="corner"></th>';
   drugs.forEach(d => {
     const name = d.g.split(' ')[0].substring(0, 12);
-    html += `<th class="col-header" title="${d.g}">${name}</th>`;
+    html += `<th class="col-header" title="${esc(d.g)}">${esc(name)}</th>`;
   });
   html += '</tr>';
-  
+
   drugs.forEach((rowDrug, ri) => {
     const name = rowDrug.g.split(' ')[0].substring(0, 14);
-    html += `<tr><td class="row-header" title="${rowDrug.g}">${name}${rowDrug.h ? ' ⚠' : ''}</td>`;
+    html += `<tr><td class="row-header" title="${esc(rowDrug.g)}">${esc(name)}${rowDrug.h ? ' ⚠' : ''}</td>`;
     drugs.forEach((colDrug, ci) => {
       if (ri === ci) {
         html += '<td><div class="matrix-cell self"></div></td>';
       } else {
         const result = getCompatibility(rowDrug, colDrug);
         const cls = result.status === 'compatible' ? 'c' : result.status === 'incompatible' ? 'i' : result.status === 'variable' ? 'v' : 'n';
-        html += `<td><div class="matrix-cell ${cls}" data-a="${rowDrug.g}" data-b="${colDrug.g}" data-s="${result.status}"></div></td>`;
+        html += `<td><div class="matrix-cell ${cls}" data-a="${esc(rowDrug.g)}" data-b="${esc(colDrug.g)}" data-s="${esc(result.status)}">${GLYPH[cls]}</div></td>`;
       }
     });
     html += '</tr>';
@@ -745,7 +784,8 @@ function showTooltip(e, el) {
   const tip = document.getElementById('matrixTooltip');
   if (!tip) return;
   const labels = { compatible: '✅ Compatible', incompatible: '❌ Incompatible', variable: '⚠️ Variable', nodata: '❓ No data' };
-  tip.innerHTML = `<strong>${el.dataset.a}</strong> + <strong>${el.dataset.b}</strong><br>${labels[el.dataset.s]}`;
+  const esc = IVDrugRef.escHtml;
+  tip.innerHTML = `<strong>${esc(el.dataset.a)}</strong> + <strong>${esc(el.dataset.b)}</strong><br>${esc(labels[el.dataset.s] || el.dataset.s)}`;
   tip.classList.add('show');
   const rect = el.getBoundingClientRect();
   tip.style.left = Math.min(rect.left, window.innerWidth - 270) + 'px';

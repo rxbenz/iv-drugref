@@ -8,9 +8,11 @@
       badges: ['badge-renal'],
       maxDose: { value: 4000, unit: 'mg/day', ref: 'Rybak MJ, et al. ASHP/IDSA/PIDS 2020 Vancomycin Guidelines' },
       calc: function(pt) {
-        const dose_low = Math.round(pt.wt * 15 / 250) * 250;
-        const dose_high = Math.round(pt.wt * 20 / 250) * 250;
-        const dose = Math.round(pt.wt * 15 / 250) * 250;
+        // Round to nearest 250 mg but never below 250 (Math.round alone → 0 mg
+        // for weight ≤8 kg).
+        const dose_low = Math.max(250, Math.round(pt.wt * 15 / 250) * 250);
+        const dose_high = Math.max(250, Math.round(pt.wt * 20 / 250) * 250);
+        const dose = dose_low;
         let freq = 'q12h', freqNote = '', dailyDose = 0;
         if (pt.crcl > 80) { freq = 'q8-12h'; freqNote = 'CrCl >80'; dailyDose = dose * 3; }
         else if (pt.crcl > 50) { freq = 'q12h'; freqNote = 'CrCl 50-80'; dailyDose = dose * 2; }
@@ -60,8 +62,13 @@
       id: 'amikacin', name: 'Amikacin', sub: '500 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-renal'],
       calc: function(pt) {
-        const dose = Math.round(pt.wt * 15);
-        const dose_ext = Math.round(pt.wt * 20);
+        // Aminoglycoside dosing weight: AdjBW when TBW >120% of IBW (same rule
+        // as the colistin entry) — TBW in obesity overshoots the dose.
+        const useAdj = pt.ht && pt.ibw && pt.wt > pt.ibw * 1.2;
+        const dw = useAdj ? Math.round((pt.ibw + 0.4 * (pt.wt - pt.ibw)) * 10) / 10 : pt.wt;
+        const dwLabel = useAdj ? `AdjBW ${dw} kg (TBW >120% IBW)` : `TBW ${dw} kg`;
+        const dose = Math.round(dw * 15);
+        const dose_ext = Math.round(dw * 20);
         let freq = 'q24h', freqNote = '';
         if (pt.crcl >= 60) { freq = 'q24h'; }
         else if (pt.crcl >= 40) { freq = 'q36h'; freqNote = 'CrCl 40-60'; }
@@ -70,6 +77,7 @@
         return {
           title: `Amikacin ${dose} mg IV ${freq}`,
           details: [
+            { l: 'Dosing weight', v: dwLabel },
             { l: 'Conventional dose', v: `15 mg/kg = ${dose} mg q8-12h` },
             { l: 'Extended-interval', v: `15-20 mg/kg = ${dose}–${dose_ext} mg ${freq}` },
             { l: 'Frequency adj', v: freq + (freqNote ? ` (${freqNote})` : '') },
@@ -85,8 +93,12 @@
       id: 'gentamicin', name: 'Gentamicin', sub: '80 mg/2 mL — <a href="tdm.html" style="color:#38bdf8;font-weight:600;">🎯 TDM →</a>',
       badges: ['badge-renal'],
       calc: function(pt) {
-        const dose_conv = (pt.wt * 1.7).toFixed(0);
-        const dose_ext = Math.round(pt.wt * 5);
+        // Same dosing-weight rule as amikacin/colistin: AdjBW when TBW >120% IBW.
+        const useAdj = pt.ht && pt.ibw && pt.wt > pt.ibw * 1.2;
+        const dw = useAdj ? Math.round((pt.ibw + 0.4 * (pt.wt - pt.ibw)) * 10) / 10 : pt.wt;
+        const dwLabel = useAdj ? `AdjBW ${dw} kg (TBW >120% IBW)` : `TBW ${dw} kg`;
+        const dose_conv = (dw * 1.7).toFixed(0);
+        const dose_ext = Math.round(dw * 5);
         let freq = 'q24h';
         if (pt.crcl >= 60) freq = 'q24h';
         else if (pt.crcl >= 40) freq = 'q36h';
@@ -95,6 +107,7 @@
         return {
           title: `Gentamicin ${dose_ext} mg IV ${freq}`,
           details: [
+            { l: 'Dosing weight', v: dwLabel },
             { l: 'Conventional', v: `1-1.7 mg/kg q8h = ${dose_conv} mg q8h` },
             { l: 'Extended-interval', v: `5-7 mg/kg q24h = ${dose_ext} mg ${freq}` },
             { l: 'Dilution', v: `ใน NSS/D5W 50-200 mL` },
@@ -395,11 +408,15 @@
     var allRows = [], primary = null, renalTables = '';
     dr.indications.forEach(function (ind, i) {
       var r = _evalIndication(pt, ind);
-      if (i === 0) primary = r;
+      // Headline = first indication whose `when(pt)` matches this patient
+      // (e.g. paracetamol <50 kg row), falling back to the first indication.
+      var applies = typeof ind.when !== 'function' || !!ind.when(pt);
+      if (!primary && applies) primary = r;
       if (i > 0) allRows.push({ l: '—', v: '' });
       allRows = allRows.concat(r.rows);
       if (r.renalTable) renalTables += '<div style="margin-top:6px;"><strong>📋 ปรับขนาดตามไต — ' + r.indLabel + ':</strong>' + r.renalTable + '</div>';
     });
+    if (!primary && dr.indications.length) primary = _evalIndication(pt, dr.indications[0]);
     var info = '<strong>📋 วิธีคิด:</strong> โปรแกรมคูณ/ใส่ค่าตามกฎด้านบนกับค่าคนไข้ที่กรอก';
     if (renalTables) info += '<br>' + renalTables + '<span style="font-size:11px;color:#64748b;">(แถวสีเขียว = ช่วง CrCl ของผู้ป่วยรายนี้)</span>';
     info += '<br><strong>สมมติฐาน:</strong> ' + dr.assumptions
@@ -424,7 +441,7 @@
     id: 'enoxaparin', name: 'Enoxaparin (treatment)', sub: 'Clexane — SC', badges: ['badge-renal'],
     doseRule: {
       drugRef: 'Lexicomp; ASH/CHEST VTE guidelines',
-      assumptions: 'ใช้ actual body weight (treatment dose). CrCl <30 ต้องปรับเป็นวันละครั้ง — โปรแกรมยังไม่ปรับตามไตให้อัตโนมัติ. Prophylaxis = 40 mg SC วันละครั้ง (fixed ไม่อิงน้ำหนัก).',
+      assumptions: 'ใช้ actual body weight (treatment dose). CrCl <30 → โปรแกรมปรับเป็น 1 mg/kg วันละครั้งให้อัตโนมัติ (ตรวจสอบซ้ำทุกครั้ง). Prophylaxis = 40 mg SC วันละครั้ง (fixed ไม่อิงน้ำหนัก).',
       indications: [
         { label: 'VTE/ACS treatment', basis: 'weight', weightBasis: 'actual', dose: 1, unit: 'mg/kg', interval: 'q12h', renalTiers: [{ min: 30 }, { max: 30, interval: 'q24h' }] }
       ]
@@ -533,8 +550,8 @@
       drugRef: 'Lexicomp; UpToDate',
       assumptions: 'รวมขนาดจากทุกแหล่ง (กิน/ฉีด/ยาผสม) ห้ามเกิน 4 g/วัน. ผู้มีปัจจัยเสี่ยงตับ (สุรา/ทุพโภชนาการ) ลด ≤2-3 g/วัน. IV infusion over 15 นาที.',
       indications: [
-        { label: 'น้ำหนัก ≥50 kg', basis: 'flat', dose: 1, unit: 'g', interval: 'q6h', maxPerDay: 4000 },
-        { label: 'น้ำหนัก <50 kg', basis: 'weight', weightBasis: 'actual', dose: 15, unit: 'mg/kg', interval: 'q6h', maxPerDose: 750, note: 'max 75 mg/kg/วัน (≤3.75 g)' }
+        { label: 'น้ำหนัก ≥50 kg', basis: 'flat', dose: 1, unit: 'g', interval: 'q6h', maxPerDay: 4000, when: function (pt) { return pt.wt >= 50; } },
+        { label: 'น้ำหนัก <50 kg', basis: 'weight', weightBasis: 'actual', dose: 15, unit: 'mg/kg', interval: 'q6h', maxPerDose: 750, note: 'max 75 mg/kg/วัน (≤3.75 g)', when: function (pt) { return pt.wt < 50; } }
       ]
     }
   }));
@@ -882,6 +899,16 @@
     // getPatientFromForm runs validation internally
     const pt = IVDrugRef.getPatientFromForm();
     if (!pt.validation.allValid) { sec.style.display = 'none'; lastCalcResult = null; return; }
+
+    // Infant (<1 yr) hard block: the guard banner explains why — do NOT also
+    // render a dose computed from a CrCl/Schwartz value that is invalid <1 yr.
+    if (window.PediatricGuard &&
+        window.PediatricGuard.getGuardStatus(pt, window.PediatricGuard.CONTEXTS.CALCULATOR_DOSING).blocked) {
+      sec.style.display = 'none';
+      lastCalcResult = null;
+      return;
+    }
+
     const result = drug.calc(pt);
     lastCalcResult = { drug: drug, pt: pt, result: result };
 
@@ -1058,7 +1085,9 @@
       label.textContent = 'µmol/L'; togText.textContent = 'mg/dL';
     } else {
       unitState.scr = 'mgdl';
-      if (!isNaN(v)) inp.value = (v / 88.4).toFixed(1);
+      // toFixed(2): with 1 decimal the µmol↔mg/dL round-trip drifts the value
+      // (0.97 → 86 µmol → 1.0) on every toggle.
+      if (!isNaN(v)) inp.value = (v / 88.4).toFixed(2);
       inp.step = '0.1'; inp.min = '0.1'; inp.max = '20';
       label.textContent = 'mg/dL'; togText.textContent = 'µmol/L';
     }

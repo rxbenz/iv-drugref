@@ -509,6 +509,25 @@ test('compat — NO cross-salt leak (the P2.3 safety fix) ⭐', () => {
   assert.notEqual(r2.source, 'curated', 'no curated match for a different sodium salt');
 });
 
+test('compat — Calcium/Magnesium + Potassium PHOSPHATE = incompatible (precipitation) ⭐', () => {
+  // v5.53.0: salt-specific 'i' rows must beat the bare-cation calcium|potassium='c'
+  // fallback so a phosphate salt is never called compatible with calcium/magnesium.
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium chloride 10%'), drug(2, 'Potassium phosphate')).status, 'incompatible');
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium gluconate'), drug(2, 'Potassium phosphate')).status, 'incompatible');
+  assert.equal(compat.getCompatibility(drug(1, 'Magnesium sulfate'), drug(2, 'Potassium phosphate')).status, 'incompatible');
+  // ...but plain Calcium + plain Potassium (KCl additive) stays compatible
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium gluconate'), drug(2, 'Potassium chloride (KCl)')).status, 'compatible');
+});
+
+test('compat — merged sync keeps the built-in safety net (partial sheet cannot wipe it) ⭐', () => {
+  // A truncated Supabase sync (1 unrelated pair) must NOT drop a built-in
+  // incompatibility like Ceftriaxone + Calcium chloride.
+  compat.rebuildCuratedMap([['Heparin', 'Morphine', 'c']]);
+  assert.equal(compat.getCompatibility(drug(1, 'Calcium chloride 10%'), drug(2, 'Ceftriaxone')).status, 'incompatible');
+  // the synced pair also applies
+  assert.equal(compat.getCompatibility(drug(1, 'Heparin'), drug(2, 'Morphine')).status, 'compatible');
+});
+
 // ═══════════ IVDrugRef.escHtml — XSS escaper (P3.1) ══════════════════════════
 test('escHtml escapes all five HTML-significant chars', () => {
   assert.equal(IVDrugRef.escHtml('<img src=x onerror=alert(1)>'),

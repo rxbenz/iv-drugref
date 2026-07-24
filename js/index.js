@@ -43,8 +43,11 @@ function handleStarClick(drugId,drugName,starVal){
     oldLabel.replaceWith(thanks);
     setTimeout(function(){thanks.textContent='\u2605 '+starVal+'/5';},2000);
   }
-  // Analytics
-  try{navigator.sendBeacon(ANALYTICS_URL,JSON.stringify({type:'DRUG_RATING',drugId:drugId,drugName:drugName,rating:starVal,session_id:sessionStorage.getItem('sessionId')||'',user_id:localStorage.getItem('anonUserId')||''}))}catch(e){};
+  // Analytics — via IVDrugRef.sendAnalytics so the event dual-writes to
+  // Supabase (the dashboard's only read source since Phase 1) + legacy GAS,
+  // with the canonical session/user ids. Direct sendBeacon-to-GAS made every
+  // post-migration rating invisible to the dashboard.
+  try{IVDrugRef.sendAnalytics({type:'DRUG_RATING',drugId:drugId,drugName:drugName,rating:starVal})}catch(e){};
 }
 
 // Star hover effect
@@ -146,7 +149,8 @@ function submitNPS(){
   if(npsSelectedScore===null)return;
   var comment=(document.getElementById('npsComment')||{}).value||'';
   localStorage.setItem('npsLastResponse',String(Date.now()));
-  try{navigator.sendBeacon(ANALYTICS_URL,JSON.stringify({type:'NPS_SUBMIT',score:npsSelectedScore,comment:comment,sessionCount:parseInt(localStorage.getItem('npsSessionCount')||'0'),session_id:sessionStorage.getItem('sessionId')||'',user_id:localStorage.getItem('anonUserId')||''}))}catch(e){};
+  // Via sendAnalytics (Supabase+GAS dual-write) — see DRUG_RATING note above.
+  try{IVDrugRef.sendAnalytics({type:'NPS_SUBMIT',score:npsSelectedScore,comment:comment,sessionCount:parseInt(localStorage.getItem('npsSessionCount')||'0')})}catch(e){};
   dismissNPS();
 }
 
@@ -511,6 +515,27 @@ if(typeof handleUrgentAlertsUpdate==='function'){
     return _origHandleUrgentAlertsUpdate(safe,t);
   };
 }
+
+// FIX (v5.63.0): the blob's dismissUrgentAlert/dismissUrgentAlertAndClose
+// delegate handlers parseInt() the data-id, but GAS alert ids are STRINGS
+// ('ALERT_<timestamp>') → parseInt→NaN → the banner ✕ and the modal
+// "รับทราบแล้ว" buttons did NOTHING for every real alert (the banner could
+// never be dismissed). Re-register the same action names string-safe; the
+// blob's NaN handlers remain harmless no-ops, and the global
+// dismissUrgentAlert() compares ids with !== so string ids work.
+IVDrugRef.delegate(document,'click',{
+  dismissUrgentAlert:function(e,t){
+    e.stopPropagation();
+    var id=t.getAttribute('data-id');
+    if(id&&typeof dismissUrgentAlert==='function')dismissUrgentAlert(id);
+  },
+  dismissUrgentAlertAndClose:function(e,t){
+    var id=t.getAttribute('data-id');
+    if(id&&typeof dismissUrgentAlert==='function')dismissUrgentAlert(id);
+    var m=document.getElementById('urgentModal');
+    if(m)m.remove();
+  }
+});
 
 // --- Register New Delegate Actions ---
 IVDrugRef.delegate(document,'click',{

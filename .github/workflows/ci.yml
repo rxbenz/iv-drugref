@@ -1,0 +1,38 @@
+# ============================================================
+# IV DrugRef — CI for pull requests
+# ============================================================
+# Runs the clinical formula tests + a full production build on every PR so a
+# red test suite is caught BEFORE merge (previously tests ran only inside the
+# deploy job on push to main, leaving main broken-but-merged on failure).
+# ============================================================
+
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run clinical formula tests
+        run: npm test
+
+      - name: Build production (no deploy)
+        run: node build.js --prod

@@ -205,6 +205,13 @@
 .compat-result.incompatible {
   background: var(--red-bg);
   border: 1px solid var(--red-border);
+  /* Incompatible = "do not co-administer" → must dominate, not read as quiet as a pass */
+  border-left: 5px solid #dc2626;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.25);
+}
+.compat-result.incompatible .result-status {
+  color: #dc2626;
+  font-size: 18px;
 }
 
 .compat-result.variable {
@@ -493,6 +500,17 @@
   cursor: pointer;
   transition: all .15s;
   position: relative;
+  /* Glyph (C/I/V/?) so status is not conveyed by color alone (colorblind-safe) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e293b;
+}
+/* Incompatible glyph is bold white on the red for max legibility/loudness */
+.matrix-cell.i {
+  color: #fff;
 }
 
 .matrix-cell:hover {
@@ -506,7 +524,7 @@
 }
 
 .matrix-cell.i {
-  background: #fca5a5;
+  background: #dc2626; /* stronger red — incompatible must read as danger, not a pastel */
 }
 
 .matrix-cell.v {

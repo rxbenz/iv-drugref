@@ -27,10 +27,14 @@ insert into public.admins(email) values ('thapanat.nk@gmail.com')
   on conflict (email) do nothing;
 
 
--- ── Step 1.2b: LOCK event reads to admins (run AFTER login + load verified) ──
--- Removes public (anon) read; only authenticated admins can SELECT events.
--- The anon INSERT policy stays, so the public app keeps logging analytics.
---
---   drop policy if exists "anon read events" on public.events;
---   create policy "admin read events" on public.events
---     for select to authenticated using (public.is_admin());
+-- ── Step 1.2b: LOCK event reads to admins ───────────────────────────
+-- Only authenticated admins can SELECT events; the anon INSERT policy (in
+-- schema.sql) stays, so the public app keeps logging analytics. This is now
+-- ACTIVE committed IaC (previously it lived only as a comment, so the repo's
+-- SQL didn't converge to the production policy — running these files fresh left
+-- the dashboard unable to read events). is_admin() is defined above, so ordering
+-- within this file is safe; run schema.sql first for the events table itself.
+drop policy if exists "anon read events" on public.events;
+drop policy if exists "admin read events" on public.events;
+create policy "admin read events" on public.events
+  for select to authenticated using (public.is_admin());

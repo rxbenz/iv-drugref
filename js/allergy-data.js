@@ -81,7 +81,15 @@
     // Macrolide group (pharmacist-verified 2026-07)
     shaeer2019: 'Shaeer KM, Chahine EB, Varghese Gupta S, Cho JC. Macrolide Allergic Reactions. Pharmacy (Basel) 2019;7(3):135. (cross-reactivity low/inconsistent — some patients tolerate a different macrolide; lack of evidence for cross-sensitization; HSR 0.4-3%)',
     pereira2024: 'Pereira HP, Cardoso Lopes J, Carrapatoso I, Faria E, et al. Immediate-hypersensitivity reactions to macrolides: experience in an allergy department. Asia Pac Allergy 2024. (drug provocation test to confirm/exclude cross-reactivity)',
-    macroPeds2024: 'Cross-reactivity of macrolides in children with macrolide hypersensitivity — provocation-test cohort. Turk Arch Pediatr 2024.'
+    macroPeds2024: 'Cross-reactivity of macrolides in children with macrolide hypersensitivity — provocation-test cohort. Turk Arch Pediatr 2024.',
+    // PPI group (pharmacist-verified 2026-07)
+    bavbek2024: 'Bavbek S, Bonadonna P, Zanoni G, et al. Hypersensitivity reactions to proton pump inhibitors. An EAACI position paper. Allergy 2024;79(3):552-. (PPIs = benzimidazole + pyridine ring; two structural clusters — benzimidazole-modified [omeprazole/esomeprazole/pantoprazole] cross-react highest vs pyridine-modified [lansoprazole/rabeprazole/dexlansoprazole]; 61.6% cross-react to ANOTHER PPI and 8.9% to ALL PPIs; a safe alternative PPI should only be recommended after skin testing + DPT)',
+    sobrevia2010: 'Sobrevia Elfau MT, Garcés Sotillos M, Ferrer Clavería L, et al. Study of cross-reactivity between proton pump inhibitors. J Investig Allergol Clin Immunol 2010;20(2):157-161. (5 omeprazole-allergic patients cross-reacted to all PPIs by skin test; Pattern 1 = single-PPI allergy with pan-PPI cross-reactivity, Pattern 2 = cross-reactivity within the same structural cluster only; ranitidine tolerated by all → H2RA alternative)',
+    kepilOzdemir2013: 'Kepil Özdemir S, Yılmaz İ, Aydın Ö, et al (Bavbek S). Immediate-type hypersensitivity reactions to proton pump inhibitors: usefulness of skin tests in the diagnosis and assessment of cross-reactivity. Clin Exp Allergy 2013. (skin tests useful to diagnose and assess PPI cross-reactivity)',
+    // Sulfonylurea group (pharmacist-verified 2026-07)
+    johnson2005: 'Johnson KK, Green DL, Rife JP, Limon L. Sulfonamide cross-reactivity: fact or fiction? Ann Pharmacother 2005;39(2):290-301. (after critique of the literature, the dogma of sulfonylarylamine [antibiotic] cross-reactivity with non-sulfonylarylamines [sulfonylureas, thiazides, etc.] is NOT supported by the data)',
+    ghimire2013: 'Ghimire S, Kim E, Kang W, et al. An evidence-based approach for providing cautionary recommendations to sulfonamide-allergic patients and determining cross-reactivity among sulfonamide-containing medications. J Clin Pharm Ther 2013;38(6):448-452. (cross-reactivity requires the N4 arylamine [antibiotics] and/or N1 heterocycle; non-sulfonylarylamines "required precaution" — cross-reactivity statements are theoretical possibilities)',
+    sulfaAllergyRev2019: 'Giles A, Foushee J, Lantz E, Gumina G. Sulfonamide Allergies. Pharmacy (Basel) 2019;7(3):132. (substitutions at N1 and N4 are the primary determinants of sulfa allergy, not the shared sulfonamide moiety; low risk of cross-allergenicity between antimicrobial and nonantimicrobial sulfonamides — prudent for more severe reactions)'
   };
 
   // --- 2. Risk tiers (rule defaults; % anchored to Picard 2019) -------------
@@ -1016,6 +1024,109 @@
       noteScar: 'SCAR จาก macrolide: เลี่ยง macrolide ทั้งกลุ่มเด็ดขาด · ห้าม challenge · ใช้ยานอกกลุ่มเท่านั้น',
       scarCautionNote: 'กรณี SCAR: เลี่ยงทั้งกลุ่ม macrolide',
       singleDrugCallout: '💡 แพ้ข้ามในกลุ่ม macrolide ต่ำและไม่สม่ำเสมอ (หลักฐานเป็น case report เป็นหลัก — Shaeer 2019; HSR พบ 0.4–3%) → การเลี่ยงทั้งกลุ่มอาจไม่จำเป็น แต่ drug provocation test เป็นวิธีเดียวที่ยืนยัน tolerance ของ macrolide ตัวอื่นได้ · มีรายงานแพ้ข้าม erythromycin↔clarithromycin (14-membered) และ erythromycin↔azithromycin · ค่าเริ่มต้นที่ปลอดภัยสุด = ยานอกกลุ่ม · SCAR = เลี่ยงทั้งกลุ่ม'
+    },
+    // ── Proton Pump Inhibitors ───────────────────────────────────────────────
+    // Cross-reactivity follows the shared benzimidazole+pyridine scaffold, split
+    // into two side-chain CLUSTERS (Bavbek 2024 EAACI, Table 1): benzimidazole-
+    // modified (omeprazole/esomeprazole/pantoprazole — methoxy/difluoromethoxy)
+    // cross-react the HIGHEST; pyridine-modified (lansoprazole/rabeprazole/
+    // dexlansoprazole) lower. 61.6% cross-react to another PPI, 8.9% to ALL PPIs
+    // → NO PPI is safe a priori: a different-cluster PPI is only "caution" and
+    // must be confirmed by skin test + DPT before use. H2RA (famotidine) is a
+    // different class → the safe alternative (Sobrevia 2010: ranitidine tolerated
+    // by all). Modelled clusterAware (same cluster = avoid, different = caution).
+    // Pharmacist-verified 2026-07 — see docs/allergy-nonbetalactam.md
+    {
+      id: 'ppi',
+      label: 'Proton Pump Inhibitors',
+      refs: ['bavbek2024', 'sobrevia2010', 'kepilOzdemir2013'],
+      clusterAware: true,
+      keepSafeOnScar: true,   // H2RA/antacid are a different pharmacologic class → safe even at SCAR
+      allergens: [
+        { id: 'omeprazole',   generic: 'Omeprazole',   th: 'โอเมพราโซล',   trade: ['Losec', 'Miracid'], cluster: 'benzimidazole' },
+        { id: 'esomeprazole', generic: 'Esomeprazole', th: 'อีโซเมพราโซล', trade: ['Nexium'], cluster: 'benzimidazole' },
+        { id: 'pantoprazole', generic: 'Pantoprazole', th: 'แพนโทพราโซล',  trade: ['Controloc', 'Pantoloc'], cluster: 'benzimidazole' },
+        { id: 'lansoprazole', generic: 'Lansoprazole', th: 'แลนโซพราโซล',  trade: ['Prevacid'], cluster: 'pyridine' },
+        { id: 'rabeprazole',  generic: 'Rabeprazole',  th: 'ราบีพราโซล',   trade: ['Pariet'], cluster: 'pyridine' }
+      ],
+      crossReason: 'PPI ที่ดัดโครงสร้าง ring กลุ่มเดียวกัน → แพ้ข้ามสูง (ต่างกลุ่ม = แพ้ข้ามต่ำกว่า แต่ยังต้องยืนยันด้วย skin test/DPT)',
+      crossReactive: [
+        { id: 'omeprazole',   generic: 'Omeprazole',   th: 'โอเมพราโซล',   sub: 'Benzimidazole (methoxy)', cluster: 'benzimidazole' },
+        { id: 'esomeprazole', generic: 'Esomeprazole', th: 'อีโซเมพราโซล', sub: 'Benzimidazole (S-omeprazole)', cluster: 'benzimidazole' },
+        { id: 'pantoprazole', generic: 'Pantoprazole', th: 'แพนโทพราโซล',  sub: 'Benzimidazole (difluoromethoxy)', cluster: 'benzimidazole' },
+        { id: 'lansoprazole', generic: 'Lansoprazole', th: 'แลนโซพราโซล',  sub: 'Pyridine (trifluoroethoxy)', cluster: 'pyridine' },
+        { generic: 'Dexlansoprazole', th: 'เดกซ์แลนโซพราโซล', sub: 'Pyridine (R-lansoprazole)', cluster: 'pyridine' },
+        { id: 'rabeprazole',  generic: 'Rabeprazole',  th: 'ราบีพราโซล',   sub: 'Pyridine (methoxypropoxy)', cluster: 'pyridine' }
+      ],
+      safeReason: 'ยากดกรดนอกกลุ่ม PPI (คนละ mechanism/โครงสร้าง) → ไม่แพ้ข้าม',
+      safe: [
+        { generic: 'Famotidine', th: 'ฟาโมทิดีน', sub: 'H2 receptor antagonist', pct: 'ไม่แพ้ข้าม',
+          reason: 'H2RA คนละ class กับ PPI (Sobrevia 2010: ranitidine ทนได้ทุกเคส) → ทางเลือกหลักเมื่อแพ้ PPI' },
+        { generic: 'Antacid / Alginate', th: 'ยาลดกรด / อัลจิเนต', sub: 'Acid neutralizer' },
+        { generic: 'Sucralfate', th: 'ซูคราลเฟต', sub: 'Mucosal protectant' }
+      ],
+      noteMild: 'แพ้ PPI: เลี่ยง PPI กลุ่มโครงสร้างเดียวกัน (benzimidazole: omeprazole/esomeprazole/pantoprazole · pyridine: lansoprazole/rabeprazole) · PPI ต่างกลุ่ม = ระวัง ยืนยันด้วย skin test/DPT ก่อนใช้ · H2RA (famotidine) ใช้ได้',
+      noteIge:  'IgE/anaphylaxis ต่อ PPI: เลี่ยง PPI กลุ่มโครงสร้างเดียวกันทั้งหมด · PPI ต่างกลุ่มแพ้ข้ามต่ำกว่า แต่ 8.9% แพ้ทั้งกลุ่ม → ต้องยืนยันด้วย skin test + DPT ก่อนใช้ (ไม่มี PPI ตัวไหน safe ก่อน work-up) · ทางเลือกปลอดภัย = H2RA (famotidine)/antacid',
+      noteScar: 'SCAR จาก PPI: เลี่ยง PPI ทุกตัวทุกกลุ่มเด็ดขาด · ห้าม challenge · ใช้ H2RA/antacid แทน',
+      scarCautionNote: 'กรณี SCAR: เลี่ยง PPI ทั้งหมด',
+      singleDrugCallout: '💡 PPI แบ่ง 2 กลุ่มโครงสร้าง — benzimidazole ดัด (omeprazole/esomeprazole/pantoprazole) แพ้ข้ามกันสูงสุด · pyridine ดัด (lansoprazole/rabeprazole/dexlansoprazole) · แพ้ข้ามไป PPI ตัวอื่นเฉลี่ย 61.6% และ 8.9% แพ้ทั้งกลุ่ม (Bavbek 2024 EAACI) → เลือก PPI ต่างกลุ่มได้แต่ต้องยืนยันด้วย skin test + drug provocation test ก่อนเสมอ (ไม่มี PPI ไหน safe ก่อน work-up) · H2RA (famotidine) เป็นทางเลือกที่ปลอดภัย (Sobrevia 2010: ranitidine ทนได้ทุกเคส)'
+    },
+    // ── Sulfonylureas ────────────────────────────────────────────────────────
+    // Sulfonylureas are NON-antibiotic (non-sulfonylarylamine) sulfonamides — they
+    // lack the N4 arylamine that drives sulfonamide-antibiotic allergy, so cross-
+    // reactivity to sulfa ANTIBIOTICS is LOW/theoretical (Strom 2003; Johnson 2005
+    // "dogma not supported"; Ghimire 2013 "precaution"; Giles 2019 "low risk,
+    // prudent for severe"). WITHIN-sulfonylurea (SU↔SU) cross-reactivity is not
+    // directly studied → modelled crossClassCaution (other SUs = caution, escalate
+    // to avoid at SCAR) per pharmacist decision. Non-SU antidiabetics are structur-
+    // ally unrelated → the clearly-safe switch. NOTE (engine): keepSafeOnScar keeps
+    // ALL safe items safe at SCAR — required so metformin/insulin (unrelated) never
+    // mis-flag as caution; the sulfa-antibiotic/thiazide SCAR precaution is carried
+    // by their per-item reason + noteScar instead of a bucket downgrade.
+    // Pharmacist-verified 2026-07 — see docs/allergy-nonbetalactam.md
+    {
+      id: 'sulfonylurea',
+      label: 'Sulfonylureas',
+      refs: ['strom2003', 'johnson2005', 'ghimire2013', 'sulfaAllergyRev2019'],
+      crossClassCaution: true,   // other SUs = caution (within-SU cross not directly studied); avoid at SCAR
+      keepSafeOnScar: true,      // non-SU antidiabetics are unrelated → must stay safe even at SCAR (see block comment)
+      allergens: [
+        { id: 'glibenclamide', generic: 'Glibenclamide (Glyburide)', th: 'ไกลเบนคลาไมด์', trade: ['Daonil'] },
+        { id: 'glipizide',      generic: 'Glipizide',       th: 'ไกลพิไซด์',      trade: [] },
+        { id: 'gliclazide',     generic: 'Gliclazide',      th: 'ไกลคลาไซด์',     trade: ['Diamicron'] },
+        { id: 'glimepiride',    generic: 'Glimepiride',     th: 'ไกลเมพิไรด์',    trade: ['Amaryl'] },
+        { id: 'chlorpropamide', generic: 'Chlorpropamide',  th: 'คลอร์โพรพาไมด์', trade: [] },
+        { id: 'tolbutamide',    generic: 'Tolbutamide',     th: 'ทอลบูตาไมด์',    trade: [] }
+      ],
+      crossReason: 'sulfonylurea ด้วยกัน — แชร์หมู่ sulfonylurea (โครงสร้างใกล้เคียงสุด) แต่ยังไม่มีข้อมูล within-SU cross โดยตรง → ระวังไว้ก่อน',
+      crossReactive: [
+        { id: 'glibenclamide', generic: 'Glibenclamide (Glyburide)', th: 'ไกลเบนคลาไมด์', sub: 'Sulfonylurea (2nd gen)', pct: 'ข้อมูลจำกัด' },
+        { id: 'glipizide',   generic: 'Glipizide',   th: 'ไกลพิไซด์',   sub: 'Sulfonylurea (2nd gen)', pct: 'ข้อมูลจำกัด' },
+        { id: 'gliclazide',  generic: 'Gliclazide',  th: 'ไกลคลาไซด์',  sub: 'Sulfonylurea (2nd gen)', pct: 'ข้อมูลจำกัด' },
+        { id: 'glimepiride', generic: 'Glimepiride', th: 'ไกลเมพิไรด์', sub: 'Sulfonylurea (2nd/3rd gen)', pct: 'ข้อมูลจำกัด' },
+        { generic: 'Gliquidone', th: 'ไกลควิโดน', sub: 'Sulfonylurea (2nd gen)', pct: 'ข้อมูลจำกัด' },
+        { id: 'chlorpropamide', generic: 'Chlorpropamide', th: 'คลอร์โพรพาไมด์', sub: 'Sulfonylurea (1st gen)', pct: 'ข้อมูลจำกัด' },
+        { id: 'tolbutamide', generic: 'Tolbutamide', th: 'ทอลบูตาไมด์', sub: 'Sulfonylurea (1st gen)', pct: 'ข้อมูลจำกัด' }
+      ],
+      safeReason: 'ยาเบาหวานนอกกลุ่ม SU (โครงสร้างไม่เกี่ยว) → ไม่แพ้ข้าม; sulfonamide subclass อื่นแพ้ข้ามต่ำ (non-arylamine)',
+      safe: [
+        { generic: 'Metformin', th: 'เมทฟอร์มิน', sub: 'Biguanide', pct: 'ไม่แพ้ข้าม',
+          reason: 'คนละโครงสร้าง — ยาเบาหวานทางเลือกหลัก (ปลอดภัยแม้กรณี SCAR)' },
+        { generic: 'Repaglinide / Nateglinide', th: 'กลุ่มไกลไนด์', sub: 'Meglitinide', pct: 'ไม่แพ้ข้าม' },
+        { generic: 'Sitagliptin / Linagliptin', th: 'กลุ่ม DPP-4i', sub: 'DPP-4 inhibitor', pct: 'ไม่แพ้ข้าม' },
+        { generic: 'Empagliflozin / Dapagliflozin', th: 'กลุ่ม SGLT2i', sub: 'SGLT2 inhibitor', pct: 'ไม่แพ้ข้าม' },
+        { generic: 'Pioglitazone', th: 'ไพโอกลิตาโซน', sub: 'Thiazolidinedione', pct: 'ไม่แพ้ข้าม' },
+        { generic: 'Insulin', th: 'อินซูลิน', sub: 'ฮอร์โมน (ไม่ใช่ sulfonamide)', pct: 'ไม่แพ้ข้าม' },
+        { generic: 'Cotrimoxazole (sulfa antibiotic)', th: 'ยาปฏิชีวนะกลุ่ม sulfa', sub: 'Sulfonylarylamine', pct: 'แพ้ข้ามต่ำ (theoretical)',
+          reason: 'sulfa antibiotic มีหมู่ N4 arylamine (SU ไม่มี) → แพ้ข้ามเชิงภูมิต่ำ (Strom 2003; Johnson 2005 "dogma ไม่มีข้อมูลหนุน") · ⚠️ Ghimire 2013 แนะ precaution ถ้าเคยมีอาการรุนแรง/SCAR' },
+        { generic: 'Hydrochlorothiazide / Furosemide', th: 'ยาขับปัสสาวะกลุ่ม sulfa', sub: 'Non-arylamine sulfonamide', pct: 'แพ้ข้ามต่ำ (theoretical)',
+          reason: 'sulfonamide subclass ต่าง (non-arylamine) → แพ้ข้ามต่ำ · precaution ถ้าเคยมีอาการรุนแรง' }
+      ],
+      noteMild: 'แพ้ sulfonylurea: SU ตัวอื่นให้ระวัง (ข้อมูล within-SU จำกัด) · ยาเบาหวานนอกกลุ่ม SU (metformin/glinide/DPP-4i/SGLT2i/insulin) ใช้ได้ · sulfa antibiotic/thiazide แพ้ข้ามต่ำ (SU เป็น non-arylamine sulfonamide)',
+      noteIge:  'IgE ต่อ sulfonylurea: เลี่ยง SU ตัวที่แพ้; SU ตัวอื่นให้ระวัง (ยืนยันก่อนใช้) · ยาเบาหวานนอกกลุ่ม SU ปลอดภัย · sulfa antibiotic แพ้ข้ามต่ำ (non-arylamine) แต่ precaution ถ้าเคยมีอาการรุนแรง',
+      noteScar: 'SCAR จาก sulfonylurea: เลี่ยง SU ทุกตัว · sulfa antibiotic/thiazide (sulfonamide อื่น) ให้ precaution/เลี่ยงถ้าไม่จำเป็น · ยาเบาหวานนอกกลุ่ม SU (metformin ฯลฯ) ยังปลอดภัย',
+      scarCautionNote: 'กรณี SCAR: เลี่ยง SU ทั้งหมด; sulfonamide อื่นให้ precaution',
+      singleDrugCallout: '💡 sulfonylurea เป็น non-antibiotic (non-arylamine) sulfonamide → แพ้ข้ามเชิงภูมิกับ sulfa antibiotic "ต่ำ/theoretical" (Strom 2003; Johnson 2005; Ghimire 2013) — ตัวกำหนดคือหมู่แทนที่ N1/N4 ไม่ใช่หมู่ sulfonamide ที่มีร่วมกัน · within-SU (SU↔SU) ยังไม่มีการศึกษาโดยตรง → จัดเป็นระวังไว้ก่อน (ยกเป็นเลี่ยงเมื่อ SCAR) · ยาเบาหวานนอกกลุ่ม SU (metformin/glinide/DPP-4i/SGLT2i/GLP-1/insulin) คือทางเลือกที่ปลอดภัยชัดเจน'
     }
   ];
 

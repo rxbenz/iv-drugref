@@ -40,8 +40,10 @@
       CRITICAL: 'critical'  // App crash / data corruption
     },
 
-    // App metadata
-    APP_VERSION: '5.11.1',
+    // App metadata — fallback only; reports read the live version lazily from
+    // IVDrugRef.VERSION (error-tracker loads before core.js, so it can't read
+    // it here). The hardcoded value had drifted ~50 releases behind (5.11.1).
+    APP_VERSION: '5.63.0',
     APP_NAME: 'IV DrugRef PWA'
   };
 
@@ -122,7 +124,7 @@
       sessionId: sessionStorage.getItem('sessionId') || 'unknown',
       screenSize: `${screen.width}x${screen.height}`,
       standalone: window.matchMedia('(display-mode: standalone)').matches,
-      appVersion: CONFIG.APP_VERSION
+      appVersion: (window.IVDrugRef && window.IVDrugRef.VERSION) || CONFIG.APP_VERSION
     };
   }
 

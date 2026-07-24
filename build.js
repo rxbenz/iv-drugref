@@ -62,8 +62,16 @@ const STATIC_FILES = [
   'i18n.js', 'translations-en.js', 'version.json'
 ];
 
+// Missing-asset tracker: a typo in PAGES/STATIC_FILES must FAIL the build
+// (previously it only warned, deploying a page with its JS/CSS silently empty).
+const MISSING_FILES = [];
+
 function readFile(filePath) {
-  if (!fs.existsSync(filePath)) { console.warn(`  ⚠ Not found: ${filePath}`); return ''; }
+  if (!fs.existsSync(filePath)) {
+    console.warn(`  ⚠ Not found: ${filePath}`);
+    MISSING_FILES.push(filePath);
+    return '';
+  }
   return fs.readFileSync(filePath, 'utf8');
 }
 
@@ -98,7 +106,8 @@ function buildPage(htmlFile, cfg) {
   let html = readFile(srcPath);
 
   if (DEV_MODE) {
-    // Dev: just copy HTML as-is to dist
+    // Dev: copy HTML as-is to dist (css/ and js/ dirs are copied in build()
+    // so the external refs actually resolve — they used to 404).
     const outPath = path.join(DIST, htmlFile);
     fs.writeFileSync(outPath, html);
     return { file: htmlFile, size: html.length };
@@ -208,7 +217,15 @@ function build() {
       console.log(`  ${f.padEnd(25)}✅ ${fmt(fs.statSync(src).size)}`);
     } else {
       console.log(`  ${f.padEnd(25)}⚠ not found`);
+      MISSING_FILES.push(src);
     }
+  }
+
+  // Dev mode: the HTML keeps external css/js refs — copy the dirs so they resolve
+  if (DEV_MODE) {
+    fs.cpSync(CSS_DIR, path.join(DIST, 'css'), { recursive: true });
+    fs.cpSync(JS_DIR, path.join(DIST, 'js'), { recursive: true });
+    console.log('  css/, js/ (dev refs)     ✅');
   }
 
   // Auto-inject build version into version.json (preserves forceUpdate flag)
@@ -243,6 +260,31 @@ function build() {
     for (const r of results) {
       const srcSize = fs.statSync(path.join(ROOT, r.file)).size;
       console.log(`  ${r.file.padEnd(25)} ${fmt(srcSize).padEnd(10)} → ${fmt(r.size).padEnd(10)} (${r.size > srcSize ? '+' : ''}${fmt(r.size - srcSize)})`);
+    }
+  }
+
+  // ── Guard 1: any missing PAGES/STATIC file fails the build ──
+  if (MISSING_FILES.length) {
+    console.error('\n❌ Build FAILED — missing source files:');
+    MISSING_FILES.forEach(f => console.error('   - ' + f));
+    process.exit(1);
+  }
+
+  // ── Guard 2: every sw.js precache asset must exist in dist/ ──
+  // A single 404 used to reject cache.addAll and break SW install for ALL
+  // users (the v5.51.x stale-SW saga). Catch it at build time instead.
+  if (!DEV_MODE) {
+    const swSrc = readFile(path.join(ROOT, 'sw.js'));
+    const listMatch = swSrc.match(/ASSETS_TO_CACHE\s*=\s*\[([\s\S]*?)\]/);
+    if (listMatch) {
+      const assets = [...listMatch[1].matchAll(/['"]\.\/([^'"]+)['"]/g)].map(m => m[1]);
+      const missing = assets.filter(a => !fs.existsSync(path.join(DIST, a)));
+      if (missing.length) {
+        console.error('\n❌ Build FAILED — sw.js precaches files missing from dist/:');
+        missing.forEach(f => console.error('   - ' + f));
+        process.exit(1);
+      }
+      console.log(`🛡  sw.js precache check: ${assets.length} assets OK`);
     }
   }
 

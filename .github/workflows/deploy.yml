@@ -32,14 +32,6 @@ jobs:
         with:
           fetch-depth: 0  # full history for tags
 
-      - name: Create backup tag
-        run: |
-          TAG="deploy/$(date -u +'%Y%m%d-%H%M%S')"
-          git tag "$TAG"
-          git push origin "$TAG"
-          echo "✅ Backup tag created: $TAG"
-          echo "BACKUP_TAG=$TAG" >> $GITHUB_ENV
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -54,6 +46,16 @@ jobs:
 
       - name: Build production
         run: node build.js --prod
+
+      # Tag only AFTER tests + build pass — deploy/* tags are the documented
+      # rollback points, so they must correspond to builds that actually shipped.
+      - name: Create backup tag
+        run: |
+          TAG="deploy/$(date -u +'%Y%m%d-%H%M%S')"
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "✅ Backup tag created: $TAG"
+          echo "BACKUP_TAG=$TAG" >> $GITHUB_ENV
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

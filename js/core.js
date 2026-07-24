@@ -1132,6 +1132,14 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.66.0',
+      date: '2026-07-24',
+      title: "เสริมความปลอดภัยระบบหลังบ้าน (backend hardening)",
+      items: [
+        "🔐 เตรียมระบบยืนยันตัวตนแบบ signed token สำหรับการแก้ข้อมูลผ่านแผงแอดมิน และ SQL ปิดไม่ให้บุคคลภายนอกอ่านข้อมูลยาที่ยังไม่อนุมัติ/ข้อมูลส่วนบุคคล — ส่วนนี้ต้องตั้งค่าฝั่งเซิร์ฟเวอร์เพิ่ม (ดู docs/gas-security-hardening.md) จึงจะมีผลเต็มที่"
+      ]
+    },
+    {
       v: '5.65.0',
       date: '2026-07-24',
       title: "ความปลอดภัย + การเข้าถึง (a11y) + ความแม่นยำข้อมูล",
@@ -1525,7 +1533,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.65.0';
+  const VERSION = '5.66.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

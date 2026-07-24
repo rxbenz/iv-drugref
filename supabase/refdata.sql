@@ -40,7 +40,7 @@ create index if not exists compat_pairs_b_idx     on public.compat_pairs (drug_b
 do $$
 declare t text;
 begin
-  foreach t in array array['drugs','compat_pairs','renal_drugs'] loop
+  foreach t in array array['compat_pairs','renal_drugs'] loop
     execute format('alter table public.%I enable row level security;', t);
 
     execute format('drop policy if exists "public read %1$s" on public.%1$I;', t);
@@ -52,6 +52,21 @@ begin
       'create policy "admin write %1$s" on public.%1$I for all to authenticated using (public.is_admin()) with check (public.is_admin());', t);
   end loop;
 end $$;
+
+-- drugs: public may read ONLY approved rows. Enforcing the status filter in RLS
+-- (not just the client's ?status=eq.approved query) stops anyone with the anon
+-- key from pulling unapproved, pharmacist-unreviewed drafts + previousData
+-- history via ?status=neq.approved. Admins (is_admin) still read/write all rows.
+alter table public.drugs enable row level security;
+drop policy if exists "public read drugs" on public.drugs;
+create policy "public read drugs" on public.drugs
+  for select to anon using (status = 'approved');
+drop policy if exists "admin read drugs" on public.drugs;
+create policy "admin read drugs" on public.drugs
+  for select to authenticated using (true);
+drop policy if exists "admin write drugs" on public.drugs;
+create policy "admin write drugs" on public.drugs
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- NOTE: a one-time data backfill (GAS → these tables) follows, using the
 -- Phase-1 pattern (temporary anon INSERT during migration, then removed).
@@ -78,5 +93,29 @@ begin
     execute format('create policy "public read %1$s" on public.%1$I for select to anon, authenticated using (true);', t);
     execute format('drop policy if exists "admin write %1$s" on public.%1$I;', t);
     execute format('create policy "admin write %1$s" on public.%1$I for all to authenticated using (public.is_admin()) with check (public.is_admin());', t);
+  end loop;
+end $$;
+
+
+-- ── updated_at bump trigger (concurrency foundation) ────────────────
+-- The clinical tables all carry `updated_at`, but nothing bumped it on UPDATE,
+-- so it couldn't detect a stale/clobbering edit (two admins overwriting each
+-- other silently). This trigger stamps updated_at on every UPDATE — giving a
+-- real "last changed" signal + the precondition an optimistic-concurrency check
+-- can key on later (client reads updated_at, then `.eq('updated_at', seen)` on
+-- the edit and treats 0 rows affected as a conflict).
+create or replace function public.touch_updated_at() returns trigger
+  language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['drugs','compat_pairs','renal_drugs','allergy_groups','allergy_refs'] loop
+    execute format('drop trigger if exists trg_touch_updated_at on public.%I;', t);
+    execute format('create trigger trg_touch_updated_at before update on public.%I for each row execute function public.touch_updated_at();', t);
   end loop;
 end $$;

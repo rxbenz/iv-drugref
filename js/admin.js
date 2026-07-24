@@ -113,7 +113,10 @@ function handleCredentialResponse(response) {
     err.style.display = 'block';
     return;
   }
-  state.user = { name: payload.name, email: payload.email, picture: payload.picture };
+  // Keep the raw GIS id_token (a signed JWT) so writes can carry a VERIFIABLE
+  // identity to GAS — the plain user= email param is trivially spoofable. GAS
+  // verifies this server-side when REQUIRE_ID_TOKEN is enabled (opt-in).
+  state.user = { name: payload.name, email: payload.email, picture: payload.picture, idToken: response.credential };
   showApp(state.user);
   // Phase A: best-effort — exchange the Google id_token for a Supabase session
   // (no extra login/redirect) so the Renal tab can write direct to Supabase.
@@ -195,6 +198,9 @@ async function apiCall(action, data = {}) {
   const url = new URL(cfg.scriptUrl);
   url.searchParams.set('action', action);
   url.searchParams.set('user', state.user?.email || 'unknown');
+  // Signed id_token for server-side identity verification (see GAS _resolveUser).
+  // GAS ignores it unless REQUIRE_ID_TOKEN='on', so this is harmless until then.
+  if (state.user?.idToken) url.searchParams.set('idToken', state.user.idToken);
 
   if (isRead) {
     Object.entries(data).forEach(([k, v]) => url.searchParams.set(k, v));
@@ -227,7 +233,8 @@ async function apiCall(action, data = {}) {
   // Large payload → use POST no-cors (fire-and-forget)
   console.log(`[API] ${action} via POST no-cors (payload: ${jsonData.length} chars)`);
   const postUrl = cfg.scriptUrl + '?action=' + action +
-    '&user=' + encodeURIComponent(state.user?.email || 'unknown');
+    '&user=' + encodeURIComponent(state.user?.email || 'unknown') +
+    (state.user?.idToken ? '&idToken=' + encodeURIComponent(state.user.idToken) : '');
 
   await fetch(postUrl, {
     method: 'POST',
@@ -244,7 +251,7 @@ async function apiCall(action, data = {}) {
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.47.0';
+const EXPECTED_GAS_VERSION = '5.66.0';
 
 async function checkBackendVersion() {
   const box = document.getElementById('version-check-result');

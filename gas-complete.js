@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.47.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.47.0 = + DDI CRUD)
+var GAS_VERSION = '5.66.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.66.0 = security hardening: id_token verify machinery + previousData/PII strips + generic errors)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -311,7 +311,8 @@ function doGet(e) {
         return errorResponse('Unknown action: ' + action);
     }
   } catch (err) {
-    return errorResponse(err.message);
+    Logger.log('handler error: ' + (err && err.message) + ' | ' + (err && err.stack));
+    return errorResponse('เกิดข้อผิดพลาดภายในระบบ'); // generic — don't echo internals to the client
   }
 }
 
@@ -400,7 +401,8 @@ function doPost(e) {
         return logAnalyticsGeneric(data, SHEETS.SESSIONS);
     }
   } catch (err) {
-    return errorResponse(err.message);
+    Logger.log('handler error: ' + (err && err.message) + ' | ' + (err && err.stack));
+    return errorResponse('เกิดข้อผิดพลาดภายในระบบ'); // generic — don't echo internals to the client
   }
 }
 
@@ -1152,7 +1154,11 @@ function handleUpdateDrug(user, data) {
       }
 
       for (var key in data) {
-        if (key === 'id') continue;
+        // Never let the client write `previousData` — the server is the sole
+        // author of that snapshot (above). Accepting it lets a crafted pending
+        // edit forge a benign-looking diff while storing malicious data.
+        // `idToken`/`user`/`action` are transport fields, not drug columns.
+        if (key === 'id' || key === 'previousData' || key === 'idToken' || key === 'user' || key === 'action') continue;
         var col = headers.indexOf(key);
         if (col >= 0) {
           var val = typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key];
@@ -1737,6 +1743,8 @@ function _syncDrugsToSupabase() {
     o.reconst = obj(o.reconst); o.dilution = obj(o.dilution); o.admin = obj(o.admin);
     o.stability = obj(o.stability); o.compat = obj(o.compat);
     o.categories = arr(o.categories); o.monitoring = arr(o.monitoring);
+    // Don't publish edit-history / editor PII to the public-read table.
+    delete o.previousData; delete o.createdBy; delete o.updatedBy;
     rows.push({ id: idNum, generic: o.generic || '', status: o.status || 'approved', data: o });
   });
   for (var i = 0; i < rows.length; i += 100) _supaUpsert('drugs', rows.slice(i, i + 100)); // chunk big payload
@@ -1757,13 +1765,78 @@ function migrateDrugsToSupabaseNow() {
 function _syncAllergyToSupabase() {
   var groups = getSheetData(SHEETS.ALLERGY_GROUPS);
   var grows = groups.filter(function (g) { return g.id; })
-    .map(function (g) { return { id: String(g.id), data: g }; });
+    .map(function (g) { return { id: String(g.id), data: _scrubPublicRow(g) }; });
   _supaUpsert('allergy_groups', grows);
   var refs = getSheetData(SHEETS.ALLERGY_REFS);
   var rrows = refs.filter(function (r) { return r.key; })
-    .map(function (r) { return { key: String(r.key), data: r }; });
+    .map(function (r) { return { key: String(r.key), data: _scrubPublicRow(r) }; });
   _supaUpsert('allergy_refs', rrows);
   return grows.length + ' groups, ' + rrows.length + ' refs';
+}
+
+// Strip editor PII / audit columns from a row before it lands in a public-read
+// table (createdBy is an editor email; created/updated stamps aren't for public).
+function _scrubPublicRow(o) {
+  if (o && typeof o === 'object') {
+    delete o.createdBy; delete o.updatedBy; delete o.createdAt; delete o.updatedAt;
+  }
+  return o;
+}
+
+// ── Identity verification (id_token) — machinery is in place but INERT until
+// you wire it into doGet/doPost and set Script Property REQUIRE_ID_TOKEN='on'.
+// See docs/gas-security-hardening.md for the exact (tested-by-you) wiring steps.
+// The GAS web app is deployed "Anyone" and historically trusted the client
+// `user=` param — trivially spoofable, so anyone could rewrite clinical drug
+// data or self-promote to admin. These helpers verify the signed Google
+// id_token server-side and resolve the trusted email; enforcement is opt-in so
+// enabling it can't lock out the admin before it's tested.
+var GIS_CLIENT_ID = '666120341779-qusaccvj5tj7o6onfb9nn5vod3o9rrv9.apps.googleusercontent.com';
+
+function _requireIdToken() {
+  try { return PropertiesService.getScriptProperties().getProperty('REQUIRE_ID_TOKEN') === 'on'; }
+  catch (e) { return false; }
+}
+
+// Verify a Google id_token via the tokeninfo endpoint; return the verified
+// lowercase email or null. Checks audience (our client id), email_verified, exp.
+function _verifyIdToken(idToken) {
+  if (!idToken) return null;
+  try {
+    var resp = UrlFetchApp.fetch(
+      'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken),
+      { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) return null;
+    var info = JSON.parse(resp.getContentText());
+    if (info.aud !== GIS_CLIENT_ID) return null;
+    if (String(info.email_verified) !== 'true') return null;
+    if (info.exp && (Number(info.exp) * 1000) < Date.now()) return null;
+    return info.email ? String(info.email).toLowerCase() : null;
+  } catch (e) { return null; }
+}
+
+// Resolve the trusted actor email + whether identity was cryptographically
+// verified. When REQUIRE_ID_TOKEN is off (default) behavior is unchanged.
+function _resolveUser(e, data) {
+  var claimed = (data && data.user) || (e && e.parameter && e.parameter.user) || '';
+  var idToken = (e && e.parameter && e.parameter.idToken) || (data && data.idToken) || '';
+  var verified = _verifyIdToken(idToken);
+  return { email: verified || claimed, verified: !!verified };
+}
+
+// Actions that mutate clinical/admin data — subject to id-token enforcement.
+function _isMutatingAction(action) {
+  var m = [
+    'createdrug', 'updatedrug', 'deletedrug', 'approvedrug', 'rejectdrug',
+    'setuserrole', 'removeuser',
+    'createallergygroup', 'updateallergygroup', 'deleteallergygroup',
+    'bulkcreateallergygroups', 'bulkcreateallergyrefs',
+    'createcompatpair', 'updatecompatpair', 'deletecompatpair', 'bulkcreatecompatpairs',
+    'createrenaldrug', 'updaterenaldrug', 'deleterenaldrug', 'bulkcreaterenaldrugs',
+    'createddipair', 'updateddipair', 'deleteddipair',
+    'createddiclassrule', 'updateddiclassrule', 'deleteddiclassrule'
+  ];
+  return m.indexOf(String(action).toLowerCase()) >= 0;
 }
 function _syncAllergySafe() {
   try { _syncAllergyToSupabase(); } catch (e) { Logger.log('allergy->supabase sync failed: ' + e.message); }

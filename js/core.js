@@ -1115,6 +1115,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.61.0',
+      date: '2026-07-24',
+      title: "NSAID 5 phenotype + Heparin HIT/DTH/immediate",
+      items: [
+        "NSAID: เลือก phenotype ได้ 5 แบบตามมาตรฐาน EAACI/ENDA — NERD/NECD/NIUA (แพ้ข้าม COX-1 ทั้งกลุ่ม, COX-2 ใช้ได้) กับ SNIUAA/SNIDR (แพ้ตัวเดียว, NSAID กลุ่มเคมีอื่นใช้ได้) พร้อมคำแนะนำจัดการเฉพาะแต่ละแบบ",
+        "Heparin: เลือกชนิดปฏิกิริยา HIT / DTH (ผื่นจุดฉีด) / immediate ได้ — คำแนะนำต่างกัน (HIT ห้ามสลับ LMWH ใช้ DTI, DTH ใช้ fondaparinux/IV UFH ได้) + เพิ่ม danaparoid"
+      ]
+    },
+    {
       v: '5.60.0',
       date: '2026-07-24',
       title: "เพิ่มกลุ่มแพ้ยา PPI + Sulfonylurea",
@@ -1455,7 +1464,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.60.0';
+  const VERSION = '5.61.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

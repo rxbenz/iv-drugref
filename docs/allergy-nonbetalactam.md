@@ -625,3 +625,35 @@ TMP-SMX, Doxycycline, Aminoglycoside, Clindamycin, Metronidazole
 
 > ทั้ง 2 กลุ่ม locked โดย `test/allergy-data.test.js` (`data: PPI …`, `data: sulfonylurea …`,
 > `multi: PPI + sulfonylurea candidates …`, `data: verified refs on PPI + sulfonylurea …`).
+
+## ✅ Phenotype subclassification — NSAID (5 phenotype) + Heparin (HIT/DTH/immediate) (pharmacist-verified 2026-07, v5.61.0)
+**ครั้งแรกที่ทำ engine `phenotype` ให้ generic** — ก่อนหน้านี้ hardcode เฉพาะ NSAID (cross/single).
+เพิ่ม field `maps:'cross'|'single'` ต่อ phenotype + helper `phenotypeMapsToSingle()` (fallback เป็น
+`id==='single'` → ค่าเดิม 'cross'/'single' ยังทำงาน, tests เดิมเขียวครบ) + surface `phenotypeNote`
+(คำแนะนำการจัดการเฉพาะ subtype) แสดงเป็น info-box ใน `paint()`.
+
+### NSAID — 2 → 5 clinical phenotype (EAACI/ENDA)
+- **โมเดล:** `chemGroupAware` เดิม + phenotype 5 แบบ (แทน cross/single) — **cross-reactive arm**
+  (`maps:'cross'`): **NERD** (โรคทางเดินหายใจเรื้อรัง), **NECD** (ลมพิษเรื้อรัง flare), **NIUA** (ลมพิษ/AE
+  ไม่มีโรคเดิม) → เลี่ยง COX-1 แรงทุกตัว, COX-2 selective/paracetamol ทนได้ · **single-drug arm**
+  (`maps:'single'`): **SNIUAA** (immediate IgE), **SNIDR** (delayed FDE/SCAR) → เลี่ยงเฉพาะตัวที่แพ้ +
+  กลุ่มเคมีเดียวกัน, กลุ่มเคมีอื่นทนได้แม้ COX-1 แรง
+- **phenotypeNote เฉพาะ subtype:** NERD → montelukast + พิจารณา aspirin desensitization; SNIDR (SCAR)
+  → ห้าม challenge · **การจัด 3→cross / 2→single ตรงกับพฤติกรรม engine เดิมเป๊ะ** (ไม่เปลี่ยน bucket)
+- **หลักฐาน:** **Kowalski 2013** (Allergy 68:1219-32 — ตัว classification นิยาม 5 phenotype: cross-reactive
+  = COX-1, non-cross-reactive = immunologic) · **Doña 2020** (Allergy 75:561-575 — ยืนยัน 5 phenotype +
+  การจัดการ). refs เดิม (kowalski2013, dona2020) ครอบคลุม
+
+### Heparin — เพิ่ม phenotype HIT / DTH / immediate
+- **โมเดล:** heparin ไม่มี chemGroupAware → phenotype **ไม่เปลี่ยน routing** (whole-class avoid เสมอ) แค่
+  เปลี่ยน **note การจัดการ**: **HIT** (เลี่ยง heparin ทุกตัว, ห้ามสลับ LMWH แทน UFH, danaparoid caution,
+  DTI first-line, ส่ง anti-PF4) · **DTH** (fondaparinux ทนได้ทุกราย, IV UFH มักใช้ได้แม้แพ้ SC, skin test)
+  · **immediate/anaphylaxis** (เลี่ยงทุกตัว → non-heparin anticoagulant)
+- **เพิ่ม `danaparoid` เป็น allergen** (heparinoid แพ้ข้ามกับ heparin ได้ → เข้าโมเดล; culprit-exclusion ใน
+  cautionItems กันตัวเองโผล่ใน caution) · **fondaparinux คงเป็น safe-alternative เท่านั้น** (pentasaccharide
+  สังเคราะห์ โครงสร้างต่าง → การแพ้มัก isolated, heparin ยังใช้ได้ — ไม่ทำเป็น allergen)
+- **หลักฐาน:** **Grims 2007** (Br J Dermatol 157:514 — DTH: 7/8 แพ้ข้าม LMWH, fondaparinux ทนได้ทุกราย,
+  MW-independent) +`grims2007` · HIT ใช้ของเดิม (`ash2018hit`, ไม่เปลี่ยน recommendation)
+
+> Locked โดย `test/allergy-data.test.js` (`data: NSAID phenotype maps …`, `data: phenotype backward-compat …`,
+> `data: phenotypeNote surfaced …`, `data: heparin — whole-class avoid …`, `data: verified refs on NSAID phenotypes + heparin DTH …`).

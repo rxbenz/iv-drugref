@@ -314,11 +314,15 @@ test('Vancomycin non-immune -> flushing reaction pseudo (slow infusion, not a co
 });
 
 // ── NSAID phenotype: single-drug (selective) routing (Phase 1) ──
-test('NBL: nsaid group exposes phenotypes (cross / single)', () => {
+test('NBL: nsaid group exposes the 5 EAACI/ENDA phenotypes (maps cross/single)', () => {
   const g = A.NBL_GROUPS.find((x) => x.id === 'nsaid');
-  assert.ok(Array.isArray(g.phenotypes) && g.phenotypes.length >= 2);
+  assert.ok(Array.isArray(g.phenotypes) && g.phenotypes.length === 5, 'five clinical phenotypes');
   const ids = g.phenotypes.map((p) => p.id);
-  assert.ok(ids.includes('cross') && ids.includes('single'));
+  ['nerd', 'necd', 'niua', 'sniuaa', 'snidr'].forEach((id) => assert.ok(ids.includes(id), `phenotype ${id} present`));
+  // cross-reactive phenotypes route to the 'cross' arm, single-drug to 'single'
+  const maps = Object.fromEntries(g.phenotypes.map((p) => [p.id, p.maps]));
+  ['nerd', 'necd', 'niua'].forEach((id) => assert.equal(maps[id], 'cross', `${id} → cross-reactive arm`));
+  ['sniuaa', 'snidr'].forEach((id) => assert.equal(maps[id], 'single', `${id} → single-drug arm`));
 });
 
 test('NBL: ibuprofen single-drug -> avoid same chem (propionic), SAFE other chem incl strong COX-1', () => {
@@ -873,6 +877,56 @@ test('data: verified refs on PPI + sulfonylurea groups', () => {
   const suRefs = new Set(su.caution.concat(su.safer).flatMap((x) => x.refs || []));
   assert.ok(suRefs.has('johnson2005') || suRefs.has('ghimire2013'), 'sulfonylurea cites Johnson 2005 / Ghimire 2013');
   [...ppiRefs, ...suRefs].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves to a real citation`));
+});
+
+// ───────── NSAID 5 phenotypes (EAACI/ENDA) + generic phenotype engine ───────
+test('data: NSAID phenotype maps — NERD/NECD/NIUA = cross-reactive, SNIUAA/SNIDR = single-drug', () => {
+  // cross-reactive arm: strong COX-1 inhibitors avoided, COX-2 selective safe
+  ['nerd', 'necd', 'niua'].forEach((ph) => {
+    const r = A.buildReport('aspirin', 'ige', { phenotype: ph });
+    assert.ok(r.avoid.some((x) => /Ibuprofen/.test(x.drug.generic)), `${ph}: ibuprofen avoid (cross-reactive COX-1)`);
+    assert.ok(r.safer.some((x) => /Celecoxib/.test(x.drug.generic)), `${ph}: celecoxib safer (COX-2)`);
+  });
+  // single-drug arm: same chemical group avoided, other groups tolerated
+  ['sniuaa', 'snidr'].forEach((ph) => {
+    const r = A.buildReport('ibuprofen', 'ige', { phenotype: ph });
+    assert.ok(r.avoid.some((x) => /Naproxen|Ketoprofen/.test(x.drug.generic)), `${ph}: same chem group (propionic) avoid`);
+    assert.ok(r.safer.some((x) => /Diclofenac|Celecoxib/.test(x.drug.generic)), `${ph}: different chem group tolerated`);
+    assert.ok(!r.avoid.some((x) => /Diclofenac/.test(x.drug.generic)), `${ph}: acetic-acid NSAID NOT avoided (single-drug)`);
+  });
+});
+
+test('data: phenotype backward-compat — legacy cross/single ids still route correctly', () => {
+  const cross = A.buildReport('aspirin', 'ige', { phenotype: 'cross' });
+  const single = A.buildReport('aspirin', 'ige', { phenotype: 'single' });
+  assert.ok(cross.avoid.length > single.avoid.length, 'legacy cross avoids more (COX-1) than single (chem-group only)');
+  assert.ok(cross.avoid.some((x) => /Ibuprofen/.test(x.drug.generic)), 'legacy cross: ibuprofen avoid');
+});
+
+test('data: phenotypeNote surfaced — NSAID NERD cites montelukast; heparin DTH≠HIT', () => {
+  const nerd = A.buildReport('aspirin', 'ige', { phenotype: 'nerd' });
+  assert.match(nerd.phenotypeNote, /montelukast/i, 'NERD note mentions montelukast');
+  const dth = A.buildReport('enoxaparin', 'ige', { phenotype: 'dth' });
+  const hit = A.buildReport('enoxaparin', 'ige', { phenotype: 'hit' });
+  assert.match(dth.phenotypeNote, /fondaparinux/i, 'heparin DTH note mentions fondaparinux');
+  assert.match(hit.phenotypeNote, /DTI|argatroban|PF4/i, 'heparin HIT note mentions DTI/PF4');
+  assert.notEqual(dth.phenotypeNote, hit.phenotypeNote, 'DTH and HIT give different guidance');
+});
+
+test('data: heparin — whole-class avoid regardless of phenotype; danaparoid allergen excludes itself from caution', () => {
+  const dth = A.buildReport('enoxaparin', 'ige', { phenotype: 'dth' });
+  assert.ok(dth.avoid.some((x) => /Heparin \(UFH\)/.test(x.drug.generic)), 'DTH: UFH avoided (whole-class)');
+  assert.ok(dth.safer.some((x) => /Fondaparinux/.test(x.drug.generic)), 'fondaparinux stays safe alternative');
+  const dana = A.buildReport('danaparoid', 'ige', { phenotype: 'dth' });
+  assert.ok(dana.avoid.some((x) => /Enoxaparin/.test(x.drug.generic)), 'danaparoid culprit → heparins avoid');
+  assert.ok(!dana.caution.some((x) => /Danaparoid/.test(x.drug.generic)), 'danaparoid not shown in its own caution list');
+});
+
+test('data: verified refs on NSAID phenotypes + heparin DTH (Grims 2007)', () => {
+  const r = A.buildReport('enoxaparin', 'ige', { phenotype: 'dth' });
+  const refs = new Set(r.avoid.concat(r.safer).flatMap((x) => x.refs || []));
+  assert.ok(refs.has('grims2007'), 'heparin cites Grims 2007 (DTH MW-independent)');
+  ['grims2007', 'kowalski2013', 'dona2020'].forEach((k) => assert.ok(A.REFS[k], `ref ${k} resolves`));
 });
 
 // ───────────── applyRemoteData (A3 Sheet override) — KEEP LAST ─────────────

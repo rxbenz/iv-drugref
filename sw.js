@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.62.0
+// IV Drug Reference PWA — Service Worker v5.63.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -482,9 +482,10 @@
 // v5.60.0: เพิ่มกลุ่มแพ้ยา PPI + Sulfonylurea
 // v5.61.0: NSAID 5 phenotype + Heparin HIT/DTH/immediate
 // v5.62.0: ปรับปรุงความแม่นยำเครื่องคำนวณ Vanco TDM
+// v5.63.0: ปรับความแม่นยำคำเตือนความปลอดภัยคลินิก
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.62.0';
+const CACHE_NAME = 'iv-drugref-v5.63.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

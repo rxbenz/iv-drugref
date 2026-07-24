@@ -72,11 +72,11 @@
       var m = A.DRUGS.filter(function (d) { return d.class === cls; });
       if (!m.length) return;
       GROUPS.push({ id: cls, label: CLASS_LABEL[cls] || cls });
-      m.forEach(function (d) { ALLERGENS.push({ id: d.id, generic: d.generic, th: d.th, gid: cls, glabel: CLASS_LABEL[cls] || cls }); });
+      m.forEach(function (d) { ALLERGENS.push({ id: d.id, generic: d.generic, th: d.th, trade: d.trade || [], gid: cls, glabel: CLASS_LABEL[cls] || cls }); });
     });
     (A.NBL_GROUPS || []).forEach(function (g) {
       GROUPS.push({ id: g.id, label: g.label });
-      g.allergens.forEach(function (a) { ALLERGENS.push({ id: a.id, generic: a.generic, th: a.th, gid: g.id, glabel: g.label }); });
+      g.allergens.forEach(function (a) { ALLERGENS.push({ id: a.id, generic: a.generic, th: a.th, trade: a.trade || [], gid: g.id, glabel: g.label }); });
     });
   }
   function allergenById(id) { for (var i = 0; i < ALLERGENS.length; i++) if (ALLERGENS[i].id === id) return ALLERGENS[i]; return null; }
@@ -97,7 +97,12 @@
     return ALLERGENS.filter(function (x) {
       if (pg !== 'all' && x.gid !== pg) return false;
       if (!q) return true;
-      return x.generic.toLowerCase().indexOf(q) >= 0 || x.th.indexOf(qth) >= 0;
+      // Search generic + Thai + TRADE names + id, so "Bactrim"/"cotrimoxazole"/
+      // "Rocephin"/"Cipro" resolve (the picker is the only way in — a missed
+      // match = no cross-reactivity warning at all).
+      if (x.generic.toLowerCase().indexOf(q) >= 0 || x.th.indexOf(qth) >= 0) return true;
+      if (x.id && x.id.toLowerCase().indexOf(q) >= 0) return true;
+      return (x.trade || []).some(function (tr) { return String(tr).toLowerCase().indexOf(q) >= 0; });
     });
   }
   function renderList() {

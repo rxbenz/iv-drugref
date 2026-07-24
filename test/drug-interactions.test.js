@@ -176,3 +176,15 @@ test('remote class token resolves case-insensitively to a canonical class', () =
   DI._applyRemote({});
   assert.deepStrictEqual(DI.check(['Cefazolin', 'NSS']), []);
 });
+
+test('DigiFab (digoxin antidote) does NOT trigger digoxin toxicity alerts ⭐', () => {
+  // v5.53.0: "Digoxin-specific antibody (DigiFab)" contains the substring
+  // "digoxin" but REVERSES it — it must not fire digoxin's bradycardia class
+  // or the digoxin+amiodarone/calcium/furosemide curated pairs.
+  const t = titles(['Digoxin-specific antibody (DigiFab)', 'Amiodarone']);
+  assert.ok(!t.some(x => /DigiFab/i.test(x) && /Amiodarone/i.test(x)), 'DigiFab+Amiodarone must not fire');
+  assert.strictEqual(DI.check(['Digoxin-specific antibody (DigiFab)', 'Calcium chloride']).length, 0);
+  assert.strictEqual(DI.check(['Digoxin-specific antibody (DigiFab)', 'Furosemide']).length, 0);
+  // real digoxin still fires (guard didn't over-reach)
+  assert.ok(titles(['Digoxin', 'Amiodarone']).some(x => /Digoxin/i.test(x) && /Amiodarone/i.test(x)));
+});

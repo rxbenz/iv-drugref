@@ -94,6 +94,20 @@ test('any allergy -> carbapenems = negligible (~0.87%)', () => {
   }
 });
 
+test('carbapenem-allergic -> another carbapenem = HIGH, never negligible ⭐', () => {
+  // v5.53.0 safety fix: a patient allergic to one carbapenem must NOT be told a
+  // sibling carbapenem is negligible/"give without testing" (shared bicyclic core).
+  const pairs = [['meropenem', 'imipenem'], ['meropenem', 'ertapenem'], ['imipenem', 'meropenem'], ['ertapenem', 'imipenem']];
+  for (const [a, t] of pairs) {
+    const r = rel(a, t);
+    assert.notEqual(r.tier, 'negligible', `${a}->${t} must not be negligible`);
+    assert.equal(r.tier, 'high', `${a}->${t} should be high (same class)`);
+    assert.equal(r.decision, 'avoid', `${a}->${t} should be avoid`);
+  }
+  // regression: a PENICILLIN allergen -> carbapenem is still negligible (unchanged)
+  assert.equal(rel('amoxicillin', 'meropenem').tier, 'negligible');
+});
+
 test('cefazolin as target = negligible from any beta-lactam allergy (unique R1)', () => {
   for (const a of ['amoxicillin', 'penicillinG', 'ceftriaxone', 'ceftazidime']) {
     assert.equal(tierOf(a, 'cefazolin'), 'negligible', `${a}->cefazolin`);

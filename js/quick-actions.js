@@ -94,11 +94,39 @@
     ['Midazolam','Cefepime','c'],['Midazolam','Diltiazem','c'],
     ['20% Mannitol','Potassium chloride','i'],['Amphotericin B','NSS','i']
   ];
+  // Salt-aware keys (ported from compatibility.js P2.3): plain first-word keys
+  // collapsed every salt of a cation to one key (Calcium gluconate & Calcium
+  // chloride → "calcium"), so one salt's curated result leaked onto another.
+  // keyCandidates returns most-specific-first: ["calciumchloride","calcium"].
+  var CATION_PREFIXES = { calcium:1, potassium:1, sodium:1, magnesium:1, ammonium:1, ferric:1, ferrous:1, zinc:1 };
+
+  function normWordsQA(generic) {
+    return generic.toLowerCase().split(/[\s,()\/]+/)
+      .map(function(w){ return w.replace(/[^a-z]/g, ''); })
+      .filter(function(w){ return w.length > 0; });
+  }
+
+  function normKey(generic) {
+    var words = normWordsQA(generic);
+    return words.length ? words[0] : generic.toLowerCase().replace(/[^a-z]/g, '');
+  }
+
+  function keyCandidates(generic) {
+    var words = normWordsQA(generic);
+    if (!words.length) return [normKey(generic)];
+    var cation = words[0];
+    if (CATION_PREFIXES[cation] && words.length >= 2) return [cation + words[1], cation];
+    return [cation];
+  }
+
   var CURATED_MAP = {};
-  CURATED.forEach(function(r) {
-    var key = [normKey(r[0]), normKey(r[1])].sort().join('|');
-    CURATED_MAP[key] = r[2];
-  });
+  function addPair(a, b, s) {
+    // Store under the MOST-SPECIFIC key so "Calcium chloride" and bare
+    // "Calcium" land on distinct keys (same convention as compatibility.js).
+    var key = [keyCandidates(a)[0], keyCandidates(b)[0]].sort().join('|');
+    CURATED_MAP[key] = s;
+  }
+  CURATED.forEach(function(r) { addPair(r[0], r[1], r[2]); });
 
   // Also try to load from compatibility page's cache if available
   try {
@@ -106,29 +134,24 @@
     if (cachedPairs) {
       var pairs = JSON.parse(cachedPairs);
       if (Array.isArray(pairs) && pairs.length > 0) {
-        pairs.forEach(function(r) {
-          var key = [normKey(r[0]), normKey(r[1])].sort().join('|');
-          CURATED_MAP[key] = r[2];
-        });
+        pairs.forEach(function(r) { addPair(r[0], r[1], r[2]); });
       }
     }
   } catch(e) {}
 
-  function normKey(generic) {
-    var words = generic.toLowerCase().split(/[\s,()\/]+/);
-    for (var w = 0; w < words.length; w++) {
-      var cleaned = words[w].replace(/[^a-z]/g, '');
-      if (cleaned.length > 0) return cleaned;
-    }
-    return generic.toLowerCase().replace(/[^a-z]/g, '');
-  }
-
   function getCompat(drugA, drugB) {
     if (drugA.i === drugB.i) return { status: 'self', detail: '' };
-    var ka = normKey(drugA.g), kb = normKey(drugB.g);
-    var key = [ka, kb].sort().join('|');
-    if (CURATED_MAP[key]) {
-      var s = CURATED_MAP[key];
+    // Probe specific→generic so a salt-specific entry wins but a bare-cation
+    // curated entry still matches every salt as a fallback.
+    var ca = keyCandidates(drugA.g), cb = keyCandidates(drugB.g);
+    var s = null;
+    for (var i = 0; i < ca.length && s == null; i++) {
+      for (var j = 0; j < cb.length && s == null; j++) {
+        var key = [ca[i], cb[j]].sort().join('|');
+        if (CURATED_MAP[key] != null) s = CURATED_MAP[key];
+      }
+    }
+    if (s) {
       return {
         status: s === 'c' ? 'compatible' : s === 'i' ? 'incompatible' : 'variable',
         detail: drugA.g + ' + ' + drugB.g
@@ -359,12 +382,15 @@
     });
     document.getElementById('qaDripGrid').innerHTML = gridHtml;
 
-    // Pre-fill weight from patient context if available
+    // Pre-fill weight from the shared patient context (core.js patientCtx).
+    // The old code read sessionStorage 'patientContext' — a key nothing ever
+    // writes — so the pre-fill was dead since the day it shipped.
     try {
-      var ptCtx = sessionStorage.getItem('patientContext');
-      if (ptCtx) {
-        var pt = JSON.parse(ptCtx);
-        if (pt && pt.weight) document.getElementById('qaDripWt').value = pt.weight;
+      var ctx = window.IVDrugRef && IVDrugRef.patientCtx;
+      if (ctx) {
+        var pts = ctx.getAll();
+        var active = pts && pts[ctx.getActiveIdx()];
+        if (active && active.wt) document.getElementById('qaDripWt').value = active.wt;
       }
     } catch(e) {}
   }
@@ -705,15 +731,20 @@
     });
     var concRow = document.getElementById('qaDripConcs');
     concRow.innerHTML = concHtml;
-    concRow.addEventListener('click', function(e) {
-      var btn = e.target.closest('[data-conc]');
-      if (!btn) return;
-      selectedDripConc = parseInt(btn.getAttribute('data-conc'));
-      concRow.querySelectorAll('.qa-drip-conc').forEach(function(b, i) {
-        b.classList.toggle('qa-selected', i === selectedDripConc);
+    // Bind once — re-adding this listener on every drug selection stacked
+    // duplicate handlers (calcDrip ran N times per click after N selections).
+    if (!concRow._qaConcBound) {
+      concRow._qaConcBound = true;
+      concRow.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-conc]');
+        if (!btn) return;
+        selectedDripConc = parseInt(btn.getAttribute('data-conc'));
+        concRow.querySelectorAll('.qa-drip-conc').forEach(function(b, i) {
+          b.classList.toggle('qa-selected', i === selectedDripConc);
+        });
+        calcDrip();
       });
-      calcDrip();
-    });
+    }
 
     // Reset result
     document.getElementById('qaDripResult').classList.remove('qa-show');

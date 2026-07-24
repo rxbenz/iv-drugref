@@ -243,10 +243,24 @@
     return null;
   }
 
+  // Neutralize antidote/exception names whose text contains a base-drug token
+  // but which must NOT match that drug's interactions. e.g. "Digoxin-specific
+  // antibody (DigiFab)" REVERSES digoxin — matching it against digoxin's
+  // bradycardia class + curated toxicity pairs produced clinically inverted
+  // alerts. Rewrite the match-string so the bare "digoxin" token disappears
+  // (the display name `g` is untouched).
+  function _matchStr(gl) {
+    if (gl.indexOf('digoxin-specific') >= 0 || gl.indexOf('digifab') >= 0 ||
+        gl.indexOf('immune fab') >= 0) {
+      return gl.replace(/digoxin/g, 'digfab-antidote');
+    }
+    return gl;
+  }
+
   // genericNames: array of drug generic strings → array of findings (severity-sorted).
   function check(genericNames) {
     var drugs = (genericNames || []).filter(Boolean).map(function (g) {
-      var gl = String(g).toLowerCase();
+      var gl = _matchStr(String(g).toLowerCase());
       return { name: g, gl: gl, classes: _classesFor(gl) };
     });
     if (drugs.length < 2) return [];

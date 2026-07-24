@@ -146,4 +146,25 @@ function loadCompatibility() {
   };
 }
 
-module.exports = { loadCore, loadVancoModels, loadCompatibility };
+// ---- Load the renal-dosing page logic (js/renal-dosing.js) ----
+// Same slicing trick as loadCompatibility: the file is one IIFE; we cut the
+// DOM trailer (loadRemoteRenalDrugs's fetch + init/listeners), export the pure
+// band-matching + remote-reshape logic, and re-close the IIFE ourselves.
+function loadRenalDosing() {
+  const { sandbox } = loadCore();
+  let src = readJs('renal-dosing.js');
+  const cut = src.indexOf('function loadRemoteRenalDrugs()');
+  if (cut > 0) src = src.slice(0, cut);
+  src += '\n;globalThis.rdRangeHit=rdRangeHit;globalThis.applyRenalRemote=applyRenalRemote;'
+    + 'globalThis.RENAL_DRUGS=RENAL_DRUGS;\n})();';
+  vm.runInContext(src, sandbox, { filename: 'renal-dosing.js' });
+  if (!sandbox.rdRangeHit) throw new Error('renal-dosing.js did not expose rdRangeHit');
+  return {
+    rdRangeHit: sandbox.rdRangeHit,
+    applyRenalRemote: sandbox.applyRenalRemote,
+    RENAL_DRUGS: sandbox.RENAL_DRUGS,
+    sandbox,
+  };
+}
+
+module.exports = { loadCore, loadVancoModels, loadCompatibility, loadRenalDosing };

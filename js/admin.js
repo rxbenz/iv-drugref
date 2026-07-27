@@ -268,28 +268,40 @@ async function apiCall(action, data = {}) {
     return json;
   }
 
-  // Large payload → use POST no-cors (fire-and-forget)
-  console.log(`[API] ${action} via POST no-cors (payload: ${jsonData.length} chars)`);
+  // Large payload → send it in the POST body instead of the query string.
+  // Kept a "simple" request (text/plain, no custom headers) so the browser does
+  // NOT issue a CORS preflight, which Apps Script cannot answer; the response
+  // GAS redirects to carries Access-Control-Allow-Origin: *, so the result is
+  // readable — unlike the old mode:'no-cors' send, which returned an opaque
+  // response and made this function fabricate {success:true} for a write whose
+  // outcome it never saw (and which doPost, before 5.72.0, discarded entirely).
+  console.log(`[API] ${action} via POST (payload: ${jsonData.length} chars)`);
   const postUrl = cfg.scriptUrl + '?action=' + action +
     '&user=' + encodeURIComponent(state.user?.email || 'unknown') +
     (state.user?.idToken ? '&idToken=' + encodeURIComponent(state.user.idToken) : '');
 
-  await fetch(postUrl, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: jsonData,
-  });
-
-  // no-cors POST returns opaque response, but server processed it
-  // Add small delay to let GAS finish writing
-  await new Promise(r => setTimeout(r, 1000));
-  return { success: true, message: 'Sent (POST no-cors)' };
+  let json;
+  try {
+    const res = await fetch(postUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: jsonData,
+    });
+    json = await res.json();
+  } catch (e) {
+    // The request left the browser — only the answer was lost. Re-sending could
+    // duplicate a create, so report the uncertainty instead of retrying blindly.
+    console.error(`[API] ${action}: response unreadable`, e);
+    throw new Error('ส่งข้อมูลไปแล้ว แต่อ่านผลลัพธ์จากเซิร์ฟเวอร์ไม่ได้ — ' +
+      'กรุณารีเฟรชหน้าแล้วตรวจสอบว่าบันทึกสำเร็จหรือไม่ ก่อนกดบันทึกซ้ำ');
+  }
+  _throwIfApiRejected(json);
+  return json;
 }
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.69.0';
+const EXPECTED_GAS_VERSION = '5.72.0';
 
 async function checkBackendVersion() {
   const box = document.getElementById('version-check-result');

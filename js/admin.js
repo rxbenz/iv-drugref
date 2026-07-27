@@ -187,6 +187,29 @@ function showApp(user) {
  *   The POST reaches doPost on the server, but we can't read the response
  *   due to CORS on the redirect. We assume success and verify via GET after.
  */
+// Turn a rejected GAS response into a thrown error, with a message the admin can
+// act on. Two distinct cases:
+//  • permissionDenied — the account isn't an editor/admin.
+//  • session expired  — a Google id_token lives ~1 hour, and we capture it ONCE at
+//    sign-in (there is no refresh), so an admin tab left open past that hour has
+//    every WRITE rejected once REQUIRE_ID_TOKEN is on. Tell them plainly to sign
+//    in again instead of leaving a bare "ปฏิเสธ".
+// The re-auth case is detected by the server flag when present, and otherwise by
+// the REQUIRE_ID_TOKEN marker in the message — so this works against an already
+// deployed GAS without waiting for a redeploy.
+function _throwIfApiRejected(json) {
+  if (!json) return;
+  const err = String(json.error || '');
+  if (json.needsReauth || err.indexOf('REQUIRE_ID_TOKEN') >= 0) {
+    toast('🔑 เซสชันหมดอายุ (เกิน 1 ชม.) — กด "Sign Out" มุมขวาบน แล้วเข้าสู่ระบบใหม่ จึงจะบันทึกได้', 'error');
+    throw new Error('Session expired — re-authentication required');
+  }
+  if (json.permissionDenied) {
+    toast('❌ ' + (json.error || 'ไม่มีสิทธิ์'), 'error');
+    throw new Error(json.error || 'Permission denied');
+  }
+}
+
 async function apiCall(action, data = {}) {
   const cfg = getConfig();
   if (!cfg.scriptUrl) {
@@ -206,10 +229,7 @@ async function apiCall(action, data = {}) {
     Object.entries(data).forEach(([k, v]) => url.searchParams.set(k, v));
     const res = await fetch(url.toString());
     const json = await res.json();
-    if (json.permissionDenied) {
-      toast('❌ ' + (json.error || 'ไม่มีสิทธิ์'), 'error');
-      throw new Error(json.error || 'Permission denied');
-    }
+    _throwIfApiRejected(json);
     return json;
   }
 
@@ -223,10 +243,7 @@ async function apiCall(action, data = {}) {
     console.log(`[API] ${action} via GET (${fullUrl.length} chars)`);
     const res = await fetch(fullUrl);
     const json = await res.json();
-    if (json.permissionDenied) {
-      toast('❌ ' + (json.error || 'ไม่มีสิทธิ์'), 'error');
-      throw new Error(json.error || 'Permission denied');
-    }
+    _throwIfApiRejected(json);
     return json;
   }
 
@@ -251,7 +268,7 @@ async function apiCall(action, data = {}) {
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.67.0';
+const EXPECTED_GAS_VERSION = '5.68.0';
 
 async function checkBackendVersion() {
   const box = document.getElementById('version-check-result');

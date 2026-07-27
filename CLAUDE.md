@@ -94,7 +94,8 @@ of `build.js` (CSS/JS load order matters there).
 | `js/share-export.js` | Clipboard copy, LINE share, print-to-PDF for results |
 | `js/error-tracker.js` | Error logging to GAS |
 | `i18n.js` / `translations-en.js` | Root-level i18n (NOT inlined — copied static to `dist/`) |
-| `drugs-data.json` | Static fallback drug dataset (166 drugs); copied static to `dist/` |
+| `drugs-data.json` | Offline/first-paint drug dataset (166 drugs); the committed copy is the fallback — `build.js` refreshes `dist/` from Supabase (see below) |
+| `drug-snapshot.js` | Build-time snapshot refresh: fetch approved drugs from Supabase + `validateSnapshot()` (the guard that refuses bad data) |
 | `sw.js` | Service worker — PWA cache, push notifications, force-update logic |
 | `version.json` | `{version, forceUpdate}` — fetched network-only by `sw.js` for cache busting |
 | `gas-complete.js` | Google Apps Script backend (NOT deployed via git — copy manually to GAS editor) |
@@ -342,6 +343,34 @@ Hardcoded reference data in `js/admin.js` for bulk importing to Google Sheets vi
 ```
 
 **Exception**: Files at root level (`i18n.js`, `translations-en.js`) are NOT part of the build's inline config — keep them without prefix. They get copied as static files to `dist/`.
+
+### `drugs-data.json` is refreshed from Supabase at build time (v5.71.0)
+`drugs-data.json` is what `index.js` renders on first paint and offline (cache →
+this file → Supabase sync). It was committed once and then drifted: by v5.70.0 it
+still flagged a drug as HIGH-ALERT that the admin panel had un-flagged months
+earlier. `build.js` now overwrites **`dist/drugs-data.json`** (never the repo copy)
+with the live approved drugs right after the static-file copy.
+
+- **`drug-snapshot.js`** holds the two pure pieces: `fetchApprovedDrugs()` (same
+  public-read query + publishable key the app uses; never throws — a build must
+  not die on someone else's outage) and `validateSnapshot(rows, baselineCount)`.
+- **The refusal is the feature.** The committed snapshot is already in `dist/`, so
+  anything `validateSnapshot()` rejects leaves users on known-good data. It
+  refuses a non-array, an empty response, rows with no usable `generic`, and —
+  the important one — **any result below `MIN_RATIO` (90%) of the committed
+  count**, which catches truncation/pagination and an emptied table. A rejected
+  refresh logs the reason and the build still succeeds.
+- **Order is by numeric `id`, not by name** — the committed file is in id order
+  (1 = Abciximab … 166 = Pembrolizumab, newer drugs appended) and `index.js`
+  renders `DRUGS` in array order, so sorting by name would push `20% Mannitol` /
+  `3% NaCl` to the top of the app's first page. Locked by a test that feeds the
+  committed file back through `validateSnapshot()` and asserts an unchanged
+  refresh reproduces it byte-for-byte.
+- `previousData`/`createdBy`/`updatedBy`/`updatedAt` are stripped — this artifact
+  is public.
+- **Offline builds**: `SKIP_DRUG_SNAPSHOT=1` skips the fetch;
+  `DRUG_SNAPSHOT_ENDPOINT=<url>` points it elsewhere (used by the build test).
+- Covered by `test/drug-snapshot.test.js` (20 tests, no network).
 
 ### Google Sheets column names ≠ GAS code field names (silent-write trap — fixed v5.69.0)
 The `DrugData` sheet uses **human-readable** column headers (`Generic Name`, `Trade Name`,

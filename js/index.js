@@ -796,6 +796,41 @@ window.fetchDrugsFromServer = async function () {
   } catch (e) { return null; }
 };
 
+// [snapshot-freshness-guard] — sliced by test/drug-sync-freshness.test.js.
+//
+// drugs-data.json is a first-paint/offline SNAPSHOT committed to the repo, not
+// live data. initDrugs() stamps whatever it loads into `drugData_v4_ts` and then
+// syncs from Supabase only when that stamp is older than 30 minutes — so loading
+// the snapshot marked it "just synced" and suppressed the sync for half an hour.
+//
+// build.js clears the drug cache on EVERY deploy (drugCacheVer → commit hash),
+// which forced exactly that path: right after a deploy the app served the
+// committed snapshot while the admin panel showed the corrected data (a drug
+// un-flagged as HIGH-ALERT still read HAD in the app). Back-dating the stamp for
+// snapshot loads makes initDrugs() fetch Supabase immediately; a real server
+// sync still stamps normally, so the 30-minute interval is unchanged.
+(function () {
+  var origLocalFile = window.fetchDrugsFromLocalFile;
+  var origSaveCache = window.saveDrugsToCache;
+  if (typeof origLocalFile !== 'function' || typeof origSaveCache !== 'function') return;
+
+  var lastLoadWasSnapshot = false;
+
+  window.fetchDrugsFromLocalFile = async function () {
+    var data = await origLocalFile.apply(this, arguments);
+    lastLoadWasSnapshot = !!(data && data.length);
+    return data;
+  };
+
+  window.saveDrugsToCache = function () {
+    origSaveCache.apply(this, arguments);
+    if (!lastLoadWasSnapshot) return;
+    lastLoadWasSnapshot = false;
+    // The snapshot is display data, never a completed sync.
+    try { localStorage.setItem('drugData_v4_ts', '0'); } catch (e) {}
+  };
+})();
+
 // Inject "ขนาดยา (Usual Dose)" as the first section of the card body. Outermost
 // renderDrugCard wrapper; dosing text is escaped (raw drug reaches this wrapper).
 (function () {

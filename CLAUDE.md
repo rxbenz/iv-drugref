@@ -364,7 +364,15 @@ either). Both conventions are now accepted:
   nothing matched; `handleCreateDrug` builds its row by resolved column position (a
   positional `appendRow` landed values in the wrong columns on the human sheet).
 - **Diagnose a stuck edit**: Run `inspectDrugHeaders()` from the ADMIN GAS editor — it logs
-  the sheet's real header row and flags every field whose writes have nowhere to go.
+  the sheet's real header row and flags every field whose writes have nowhere to go. The
+  live layout (27 columns, verified 2026-07-27) is pinned as `HUMAN_HEADERS` in
+  `test/helpers/load-gas.js`; its column ORDER differs from `DRUG_DEFAULT_HEADERS`, which is
+  what the old positional `appendRow` got wrong.
+- The sheet originally had **no `status` / `updatedAt` column at all**, so the draft →
+  pending → approved workflow could never store anything and `normalizeDrugRow()` reported
+  every row as `approved` (APPROVED=all / PENDING=0 / DRAFT=0). `addMissingDrugColumns()`
+  (Run once from the ADMIN GAS editor) appends them and backfills `status='approved'` for
+  rows holding a drug — behaviour-preserving, blank rows untouched, safe to re-run.
 - Client side: `_throwIfApiRejected()` (`js/admin.js`) now treats `success:false` as an
   error, and `_warnIfFieldsSkipped()` warns on partial writes. **Never report a write as
   successful without checking the response** — a silently dropped clinical edit is worse

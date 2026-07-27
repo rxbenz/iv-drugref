@@ -134,17 +134,23 @@ function loadGas({ drugSheetRows, adminUsers } = {}) {
   };
 }
 
-// Header row of the production DrugData sheet: human-readable names, with the
-// later-added workflow columns in lowercase (see CLAUDE.md). This layout is
+// The REAL header row of the production DrugData sheet, verbatim from
+// inspectDrugHeaders() after the repair (2026-07-27, 27 columns): human-readable
+// names for the clinical fields, lowercase for the workflow ones. This layout is
 // what silently swallowed every drug edit before v5.69.0.
-const HUMAN_HEADERS = ['ID', 'Generic Name', 'Trade Name', 'Strength', 'ED/NED', 'HAD', 'Categories',
+//
+// Keep the ORDER as-is — it deliberately does not match DRUG_DEFAULT_HEADERS
+// (Categories is 6th here but 7th in code, HAD is 22nd but 6th in code), which
+// is exactly what made handleCreateDrug's old positional appendRow write values
+// into the wrong columns. A same-order fixture would not catch that.
+const HUMAN_HEADERS = ['ID', 'Generic Name', 'Trade Name', 'Strength', 'ED/NED', 'Categories',
   'Reconst: Solvent', 'Reconst: Volume', 'Reconst: Conc',
   'Dilution: Diluent', 'Dilution: Volume', 'Dilution: Final Conc',
   'Admin: Route', 'Admin: Rate',
   'Stability: Reconst', 'Stability: Diluted', 'Stability: Storage',
   'Compat: Y-site', 'Compat: Incompatible',
-  'Precautions', 'Monitoring', 'Reference', 'Usual Dose',
-  'status', 'previousData', 'updatedAt'];
+  'Precautions', 'Monitoring', 'HAD', 'Reference', 'previousData', 'Usual Dose',
+  'status', 'updatedAt'];
 
 // The header row the PRODUCTION sheet actually has, as reported by
 // inspectDrugHeaders() on 2026-07-27: the clinical columns only — no `status`

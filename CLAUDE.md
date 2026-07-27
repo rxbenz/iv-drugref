@@ -344,6 +344,30 @@ Hardcoded reference data in `js/admin.js` for bulk importing to Google Sheets vi
 
 **Exception**: Files at root level (`i18n.js`, `translations-en.js`) are NOT part of the build's inline config — keep them without prefix. They get copied as static files to `dist/`.
 
+### Large writes go by POST — `doPost` must route them (fixed v5.72.0)
+`js/admin.js` `apiCall()` sends a write as a **GET** with the payload in the query
+string, but switches to **POST** once that URL would exceed ~6 KB — which a drug
+record with long Thai `precautions` does. Two things made that path lose data:
+
+- **`doPost` didn't know the action.** It hand-listed only the bulk/allergy ops,
+  so `updateDrug`/`createDrug`/`approveDrug` fell through to the analytics switch
+  and were filed as a **Sessions row** — the drug was never written.
+- **The client couldn't see the reply.** It sent `mode:'no-cors'` (opaque
+  response) and returned a fabricated `{success:true}`.
+
+Both fixed: `routeApiAction(action, user, data, e)` is now the **single routing
+table shared by `doGet` and `doPost`** (add a new action there, never to one verb
+only), and the POST is a plain readable request — `text/plain` + no custom
+headers keeps it a "simple" request, so the browser skips the CORS preflight GAS
+cannot answer and the redirected response's `Access-Control-Allow-Origin: *` lets
+the client read `written`/`skipped`/errors exactly as on the GET path.
+- Analytics events are told apart by their `type`/`event` field, so a
+  `QUICK_ACTION` carrying its own `action` can never reach an API handler.
+- If the reply is genuinely unreadable, `apiCall` **throws** rather than retrying:
+  the request already left the browser, so a blind resend could duplicate a
+  create. The Thai error tells the admin to refresh and check before re-saving.
+- Locked by `test/gas-post-routing.test.js` (12 tests; 6 fail against pre-fix code).
+
 ### `drugs-data.json` is refreshed from Supabase at build time (v5.71.0)
 `drugs-data.json` is what `index.js` renders on first paint and offline (cache →
 this file → Supabase sync). It was committed once and then drifted: by v5.70.0 it
@@ -704,10 +728,13 @@ git checkout deploy/20260405-090013  # Go to specific backup
 ```
 
 ## Pending Items
-- [ ] **REQUIRED — deploy `gas-complete.js` 5.69.0 to the ADMIN GAS**: until then every drug
-      edit is still silently dropped (see the column-resolution note above). Copy → Save →
-      **Deploy → Manage deployments → Edit → New version**, then check ตั้งค่า → ตรวจสอบเวอร์ชัน
-      reports 5.69.0. Run `inspectDrugHeaders()` once to confirm the sheet's headers resolve.
+- [ ] **REQUIRED — deploy `gas-complete.js` 5.72.0 to the ADMIN GAS**: until then a drug edit
+      whose payload exceeds ~6 KB is still discarded (POST routing, see the note above).
+      Copy → Save → **Deploy → Manage deployments → Edit → New version**, then check
+      ตั้งค่า → ตรวจสอบเวอร์ชัน reports 5.72.0.
+      *(5.69.0 — column resolution — was deployed and verified on 2026-07-27:
+      `addMissingDrugColumns()` added `status`/`updatedAt` and backfilled 166 rows,
+      `inspectDrugHeaders()` resolves all 19 fields.)*
 - [ ] Deploy latest `gas-complete.js` to BOTH GAS editors (has upsert bulk import + version endpoint + **previousData** diff support)
 - [ ] Re-import CURATED compatibility pairs via admin panel after GAS deploy
 - [ ] Delete Valproic+Meropenem pair manually from admin (PK interaction, not Y-site)

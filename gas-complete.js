@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.69.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.69.0 = drug writes resolve real sheet headers)
+var GAS_VERSION = '5.72.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.72.0 = doPost routes API actions, shared with doGet)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -210,119 +210,140 @@ function doGet(e) {
         error: 'ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่' });
     }
 
-    switch (action) {
-      // ── Version Check ──
-      case 'version':
-        return jsonResponse({ version: GAS_VERSION });
-
-      // ── Dashboard ──
-      case 'raw':
-        return handleRaw();
-      case 'export':
-        return handleExport(e.parameter.sheet);
-
-      // ── Drug Data (App Sync) ──
-      case 'drugs':
-        return handleGetDrugs();
-
-      // ── Compat Pairs (Public — no auth) ──
-      case 'compatpairs':
-        return handleGetCompatPairsPublic();
-
-      // ── Admin CRUD ──
-      case 'getdrugs':
-        return handleAdminGetDrugs(user);
-      case 'createdrug':
-        return handleCreateDrug(user, data);
-      case 'updatedrug':
-        return handleUpdateDrug(user, data);
-      case 'deletedrug':
-        return handleDeleteDrug(user, data);
-      case 'approvedrug':
-        return handleApproveDrug(user, data);
-      case 'rejectdrug':
-        return handleRejectDrug(user, data);
-
-      // ── Admin Users ──
-      case 'getaudit':
-        return handleGetAudit();
-      case 'getusers':
-        return handleGetUsers();
-      case 'setuserrole':
-        return handleSetUserRole(user, data);
-      case 'removeuser':
-        return handleRemoveUser(user, data);
-
-      // ── Compatibility Pairs ──
-      case 'getcompatpairs':
-        return handleGetCompatPairs(user);
-      case 'createcompatpair':
-        return handleCreateCompatPair(user, data);
-      case 'updatecompatpair':
-        return handleUpdateCompatPair(user, data);
-      case 'deletecompatpair':
-        return handleDeleteCompatPair(user, data);
-      case 'bulkcreatecompatpairs':
-        return handleBulkCreateCompatPairs(user, data);
-
-      // ── Drug–Drug Interaction (DDI) data ──
-      case 'getddipairs':
-        return handleGetDDIPairs(user);
-      case 'createddipair':
-        return handleCreateDDIPair(user, data);
-      case 'updateddipair':
-        return handleUpdateDDIPair(user, data);
-      case 'deleteddipair':
-        return handleDeleteDDIPair(user, data);
-      case 'getddiclassrules':
-        return handleGetDDIClassRules(user);
-      case 'createddiclassrule':
-        return handleCreateDDIClassRule(user, data);
-      case 'updateddiclassrule':
-        return handleUpdateDDIClassRule(user, data);
-      case 'deleteddiclassrule':
-        return handleDeleteDDIClassRule(user, data);
-
-      // ── Renal Dosing Data ──
-      case 'renaldrugs':
-        return handleGetRenalDrugsPublic();
-      case 'getrenaldrugs':
-        return handleGetRenalDrugs(user);
-      case 'createrenaldrug':
-        return handleCreateRenalDrug(user, data);
-      case 'updaterenaldrug':
-        return handleUpdateRenalDrug(user, data);
-      case 'deleterenaldrug':
-        return handleDeleteRenalDrug(user, data);
-      case 'bulkcreaterenaldrugs':
-        return handleBulkCreateRenalDrugs(user, data);
-
-      // ── Allergy cross-reactivity data ──
-      case 'allergydata':
-        return handleGetAllergyDataPublic();
-      case 'getallergygroups':
-        return handleGetAllergyGroups(user);
-      case 'createallergygroup':
-        return handleCreateAllergyGroup(user, data);
-      case 'updateallergygroup':
-        return handleUpdateAllergyGroup(user, data);
-      case 'deleteallergygroup':
-        return handleDeleteAllergyGroup(user, data);
-      case 'bulkcreateallergygroups':
-        return handleBulkCreateAllergyGroups(user, data);
-      case 'bulkcreateallergyrefs':
-        return handleBulkCreateAllergyRefs(user, data);
-
-      // ── Urgent Alerts ──
-      case 'checkurgentalerts':
-        return handleCheckUrgentAlerts(e.parameter.since);
-
-      default:
-        return errorResponse('Unknown action: ' + action);
-    }
+    var routed = routeApiAction(action, user, data, e);
+    if (routed) return routed;
+    return errorResponse('Unknown action: ' + action);
   } catch (err) {
     Logger.log('handler error: ' + (err && err.message) + ' | ' + (err && err.stack));
     return errorResponse('เกิดข้อผิดพลาดภายในระบบ'); // generic — don't echo internals to the client
+  }
+}
+
+/**
+ * Action router shared by doGet AND doPost.
+ *
+ * The admin client sends a write as a GET with the payload in the query string,
+ * but switches to POST once that URL would exceed ~6 KB (a long drug record).
+ * doPost used to know only the bulk/allergy actions, so a large drug edit fell
+ * through to the analytics switch below and was logged as a Sessions row —
+ * the drug was never touched, and the client (which could not read the opaque
+ * no-cors response) reported success. Both verbs now resolve actions here, so
+ * the two paths cannot drift apart again.
+ *
+ * Returns null when `action` is not an API action: doGet answers "Unknown
+ * action", doPost falls through to the analytics logger.
+ */
+function routeApiAction(action, user, data, e) {
+  var params = (e && e.parameter) || {};
+  switch (action) {
+    // ── Version Check ──
+    case 'version':
+      return jsonResponse({ version: GAS_VERSION });
+
+    // ── Dashboard ──
+    case 'raw':
+      return handleRaw();
+    case 'export':
+      return handleExport(params.sheet);
+
+    // ── Drug Data (App Sync) ──
+    case 'drugs':
+      return handleGetDrugs();
+
+    // ── Compat Pairs (Public — no auth) ──
+    case 'compatpairs':
+      return handleGetCompatPairsPublic();
+
+    // ── Admin CRUD ──
+    case 'getdrugs':
+      return handleAdminGetDrugs(user);
+    case 'createdrug':
+      return handleCreateDrug(user, data);
+    case 'updatedrug':
+      return handleUpdateDrug(user, data);
+    case 'deletedrug':
+      return handleDeleteDrug(user, data);
+    case 'approvedrug':
+      return handleApproveDrug(user, data);
+    case 'rejectdrug':
+      return handleRejectDrug(user, data);
+
+    // ── Admin Users ──
+    case 'getaudit':
+      return handleGetAudit();
+    case 'getusers':
+      return handleGetUsers();
+    case 'setuserrole':
+      return handleSetUserRole(user, data);
+    case 'removeuser':
+      return handleRemoveUser(user, data);
+
+    // ── Compatibility Pairs ──
+    case 'getcompatpairs':
+      return handleGetCompatPairs(user);
+    case 'createcompatpair':
+      return handleCreateCompatPair(user, data);
+    case 'updatecompatpair':
+      return handleUpdateCompatPair(user, data);
+    case 'deletecompatpair':
+      return handleDeleteCompatPair(user, data);
+    case 'bulkcreatecompatpairs':
+      return handleBulkCreateCompatPairs(user, data);
+
+    // ── Drug–Drug Interaction (DDI) data ──
+    case 'getddipairs':
+      return handleGetDDIPairs(user);
+    case 'createddipair':
+      return handleCreateDDIPair(user, data);
+    case 'updateddipair':
+      return handleUpdateDDIPair(user, data);
+    case 'deleteddipair':
+      return handleDeleteDDIPair(user, data);
+    case 'getddiclassrules':
+      return handleGetDDIClassRules(user);
+    case 'createddiclassrule':
+      return handleCreateDDIClassRule(user, data);
+    case 'updateddiclassrule':
+      return handleUpdateDDIClassRule(user, data);
+    case 'deleteddiclassrule':
+      return handleDeleteDDIClassRule(user, data);
+
+    // ── Renal Dosing Data ──
+    case 'renaldrugs':
+      return handleGetRenalDrugsPublic();
+    case 'getrenaldrugs':
+      return handleGetRenalDrugs(user);
+    case 'createrenaldrug':
+      return handleCreateRenalDrug(user, data);
+    case 'updaterenaldrug':
+      return handleUpdateRenalDrug(user, data);
+    case 'deleterenaldrug':
+      return handleDeleteRenalDrug(user, data);
+    case 'bulkcreaterenaldrugs':
+      return handleBulkCreateRenalDrugs(user, data);
+
+    // ── Allergy cross-reactivity data ──
+    case 'allergydata':
+      return handleGetAllergyDataPublic();
+    case 'getallergygroups':
+      return handleGetAllergyGroups(user);
+    case 'createallergygroup':
+      return handleCreateAllergyGroup(user, data);
+    case 'updateallergygroup':
+      return handleUpdateAllergyGroup(user, data);
+    case 'deleteallergygroup':
+      return handleDeleteAllergyGroup(user, data);
+    case 'bulkcreateallergygroups':
+      return handleBulkCreateAllergyGroups(user, data);
+    case 'bulkcreateallergyrefs':
+      return handleBulkCreateAllergyRefs(user, data);
+
+    // ── Urgent Alerts ──
+    case 'checkurgentalerts':
+      return handleCheckUrgentAlerts(params.since);
+
+    default:
+      return null;
   }
 }
 
@@ -342,26 +363,22 @@ function doPost(e) {
         error: 'ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่' });
     }
 
-    // ── Admin bulk operations via POST ──
-    if (data.action === 'bulkCreateCompatPairs') {
-      return handleBulkCreateCompatPairs(_auth.email, data);
-    }
-    if (data.action === 'bulkCreateRenalDrugs') {
-      return handleBulkCreateRenalDrugs(_auth.email, data);
-    }
-
-    // ── Allergy admin ops via POST (large payloads) ──
-    // apiCall sends the action in the BODY for small writes and in the URL query
-    // for large no-cors POSTs, so accept either source here.
-    var postAction = data.action || (e && e.parameter && e.parameter.action) || '';
-    var postUser = _auth.email;
-    switch (postAction) {
-      case 'createAllergyGroup':      return handleCreateAllergyGroup(postUser, data);
-      case 'updateAllergyGroup':      return handleUpdateAllergyGroup(postUser, data);
-      case 'deleteAllergyGroup':      return handleDeleteAllergyGroup(postUser, data);
-      case 'bulkCreateAllergyGroups': return handleBulkCreateAllergyGroups(postUser, data);
-      case 'bulkCreateAllergyRefs':   return handleBulkCreateAllergyRefs(postUser, data);
-    }
+    // ── API actions via POST ──
+    // The admin client switches from GET to POST once a write's payload would
+    // push the URL past ~6 KB (a long drug record). Route those through the SAME
+    // table doGet uses: the hand-written list that used to live here covered
+    // only the bulk/allergy ops, so a large drug edit fell through to the
+    // analytics switch below and was filed as a Sessions row — the drug was
+    // never written, and the client reported success anyway.
+    //
+    // Analytics events are told apart by their `type`/`event` field: they also
+    // carry an `action` (e.g. QUICK_ACTION), which must not reach an API handler.
+    var isAnalytics = !!(data.type || data.event);
+    var postAction = isAnalytics
+      ? ''
+      : String(data.action || (e && e.parameter && e.parameter.action) || '');
+    var routed = routeApiAction(postAction.toLowerCase(), _auth.email, data, e);
+    if (routed) return routed;
 
     var eventType = data.type || data.event || data.action || '';
 

@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.66.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.66.0 = security hardening: id_token verify machinery + previousData/PII strips + generic errors)
+var GAS_VERSION = '5.67.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.67.0 = id_token verification wired into doGet/doPost, opt-in via REQUIRE_ID_TOKEN)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -193,11 +193,20 @@ function smartLog(sheetName, data, fallbackHeaders) {
 function doGet(e) {
   try {
     var action = (e.parameter.action || '').toLowerCase();
-    var user = e.parameter.user || '';
     var data = {};
 
     if (e.parameter.data) {
       try { data = JSON.parse(e.parameter.data); } catch (err) { /* ignore */ }
+    }
+
+    // Trusted actor: the VERIFIED id_token email when the client supplies one,
+    // else the (spoofable) user= param — so behaviour is unchanged while
+    // REQUIRE_ID_TOKEN is off. With the flag on, mutating actions REQUIRE a
+    // cryptographically verified identity.
+    var _auth = _resolveUser(e, data);
+    var user = _auth.email;
+    if (_isMutatingAction(action) && _requireIdToken() && !_auth.verified) {
+      return errorResponse('ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่');
     }
 
     switch (action) {
@@ -324,19 +333,26 @@ function doPost(e) {
     var data = {};
     try { data = JSON.parse(e.postData.contents); } catch (err) { /* ignore */ }
 
+    // Trusted actor — resolved ONCE, before any admin routing below (see doGet).
+    var _auth = _resolveUser(e, data);
+    var _actionEarly = String(data.action || (e && e.parameter && e.parameter.action) || '').toLowerCase();
+    if (_isMutatingAction(_actionEarly) && _requireIdToken() && !_auth.verified) {
+      return errorResponse('ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่');
+    }
+
     // ── Admin bulk operations via POST ──
     if (data.action === 'bulkCreateCompatPairs') {
-      return handleBulkCreateCompatPairs(data.user || '', data);
+      return handleBulkCreateCompatPairs(_auth.email, data);
     }
     if (data.action === 'bulkCreateRenalDrugs') {
-      return handleBulkCreateRenalDrugs(data.user || '', data);
+      return handleBulkCreateRenalDrugs(_auth.email, data);
     }
 
     // ── Allergy admin ops via POST (large payloads) ──
     // apiCall sends the action in the BODY for small writes and in the URL query
     // for large no-cors POSTs, so accept either source here.
     var postAction = data.action || (e && e.parameter && e.parameter.action) || '';
-    var postUser = data.user || (e && e.parameter && e.parameter.user) || '';
+    var postUser = _auth.email;
     switch (postAction) {
       case 'createAllergyGroup':      return handleCreateAllergyGroup(postUser, data);
       case 'updateAllergyGroup':      return handleUpdateAllergyGroup(postUser, data);
@@ -1783,14 +1799,18 @@ function _scrubPublicRow(o) {
   return o;
 }
 
-// ── Identity verification (id_token) — machinery is in place but INERT until
-// you wire it into doGet/doPost and set Script Property REQUIRE_ID_TOKEN='on'.
-// See docs/gas-security-hardening.md for the exact (tested-by-you) wiring steps.
+// ── Identity verification (id_token) — WIRED into doGet + doPost (v5.67.0).
 // The GAS web app is deployed "Anyone" and historically trusted the client
 // `user=` param — trivially spoofable, so anyone could rewrite clinical drug
 // data or self-promote to admin. These helpers verify the signed Google
-// id_token server-side and resolve the trusted email; enforcement is opt-in so
-// enabling it can't lock out the admin before it's tested.
+// id_token server-side and resolve the trusted email.
+//
+// ENFORCEMENT IS OPT-IN: with Script Property REQUIRE_ID_TOKEN unset/off
+// (the default) behaviour is IDENTICAL to before — the verified email is used
+// when a token is present, otherwise it falls back to the param. Set
+// REQUIRE_ID_TOKEN='on' to make a verified identity MANDATORY for every
+// mutating action. Deleting the property instantly reverts, so enabling it can
+// never lock the admin out permanently. See docs/gas-security-hardening.md §C.
 var GIS_CLIENT_ID = '666120341779-qusaccvj5tj7o6onfb9nn5vod3o9rrv9.apps.googleusercontent.com';
 
 function _requireIdToken() {
@@ -1802,6 +1822,20 @@ function _requireIdToken() {
 // lowercase email or null. Checks audience (our client id), email_verified, exp.
 function _verifyIdToken(idToken) {
   if (!idToken) return null;
+
+  // Cache VERIFIED results: the admin client attaches the token to every call,
+  // so without this each request would pay a ~300-500 ms round-trip to Google.
+  // Only positive results are cached — a transient network failure must not
+  // lock the admin out for the whole TTL.
+  var cache = null, key = null;
+  try {
+    cache = CacheService.getScriptCache();
+    key = 'idtok_' + Utilities.base64EncodeWebSafe(
+      Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, idToken));
+    var hit = cache.get(key);
+    if (hit) return hit;
+  } catch (e) { cache = null; }
+
   try {
     var resp = UrlFetchApp.fetch(
       'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken),
@@ -1811,7 +1845,14 @@ function _verifyIdToken(idToken) {
     if (info.aud !== GIS_CLIENT_ID) return null;
     if (String(info.email_verified) !== 'true') return null;
     if (info.exp && (Number(info.exp) * 1000) < Date.now()) return null;
-    return info.email ? String(info.email).toLowerCase() : null;
+    var email = info.email ? String(info.email).toLowerCase() : null;
+    if (email && cache && key) {
+      // Never cache past the token's own expiry (cap at 5 min).
+      var ttl = 300;
+      if (info.exp) ttl = Math.min(ttl, Math.floor(Number(info.exp) - (Date.now() / 1000)));
+      if (ttl > 0) { try { cache.put(key, email, ttl); } catch (e2) {} }
+    }
+    return email;
   } catch (e) { return null; }
 }
 

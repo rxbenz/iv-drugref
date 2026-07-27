@@ -1132,6 +1132,14 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.67.0',
+      date: '2026-07-27',
+      title: "ปิดช่องโหว่ปลอมตัวเป็นแอดมิน (ขั้นเตรียมพร้อม)",
+      items: [
+        "🔐 ระบบหลังบ้านตรวจสอบตัวตนผู้แก้ข้อมูลด้วย signed token จาก Google แทนการเชื่ออีเมลที่ส่งมาเฉย ๆ (ต้อง deploy GAS + เปิดสวิตช์ตาม docs/gas-security-hardening.md จึงจะบังคับใช้เต็มรูปแบบ)"
+      ]
+    },
+    {
       v: '5.66.0',
       date: '2026-07-24',
       title: "เสริมความปลอดภัยระบบหลังบ้าน (backend hardening)",
@@ -1533,7 +1541,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.66.0';
+  const VERSION = '5.67.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

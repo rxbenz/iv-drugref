@@ -251,7 +251,7 @@ async function apiCall(action, data = {}) {
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.66.0';
+const EXPECTED_GAS_VERSION = '5.67.0';
 
 async function checkBackendVersion() {
   const box = document.getElementById('version-check-result');

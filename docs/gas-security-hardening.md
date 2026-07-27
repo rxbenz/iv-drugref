@@ -57,56 +57,67 @@
 
 ---
 
-## <a name="ส่วน-c"></a>ส่วน C — เปิด id_token verify 🔴 (ปิดช่องปลอม admin)
+## <a name="ส่วน-c"></a>ส่วน C — เปิด id_token verify 🔴 (ปิดช่องปลอมเป็น admin)
 
 **ปัญหาที่ปิด:** GAS deploy แบบ "Anyone" + เชื่อ param `user=` ที่ปลอมได้ → ใครก็ยิง
 `curl '…/exec?action=setUserRole&user=<อีเมลคุณ>&data={"email":"attacker","role":"admin"}'`
 เพื่อ **ตั้งตัวเองเป็น admin** หรือแก้ข้อมูลยาได้
 
-**สถานะตอนนี้:** เครื่องมือตรวจ id_token **อยู่ใน `gas-complete.js` แล้ว** (ฟังก์ชัน
-`_verifyIdToken` / `_resolveUser` / `_requireIdToken` / `_isMutatingAction`) และหน้า admin
-**ส่ง id_token ไปด้วยแล้ว** (`js/admin.js`) — แต่ **ยังไม่ได้ต่อสายเข้า `doGet`/`doPost`**
-เพราะเป็นจุดที่ต้องทดสอบเองในเครื่องจริง (โครงสร้าง doGet/doPost ของคุณต่างจาก branch ต้นทาง
-ผมจึงไม่แก้ให้แบบเดา ๆ เพื่อไม่ให้ backend พังตอน deploy)
+**สถานะ: โค้ดต่อสายเรียบร้อยแล้ว (v5.67.0) — คุณเหลือแค่ deploy → ทดสอบ → เปิดสวิตช์**
 
-### ขั้นตอน (ทำในเครื่องจริง + ทดสอบก่อนบังคับ)
+สิ่งที่ทำไปแล้วในโค้ด (ไม่ต้องแก้เอง):
+- `doGet` / `doPost` เรียก `_resolveUser()` แล้วใช้ **อีเมลจาก id_token ที่ยืนยันแล้ว**
+  แทน `e.parameter.user` / `data.user` เดิมทุกจุด
+- ถ้าเปิดสวิตช์ `REQUIRE_ID_TOKEN=on` → คำสั่งที่ **แก้ข้อมูล** ทุกตัวจะถูกปฏิเสธถ้าไม่มี
+  token ที่ถูกต้อง (คำสั่งอ่านอย่างเดียวไม่กระทบ)
+- หน้า admin แนบ id_token ไปให้อยู่แล้ว (ตั้งแต่ v5.66.0)
+- ใส่ cache ผลการตรวจ token (5 นาที) เพื่อไม่ให้ทุกคำสั่งต้องวิ่งไปถาม Google ใหม่
 
-**C1. ต่อสายใน `doGet(e)`** — หาบรรทัด `var user = e.parameter.user || '';` (ต้นฟังก์ชัน)
-แล้ว **แทนที่** ด้วย (ต้องมี `var data = {}` + parse `e.parameter.data` อยู่ก่อนหน้าแล้ว —
-ถ้ายังไม่มีให้ย้ายขึ้นมา):
+### C1. Deploy โค้ดใหม่ (ยังไม่เปิดสวิตช์ = ยังทำงานเหมือนเดิมทุกอย่าง)
 
-```javascript
-    // Trusted actor: verified id_token email when present, else the (spoofable) param.
-    var _auth = _resolveUser(e, data);
-    var user = _auth.email;
-    if (_isMutatingAction(action) && _requireIdToken() && !_auth.verified) {
-      return errorResponse('Identity not verified — a valid signed id_token is required (REQUIRE_ID_TOKEN is on).');
-    }
+ทำเหมือนส่วน B — copy `gas-complete.js` → วางทับ → Ctrl+S → **Deploy → Manage deployments
+→ ✏️ → New version → Deploy** ทำ **ทั้ง 2 GAS**
+
+ตรวจว่าขึ้นเวอร์ชันใหม่แล้ว (ต้องได้ `{"version":"5.67.0"}` ทั้งคู่):
+- Admin GAS: `<ADMIN_URL>/exec?action=version`
+- Analytics GAS: `<ANALYTICS_URL>/exec?action=version`
+
+### C2. ทดสอบก่อนบังคับ (สำคัญที่สุด)
+
+ตอนนี้สวิตช์ยังปิด → ทุกอย่างต้องทำงานปกติ 100%:
+1. เข้าหน้า admin → ลอง **แก้ข้อมูลยา 1 รายการ** แล้วบันทึก → ต้องสำเร็จ
+2. ลองแท็บ Compatibility / Renal / Allergy → โหลดข้อมูลได้ปกติ
+3. เปิด GAS editor → เมนู **Executions** → ดูรายการล่าสุด ต้องเป็น *Completed* (ไม่ใช่ Failed)
+
+ถ้ามีอะไรผิดปกติ → **หยุด** อย่าเพิ่งทำ C3 แล้วแจ้งมาได้
+
+### C3. เปิดสวิตช์บังคับใช้
+
+ทำ **ทั้ง 2 GAS**: GAS editor → ⚙️ **Project Settings** → เลื่อนลงหา **Script Properties**
+→ **Add script property**
+- Property: `REQUIRE_ID_TOKEN`
+- Value: `on`
+→ **Save script properties**
+
+> ไม่ต้อง Deploy ใหม่หลังเพิ่ม property — มีผลทันที
+
+### C4. ยืนยันว่าปิดช่องโหว่สำเร็จ
+
+**ก) แอดมินตัวจริงต้องยังใช้งานได้:** กลับไปหน้า admin → แก้ข้อมูลยา 1 รายการ → ต้องสำเร็จ
+
+**ข) คนนอกต้องถูกปฏิเสธ:** เปิดลิงก์นี้ในเบราว์เซอร์ (แทน `<ADMIN_URL>` ด้วย URL ของ Admin GAS)
 ```
-
-**C2. ต่อสายใน `doPost(e)`** — หลัง parse `data` จาก body และได้ค่า `action` แล้ว ใส่:
-
-```javascript
-    var _auth = _resolveUser(e, data);
-    var postUser = _auth.email;   // ← ใช้ postUser นี้แทน data.user เดิมในการเช็คสิทธิ์
-    if (_isMutatingAction(String(action).toLowerCase()) && _requireIdToken() && !_auth.verified) {
-      return errorResponse('Identity not verified — a valid signed id_token is required (REQUIRE_ID_TOKEN is on).');
-    }
+<ADMIN_URL>/exec?action=setUserRole&user=thapanat.nk@gmail.com&data={"email":"test@evil.com","role":"admin"}
 ```
+- ✅ **ถูกต้อง:** ได้ข้อความปฏิเสธ *"ต้องยืนยันตัวตนด้วย id_token…"*
+- ❌ ถ้ายังสำเร็จ = สวิตช์ยังไม่ทำงาน ตรวจว่าตั้ง property ถูกที่ GAS ตัวที่กำลังทดสอบไหม
 
-> ⚠️ จุดสำคัญ: หา `checkPermission(...)` / `getRole(...)` ในแต่ละ handler แล้วให้ใช้
-> **`_auth.email`** (จาก id_token) แทน `e.parameter.user` / `data.user` เดิม — ไม่งั้นยังปลอมได้
+> จากนั้นเข้าแท็บ **จัดการผู้ใช้** ในหน้า admin เพื่อเช็กว่าไม่มี `test@evil.com` โผล่มาจริง ๆ
 
-**C3. ทดสอบ (สำคัญที่สุด — ก่อนบังคับ):**
-- Deploy GAS ใหม่ (ยังไม่เปิด flag) → ล็อกอิน admin → ลองแก้ข้อมูลสัก 1 รายการ → ต้องยังทำงานปกติ
-  (ตอนนี้ `REQUIRE_ID_TOKEN` ยังไม่เปิด = พฤติกรรมเดิม แค่มี id_token ส่งไปด้วย)
-- ดู **Executions log** ใน GAS ว่า `_verifyIdToken` คืนอีเมลถูกต้อง (ไม่ null)
+### ถ้าพลาดล็อกตัวเองออก
 
-**C4. บังคับใช้:** เมื่อทดสอบผ่านแล้ว → GAS editor → **Project Settings → Script Properties
-→ Add property**: ชื่อ `REQUIRE_ID_TOKEN` ค่า `on` → ทำทั้ง 2 GAS
-- ทดสอบซ้ำว่า admin ยังแก้ได้ **และ** `curl` แบบไม่มี id_token ต้องถูกปฏิเสธ
-- ถ้าล็อกเอาต์ตัวเองโดยไม่ตั้งใจ → ลบ property `REQUIRE_ID_TOKEN` ออก = กลับสู่ปกติทันที
-  (ค่า default = ปิด จึงไม่มีทางล็อกถาวร)
+ลบ property `REQUIRE_ID_TOKEN` ทิ้ง → กลับสู่พฤติกรรมเดิมทันที (ค่าเริ่มต้น = ปิด
+จึงไม่มีทางล็อกถาวร) แล้วแจ้งมาได้ครับ
 
 ---
 
@@ -129,9 +140,11 @@
 
 ## ✅ Checklist
 
-- [ ] ส่วน A: รัน `refdata.sql` + `auth.sql` (+ `audit.sql`) ใน Supabase SQL Editor
-- [ ] ส่วน A: ตรวจ `?status=neq.approved` คืน `[]`
-- [ ] ส่วน B: copy `gas-complete.js` → deploy **New version** ทั้ง 2 GAS → เห็นเวอร์ชัน 5.66.0
-- [ ] ส่วน C: ต่อสาย doGet/doPost (C1–C2) → deploy → ทดสอบ (C3)
-- [ ] ส่วน C: ตั้ง `REQUIRE_ID_TOKEN=on` ทั้ง 2 GAS → ทดสอบซ้ำ (C4)
+- [x] ส่วน A: รัน SQL ใน Supabase SQL Editor *(2026-07-27)*
+- [x] ส่วน A: ตรวจ `?status=neq.approved` คืน `[]` ✅ ปิดช่องโหว่แล้ว
+- [x] ส่วน B: deploy `gas-complete.js` v5.66.0 ทั้ง 2 GAS *(2026-07-27)*
+- [ ] ส่วน C1: deploy `gas-complete.js` **v5.67.0** ทั้ง 2 GAS (โค้ดต่อสายให้แล้ว)
+- [ ] ส่วน C2: ทดสอบตอนสวิตช์ยังปิด — แก้ข้อมูลยาได้ปกติ + Executions ไม่ Failed
+- [ ] ส่วน C3: ตั้ง Script Property `REQUIRE_ID_TOKEN=on` ทั้ง 2 GAS
+- [ ] ส่วน C4: ยืนยัน — แอดมินยังแก้ได้ + ลิงก์ `setUserRole` ของคนนอกถูกปฏิเสธ
 - [ ] ส่วน D: วางแผนทำภายหลัง

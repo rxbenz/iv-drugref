@@ -20,6 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { fetchApprovedDrugs, validateSnapshot } = require('./drug-snapshot');
 
 // Minification libraries (only required for --prod)
 let CleanCSS;
@@ -182,7 +183,50 @@ function buildPage(htmlFile, cfg) {
   return { file: htmlFile, size: html.length };
 }
 
-function build() {
+/**
+ * Overwrite dist/drugs-data.json with the live approved drugs.
+ *
+ * The committed snapshot has already been copied into dist/ by the static-file
+ * loop, so it is the automatic fallback: this only replaces it when the fetch
+ * both succeeds and passes validateSnapshot(). A Supabase outage therefore
+ * costs freshness, never a deploy — and never a bad dataset, which is the one
+ * outcome worth failing over (users read this file with no network).
+ *
+ * Set SKIP_DRUG_SNAPSHOT=1 to build offline without waiting for the fetch.
+ */
+async function refreshDrugSnapshot() {
+  const label = 'drugs-data.json';
+  const dst = path.join(DIST, 'drugs-data.json');
+
+  if (process.env.SKIP_DRUG_SNAPSHOT) {
+    console.log(`  ${label.padEnd(25)}⏭  refresh skipped (SKIP_DRUG_SNAPSHOT)`);
+    return;
+  }
+  if (!fs.existsSync(dst)) {
+    console.log(`  ${label.padEnd(25)}⚠ refresh skipped — no committed snapshot to fall back on`);
+    return;
+  }
+
+  let baseline = 0;
+  try {
+    const committed = JSON.parse(fs.readFileSync(dst, 'utf8'));
+    if (Array.isArray(committed)) baseline = committed.length;
+  } catch (e) { /* unreadable baseline → floor check simply won't apply */ }
+
+  const fetched = await fetchApprovedDrugs();
+  const result = fetched.ok ? validateSnapshot(fetched.rows, baseline) : fetched;
+
+  if (!result.ok) {
+    console.log(`  ${label.padEnd(25)}⚠ kept committed snapshot (${baseline} drugs) — ${result.reason}`);
+    return;
+  }
+
+  fs.writeFileSync(dst, JSON.stringify(result.drugs, null, 2) + '\n');
+  const dropped = result.dropped ? `, ${result.dropped} unusable row(s) dropped` : '';
+  console.log(`  ${label.padEnd(25)}🔄 refreshed from Supabase — ${result.drugs.length} drugs${dropped}`);
+}
+
+async function build() {
   console.log('\n╔══════════════════════════════════════════════════════════╗');
   console.log('║   IV DrugRef PWA v5.0 — Build System                    ║');
   console.log('╚══════════════════════════════════════════════════════════╝\n');
@@ -220,6 +264,9 @@ function build() {
       MISSING_FILES.push(src);
     }
   }
+
+  // Ship today's drug data as the offline fallback, not the day it was committed.
+  await refreshDrugSnapshot();
 
   // Dev mode: the HTML keeps external css/js refs — copy the dirs so they resolve
   if (DEV_MODE) {
@@ -291,4 +338,7 @@ function build() {
   console.log('\n✅ Build completed!\n');
 }
 
-build();
+build().catch(err => {
+  console.error('\n❌ Build FAILED —', (err && err.stack) || err);
+  process.exit(1);
+});

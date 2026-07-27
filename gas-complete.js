@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.67.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.67.0 = id_token verification wired into doGet/doPost, opt-in via REQUIRE_ID_TOKEN)
+var GAS_VERSION = '5.68.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.68.0 = needsReauth flag on id_token rejection)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -206,7 +206,8 @@ function doGet(e) {
     var _auth = _resolveUser(e, data);
     var user = _auth.email;
     if (_isMutatingAction(action) && _requireIdToken() && !_auth.verified) {
-      return errorResponse('ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่');
+      return jsonResponse({ success: false, needsReauth: true,
+        error: 'ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่' });
     }
 
     switch (action) {
@@ -337,7 +338,8 @@ function doPost(e) {
     var _auth = _resolveUser(e, data);
     var _actionEarly = String(data.action || (e && e.parameter && e.parameter.action) || '').toLowerCase();
     if (_isMutatingAction(_actionEarly) && _requireIdToken() && !_auth.verified) {
-      return errorResponse('ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่');
+      return jsonResponse({ success: false, needsReauth: true,
+        error: 'ปฏิเสธ: ต้องยืนยันตัวตนด้วย id_token ที่ถูกต้อง (REQUIRE_ID_TOKEN เปิดอยู่) — กรุณา Sign out แล้วเข้าใหม่' });
     }
 
     // ── Admin bulk operations via POST ──

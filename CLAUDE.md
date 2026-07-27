@@ -107,7 +107,7 @@ Both use `gas-complete.js` but bound to different Google Sheets:
 | GAS | Spreadsheet | URL |
 |-----|------------|-----|
 | **Admin** | Admin data (compatibility pairs, renal drugs, users) | `https://script.google.com/macros/s/AKfycbwJhLwY34rKpVVBE4aFRMOee6-lldazO64uOk0EXEA0Yvwgz6SA3kjeWt7-R6BSsNZT/exec` |
-| **Analytics** | Analytics + drug data (ID: `1WWXRocEfhLSZRvuWPbDZ7uKlW60wGB3HIGF_4vjkIeE`) | `https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec` |
+| **Analytics** | Analytics + drug data (ID: `1WWXRocEfhLSZRvuWPbDZ7uKlW61wGB3HIGF_4vjkIeE` — as in `gas-complete.js` `DRUG_SPREADSHEET_ID`, the value the working deployment uses) | `https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec` |
 
 **IMPORTANT**: When updating `gas-complete.js`, you must manually copy to BOTH GAS editors and create new deployments.
 
@@ -343,8 +343,45 @@ Hardcoded reference data in `js/admin.js` for bulk importing to Google Sheets vi
 
 **Exception**: Files at root level (`i18n.js`, `translations-en.js`) are NOT part of the build's inline config — keep them without prefix. They get copied as static files to `dist/`.
 
-### Google Sheets column names ≠ GAS code field names
-The `DrugData` sheet uses **human-readable** column headers (`Generic Name`, `Trade Name`, `Reconst: Solvent`, etc.) while the GAS code uses **lowercase** keys (`generic`, `trade`, `reconst` as JSON object). The `normalizeDrugRow()` function maps between them. When adding new columns to the sheet, use the **lowercase** key name (e.g., `previousData`) — the code looks up columns by `headers.indexOf('previousData')`.
+### Google Sheets column names ≠ GAS code field names (silent-write trap — fixed v5.69.0)
+The `DrugData` sheet uses **human-readable** column headers (`Generic Name`, `Trade Name`,
+`Reconst: Solvent`, `HAD`, …) while the GAS code uses **lowercase** keys (`generic`, `trade`,
+`reconst` as JSON object). `normalizeDrugRow()` maps them on **read**.
+
+**Writes must go through `_drugCol()` / `_drugCells()`** (`gas-complete.js`), never a bare
+`headers.indexOf(<code key>)`. Until v5.69.0 they did exactly that, so on the production
+sheet **every** field missed its column, `if (col >= 0)` skipped it, and the handler still
+returned `{success:true}` — the admin panel showed a green toast for a drug edit that was
+never saved (unchecking HIGH-ALERT stayed checked; `approveDrug` couldn't write `status`
+either). Both conventions are now accepted:
+- `DRUG_HEADER_ALIASES` — per code key, the header spellings that mean it (`had` →
+  `['had','HAD']`). Keep it in sync with what `normalizeDrugRow()` reads.
+- `DRUG_NESTED_HEADERS` — `reconst`/`dilution`/`admin`/`stability`/`compat` occupy one column
+  **per sub-field** on the human sheet (`Reconst: Solvent`…), one JSON column on a
+  code-created sheet. `_drugCells()` also formats arrays per column (comma for `Categories`,
+  JSON for `categories`), so what is written is what the read path parses back.
+- `handleUpdateDrug` returns `written[]` / `skipped[]`, and **fails** (`success:false`) when
+  nothing matched; `handleCreateDrug` builds its row by resolved column position (a
+  positional `appendRow` landed values in the wrong columns on the human sheet).
+- **Diagnose a stuck edit**: Run `inspectDrugHeaders()` from the ADMIN GAS editor — it logs
+  the sheet's real header row and flags every field whose writes have nowhere to go. The
+  live layout (27 columns, verified 2026-07-27) is pinned as `HUMAN_HEADERS` in
+  `test/helpers/load-gas.js`; its column ORDER differs from `DRUG_DEFAULT_HEADERS`, which is
+  what the old positional `appendRow` got wrong.
+- The sheet originally had **no `status` / `updatedAt` column at all**, so the draft →
+  pending → approved workflow could never store anything and `normalizeDrugRow()` reported
+  every row as `approved` (APPROVED=all / PENDING=0 / DRAFT=0). `addMissingDrugColumns()`
+  (Run once from the ADMIN GAS editor) appends them and backfills `status='approved'` for
+  rows holding a drug — behaviour-preserving, blank rows untouched, safe to re-run.
+- Client side: `_throwIfApiRejected()` (`js/admin.js`) now treats `success:false` as an
+  error, and `_warnIfFieldsSkipped()` warns on partial writes. **Never report a write as
+  successful without checking the response** — a silently dropped clinical edit is worse
+  than a visible failure.
+- Locked by `test/gas-drug-columns.test.js` (12 tests, run the real handlers against an
+  in-memory sheet via `test/helpers/load-gas.js`; 11 of them fail against the pre-fix code).
+
+When adding a new column to the sheet, add its spelling to `DRUG_HEADER_ALIASES` **and** to
+`normalizeDrugRow()` — or name it exactly like the lowercase code key.
 
 ### GAS returns all data as strings — normalize after loading
 Google Sheets stores everything as text. When drug data comes back from GAS, fields like `categories` and `monitoring` arrive as comma-separated strings (`"Antibiotic, Critical"`) or JSON strings (`"[\"Antibiotic\",\"Critical\"]"`), and nested objects like `reconst`, `dilution`, `admin`, `stability`, `compat` arrive as JSON strings (`"{\"solvent\":\"NSS\",...}"`). Frontend code (e.g., `openDrugModal()`) expects arrays and objects — calling `.join()` on a string throws `TypeError`.
@@ -638,6 +675,10 @@ git checkout deploy/20260405-090013  # Go to specific backup
 ```
 
 ## Pending Items
+- [ ] **REQUIRED — deploy `gas-complete.js` 5.69.0 to the ADMIN GAS**: until then every drug
+      edit is still silently dropped (see the column-resolution note above). Copy → Save →
+      **Deploy → Manage deployments → Edit → New version**, then check ตั้งค่า → ตรวจสอบเวอร์ชัน
+      reports 5.69.0. Run `inspectDrugHeaders()` once to confirm the sheet's headers resolve.
 - [ ] Deploy latest `gas-complete.js` to BOTH GAS editors (has upsert bulk import + version endpoint + **previousData** diff support)
 - [ ] Re-import CURATED compatibility pairs via admin panel after GAS deploy
 - [ ] Delete Valproic+Meropenem pair manually from admin (PK interaction, not Y-site)

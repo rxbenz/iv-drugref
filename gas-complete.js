@@ -1230,6 +1230,60 @@ function inspectDrugHeaders() {
   });
 }
 
+/**
+ * Maintenance (Run ONCE from the ADMIN GAS editor): add the workflow columns the
+ * DrugData sheet is missing.
+ *
+ * The production sheet was built with the clinical columns only — it has no
+ * `status` column at all, so the draft → pending → approved workflow could never
+ * store anything: normalizeDrugRow() fell back to `status: 'approved'` for every
+ * row (hence APPROVED=all, PENDING=0, DRAFT=0) and every status write had
+ * nowhere to land. `updatedAt` was missing for the same reason.
+ *
+ * Appends each missing column at the end (nothing existing is touched) and
+ * backfills `status='approved'` for rows that have a drug name — which is
+ * exactly what the app already assumed, so live behaviour does not change.
+ * Safe to re-run: columns that exist are left alone.
+ */
+function addMissingDrugColumns() {
+  var sheet = getDrugSS().getSheetByName(SHEETS.DRUGS);
+  if (!sheet) { Logger.log('DrugData sheet not found'); return []; }
+
+  var lastRow = sheet.getLastRow();
+  var wanted = [{ key: 'status', backfill: 'approved' }, { key: 'updatedAt', backfill: '' }];
+  var added = [];
+
+  wanted.forEach(function (w) {
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (_drugCol(headers, w.key) >= 0) {
+      Logger.log('✓ already present: ' + w.key);
+      return;
+    }
+    var col = sheet.getLastColumn() + 1;
+    sheet.getRange(1, col).setValue(w.key).setFontWeight('bold');
+
+    if (w.backfill && lastRow > 1) {
+      // Only rows that actually hold a drug — never stamp a status onto blanks.
+      var gCol = _drugCol(headers, 'generic');
+      var names = gCol >= 0 ? sheet.getRange(2, gCol + 1, lastRow - 1, 1).getValues() : null;
+      var vals = [];
+      for (var r = 0; r < lastRow - 1; r++) {
+        vals.push([(!names || String(names[r][0]).trim()) ? w.backfill : '']);
+      }
+      sheet.getRange(2, col, vals.length, 1).setValues(vals);
+      Logger.log('+ added column "' + w.key + '" and backfilled "' + w.backfill + '" for ' + vals.length + ' rows');
+    } else {
+      Logger.log('+ added column "' + w.key + '"');
+    }
+    added.push(w.key);
+  });
+
+  Logger.log(added.length
+    ? 'Done. Added: ' + added.join(', ') + ' — run inspectDrugHeaders() again to confirm.'
+    : 'Nothing to do — all workflow columns already exist.');
+  return added;
+}
+
 function handleCreateDrug(user, data) {
   var perm = checkPermission(user, 'editor');
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ' });

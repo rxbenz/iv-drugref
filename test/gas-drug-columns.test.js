@@ -15,7 +15,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { loadGas, HUMAN_HEADERS, CODE_HEADERS } = require('./helpers/load-gas');
+const { loadGas, HUMAN_HEADERS, PROD_HEADERS, CODE_HEADERS } = require('./helpers/load-gas');
 
 const USER = 'admin@test.local';
 const ID = 1001;
@@ -169,6 +169,104 @@ test('approveDrug flips status to approved on the human sheet', () => {
 
   assert.equal(res.success, true);
   assert.equal(g.drugSheet.rows[1][colOf(HUMAN_HEADERS, 'status')], 'approved');
+});
+
+// ── The production sheet has no `status` column at all ──────────────────────
+// inspectDrugHeaders() on the live sheet (2026-07-27) reported
+// `status → NOT FOUND`, so draft/pending could never be stored and every row
+// read back as 'approved'. addMissingDrugColumns() repairs the layout.
+
+/** header + drug row + a blank row + a second drug, in the live column layout. */
+function prodSheet() {
+  const row = (over) => {
+    const cells = Object.assign({
+      'ID': ID, 'Generic Name': 'Abciximab', 'HAD': true, 'Categories': 'cardiovascular',
+    }, over);
+    return PROD_HEADERS.map((h) => (h in cells ? cells[h] : ''));
+  };
+  return loadGas({
+    drugSheetRows: [
+      PROD_HEADERS.slice(),
+      row(),
+      PROD_HEADERS.map(() => ''),
+      row({ 'ID': 1002, 'Generic Name': 'Acyclovir', 'HAD': false }),
+    ],
+  });
+}
+
+test('without a status column every row reads as approved (the live symptom)', () => {
+  const g = prodSheet();
+  assert.equal(PROD_HEADERS.indexOf('status'), -1);
+  assert.equal(g.sandbox.normalizeDrugRow(g.rowObject(1)).status, 'approved');
+});
+
+test('a draft save on the un-repaired sheet reports status as skipped', () => {
+  const g = prodSheet();
+  const res = g.json(g.sandbox.handleUpdateDrug(USER, { id: ID, generic: 'Abciximab', status: 'draft' }));
+
+  assert.equal(res.success, true);
+  assert.ok(res.skipped.includes('status'),
+    'the admin panel must be told the workflow status was not stored');
+});
+
+test('addMissingDrugColumns appends status/updatedAt and backfills approved', () => {
+  const g = prodSheet();
+  const added = g.sandbox.addMissingDrugColumns();
+  assert.deepEqual(added, ['status', 'updatedAt']);
+
+  const headers = g.drugSheet.rows[0];
+  const statusIdx = headers.indexOf('status');
+  assert.equal(statusIdx, PROD_HEADERS.length, 'appended after the existing columns');
+  assert.ok(headers.indexOf('updatedAt') > statusIdx);
+
+  assert.equal(g.drugSheet.rows[1][statusIdx], 'approved', 'existing drugs keep the status the app assumed');
+  assert.equal(g.drugSheet.rows[3][statusIdx], 'approved');
+  assert.equal(g.drugSheet.rows[2][statusIdx], '', 'a blank row must not be stamped with a status');
+});
+
+test('addMissingDrugColumns leaves the clinical columns untouched', () => {
+  const g = prodSheet();
+  const before = g.drugSheet.rows[1].slice(0, PROD_HEADERS.length);
+  g.sandbox.addMissingDrugColumns();
+  assert.deepEqual(g.drugSheet.rows[1].slice(0, PROD_HEADERS.length), before);
+});
+
+test('addMissingDrugColumns is safe to re-run', () => {
+  const g = prodSheet();
+  g.sandbox.addMissingDrugColumns();
+  const headerCount = g.drugSheet.rows[0].length;
+
+  assert.deepEqual(g.sandbox.addMissingDrugColumns(), []);
+  assert.equal(g.drugSheet.rows[0].length, headerCount, 'no duplicate columns on a second run');
+});
+
+test('after the repair, draft → pending → approved actually persists', () => {
+  const g = prodSheet();
+  g.sandbox.addMissingDrugColumns();
+  const statusIdx = g.drugSheet.rows[0].indexOf('status');
+
+  g.sandbox.handleUpdateDrug(USER, { id: ID, generic: 'Abciximab', status: 'draft' });
+  assert.equal(g.drugSheet.rows[1][statusIdx], 'draft');
+  assert.equal(g.sandbox.normalizeDrugRow(g.rowObject(1)).status, 'draft');
+
+  g.sandbox.handleUpdateDrug(USER, { id: ID, generic: 'Abciximab', status: 'pending' });
+  assert.equal(g.drugSheet.rows[1][statusIdx], 'pending');
+
+  g.sandbox.handleApproveDrug(USER, { id: ID });
+  assert.equal(g.drugSheet.rows[1][statusIdx], 'approved');
+});
+
+test('after the repair, unchecking HIGH-ALERT and saving a draft both land at once', () => {
+  const g = prodSheet();
+  g.sandbox.addMissingDrugColumns();
+  const res = g.json(g.sandbox.handleUpdateDrug(USER, {
+    id: ID, generic: 'Abciximab', had: false, status: 'draft',
+  }));
+
+  assert.deepEqual(res.skipped, [], 'nothing left with nowhere to go');
+  const drug = g.sandbox.normalizeDrugRow(g.rowObject(1));
+  assert.equal(drug.had, false);
+  assert.equal(drug.status, 'draft');
 });
 
 test('editors without a matching row still get an explicit error', () => {

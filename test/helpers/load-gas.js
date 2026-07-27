@@ -29,18 +29,37 @@ function makeSheet(name, rows) {
     rows,
     getName: () => name,
     getDataRange: () => ({ getValues: () => rows.map((r) => r.slice()) }),
-    getRange(r, c) {
+    getLastRow: () => rows.length,
+    getLastColumn: () => (rows[0] ? rows[0].length : 0),
+    getRange(r, c, numRows, numCols) {
+      const nr = numRows || 1;
+      const nc = numCols || 1;
+      const cell = (rowIdx, colIdx) => {
+        while (rows.length < rowIdx) rows.push([]);
+        const row = rows[rowIdx - 1];
+        while (row.length < colIdx) row.push('');
+        return row;
+      };
       const api = {
-        setValue(v) {
-          while (rows.length < r) rows.push([]);
-          const row = rows[r - 1];
-          while (row.length < c) row.push('');
-          row[c - 1] = v;
+        setValue(v) { cell(r, c)[c - 1] = v; return api; },
+        getValue: () => (rows[r - 1] || [])[c - 1],
+        setValues(vals) {
+          for (let i = 0; i < nr; i++) {
+            for (let j = 0; j < nc; j++) cell(r + i, c + j)[c + j - 1] = vals[i][j];
+          }
           return api;
+        },
+        getValues() {
+          const out = [];
+          for (let i = 0; i < nr; i++) {
+            const row = [];
+            for (let j = 0; j < nc; j++) row.push((rows[r + i - 1] || [])[c + j - 1]);
+            out.push(row);
+          }
+          return out;
         },
         setFontWeight: () => api,
         setBackground: () => api,
-        getValue: () => (rows[r - 1] || [])[c - 1],
       };
       return api;
     },
@@ -127,9 +146,16 @@ const HUMAN_HEADERS = ['ID', 'Generic Name', 'Trade Name', 'Strength', 'ED/NED',
   'Precautions', 'Monitoring', 'Reference', 'Usual Dose',
   'status', 'previousData', 'updatedAt'];
 
+// The header row the PRODUCTION sheet actually has, as reported by
+// inspectDrugHeaders() on 2026-07-27: the clinical columns only — no `status`
+// and no `updatedAt`. Without `status` the whole draft → pending → approved
+// workflow has nowhere to store anything, and normalizeDrugRow() reports every
+// row as 'approved'. addMissingDrugColumns() is what repairs this layout.
+const PROD_HEADERS = HUMAN_HEADERS.filter((h) => h !== 'status' && h !== 'updatedAt');
+
 // Header row a sheet gets when handleCreateDrug creates it from scratch.
 const CODE_HEADERS = ['id', 'generic', 'trade', 'strength', 'ed', 'had', 'categories', 'status',
   'reconst', 'dilution', 'admin', 'stability', 'compat', 'precautions', 'monitoring', 'ref',
   'createdBy', 'createdAt', 'updatedAt', 'previousData'];
 
-module.exports = { loadGas, makeSheet, makeSpreadsheet, HUMAN_HEADERS, CODE_HEADERS };
+module.exports = { loadGas, makeSheet, makeSpreadsheet, HUMAN_HEADERS, PROD_HEADERS, CODE_HEADERS };

@@ -208,6 +208,27 @@ function _throwIfApiRejected(json) {
     toast('❌ ' + (json.error || 'ไม่มีสิทธิ์'), 'error');
     throw new Error(json.error || 'Permission denied');
   }
+  // A GAS handler that fails returns {success:false, error:…} (errorResponse).
+  // Without this check the caller's success toast fired on a write that never
+  // landed — the editor believed a clinical edit was saved when it was dropped.
+  // Read handlers answer with {drugs:[…]} and no `success` key, so only an
+  // EXPLICIT false is a failure.
+  if (json.success === false) {
+    toast('❌ ' + (json.error || 'บันทึกไม่สำเร็จ'), 'error');
+    throw new Error(json.error || 'Request failed');
+  }
+}
+
+/**
+ * Warn when the backend accepted the write but had nowhere to put some fields
+ * (sheet column missing). Those values are NOT saved — never let that pass as a
+ * clean success.
+ */
+function _warnIfFieldsSkipped(result) {
+  if (result && result.skipped && result.skipped.length) {
+    toast('⚠️ ไม่ได้บันทึก ' + result.skipped.length + ' ช่อง (ไม่พบคอลัมน์ในชีต): ' +
+      result.skipped.join(', '), 'warning');
+  }
 }
 
 async function apiCall(action, data = {}) {
@@ -268,7 +289,7 @@ async function apiCall(action, data = {}) {
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.68.0';
+const EXPECTED_GAS_VERSION = '5.69.0';
 
 async function checkBackendVersion() {
   const box = document.getElementById('version-check-result');
@@ -796,6 +817,7 @@ async function saveDrug(status) {
       const result = await apiCall('updateDrug', data);
       resultId = state.editingId;
       toast(`แก้ไข ${data.generic} สำเร็จ — ${statusLabel}`, 'success');
+      _warnIfFieldsSkipped(result);
     } else {
       const result = await apiCall('createDrug', data);
       resultId = result.id;
@@ -836,7 +858,7 @@ async function saveDrugAndApprove() {
     let drugId;
     if (state.editingId) {
       data.id = state.editingId;
-      await apiCall('updateDrug', data);
+      _warnIfFieldsSkipped(await apiCall('updateDrug', data));
       drugId = state.editingId;
     } else {
       const result = await apiCall('createDrug', data);

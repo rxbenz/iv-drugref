@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.68.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.68.0 = needsReauth flag on id_token rejection)
+var GAS_VERSION = '5.69.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.69.0 = drug writes resolve real sheet headers)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -1081,7 +1081,7 @@ function normalizeDrugRow(d) {
     ed: d['ED/NED'] || d['ed'] || 'N',
     had: hadVal,
     categories: cats,
-    status: d['status'] || 'approved',
+    status: d['status'] || d['Status'] || 'approved',
     reconst: {
       solvent: d['Reconst: Solvent'] || '',
       volume: d['Reconst: Volume'] || '',
@@ -1113,29 +1113,159 @@ function normalizeDrugRow(d) {
   };
 }
 
+// ════════════════════════════════════════════════
+// DRUG SHEET COLUMN RESOLUTION
+// ════════════════════════════════════════════════
+// The DrugData sheet in production uses HUMAN-READABLE headers ('Generic Name',
+// 'HAD', 'Reconst: Solvent', …). A sheet created from scratch by handleCreateDrug
+// gets the lowercase code keys instead. normalizeDrugRow() has always READ both.
+//
+// Writes used to resolve their target with a bare headers.indexOf(<code key>),
+// which matches only the lowercase spelling — so on the production sheet every
+// field missed its column and was skipped by `if (col >= 0)`, silently. The row
+// was never touched, the handler still returned success, and the admin panel
+// showed a green toast for an edit that never happened. Every write now goes
+// through _drugCol()/_drugCells(), which accept the same spellings the read path
+// does, and any field with no column at all is reported back as `skipped`.
+
+var DRUG_HEADER_ALIASES = {
+  id:           ['id', 'ID'],
+  generic:      ['generic', 'Generic Name'],
+  trade:        ['trade', 'Trade Name'],
+  strength:     ['strength', 'Strength'],
+  ed:           ['ed', 'ED/NED'],
+  had:          ['had', 'HAD'],
+  categories:   ['categories', 'Categories'],
+  status:       ['status', 'Status'],
+  precautions:  ['precautions', 'Precautions'],
+  monitoring:   ['monitoring', 'Monitoring'],
+  ref:          ['ref', 'Reference'],
+  dosing:       ['dosing', 'Usual Dose'],
+  createdBy:    ['createdBy'],
+  createdAt:    ['createdAt'],
+  updatedAt:    ['updatedAt'],
+  previousData: ['previousData']
+};
+
+// Nested objects live in one JSON column on a code-created sheet, but in one
+// column PER SUB-FIELD on the human-readable sheet (mirrors normalizeDrugRow).
+var DRUG_NESTED_HEADERS = {
+  reconst:   { solvent: 'Reconst: Solvent', volume: 'Reconst: Volume', conc: 'Reconst: Conc' },
+  dilution:  { diluent: 'Dilution: Diluent', volume: 'Dilution: Volume', finalConc: 'Dilution: Final Conc' },
+  admin:     { route: 'Admin: Route', rate: 'Admin: Rate' },
+  stability: { reconst: 'Stability: Reconst', diluted: 'Stability: Diluted', storage: 'Stability: Storage' },
+  compat:    { ysite: 'Compat: Y-site', incompat: 'Compat: Incompatible' }
+};
+
+var DRUG_DEFAULT_HEADERS = ['id', 'generic', 'trade', 'strength', 'ed', 'had', 'categories', 'status',
+  'reconst', 'dilution', 'admin', 'stability', 'compat', 'precautions', 'monitoring', 'ref',
+  'createdBy', 'createdAt', 'updatedAt', 'previousData'];
+
+/** Index of the column holding `key` on this sheet, or -1. */
+function _drugCol(headers, key) {
+  var aliases = DRUG_HEADER_ALIASES[key] || [key];
+  for (var i = 0; i < aliases.length; i++) {
+    var c = headers.indexOf(aliases[i]);
+    if (c >= 0) return c;
+  }
+  return -1;
+}
+
+/**
+ * Resolve one client field to the [colIndex, cellValue] pairs it must write.
+ * Returns [] when this sheet has no column for it (caller records it skipped).
+ * Values are formatted for the convention of the column actually found, so what
+ * is written is what normalizeDrugRow reads back: a human-readable column gets
+ * the flat/comma form, a lowercase code column gets the JSON form.
+ */
+function _drugCells(headers, key, value) {
+  var out = [], c, sub;
+
+  var nested = DRUG_NESTED_HEADERS[key];
+  if (nested) {
+    for (sub in nested) {
+      c = headers.indexOf(nested[sub]);
+      if (c >= 0) out.push([c, (value && value[sub] != null) ? value[sub] : '']);
+    }
+    if (out.length) return out;                       // human-readable sheet
+    c = headers.indexOf(key);                         // single JSON column
+    return c >= 0 ? [[c, JSON.stringify(value || {})]] : [];
+  }
+
+  var col = _drugCol(headers, key);
+  if (col < 0) return [];
+
+  var v = value;
+  if (key === 'categories' || key === 'monitoring') {
+    var list = Array.isArray(v) ? v : (typeof v === 'string' && v ? [v] : []);
+    // 'Categories'/'Monitoring' are read back with .split(','), the lowercase
+    // columns as JSON — write whichever form this column's reader expects.
+    v = (headers[col] === key) ? JSON.stringify(list) : list.join(', ');
+  } else if (v && typeof v === 'object') {
+    v = JSON.stringify(v);
+  } else if (v === undefined || v === null) {
+    v = '';
+  }
+  return [[col, v]];
+}
+
+/**
+ * Maintenance (Run from the GAS editor): print the DrugData sheet's real header
+ * row and how each field resolves against it. Run this first whenever a drug
+ * edit doesn't stick — a "NOT FOUND" line is a field whose writes go nowhere.
+ */
+function inspectDrugHeaders() {
+  var sheet = getDrugSS().getSheetByName(SHEETS.DRUGS);
+  if (!sheet) { Logger.log('DrugData sheet not found'); return; }
+  var headers = sheet.getDataRange().getValues()[0] || [];
+  Logger.log('DrugData headers (' + headers.length + '): ' + headers.join(' | '));
+  var keys = ['id', 'generic', 'trade', 'strength', 'ed', 'had', 'categories', 'status',
+    'precautions', 'monitoring', 'ref', 'dosing', 'updatedAt', 'previousData',
+    'reconst', 'dilution', 'admin', 'stability', 'compat'];
+  keys.forEach(function (k) {
+    var cells = _drugCells(headers, k, '');
+    Logger.log('  ' + k + ' → ' + (cells.length
+      ? cells.map(function (c) { return headers[c[0]]; }).join(', ')
+      : '*** NOT FOUND — writes to this field are dropped ***'));
+  });
+}
+
 function handleCreateDrug(user, data) {
   var perm = checkPermission(user, 'editor');
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ' });
 
-  var sheet = getOrCreateSheet(SHEETS.DRUGS,
-    ['id', 'generic', 'trade', 'strength', 'ed', 'had', 'categories', 'status',
-     'reconst', 'dilution', 'admin', 'stability', 'compat', 'precautions', 'monitoring', 'ref',
-     'createdBy', 'createdAt', 'updatedAt', 'previousData'],
-    getDrugSS()
-  );
+  var sheet = getOrCreateSheet(SHEETS.DRUGS, DRUG_DEFAULT_HEADERS, getDrugSS());
+  var headers = sheet.getDataRange().getValues()[0] || [];
 
   var id = Date.now();
   var now = new Date().toISOString();
-  sheet.appendRow([
-    id, data.generic || '', data.trade || '', data.strength || '',
-    data.ed || 'N', data.had || false, JSON.stringify(data.categories || []),
-    data.status || 'draft',
-    JSON.stringify(data.reconst || {}), JSON.stringify(data.dilution || {}),
-    JSON.stringify(data.admin || {}), JSON.stringify(data.stability || {}),
-    JSON.stringify(data.compat || {}), data.precautions || '',
-    JSON.stringify(data.monitoring || []), data.ref || '',
-    user, now, now
-  ]);
+  var fields = {
+    id: id,
+    generic: data.generic || '', trade: data.trade || '', strength: data.strength || '',
+    ed: data.ed || 'N', had: !!data.had, categories: data.categories || [],
+    status: data.status || 'draft',
+    reconst: data.reconst || {}, dilution: data.dilution || {}, admin: data.admin || {},
+    stability: data.stability || {}, compat: data.compat || {},
+    precautions: data.precautions || '', monitoring: data.monitoring || [],
+    ref: data.ref || '', dosing: data.dosing || '',
+    createdBy: user, createdAt: now, updatedAt: now
+  };
+
+  // Build the row by RESOLVED column position, not by argument order: a
+  // positional appendRow lands every value in the wrong column on the
+  // human-readable sheet (its columns are in a different order and count).
+  var row = [], placed = 0, key, cells, i;
+  for (i = 0; i < headers.length; i++) row.push('');
+  for (key in fields) {
+    cells = _drugCells(headers, key, fields[key]);
+    for (i = 0; i < cells.length; i++) { row[cells[i][0]] = cells[i][1]; placed++; }
+  }
+  if (!placed) {
+    return jsonResponse({ success: false, error: 'ไม่พบคอลัมน์ที่ตรงกับข้อมูลยาในชีต ' +
+      SHEETS.DRUGS + ' — ไม่ได้บันทึก (headers: ' + headers.join(' | ') + ')' });
+  }
+
+  sheet.appendRow(row);
 
   addAuditLog(user, 'createDrug', id, data.generic, 'Status: ' + (data.status || 'draft'));
   _syncDrugsSafe();   // dual-write to Supabase (best-effort)
@@ -1151,14 +1281,14 @@ function handleUpdateDrug(user, data) {
 
   var all = sheet.getDataRange().getValues();
   var headers = all[0];
-  var idCol = headers.indexOf('id');
-  if (idCol === -1) return errorResponse('ID column not found');
+  var idCol = _drugCol(headers, 'id');
+  if (idCol === -1) return errorResponse('ID column not found. Headers: ' + headers.join(' | '));
 
   for (var i = 1; i < all.length; i++) {
     if (String(all[i][idCol]) === String(data.id)) {
       // ═══ Snapshot previous data when changing to pending (for diff review) ═══
-      var prevStatusCol = headers.indexOf('status');
-      var prevDataCol = headers.indexOf('previousData');
+      var prevStatusCol = _drugCol(headers, 'status');
+      var prevDataCol = _drugCol(headers, 'previousData');
       if (data.status === 'pending' && prevDataCol >= 0 && prevStatusCol >= 0 && all[i][prevStatusCol] === 'approved') {
         var snapshot = {};
         for (var h = 0; h < headers.length; h++) {
@@ -1171,24 +1301,37 @@ function handleUpdateDrug(user, data) {
         sheet.getRange(i + 1, prevDataCol + 1).setValue(JSON.stringify(snapshot));
       }
 
+      var written = [], skipped = [];
       for (var key in data) {
         // Never let the client write `previousData` — the server is the sole
         // author of that snapshot (above). Accepting it lets a crafted pending
         // edit forge a benign-looking diff while storing malicious data.
         // `idToken`/`user`/`action` are transport fields, not drug columns.
         if (key === 'id' || key === 'previousData' || key === 'idToken' || key === 'user' || key === 'action') continue;
-        var col = headers.indexOf(key);
-        if (col >= 0) {
-          var val = typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key];
-          sheet.getRange(i + 1, col + 1).setValue(val);
+        var cells = _drugCells(headers, key, data[key]);
+        if (!cells.length) { skipped.push(key); continue; }
+        for (var c = 0; c < cells.length; c++) {
+          sheet.getRange(i + 1, cells[c][0] + 1).setValue(cells[c][1]);
         }
+        written.push(key);
       }
-      var updCol = headers.indexOf('updatedAt');
+
+      // Nothing matched a column → the edit would vanish without a trace. Say so
+      // instead of returning success: a silently-dropped clinical edit is worse
+      // than a visible failure, because the editor believes the change is live.
+      if (!written.length) {
+        return jsonResponse({ success: false, error: 'ไม่พบคอลัมน์ที่ตรงกับข้อมูลที่ส่งมาในชีต ' +
+          SHEETS.DRUGS + ' — ไม่ได้บันทึก (headers: ' + headers.join(' | ') + ')' });
+      }
+
+      var updCol = _drugCol(headers, 'updatedAt');
       if (updCol >= 0) sheet.getRange(i + 1, updCol + 1).setValue(new Date().toISOString());
 
-      addAuditLog(user, 'updateDrug', data.id, data.generic || all[i][headers.indexOf('generic')], 'Updated fields: ' + Object.keys(data).join(', '));
+      addAuditLog(user, 'updateDrug', data.id, data.generic || all[i][_drugCol(headers, 'generic')],
+        'Updated: ' + written.join(', ') +
+        (skipped.length ? ' | SKIPPED (no column): ' + skipped.join(', ') : ''));
       _syncDrugsSafe();   // dual-write to Supabase (covers approve/reject too)
-      return jsonResponse({ success: true, id: data.id, message: 'Drug updated' });
+      return jsonResponse({ success: true, id: data.id, written: written, skipped: skipped, message: 'Drug updated' });
     }
   }
   return errorResponse('Drug not found: ' + data.id);

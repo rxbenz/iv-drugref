@@ -2901,32 +2901,72 @@ async function importCuratedRenal() {
 /* ═══════════════════════════════════════════
    ANALYTICS SUMMARY
    ═══════════════════════════════════════════ */
+// Buckets this panel needs → the canonical event `type` that fills them.
+// (error-tracker.js emits lowercase 'error_report'; the rest are UPPER_CASE.)
+var ANALYTICS_TYPE_KEY = { SESSION_START: 'sessions', SEARCH: 'searches', error_report: 'errors' };
+
 async function loadAnalyticsSummary() {
-  // Analytics data อยู่ใน analytics spreadsheet (ไม่ใช่ admin spreadsheet)
-  // ใช้ IVDrugRef.getAnalyticsUrl() จาก core.js หรือ localStorage analyticsUrl
-  var analyticsUrl = (typeof IVDrugRef !== 'undefined' && IVDrugRef.getAnalyticsUrl)
-    ? IVDrugRef.getAnalyticsUrl()
-    : localStorage.getItem('analyticsUrl') || '';
-  if (!analyticsUrl) {
-    showAnalyticsStatus('ไม่พบ Analytics URL — ตรวจสอบ core.js', true);
+  // Read analytics from SUPABASE, which has been the authoritative analytics
+  // store since v5.29–5.30 — not GAS. The old `?action=raw` call made one GAS
+  // request read ALL 16 Sheets tabs end-to-end; as the data grew (19k+ rows and
+  // still dual-written) it stopped finishing inside the 15s abort and the panel
+  // showed "Timeout — ลองอีกครั้ง".
+  // Reads use the admin's AUTHENTICATED client because `events` SELECT is
+  // admin-only under RLS ("admin read events", supabase/auth.sql) — the same way
+  // dashboard.js reads it. Only what this summary actually renders is fetched:
+  // the last 30 days of SESSION_START / SEARCH / error_report (every stat here is
+  // already windowed to 7d/30d), which the (type, ts) index serves directly.
+  var sb = (window.AdminSupabase && AdminSupabase.available()) ? AdminSupabase.client() : null;
+  if (!sb) {
+    showAnalyticsStatus('❌ ยังไม่ได้เชื่อมต่อ Supabase — ลอง Sign out แล้ว Sign in ใหม่', true);
     return;
   }
   showLoading('กำลังโหลดข้อมูล analytics...');
   try {
-    var controller = new AbortController();
-    var timeout = setTimeout(function() { controller.abort(); }, 15000);
-    var res = await fetch(analyticsUrl + '?action=raw', { signal: controller.signal });
-    clearTimeout(timeout);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var data = await res.json();
-    if (data.error) throw new Error(data.error);
-    state.analyticsData = data;
+    // Without a signed-in session the read falls back to the anon role, which has
+    // NO select policy on `events` — PostgREST then returns an empty array rather
+    // than an error, which would render as a silent wall of zeros. Say so instead.
+    var sess = await AdminSupabase.session();
+    if (!sess) throw new Error('เซสชันหมดอายุ — กรุณา Sign out แล้ว Sign in ใหม่');
+
+    var since = new Date(Date.now() - 30 * 86400000).toISOString();
+    var types = Object.keys(ANALYTICS_TYPE_KEY);
+    var raw = { sessions: [], searches: [], errors: [] };
+    var offset = 0, got = 0;
+    do {
+      var res = await sb.from('events')
+        .select('ts,type,session_id,user_id,data')
+        .gte('ts', since)
+        .in('type', types)
+        .order('ts', { ascending: true })
+        .range(offset, offset + 999);
+      if (res.error) throw new Error(res.error.message);
+      var rows = res.data || [];
+      got = rows.length;
+      for (var i = 0; i < rows.length; i++) {
+        var ev = rows[i];
+        var key = ANALYTICS_TYPE_KEY[ev.type];
+        if (!key) continue;
+        // Reshape back to the flat row the renderers expect (data jsonb spread to
+        // top level + server ts as `timestamp`) — same convention as dashboard.js.
+        var row = {};
+        if (ev.data && typeof ev.data === 'object') {
+          for (var k in ev.data) if (k !== '_src') row[k] = ev.data[k];
+        }
+        row.timestamp = ev.ts;
+        row.session_id = ev.session_id;
+        row.user_id = ev.user_id;
+        raw[key].push(row);
+      }
+      offset += 1000;
+    } while (got === 1000 && offset < 200000); // full page ⇒ more rows; hard guard
+
+    state.analyticsData = raw;
     renderAnalyticsSummary();
     showAnalyticsStatus('');
     toast('โหลด analytics สำเร็จ');
   } catch (e) {
-    var msg = e.name === 'AbortError' ? 'Timeout — ลองอีกครั้ง' : e.message;
-    showAnalyticsStatus('❌ โหลด analytics ล้มเหลว: ' + msg, true);
+    showAnalyticsStatus('❌ โหลด analytics ล้มเหลว: ' + e.message, true);
   }
   hideLoading();
 }

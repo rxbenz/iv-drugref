@@ -21,25 +21,31 @@
 | shareTargetPicker | **OFF** (เปิดตอน Phase 7 พร้อม scope `chat_message.write`) |
 
 ## Rich menu (OA Manager)
-- ชื่อ: **เมนูหลัก IV DrugRef** · เทมเพลต 6 ปุ่ม (2×3) · รูป: [`richmenu.jpg`](richmenu.jpg) (แนบในโฟลเดอร์นี้)
-- **แอ็กชัน = ลิงก์ (plain https)** — ไม่ใช่ LIFF URL:
+- ชื่อ: **เมนูหลัก IV DrugRef** · เทมเพลต 6 ปุ่ม (2×3)
+- **ดีไซน์ v2 (โทนสว่าง, ภาษาอังกฤษ)** — ใช้จริง: [`richmenu.jpg`](richmenu.jpg)
+  (การ์ดขาว glassmorphism เงานุ่ม + ไอคอนเส้น gradient) · ต้นฉบับ [`richmenu.html`](richmenu.html)
+  · ทางเลือกโทนเข้ม: [`richmenu-dark.jpg`](richmenu-dark.jpg) / [`richmenu-dark.html`](richmenu-dark.html)
+- **แอ็กชัน = ลิงก์ (plain https)** — ไม่ใช่ LIFF URL · **ลำดับ 6 ปุ่ม/URL คงเดิม** (เปลี่ยนดีไซน์ = เปลี่ยนแค่รูป ไม่ต้องแก้ลิงก์):
 
-| ปุ่ม | ป้ายแอ็กชัน | URL |
+| ปุ่ม (v2 EN) | ป้ายแอ็กชัน | URL |
 |---|---|---|
-| 💉 ค้นหายา | ค้นหายา | `https://rxbenz.github.io/iv-drugref/index.html` |
-| 🔗 เข้ากันได้ | เข้ากันได้ | `…/compatibility.html` |
-| 🧬 ยากับไต | ยากับไต | `…/renal-dosing.html` |
-| 🧮 คำนวณ | คำนวณ | `…/calculator.html` |
-| 💊 อันตรกิริยา | อันตรกิริยา | `…/interactions.html` |
-| 🛡️ แพ้ยา | แพ้ยา | `…/allergy.html` |
+| 🔍 Drug Info | Drug Info | `https://rxbenz.github.io/iv-drugref/index.html` |
+| 🔗 Compatibility | Compatibility | `…/compatibility.html` |
+| 💧 Renal Dosing | Renal Dosing | `…/renal-dosing.html` |
+| 🧮 Calculators | Calculators | `…/calculator.html` |
+| ⇄ Interactions | Interactions | `…/interactions.html` |
+| 🛡️ Allergy | Allergy | `…/allergy.html` |
+
+> ดีไซน์เดิม v1 (โทนเข้ม/ฟอนต์ไทย Loma) ถูกแทนด้วย v2 ตามที่ผู้ใช้เลือกโทนสว่าง
 
 **ทำไม plain https ไม่ใช่ LIFF URL**: ลิงก์เว็บตรงเปิดใน **in-app browser ของ LINE**
 (UA มี `Line/` → hardening ทำงาน) และ**ชัวร์กว่า** — ไม่ต้องพึ่งการต่อ path ของ LIFF
 ที่จุกจิก (endpoint มี `/` ปิดท้าย → ถ้าใช้ LIFF URL path จะเพี้ยนเป็น `//`). LIFF app
 เก็บไว้ใช้ Phase 3 (ปุ่มการ์ดในบอต) + Phase 7 (แชร์).
 
-> รูป rich menu สร้างด้วย headless Chromium จาก HTML (ฟอนต์ไทย Loma + Noto Color Emoji)
-> ขนาด 2500×1686 JPEG 121 KB (ต่ำกว่าลิมิต LINE 1 MB)
+> รูป rich menu สร้างด้วย headless Chromium จาก HTML (การ์ด glassmorphism + inline SVG icons)
+> ขนาด 2500×1686 JPEG ~130 KB (ต่ำกว่าลิมิต LINE 1 MB) · แก้ดีไซน์ที่ `richmenu.html` แล้วเรนเดอร์ใหม่:
+> `chromium --headless=new --window-size=2500,1686 --default-background-color=eaf1f8ff --screenshot=out.jpg file://…/richmenu.html`
 
 ## ทดสอบบนมือถือ — ผ่านครบ ✅
 1. ✅ เมนูโผล่ใต้ห้องแชต + กดแต่ละปุ่มเปิดถูกหน้าในแอป LINE

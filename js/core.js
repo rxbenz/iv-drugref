@@ -1132,6 +1132,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.79.2',
+      date: '2026-07-31',
+      title: "แก้หน้า Analytics ใน Admin โหลดไม่ขึ้น",
+      items: [
+        "หน้า Analytics ใน Admin เปลี่ยนไปอ่านจาก Supabase โดยตรง (เดิมดึงผ่าน Google Sheets ทั้ง 16 แท็บจนหมดเวลา 15 วินาที)",
+        "โหลดเฉพาะข้อมูล 30 วันล่าสุดเท่าที่หน้านี้ใช้จริง — เร็วขึ้นมากและไม่ Timeout อีก"
+      ]
+    },
+    {
       v: '5.79.1',
       date: '2026-07-31',
       title: "แก้บั๊กหน้า Admin/Dashboard",
@@ -1611,7 +1620,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.79.1';
+  const VERSION = '5.79.2';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

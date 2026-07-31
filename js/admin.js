@@ -301,7 +301,7 @@ async function apiCall(action, data = {}) {
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.72.0';
+const EXPECTED_GAS_VERSION = '5.73.0';
 
 // [gas-version-verdict] — sliced by test/gas-version-verdict.test.js
 
@@ -3173,7 +3173,7 @@ function renderRecentErrors(errors) {
    ═══════════════════════════════════════════ */
 function switchTab(tab) {
   // Editor ไม่สามารถเข้า tab ที่ถูกจำกัด
-  if (!isAdmin() && ['import', 'settings', 'users', 'analytics'].includes(tab)) {
+  if (!isAdmin() && ['import', 'settings', 'users', 'analytics', 'alerts'].includes(tab)) {
     toast('❌ คุณไม่มีสิทธิ์เข้าถึงส่วนนี้', 'error');
     return;
   }
@@ -3188,6 +3188,7 @@ function switchTab(tab) {
   if (tab === 'renal') loadRenalDrugs();
   if (tab === 'allergy') loadAllergyData();
   if (tab === 'analytics') loadAnalyticsSummary();
+  if (tab === 'alerts') loadUrgentAlerts();
 }
 
 /* ═══════════════════════════════════════════
@@ -3546,6 +3547,11 @@ document.addEventListener('DOMContentLoaded', () => {
   IVDrugRef.delegate(document, 'click', {
     signOut: function() { signOut(); },
     switchTab: function(e, t) { switchTab(t.dataset.tab); },
+    openAlertForm: function() { openAlertForm(); },
+    closeAlertForm: function() { closeAlertForm(); },
+    submitUrgentAlert: function() { submitUrgentAlert(); },
+    loadUrgentAlerts: function() { loadUrgentAlerts(); },
+    resolveUrgentAlert: function(e, t) { resolveUrgentAlertById(t.dataset.id); },
     openDrugModal: function() { openDrugModal(); },
     exportData: function() { exportData(); },
     triggerFileInput: function() { document.getElementById('import-file-input').click(); },
@@ -3867,6 +3873,141 @@ function renderQualityDashboard() {
       }
       dupEl.innerHTML = dHtml;
     }
+  }
+}
+
+/* ═══════════════════════════════════════════
+   URGENT ALERTS (ประกาศด่วน) — admin panel
+   Alerts reach clients through the service worker's 5-minute poll of
+   checkUrgentAlerts. GAS writes/reads them in ONE shared spreadsheet
+   (getAlertSS) so the admin deployment and the SW's analytics deployment
+   agree — see gas-complete.js. Requires GAS 5.73.0+.
+   ═══════════════════════════════════════════ */
+const ALERT_SEVERITY = {
+  high:   { label: 'สูง',   icon: '🔴' },
+  medium: { label: 'กลาง', icon: '🟠' },
+  low:    { label: 'ต่ำ',   icon: '🟡' }
+};
+const ALERT_TYPE_LABEL = {
+  safety_alert: 'ความปลอดภัย', recall: 'เรียกคืนยา',
+  shortage: 'ยาขาดคราว', info: 'ข่าวสาร'
+};
+
+function openAlertForm() {
+  const f = document.getElementById('alert-form');
+  if (f) f.style.display = '';
+  const t = document.getElementById('alert-title');
+  if (t) t.focus();
+}
+
+function closeAlertForm() {
+  const f = document.getElementById('alert-form');
+  if (f) f.style.display = 'none';
+  ['alert-title', 'alert-message', 'alert-drug', 'alert-action'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+async function loadUrgentAlerts() {
+  showLoading('กำลังโหลดประกาศ...');
+  try {
+    const result = await apiCall('listUrgentAlerts');
+    _throwIfApiRejected(result, 'listUrgentAlerts');
+    state.urgentAlerts = result.alerts || [];
+    renderUrgentAlerts();
+  } catch (err) {
+    toast('❌ โหลดประกาศไม่สำเร็จ: ' + (err.message || err), 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+function renderUrgentAlerts() {
+  const tbody = document.getElementById('alerts-table-body');
+  if (!tbody) return;
+  const alerts = (state.urgentAlerts || []).slice().sort(function(a, b) {
+    return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+  });
+
+  const activeCount = alerts.filter(function(a) { return a.status !== 'resolved'; }).length;
+  const badge = document.getElementById('alerts-count');
+  if (badge) {
+    badge.textContent = String(activeCount);
+    badge.style.display = activeCount > 0 ? '' : 'none';
+  }
+
+  if (!alerts.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px">ยังไม่มีประกาศ</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = alerts.map(function(a) {
+    const resolved = a.status === 'resolved';
+    const sev = ALERT_SEVERITY[a.severity] || ALERT_SEVERITY.medium;
+    const when = a.createdAt ? String(a.createdAt).replace('T', ' ').slice(0, 16) : '-';
+    const typeLabel = ALERT_TYPE_LABEL[a.type] || a.type || '';
+    return '<tr' + (resolved ? ' style="opacity:.55"' : '') + '>' +
+      '<td>' + (resolved ? '<span style="color:var(--text-muted)">ปิดแล้ว</span>' : '<strong style="color:#dc2626">กำลังแสดง</strong>') + '</td>' +
+      '<td>' + sev.icon + ' ' + escHtml(sev.label) + '</td>' +
+      '<td><strong>' + escHtml(a.title) + '</strong>' +
+        '<div style="font-size:11px;color:var(--text-muted)">' + escHtml(typeLabel) + ' · ' + escHtml(a.message) + '</div></td>' +
+      '<td>' + escHtml(a.drugName || '-') + '</td>' +
+      '<td style="font-size:12px">' + escHtml(when) + '</td>' +
+      '<td style="font-size:12px">' + escHtml(a.createdBy || '-') + '</td>' +
+      '<td>' + (resolved ? '-' :
+        '<button class="btn btn-outline" style="padding:4px 10px;font-size:12px" data-action="resolveUrgentAlert" data-id="' +
+          escHtml(a.id) + '">ปิดประกาศ</button>') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function submitUrgentAlert() {
+  const val = function(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const title = val('alert-title');
+  const message = val('alert-message');
+  if (!title || !message) { toast('⚠️ ต้องกรอกหัวข้อและรายละเอียด', 'error'); return; }
+
+  const severity = val('alert-severity') || 'medium';
+  const sev = ALERT_SEVERITY[severity] || ALERT_SEVERITY.medium;
+  // Alerts push to EVERY user's device — make the blast radius explicit.
+  if (!confirm('ส่งประกาศนี้ถึงผู้ใช้แอปทุกคน?\n\n' + sev.icon + ' ' + sev.label + ' — ' + title +
+               '\n\nผู้ใช้ที่เปิดแอปไว้จะได้รับภายใน ~5 นาที')) return;
+
+  const btn = document.getElementById('btn-submit-alert');
+  if (btn) btn.disabled = true;
+  showLoading('กำลังส่งประกาศ...');
+  try {
+    const result = await apiCall('createUrgentAlert', {
+      title: title, message: message, severity: severity,
+      type: val('alert-type') || 'safety_alert',
+      drugName: val('alert-drug'), actionRequired: val('alert-action')
+    });
+    _throwIfApiRejected(result, 'createUrgentAlert');
+    toast('✅ ส่งประกาศแล้ว', 'success');
+    closeAlertForm();
+    await loadUrgentAlerts();
+  } catch (err) {
+    toast('❌ ส่งประกาศไม่สำเร็จ: ' + (err.message || err), 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    hideLoading();
+  }
+}
+
+async function resolveUrgentAlertById(alertId) {
+  if (!alertId) return;
+  if (!confirm('ปิดประกาศนี้? ผู้ใช้จะไม่เห็นประกาศนี้อีก')) return;
+  showLoading('กำลังปิดประกาศ...');
+  try {
+    const result = await apiCall('resolveUrgentAlert', { alertId: alertId });
+    _throwIfApiRejected(result, 'resolveUrgentAlert');
+    toast('✅ ปิดประกาศแล้ว', 'success');
+    await loadUrgentAlerts();
+  } catch (err) {
+    toast('❌ ปิดประกาศไม่สำเร็จ: ' + (err.message || err), 'error');
+  } finally {
+    hideLoading();
   }
 }
 

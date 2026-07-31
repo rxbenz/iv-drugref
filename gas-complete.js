@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.72.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.72.0 = doPost routes API actions, shared with doGet)
+var GAS_VERSION = '5.73.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.73.0 = urgent-alert admin routes + shared alert spreadsheet)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -341,6 +341,12 @@ function routeApiAction(action, user, data, e) {
     // ── Urgent Alerts ──
     case 'checkurgentalerts':
       return handleCheckUrgentAlerts(params.since);
+    case 'listurgentalerts':
+      return handleListUrgentAlerts(user);
+    case 'createurgentalert':
+      return createUrgentAlert(user, data);
+    case 'resolveurgentalert':
+      return resolveUrgentAlert(user, data);
 
     default:
       return null;
@@ -2488,9 +2494,43 @@ function handleBulkCreateAllergyRefs(user, data) {
 // URGENT ALERTS
 // ════════════════════════════════════════════════
 
+// Urgent alerts live in ONE spreadsheet regardless of which deployment runs the
+// code (v5.56.0). The service worker polls checkUrgentAlerts on the ANALYTICS
+// web app while the admin panel writes through the ADMIN web app — with the
+// bound-spreadsheet getSS() those are two DIFFERENT sheets, so an alert created
+// in admin would never reach any client. getDrugSS() opens the analytics
+// spreadsheet by id (same one the SW reads), so create/resolve/read agree.
+function getAlertSS() {
+  return getDrugSS();
+}
+
+// Read the UrgentAlerts tab from the shared alert spreadsheet as objects.
+function getAlertRows() {
+  var sheet = getAlertSS().getSheetByName(SHEETS.URGENT_ALERTS);
+  if (!sheet) return [];
+  var all = sheet.getDataRange().getValues();
+  if (all.length < 2) return [];
+  var headers = all[0];
+  var out = [];
+  for (var i = 1; i < all.length; i++) {
+    var row = {};
+    var blank = true;
+    for (var c = 0; c < headers.length; c++) {
+      var key = String(headers[c] || '').trim();
+      if (!key) continue;
+      var v = all[i][c];
+      if (v instanceof Date) v = v.toISOString();
+      row[key] = v;
+      if (v !== '' && v != null) blank = false;
+    }
+    if (!blank) out.push(row);
+  }
+  return out;
+}
+
 function handleCheckUrgentAlerts(since) {
   var sinceTs = parseInt(since) || 0;
-  var alerts = getSheetData(SHEETS.URGENT_ALERTS);
+  var alerts = getAlertRows();
 
   // Filter active (not resolved)
   var active = alerts.filter(function(a) {
@@ -2515,26 +2555,56 @@ function handleCheckUrgentAlerts(since) {
 // UTILITY: Admin Alert Management
 // ════════════════════════════════════════════════
 
+var URGENT_ALERT_HEADERS = ['id', 'type', 'severity', 'title', 'message', 'drugName',
+  'actionRequired', 'status', 'createdAt', 'createdBy'];
+
+// Admin panel: list every alert (active + resolved) for the management table.
+function handleListUrgentAlerts(user) {
+  var perm = checkPermission(user, 'admin');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  return jsonResponse({ success: true, alerts: getAlertRows(), myRole: perm.role });
+}
+
 function createUrgentAlert(user, data) {
   var perm = checkPermission(user, 'admin');
-  if (!perm.allowed) return jsonResponse({ permissionDenied: true });
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+
+  if (!data || !String(data.title || '').trim() || !String(data.message || '').trim()) {
+    return jsonResponse({ success: false, error: 'ต้องระบุหัวข้อและรายละเอียดของประกาศ' });
+  }
 
   var id = 'ALERT_' + Date.now();
-  appendToSheet(SHEETS.URGENT_ALERTS,
-    ['id', 'type', 'severity', 'title', 'message', 'drugName', 'actionRequired', 'status', 'createdAt', 'createdBy'],
-    [id, data.type || 'safety_alert', data.severity || 'medium', data.title || '', data.message || '',
-     data.drugName || '', data.actionRequired || '', 'active', new Date().toISOString(), user]
-  );
+  // Write into the SHARED alert spreadsheet (see getAlertSS) so the service
+  // worker's poll — which runs against the analytics deployment — sees it.
+  var sheet = getAlertSS().getSheetByName(SHEETS.URGENT_ALERTS);
+  if (!sheet) {
+    sheet = getAlertSS().insertSheet(SHEETS.URGENT_ALERTS);
+    sheet.appendRow(URGENT_ALERT_HEADERS);
+  }
+  var headers = sheet.getDataRange().getValues()[0] || URGENT_ALERT_HEADERS;
+  var values = {
+    id: id, type: data.type || 'safety_alert', severity: data.severity || 'medium',
+    title: String(data.title).trim(), message: String(data.message).trim(),
+    drugName: data.drugName || '', actionRequired: data.actionRequired || '',
+    status: 'active', createdAt: new Date().toISOString(), createdBy: user
+  };
+  // Build the row BY HEADER POSITION (a positional appendRow would scramble
+  // columns if the sheet's order ever differs — the drug-sheet lesson).
+  var row = headers.map(function(h) {
+    var key = String(h || '').trim();
+    return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : '';
+  });
+  sheet.appendRow(row);
 
   addAuditLog(user, 'createUrgentAlert', id, data.drugName, data.title);
-  return jsonResponse({ success: true, alertId: id });
+  return jsonResponse({ success: true, alertId: id, alert: values });
 }
 
 function resolveUrgentAlert(user, data) {
   var perm = checkPermission(user, 'admin');
-  if (!perm.allowed) return jsonResponse({ permissionDenied: true });
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
 
-  var sheet = getSS().getSheetByName(SHEETS.URGENT_ALERTS);
+  var sheet = getAlertSS().getSheetByName(SHEETS.URGENT_ALERTS);
   if (!sheet) return errorResponse('UrgentAlerts sheet not found');
 
   var all = sheet.getDataRange().getValues();

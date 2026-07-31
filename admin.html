@@ -76,6 +76,7 @@
     <button class="tab-btn" data-tab="ddi" data-action="switchTab">💊 DDI</button>
     <button class="tab-btn" data-tab="renal" data-action="switchTab">💊 Renal Dosing</button>
     <button class="tab-btn" data-tab="allergy" data-action="switchTab">🛡️ Allergy</button>
+    <button class="tab-btn" data-tab="alerts" data-action="switchTab">📢 ประกาศด่วน<span class="tab-badge" id="alerts-count" style="display:none">0</span></button>
     <button class="tab-btn" data-tab="analytics" data-action="switchTab">📈 Analytics</button>
     <button class="tab-btn" data-tab="settings" data-action="switchTab">⚙️ ตั้งค่า</button>
   </div>
@@ -577,6 +578,64 @@
         </table>
       </div>
       <div class="pagination" id="allergy-pagination"></div>
+    </div>
+
+<!-- ═══════ PANEL: URGENT ALERTS ═══════ -->
+    <div class="panel" id="alerts-panel">
+      <h2 style="margin-bottom:4px">📢 ประกาศด่วน (Urgent Alerts)</h2>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">
+        ส่งประกาศถึงผู้ใช้แอปทุกคน — เครื่องที่เปิดแอปไว้จะได้รับภายใน ~5 นาที ·
+        ใช้กับเรื่อง<strong>ด่วนด้านความปลอดภัย</strong>เท่านั้น (เรียกคืนยา, ข้อควรระวังใหม่)
+      </p>
+
+      <div class="toolbar" style="margin-top:8px">
+        <button class="btn btn-primary" data-action="openAlertForm">＋ สร้างประกาศใหม่</button>
+        <button class="btn btn-outline" data-action="loadUrgentAlerts">🔄 รีเฟรช</button>
+      </div>
+
+      <!-- create form (hidden until "สร้างประกาศใหม่") -->
+      <div id="alert-form" style="display:none;margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-soft,rgba(0,0,0,.02))">
+        <div class="form-row" style="display:flex;gap:12px;flex-wrap:wrap">
+          <label style="flex:1;min-width:180px">ระดับความรุนแรง
+            <select class="filter-select" id="alert-severity" style="width:100%">
+              <option value="high">🔴 สูง — ต้องดำเนินการทันที</option>
+              <option value="medium" selected>🟠 กลาง — ควรทราบโดยเร็ว</option>
+              <option value="low">🟡 ต่ำ — เพื่อทราบ</option>
+            </select>
+          </label>
+          <label style="flex:1;min-width:180px">ประเภท
+            <select class="filter-select" id="alert-type" style="width:100%">
+              <option value="safety_alert">⚠️ แจ้งเตือนความปลอดภัย</option>
+              <option value="recall">📦 เรียกคืนยา</option>
+              <option value="shortage">📉 ยาขาดคราว</option>
+              <option value="info">ℹ️ ข่าวสารทั่วไป</option>
+            </select>
+          </label>
+          <label style="flex:1;min-width:180px">ชื่อยา (ถ้ามี)
+            <input type="text" class="search-box" id="alert-drug" placeholder="เช่น Vancomycin" style="width:100%">
+          </label>
+        </div>
+        <label style="display:block;margin-top:12px">หัวข้อ <span style="color:#dc2626">*</span>
+          <input type="text" class="search-box" id="alert-title" maxlength="80" placeholder="เช่น เรียกคืน Vancomycin lot A123" style="width:100%">
+        </label>
+        <label style="display:block;margin-top:12px">รายละเอียด <span style="color:#dc2626">*</span>
+          <textarea id="alert-message" rows="3" maxlength="500" placeholder="อธิบายสั้น ๆ ว่าเกิดอะไรขึ้น" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></textarea>
+        </label>
+        <label style="display:block;margin-top:12px">สิ่งที่ต้องทำ (ถ้ามี)
+          <input type="text" class="search-box" id="alert-action" maxlength="200" placeholder="เช่น ส่งคืนคลังยาทันที" style="width:100%">
+        </label>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn btn-primary" data-action="submitUrgentAlert" id="btn-submit-alert">📢 ส่งประกาศ</button>
+          <button class="btn btn-outline" data-action="closeAlertForm">ยกเลิก</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:16px">
+        <table class="drug-table">
+          <thead><tr><th>สถานะ</th><th>ระดับ</th><th>หัวข้อ</th><th>ยา</th><th>สร้างเมื่อ</th><th>โดย</th><th>จัดการ</th></tr></thead>
+          <tbody id="alerts-table-body"></tbody>
+        </table>
+      </div>
     </div>
 
 <!-- ═══════ PANEL: ANALYTICS SUMMARY ═══════ -->

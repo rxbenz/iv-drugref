@@ -25,7 +25,7 @@
 // ──────────────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────────────
-var GAS_VERSION = '5.73.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.73.0 = urgent-alert admin routes + shared alert spreadsheet)
+var GAS_VERSION = '5.74.0'; // ← bump เมื่อแก้ GAS แล้ว deploy ใหม่ (5.74.0 = LINE broadcast for urgent alerts + quota check)
 
 var SPREADSHEET_ID = ''; // ← ใส่ ID ของ Google Sheets (ถ้าว่าง = ใช้ bound spreadsheet)
 
@@ -347,6 +347,8 @@ function routeApiAction(action, user, data, e) {
       return createUrgentAlert(user, data);
     case 'resolveurgentalert':
       return resolveUrgentAlert(user, data);
+    case 'linequota':
+      return handleLineQuota(user);
 
     default:
       return null;
@@ -2565,6 +2567,101 @@ function handleListUrgentAlerts(user) {
   return jsonResponse({ success: true, alerts: getAlertRows(), myRole: perm.role });
 }
 
+// ════════════════════════════════════════════════
+// LINE BROADCAST (Phase 6) — push an urgent alert to the OA's followers
+// ── The channel access token lives in Script Properties (LINE_CHANNEL_ACCESS_TOKEN),
+//    NEVER in this file: the repo is public. Same rule as SUPABASE_SERVICE_KEY.
+// ── Broadcast COSTS QUOTA: 1 message per follower, against the OA's monthly
+//    allowance (free plan = 300/month, hard ceiling). Replies from the bot are
+//    free; only this path spends. The admin UI shows the remaining quota and
+//    asks for confirmation before calling it.
+// ════════════════════════════════════════════════
+function _lineToken() {
+  var t = PropertiesService.getScriptProperties().getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  if (!t) throw new Error('LINE_CHANNEL_ACCESS_TOKEN not set in Script Properties');
+  return t;
+}
+
+// GET a LINE Messaging API endpoint with the channel token. Returns parsed JSON.
+function _lineGet(path) {
+  var resp = UrlFetchApp.fetch('https://api.line.me/v2/bot/' + path, {
+    method: 'get',
+    headers: { Authorization: 'Bearer ' + _lineToken() },
+    muteHttpExceptions: true
+  });
+  var code = resp.getResponseCode();
+  var body = resp.getContentText();
+  if (code !== 200) throw new Error('LINE ' + path + ' → HTTP ' + code + ' ' + body);
+  return JSON.parse(body || '{}');
+}
+
+// Remaining broadcast quota, for the pre-send confirmation in the admin panel.
+// `type: 'none'` means the plan has no monthly limit (nothing to warn about).
+function handleLineQuota(user) {
+  var perm = checkPermission(user, 'admin');
+  if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
+  try {
+    var quota = _lineGet('message/quota');                 // {type, value}
+    var used = _lineGet('message/quota/consumption');      // {totalUsage}
+    var limit = (quota && quota.type === 'limited') ? Number(quota.value) : null;
+    var totalUsage = Number((used && used.totalUsage) || 0);
+    return jsonResponse({
+      success: true,
+      limited: limit !== null,
+      limit: limit,
+      used: totalUsage,
+      remaining: limit === null ? null : Math.max(0, limit - totalUsage),
+      followers: _lineFollowerCount()
+    });
+  } catch (e) {
+    return jsonResponse({ success: false, error: String(e.message || e) });
+  }
+}
+
+// Follower count drives the cost estimate (1 broadcast = 1 message per follower).
+// Best-effort: LINE only publishes yesterday's figure, and a brand-new OA has
+// none at all — the UI must still work, just without an estimate.
+function _lineFollowerCount() {
+  try {
+    var d = new Date(Date.now() - 86400000);
+    var ymd = Utilities.formatDate(d, 'Asia/Bangkok', 'yyyyMMdd');
+    var r = _lineGet('insight/followers?date=' + ymd);
+    return (r && r.status === 'ready' && r.followers != null) ? Number(r.followers) : null;
+  } catch (e) { return null; }
+}
+
+// Send one alert to every follower. BEST-EFFORT BY DESIGN: a LINE failure must
+// never fail alert creation — the in-app alert is the primary channel and is
+// already written to the sheet by the time this runs.
+function _lineBroadcastAlert(alert) {
+  try {
+    var sev = String(alert.severity || 'medium');
+    var icon = sev === 'critical' ? '🚨' : sev === 'high' ? '⚠️' : sev === 'low' ? 'ℹ️' : '⚠️';
+    var lines = [icon + ' ประกาศด่วน — IV DrugRef', '', String(alert.title || '')];
+    if (alert.drugName) lines.push('ยา: ' + alert.drugName);
+    lines.push('', String(alert.message || ''));
+    if (alert.actionRequired) lines.push('', '👉 สิ่งที่ต้องทำ: ' + alert.actionRequired);
+    lines.push('', 'เปิดแอป: https://rxbenz.github.io/iv-drugref/');
+
+    var resp = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/broadcast', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + _lineToken() },
+      payload: JSON.stringify({ messages: [{ type: 'text', text: lines.join('\n').slice(0, 4900) }] }),
+      muteHttpExceptions: true
+    });
+    var code = resp.getResponseCode();
+    var ok = (code === 200);
+    addAuditLog(alert.createdBy || 'system', 'lineBroadcast', alert.id, alert.drugName,
+                ok ? 'sent' : ('failed HTTP ' + code + ' ' + resp.getContentText()));
+    return ok ? { sent: true }
+              : { sent: false, error: 'HTTP ' + code + ' ' + resp.getContentText() };
+  } catch (e) {
+    try { addAuditLog(alert.createdBy || 'system', 'lineBroadcast', alert.id, alert.drugName, 'failed ' + e.message); } catch (e2) {}
+    return { sent: false, error: String(e.message || e) };
+  }
+}
+
 function createUrgentAlert(user, data) {
   var perm = checkPermission(user, 'admin');
   if (!perm.allowed) return jsonResponse({ permissionDenied: true, error: 'ไม่มีสิทธิ์' });
@@ -2597,7 +2694,15 @@ function createUrgentAlert(user, data) {
   sheet.appendRow(row);
 
   addAuditLog(user, 'createUrgentAlert', id, data.drugName, data.title);
-  return jsonResponse({ success: true, alertId: id, alert: values });
+
+  // Optional LINE broadcast. Runs AFTER the row is written and can only report,
+  // never throw — the in-app alert must stand on its own if LINE is unreachable
+  // or the token is missing.
+  var line = null;
+  if (data.lineBroadcast === true || data.lineBroadcast === 'true') {
+    line = _lineBroadcastAlert(values);
+  }
+  return jsonResponse({ success: true, alertId: id, alert: values, line: line });
 }
 
 function resolveUrgentAlert(user, data) {

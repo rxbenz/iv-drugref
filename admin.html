@@ -624,6 +624,18 @@
         <label style="display:block;margin-top:12px">สิ่งที่ต้องทำ (ถ้ามี)
           <input type="text" class="search-box" id="alert-action" maxlength="200" placeholder="เช่น ส่งคืนคลังยาทันที" style="width:100%">
         </label>
+        <div style="margin-top:14px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer">
+            <input type="checkbox" id="alert-line" data-action="toggleAlertLine" style="margin-top:3px">
+            <span>
+              <strong>ส่งเข้า LINE ด้วย</strong> (broadcast ถึงผู้ติดตาม OA)
+              <span style="display:block;font-size:12px;color:var(--text-muted);margin-top:2px">
+                กินโควตาข้อความ — 1 ครั้ง = 1 ข้อความต่อผู้ติดตาม 1 คน
+              </span>
+            </span>
+          </label>
+          <div id="alert-line-quota" style="display:none;margin-top:8px;font-size:13px"></div>
+        </div>
         <div style="margin-top:14px;display:flex;gap:8px">
           <button class="btn btn-primary" data-action="submitUrgentAlert" id="btn-submit-alert">📢 ส่งประกาศ</button>
           <button class="btn btn-outline" data-action="closeAlertForm">ยกเลิก</button>

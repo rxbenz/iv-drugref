@@ -303,6 +303,50 @@ async function apiCall(action, data = {}) {
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
 const EXPECTED_GAS_VERSION = '5.72.0';
 
+// [gas-version-verdict] — sliced by test/gas-version-verdict.test.js
+
+/**
+ * Compare two version strings NUMERICALLY: -1 / 0 / 1.
+ * String comparison would rank "5.9.0" above "5.72.0". Missing parts count as
+ * 0 so "5.72" equals "5.72.0", a leading "v" is ignored, and a non-numeric part
+ * counts as 0 rather than poisoning the result with NaN.
+ */
+function compareVersions(a, b) {
+  const parts = (v) => String(v == null ? '' : v).trim().replace(/^v/i, '').split('.');
+  const A = parts(a), B = parts(b);
+  for (let i = 0; i < Math.max(A.length, B.length); i++) {
+    const x = parseInt(A[i], 10) || 0;
+    const y = parseInt(B[i], 10) || 0;
+    if (x !== y) return x < y ? -1 : 1;
+  }
+  return 0;
+}
+
+/**
+ * What to tell the admin about the deployed GAS version.
+ *
+ * A backend NEWER than this build expects is the normal state between deploying
+ * gas-complete.js and the site finishing its own deploy. Reporting every
+ * mismatch as "ยัง deploy ไม่ครบ?" sent the maintainer back to the GAS editor to
+ * redo a deploy that had already succeeded — so the two directions now read
+ * differently, and only the older-backend case asks for action.
+ */
+function gasVersionVerdict(expected, deployed, fetchError) {
+  if (fetchError) return { icon: '⚠️', note: fetchError };
+  if (!deployed) return { icon: '⚠️', note: 'คำตอบจาก GAS ไม่มีเลขเวอร์ชัน' };
+
+  const cmp = compareVersions(deployed, expected);
+  if (cmp === 0) return { icon: '✅', note: 'ตรงกับโค้ด' };
+  if (cmp < 0) {
+    return { icon: '⚠️', note: 'เก่ากว่าที่แอปต้องการ (v' + expected +
+      ') — วาง gas-complete.js ใหม่ใน GAS แล้ว Deploy' };
+  }
+  return { icon: 'ℹ️', note: 'ใหม่กว่าที่แอปรุ่นนี้คาดหวัง (v' + expected +
+    ') — รอเว็บ deploy ตามมา ไม่ต้องทำอะไร' };
+}
+
+// [/gas-version-verdict]
+
 async function checkBackendVersion() {
   const box = document.getElementById('version-check-result');
   if (!box) return;
@@ -327,20 +371,20 @@ async function checkBackendVersion() {
     if (!res.ok) supaErr = 'HTTP ' + res.status + (res.status === 404 ? ' (ยังไม่ได้รัน ddi.sql?)' : '');
   } catch (e) { supaErr = e.message; }
 
-  const gasMatch = gasVer && gasVer === EXPECTED_GAS_VERSION;
-  const row = (label, value, ok, note) =>
+  const gas = gasVersionVerdict(EXPECTED_GAS_VERSION, gasVer, gasErr);
+  const row = (label, value, icon, note) =>
     `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-       <span style="width:18px">${ok ? '✅' : '⚠️'}</span>
+       <span style="width:18px">${icon}</span>
        <span style="flex:1;font-size:13px">${escHtml(label)}</span>
        <code style="font-size:12px">${escHtml(value)}</code>
        ${note ? `<span style="font-size:11px;color:var(--text-muted)">${escHtml(note)}</span>` : ''}
      </div>`;
 
   box.innerHTML =
-    row('App version (frontend)', 'v' + appVer, true, '') +
-    row('GAS version (deployed)', gasErr ? 'error' : ('v' + (gasVer || '?')), gasMatch,
-        gasErr ? gasErr : (gasMatch ? 'ตรงกับโค้ด' : 'คาดหวัง v' + EXPECTED_GAS_VERSION + ' — ยัง deploy ไม่ครบ?')) +
-    row('Supabase (ddi_pairs)', supaOk ? 'reachable' : 'unreachable', supaOk, supaErr || 'พร้อมใช้งาน DDI');
+    row('App version (frontend)', 'v' + appVer, '✅', '') +
+    row('GAS version (deployed)', gasErr ? 'error' : ('v' + (gasVer || '?')), gas.icon, gas.note) +
+    row('Supabase (ddi_pairs)', supaOk ? 'reachable' : 'unreachable', supaOk ? '✅' : '⚠️',
+        supaErr || 'พร้อมใช้งาน DDI');
 }
 
 async function testConnection() {

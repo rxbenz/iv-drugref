@@ -86,7 +86,7 @@ function makeSpreadsheet(sheets) {
  * Returns the sandbox plus handles to the fake sheets and a json() helper
  * that unwraps what the handlers return through ContentService.
  */
-function loadGas({ drugSheetRows, adminUsers } = {}) {
+function loadGas({ drugSheetRows, adminUsers, scriptProperties, urlFetch } = {}) {
   const drugSheet = makeSheet('DrugData', drugSheetRows || []);
   const auditSheet = makeSheet('AuditLog', [['timestamp', 'user', 'action', 'drugId', 'drugName', 'details']]);
   const usersSheet = makeSheet('AdminUsers', adminUsers || [
@@ -96,6 +96,8 @@ function loadGas({ drugSheetRows, adminUsers } = {}) {
 
   const drugSS = makeSpreadsheet({ DrugData: drugSheet });
   const adminSS = makeSpreadsheet({ AuditLog: auditSheet, AdminUsers: usersSheet });
+  const props = Object.assign({}, scriptProperties);
+  const fetchCalls = [];
 
   const sandbox = {
     console,
@@ -108,9 +110,36 @@ function loadGas({ drugSheetRows, adminUsers } = {}) {
       createTextOutput: (text) => ({ _text: text, setMimeType() { return this; } }),
     },
     Logger: { log() {} },
-    // Reached only by the best-effort Supabase dual-write, which is wrapped in
-    // try/catch — left undefined so the sync is a no-op in tests.
-    Utilities: undefined,
+    // Minimal Utilities: formatDate is needed by the LINE follower-insight call
+    // (which dates its query). The Supabase dual-write also reaches for
+    // Utilities, but it is best-effort inside try/catch and has no service key
+    // here, so it still no-ops.
+    Utilities: {
+      formatDate: (d, _tz, fmt) => {
+        const p = (n) => String(n).padStart(2, '0');
+        return String(fmt).replace('yyyy', d.getUTCFullYear())
+          .replace('MM', p(d.getUTCMonth() + 1)).replace('dd', p(d.getUTCDate()));
+      },
+      sleep() {},
+    },
+    // Secrets live in Script Properties (LINE_CHANNEL_ACCESS_TOKEN,
+    // SUPABASE_SERVICE_KEY) — pass `scriptProperties` to simulate "configured"
+    // vs "never set", which changes what the LINE broadcast path reports.
+    PropertiesService: {
+      getScriptProperties: () => ({
+        getProperty: (k) => (props && k in props ? props[k] : null),
+        setProperty(k, v) { props[k] = v; },
+      }),
+    },
+    // Outgoing HTTP (LINE Messaging API). Every call is recorded on
+    // `fetchCalls`; `urlFetch(url, opts)` decides the reply as {code, body}.
+    UrlFetchApp: {
+      fetch(url, opts) {
+        fetchCalls.push({ url, method: (opts && opts.method) || 'get', opts });
+        const r = (urlFetch ? urlFetch(url, opts) : null) || { code: 200, body: '{}' };
+        return { getResponseCode: () => r.code, getContentText: () => r.body };
+      },
+    },
   };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'gas-complete.js'), 'utf8'),
@@ -121,6 +150,10 @@ function loadGas({ drugSheetRows, adminUsers } = {}) {
     drugSheet,
     auditSheet,
     usersSheet,
+    /** Every UrlFetchApp call the handlers made, in order. */
+    fetchCalls,
+    /** Script Properties as the handlers see them (mutations included). */
+    props,
     /** Unwrap a handler's ContentService response into a plain object. */
     json: (res) => JSON.parse(res._text),
     /** Rebuild the object getSheetData() would produce for a drug row. */

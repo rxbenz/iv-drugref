@@ -301,7 +301,7 @@ async function apiCall(action, data = {}) {
 
 // Expected GAS backend version — keep in sync with GAS_VERSION in gas-complete.js.
 // If the deployed GAS reports an older value, the editor copy wasn't redeployed.
-const EXPECTED_GAS_VERSION = '5.73.0';
+const EXPECTED_GAS_VERSION = '5.74.0';
 
 // [gas-version-verdict] — sliced by test/gas-version-verdict.test.js
 
@@ -3699,7 +3699,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAuditLog: function() { renderAuditLog(); },
     filterCompat: function() { filterCompat(); },
     filterRenal: function() { filterRenal(); },
-    filterAllergy: function() { filterAllergy(); }
+    filterAllergy: function() { filterAllergy(); },
+    toggleAlertLine: function() { toggleAlertLine(); }
   });
 
   // Init Google Auth after GIS library loads
@@ -3966,6 +3967,11 @@ function closeAlertForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  // Reset the LINE opt-in too — it must never stay ticked for the next alert.
+  const lineCb = document.getElementById('alert-line');
+  if (lineCb) lineCb.checked = false;
+  const lineBox = document.getElementById('alert-line-quota');
+  if (lineBox) lineBox.style.display = 'none';
 }
 
 async function loadUrgentAlerts() {
@@ -4021,6 +4027,43 @@ function renderUrgentAlerts() {
   }).join('');
 }
 
+// Remaining LINE quota, fetched when the admin ticks "ส่งเข้า LINE ด้วย" so the
+// cost is visible BEFORE sending. Cached per page-load — the number only moves
+// when something is actually broadcast.
+let _lineQuotaCache = null;
+async function toggleAlertLine() {
+  const cb = document.getElementById('alert-line');
+  const box = document.getElementById('alert-line-quota');
+  if (!cb || !box) return;
+  if (!cb.checked) { box.style.display = 'none'; return; }
+
+  box.style.display = 'block';
+  box.innerHTML = '<span style="color:var(--text-muted)">กำลังตรวจโควตา…</span>';
+  try {
+    if (!_lineQuotaCache) _lineQuotaCache = await apiCall('lineQuota', {});
+    const q = _lineQuotaCache;
+    if (!q || q.success === false) throw new Error((q && q.error) || 'ตรวจโควตาไม่สำเร็จ');
+    box.innerHTML = _renderLineQuota(q);
+  } catch (err) {
+    _lineQuotaCache = null;
+    // Don't block sending — the send itself reports its own outcome.
+    box.innerHTML = '<span style="color:#b45309">⚠️ ตรวจโควตาไม่ได้: ' + escHtml(err.message || String(err)) +
+      '<br>ยังส่งได้ แต่จะไม่รู้ยอดคงเหลือล่วงหน้า</span>';
+  }
+}
+
+function _renderLineQuota(q) {
+  if (!q.limited) return '<span style="color:#15803d">✅ แพ็กเกจนี้ไม่จำกัดจำนวนข้อความ</span>';
+  const cost = (q.followers == null) ? null : Number(q.followers);
+  const left = Number(q.remaining || 0);
+  const tight = cost != null && cost > left;
+  return '<div>เหลือโควตาเดือนนี้: <strong>' + left + '</strong> / ' + q.limit + ' ข้อความ</div>' +
+    (cost == null
+      ? '<div style="color:var(--text-muted)">ยังไม่ทราบจำนวนผู้ติดตาม (LINE รายงานย้อนหลัง 1 วัน) — ประเมินยอดใช้ล่วงหน้าไม่ได้</div>'
+      : '<div' + (tight ? ' style="color:#b91c1c;font-weight:600"' : '') + '>ครั้งนี้จะใช้ ~' + cost +
+        ' ข้อความ (ผู้ติดตาม ' + cost + ' คน)' + (tight ? ' — เกินโควตาที่เหลือ!' : '') + '</div>');
+}
+
 async function submitUrgentAlert() {
   const val = function(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   const title = val('alert-title');
@@ -4029,9 +4072,22 @@ async function submitUrgentAlert() {
 
   const severity = val('alert-severity') || 'medium';
   const sev = ALERT_SEVERITY[severity] || ALERT_SEVERITY.medium;
-  // Alerts push to EVERY user's device — make the blast radius explicit.
-  if (!confirm('ส่งประกาศนี้ถึงผู้ใช้แอปทุกคน?\n\n' + sev.icon + ' ' + sev.label + ' — ' + title +
-               '\n\nผู้ใช้ที่เปิดแอปไว้จะได้รับภายใน ~5 นาที')) return;
+  const lineCb = document.getElementById('alert-line');
+  const viaLine = !!(lineCb && lineCb.checked);
+
+  // Alerts push to EVERY user's device — make the blast radius explicit, and
+  // spell out the LINE quota cost too, because that one cannot be undone.
+  let extra = '\n\nผู้ใช้ที่เปิดแอปไว้จะได้รับภายใน ~5 นาที';
+  if (viaLine) {
+    const q = _lineQuotaCache;
+    const cost = (q && q.followers != null) ? q.followers : null;
+    extra += '\n\n📣 ส่งเข้า LINE ด้วย (broadcast — ยกเลิกไม่ได้)';
+    if (q && q.limited) {
+      extra += '\nโควตาเหลือ ' + q.remaining + '/' + q.limit + ' ข้อความ' +
+               (cost != null ? ' · ครั้งนี้ใช้ ~' + cost + ' ข้อความ' : '');
+    }
+  }
+  if (!confirm('ส่งประกาศนี้ถึงผู้ใช้แอปทุกคน?\n\n' + sev.icon + ' ' + sev.label + ' — ' + title + extra)) return;
 
   const btn = document.getElementById('btn-submit-alert');
   if (btn) btn.disabled = true;
@@ -4040,10 +4096,20 @@ async function submitUrgentAlert() {
     const result = await apiCall('createUrgentAlert', {
       title: title, message: message, severity: severity,
       type: val('alert-type') || 'safety_alert',
-      drugName: val('alert-drug'), actionRequired: val('alert-action')
+      drugName: val('alert-drug'), actionRequired: val('alert-action'),
+      lineBroadcast: viaLine
     });
     _throwIfApiRejected(result, 'createUrgentAlert');
-    toast('✅ ส่งประกาศแล้ว', 'success');
+    // The alert itself is saved either way; report the LINE leg separately so a
+    // broadcast failure can't be mistaken for the announcement not going out.
+    if (viaLine && result.line && result.line.sent === false) {
+      toast('✅ ประกาศในแอปแล้ว — แต่ส่ง LINE ไม่สำเร็จ: ' + (result.line.error || ''), 'error');
+    } else if (viaLine && result.line && result.line.sent) {
+      _lineQuotaCache = null; // quota just moved
+      toast('✅ ส่งประกาศ + LINE แล้ว', 'success');
+    } else {
+      toast('✅ ส่งประกาศแล้ว', 'success');
+    }
     closeAlertForm();
     await loadUrgentAlerts();
   } catch (err) {

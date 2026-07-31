@@ -75,7 +75,7 @@ GAS ยังคงเหมาะกับงาน **ขาออก** (ยิ
 | Channel access token (ตัวเดียวกัน) | GAS Script Properties (`LINE_CHANNEL_ACCESS_TOKEN`) | broadcast ประกาศด่วน (Phase 6) |
 | LIFF ID | ไม่ใช่ secret (เป็นค่า public ใส่ในโค้ดได้) | สร้างลิงก์ `https://liff.line.me/{liffId}/...` |
 
-รายละเอียด + วิธี rotate ดู `SECRETS.md` (จะสร้างใน Phase 6)
+รายละเอียด + วิธี rotate ดู [`SECRETS.md`](SECRETS.md)
 
 ## กติกาความปลอดภัยทางคลินิก (ตายตัว ทุก phase)
 
@@ -90,12 +90,12 @@ GAS ยังคงเหมาะกับงาน **ขาออก** (ยิ
 | Phase | เนื้อหา | ขนาด | คู่มือ | สถานะ |
 |---|---|---|---|---|
 | 0 | เตรียมคอนโซล LINE + Supabase dashboard | S | [`01-prerequisites.md`](01-prerequisites.md) | ✅ เสร็จ (2026-07-17) |
-| 1 | กัน reload วนใน LINE + rich menu + LIFF | S/M | `02-rich-menu-liff.md` (จะสร้างตอนทำ) | ⬜ รอ Phase 0 |
-| 2 | โครงบอต: webhook + ตรวจลายเซ็น + ตอบเมนู | M | `03-webhook-bot.md` (จะสร้างตอนทำ) | ⬜ |
-| 3 | บอตค้นข้อมูลยา (Flex card + deep link) | M | — | ⬜ |
-| 4 | บอตเช็คคู่ Y-site + renal + deep link ใหม่ 2 จุด | M | — | ⬜ |
-| 5 | หน้าจอ "ประกาศด่วน" ใน admin + route GAS | M | `04-urgent-alerts.md` (จะสร้างตอนทำ) | ⬜ |
-| 6 | Broadcast ประกาศด่วนเข้า LINE + ตัวเช็คโควตา | S | `04-urgent-alerts.md` + `SECRETS.md` | ⬜ |
+| 1 | กัน reload วนใน LINE + rich menu + LIFF | S/M | [`02-rich-menu-liff.md`](02-rich-menu-liff.md) | ✅ live (v5.53.0) |
+| 2 | โครงบอต: webhook + ตรวจลายเซ็น + ตอบเมนู | M | [`03-webhook-bot.md`](03-webhook-bot.md) | ✅ live |
+| 3 | บอตค้นข้อมูลยา (Flex card + deep link) | M | [`03-webhook-bot.md`](03-webhook-bot.md) | ✅ live |
+| 4 | บอตเช็คคู่ Y-site + renal + deep link ใหม่ 2 จุด | M | [`03-webhook-bot.md`](03-webhook-bot.md) | ✅ live (v5.54.0) |
+| 5 | หน้าจอ "ประกาศด่วน" ใน admin + route GAS | M | [`04-urgent-alerts.md`](04-urgent-alerts.md) | ✅ live (v5.79.0) |
+| 6 | Broadcast ประกาศด่วนเข้า LINE + ตัวเช็คโควตา | S | [`04-urgent-alerts.md`](04-urgent-alerts.md) + [`SECRETS.md`](SECRETS.md) | ✅ (รอ deploy GAS 5.74.0) |
 | 7 | อัปเกรดปุ่มแชร์ (shareTargetPicker) | M | `05-share-upgrade.md` (จะสร้างตอนทำ) | ⬜ |
 
 แผนแม่บทฉบับเต็ม (รายละเอียดต่อ phase + ตารางความเสี่ยง): [`00-plan.md`](00-plan.md)

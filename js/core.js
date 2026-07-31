@@ -1132,6 +1132,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.79.1',
+      date: '2026-07-31',
+      title: "แก้บั๊กหน้า Admin/Dashboard",
+      items: [
+        "แก้หน้า Analytics ใน Admin ที่ขึ้น error เมื่อมีคำค้นหาเป็นตัวเลข (เช่น ค้น \"500\") ทำให้โหลดสถิติไม่ขึ้นทั้งหน้า",
+        "แก้เลขเวอร์ชันท้ายหน้า Dashboard ที่ค้างเป็นเลขเก่า ให้ตรงกับเวอร์ชันแอปจริงเสมอ"
+      ]
+    },
+    {
       v: '5.79.0',
       date: '2026-07-31',
       title: "ประกาศด่วนถึงผู้ใช้ทุกคน 📢",
@@ -1602,7 +1611,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.79.0';
+  const VERSION = '5.79.1';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

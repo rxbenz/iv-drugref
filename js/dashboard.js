@@ -455,7 +455,10 @@
     if (tab === 'survey' || tab === 'overview') renderSurvey(surveys, microFeedback, susItems);
     if (tab === 'journey' || tab === 'overview') renderJourney(pageViews, sessions, searches, doseCalcs, tdmUsage, featureUse);
 
-    document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length + searches.length + tdmUsage.length + renalDosing.length + compatUsage.length} rows | Dashboard v6.2`;
+    // Version is single-sourced from core.js VERSION (never hardcode a number
+    // here — the old literal "Dashboard v6.2" drifted from the shipped app version).
+    const _appVer = (typeof IVDrugRef !== 'undefined' && IVDrugRef.VERSION) ? ' | IV DrugRef v' + IVDrugRef.VERSION : '';
+    document.getElementById('footerInfo').textContent = `Filtered: ${sessions.length + searches.length + tdmUsage.length + renalDosing.length + compatUsage.length} rows${_appVer}`;
   }
 
   // Debounced version for filter changes

@@ -3007,15 +3007,18 @@ function renderMissingDrugs(searches) {
   // Strategy: group by session, take the LONGEST query per session
   // as the user's intended search term. Then check if it matches any drug.
   var drugNames = state.drugs.map(function(d) {
-    return (d.name || d.genericName || '').toLowerCase();
+    return String(d.name || d.genericName || '').toLowerCase();
   });
 
   // Group searches by session_id, find the longest query per session
   var sessionQueries = {};
   searches.forEach(function(s) {
-    var q = (s.query || '').trim().toLowerCase();
+    // String(): Sheets/GAS returns a numeric-looking query ("500", "0.9") as a
+    // NUMBER, so a bare .trim() throws "(...).trim is not a function" and kills
+    // the whole analytics render. dashboard.js already guards this way.
+    var q = String(s.query || '').trim().toLowerCase();
     var sid = s.session_id || 'unknown';
-    var clicked = (s.drug_clicked || '').trim();
+    var clicked = String(s.drug_clicked || '').trim();
     if (!q || q.length < 3) return; // ignore very short partial typing
     if (clicked) return; // user found what they wanted
     // Keep the longest query per session (= final intended search)
@@ -3065,7 +3068,7 @@ function renderMissingDrugs(searches) {
 function renderTopSearchedDrugs(searches) {
   var drugCount = {};
   searches.forEach(function(s) {
-    var name = (s.drug_clicked || '').trim();
+    var name = String(s.drug_clicked || '').trim(); // may arrive as a number from Sheets
     if (!name) return;
     if (!drugCount[name]) drugCount[name] = 0;
     drugCount[name]++;
@@ -3098,11 +3101,11 @@ function renderTopSearchedDrugs(searches) {
 function renderAllQueries(searches) {
   // Group by session, take longest query per session as the intended search
   var drugNames = state.drugs.map(function(d) {
-    return (d.name || d.genericName || '').toLowerCase();
+    return String(d.name || d.genericName || '').toLowerCase();
   });
   var sessionQueries = {};
   searches.forEach(function(s) {
-    var q = (s.query || '').trim().toLowerCase();
+    var q = String(s.query || '').trim().toLowerCase(); // may arrive as a number from Sheets
     var sid = s.session_id || 'unknown';
     if (!q || q.length < 2) return;
     if (!sessionQueries[sid] || q.length > sessionQueries[sid].length) {
@@ -3156,7 +3159,7 @@ function renderRecentErrors(errors) {
   }
 
   tbody.innerHTML = sorted.map(function(e) {
-    var sev = (e.severity || 'info').toLowerCase();
+    var sev = String(e.severity || 'info').toLowerCase();
     var sevClass = sev === 'high' || sev === 'critical' ? 'priority-high'
       : sev === 'medium' ? 'priority-medium' : '';
     return '<tr class="' + sevClass + '">'

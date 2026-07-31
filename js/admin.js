@@ -3042,13 +3042,30 @@ function renderAnalyticsSummary() {
   renderRecentErrors(errors);
 }
 
+// Drug names used to answer "is this search term already in the DB?".
+// The dataset's field is `generic` — `name`/`genericName` never existed on these
+// objects (35 other call sites in this file read `.generic`). Reading the wrong
+// key produced an array of '' and, because `q.indexOf('') === 0` always matches,
+// EVERY query looked like it was already in the DB: the missing-drugs table was
+// permanently empty and All-queries showed "✅ มี" on every row. Blank names are
+// dropped for that same reason — one empty entry would swallow the whole list.
+function drugNamesForMatch() {
+  return (state.drugs || [])
+    .map(function(d) { return String(d.generic || d.name || d.genericName || '').trim().toLowerCase(); })
+    .filter(Boolean);
+}
+function queryMatchesDrug(q, drugNames) {
+  if (!q) return false;
+  return drugNames.some(function(name) {
+    return name.indexOf(q) !== -1 || q.indexOf(name) !== -1;
+  });
+}
+
 function renderMissingDrugs(searches) {
   // Search data logs every keystroke: "c","ce","cef","ceft"...
   // Strategy: group by session, take the LONGEST query per session
   // as the user's intended search term. Then check if it matches any drug.
-  var drugNames = state.drugs.map(function(d) {
-    return String(d.name || d.genericName || '').toLowerCase();
-  });
+  var drugNames = drugNamesForMatch();
 
   // Group searches by session_id, find the longest query per session
   var sessionQueries = {};
@@ -3076,11 +3093,7 @@ function renderMissingDrugs(searches) {
 
   // Filter out queries that match a drug in the DB
   var missingList = Object.keys(missingMap)
-    .filter(function(q) {
-      return !drugNames.some(function(name) {
-        return name.indexOf(q) !== -1 || q.indexOf(name) !== -1;
-      });
-    })
+    .filter(function(q) { return !queryMatchesDrug(q, drugNames); })
     .map(function(q) { return { query: q, count: missingMap[q] }; })
     .sort(function(a, b) { return b.count - a.count; })
     .slice(0, 20);
@@ -3140,9 +3153,7 @@ function renderTopSearchedDrugs(searches) {
 
 function renderAllQueries(searches) {
   // Group by session, take longest query per session as the intended search
-  var drugNames = state.drugs.map(function(d) {
-    return String(d.name || d.genericName || '').toLowerCase();
-  });
+  var drugNames = drugNamesForMatch();
   var sessionQueries = {};
   searches.forEach(function(s) {
     var q = String(s.query || '').trim().toLowerCase(); // may arrive as a number from Sheets
@@ -3171,9 +3182,7 @@ function renderAllQueries(searches) {
   }
 
   tbody.innerHTML = allQueries.map(function(item, i) {
-    var found = drugNames.some(function(name) {
-      return name.indexOf(item.query) !== -1 || item.query.indexOf(name) !== -1;
-    });
+    var found = queryMatchesDrug(item.query, drugNames);
     var status = found
       ? '<span style="color:var(--success, #22c55e)">✅ มี</span>'
       : '<span style="color:var(--danger, #ef4444);font-weight:600">❌ ไม่มี</span>';

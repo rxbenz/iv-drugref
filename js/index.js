@@ -81,19 +81,30 @@ function incrementSessionCount(){
 }
 
 var _npsIdleTimer=null;
+// How often the NPS prompt may appear. The old rule fired only when the session
+// count was EXACTLY 5/10/20/40/80/160, so a user whose count stepped past a
+// trigger (or who was already past 5 when this shipped) could never see it —
+// NPS responses sat at 0. Now: ask from the 3rd session onward, but remember a
+// "ไว้ภายหลัง" so relaxing the trigger doesn't turn into nagging at the bedside.
+var NPS_MIN_SESSIONS=3;      // was: exact match on [5,10,20,40,80,160]
+var NPS_SNOOZE_DAYS=14;      // "ไว้ภายหลัง" → ask again after this
+var NPS_ANSWERED_DAYS=90;    // answered → leave them alone (unchanged)
+var NPS_IDLE_MS=8000;        // was 30000 — most visits ended before it fired
 function checkNPS(){
   var count=parseInt(localStorage.getItem('npsSessionCount')||'0');
   var lastResp=parseInt(localStorage.getItem('npsLastResponse')||'0');
-  var daysSince=(Date.now()-lastResp)/86400000;
-  if(daysSince<90)return;
-  var triggers=[5,10,20,40,80,160];
-  if(triggers.indexOf(count)<0)return;
-  // Wait 30s idle on index page, only show if not searching
+  var snoozed=parseInt(localStorage.getItem('npsSnoozedAt')||'0');
+  var DAY=86400000;
+  if(lastResp&&(Date.now()-lastResp)/DAY<NPS_ANSWERED_DAYS)return;
+  if(snoozed&&(Date.now()-snoozed)/DAY<NPS_SNOOZE_DAYS)return;
+  if(count<NPS_MIN_SESSIONS)return;
+  // Wait for an idle moment on the index page, and never interrupt a search —
+  // someone looking a drug up at the bedside must not get a survey mid-task.
   _npsIdleTimer=setTimeout(function(){
     var si=document.getElementById('searchInput');
     if(si&&si.value.trim().length>0)return; // user is searching — skip
     showNPS();
-  },30000);
+  },NPS_IDLE_MS);
   // Reset timer if user starts searching
   var si=document.getElementById('searchInput');
   if(si){
@@ -155,6 +166,10 @@ function submitNPS(){
 }
 
 function dismissNPS(){
+  // Remember the brush-off. Without this the relaxed trigger (session >= 3)
+  // would re-prompt on the very next visit; submitNPS() records
+  // npsLastResponse first, so its 90-day rule still wins for responders.
+  try{localStorage.setItem('npsSnoozedAt',String(Date.now()));}catch(e){}
   var bd=document.getElementById('npsBackdrop');
   var sh=document.getElementById('npsSheet');
   if(sh)sh.classList.remove('open');

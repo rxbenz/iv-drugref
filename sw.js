@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.79.5
+// IV Drug Reference PWA — Service Worker v5.80.0
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -499,9 +499,10 @@
 // v5.79.3: แก้ตาราง 'ยาที่ค้นแล้วไม่มีในฐานข้อมูล'
 // v5.79.4: แก้ตาราง 'ยาที่ดูบ่อย' ใน Dashboard
 // v5.79.5: ระบบเก็บ error ใช้งานได้จริง
+// v5.80.0: ขอความเห็นผู้ใช้ (NPS) ให้ถามง่ายขึ้น
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.79.5';
+const CACHE_NAME = 'iv-drugref-v5.80.0';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

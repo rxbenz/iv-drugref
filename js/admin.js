@@ -2948,10 +2948,17 @@ async function loadAnalyticsSummary() {
         var key = ANALYTICS_TYPE_KEY[ev.type];
         if (!key) continue;
         // Reshape back to the flat row the renderers expect (data jsonb spread to
-        // top level + server ts as `timestamp`) — same convention as dashboard.js.
+        // top level + server ts as `timestamp`) — same convention as dashboard.js,
+        // including the camelCase → snake_case alias that GAS's smartLog() used to
+        // apply on the way into Sheets (renderers here read snake_case).
         var row = {};
         if (ev.data && typeof ev.data === 'object') {
-          for (var k in ev.data) if (k !== '_src') row[k] = ev.data[k];
+          for (var k in ev.data) {
+            if (k === '_src') continue;
+            row[k] = ev.data[k];
+            var snake = k.replace(/([A-Z])/g, '_$1').toLowerCase();
+            if (snake !== k && ev.data[snake] === undefined) row[snake] = ev.data[k];
+          }
         }
         row.timestamp = ev.ts;
         row.session_id = ev.session_id;

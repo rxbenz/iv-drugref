@@ -307,6 +307,34 @@
   };
   let _sb = null;   // Supabase client (created in initAuthGate; carries the admin session token)
 
+  // One Supabase `events` row → the flat row shape every renderer here expects
+  // (payload spread to top level, server `ts` as `timestamp`).
+  //
+  // KEY NAMING: the renderers read snake_case (drug_name, drug_clicked, …) because
+  // analytics used to land in Sheets, where GAS's smartLog() matched a camelCase
+  // payload key onto its snake_case column. Supabase stores the payload VERBATIM,
+  // so that translation disappeared with the migration: VIEW_DRUG sends `drugName`,
+  // countBy(drugExpands, 'drug_name') read undefined, and "Top ยาดูบ่อย" rendered
+  // empty while single-word fields (source) and already-snake ones (drug_clicked)
+  // kept working. So mirror smartLog here: every camelCase key also gets a
+  // snake_case alias. A real snake_case key always wins over an alias, and rows
+  // migrated from Sheets (already snake_case) are unaffected.
+  function eventToRow(ev) {
+    const row = {};
+    if (ev.data && typeof ev.data === 'object') {
+      for (const k in ev.data) {
+        if (k === '_src') continue;
+        row[k] = ev.data[k];
+        const snake = k.replace(/([A-Z])/g, '_$1').toLowerCase();
+        if (snake !== k && ev.data[snake] === undefined) row[snake] = ev.data[k];
+      }
+    }
+    row.timestamp = ev.ts;
+    row.session_id = ev.session_id;
+    row.user_id = ev.user_id;
+    return row;
+  }
+
   async function fetchRaw() {
     document.getElementById('statusMsg').textContent = '⏳ กำลังโหลดจาก Supabase...';
     document.getElementById('statusMsg').style.display = 'block';
@@ -334,14 +362,7 @@
           const ev = rows[i];
           const key = TYPE_TO_KEY[ev.type];
           if (!key) continue;
-          const row = {};
-          if (ev.data && typeof ev.data === 'object') {
-            for (const k in ev.data) if (k !== '_src') row[k] = ev.data[k];
-          }
-          row.timestamp = ev.ts;
-          row.session_id = ev.session_id;
-          row.user_id = ev.user_id;
-          raw[key].push(row);
+          raw[key].push(eventToRow(ev));
         }
         offset += 1000;                      // next page window
       } while (got === 1000 && offset < 200000);  // full page ⇒ more rows; 200k guard

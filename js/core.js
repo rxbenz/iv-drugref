@@ -1132,6 +1132,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.79.4',
+      date: '2026-07-31',
+      title: "แก้ตาราง 'ยาที่ดูบ่อย' ใน Dashboard",
+      items: [
+        "แก้ Dashboard → Drug Usage ที่ตาราง 'Top ยาดูบ่อย' ว่างเปล่า (ชื่อฟิลด์ข้อมูลไม่ตรงกันหลังย้ายมาใช้ Supabase)",
+        "ข้อมูลเก่าและใหม่นับรวมกันได้ถูกต้องแล้ว"
+      ]
+    },
+    {
       v: '5.79.3',
       date: '2026-07-31',
       title: "แก้ตาราง 'ยาที่ค้นแล้วไม่มีในฐานข้อมูล'",
@@ -1629,7 +1638,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.79.3';
+  const VERSION = '5.79.4';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

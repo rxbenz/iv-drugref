@@ -1132,6 +1132,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.79.5',
+      date: '2026-07-31',
+      title: "ระบบเก็บ error ใช้งานได้จริง",
+      items: [
+        "แก้หน้า Admin/Dashboard ที่แสดง 'ไม่มี errors' และ Error rate 0.0% เสมอ ทั้งที่ยังไม่เคยเก็บข้อมูล error เข้าฐานใหม่เลย (ส่งเข้า Google Sheets อย่างเดียว)",
+        "ต่อจากนี้ error ที่เกิดขึ้นจริงจะถูกบันทึกและแสดงในหน้าสถิติ"
+      ]
+    },
+    {
       v: '5.79.4',
       date: '2026-07-31',
       title: "แก้ตาราง 'ยาที่ดูบ่อย' ใน Dashboard",
@@ -1638,7 +1647,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.79.4';
+  const VERSION = '5.79.5';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

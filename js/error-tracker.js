@@ -20,6 +20,17 @@
     // GAS endpoint (same as analytics)
     GAS_URL: 'https://script.google.com/macros/s/AKfycbxsNFG4Ayq9OOYe53pEhd88_sA2saHwSjCph6EloEQ2K_f34DTeL1CmDrs0Q2X_csKP/exec',
 
+    // Supabase `events` — the analytics store the admin panel and dashboard
+    // actually read. Errors used to reach the dashboards only because the old
+    // Sheets ErrorLog tab was migrated once; live errors went to GAS alone, so
+    // both "Errors ล่าสุด" and the ERRORS/ERROR RATE cards read as a clean 0
+    // whether or not anything was breaking. This tracker deliberately does NOT
+    // depend on core.js (it loads first so it can catch early failures), so it
+    // posts here itself. The publishable key is the same one core.js/dashboard.js
+    // embed; RLS allows anon INSERT on events and admin-only SELECT.
+    SUPA_EVENTS_URL: 'https://bzwbagojjpiazbeaahmg.supabase.co/rest/v1/events',
+    SUPA_KEY: 'sb_publishable_W-06i5yY0YHlcEGFVYQKnA_asoFaH4S',
+
     // LocalStorage keys
     LS_ERROR_LOG: 'iv_drugref_error_log',
     LS_ERROR_QUEUE: 'iv_drugref_error_queue',
@@ -287,6 +298,47 @@
     } catch (e) { return false; }
   }
 
+  // ─── Send to Supabase (one row per error, the shape the dashboards render) ───
+  // Best-effort and never throws — an error tracker must not become a source of
+  // errors. sendBeacon can't set the apikey/Authorization headers, so this uses
+  // fetch(keepalive) exactly like core.js's analytics writer.
+  function sendToSupabase(entries) {
+    try {
+      const uid = (function () {
+        try { return localStorage.getItem('anonUserId') || null; } catch (e) { return null; }
+      })();
+      const rows = entries.map(function (e) {
+        const c = e.context || {};
+        return {
+          type: 'error_report',
+          session_id: c.sessionId || 'unknown',
+          user_id: uid,
+          app_version: c.appVersion || CONFIG.APP_VERSION,
+          client_ts: c.timestamp || new Date().toISOString(),
+          // Flattened: the renderers read message/severity/page/url at the top
+          // level of the payload (context is nested in the queue entry).
+          data: {
+            message: e.message, severity: e.severity, error_type: e.type,
+            source: e.source, page: c.page, url: c.url,
+            user_agent: c.userAgent, standalone: c.standalone, online: c.online,
+            screen_size: c.screenSize, fingerprint: e.fingerprint
+          }
+        };
+      });
+      fetch(CONFIG.SUPA_EVENTS_URL, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          apikey: CONFIG.SUPA_KEY,
+          Authorization: 'Bearer ' + CONFIG.SUPA_KEY,
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify(rows),
+        keepalive: true
+      }).catch(function () { /* best-effort */ });
+    } catch (e) { /* never throw from the error tracker */ }
+  }
+
   // ─── Flush queue (only clear on successful send) ───
   function flushQueue() {
     const queue = getQueue();
@@ -294,6 +346,9 @@
 
     const sent = sendToGAS(queue);
     if (sent) {
+      // Same batch, both stores — gated on the GAS attempt so the shared
+      // rate-limit accounting can't let Supabase receive a batch twice.
+      sendToSupabase(queue);
       clearQueue(); // Only clear if send was attempted successfully
     }
     // If send failed (rate limit, offline), queue persists for next flush

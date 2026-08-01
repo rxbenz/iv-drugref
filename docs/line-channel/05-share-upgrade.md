@@ -59,10 +59,16 @@ https://liff.line.me/2010742553-w9T3Wtjt/calculator.html?liffdebug=1
 | `sdk=timeout` / `sdk=error` | โหลด LIFF SDK ไม่ขึ้น | เน็ต หรือ CSP `script-src` |
 | `... | CSP script-src←https://…` | เบราว์เซอร์บล็อกตาม CSP | เพิ่มโดเมนใน CSP หน้านั้น |
 | `init=fail:…` / `init=throw:…` | `liff.init()` พัง (ดูรหัสที่ตามมา) | ตั้งค่า LIFF app |
-| `inClient=false` | เปิดใน **in-app browser** ไม่ใช่ LIFF browser | ใช้ลิงก์ `liff.line.me/...` |
+| `ctx=none` | **ไม่ใช่ LIFF launch จริง** (in-app browser ธรรมดา) | เปิดด้วยลิงก์ `liff.line.me/...` |
+| `ctx=utou/full`, `none/full` ฯลฯ | เป็น LIFF launch จริง | — |
 | `picker=false perm=prompt` | scope ตั้งไว้แล้ว แต่ **ผู้ใช้ยังไม่ได้กดอนุญาต** | ปุ่มจะขอสิทธิ์ให้เอง (v5.87.0) |
 | `picker=false perm=unavailable` | **ไม่มี scope** ที่ตัว LIFF app | เปิด scope `chat_message.write` |
 | `picker=false perm=granted` + `pickErr=…` | ครบทุกเงื่อนไข แต่ LINE ปฏิเสธจริง — อ่านรหัสใน `pickErr` | ตามรหัสที่ได้ |
+
+> ⚠️ **`inClient=true` ไม่ได้แปลว่าอยู่ใน LIFF browser** — มันเป็น true ทุกที่ที่อยู่ในแอป LINE
+> รวมถึง in-app browser ธรรมดาซึ่ง `shareTargetPicker` **ใช้ไม่ได้ตั้งแต่ต้น** และ LINE จะตอบ
+> **`FORBIDDEN`** ซึ่งเป็น**รหัสเดียวกับ**ตอนที่แอปไม่ได้รับอนุญาตจริง ๆ → ต้องดู `ctx` ถึงจะแยกออก
+> (`getContext()` คืนค่าเฉพาะตอนเป็น LIFF launch จริง) · v5.88.1
 
 > **`isApiAvailable()` เป็นแค่คำบอกเล่า ไม่ใช่คำตัดสิน** — บนเครื่องจริงเจอ
 > `inClient=true perm=granted` ครบทุกเงื่อนไข แต่มันยังตอบ `picker=false`

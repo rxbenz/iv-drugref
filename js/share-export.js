@@ -138,6 +138,7 @@
     if (!d) return 'LIFF: bridge OFF';
     var t = 'LIFF sdk=' + d.sdk + ' init=' + (d.init == null ? '-' : d.init) +
             ' inClient=' + (d.inClient == null ? '-' : d.inClient) +
+            ' ctx=' + (d.ctx == null ? '-' : d.ctx) +
             ' picker=' + (d.picker == null ? '-' : d.picker) +
             ' perm=' + (d.perm == null ? '-' : d.perm);
     if (d.pickErr) t += ' pickErr=' + d.pickErr;

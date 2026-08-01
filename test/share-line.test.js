@@ -381,3 +381,15 @@ test('an SDK without shareTargetPicker at all is no_sdk', async () => {
   await settle();
   assert.strictEqual(reason(t.events), 'no_sdk');
 });
+
+test('debug readout names the launch context, not just "inside LINE"', async () => {
+  // isInClient() is true in the plain in-app browser too, where the picker can
+  // never work — ctx is what separates a real LIFF launch from that.
+  const t = load({ ua: 'iPhone', inLine: true, liff: null, search: '?liffdebug=1',
+    diag: { sdk: 'loaded', init: 'ok', inClient: true, ctx: 'none', picker: false,
+            perm: 'granted', csp: [], pickErr: 'FORBIDDEN' } });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.match(t.toastText(), /ctx=none/);
+  assert.match(t.toastText(), /pickErr=FORBIDDEN/);
+});

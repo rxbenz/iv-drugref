@@ -1222,6 +1222,14 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.88.1',
+      date: '2026-08-01',
+      title: "เพิ่มตัวตรวจโหมดการเปิดหน้า (สำหรับผู้ดูแล)",
+      items: [
+        "ช่วยแยกว่าเปิดผ่าน LINE แบบไหน เพื่อไล่ปัญหาปุ่มแชร์"
+      ]
+    },
+    {
       v: '5.88.0',
       date: '2026-08-01',
       title: "ปุ่มแชร์ LINE เรียกหน้าต่างเลือกแชตตรง ๆ",
@@ -1829,7 +1837,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.88.0';
+  const VERSION = '5.88.1';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

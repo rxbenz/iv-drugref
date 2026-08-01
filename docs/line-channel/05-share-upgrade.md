@@ -44,6 +44,28 @@
 
 > ⚠️ LINE เตือนว่าเปิด scope นี้แล้ว **ปุ่มย่อหน้าต่าง (minimize) ของ LIFF จะถูกปิด** — ไม่กระทบเรา เพราะเราไม่ได้ใช้ฟีเจอร์นั้น
 
+## หาสาเหตุเมื่อปุ่มยังตกไปที่ "คัดลอก" — โหมด `?liffdebug=1`
+
+ตกมาที่ clipboard ได้จาก **3 สาเหตุที่ผู้ใช้เห็นเหมือนกันหมด** แต่แก้คนละที่ เติม
+`?liffdebug=1` ท้าย URL แล้วกดปุ่ม LINE → toast จะบอกเหตุผลแทนข้อความปกติ เช่น
+
+```
+https://liff.line.me/2010742553-w9T3Wtjt/calculator.html?liffdebug=1
+```
+
+| toast ที่ได้ | แปลว่า | แก้ที่ |
+|---|---|---|
+| `sdk=timeout` / `sdk=error` | โหลด LIFF SDK ไม่ขึ้น | เน็ต หรือ CSP `script-src` |
+| `... | CSP script-src←https://…` | เบราว์เซอร์บล็อกตาม CSP | เพิ่มโดเมนใน CSP หน้านั้น |
+| `init=fail:…` / `init=throw:…` | `liff.init()` พัง (ดูรหัสที่ตามมา) | ตั้งค่า LIFF app |
+| `sdk=loaded init=ok picker=false` | ทุกอย่างปกติ แต่ **ไม่มีสิทธิ์** | เปิด scope `chat_message.write` |
+
+เหตุผลเดียวกันถูกส่งเข้า analytics เป็นฟิลด์ `reason` (`no_sdk` / `no_picker` /
+`picker_error`) คู่กับ `method` เดิม — ดูย้อนหลังใน dashboard ได้โดยไม่ต้องเปิดโหมด debug
+
+> โหมดนี้ **ไม่เปลี่ยนพฤติกรรมการแชร์เลย** เปลี่ยนแค่ข้อความใน toast · ผู้ใช้ที่ไม่ได้เติม
+> พารามิเตอร์จะไม่เห็นอะไรต่างจากเดิม (ล็อกด้วยเทสต์ "no diagnostics leak to real users")
+
 ## ข้อจำกัดที่ควรรู้
 
 หน้าต่างเลือกแชต (`shareTargetPicker`) ทำงานได้เมื่อหน้าถูกเปิดใน **LIFF browser**

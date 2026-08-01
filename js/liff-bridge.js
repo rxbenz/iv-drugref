@@ -36,23 +36,48 @@
   // this file is loaded BEFORE core.js on every page that has it.
   window.__liffBridge = true;
 
+  // WHY the share button fell back matters and is invisible from the outside:
+  // a blocked SDK, a failed init and a missing chat_message.write scope all end
+  // as the same "copied to clipboard" toast, with three different fixes. Record
+  // which one happened so ?liffdebug=1 can report it (see share-export.js).
+  // Costs nothing on the normal path — a few property writes, in LINE only.
+  var diag = { sdk: 'loading', init: null, picker: null, csp: [] };
+  window.__liffDiag = diag;
+  try {
+    window.addEventListener('securitypolicyviolation', function (e) {
+      if (diag.csp.length < 4) diag.csp.push((e.violatedDirective || '?') + '←' + (e.blockedURI || '?'));
+    });
+  } catch (e) {}
+
   window.__liffReady = new Promise(function (resolve) {
     var done = false;
     var finish = function (v) { if (!done) { done = true; resolve(v); } };
     // Never let a slow/blocked CDN hang a share tap — fall back instead.
-    setTimeout(function () { finish(null); }, 6000);
+    setTimeout(function () {
+      if (diag.sdk === 'loading') diag.sdk = 'timeout';
+      finish(null);
+    }, 6000);
 
     var s = document.createElement('script');
     s.src = SDK_URL;
     s.async = true;
-    s.onerror = function () { finish(null); };
+    s.onerror = function () { diag.sdk = 'error'; finish(null); };
     s.onload = function () {
-      if (!window.liff) { finish(null); return; }
+      diag.sdk = 'loaded';
+      if (!window.liff) { diag.init = 'no-global'; finish(null); return; }
       try {
         window.liff.init({ liffId: LIFF_ID })
-          .then(function () { finish(window.liff); })
-          .catch(function () { finish(null); });
-      } catch (e) { finish(null); }
+          .then(function () {
+            diag.init = 'ok';
+            try { diag.picker = !!window.liff.isApiAvailable('shareTargetPicker'); }
+            catch (e) { diag.picker = 'err'; }
+            finish(window.liff);
+          })
+          .catch(function (err) {
+            diag.init = 'fail:' + ((err && (err.code || err.message)) || '?');
+            finish(null);
+          });
+      } catch (e) { diag.init = 'throw:' + ((e && e.message) || '?'); finish(null); }
     };
     (document.head || document.documentElement).appendChild(s);
   });

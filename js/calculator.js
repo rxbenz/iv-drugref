@@ -934,6 +934,7 @@
         </div>` : ''}
         <div class="share-row">
           <button class="btn" data-action="copyCalcResult">\ud83d\udccb \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01</button>
+          <button class="btn" data-action="shareCalcLine">\ud83d\udcac LINE</button>
         </div>
       </div>
     `;
@@ -1131,6 +1132,11 @@
       if (!lastCalcResult || !IVDrugRef.ShareExport) return;
       var text = buildCalcShareText(lastCalcResult.drug, lastCalcResult.pt, lastCalcResult.result);
       IVDrugRef.ShareExport.copyText(text, { page: 'calculator', drug: lastCalcResult.drug.name });
+    },
+    shareCalcLine: function() {
+      if (!lastCalcResult || !IVDrugRef.ShareExport) return;
+      var text = buildCalcShareText(lastCalcResult.drug, lastCalcResult.pt, lastCalcResult.result);
+      IVDrugRef.ShareExport.shareToLine(text, { page: 'calculator', drug: lastCalcResult.drug.name });
     },
     toggleWtUnit: toggleWtUnit,
     toggleHtUnit: toggleHtUnit,

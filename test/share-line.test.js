@@ -250,3 +250,83 @@ test('debug mode still copies to the clipboard — diagnosis never costs the sha
   assert.strictEqual(t.copied(), 'AUC 450');
   assert.strictEqual(method(t.events), 'clipboard');
 });
+
+// ── asking for the grant the user never gave ─────────────────────────────────
+// Configuring chat_message.write on the LIFF app is not the same as the USER
+// having granted it, and an account authorised before the scope was added is
+// never re-prompted on its own. The button asks — once — and retries.
+
+/** A liff stub whose picker only turns on after the permission is granted. */
+function liffNeedingGrant({ state = 'prompt', accept = true, hasApi = true } = {}) {
+  const calls = { requestAll: 0 };
+  let granted = state === 'granted';
+  const liff = {
+    calls,
+    isApiAvailable: () => granted,
+    shareTargetPicker: () => Promise.resolve({ status: 'success' }),
+  };
+  if (hasApi) {
+    liff.permission = {
+      query: () => Promise.resolve({ state: granted ? 'granted' : state }),
+      requestAll: () => { calls.requestAll++; if (accept) granted = true; return Promise.resolve(); },
+    };
+  }
+  return liff;
+}
+
+test('picker off + grant pending -> asks, then shares for real', async () => {
+  const liff = liffNeedingGrant();
+  const t = load({ ua: 'iPhone', inLine: true, liff });
+  t.api.shareToLine('AUC 450', { page: 'vanco-tdm' });
+  await settle();
+  assert.strictEqual(liff.calls.requestAll, 1, 'asked once');
+  assert.strictEqual(method(t.events), 'liff_picker', 'and the share actually went out');
+});
+
+test('a declined grant falls back to the clipboard, tagged no_grant', async () => {
+  const liff = liffNeedingGrant({ accept: false });
+  const t = load({ ua: 'iPhone', inLine: true, liff });
+  t.api.shareToLine('AUC 450', {});
+  await settle();
+  assert.strictEqual(liff.calls.requestAll, 1);
+  assert.strictEqual(t.copied(), 'AUC 450');
+  assert.strictEqual(reason(t.events), 'no_grant');
+});
+
+test('never prompts when there is nothing to prompt for', async () => {
+  // state 'unavailable' = the scope is not on the LIFF app at all; asking the
+  // user cannot fix that, and a prompt on every tap would be pure nagging.
+  const liff = liffNeedingGrant({ state: 'unavailable' });
+  const t = load({ ua: 'iPhone', inLine: true, liff });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.strictEqual(liff.calls.requestAll, 0);
+  assert.strictEqual(reason(t.events), 'no_picker');
+});
+
+test('an older SDK with no permission API still just copies', async () => {
+  const liff = liffNeedingGrant({ hasApi: false });
+  const t = load({ ua: 'iPhone', inLine: true, liff });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.strictEqual(reason(t.events), 'no_picker');
+  assert.strictEqual(method(t.events), 'clipboard');
+});
+
+test('a picker that is already available is shared without any prompt', async () => {
+  const liff = liffNeedingGrant({ state: 'granted' });
+  const t = load({ ua: 'iPhone', inLine: true, liff });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.strictEqual(liff.calls.requestAll, 0, 'no permission round-trip when it already works');
+  assert.strictEqual(method(t.events), 'liff_picker');
+});
+
+test('debug readout carries the LIFF-browser and grant states', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: null, search: '?liffdebug=1',
+    diag: { sdk: 'loaded', init: 'ok', inClient: true, picker: false, perm: 'prompt', csp: [] } });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.match(t.toastText(), /inClient=true/);
+  assert.match(t.toastText(), /perm=prompt/);
+});

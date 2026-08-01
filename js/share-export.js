@@ -137,7 +137,9 @@
     var d = window.__liffDiag;
     if (!d) return 'LIFF: bridge OFF';
     var t = 'LIFF sdk=' + d.sdk + ' init=' + (d.init == null ? '-' : d.init) +
-            ' picker=' + (d.picker == null ? '-' : d.picker);
+            ' inClient=' + (d.inClient == null ? '-' : d.inClient) +
+            ' picker=' + (d.picker == null ? '-' : d.picker) +
+            ' perm=' + (d.perm == null ? '-' : d.perm);
     if (d.csp && d.csp.length) t += ' | CSP ' + d.csp.join(' , ');
     return t;
   }
@@ -193,20 +195,27 @@
       liffReady.then(function(liff) {
         var canPick = false;
         try { canPick = !!(liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')); } catch (e) {}
-        if (!canPick) { _shareViaClipboard(text, analytics, liff ? 'no_picker' : 'no_sdk'); return; }
-        liff.shareTargetPicker([{ type: 'text', text: text }])
-          .then(function(res) {
-            // A null/undefined result means the user backed out of the picker —
-            // not a failure, so don't fall back and don't toast.
-            if (res) {
-              showToast('\u2705 \u0e2a\u0e48\u0e07\u0e43\u0e19 LINE \u0e41\u0e25\u0e49\u0e27');
-              // ✅ ส่งใน LINE แล้ว
-              trackShareExport('share_line', _withMethod(analytics, 'liff_picker'));
-            } else {
-              trackShareExport('share_line', _withMethod(analytics, 'liff_cancelled'));
+        if (!canPick) {
+          // Configuring chat_message.write on the LIFF app is not the same as the
+          // USER having granted it, and an account authorised before the scope was
+          // added is never re-prompted on its own — it just silently loses the
+          // picker. Ask for the grant here, once, and retry; anything else (no
+          // SDK, already granted, refusal) still lands on the clipboard.
+          _requestPermission(liff).then(function(status) {
+            var retry = false;
+            if (status === 'granted') {
+              try { retry = !!liff.isApiAvailable('shareTargetPicker'); } catch (e) {}
             }
-          })
-          .catch(function() { _shareViaClipboard(text, analytics, 'picker_error'); });
+            if (retry) { _pick(liff, text, analytics); return; }
+            // 'declined' is the only status that means the USER said no; every
+            // other route here (no SDK, no permission API, already granted,
+            // nothing to prompt for) is still just an unavailable picker.
+            _shareViaClipboard(text, analytics,
+              !liff ? 'no_sdk' : (status === 'declined' ? 'no_grant' : 'no_picker'));
+          });
+          return;
+        }
+        _pick(liff, text, analytics);
       });
       return;
     }
@@ -222,6 +231,58 @@
 
     // 3. Desktop / anything else.
     _shareViaClipboard(text, analytics);
+  }
+
+  /**
+   * Ask LINE for chat_message.write when the user has not granted it yet.
+   * Resolves (never rejects) with WHAT HAPPENED, because the caller has to tell
+   * a refusal apart from there being nothing to ask in the first place:
+   *   'granted'      – prompted and the user accepted
+   *   'declined'     – prompted and the user did not accept
+   *   'not_prompted' – state was already granted/unavailable, so no prompt
+   *   'no_api'       – this LIFF build has no permission API
+   * Only "prompt" is ever prompted, so a user who already said no is not nagged
+   * on every tap.
+   */
+  function _requestPermission(liff) {
+    return new Promise(function(resolve) {
+      var perm = liff && liff.permission;
+      if (!perm || !perm.query || !perm.requestAll) { resolve('no_api'); return; }
+      var settled = false;
+      var done = function(v) { if (!settled) { settled = true; resolve(v); } };
+      // The consent sheet is native and can sit open indefinitely; the timeout
+      // only guards against the API never settling, not against a slow human.
+      setTimeout(function() { done('declined'); }, 30000);
+      try {
+        perm.query('chat_message.write').then(function(r) {
+          if (!r || r.state !== 'prompt') { done('not_prompted'); return; }
+          perm.requestAll()
+            .then(function() {
+              perm.query('chat_message.write')
+                .then(function(after) { done(after && after.state === 'granted' ? 'granted' : 'declined'); })
+                .catch(function() { done('declined'); });
+            })
+            .catch(function() { done('declined'); });
+        }).catch(function() { done('no_api'); });
+      } catch (e) { done('no_api'); }
+    });
+  }
+
+  // The picker itself, once we know it is available.
+  function _pick(liff, text, analytics) {
+    liff.shareTargetPicker([{ type: 'text', text: text }])
+      .then(function(res) {
+        // A null/undefined result means the user backed out of the picker —
+        // not a failure, so don't fall back and don't toast.
+        if (res) {
+          showToast('\u2705 \u0e2a\u0e48\u0e07\u0e43\u0e19 LINE \u0e41\u0e25\u0e49\u0e27');
+          // ✅ ส่งใน LINE แล้ว
+          trackShareExport('share_line', _withMethod(analytics, 'liff_picker'));
+        } else {
+          trackShareExport('share_line', _withMethod(analytics, 'liff_cancelled'));
+        }
+      })
+      .catch(function() { _shareViaClipboard(text, analytics, 'picker_error'); });
   }
 
   /**

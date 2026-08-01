@@ -1222,6 +1222,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.88.0',
+      date: '2026-08-01',
+      title: "ปุ่มแชร์ LINE เรียกหน้าต่างเลือกแชตตรง ๆ",
+      items: [
+        "เดิมเชื่อค่าที่ LINE รายงานว่าใช้ฟีเจอร์ไม่ได้ ทั้งที่จริงใช้ได้ — ตอนนี้ลองเรียกเลย",
+        "ถ้าเรียกไม่ได้จริง ยังคัดลอกให้เหมือนเดิม"
+      ]
+    },
+    {
       v: '5.87.0',
       date: '2026-08-01',
       title: "ปุ่มแชร์ LINE ขออนุญาตให้เองแล้ว",
@@ -1820,7 +1829,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.87.0';
+  const VERSION = '5.88.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

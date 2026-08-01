@@ -194,7 +194,10 @@ test('no SDK at all is reported as no_sdk, not just "clipboard"', async () => {
 });
 
 test('SDK present but picker unavailable is reported as no_picker', async () => {
-  const t = load({ ua: 'iPhone', inLine: true, liff: { isApiAvailable: () => false } });
+  // A real SDK whose picker refuses — not one missing the method, which is a
+  // different fault (no_sdk) and has its own test below.
+  const t = load({ ua: 'iPhone', inLine: true,
+    liff: { isApiAvailable: () => false, shareTargetPicker: () => Promise.reject(new Error('nope')) } });
   t.api.shareToLine('x', { page: 'calculator' });
   await settle();
   assert.strictEqual(reason(t.events), 'no_picker');
@@ -263,7 +266,9 @@ function liffNeedingGrant({ state = 'prompt', accept = true, hasApi = true } = {
   const liff = {
     calls,
     isApiAvailable: () => granted,
-    shareTargetPicker: () => Promise.resolve({ status: 'success' }),
+    shareTargetPicker: () => (granted
+      ? Promise.resolve({ status: 'success' })
+      : Promise.reject(new Error('unavailable'))),
   };
   if (hasApi) {
     liff.permission = {
@@ -329,4 +334,50 @@ test('debug readout carries the LIFF-browser and grant states', async () => {
   await settle();
   assert.match(t.toastText(), /inClient=true/);
   assert.match(t.toastText(), /perm=prompt/);
+});
+
+// ── isApiAvailable is advisory, not authoritative ────────────────────────────
+// On device it reported false with inClient=true and perm=granted — every
+// documented condition met. Trusting it there costs a share that would have
+// worked, so the call is attempted anyway and failure lands where the flag
+// would have left us: the clipboard.
+
+test('picker works even though isApiAvailable says it does not', async () => {
+  const liff = {
+    isApiAvailable: () => false,
+    shareTargetPicker: () => Promise.resolve({ status: 'success' }),
+  };
+  const t = load({ ua: 'iPhone', inLine: true, liff });
+  t.api.shareToLine('AUC 450', { page: 'calculator' });
+  await settle();
+  assert.strictEqual(method(t.events), 'liff_picker', 'shared instead of believing the flag');
+});
+
+test('a genuinely unavailable picker still just copies, and records why', async () => {
+  const err = new Error('shareTargetPicker is not available');
+  err.code = 'FORBIDDEN';
+  const t = load({ ua: 'iPhone', inLine: true, search: '?liffdebug=1',
+    diag: { sdk: 'loaded', init: 'ok', inClient: true, picker: false, perm: 'granted', csp: [] },
+    liff: { isApiAvailable: () => false, shareTargetPicker: () => Promise.reject(err) } });
+  t.api.shareToLine('AUC 450', {});
+  await settle();
+  assert.strictEqual(t.copied(), 'AUC 450');
+  assert.strictEqual(method(t.events), 'clipboard');
+  assert.match(t.toastText(), /pickErr=FORBIDDEN/, 'the real error is reported, not guessed at');
+});
+
+test('a picker that throws synchronously is caught too', async () => {
+  const t = load({ ua: 'iPhone', inLine: true,
+    liff: { isApiAvailable: () => true, shareTargetPicker: () => { throw new Error('boom'); } } });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.strictEqual(method(t.events), 'clipboard');
+  assert.strictEqual(reason(t.events), 'picker_error');
+});
+
+test('an SDK without shareTargetPicker at all is no_sdk', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: { isApiAvailable: () => false } });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.strictEqual(reason(t.events), 'no_sdk');
 });

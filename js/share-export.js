@@ -140,6 +140,7 @@
             ' inClient=' + (d.inClient == null ? '-' : d.inClient) +
             ' picker=' + (d.picker == null ? '-' : d.picker) +
             ' perm=' + (d.perm == null ? '-' : d.perm);
+    if (d.pickErr) t += ' pickErr=' + d.pickErr;
     if (d.csp && d.csp.length) t += ' | CSP ' + d.csp.join(' , ');
     return t;
   }
@@ -193,29 +194,26 @@
     // 1. In LINE: wait for the SDK liff-bridge.js already started loading.
     if (inLine && liffReady && typeof liffReady.then === 'function') {
       liffReady.then(function(liff) {
-        var canPick = false;
-        try { canPick = !!(liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')); } catch (e) {}
-        if (!canPick) {
-          // Configuring chat_message.write on the LIFF app is not the same as the
-          // USER having granted it, and an account authorised before the scope was
-          // added is never re-prompted on its own — it just silently loses the
-          // picker. Ask for the grant here, once, and retry; anything else (no
-          // SDK, already granted, refusal) still lands on the clipboard.
-          _requestPermission(liff).then(function(status) {
-            var retry = false;
-            if (status === 'granted') {
-              try { retry = !!liff.isApiAvailable('shareTargetPicker'); } catch (e) {}
-            }
-            if (retry) { _pick(liff, text, analytics); return; }
-            // 'declined' is the only status that means the USER said no; every
-            // other route here (no SDK, no permission API, already granted,
-            // nothing to prompt for) is still just an unavailable picker.
-            _shareViaClipboard(text, analytics,
-              !liff ? 'no_sdk' : (status === 'declined' ? 'no_grant' : 'no_picker'));
-          });
+        if (!liff || typeof liff.shareTargetPicker !== 'function') {
+          _shareViaClipboard(text, analytics, 'no_sdk');
           return;
         }
-        _pick(liff, text, analytics);
+        var canPick = false;
+        try { canPick = !!(liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')); } catch (e) {}
+        if (canPick) { _pick(liff, text, analytics); return; }
+
+        // isApiAvailable said no. Two things can be behind that, and only one is
+        // real. Configuring chat_message.write on the LIFF app is not the same as
+        // the USER having granted it, and an account authorised before the scope
+        // was added is never re-prompted — so ask, once, if there is anything to
+        // ask for. But isApiAvailable is also only ADVISORY: on device it has
+        // reported false with inClient=true and perm=granted, every condition
+        // met. So after asking, call the picker anyway rather than trusting the
+        // flag. A genuinely unavailable API rejects, which lands on the
+        // clipboard — exactly where trusting the flag would have left us.
+        _requestPermission(liff).then(function(status) {
+          _pick(liff, text, analytics, status === 'declined' ? 'no_grant' : 'no_picker');
+        });
       });
       return;
     }
@@ -268,9 +266,26 @@
     });
   }
 
-  // The picker itself, once we know it is available.
-  function _pick(liff, text, analytics) {
-    liff.shareTargetPicker([{ type: 'text', text: text }])
+  /**
+   * Open the picker. `fallbackReason` is used when the call fails, which is the
+   * expected outcome when we got here despite isApiAvailable saying no — the
+   * real error is recorded on the diag so ?liffdebug=1 can name it instead of
+   * leaving us to guess at an unavailable API again.
+   */
+  function _pick(liff, text, analytics, fallbackReason) {
+    var bail = function(err) {
+      try {
+        if (window.__liffDiag) {
+          window.__liffDiag.pickErr = (err && (err.code || err.message)) || 'err';
+        }
+      } catch (e) {}
+      _shareViaClipboard(text, analytics, fallbackReason || 'picker_error');
+    };
+    var p;
+    try { p = liff.shareTargetPicker([{ type: 'text', text: text }]); }
+    catch (e) { bail(e); return; }
+    if (!p || typeof p.then !== 'function') { bail(null); return; }
+    p
       .then(function(res) {
         // A null/undefined result means the user backed out of the picker —
         // not a failure, so don't fall back and don't toast.
@@ -282,7 +297,7 @@
           trackShareExport('share_line', _withMethod(analytics, 'liff_cancelled'));
         }
       })
-      .catch(function() { _shareViaClipboard(text, analytics, 'picker_error'); });
+      .catch(bail);
   }
 
   /**

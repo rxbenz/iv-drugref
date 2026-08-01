@@ -41,7 +41,12 @@
   // as the same "copied to clipboard" toast, with three different fixes. Record
   // which one happened so ?liffdebug=1 can report it (see share-export.js).
   // Costs nothing on the normal path — a few property writes, in LINE only.
-  var diag = { sdk: 'loading', init: null, picker: null, csp: [] };
+  // `inClient` separates the two ways a page opens inside LINE: the LIFF browser
+  // (where shareTargetPicker exists) and the plain in-app browser (where it can
+  // never work). `perm` separates the scope being CONFIGURED on the LIFF app —
+  // which the console shows — from the user having GRANTED it, which is a
+  // different thing and the one that actually gates the picker.
+  var diag = { sdk: 'loading', init: null, inClient: null, picker: null, perm: null, csp: [] };
   window.__liffDiag = diag;
   try {
     window.addEventListener('securitypolicyviolation', function (e) {
@@ -68,10 +73,21 @@
       try {
         window.liff.init({ liffId: LIFF_ID })
           .then(function () {
+            var liff = window.liff;
             diag.init = 'ok';
-            try { diag.picker = !!window.liff.isApiAvailable('shareTargetPicker'); }
+            try { diag.inClient = !!(liff.isInClient && liff.isInClient()); } catch (e) { diag.inClient = 'err'; }
+            try { diag.picker = !!(liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')); }
             catch (e) { diag.picker = 'err'; }
-            finish(window.liff);
+            // Grant state is async; resolve the bridge either way so a share tap
+            // is never held up waiting on a diagnostic.
+            try {
+              if (liff.permission && liff.permission.query) {
+                liff.permission.query('chat_message.write')
+                  .then(function (r) { diag.perm = (r && r.state) || '?'; })
+                  .catch(function () { diag.perm = 'err'; });
+              } else { diag.perm = 'no-api'; }
+            } catch (e) { diag.perm = 'err'; }
+            finish(liff);
           })
           .catch(function (err) {
             diag.init = 'fail:' + ((err && (err.code || err.message)) || '?');

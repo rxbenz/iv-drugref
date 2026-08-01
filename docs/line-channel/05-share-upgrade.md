@@ -1,6 +1,7 @@
 # Phase 7 — อัปเกรดปุ่มแชร์เข้า LINE
 
-> สถานะ: ✅ โค้ดขึ้นแล้ว (v5.82.0) · เหลือ **เปิด scope `chat_message.write` ให้ LIFF app** จึงจะได้หน้าต่างเลือกแชต
+> สถานะ: ✅ โค้ดขึ้นแล้ว (v5.82.0) · scope `chat_message.write` ตั้งในคอนโซลแล้ว
+> · v5.87.0 ปุ่มขอสิทธิ์จากผู้ใช้ให้เองเมื่อยังไม่เคยอนุญาต (ดูหัวข้อ `?liffdebug=1`)
 
 ## เดิม vs ใหม่
 
@@ -58,10 +59,19 @@ https://liff.line.me/2010742553-w9T3Wtjt/calculator.html?liffdebug=1
 | `sdk=timeout` / `sdk=error` | โหลด LIFF SDK ไม่ขึ้น | เน็ต หรือ CSP `script-src` |
 | `... | CSP script-src←https://…` | เบราว์เซอร์บล็อกตาม CSP | เพิ่มโดเมนใน CSP หน้านั้น |
 | `init=fail:…` / `init=throw:…` | `liff.init()` พัง (ดูรหัสที่ตามมา) | ตั้งค่า LIFF app |
-| `sdk=loaded init=ok picker=false` | ทุกอย่างปกติ แต่ **ไม่มีสิทธิ์** | เปิด scope `chat_message.write` |
+| `inClient=false` | เปิดใน **in-app browser** ไม่ใช่ LIFF browser | ใช้ลิงก์ `liff.line.me/...` |
+| `picker=false perm=prompt` | scope ตั้งไว้แล้ว แต่ **ผู้ใช้ยังไม่ได้กดอนุญาต** | ปุ่มจะขอสิทธิ์ให้เอง (v5.87.0) |
+| `picker=false perm=unavailable` | **ไม่มี scope** ที่ตัว LIFF app | เปิด scope `chat_message.write` |
+
+> **`scope ที่ตั้งในคอนโซล` ≠ `ผู้ใช้อนุญาตแล้ว`** — เป็นคนละอย่างและเป็นกับดักที่เจอจริง:
+> คอนโซลแสดง `openid, chat_message.write` ครบ แต่บัญชีที่เคยเปิดแอปนี้ **ก่อน**
+> เพิ่ม scope จะถูกจำสิทธิ์ชุดเก่าไว้ และ LINE **ไม่ถามใหม่เอง** → `picker=false` เงียบ ๆ
+> ตั้งแต่ v5.87.0 ปุ่มจะเรียก `liff.permission.requestAll()` ให้เองเมื่อสถานะเป็น `prompt`
+> แล้วลองเปิดหน้าต่างเลือกแชตอีกครั้ง (ถ้าผู้ใช้ไม่อนุญาต → คัดลอกเหมือนเดิม
+> และ **ไม่ถามซ้ำทุกครั้งที่กด** เพราะถามเฉพาะสถานะ `prompt` เท่านั้น)
 
 เหตุผลเดียวกันถูกส่งเข้า analytics เป็นฟิลด์ `reason` (`no_sdk` / `no_picker` /
-`picker_error`) คู่กับ `method` เดิม — ดูย้อนหลังใน dashboard ได้โดยไม่ต้องเปิดโหมด debug
+`no_grant` / `picker_error`) คู่กับ `method` เดิม — ดูย้อนหลังใน dashboard ได้โดยไม่ต้องเปิดโหมด debug
 
 > โหมดนี้ **ไม่เปลี่ยนพฤติกรรมการแชร์เลย** เปลี่ยนแค่ข้อความใน toast · ผู้ใช้ที่ไม่ได้เติม
 > พารามิเตอร์จะไม่เห็นอะไรต่างจากเดิม (ล็อกด้วยเทสต์ "no diagnostics leak to real users")

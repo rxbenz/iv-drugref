@@ -46,7 +46,13 @@
   // never work). `perm` separates the scope being CONFIGURED on the LIFF app —
   // which the console shows — from the user having GRANTED it, which is a
   // different thing and the one that actually gates the picker.
-  var diag = { sdk: 'loading', init: null, inClient: null, picker: null, perm: null, csp: [] };
+  // `ctx` is the one that settles it. isInClient() is true anywhere inside the
+  // LINE app, including the plain in-app browser where shareTargetPicker can
+  // never work and LINE answers FORBIDDEN — the same error a genuinely
+  // unpermitted app gets. getContext() only returns something in a real LIFF
+  // launch, so it tells those two apart without reading the window chrome.
+  var diag = { sdk: 'loading', init: null, inClient: null, ctx: null,
+               picker: null, perm: null, csp: [] };
   window.__liffDiag = diag;
   try {
     window.addEventListener('securitypolicyviolation', function (e) {
@@ -76,6 +82,10 @@
             var liff = window.liff;
             diag.init = 'ok';
             try { diag.inClient = !!(liff.isInClient && liff.isInClient()); } catch (e) { diag.inClient = 'err'; }
+            try {
+              var c = liff.getContext && liff.getContext();
+              diag.ctx = c ? ((c.type || '?') + '/' + (c.viewType || '?')) : 'none';
+            } catch (e) { diag.ctx = 'err'; }
             try { diag.picker = !!(liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')); }
             catch (e) { diag.picker = 'err'; }
             // Grant state is async; resolve the bridge either way so a share tap

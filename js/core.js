@@ -37,7 +37,28 @@ var IVDrugRef = (function() {
       if (!rel) return;
       var target = new URL(rel, location.href);
       if (target.origin !== location.origin) return;     // belt and braces
-      if (target.href === location.href) return;         // already there — never loop
+      // LOOP GUARD — compare against where we are with liff.state REMOVED.
+      // LINE keeps re-attaching ?liff.state to the page it lands on, so a plain
+      // href comparison saw a difference (the query) every time and forwarded
+      // again… and again: calculator.html reloaded forever on the first LIFF
+      // rollout. Comparing only the pathname would stop that but break deep
+      // links, where the destination is the SAME page with different params
+      // (index.html?drug=Vancomycin from a bot card). Comparing the effective
+      // URL — path + query, ignoring liff.state — gets both right, and is
+      // self-limiting: once forwarded, the URL carries no liff.state at all.
+      var here = new URL(location.href);
+      here.searchParams.delete('liff.state');
+      if (target.pathname === here.pathname && target.search === here.search) {
+        // Already where liff.state points. Drop the parameter in place (no
+        // navigation, no reload) so the LIFF SDK that liff-bridge.js loads a
+        // moment later doesn't attempt the very same hop from its own logic.
+        try {
+          if (typeof history !== 'undefined' && history.replaceState) {
+            history.replaceState(null, '', here.href);
+          }
+        } catch (e) { /* URL cosmetics only — never worth an exception */ }
+        return;
+      }
       location.replace(target.href);
     } catch (e) { /* forwarding is best-effort; never block the page */ }
   })();
@@ -1166,6 +1187,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.83.1',
+      date: '2026-08-01',
+      title: "แก้ปุ่มเมนู LINE โหลดวน",
+      items: [
+        "กดปุ่มใน rich menu ของ LINE แล้วหน้าเป้าหมายโหลดซ้ำไม่หยุด — แก้แล้ว",
+        "ลิงก์เจาะจงยาจากบอต (เช่น เปิดหน้ายา Vancomycin) ยังทำงานเหมือนเดิม"
+      ]
+    },
+    {
       v: '5.83.0',
       date: '2026-08-01',
       title: "แก้ลิงก์เมนู LINE ให้เปิดถูกหน้า",
@@ -1719,7 +1749,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.83.0';
+  const VERSION = '5.83.1';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

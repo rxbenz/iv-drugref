@@ -15,28 +15,50 @@ var IVDrugRef = (function() {
   // does NOT open that page. LINE opens the LIFF app's Endpoint URL (our index)
   // and hands the rest over as ?liff.state=%2Fcalculator.html%3Fdrug%3Dx,
   // expecting the page to forward itself. The LIFF SDK does this during
-  // liff.init(), but the landing page is index.html, which has no SDK — so a
-  // rich-menu button pointed at a LIFF sub-path just sat on the drug list.
+  // liff.init(), which is why liff-bridge.js now runs on the endpoint page too.
   //
-  // Doing it here (core.js, on every page) forwards immediately, with no SDK
-  // load and no flash of the wrong page. Same-origin only: liff.state comes from
-  // the URL, so an absolute or protocol-relative value would be an open redirect
-  // and is rejected. The path resolves against the CURRENT DIRECTORY, because
-  // the endpoint lives under /iv-drugref/ — resolving from the origin root would
-  // aim at /calculator.html and 404.
+  // THE HOP BELONGS TO THE SDK. liff.init() forwards *and* takes delivery of the
+  // LIFF session LINE just granted, as one operation. Navigating first throws
+  // that session away: liff.init() on the destination finds no context, goes
+  // back to liff.line.me to get one ("logging in…"), which returns to the
+  // endpoint, which forwards again — the bounce loop v5.83.1 uncovered once its
+  // own reload loop was gone. So when liff-bridge.js is on the page (it sets
+  // __liffBridge synchronously, ahead of its async SDK load) this stands down
+  // and lets the SDK do it, stepping in only after a grace period if the SDK
+  // never arrives — a blocked CDN must still land the button on the right page.
+  //
+  // When we do forward: same-origin only. liff.state comes from the URL, so an
+  // absolute or protocol-relative value would be an open redirect and is
+  // rejected. The path resolves against the CURRENT DIRECTORY, because the
+  // endpoint lives under /iv-drugref/ — resolving from the origin root would aim
+  // at /calculator.html and 404. Other query parameters ride along: the LINE
+  // login round-trip leaves its code/state there and the destination needs them.
   (function forwardLiffState() {
-    try {
-      if (typeof location === 'undefined' || !location.search) return;
+    var SDK_GRACE_MS = 4000;
+
+    function bridged() {
+      try { return !!(typeof window !== 'undefined' && window.__liffBridge); }
+      catch (e) { return false; }
+    }
+
+    // → href to forward to, or null when there is nothing to do.
+    function resolve() {
+      if (typeof location === 'undefined' || !location.search) return null;
       var raw = new URLSearchParams(location.search).get('liff.state');
-      if (!raw) return;
+      if (!raw) return null;
       // Reject before normalising: "//host/x" is protocol-relative (another
       // origin) and "scheme:..." is absolute. Stripping slashes first would turn
       // "//evil.example/x" into the innocent-looking path "evil.example/x".
-      if (/^\/\//.test(raw) || /^[a-z][a-z0-9+.-]*:/i.test(raw)) return;
+      if (/^\/\//.test(raw) || /^[a-z][a-z0-9+.-]*:/i.test(raw)) return null;
       var rel = raw.replace(/^\/+/, '');                 // "/calculator.html" → "calculator.html"
-      if (!rel) return;
+      if (!rel) return null;
       var target = new URL(rel, location.href);
-      if (target.origin !== location.origin) return;     // belt and braces
+      if (target.origin !== location.origin) return null;   // belt and braces
+      var carry = new URLSearchParams(location.search);
+      carry.delete('liff.state');
+      carry.forEach(function (v, k) {
+        if (!target.searchParams.has(k)) target.searchParams.append(k, v);
+      });
       // LOOP GUARD — compare against where we are with liff.state REMOVED.
       // LINE keeps re-attaching ?liff.state to the page it lands on, so a plain
       // href comparison saw a difference (the query) every time and forwarded
@@ -44,22 +66,35 @@ var IVDrugRef = (function() {
       // rollout. Comparing only the pathname would stop that but break deep
       // links, where the destination is the SAME page with different params
       // (index.html?drug=Vancomycin from a bot card). Comparing the effective
-      // URL — path + query, ignoring liff.state — gets both right, and is
-      // self-limiting: once forwarded, the URL carries no liff.state at all.
+      // URL — path + query, ignoring liff.state — gets both right.
       var here = new URL(location.href);
       here.searchParams.delete('liff.state');
       if (target.pathname === here.pathname && target.search === here.search) {
-        // Already where liff.state points. Drop the parameter in place (no
-        // navigation, no reload) so the LIFF SDK that liff-bridge.js loads a
-        // moment later doesn't attempt the very same hop from its own logic.
-        try {
-          if (typeof history !== 'undefined' && history.replaceState) {
-            history.replaceState(null, '', here.href);
-          }
-        } catch (e) { /* URL cosmetics only — never worth an exception */ }
+        // Already where liff.state points, so nothing should hop again. Drop the
+        // parameter in place (no navigation, no reload) — but only when no SDK
+        // is here, because the SDK reads it as part of its own bootstrap.
+        if (!bridged()) {
+          try {
+            if (typeof history !== 'undefined' && history.replaceState) {
+              history.replaceState(null, '', here.href);
+            }
+          } catch (e) { /* URL cosmetics only — never worth an exception */ }
+        }
+        return null;
+      }
+      return target.href;
+    }
+
+    try {
+      var href = resolve();
+      if (!href) return;
+      if (bridged()) {
+        setTimeout(function () {
+          try { var late = resolve(); if (late) location.replace(late); } catch (e) {}
+        }, SDK_GRACE_MS);
         return;
       }
-      location.replace(target.href);
+      location.replace(href);
     } catch (e) { /* forwarding is best-effort; never block the page */ }
   })();
 
@@ -1187,6 +1222,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.84.0',
+      date: '2026-08-01',
+      title: "แก้ปุ่มเมนู LINE เด้งวนที่หน้าล็อกอิน",
+      items: [
+        "กดปุ่มใน rich menu แล้วค้างที่ logging in… เด้งกลับไปกลับมา — แก้แล้ว",
+        "หน้าแรกของแอปรองรับการเปิดผ่าน LINE อย่างถูกวิธีแล้ว ทำให้ปุ่มแชร์เข้าแชตทำงานได้"
+      ]
+    },
+    {
       v: '5.83.1',
       date: '2026-08-01',
       title: "แก้ปุ่มเมนู LINE โหลดวน",
@@ -1749,7 +1793,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.83.1';
+  const VERSION = '5.84.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

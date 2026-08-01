@@ -1222,6 +1222,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.85.0',
+      date: '2026-08-01',
+      title: "เพิ่มปุ่มแชร์ LINE ในหน้าคำนวณขนาดยา",
+      items: [
+        "หน้าคำนวณขนาดยามีปุ่ม 💬 LINE แล้ว (เดิมมีแต่ปุ่มคัดลอก)",
+        "เปิดในแอป LINE จะได้หน้าต่างเลือกแชต เปิดในเบราว์เซอร์จะเด้งไป LINE พร้อมข้อความ"
+      ]
+    },
+    {
       v: '5.84.0',
       date: '2026-08-01',
       title: "แก้ปุ่มเมนู LINE เด้งวนที่หน้าล็อกอิน",
@@ -1793,7 +1802,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.84.0';
+  const VERSION = '5.85.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

@@ -62,6 +62,13 @@ https://liff.line.me/2010742553-w9T3Wtjt/calculator.html?liffdebug=1
 | `inClient=false` | เปิดใน **in-app browser** ไม่ใช่ LIFF browser | ใช้ลิงก์ `liff.line.me/...` |
 | `picker=false perm=prompt` | scope ตั้งไว้แล้ว แต่ **ผู้ใช้ยังไม่ได้กดอนุญาต** | ปุ่มจะขอสิทธิ์ให้เอง (v5.87.0) |
 | `picker=false perm=unavailable` | **ไม่มี scope** ที่ตัว LIFF app | เปิด scope `chat_message.write` |
+| `picker=false perm=granted` + `pickErr=…` | ครบทุกเงื่อนไข แต่ LINE ปฏิเสธจริง — อ่านรหัสใน `pickErr` | ตามรหัสที่ได้ |
+
+> **`isApiAvailable()` เป็นแค่คำบอกเล่า ไม่ใช่คำตัดสิน** — บนเครื่องจริงเจอ
+> `inClient=true perm=granted` ครบทุกเงื่อนไข แต่มันยังตอบ `picker=false`
+> ตั้งแต่ **v5.88.0** ปุ่มจะ **เรียกหน้าต่างเลือกแชตไปเลย** ไม่เชื่อค่านี้ ถ้าเรียกไม่ได้จริง
+> LINE จะโยน error ออกมา → ตกไปคัดลอก (จุดเดิมกับตอนที่เชื่อค่านี้ ไม่มีอะไรแย่ลง)
+> และ **รหัส error ตัวจริงถูกเก็บไว้ที่ `pickErr`** จะได้ไม่ต้องเดาอีก
 
 > **`scope ที่ตั้งในคอนโซล` ≠ `ผู้ใช้อนุญาตแล้ว`** — เป็นคนละอย่างและเป็นกับดักที่เจอจริง:
 > คอนโซลแสดง `openid, chat_message.write` ครบ แต่บัญชีที่เคยเปิดแอปนี้ **ก่อน**

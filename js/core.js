@@ -9,6 +9,40 @@
 var IVDrugRef = (function() {
 
   // ============================================================
+  // LIFF SUB-PATH FORWARDING
+  // ============================================================
+  // A LIFF URL with a path — https://liff.line.me/<id>/calculator.html?drug=x —
+  // does NOT open that page. LINE opens the LIFF app's Endpoint URL (our index)
+  // and hands the rest over as ?liff.state=%2Fcalculator.html%3Fdrug%3Dx,
+  // expecting the page to forward itself. The LIFF SDK does this during
+  // liff.init(), but the landing page is index.html, which has no SDK — so a
+  // rich-menu button pointed at a LIFF sub-path just sat on the drug list.
+  //
+  // Doing it here (core.js, on every page) forwards immediately, with no SDK
+  // load and no flash of the wrong page. Same-origin only: liff.state comes from
+  // the URL, so an absolute or protocol-relative value would be an open redirect
+  // and is rejected. The path resolves against the CURRENT DIRECTORY, because
+  // the endpoint lives under /iv-drugref/ — resolving from the origin root would
+  // aim at /calculator.html and 404.
+  (function forwardLiffState() {
+    try {
+      if (typeof location === 'undefined' || !location.search) return;
+      var raw = new URLSearchParams(location.search).get('liff.state');
+      if (!raw) return;
+      // Reject before normalising: "//host/x" is protocol-relative (another
+      // origin) and "scheme:..." is absolute. Stripping slashes first would turn
+      // "//evil.example/x" into the innocent-looking path "evil.example/x".
+      if (/^\/\//.test(raw) || /^[a-z][a-z0-9+.-]*:/i.test(raw)) return;
+      var rel = raw.replace(/^\/+/, '');                 // "/calculator.html" → "calculator.html"
+      if (!rel) return;
+      var target = new URL(rel, location.href);
+      if (target.origin !== location.origin) return;     // belt and braces
+      if (target.href === location.href) return;         // already there — never loop
+      location.replace(target.href);
+    } catch (e) { /* forwarding is best-effort; never block the page */ }
+  })();
+
+  // ============================================================
   // PATIENT INPUT VALIDATION
   // ============================================================
 
@@ -1132,6 +1166,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.83.0',
+      date: '2026-08-01',
+      title: "แก้ลิงก์เมนู LINE ให้เปิดถูกหน้า",
+      items: [
+        "แก้ปัญหากดปุ่มในเมนู LINE แล้วไปโผล่หน้าแรกแทนหน้าที่เลือก (รองรับลิงก์แบบ LIFF)",
+        "ผลพลอยได้: หน้าที่เปิดผ่านเมนูจะแชร์เข้าแชต LINE ได้โดยตรง"
+      ]
+    },
+    {
       v: '5.82.0',
       date: '2026-08-01',
       title: "แชร์ผลเข้า LINE ได้ตรง ๆ แล้ว 📤",
@@ -1676,7 +1719,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.82.0';
+  const VERSION = '5.83.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

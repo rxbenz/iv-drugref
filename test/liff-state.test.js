@@ -23,10 +23,16 @@ const CORE = SRC.slice(0, SRC.indexOf('THEME MANAGER'));
 
 const ENDPOINT = 'https://rxbenz.github.io/iv-drugref/index.html';
 
-/** Load core.js with a stub location and report where it tried to send us. */
-function forwardFrom(href, out) {
+/**
+ * Load core.js with a stub location and report where it tried to send us.
+ * `opts.bridge` mimics liff-bridge.js having set window.__liffBridge first.
+ * `out.rewritten` collects history.replaceState targets, `out.runTimers()` fires
+ * whatever core.js scheduled (the SDK-never-arrived fallback lives in there).
+ */
+function forwardFrom(href, out, opts) {
   const replaced = [];
   const rewritten = [];
+  const timers = [];
   const url = new URL(href);
   const el = () => new Proxy({ style: {}, dataset: {}, classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     innerHTML: '', textContent: '', appendChild(c) { return c; }, addEventListener() {},
@@ -52,14 +58,22 @@ function forwardFrom(href, out) {
     })(),
     navigator: { onLine: true, userAgent: 'node-test' },
     fetch: () => new Promise(() => {}),
-    setTimeout, clearTimeout, setInterval: () => 0, clearInterval,
+    // Recorded, not run: the fallback is on a 4s timer and the test drives it.
+    setTimeout: (fn, ms) => timers.push({ fn, ms }),
+    clearTimeout() {}, setInterval: () => 0, clearInterval,
   };
   sandbox.window.document = sandbox.document;
   sandbox.window.localStorage = sandbox.localStorage;
+  if (opts && opts.bridge) sandbox.window.__liffBridge = true;
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(CORE, sandbox, { filename: 'core.js' });
-  if (out) out.rewritten = rewritten;
+  if (out) {
+    out.rewritten = rewritten;
+    out.timers = timers;
+    // core.js schedules unrelated work at load too; each one is independent.
+    out.runTimers = () => timers.forEach((t) => { try { t.fn(); } catch (e) {} });
+  }
   return replaced;
 }
 
@@ -131,6 +145,51 @@ test('stripping keeps the page own query intact', () => {
   const here = 'https://rxbenz.github.io/iv-drugref/index.html';
   forwardFrom(here + '?drug=Vanco&liff.state=' + encodeURIComponent('/index.html?drug=Vanco'), out);
   assert.deepStrictEqual(out.rewritten, [here + '?drug=Vanco']);
+});
+
+// ── standing down for the LIFF SDK ───────────────────────────────────────────
+// Forwarding ourselves discards the LIFF session LINE just granted: liff.init()
+// on the destination then finds no context, returns to liff.line.me for one
+// ("logging in…"), which sends us back to the endpoint — a bounce loop. Where
+// the SDK is present it owns the hop.
+
+test('stands down when liff-bridge is on the page (SDK owns the hop)', () => {
+  const out = {};
+  const to = forwardFrom(ENDPOINT + '?liff.state=' + encodeURIComponent('/calculator.html'), out, { bridge: true });
+  assert.strictEqual(to.length, 0, 'no navigation — liff.init() does it');
+});
+
+test('…but still forwards if the SDK never arrives (blocked CDN)', () => {
+  const out = {};
+  const to = forwardFrom(ENDPOINT + '?liff.state=' + encodeURIComponent('/calculator.html'), out, { bridge: true });
+  assert.ok(out.timers.some((t) => t.ms >= 1000), 'the fallback waits out a grace period');
+  out.runTimers();
+  assert.deepStrictEqual(to, ['https://rxbenz.github.io/iv-drugref/calculator.html']);
+});
+
+test('with the SDK present, liff.state is NOT stripped — the SDK reads it', () => {
+  const out = {};
+  const here = 'https://rxbenz.github.io/iv-drugref/calculator.html';
+  const to = forwardFrom(here + '?liff.state=' + encodeURIComponent('/calculator.html'), out, { bridge: true });
+  assert.strictEqual(to.length, 0);
+  assert.deepStrictEqual(out.rewritten, [], 'left intact for liff.init()');
+});
+
+// ── carrying the login round-trip ────────────────────────────────────────────
+
+test('other query params ride along (LINE leaves code/state on the endpoint)', () => {
+  const to = forwardFrom(ENDPOINT + '?code=AbC123&state=xyz&liff.state=' + encodeURIComponent('/calculator.html'));
+  const u = new URL(to[0]);
+  assert.strictEqual(u.pathname, '/iv-drugref/calculator.html');
+  assert.strictEqual(u.searchParams.get('code'), 'AbC123');
+  assert.strictEqual(u.searchParams.get('state'), 'xyz');
+  assert.strictEqual(u.searchParams.get('liff.state'), null, 'never carried — that is the loop');
+});
+
+test('liff.state own params win over carried ones', () => {
+  const to = forwardFrom(ENDPOINT + '?drug=Aspirin&liff.state=' + encodeURIComponent('/index.html?drug=Vancomycin'));
+  const u = new URL(to[0]);
+  assert.deepStrictEqual(u.searchParams.getAll('drug'), ['Vancomycin']);
 });
 
 test('a real forward does not also rewrite history', () => {

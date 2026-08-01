@@ -72,6 +72,20 @@ https://liff.line.me/2010742553-w9T3Wtjt/allergy.html
    **หน้าเดิมแต่คนละยา** (`index.html?drug=Vancomycin`) จะถูกมองว่า "อยู่แล้ว" แล้วไม่พาไปไหน
    (เทสต์จับเคสนี้ได้ทันทีตอนลองวิธี path อย่างเดียว) · เมื่อไม่ส่งต่อจะลบ `liff.state`
    ทิ้งด้วย `history.replaceState` (ไม่โหลดหน้าใหม่) กัน LIFF SDK กระโดดซ้ำจากฝั่งมันเอง
+5. **หน้า Endpoint ต้องเรียก `liff.init()` เอง — การกระโดดเป็นหน้าที่ของ SDK** ← อาการรอบสาม
+   (v5.83.1): ไม่วนแล้ว แต่ขึ้น **"logging in…" แล้วเด้งกลับไปกลับมา** สาเหตุ: `liff.init()`
+   ทำสองอย่างพร้อมกันในจังหวะเดียว คือ **รับ LIFF session** ที่ LINE เพิ่งมอบให้ **แล้วจึง**
+   พาไปหน้าย่อยตาม `liff.state` — พอ `core.js` ชิงพาไปก่อน session หลุด → `liff.init()`
+   ที่หน้าปลายทางไม่มี context → เด้งกลับไปขอที่ liff.line.me → LINE ส่งกลับมาที่ Endpoint
+   → ส่งต่ออีก → วน
+   → **v5.84.0**: `index.html` (= Endpoint) โหลด `js/liff-bridge.js` แล้ว (พร้อม CSP
+   `static.line-scdn.net` / `api.line.me` / `liffsdk.line-scdn.net` / `api-data.line.me`)
+   และ `liff-bridge.js` ถูกย้ายให้โหลด **ก่อน `core.js` ทุกหน้า** เพราะมันตั้งธง
+   `window.__liffBridge` แบบทันที ส่วนตัวส่งต่อใน `core.js` เห็นธงนี้แล้วจะ **ยืนหลบ**
+   (ไม่ส่งต่อ ไม่ลบ `liff.state`) ปล่อยให้ SDK ทำ — และมี **ตัวสำรอง 4 วินาที**
+   เผื่อ SDK โหลดไม่ขึ้น (CDN ถูกบล็อก) ปุ่มจะยังพาไปถูกหน้า แค่ไม่มี session
+   · เวลาส่งต่อจะ **พาพารามิเตอร์อื่นไปด้วย** (`code`/`state` ของขั้นตอนล็อกอิน) ยกเว้น
+   `liff.state` เอง · ล็อกด้วยเทสต์ 18 เคสใน `test/liff-state.test.js`
 
 > รูป rich menu สร้างด้วย headless Chromium จาก HTML (การ์ด glassmorphism + inline SVG icons)
 > ขนาด 2500×1686 JPEG ~130 KB (ต่ำกว่าลิมิต LINE 1 MB) · แก้ดีไซน์ที่ `richmenu.html` แล้วเรนเดอร์ใหม่:

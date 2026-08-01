@@ -29,6 +29,13 @@
 
   if (!inLine()) { window.__liffReady = Promise.resolve(null); return; }
 
+  // Tell core.js's liff.state forwarder to stand down: liff.init() does that hop
+  // itself and keeps the LIFF session while doing it, which a hand-rolled
+  // location.replace() cannot. Set synchronously — the forwarder runs the moment
+  // core.js is parsed, long before the SDK below finishes loading — which is why
+  // this file is loaded BEFORE core.js on every page that has it.
+  window.__liffBridge = true;
+
   window.__liffReady = new Promise(function (resolve) {
     var done = false;
     var finish = function (v) { if (!done) { done = true; resolve(v); } };

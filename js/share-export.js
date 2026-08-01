@@ -126,21 +126,41 @@
     trackShareExport('copy', analytics);
   }
 
+  // ?liffdebug=1 replaces the fallback toast with a readout of WHY the picker
+  // was unavailable. Sharing behaves identically either way — only the toast
+  // text changes — so a tester can report the cause instead of the symptom
+  // (blocked SDK, failed init and missing scope all look the same otherwise).
+  function _liffDebugOn() {
+    try { return /[?&]liffdebug=1(&|$)/.test(location.search || ''); } catch (e) { return false; }
+  }
+  function _liffDiagText() {
+    var d = window.__liffDiag;
+    if (!d) return 'LIFF: bridge OFF';
+    var t = 'LIFF sdk=' + d.sdk + ' init=' + (d.init == null ? '-' : d.init) +
+            ' picker=' + (d.picker == null ? '-' : d.picker);
+    if (d.csp && d.csp.length) t += ' | CSP ' + d.csp.join(' , ');
+    return t;
+  }
+
   // Clipboard path — the original behaviour, still what desktop gets.
-  function _shareViaClipboard(text, analytics) {
+  // `reason` narrows the analytics for a LIFF fallback; desktop passes none.
+  function _shareViaClipboard(text, analytics, reason) {
     copyToClipboard(text).then(function(ok) {
-      showToast(ok
+      showToast(_liffDebugOn() ? _liffDiagText() : (ok
         ? '\u2705 \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01\u0e41\u0e25\u0e49\u0e27 \u2014 \u0e27\u0e32\u0e07\u0e43\u0e19 LINE \u0e44\u0e14\u0e49\u0e40\u0e25\u0e22'
         // ✅ คัดลอกแล้ว — วางใน LINE ได้เลย
-        : '\u274c \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08');
-      trackShareExport('share_line', _withMethod(analytics, ok ? 'clipboard' : 'failed'));
+        : '\u274c \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08'));
+      trackShareExport('share_line', _withMethod(analytics, ok ? 'clipboard' : 'failed', reason));
     });
   }
 
   // Tag every share with HOW it went out, so the dashboard can tell a real LINE
   // send from a clipboard fallback instead of counting them as one number.
-  function _withMethod(analytics, method) {
+  // `method` stays the coarse bucket the dashboard already groups by; `reason`
+  // is the finer detail, present only when there is one.
+  function _withMethod(analytics, method, reason) {
     var out = { method: method };
+    if (reason) out.reason = reason;
     if (analytics) { for (var k in analytics) { if (analytics.hasOwnProperty(k)) out[k] = analytics[k]; } }
     return out;
   }
@@ -173,7 +193,7 @@
       liffReady.then(function(liff) {
         var canPick = false;
         try { canPick = !!(liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')); } catch (e) {}
-        if (!canPick) { _shareViaClipboard(text, analytics); return; }
+        if (!canPick) { _shareViaClipboard(text, analytics, liff ? 'no_picker' : 'no_sdk'); return; }
         liff.shareTargetPicker([{ type: 'text', text: text }])
           .then(function(res) {
             // A null/undefined result means the user backed out of the picker —
@@ -186,7 +206,7 @@
               trackShareExport('share_line', _withMethod(analytics, 'liff_cancelled'));
             }
           })
-          .catch(function() { _shareViaClipboard(text, analytics); });
+          .catch(function() { _shareViaClipboard(text, analytics, 'picker_error'); });
       });
       return;
     }

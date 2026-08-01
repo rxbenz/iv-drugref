@@ -1222,6 +1222,15 @@ var IVDrugRef = (function() {
   // Shape: { v:'x.y.z', date:'YYYY-MM-DD', title:'หัวข้อสั้น ๆ', items:['บรรทัดไทย', ...] }
   const RELEASE_NOTES = [
     {
+      v: '5.86.0',
+      date: '2026-08-01',
+      title: "เพิ่มโหมดตรวจหาสาเหตุปุ่มแชร์ LINE",
+      items: [
+        "ปุ่มแชร์ที่ตกไปเป็นคัดลอก ตอนนี้บอกสาเหตุได้ว่าเพราะอะไร (โหมดสำหรับผู้ดูแล)",
+        "การใช้งานปกติไม่เปลี่ยน"
+      ]
+    },
+    {
       v: '5.85.0',
       date: '2026-08-01',
       title: "เพิ่มปุ่มแชร์ LINE ในหน้าคำนวณขนาดยา",
@@ -1802,7 +1811,7 @@ var IVDrugRef = (function() {
   /**
    * Version and app name constants
    */
-  const VERSION = '5.85.0';
+  const VERSION = '5.86.0';
   const APP_NAME = 'IV DrugRef';
 
   // ============================================================

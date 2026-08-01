@@ -29,10 +29,12 @@ const SRC = fs.readFileSync(path.join(__dirname, '..', 'js', 'share-export.js'),
  *   clipboardOk – navigator.clipboard.writeText resolves/rejects
  */
 function load({ ua = 'Mozilla/5.0 (Windows NT 10.0) Chrome/120', inLine = false,
-                liff = null, openBlocked = false, clipboardOk = true } = {}) {
+                liff = null, openBlocked = false, clipboardOk = true,
+                search = '', diag = undefined } = {}) {
   const events = [];      // analytics
   const toasts = [];
   const opened = [];
+  const created = [];     // every createElement — the toast is in here
   let copied = null;
 
   const el = () => new Proxy({ style: {}, classList: { add() {}, remove() {} }, remove() {},
@@ -40,7 +42,9 @@ function load({ ua = 'Mozilla/5.0 (Windows NT 10.0) Chrome/120', inLine = false,
     { get(t, p) { return p in t ? t[p] : function () { return el(); }; }, set(t, p, v) { t[p] = v; return true; } });
 
   const sandbox = {
-    document: { createElement: () => el(), getElementById: () => null, body: el(), head: el(),
+    location: { search },
+    document: { createElement: () => { const e = el(); created.push(e); return e; },
+      getElementById: () => null, body: el(), head: el(),
       querySelector: () => null, addEventListener() {},
       execCommand: () => { copied = 'execCommand'; return clipboardOk; } },
     navigator: {
@@ -49,6 +53,7 @@ function load({ ua = 'Mozilla/5.0 (Windows NT 10.0) Chrome/120', inLine = false,
     },
     window: {
       __liffReady: Promise.resolve(liff),
+      __liffDiag: diag,
       open: (url) => { opened.push(url); return openBlocked ? null : {}; },
       addEventListener() {},
     },
@@ -69,7 +74,11 @@ function load({ ua = 'Mozilla/5.0 (Windows NT 10.0) Chrome/120', inLine = false,
 
   const api = sandbox.IVDrugRef.ShareExport;
   assert.ok(api && api.shareToLine, 'share-export exposed shareToLine');
-  return { api, events, toasts, opened, copied: () => copied, sandbox };
+  const toastText = () => {
+    const t = created.filter((e) => e.id === 'ivdr-toast').pop();
+    return t && t.textContent;
+  };
+  return { api, events, toasts, opened, copied: () => copied, toastText, sandbox };
 }
 
 // analytics land asynchronously (clipboard/LIFF promises) — let them settle
@@ -164,4 +173,80 @@ test('caller analytics are preserved alongside the method tag', async () => {
   assert.strictEqual(e.drug, 'Vancomycin');
   assert.strictEqual(e.auc, '450');
   assert.strictEqual(e.method, 'clipboard');
+});
+
+// ── telling the three fallbacks apart ────────────────────────────────────────
+// A blocked SDK, a failed init and a missing chat_message.write scope all end as
+// the same clipboard toast but need three different fixes, so the cause has to
+// reach analytics — and, under ?liffdebug=1, the tester's screen.
+
+const reason = (events) => {
+  const e = events.filter((x) => x.action === 'share_line').pop();
+  return e && e.reason;
+};
+
+test('no SDK at all is reported as no_sdk, not just "clipboard"', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: null });
+  t.api.shareToLine('x', { page: 'calculator' });
+  await settle();
+  assert.strictEqual(method(t.events), 'clipboard');
+  assert.strictEqual(reason(t.events), 'no_sdk');
+});
+
+test('SDK present but picker unavailable is reported as no_picker', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: { isApiAvailable: () => false } });
+  t.api.shareToLine('x', { page: 'calculator' });
+  await settle();
+  assert.strictEqual(reason(t.events), 'no_picker');
+});
+
+test('a throwing picker is reported as picker_error', async () => {
+  const t = load({ ua: 'iPhone', inLine: true,
+    liff: { isApiAvailable: () => true, shareTargetPicker: () => Promise.reject(new Error('nope')) } });
+  t.api.shareToLine('x', { page: 'calculator' });
+  await settle();
+  assert.strictEqual(reason(t.events), 'picker_error');
+});
+
+test('desktop clipboard carries no reason — nothing went wrong there', async () => {
+  const t = load({ ua: 'Macintosh' });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.strictEqual(method(t.events), 'clipboard');
+  assert.strictEqual(reason(t.events), undefined);
+});
+
+test('without the debug flag the toast is the ordinary Thai one', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: null, diag: { sdk: 'timeout', init: null, picker: null, csp: [] } });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.match(t.toastText(), /LINE/);
+  assert.ok(!/sdk=/.test(t.toastText()), 'no diagnostics leak to real users');
+});
+
+test('?liffdebug=1 shows the cause instead of the toast', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: null, search: '?liffdebug=1',
+    diag: { sdk: 'loaded', init: 'ok', picker: false, csp: [] } });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.match(t.toastText(), /sdk=loaded/);
+  assert.match(t.toastText(), /init=ok/);
+  assert.match(t.toastText(), /picker=false/);
+});
+
+test('a CSP block shows up in the debug readout', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: null, search: '?a=1&liffdebug=1',
+    diag: { sdk: 'error', init: null, picker: null, csp: ['script-src←https://static.line-scdn.net'] } });
+  t.api.shareToLine('x', {});
+  await settle();
+  assert.match(t.toastText(), /CSP/);
+  assert.match(t.toastText(), /line-scdn/);
+});
+
+test('debug mode still copies to the clipboard — diagnosis never costs the share', async () => {
+  const t = load({ ua: 'iPhone', inLine: true, liff: null, search: '?liffdebug=1' });
+  t.api.shareToLine('AUC 450', {});
+  await settle();
+  assert.strictEqual(t.copied(), 'AUC 450');
+  assert.strictEqual(method(t.events), 'clipboard');
 });

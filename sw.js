@@ -1,5 +1,5 @@
 // ============================================================================
-// IV Drug Reference PWA — Service Worker v5.83.0
+// IV Drug Reference PWA — Service Worker v5.83.1
 // Based on V4.7.1 with modular file structure support
 // Added: Push notifications, urgent alert background sync, separate drug data cache
 // Changed: version.json excluded from cache (always network) for force-update support
@@ -503,9 +503,10 @@
 // v5.81.0: ส่งประกาศด่วนเข้า LINE ได้แล้ว 📣
 // v5.82.0: แชร์ผลเข้า LINE ได้ตรง ๆ แล้ว 📤
 // v5.83.0: แก้ลิงก์เมนู LINE ให้เปิดถูกหน้า
+// v5.83.1: แก้ปุ่มเมนู LINE โหลดวน
 // ============================================================================
 
-const CACHE_NAME = 'iv-drugref-v5.83.0';
+const CACHE_NAME = 'iv-drugref-v5.83.1';
 const DRUG_DATA_CACHE = 'iv-drugref-data-v1';
 const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

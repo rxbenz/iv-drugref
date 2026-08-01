@@ -24,8 +24,9 @@ const CORE = SRC.slice(0, SRC.indexOf('THEME MANAGER'));
 const ENDPOINT = 'https://rxbenz.github.io/iv-drugref/index.html';
 
 /** Load core.js with a stub location and report where it tried to send us. */
-function forwardFrom(href) {
+function forwardFrom(href, out) {
   const replaced = [];
+  const rewritten = [];
   const url = new URL(href);
   const el = () => new Proxy({ style: {}, dataset: {}, classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     innerHTML: '', textContent: '', appendChild(c) { return c; }, addEventListener() {},
@@ -40,11 +41,15 @@ function forwardFrom(href) {
   };
   const sandbox = {
     location, URL, URLSearchParams, console,
+    history: { replaceState: (_s, _t, u) => rewritten.push(u) },
     window: { location, addEventListener() {}, matchMedia: () => ({ matches: false, addEventListener() {} }) },
     document: { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [],
       createElement: el, addEventListener() {}, body: el(), head: el(), documentElement: el(), readyState: 'complete' },
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
-    sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    sessionStorage: (function () {
+      const m = new Map();
+      return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) };
+    })(),
     navigator: { onLine: true, userAgent: 'node-test' },
     fetch: () => new Promise(() => {}),
     setTimeout, clearTimeout, setInterval: () => 0, clearInterval,
@@ -54,6 +59,7 @@ function forwardFrom(href) {
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(CORE, sandbox, { filename: 'core.js' });
+  if (out) out.rewritten = rewritten;
   return replaced;
 }
 
@@ -95,4 +101,41 @@ test('never forwards to the page it is already on (no reload loop)', () => {
   // resolves to .../index.html, which differs from the current href only by the
   // query — so if it ever resolved identically it must not redirect
   to.forEach((u) => assert.notStrictEqual(u, ENDPOINT + '?liff.state=' + encodeURIComponent('/index.html')));
+});
+
+test('already on the requested page → does NOT forward (the reload loop)', () => {
+  // What LINE actually does: it keeps re-attaching ?liff.state to the page it
+  // landed on. Comparing full hrefs saw "different URL" every time and forwarded
+  // again, so calculator.html reloaded forever. Comparing paths ends it.
+  const here = 'https://rxbenz.github.io/iv-drugref/calculator.html';
+  const to = forwardFrom(here + '?liff.state=' + encodeURIComponent('/calculator.html'));
+  assert.strictEqual(to.length, 0, 'no forward — we are already on that page');
+});
+
+test('same page with an extra query is still not a forward', () => {
+  const here = 'https://rxbenz.github.io/iv-drugref/index.html';
+  const to = forwardFrom(here + '?drug=Vanco&liff.state=' + encodeURIComponent('/index.html?drug=Vanco'));
+  assert.strictEqual(to.length, 0);
+});
+
+test('when it does not forward, liff.state is stripped in place (SDK must not retry it)', () => {
+  const out = {};
+  const here = 'https://rxbenz.github.io/iv-drugref/calculator.html';
+  const to = forwardFrom(here + '?liff.state=' + encodeURIComponent('/calculator.html'), out);
+  assert.strictEqual(to.length, 0, 'no navigation');
+  assert.deepStrictEqual(out.rewritten, [here], 'URL rewritten without liff.state');
+});
+
+test('stripping keeps the page own query intact', () => {
+  const out = {};
+  const here = 'https://rxbenz.github.io/iv-drugref/index.html';
+  forwardFrom(here + '?drug=Vanco&liff.state=' + encodeURIComponent('/index.html?drug=Vanco'), out);
+  assert.deepStrictEqual(out.rewritten, [here + '?drug=Vanco']);
+});
+
+test('a real forward does not also rewrite history', () => {
+  const out = {};
+  const to = forwardFrom(ENDPOINT + '?liff.state=' + encodeURIComponent('/calculator.html'), out);
+  assert.strictEqual(to.length, 1);
+  assert.deepStrictEqual(out.rewritten, []);
 });

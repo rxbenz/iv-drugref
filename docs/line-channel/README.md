@@ -95,7 +95,7 @@ GAS ยังคงเหมาะกับงาน **ขาออก** (ยิ
 | 3 | บอตค้นข้อมูลยา (Flex card + deep link) | M | [`03-webhook-bot.md`](03-webhook-bot.md) | ✅ live |
 | 4 | บอตเช็คคู่ Y-site + renal + deep link ใหม่ 2 จุด | M | [`03-webhook-bot.md`](03-webhook-bot.md) | ✅ live (v5.54.0) |
 | 5 | หน้าจอ "ประกาศด่วน" ใน admin + route GAS | M | [`04-urgent-alerts.md`](04-urgent-alerts.md) | ✅ live (v5.79.0) |
-| 6 | Broadcast ประกาศด่วนเข้า LINE + ตัวเช็คโควตา | S | [`04-urgent-alerts.md`](04-urgent-alerts.md) + [`SECRETS.md`](SECRETS.md) | ✅ (รอ deploy GAS 5.74.0) |
-| 7 | อัปเกรดปุ่มแชร์ (shareTargetPicker) | M | `05-share-upgrade.md` (จะสร้างตอนทำ) | ⬜ |
+| 6 | Broadcast ประกาศด่วนเข้า LINE + ตัวเช็คโควตา | S | [`04-urgent-alerts.md`](04-urgent-alerts.md) + [`SECRETS.md`](SECRETS.md) | ✅ live (GAS 5.74.0 deployed 2026-08-01) |
+| 7 | อัปเกรดปุ่มแชร์ (shareTargetPicker) | M | [`05-share-upgrade.md`](05-share-upgrade.md) | ✅ (รอเปิด scope chat_message.write) |
 
 แผนแม่บทฉบับเต็ม (รายละเอียดต่อ phase + ตารางความเสี่ยง): [`00-plan.md`](00-plan.md)

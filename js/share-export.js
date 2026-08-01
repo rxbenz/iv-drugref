@@ -126,19 +126,82 @@
     trackShareExport('copy', analytics);
   }
 
-  /**
-   * Copy for LINE sharing + show LINE-specific toast
-   * @param {string} text - Plain text to copy
-   * @param {object} [analytics] - Extra analytics fields
-   */
-  function shareToLine(text, analytics) {
+  // Clipboard path — the original behaviour, still what desktop gets.
+  function _shareViaClipboard(text, analytics) {
     copyToClipboard(text).then(function(ok) {
       showToast(ok
         ? '\u2705 \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01\u0e41\u0e25\u0e49\u0e27 \u2014 \u0e27\u0e32\u0e07\u0e43\u0e19 LINE \u0e44\u0e14\u0e49\u0e40\u0e25\u0e22'
         // ✅ คัดลอกแล้ว — วางใน LINE ได้เลย
         : '\u274c \u0e04\u0e31\u0e14\u0e25\u0e2d\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08');
+      trackShareExport('share_line', _withMethod(analytics, ok ? 'clipboard' : 'failed'));
     });
-    trackShareExport('share_line', analytics);
+  }
+
+  // Tag every share with HOW it went out, so the dashboard can tell a real LINE
+  // send from a clipboard fallback instead of counting them as one number.
+  function _withMethod(analytics, method) {
+    var out = { method: method };
+    if (analytics) { for (var k in analytics) { if (analytics.hasOwnProperty(k)) out[k] = analytics[k]; } }
+    return out;
+  }
+
+  function _isMobile() {
+    return /android|iphone|ipad|ipod/i.test(navigator.userAgent || '');
+  }
+
+  /**
+   * Share a result to LINE, best available way first:
+   *   1. inside LINE  -> LIFF shareTargetPicker (pick a chat, send as a message)
+   *   2. mobile web   -> line.me share URL (opens LINE with the text prefilled)
+   *   3. desktop/else -> clipboard + "paste it in LINE" toast (original behaviour)
+   *
+   * The mobile branch must call window.open SYNCHRONOUSLY inside the click
+   * handler or popup blockers kill it, so it is decided before any await. The
+   * LIFF branch is async but runs inside LINE, where there is no popup blocker
+   * to lose the gesture to. Every branch degrades to the clipboard, so the
+   * button never becomes a dead end.
+   *
+   * @param {string} text - Plain text to share
+   * @param {object} [analytics] - Extra analytics fields
+   */
+  function shareToLine(text, analytics) {
+    var liffReady = window.__liffReady;
+    var inLine = !!(window.IVDrugRef && IVDrugRef.isLineInApp && IVDrugRef.isLineInApp());
+
+    // 1. In LINE: wait for the SDK liff-bridge.js already started loading.
+    if (inLine && liffReady && typeof liffReady.then === 'function') {
+      liffReady.then(function(liff) {
+        var canPick = false;
+        try { canPick = !!(liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')); } catch (e) {}
+        if (!canPick) { _shareViaClipboard(text, analytics); return; }
+        liff.shareTargetPicker([{ type: 'text', text: text }])
+          .then(function(res) {
+            // A null/undefined result means the user backed out of the picker —
+            // not a failure, so don't fall back and don't toast.
+            if (res) {
+              showToast('\u2705 \u0e2a\u0e48\u0e07\u0e43\u0e19 LINE \u0e41\u0e25\u0e49\u0e27');
+              // ✅ ส่งใน LINE แล้ว
+              trackShareExport('share_line', _withMethod(analytics, 'liff_picker'));
+            } else {
+              trackShareExport('share_line', _withMethod(analytics, 'liff_cancelled'));
+            }
+          })
+          .catch(function() { _shareViaClipboard(text, analytics); });
+      });
+      return;
+    }
+
+    // 2. Mobile web: hand the text straight to LINE.
+    if (_isMobile()) {
+      var w = null;
+      try {
+        w = window.open('https://line.me/R/share?text=' + encodeURIComponent(text), '_blank');
+      } catch (e) { w = null; }
+      if (w) { trackShareExport('share_line', _withMethod(analytics, 'line_url')); return; }
+    }
+
+    // 3. Desktop / anything else.
+    _shareViaClipboard(text, analytics);
   }
 
   /**
